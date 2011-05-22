@@ -17,7 +17,10 @@ branch when you run it). Then you just need to push the ``gh-pages`` branch
 into github.
 
 You can run the ``./update`` script (and push the result back) manually, or you
-can setup a cron job at your server and run (+push) it automatically.
+can setup a cron job at your server and run (+push) it automatically. In either
+case, don't forget to always pull latest changes into the ``master`` branch
+first, so that you get the latest updates of the configuration, and you don't
+push in some older version by accident.
 
 How to Update Manually
 ----------------------
