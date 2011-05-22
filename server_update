@@ -15,16 +15,18 @@ echo "'server_update' started"
 echo "Date:"
 date
 echo
-echo "Running './update'"
 
 # Find the directory this script is in:
 ROOT=`readlink -n "$0" 2> /dev/null` || \
 ROOT=`realpath    "$0" 2> /dev/null` || \
 ROOT="$0"
 ROOT="${ROOT%/*}/"
-
-
 cd "$ROOT"
+
+echo "Updating the planet.sympy.org repository master with latest updates"
+git pull origin master
+echo "    Done."
+echo "Running './update'"
 ./update
 echo "'./update' finished"
 echo "Running 'git push origin gh-pages'"
