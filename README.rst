@@ -14,3 +14,12 @@ On Ubuntu::
 Build (or update) the planet::
 
     ./update
+
+Developer Information
+---------------------
+
+The ``common`` directory is copied from ``/usr/share/planet-venus/theme/`` and
+``theme`` is copied from ``/usr/share/planet-venus/theme/classic_fancy``.
+SymPy logo was added into the ``theme/images``. If you want to modify the
+contens of the main planet page, just modify the file
+``theme/index.html.tmpl``.
