@@ -1,0 +1,22 @@
+#! /bin/sh
+
+# Run this on the server. For example to run it every 5 minutes, put this into
+# your crontab using "crontab -e" (adjust the path to the script):
+#
+# */5 * * * * ~/repos/planet.sympy.org/server_update >> cron_log 2>&1
+#
+# This will run the server_update script and save all output to cron_log (in
+# your home directory).
+
+set -e
+
+# Find the directory this script is in:
+ROOT=`readlink -n "$0" 2> /dev/null` || \
+ROOT=`realpath    "$0" 2> /dev/null` || \
+ROOT="$0"
+ROOT="${ROOT%/*}/"
+
+
+cd "$ROOT"
+./update
+git push origin gh-pages
