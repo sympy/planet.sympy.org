@@ -10,3 +10,7 @@ Installation
 On Ubuntu::
 
     sudo apt-get install planet-venus
+
+Build (or update) the planet::
+
+    ./update
