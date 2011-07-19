@@ -3,6 +3,12 @@ planet.sympy.org
 
 This repository hosts http://planet.sympy.org/.
 
+Installation
+------------
+
+Run the ``server_update`` script (edit it first, so that it pushes into the right repository, and setup the ssh keys).
+Then add it to a cron job, see the comments in the script for detailed documentation.
+
 How it Works
 ------------
 
