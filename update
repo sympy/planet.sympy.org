@@ -5,6 +5,20 @@ set -e
 planet --verbose planet.ini
 git checkout gh-pages
 cp -r output/* .
-git add *.xml *.html *.css images
-git commit -a -m "Automatic commit"
+# Check for updates. Due to timestamps, many files change with each update,
+# however, the files rss10.xml and rss20.xml only change if something
+# significant changes. As such, we monitor rss10.xml, and only if that changes,
+# we go ahead and create a new commit. Otherwise we just revert the changes and
+# switch back to master.
+if git diff --quiet rss10.xml
+then
+    # rss10.xml did *not* change
+    echo "No updates found, no commit is generated in gh-pages"
+    git reset --hard
+else
+    # rss10.xml did change, create a commit
+    echo "Updates found, commit is generated in gh-pages"
+    git add *.xml *.html *.css images
+    git commit -a -m "Automatic commit"
+fi
 git checkout master
