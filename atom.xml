@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2011-10-30T19:20:17Z</updated>
+  <updated>2011-10-31T23:20:18Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,40 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry>
+    <id>tag:blogger.com,1999:blog-8814696591561172392.post-7396657487035470347</id>
+    <link href="http://vperic.blogspot.com/feeds/7396657487035470347/comments/default" rel="replies" type="application/atom+xml"/>
+    <link href="http://vperic.blogspot.com/2011/11/gsoc-final-report.html#comment-form" rel="replies" type="text/html"/>
+    <link href="http://www.blogger.com/feeds/8814696591561172392/posts/default/7396657487035470347" rel="edit" type="application/atom+xml"/>
+    <link href="http://www.blogger.com/feeds/8814696591561172392/posts/default/7396657487035470347" rel="self" type="application/atom+xml"/>
+    <link href="http://vperic.blogspot.com/2011/11/gsoc-final-report.html" rel="alternate" type="text/html"/>
+    <title>GSoC: Final Report</title>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><div dir="ltr" style="text-align: left;"><span style="font-size: large;"><b>Introduction</b></span><br/><br/>My project, officially named just "Porting to Python 3", is actually divided into two separate (albeit mutually complimentary) parts: my first goal was to set up a testing framework, to ensure continuous testing of SymPy across different versions of Python. SymPy used to have a server that ran buildbot, but it stopped working some time ago. This was to provide a solid base for working on my main project, making the code Python 3 compatible. As this was to be done with a single code-base, I estimated (correctly) that these could lead to subtle incompatibilities between various Python versions. Time permitting, I also intended to leverage this framework and my knowledge to get SymPy compatible with PyPy, too. The original application can be seen at the SymPy Wiki, <a href="https://github.com/sympy/sympy/wiki/GSoC-2011-Application%3A-Vladimir-Peri%C4%87%3A-Porting-to-Python-3">here</a>. More details about my progress can also be found in <a href="http://vperic.blogspot.com/">my blog</a>.<br/><br/><span style="font-size: large;"><b>Testing framework</b></span><br/><br/>As mentioned above, SymPy used to use buildbot, so this was my first choice. I also read about Tox, a tool that is written for the sole purpose of testing Python programs under various conditions (different interpreters, presence or lack of certain dependencies), which also provides good integration with Jenkins, a well known server for continuous integration. My initial thoughts on this are in <a href="http://vperic.blogspot.com/2011/05/continuous-integration-and-sympy.html">one of my first blog posts</a>, where I had decided to use Tox and then later try to integrate it with Jenkins, to form a fully functioning CI server. While Tox was immediately useful (here's <a href="http://vperic.blogspot.com/2011/06/setting-up-and-using-tox-in-sympy.html">a post on setting up and using it</a>), the integration with Jenkins proved to be more arduous than my initial tests showed. In retrospect, perhaps I should have given buildbot a more thorough look later, rather than eliminate it so early. Furthermore, while I saw Tox as a great tool, the uptake among other developers has been.. less than stellar (other than Aaron, I'm not aware of anyone using it regularly).<br/><br/>Fortunately, parallel to me setting up Tox/Jenkins, work was progressing on <a href="https://github.com/sympy/sympy-bot">sympy-bot</a>. The main need for continuous integration came from a desire to review all pull requests and test them for errors - while bigger companies and projects might need real CI, all of SymPy's code gets in through the GitHub pull request system, so theoretically it should be enough to just thoroughly test every pull request; sympy-bot was developed with this purpose in mind. Designed to be ran manually, it still has the basic functionality which I couldn't manage to replicate in Jenkins: run the test suite and post the results back. Work on it has also quickened somewhat in the last couple of months, and <i>I now consider further development of sympy-bot a better idea than working more with Jenkins.</i><br/><br/><span style="font-size: large;"><b>Python 3 porting</b></span><br/><br/>Even with the relative failure of setting up a robust testing framework, my main project was also progressing. Due to the nature of the issue, progress was somewhat sporadic and didn't proceed at a steady pace. This was particularly apparent during the start - I was simply stumped by some of the errors I was getting and couldn't get around them; once I made a key breakthrough, I was quickly able to get SymPy importable under Python 3, though this only happened <a href="http://vperic.blogspot.com/2011/06/gsoc-week-5-sympy-now-runs-in-python-3.html">by week five</a>. The rest of my summer was spent hunting down the remaining errors, which was interesting at first but got very tiresome by the end. In fact, at the end Mateusz had to step in and fix the remaining few failures as I simply couldn't bring myself to look at them <i>yet again</i>. Thanks Mateusz! [Mateusz also did a lot of work on improving PyPy support, something for which I simply didn't find the time, so double thanks to Mateusz!]<br/><br/>One issue that arose early during the porting process was the (un)bundling of libraries with SymPy. SymPy bundled Pyglet and mpmath. Bundling the first was probably a bad idea at the start, and it was finally removed by Stefan Krastanov sometime early in the summer to unanimous approval. Unbundling mpmath was a more contentious issue, it sparked <a href="https://code.google.com/p/sympy/issues/detail?id=2482">a very lively discussion on the issue tracker</a>. I won't rephrase it here, but in the end it was decided <b>not</b> to unbudle it. This meant that I had to write a custom tool to handle calling 2to3: we needed to avoid calling it on the mpmath/ directories, because mpmath is already py3k compatible (and running 2to3 on such code produces bad code).<br/><br/>It was ultimately decided that this tool will live in bin/use2to3 and work by creating a Python 3-compatible version of the source code in a py3k-sympy/ subdirectory (originally sympy-py3k/ but that interfered too much with tab-completion!), from which SymPy could then be ran normally under Python 3. While I initially had misgivings about the script, I now think it's quite powerful. It's not the most ideal solution, but it does work and was the last missing link in seamless Python 3 support (eg. it also corrects shebangs and fixes some whitespace issues caused by 2to3).<br/><br/><b><span style="font-size: large;">Conclusion</span></b><br/><br/>Officially, my project was a success, but I really couldn't have done it without the help of other developers working on SymPy, in particular Ronan, Aaron and Mateusz. Beyond the GSoC period, I've got every intention to continue working with SymPy, as I think I've already shown with the few pull requests I've submitted since; I have also decided to take a more active role in helping with the <a href="https://github.com/sympy/sympy/wiki/GCI-2011-Organization-Application">Google Code-In project</a> (assuming SymPy is accepted). As for my project, I intend to focus more on the infrastructure needed to support SymPy, rather than the math issues. Still, as my knowledge of math and SymPy internals increases, I'm sure I'll find other places to contribute as well.<br/><br/>To future GSoC students, I suggest maintaining good communication links and trying to be involved with the project as much as possible. Good communication with the core developers and general awareness of the current state of SymPy helped me a lot. While this was arguably more important for my project than others, at least <a href="https://github.com/sympy/sympy/wiki/GSoC-2011-Report-Sean-Vig-Symbolic-Clebsch-Gordon-coefficients%3AWigner-symbols-and-Implementing-Addition-of-Spin-Angular-Momenta">Sean Vig</a> has also expressed regret at not being more involved. The second most important bit of advice is to try and split your work into multiple pull requests and try to get them merged as fast as possible. SymPy has a very rapid pace of development, and as such it is <i>always</i> better to integrate sooner rather than later. This ties in to making good, atomic commits, but means more than that: your work should be clearly separated into small, logical chunks (&lt;= 20 commits is my suggestion). A lot of the work done this summer has still to be integrated, or there were many troubles getting it finally in (eg. the physics.mechanics module). Finally, try to budget a lot of extra time in your project application - most of us are not experienced developers and cannot estimate the amount of work needed for something correctly. Plus, when some additional problems arise (and they <i>will</i>), it's always better to have time set aside to deal with them.<br/></div><div class="blogger-post-footer"><img alt="" height="1" src="https://blogger.googleusercontent.com/tracker/8814696591561172392-7396657487035470347?l=vperic.blogspot.com" width="1"/></div></div>
+    </content>
+    <updated>2011-10-31T23:02:24Z</updated>
+    <published>2011-10-31T23:02:00Z</published>
+    <category scheme="http://www.blogger.com/atom/ns#" term="SymPy"/>
+    <author>
+      <name>Vladimir Perić</name>
+      <email>noreply@blogger.com</email>
+    </author>
+    <source>
+      <id>tag:blogger.com,1999:blog-8814696591561172392</id>
+      <category term="SymPy"/>
+      <category term="Tox"/>
+      <author>
+        <name>Vladimir Perić</name>
+        <email>noreply@blogger.com</email>
+      </author>
+      <link href="http://vperic.blogspot.com/feeds/posts/default" rel="http://schemas.google.com/g/2005#feed" type="application/atom+xml"/>
+      <link href="http://www.blogger.com/feeds/8814696591561172392/posts/default/-/SymPy" rel="self" type="application/atom+xml"/>
+      <link href="http://vperic.blogspot.com/search/label/SymPy" rel="alternate" type="text/html"/>
+      <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
+      <title>Vlada's SymPy Blog</title>
+      <updated>2011-10-31T23:02:23Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en">
     <id>http://dlpeterson.com/blog/?p=175</id>
@@ -274,6 +308,8 @@ That last one is a real doozy.  Try saying that 5 times real fast, then explain 
     </author>
     <source>
       <id>tag:blogger.com,1999:blog-8814696591561172392</id>
+      <category term="SymPy"/>
+      <category term="Tox"/>
       <author>
         <name>Vladimir Perić</name>
         <email>noreply@blogger.com</email>
@@ -283,7 +319,7 @@ That last one is a real doozy.  Try saying that 5 times real fast, then explain 
       <link href="http://vperic.blogspot.com/search/label/SymPy" rel="alternate" type="text/html"/>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>Vlada's SymPy Blog</title>
-      <updated>2011-09-07T20:19:24Z</updated>
+      <updated>2011-10-31T23:02:23Z</updated>
     </source>
   </entry>
 
@@ -417,7 +453,7 @@ x**(S(4)/5)
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy, including my Google Summer of Code 2009 and 2010 projects.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2011-10-30T19:20:07Z</updated>
+      <updated>2011-10-31T23:20:08Z</updated>
     </source>
   </entry>
 
@@ -446,7 +482,7 @@ x**(S(4)/5)
       <link href="http://saptman.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My symply awesome gsoc summer</subtitle>
       <title>saptman</title>
-      <updated>2011-10-30T19:20:16Z</updated>
+      <updated>2011-10-31T23:20:18Z</updated>
     </source>
   </entry>
 
@@ -495,7 +531,7 @@ Wavefunction(-2**(1/2)*hbar*I*pi*n*(1/L)**(1/2)*cos(pi*n*x_2/L)/L, x_2)</pre>
       <link href="http://lazovichsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My adventures during GSoC 2011</subtitle>
       <title>Tomo Lazovich's SymPy Blog</title>
-      <updated>2011-10-30T19:20:14Z</updated>
+      <updated>2011-10-31T23:20:15Z</updated>
     </source>
   </entry>
 
@@ -528,7 +564,7 @@ Wavefunction(-2**(1/2)*hbar*I*pi*n*(1/L)**(1/2)*cos(pi*n*x_2/L)/L, x_2)</pre>
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>gilbertgede</title>
-      <updated>2011-10-30T19:20:13Z</updated>
+      <updated>2011-10-31T23:20:14Z</updated>
     </source>
   </entry>
 
@@ -561,7 +597,7 @@ Wavefunction(-2**(1/2)*hbar*I*pi*n*(1/L)**(1/2)*cos(pi*n*x_2/L)/L, x_2)</pre>
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2011-10-30T19:20:16Z</updated>
+      <updated>2011-10-31T23:20:17Z</updated>
     </source>
   </entry>
 
@@ -626,7 +662,7 @@ Wavefunction(-2**(1/2)*hbar*I*pi*n*(1/L)**(1/2)*cos(pi*n*x_2/L)/L, x_2)</pre>
       <link href="http://nessgrh.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My GSoC Project</subtitle>
       <title>nessgrh</title>
-      <updated>2011-10-30T19:20:12Z</updated>
+      <updated>2011-10-31T23:20:13Z</updated>
     </source>
   </entry>
 
@@ -720,7 +756,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy, including my Google Summer of Code 2009 and 2010 projects.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2011-10-30T19:20:08Z</updated>
+      <updated>2011-10-31T23:20:08Z</updated>
     </source>
   </entry>
 
@@ -753,7 +789,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://lazovichsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My adventures during GSoC 2011</subtitle>
       <title>Tomo Lazovich's SymPy Blog</title>
-      <updated>2011-10-30T19:20:14Z</updated>
+      <updated>2011-10-31T23:20:15Z</updated>
     </source>
   </entry>
 
@@ -786,7 +822,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>gilbertgede</title>
-      <updated>2011-10-30T19:20:13Z</updated>
+      <updated>2011-10-31T23:20:14Z</updated>
     </source>
   </entry>
 
@@ -842,7 +878,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://nessgrh.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My GSoC Project</subtitle>
       <title>nessgrh</title>
-      <updated>2011-10-30T19:20:12Z</updated>
+      <updated>2011-10-31T23:20:13Z</updated>
     </source>
   </entry>
 
@@ -931,7 +967,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://nessgrh.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My GSoC Project</subtitle>
       <title>nessgrh</title>
-      <updated>2011-10-30T19:20:12Z</updated>
+      <updated>2011-10-31T23:20:13Z</updated>
     </source>
   </entry>
 
@@ -959,7 +995,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2011-10-30T19:20:16Z</updated>
+      <updated>2011-10-31T23:20:17Z</updated>
     </source>
   </entry>
 
@@ -1027,7 +1063,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://sherjilozair.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://sherjilozair.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>Sherjil Ozair</title>
-      <updated>2011-10-30T19:20:15Z</updated>
+      <updated>2011-10-31T23:20:16Z</updated>
     </source>
   </entry>
 
@@ -1058,7 +1094,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://lazovichsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My adventures during GSoC 2011</subtitle>
       <title>Tomo Lazovich's SymPy Blog</title>
-      <updated>2011-10-30T19:20:14Z</updated>
+      <updated>2011-10-31T23:20:15Z</updated>
     </source>
   </entry>
 
@@ -1086,7 +1122,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://saptman.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My symply awesome gsoc summer</subtitle>
       <title>saptman</title>
-      <updated>2011-10-30T19:20:16Z</updated>
+      <updated>2011-10-31T23:20:18Z</updated>
     </source>
   </entry>
 
@@ -1155,7 +1191,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>gilbertgede</title>
-      <updated>2011-10-30T19:20:13Z</updated>
+      <updated>2011-10-31T23:20:14Z</updated>
     </source>
   </entry>
 
@@ -1303,7 +1339,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy, including my Google Summer of Code 2009 and 2010 projects.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2011-10-30T19:20:08Z</updated>
+      <updated>2011-10-31T23:20:08Z</updated>
     </source>
   </entry>
 
@@ -1372,7 +1408,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2011-10-30T19:20:16Z</updated>
+      <updated>2011-10-31T23:20:17Z</updated>
     </source>
   </entry>
 
@@ -1439,7 +1475,7 @@ x**4 + 2*x**3*y + 2*x**3 + x**2*y**2 + 4*x**2*y + x**2 + 2*x*y**2 + 2*x*y + y**2
       <link href="http://nessgrh.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My GSoC Project</subtitle>
       <title>nessgrh</title>
-      <updated>2011-10-30T19:20:12Z</updated>
+      <updated>2011-10-31T23:20:13Z</updated>
     </source>
   </entry>
 
@@ -1462,6 +1498,8 @@ x**4 + 2*x**3*y + 2*x**3 + x**2*y**2 + 4*x**2*y + x**2 + 2*x*y**2 + 2*x*y + y**2
     </author>
     <source>
       <id>tag:blogger.com,1999:blog-8814696591561172392</id>
+      <category term="SymPy"/>
+      <category term="Tox"/>
       <author>
         <name>Vladimir Perić</name>
         <email>noreply@blogger.com</email>
@@ -1471,7 +1509,7 @@ x**4 + 2*x**3*y + 2*x**3 + x**2*y**2 + 4*x**2*y + x**2 + 2*x*y**2 + 2*x*y + y**2
       <link href="http://vperic.blogspot.com/search/label/SymPy" rel="alternate" type="text/html"/>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>Vlada's SymPy Blog</title>
-      <updated>2011-09-07T20:19:24Z</updated>
+      <updated>2011-10-31T23:02:23Z</updated>
     </source>
   </entry>
 
@@ -1565,7 +1603,7 @@ Out[2]:
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy, including my Google Summer of Code 2009 and 2010 projects.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2011-10-30T19:20:08Z</updated>
+      <updated>2011-10-31T23:20:08Z</updated>
     </source>
   </entry>
 
@@ -1928,7 +1966,7 @@ print A.subs(v, 5).eigenvals()</pre>
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>gilbertgede</title>
-      <updated>2011-10-30T19:20:13Z</updated>
+      <updated>2011-10-31T23:20:14Z</updated>
     </source>
   </entry>
 
@@ -1957,7 +1995,7 @@ print A.subs(v, 5).eigenvals()</pre>
       <link href="http://saptman.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My symply awesome gsoc summer</subtitle>
       <title>saptman</title>
-      <updated>2011-10-30T19:20:16Z</updated>
+      <updated>2011-10-31T23:20:18Z</updated>
     </source>
   </entry>
 
@@ -2023,7 +2061,7 @@ print A.subs(v, 5).eigenvals()</pre>
       <link href="http://nessgrh.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My GSoC Project</subtitle>
       <title>nessgrh</title>
-      <updated>2011-10-30T19:20:12Z</updated>
+      <updated>2011-10-31T23:20:13Z</updated>
     </source>
   </entry>
 
@@ -2083,7 +2121,7 @@ print A.subs(v, 5).eigenvals()</pre>
       <link href="http://nessgrh.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My GSoC Project</subtitle>
       <title>nessgrh</title>
-      <updated>2011-10-30T19:20:12Z</updated>
+      <updated>2011-10-31T23:20:13Z</updated>
     </source>
   </entry>
 
@@ -2182,7 +2220,7 @@ print A.subs(v, 5).eigenvals()</pre>
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2011-10-30T19:20:16Z</updated>
+      <updated>2011-10-31T23:20:17Z</updated>
     </source>
   </entry>
 
@@ -2220,7 +2258,7 @@ print A.subs(v, 5).eigenvals()</pre>
       <link href="http://lazovichsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My adventures during GSoC 2011</subtitle>
       <title>Tomo Lazovich's SymPy Blog</title>
-      <updated>2011-10-30T19:20:14Z</updated>
+      <updated>2011-10-31T23:20:15Z</updated>
     </source>
   </entry>
 
@@ -2254,7 +2292,7 @@ print A.subs(v, 5).eigenvals()</pre>
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2011-10-30T19:20:16Z</updated>
+      <updated>2011-10-31T23:20:17Z</updated>
     </source>
   </entry>
 
@@ -2281,7 +2319,7 @@ print A.subs(v, 5).eigenvals()</pre>
       <link href="http://sherjilozair.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://sherjilozair.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>Sherjil Ozair</title>
-      <updated>2011-10-30T19:20:15Z</updated>
+      <updated>2011-10-31T23:20:16Z</updated>
     </source>
   </entry>
 
@@ -2329,7 +2367,7 @@ print A.subs(v, 5).eigenvals()</pre>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy, including my Google Summer of Code 2009 and 2010 projects.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2011-10-30T19:20:08Z</updated>
+      <updated>2011-10-31T23:20:08Z</updated>
     </source>
   </entry>
 
@@ -2362,7 +2400,7 @@ print A.subs(v, 5).eigenvals()</pre>
       <link href="http://lazovichsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My adventures during GSoC 2011</subtitle>
       <title>Tomo Lazovich's SymPy Blog</title>
-      <updated>2011-10-30T19:20:14Z</updated>
+      <updated>2011-10-31T23:20:15Z</updated>
     </source>
   </entry>
 
@@ -2393,7 +2431,7 @@ print A.subs(v, 5).eigenvals()</pre>
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>gilbertgede</title>
-      <updated>2011-10-30T19:20:13Z</updated>
+      <updated>2011-10-31T23:20:14Z</updated>
     </source>
   </entry>
 
@@ -2475,7 +2513,7 @@ print A.subs(v, 5).eigenvals()</pre>
       <link href="http://nessgrh.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My GSoC Project</subtitle>
       <title>nessgrh</title>
-      <updated>2011-10-30T19:20:12Z</updated>
+      <updated>2011-10-31T23:20:13Z</updated>
     </source>
   </entry>
 
@@ -2565,7 +2603,7 @@ print A.subs(v, 5).eigenvals()</pre>
       <link href="http://nessgrh.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My GSoC Project</subtitle>
       <title>nessgrh</title>
-      <updated>2011-10-30T19:20:12Z</updated>
+      <updated>2011-10-31T23:20:13Z</updated>
     </source>
   </entry>
 
@@ -2626,6 +2664,8 @@ print A.subs(v, 5).eigenvals()</pre>
     </author>
     <source>
       <id>tag:blogger.com,1999:blog-8814696591561172392</id>
+      <category term="SymPy"/>
+      <category term="Tox"/>
       <author>
         <name>Vladimir Perić</name>
         <email>noreply@blogger.com</email>
@@ -2635,7 +2675,7 @@ print A.subs(v, 5).eigenvals()</pre>
       <link href="http://vperic.blogspot.com/search/label/SymPy" rel="alternate" type="text/html"/>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>Vlada's SymPy Blog</title>
-      <updated>2011-09-07T20:19:24Z</updated>
+      <updated>2011-10-31T23:02:23Z</updated>
     </source>
   </entry>
 
@@ -2664,7 +2704,7 @@ print A.subs(v, 5).eigenvals()</pre>
       <link href="http://sherjilozair.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://sherjilozair.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>Sherjil Ozair</title>
-      <updated>2011-10-30T19:20:15Z</updated>
+      <updated>2011-10-31T23:20:16Z</updated>
     </source>
   </entry>
 
@@ -2693,7 +2733,7 @@ print A.subs(v, 5).eigenvals()</pre>
       <link href="http://saptman.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My symply awesome gsoc summer</subtitle>
       <title>saptman</title>
-      <updated>2011-10-30T19:20:16Z</updated>
+      <updated>2011-10-31T23:20:18Z</updated>
     </source>
   </entry>
 
@@ -2729,95 +2769,7 @@ print A.subs(v, 5).eigenvals()</pre>
       <link href="http://lazovichsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My adventures during GSoC 2011</subtitle>
       <title>Tomo Lazovich's SymPy Blog</title>
-      <updated>2011-10-30T19:20:14Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://gilbertgede.wordpress.com/?p=60</id>
-    <link href="http://gilbertgede.wordpress.com/2011/07/09/gsoc-week-7/" rel="alternate" type="text/html"/>
-    <title>GSoC, Week 7</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">I submitted my pull request a little while ago for my code. Currently, it looks like I’m waiting on a few things. I think the biggest thing is the pull request Brian Granger has opened. I’ve already written a branch which uses his code, and everything works. I just have to wait for his pull [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=gilbertgede.wordpress.com&amp;blog=22677911&amp;post=60&amp;subd=gilbertgede&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>I submitted my pull request a little while ago for my code. Currently, it looks like I’m waiting on a few things. I think the biggest thing is the pull request Brian Granger has opened. I’ve already written a branch which uses his code, and everything works. I just have to wait for his pull request to get accepted in order to switch what is in my pull request. Then of course, that has to get approved. This delay has had some positive benefits though.</p>
-<p>Working with other people’s branches has definitely helped my familiarity and confidence with using git. Using the fetch and merge commands with multiple remotes, along with getting merge errors and fixing them, has given some me good experience. Also, rebasing to play with commit history, and amending commits has been helpful.</p>
-<p>I feel like I had the functionality I wanted before from my ‘DynamicSymbol’ class, but with the ability to take the derivatives of functions now, with respect to functions means that this object is no longer needed really. What I did before was have ‘DynamicSymbol’ extend ‘Symbol’. I then used the ability of the ‘symbols’ function to to supply my own class for creation in the ‘dynamicsymbols’:</p>
-<pre>def dynamicsymbols(names):
-    """Wraps sympy.symbols to use DynamicSymbol. """
-    return symbols(names, cls=DynamicSymbol)</pre>
-<p>This was an OK solution. Now though, one can use functions to represent these time varying quantities; instead of q1, q1d, q1dd we’ll have q1(t), Derivative(q1(t), t), etc. This is certainly more consistent with the rest of SymPy. Now my ‘dynamicsymbols’ function uses symbols with ‘cls=Function’ to create a number of undefined function objects, which then are called with ‘(t)’ as an argument (I actually do something like dynamicsymbols._t = Symbol(‘t’). This way the time value is specified in only one place, but that place is still associated with dynamic symbols. The ability of Python to set an attribute to a function is certainly interesting…). I also added the ability to specify the level of differentiation; you can call:</p>
-<pre>In [11]: dynamicsymbols('q1 q2')
-(q1, q2)
-
-In [12]: dynamicsymbols('q1 q2', 1)
-(q1', q2')</pre>
-<p>This means you can’t create q1, q1′, q1” on one line, but at least all dynamic symbols of the same level of differentiation can be called together. The above snippet leads to the next topic though: printing.</p>
-<p>When you start up ipython, and do the following:</p>
-<pre>In [1]: from sympy.physics.mechanics import *
-
-In [2]: dynamicsymbols('q1 q2', 1)
-Out[2]: (Derivative(q1(t), t), Derivative(q2(t), t))</pre>
-<p>the output isn’t actually the same as what I presented a few lines above. This is because of the default printing of Derivative (shown in the line immediately above). When dealing with multibody dynamics problems, you get a lot of derivatives of these dynamic symbols (generalized coordinates and speeds). It gets out of control pretty fast if we print out every time derivative in the above form. So, what I did was to write my own printer which shows derivatives as q’ instead of Derivative(q(t), t), under certain conditions (and q” for Derivative(q(t),t,t) and so forth). The conditions are that that the derivative has to have been taken with respect to the time symbol (stored in dynamicsymbols._t, as previously mentioned) and that its first argument (the value which is being differentiated) has to be an ‘UndefinedFunction’ and that the derivative can only be taken with respect to t.</p>
-<pre>    def _print_Derivative(self, e):
-        from sympy.core.function import UndefinedFunction
-        t = dynamicsymbols._t
-        if (bool([i == t for i in e.variables]) &amp;
-            isinstance(type(e.args[0]), UndefinedFunction)):
-            ol = str(e.args[0].func)
-            for i, v in enumerate(e.variables):
-                ol += '\''
-            return ol
-        else:
-            return StrPrinter().doprint(e)</pre>
-<p>The above block of code shows how it is done; the first part of the undefined function function is added to our output string (e.args[0].func), then for each entry in e.variables we print a ‘. In this method, ‘e’ is the expression to be printed. Then our final list is returned, or just the normal printer’s output if the given expression did not meet our criteria. Now, this actually doesn’t print out everything perfectly:</p>
-<pre>In [23]: Derivative(q1,t)
-q1'
-
-In [24]: Derivative(q1*x,t)
-Derivative(x*q1(t), t)
-
-In [25]: Derivative(q1*x,t, evaluate=True)
-x*q1'</pre>
-<p>We can still get examples where it prints out the long way: when evaluate is not true and the ‘Derivative’ object does not only contain an undefined function. I’m willing to live with this at the moment though, as I think that all my code uses ‘diff’ where evaluate always gets called. I also wrote a ‘_print_Function’ method, in order to print q1(t) as q1:</p>
-<pre>    def _print_Function(self, e):
-        from sympy.core.function import UndefinedFunction
-        t = dynamicsymbols._t
-        temp = StrPrinter().doprint(e)
-        if isinstance(type(e), UndefinedFunction):
-            return temp.replace('(t)', '')
-        return temp</pre>
-<p>I think this one is even simpler. If the Function is an undefined function, print it to a string, then replace the ‘(t)’ in the string with nothing. Checking that it is an undefined function is definitely important, otherwise you get:</p>
-<pre>In [10]: cos(t)
-cos</pre>
-<p>And I don’t think anyone wants that. So the last two bits of this are interactive printing and integration of my non-SymPy objects with the printing system.</p>
-<p>In order to get my Vector and and Dyad to print out with a SymPy printer correctly, I had to do the following: have one method (I chose __str__) which creates the string representation of the object, and then set __repr__ = __str__, _sympystr = __str__, _sympyrepr = __str__. Those last two functions are what the printer looks for, I believe. I’m actually still not completely clear on the difference between repr and str in Python, but I think one is supposed to satisfy: x == eval(repr(x)), except that I’m not sure if it is repr or str there. Additionally, in doctests, unless you do print, a returned value which you check against is called with repr I believe. SymPy does not exactly follow the above obj=eval(repr(obj)), and now, my code doesn’t always either, which I think is an acceptable tradeoff considering the readability issues. The way that the printer (which currently only has _print_Derivative and _print_Function methods overridden) is used by vector is as follows: the string value of a vector’s non-zero measure number is obtained with MechanicsStrPrinter().doprint(ar[i][0]). Here ar[i][0] is what I am supplying, but whatever is put in .doprint() will be printed by the printer.</p>
-<p>Now for most of the work in physics.mechanics, you’ll be dealing with Vector quantities, so my printer is used automatically. But at the end of forming Kane’s equations, you are left with Fr + Fr* = 0. This is a r x 1 vector represented by a SymPy Matrix of the same shape. It will also be full of qdots and udots (generalized coordinate and speed time derivatives). This can end up being the biggest expression generated in forming the equations of motion, so being concise where it is practical is a good idea. Unfortunately my printer won’t get called here, because Matrix uses the default StrPrinter. Enter the display hook:</p>
-<pre>def mechanics_printing():
-    def mydhook(ar):
-        print MechanicsStrPrinter().doprint(ar)
-    sys.displayhook = mydhook
-    return 'displayhook set'</pre>
-<p>This function, mechanics_printing(), will be called by the user at the beginning of an interactive session in order to print out Derivatives and Functions which are not part of a mechanics Vector in the way I have chosen. You can set sys.displayhook to use a custom printing function of your creation. Here, a one line function to just use my printer is defined, then the system displayhook is set to use my displayhook. At this point I learned there is no such thing as a “void”  function in Python; everything has to return a value, and if you don’t, None is automatically returned. I just had it print that the displayhook was set, rather than it printing ‘None’ when you call this function. I believe this only sets the interactive printing though; I’m not sure what will be printed when you have a script file you have written and it prints out the screen or a file; this still needs to be worked out.</p>
-<p>Hopefully all of this will help out someone in the future with their SymPy printing issues.</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/gilbertgede.wordpress.com/60/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/gilbertgede.wordpress.com/60/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/gilbertgede.wordpress.com/60/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/gilbertgede.wordpress.com/60/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/gilbertgede.wordpress.com/60/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/gilbertgede.wordpress.com/60/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/gilbertgede.wordpress.com/60/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/gilbertgede.wordpress.com/60/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/gilbertgede.wordpress.com/60/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/gilbertgede.wordpress.com/60/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/gilbertgede.wordpress.com/60/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/gilbertgede.wordpress.com/60/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/gilbertgede.wordpress.com/60/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/gilbertgede.wordpress.com/60/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=gilbertgede.wordpress.com&amp;blog=22677911&amp;post=60&amp;subd=gilbertgede&amp;ref=&amp;feed=1" width="1"/><div class="sharedaddy sd-like-enabled"/></div>
-    </content>
-    <updated>2011-07-09T16:49:38Z</updated>
-    <category term="GSoC 2011"/>
-    <category term="PyDy"/>
-    <category term="SymPy"/>
-    <author>
-      <name>gilbertgede</name>
-    </author>
-    <source>
-      <id>http://gilbertgede.wordpress.com</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://gilbertgede.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://gilbertgede.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://gilbertgede.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>Just another WordPress.com site</subtitle>
-      <title>gilbertgede</title>
-      <updated>2011-10-30T19:20:13Z</updated>
+      <updated>2011-10-31T23:20:15Z</updated>
     </source>
   </entry>
 </feed>
