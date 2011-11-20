@@ -214,58 +214,58 @@ That last one is a real doozy.  Try saying that 5 times real fast, then explain 
 	<title>Aaron Meurer: sqrt(x) now prints as &quot;sqrt(x)&quot;</title>
 	<link>http://asmeurersympy.wordpress.com/2011/08/18/sqrtx-now-prints-as-sqrtx/</link>
 	<content:encoded>&lt;p&gt;Just a few moments ago, &lt;a href=&quot;https://github.com/sympy/sympy/pull/548&quot; target=&quot;_blank&quot;&gt;a branch&lt;/a&gt; was pushed in that fixed one of my biggest grievances in SymPy, if not the biggest.  Previously we had this behavior:&lt;/p&gt;
-&lt;pre class=&quot;brush: python;&quot;&gt;In [1]: sqrt(x)
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;In [1]: sqrt(x)
 Out[1]: x**(1/2)
 
 In [2]: solve(x**2 - 2, x)
 Out[2]: [-2**(1/2), 2**(1/2)]
-&lt;/pre&gt;
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
 &lt;p&gt;Now suppose you took the output of those expressions and pasted them into isympy:&lt;/p&gt;
-&lt;pre class=&quot;brush: python;&quot;&gt;In [3]: x**(1/2)
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;In [3]: x**(1/2)
 Out[3]: x**0.5
 
 In [4]: [-2**(1/2), 2**(1/2)]
 Out[4]: [-1.41421356237, 1.41421356237]
-&lt;/pre&gt;
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
 &lt;p&gt;That’s with &lt;code&gt;__future__.division&lt;/code&gt;.  Here’s what would happen with old division:&lt;/p&gt;
-&lt;pre class=&quot;brush: python;&quot;&gt;In [2]: x**(1/2)
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;In [2]: x**(1/2)
 Out[2]: 1
 
 In [3]: [-2**(1/2), 2**(1/2)]
 Out[3]: [-1, 1]
-&lt;/pre&gt;
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
 &lt;p&gt;This is because with old division, &lt;code&gt;1/2&lt;/code&gt; evaluates to &lt;code&gt;0&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;The problem is that Python evaluates &lt;code&gt;1/2&lt;/code&gt; to &lt;code&gt;0.5&lt;/code&gt; (or &lt;code&gt;0&lt;/code&gt;) before SymPy has a change to convert it to a Rational.  There were several ways that people got around this.  If you copy an expression with number division in it and want to paste it into a SymPy session, the easiest way to do this was to pass it as a string to &lt;code&gt;sympify()&lt;/code&gt;:&lt;/p&gt;
-&lt;pre class=&quot;brush: python;&quot;&gt;In [1]: sympify(&quot;x**(1/2)&quot;)
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;In [1]: sympify(&quot;x**(1/2)&quot;)
 Out[1]: x**(1/2)
 
 In [2]: sympify(&quot;[-2**(1/2), 2**(1/2)]&quot;)
 Out[2]: [-2**(1/2), 2**(1/2)]
-&lt;/pre&gt;
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
 &lt;p&gt;If that was too much typing for you, you could use the &lt;code&gt;S()&lt;/code&gt; shortcut to &lt;code&gt;sympify()&lt;/code&gt;&lt;/p&gt;
-&lt;pre class=&quot;brush: python;&quot;&gt;In [3]: S(&quot;x**(1/2)&quot;)
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;In [3]: S(&quot;x**(1/2)&quot;)
 Out[3]: x**(1/2)
 
 In [4]: S(&quot;[-2**(1/2), 2**(1/2)]&quot;)
 Out[4]: [-2**(1/2), 2**(1/2)]
-&lt;/pre&gt;
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
 &lt;p&gt;This solution is fine if you want to paste an expression into a SymPy session, but it’s not a very clean one if you want to paste code into a script. For that, you need to modify the code so that it no longer contains Python int/Python int.  The easiest way to do this is to sympify one of the ints.  So you would do something like&lt;/p&gt;
-&lt;pre class=&quot;brush: python;&quot;&gt;In [5]: x**(S(1)/2)
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;In [5]: x**(S(1)/2)
 Out[5]: x**(1/2)
 
 In [6]: [-2**(S(1)/2), 2**(S(1)/2)]
 Out[6]: [-2**(1/2), 2**(1/2)]
-&lt;/pre&gt;
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
 &lt;p&gt;This wasn’t terribly readable, though.  The &lt;em&gt;best&lt;/em&gt; way to fix the problem when you had a power of one half was to use &lt;code&gt;sqrt()&lt;/code&gt;, which is a shortcut to &lt;code&gt;Pow(…, Rational(1, 2))&lt;/code&gt;.  &lt;/p&gt;
 &lt;p&gt;Well, this last item should make you think.  If &lt;code&gt;sqrt(x)&lt;/code&gt; is more readable than &lt;code&gt;x**(S(1)/2)&lt;/code&gt; or even &lt;code&gt;x**(1/2)&lt;/code&gt;, why not print it like that in the first place.  Well, I thought so, so I changed the string printer, and now this is the way that SymPy works.  So 90% of the time, you can just paste the result of &lt;code&gt;str()&lt;/code&gt; or &lt;code&gt;print&lt;/code&gt;, and it will just work, because there won’t be any &lt;code&gt;**(1/2)&lt;/code&gt;, which was by far the most common problem of “Python evaluating the expression to something before we can.”  In the git master, SymPy now behaves like&lt;/p&gt;
-&lt;pre class=&quot;brush: python;&quot;&gt;In [1]: sqrt(x)
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;In [1]: sqrt(x)
 Out[1]: sqrt(x)
 
 In [2]: solve(x**2 - 2, x)
 Out[2]: [-sqrt(2), sqrt(2)]
-&lt;/pre&gt;
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
 &lt;p&gt;You can obviously just copy and paste these results, and you get the exact same thing back.  Not only does this make expressions more copy-and-pastable, but the output is &lt;em&gt;much&lt;/em&gt; nicer in terms of readability.  Here are some before and afters that come from actual SymPy doctests that I had to change after fixing the printer:&lt;/p&gt;
-&lt;pre class=&quot;brush: python;&quot;&gt;Before:
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;Before:
 &amp;gt;&amp;gt;&amp;gt; e = ((2+2*sqrt(2))*x+(2+sqrt(8))*y)/(2+sqrt(2))
 &amp;gt;&amp;gt;&amp;gt; radsimp(e)
 2**(1/2)*x + 2**(1/2)*y
@@ -273,8 +273,8 @@ Out[2]: [-sqrt(2), sqrt(2)]
 After:
 &amp;gt;&amp;gt;&amp;gt; radsimp(e)
 sqrt(2)*x + sqrt(2)*y
-&lt;/pre&gt;
-&lt;pre class=&quot;brush: python;&quot;&gt;Before:
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;Before:
 &amp;gt;&amp;gt;&amp;gt; b = besselj(n, z)
 &amp;gt;&amp;gt;&amp;gt; b.rewrite(jn)
 2**(1/2)*z**(1/2)*jn(n - 1/2, z)/pi**(1/2)
@@ -282,8 +282,8 @@ sqrt(2)*x + sqrt(2)*y
 After:
 &amp;gt;&amp;gt;&amp;gt; b.rewrite(jn)
 sqrt(2)*sqrt(z)*jn(n - 1/2, z)/sqrt(pi)
-&lt;/pre&gt;
-&lt;pre class=&quot;brush: python;&quot;&gt;Before:
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;Before:
 &amp;gt;&amp;gt;&amp;gt; x = sympify('-1/(-3/2+(1/2)*sqrt(5))*sqrt(3/2-1/2*sqrt(5))')
 &amp;gt;&amp;gt;&amp;gt; x
 (3/2 - 5**(1/2)/2)**(-1/2)
@@ -291,34 +291,34 @@ sqrt(2)*sqrt(z)*jn(n - 1/2, z)/sqrt(pi)
 After
 &amp;gt;&amp;gt;&amp;gt; x
 1/sqrt(3/2 - sqrt(5)/2)
-&lt;/pre&gt;
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
 &lt;p&gt;And not only is &lt;code&gt;sqrt(x)&lt;/code&gt; easier to read than &lt;code&gt;x**(1/2)&lt;/code&gt; but it’s fewer characters.&lt;/p&gt;
 &lt;p&gt;In the course of changing this, I went ahead and did some greps of the repository to get rid of all &lt;code&gt;**(S(1)/2)&lt;/code&gt;, &lt;code&gt;**Rational(1, 2)&lt;/code&gt; and similar throughout the code base (not just in the output of doctests where the change had to be made), replacing them with just &lt;code&gt;sqrt&lt;/code&gt;.  Big thanks to Chris Smith for helping me catch all instances of this.  Now the code should be a little easier to read and maintain.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Future Work&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;This is a big change, and I believe it will fix the copy-paste problem for 90% of expressions. But it does not solve it completely.  It is still possible to get int/int in the string form of an expression.  Only powers of 1/2 and -1/2 are converted to sqrt, so any other rational power will still print as a/b, like&lt;/p&gt;
-&lt;pre class=&quot;brush: python;&quot;&gt;In [1]: x**Rational(3, 2)
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;In [1]: x**Rational(3, 2)
 Out[1]: x**(3/2)
-&lt;/pre&gt;
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
 &lt;p&gt;Also, as you may have noticed in the last example above, a rational number that sits by itself will still be printed as int/int, like&lt;/p&gt;
-&lt;pre class=&quot;brush: python;&quot;&gt;In [2]: (1 + x)/2
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;In [2]: (1 + x)/2
 Out[2]: x/2 + 1/2
-&lt;/pre&gt;
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
 &lt;p&gt;Therefore, I’m leaving the &lt;a href=&quot;http://code.google.com/p/sympy/issues/detail?id=2359&quot; target=&quot;_blank&quot;&gt;issue for this&lt;/a&gt; open to discuss potential future fixes to the string printer.  One idea is to create a &lt;code&gt;root&lt;/code&gt; function that is a shortcut to &lt;code&gt;root(x, a) == x**(1/a)&lt;/code&gt;. This would work for rational powers where the numerator is 1.  For other rational powers, we could then denest these with an integer power.  It’s important to do this in the right order, though, as they are not equivalent.  You can see that SymPy auto-simplifies it when it is mathematically correct in all cases, and not when it is not:&lt;/p&gt;
-&lt;pre class=&quot;brush: python;&quot;&gt;In [3]: sqrt(x**3)
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;In [3]: sqrt(x**3)
 Out[3]: sqrt(x**3)
 
 In [4]: sqrt(x)**3
 Out[4]: x**(3/2)
-&lt;/pre&gt;
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
 &lt;p&gt;Thus &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cleft%28%5Csqrt%7Bx%7D%5Cright%29%5E3+%3D+x%5E%7B%5Cfrac%7B3%7D%7B2%7D%7D&amp;amp;bg=ffffff&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\left(\sqrt{x}\right)^3 = x^{\frac{3}{2}}&quot; class=&quot;latex&quot; title=&quot;\left(\sqrt{x}\right)^3 = x^{\frac{3}{2}}&quot; /&gt; but &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Csqrt%7Bx%5E3%7D+%5Cneq+x%5E%7B%5Cfrac%7B3%7D%7B2%7D%7D&amp;amp;bg=ffffff&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\sqrt{x^3} \neq x^{\frac{3}{2}}&quot; class=&quot;latex&quot; title=&quot;\sqrt{x^3} \neq x^{\frac{3}{2}}&quot; /&gt; (to see this, replace &lt;img src=&quot;http://s0.wp.com/latex.php?latex=x&amp;amp;bg=ffffff&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;x&quot; class=&quot;latex&quot; title=&quot;x&quot; /&gt; with -1).&lt;/p&gt;
 &lt;p&gt;So the idea would be to print &lt;code&gt;Pow(expr, Rational(a, b))&lt;/code&gt; as &lt;code&gt;root(expr, b)**a&lt;/code&gt;.  &lt;/p&gt;
 &lt;p&gt;The merits of this are debatable, but anyway I think we should have this &lt;code&gt;root()&lt;/code&gt; function in any case (see &lt;a href=&quot;http://code.google.com/p/sympy/issues/detail?id=2643&quot; target=&quot;_blank&quot;&gt;issue 2643&lt;/a&gt;).&lt;/p&gt;
 &lt;p&gt;Another idea, which is probably not a good one, is to always print &lt;code&gt;int/int&lt;/code&gt; as &lt;code&gt;S(int)/int&lt;/code&gt;.  So we would get&lt;/p&gt;
-&lt;pre class=&quot;brush: python;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; Rational(1, 2)
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; Rational(1, 2)
 S(1)/2
 &amp;gt;&amp;gt;&amp;gt; x**Rational(4, 5)
 x**(S(4)/5)
-&lt;/pre&gt;
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
 &lt;p&gt;This is probably a bad idea because even though expressions would always be copy-pastable, they would be slightly less readable.  &lt;/p&gt;
 &lt;p&gt;By the way, in case you didn’t catch it, all of these changes only affect the string printer.  The pretty printer remained unaffected, and would under any additional changes, as it isn’t copy-pastable anyway, and already does a superb job of printing roots.&lt;/p&gt;
 &lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/asmeurersympy.wordpress.com/1042/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/asmeurersympy.wordpress.com/1042/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/godelicious/asmeurersympy.wordpress.com/1042/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/delicious/asmeurersympy.wordpress.com/1042/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/gofacebook/asmeurersympy.wordpress.com/1042/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/facebook/asmeurersympy.wordpress.com/1042/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/gotwitter/asmeurersympy.wordpress.com/1042/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/twitter/asmeurersympy.wordpress.com/1042/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/gostumble/asmeurersympy.wordpress.com/1042/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/stumble/asmeurersympy.wordpress.com/1042/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/godigg/asmeurersympy.wordpress.com/1042/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/digg/asmeurersympy.wordpress.com/1042/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/goreddit/asmeurersympy.wordpress.com/1042/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/reddit/asmeurersympy.wordpress.com/1042/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;amp;blog=7467151&amp;amp;post=1042&amp;amp;subd=asmeurersympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
@@ -455,8 +455,8 @@ Now I’d like to update &lt;img src=&quot;http://s0.wp.com/latex.php?latex=P&am
 &lt;div style=&quot;width: 253px;&quot; class=&quot;wp-caption alignnone&quot; id=&quot;attachment_1023&quot;&gt;&lt;a href=&quot;http://asmeurersympy.files.wordpress.com/2011/08/screen-shot-2011-08-07-at-8-41-30-pm.png&quot;&gt;&lt;img src=&quot;http://asmeurersympy.files.wordpress.com/2011/08/screen-shot-2011-08-07-at-8-41-30-pm.png?w=243&amp;amp;h=300&quot; title=&quot;PuDB Prefs Window&quot; height=&quot;300&quot; width=&quot;243&quot; alt=&quot;&quot; class=&quot;size-medium wp-image-1023&quot; /&gt;&lt;/a&gt;&lt;p class=&quot;wp-caption-text&quot;&gt;Click to see full size image&lt;/p&gt;&lt;/div&gt;
 &lt;p&gt;So if you’re not already using this awesome Python debugger, you should.  You can &lt;code&gt;pip install pudb&lt;/code&gt;, or &lt;a href=&quot;https://github.com/inducer/pudb&quot; target=&quot;_blank&quot;&gt;fork it&lt;/a&gt; at GitHub.&lt;/p&gt;
 &lt;p&gt;Running it in your code is very easy.  Just add&lt;/p&gt;
-&lt;pre class=&quot;brush: python;&quot;&gt;import pudb;pudb.set_trace()
-&lt;/pre&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;import pudb;pudb.set_trace()
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
 &lt;p&gt;in your code wherever you want to set a break point, or you can do &lt;code&gt;python -m pudb.run script.py&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;This awesome tool has increased my productivity tenfold since I discovered it, and has helped me track down bugs that would have otherwise extremely difficult if not impossible to find.  And now, it’s just better.&lt;/p&gt;
 &lt;p&gt;PuDB uses the &lt;a href=&quot;http://excess.org/urwid/&quot; target=&quot;_blank&quot;&gt;urwid library&lt;/a&gt; to do all its console GUI magic.  This library makes it pretty easy to do a lot of stuff. For example, it automatically does relative sizing of widgets, so, for example, when you resize the variables, stack, or breakpoints views, you are actually increasing the relative size of each, not the size in characters.  This makes it portable against any terminal size.  The library also made coding the prefs window autoupdate magic very easy.&lt;/p&gt;
@@ -854,22 +854,22 @@ x**4 + 2*x**3*y + 2*x**3 + x**2*y**2 + 4*x**2*y + x**2 + 2*x*y**2 + 2*x*y + y**2
 &lt;p&gt;Some of these were caused by wrong merge conflict resolutions by me.  So I went through &lt;code&gt;git diff sympy-0.7.0&lt;/code&gt; change by change and made sure that nothing was different that I didn’t want to be.  I would recommend doing this for any big merge.&lt;/p&gt;
 &lt;p&gt;Then, I had to fix a few bugs that caused test failures.  Several semantics were changed in the release.  I think the ones that I had to change were the renaming of &lt;code&gt;has_any_symbols&lt;/code&gt; to just &lt;code&gt;has&lt;/code&gt;, the renaming of &lt;code&gt;Poly.as_basic()&lt;/code&gt; to &lt;code&gt;Poly.as_expr()&lt;/code&gt;, and the swapping of the meanings of &lt;code&gt;quo&lt;/code&gt; and &lt;code&gt;exquo&lt;/code&gt; in the polys.  There were also some doctest failures due to the change to lexicographic ordering in the printer.&lt;/p&gt;
 &lt;p&gt;After all that, there were two regressions that caused test failures.  The first was the following:&lt;/p&gt;
-&lt;p&gt;Before:&lt;/p&gt;
-&lt;pre class=&quot;brush: python;&quot;&gt;In [1]: Integral((exp(x*log(x))*log(x)), x).subs(exp(x*log(x)), x**x)
-Out[1]:
-⌠
-⎮  x
+&lt;p&gt;Before:&lt;br /&gt;
+&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;In [1]: Integral((exp(x*log(x))*log(x)), x).subs(exp(x*log(x)), x**x)
+Out[1]: 
+⌠             
+⎮  x          
 ⎮ x ⋅log(x) dx
-⌡
-&lt;/pre&gt;
-&lt;p&gt;After:&lt;/p&gt;
-&lt;pre class=&quot;brush: python;&quot;&gt;In [1]: Integral((exp(x*log(x))*log(x)), x).subs(exp(x*log(x)), x**x)
-Out[1]:
-⌠
-⎮  x⋅log(x)
+⌡             
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;p&gt;After:&lt;br /&gt;
+&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;In [1]: Integral((exp(x*log(x))*log(x)), x).subs(exp(x*log(x)), x**x)
+Out[1]: 
+⌠                    
+⎮  x⋅log(x)          
 ⎮ ℯ        ⋅log(x) dx
-⌡
-&lt;/pre&gt;
+⌡                    
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
 &lt;p&gt;This substitution is necessary because the Risch algorithm requires expressions like &lt;img src=&quot;http://s0.wp.com/latex.php?latex=x%5Ex&amp;amp;bg=ffffff&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;x^x&quot; class=&quot;latex&quot; title=&quot;x^x&quot; /&gt; to be rewritten as &lt;img src=&quot;http://s0.wp.com/latex.php?latex=e%5E%7Bx%5Clog%28x%29%7D&amp;amp;bg=ffffff&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;e^{x\log(x)}&quot; class=&quot;latex&quot; title=&quot;e^{x\log(x)}&quot; /&gt; before it can integrate them, but I try to convert them back after integrating so that the user gets the same thing in the result that he entered.  I created &lt;a href=&quot;http://code.google.com/p/sympy/issues/detail?id=2571&quot; target=&quot;_blank&quot;&gt;issue 2571&lt;/a&gt; for this.&lt;/p&gt;
 &lt;p&gt;The second was that I had several places in my docstrings with things like&lt;/p&gt;
 &lt;blockquote&gt;&lt;p&gt;
@@ -877,26 +877,27 @@ Given a derivation D on k[t] and f, g in k(t) with f weakly normalized with resp
 &lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;The problem here is the “raise NonElementaryIntegralException,” part.  The code quality checker things that this is an old style exception (like &lt;code&gt;raise Exception, message&lt;/code&gt;), due to a poorly formed regular expression.  I fixed this in a &lt;a href=&quot;https://github.com/sympy/sympy/pull/511&quot; target=&quot;_blank&quot;&gt;pull request&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;The good news is that now a lot of stuff works that didn’t before because of fixes that were required that only existed in &lt;code&gt;master&lt;/code&gt;.  For example, the following did not work before, but now does due to improvements to &lt;code&gt;RootSum&lt;/code&gt;:&lt;/p&gt;
-&lt;pre class=&quot;brush: python;&quot;&gt;In [1]: risch_integrate(1/(exp(5*x) + exp(x) + 1), x)
-Out[1]:
-           ⎛    2
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;In [1]: risch_integrate(1/(exp(5*x) + exp(x) + 1), x)
+Out[1]: 
+           ⎛    2                                                           
 x + RootSum⎝21⋅z  + 6⋅z + 1, Lambda(_i, _i*log(-3381*_i**4/4 - 3381*_i**3/4 
 
-                                       ⎞          ⎛     3        2
+                                       ⎞          ⎛     3        2          
 - 625*_i**2/2 - 125*_i/2 + exp(x) - 5))⎠ + RootSum⎝161⋅z  + 115⋅z  + 19⋅z + 
 
+                                                                            
 1, Lambda(_i, _i*log(-3381*_i**4/4 - 3381*_i**3/4 - 625*_i**2/2 - 125*_i/2 +
 
              ⎞
  exp(x) - 5))⎠
 
 In [2]: cancel(risch_integrate(1/(exp(5*x) + exp(x) + 1), x).diff(x))
-Out[2]:
-      1
+Out[2]: 
+      1      
 ─────────────
- 5⋅x    x
+ 5⋅x    x    
 ℯ    + ℯ  + 1
-&lt;/pre&gt;
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
 &lt;p&gt;The general definition of the logarithmic part of an integral is a sum over the roots of a polynomial, which must be expressed as a &lt;code&gt;RootSum&lt;/code&gt; in the general case.  Previously, &lt;code&gt;RootSum.diff&lt;/code&gt; did not work, but thanks to Mateusz, an algorithm for computing exactly the RootSum where the Lambda expression is a rational function was implemented (see &lt;a href=&quot;http://mattpap.github.com/scipy-2011-tutorial/html/mathematics.html#summing-roots-of-polynomials&quot; target=&quot;_blank&quot;&gt;this bit&lt;/a&gt; from our SciPy tutorial for an idea on how this works), so now the Risch Algorithm can work with RootSum objects just as well with as an ordinary sum of logarithms.&lt;/p&gt;
 &lt;p&gt;Also, there was a bug in the square free algorithm in my branch that was fixed in &lt;code&gt;master&lt;/code&gt; that was causing wrong results (I don’t remember the expression that produced them right now), and also there was a fix by me in &lt;code&gt;master&lt;/code&gt; to make &lt;code&gt;is_rational_function()&lt;/code&gt; faster, as it was significantly slowing down the calculation of some integrals (for example, &lt;code&gt;risch_integrate(Add(*(exp(i*x) for i in range(1000))))&lt;/code&gt;, which is still slow to calculate, but now it’s because of other things).&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;About big branches&lt;/strong&gt;&lt;/p&gt;
