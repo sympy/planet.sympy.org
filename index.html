@@ -23,6 +23,42 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>November 28, 2011</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://seanvig.blogspot.com/search/label/sympy" title="Sean Vig's 2011 GSoC Project">Sean Vig</a></h3>
+
+
+<div class="entrygroup" id="tag:blogger.com,1999:blog-8510171342300140296.post-7586073962705778071">
+<h4><a href="http://seanvig.blogspot.com/2011/11/finalizing-arbitrary-spin-coupling.html">Finalizing arbitrary spin coupling</a></h4>
+<div class="entry">
+<div class="content">
+As expected, my work with Sympy slowed drastically once school started, but nevertheless, I have found enough time to polish off the coupling of arbitrary number of spin spaces that I started over the summer. I'll probably wait until after school is done (and the initial Google Code-In traffic dies down) before opening a pull request, but it has neared the state of conclusion, but I will outline the work done on the branch <a href="https://github.com/flacjacket/sympy/tree/multi_coupled">here</a>.<br /><br />A notable change from the summer is the coupling and uncoupling code is now <i>much</i> cleaner. The old methods used messy <span style="font-family: 'Courier New', Courier, monospace;">while True:</span> loops  which would increment some parameters and check if some end condition was reached, which I found very unsatisfactory and open to some weird use case throwing it into complete disarray. The new methods utilize the notion that any coupling or uncoupling will occur such that there is a well defined change in either the j (in the case of coupling) or m (in the case of uncoupling) values from their maximal values, and this change can be applied over the (un)couplings in the same way you can distribute n balls in m boxes, then it is just matching an integer to a given state and check that the given state is physically feasible.<br /><br />In addition, I have added all necessary documentation for the new functionality and fixed a few other minor issues with other parts of the new code. I may yet change some of the handling of the j_coupling parameter, but I will reevaluate that when I have more time to look at the code after I finish the semester.<br /><br />The passing of quantum numbers to define the couplings and un-couplings is still quite verbose, but I see no better way of passing the parameters, hopefully in review someone will see a better way of defining states and couplings.<div class="blogger-post-footer"><img src="https://blogger.googleusercontent.com/tracker/8510171342300140296-7586073962705778071?l=seanvig.blogspot.com" alt="" width="1" height="1" /></div></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://seanvig.blogspot.com/2011/11/finalizing-arbitrary-spin-coupling.html">by Sean Vig (noreply@blogger.com) at November 28, 2011 05:58 AM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>November 26, 2011</h2>
 
 <div class="channelgroup">
@@ -3148,56 +3184,6 @@ Most of this last week was spent developing coupled and uncoupled states, beginn
 </div>
 
 </div>
-<div class="daygroup">
-<h2>July 12, 2011</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://fseoane.net/blog" title="I say things">Fabian Pedregosa</a></h3>
-
-
-<div class="entrygroup" id="http://fseoane.net/blog/?p=939">
-<h4 lang="en"><a href="http://fseoane.net/blog/2011/ridge-regression-path/">Ridge regression path</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>Ridge coefficients for multiple values of the regularization parameter can be elegantly computed by updating the <i>thin</i> SVD decomposition of the design matrix:</p>
-<div style="overflow: auto; white-space: nowrap; width: 435px;" class="codecolorer-container python default"><div style="" class="python codecolorer"><span style="color: #ff7700; font-weight: bold;">import</span> numpy <span style="color: #ff7700; font-weight: bold;">as</span> np<br />
-<span style="color: #ff7700; font-weight: bold;">from</span> scipy <span style="color: #ff7700; font-weight: bold;">import</span> linalg<br />
-<br />
-<span style="color: #ff7700; font-weight: bold;">def</span> ridge<span style="color: black;">(</span>A, b, alphas<span style="color: black;">)</span>:<br />
-    <span style="color: #483d8b;">"""Return coefficients for regularized least squares <br />
-               min ||A x - b|| + alpha ||x||<br />
-    """</span> <br />
-    U, s, V = linalg.<span style="color: black;">svd</span><span style="color: black;">(</span>X, full_matrices=<span style="color: #008000;">False</span><span style="color: black;">)</span><br />
-    d = np.<span style="color: black;">dot</span><span style="color: black;">(</span>U.<span style="color: black;">T</span>, y<span style="color: black;">)</span> / <span style="color: black;">(</span>s + alphas<span style="color: black;">[</span>:, np.<span style="color: black;">newaxis</span><span style="color: black;">]</span> / s<span style="color: black;">)</span><br />
-    <span style="color: #ff7700; font-weight: bold;">return</span> np.<span style="color: black;">dot</span><span style="color: black;">(</span>d, V<span style="color: black;">)</span></div></div>
-<p>For a concrete problem it then can be used to efficiently compute it’s <i>path</i>, that is, to plot the coefficients as a function of the regularization parameter.</p>
-<p><a href="http://fseoane.net/blog/wp-content/uploads/2011/07/ridge_nocv.png"><img src="http://fseoane.net/blog/wp-content/uploads/2011/07/ridge_nocv.png" alt="" width="550" class="aligncenter size-full wp-image-950" title="Ridge path" /></a></p>
-<p>A variant of this algorithm can then be used to compute the optimal regularization parameter in the sense of leave-one-out cross-validation and is implemented in scikit-learn’s <a href="http://scikit-learn.sourceforge.net/dev/modules/linear_model.html#generalized-cross-validation">RidgeCV</a> (see also <a href="http://www.mblondel.org/journal/2011/02/09/regularized-least-squares/">this blog post</a> by Mathieu Blondel). This optimal parameter is denoted with a vertical dotted line in the following picture, full code can be found <a href="https://gist.github.com/1076844">here</a>.</p>
-<p><a href="http://fseoane.net/blog/wp-content/uploads/2011/07/ridge.png"><img src="http://fseoane.net/blog/wp-content/uploads/2011/07/ridge.png" alt="" width="550" class="aligncenter size-full wp-image-940" title="Ridge path" /></a></p></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://fseoane.net/blog/2011/ridge-regression-path/">by fabian at July 12, 2011 07:21 AM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -3263,7 +3249,7 @@ Most of this last week was spent developing coupled and uncoupled states, beginn
 <a href="http://saptman.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://saptman.wordpress.com" class="message" title="no activity in 7 days">Saptarshi Mandal</a>
 </li>
 <li>
-<a href="http://seanvig.blogspot.com/feeds/posts/default/-/sympy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://seanvig.blogspot.com/search/label/sympy" class="message" title="no activity in 7 days">Sean Vig</a>
+<a href="http://www.blogger.com/feeds/8510171342300140296/posts/default/-/sympy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://seanvig.blogspot.com/search/label/sympy" title="Sean Vig's 2011 GSoC Project">Sean Vig</a>
 </li>
 <li>
 <a href="http://sherjilozair.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sherjilozair.wordpress.com" class="message" title="no activity in 7 days">Sherjil Ozair</a>
@@ -3284,7 +3270,7 @@ Most of this last week was spent developing coupled and uncoupled states, beginn
 
 <p>
 <strong>Last updated:</strong><br>
-November 27, 2011 09:40 PM<br>
+November 28, 2011 06:00 AM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
