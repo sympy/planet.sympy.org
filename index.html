@@ -23,6 +23,75 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>February 07, 2012</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://sympystats.wordpress.com" title="sympy-stats">Matthew Rocklin</a></h3>
+
+
+<div class="entrygroup" id="http://sympystats.wordpress.com/?p=241">
+<h4 lang="en"><a href="http://sympystats.wordpress.com/2012/02/06/sympy-stats-is-in/">sympy.stats is in</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<h3>Development</h3>
+<p>It seems there was a flurry of development over the winter holidays.</p>
+<p>Tom’s Meijer-G integration code was merged into master giving SymPy an incredibly powerful definite integration engine. This encouraged me to finish up the pull request for random variables.</p>
+<p>Earlier this morning we finally merged it in and sympy.stats is now in master. If you’re interested please play with it and generate feedback. At the very least it should be able to solve many of your introductory stats homework problems :)</p>
+<p>Actually, I tried using it for a non-trivial example last month and generated an integral which killed the integration engine (mostly this was due to a combination of trigonometric and delta functions). However, I still really wanted the result. The standard solution to analytically intractable statistics problems is to sample. This pushed me to build a monte carlo engine into sympy stats.</p>
+<h3>Sampling</h3>
+<p>The family of stats functions P, E, Var, Density, Given, now have a new member, Sample. You can generate a random sample of any random expression as follows</p>
+<p></p><pre class="brush: python;">&gt;&gt;&gt; from sympy.stats import *
+&gt;&gt;&gt; X, Y = Die(6), Die(6)
+&gt;&gt;&gt; roll = X+Y
+&gt;&gt;&gt; Sample(roll)
+10
+&gt;&gt;&gt; Sample(roll)
+5
+&gt;&gt;&gt; Sample(X, roll&gt;10) # Sample X given that X+Y&gt;10
+6
+</pre><p></p>
+<p>Sampling is of course more fail-proof than solving integrals and so expressions can be made arbitrarily complex without issue. This sampling mechanism is also built into the probability and expectation functions using the keyword “numsamples”</p>
+<p></p><pre class="brush: python;">&gt;&gt;&gt; from sympy.stats import *
+&gt;&gt;&gt; X, Y = Normal(0, 1), Normal(0, 1)
+&gt;&gt;&gt; P(X&gt;Y)
+1/2
+&gt;&gt;&gt; P(X&gt;Y, numsamples = 1000)
+499 
+────
+1000
+&gt;&gt;&gt; E(X+Y)
+0
+&gt;&gt;&gt; E(X+Y, numsamples = 1000)
+-0.0334982435603208
+</pre><p></p>
+<h3>Future</h3>
+<p>GSoC 2012 was announced a couple days ago. I’m excited to see what projects are proposed. </p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/sympystats.wordpress.com/241/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/sympystats.wordpress.com/241/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godelicious/sympystats.wordpress.com/241/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/delicious/sympystats.wordpress.com/241/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/sympystats.wordpress.com/241/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/facebook/sympystats.wordpress.com/241/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/sympystats.wordpress.com/241/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/twitter/sympystats.wordpress.com/241/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gostumble/sympystats.wordpress.com/241/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/stumble/sympystats.wordpress.com/241/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godigg/sympystats.wordpress.com/241/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/digg/sympystats.wordpress.com/241/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/goreddit/sympystats.wordpress.com/241/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/reddit/sympystats.wordpress.com/241/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=sympystats.wordpress.com&amp;blog=22550280&amp;post=241&amp;subd=sympystats&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://sympystats.wordpress.com/2012/02/06/sympy-stats-is-in/">by mrocklin at February 07, 2012 04:03 AM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>January 26, 2012</h2>
 
 <div class="channelgroup">
@@ -3061,7 +3130,7 @@ This last week, most of the coding I have done has been working on getting repre
 <p>The probability density of a multivariate normal random variable is proportional to the following:</p>
 <p><img src="http://s0.wp.com/latex.php?latex=f%28X%29+%3D+e%5E%7B+%5Cleft%28-+%5Cmu+%2B+X%5Cright%29%5ET+%5CSigma%5E%7B-1%7D+%5Cleft%28-+%5Cmu+%2B+X%5Cright%29%7D+&amp;bg=ffffff&amp;fg=333333&amp;s=3" alt="f(X) = e^{ \left(- \mu + X\right)^T \Sigma^{-1} \left(- \mu + X\right)} " class="latex" title="f(X) = e^{ \left(- \mu + X\right)^T \Sigma^{-1} \left(- \mu + X\right)} " /></p>
 <p>Where <img src="http://s0.wp.com/latex.php?latex=X&amp;bg=ffffff&amp;fg=333333&amp;s=0" alt="X" class="latex" title="X" /> is an n-dimensional state vector, <img src="http://s0.wp.com/latex.php?latex=%5Cmu&amp;bg=ffffff&amp;fg=333333&amp;s=0" alt="\mu" class="latex" title="\mu" /> is the mean of the distribution, and <img src="http://s0.wp.com/latex.php?latex=%5CSigma&amp;bg=ffffff&amp;fg=333333&amp;s=0" alt="\Sigma" class="latex" title="\Sigma" /> is an n by n covariance matrix. Pictorally a 2-D density might be represented like this:</p>
-<p style="text-align: center;"><a href="http://sympystats.files.wordpress.com/2011/07/mvn.png"><img src="http://sympystats.files.wordpress.com/2011/07/mvn.png?w=448&amp;h=320" title="mvn" height="320" width="448" alt="" class="aligncenter size-full wp-image-195" /></a>With contour lines showing decreasing probability levels dropping off around the mean (blue x). This distribution is entirely defined by the two quantities, <img src="http://s0.wp.com/latex.php?latex=%5Cmu&amp;bg=ffffff&amp;fg=333333&amp;s=0" alt="\mu" class="latex" title="\mu" /> which gives the center of the distribution and <img src="http://s0.wp.com/latex.php?latex=%5CSigma&amp;bg=ffffff&amp;fg=333333&amp;s=0" alt="\Sigma" class="latex" title="\Sigma" /> which effectively gives the shape of the ellipses. That is, rather than carry around the functional form above, we can simply define X as <img src="http://s0.wp.com/latex.php?latex=X+%5Csim+N%28%5Cmu%2C+%5CSigma%29&amp;bg=ffffff&amp;fg=333333&amp;s=0" alt="X \sim N(\mu, \Sigma)" class="latex" title="X \sim N(\mu, \Sigma)" /> and forget the rest.</p>
+<p style="text-align: center;"><a href="http://sympystats.files.wordpress.com/2011/07/mvn.png"><img src="http://sympystats.files.wordpress.com/2011/07/mvn.png?w=640" alt="" class="aligncenter size-full wp-image-195" title="mvn" /></a>With contour lines showing decreasing probability levels dropping off around the mean (blue x). This distribution is entirely defined by the two quantities, <img src="http://s0.wp.com/latex.php?latex=%5Cmu&amp;bg=ffffff&amp;fg=333333&amp;s=0" alt="\mu" class="latex" title="\mu" /> which gives the center of the distribution and <img src="http://s0.wp.com/latex.php?latex=%5CSigma&amp;bg=ffffff&amp;fg=333333&amp;s=0" alt="\Sigma" class="latex" title="\Sigma" /> which effectively gives the shape of the ellipses. That is, rather than carry around the functional form above, we can simply define X as <img src="http://s0.wp.com/latex.php?latex=X+%5Csim+N%28%5Cmu%2C+%5CSigma%29&amp;bg=ffffff&amp;fg=333333&amp;s=0" alt="X \sim N(\mu, \Sigma)" class="latex" title="X \sim N(\mu, \Sigma)" /> and forget the rest.</p>
 <p>Multivariate normals are convenient for three reasons</p>
 <ol>
 <li>They are easy to represent – we only need a mean and covariance matrix</li>
@@ -3077,7 +3146,7 @@ This last week, most of the coding I have done has been working on getting repre
 <p>Multivariate Normals (MVNs) have been a goal of mine for some time while working on this project. They’re where this project starts to intersect with my actual work. I do lots of manipulations on MVNs and would like to stop dealing with all the matrix algebra.</p>
 <p>In order to build them correctly it was clear I would need a relatively powerful symbolic matrix expression system. I’ve been working on something over at <a href="https://github.com/mrocklin/sympy/tree/matrix_expr/sympy/matrices">this branch</a>.</p>
 <p>Now we can represent symbolic matrices and, using them, represent MVN Random Variables</p>
-<pre class="brush: python;"># Lets make a Multivariate Normal Random Variable
+<p></p><pre class="brush: python;"># Lets make a Multivariate Normal Random Variable
 &gt;&gt;&gt; mu = MatrixSymbol('mu', n, 1) # n by 1 mean vector
 &gt;&gt;&gt; Sigma = MatrixSymbol('Sigma', n, n) # n by n covariance matrix
 &gt;&gt;&gt; X = Normal(mu, Sigma, 'X') # a multivariate normal random variable
@@ -3110,14 +3179,14 @@ This last week, most of the coding I have done has been working on getting repre
 &gt;&gt;&gt; data = MatrixSymbol('data', k, 1)
 &gt;&gt;&gt; Density(X ,  Eq(H*X+noise, data)  ) # Density of X given  HX+noise==data
 # I'm switching to the latex printer for this
-</pre>
+</pre><p></p>
 <p><img src="http://s0.wp.com/latex.php?latex=%5Cleft%5B%5Cbegin%7Bsmallmatrix%7D%5Cmathbb%7BI%7D+%26+%5Cbold%7B0%7D%5Cend%7Bsmallmatrix%7D%5Cright%5D+%5Cleft%28%5Cleft%5B%5Cbegin%7Bsmallmatrix%7D%5CSigma+%26+%5Cbold%7B0%7D%5C%5C%5Cbold%7B0%7D+%26+R%5Cend%7Bsmallmatrix%7D%5Cright%5D+%5Cleft%5B%5Cbegin%7Bsmallmatrix%7DH%5ET%5C%5C%5Cmathbb%7BI%7D%5Cend%7Bsmallmatrix%7D%5Cright%5D+%5Cleft%28%5Cleft%5B%5Cbegin%7Bsmallmatrix%7DH+%26+%5Cmathbb%7BI%7D%5Cend%7Bsmallmatrix%7D%5Cright%5D+%5Cleft%5B%5Cbegin%7Bsmallmatrix%7D%5CSigma+%26+%5Cbold%7B0%7D%5C%5C%5Cbold%7B0%7D+%26+R%5Cend%7Bsmallmatrix%7D%5Cright%5D+%5Cleft%5B%5Cbegin%7Bsmallmatrix%7DH%5ET%5C%5C%5Cmathbb%7BI%7D%5Cend%7Bsmallmatrix%7D%5Cright%5D%5Cright%29%5E%7B-1%7D+%5Cleft%28+%5Cleft%5B%5Cbegin%7Bsmallmatrix%7DH+%26+%5Cmathbb%7BI%7D%5Cend%7Bsmallmatrix%7D%5Cright%5D+%5Cleft%5B%5Cbegin%7Bsmallmatrix%7D%5Cmu%5C%5C%5Cbold%7B0%7D%5Cend%7Bsmallmatrix%7D%5Cright%5D+-+data%5Cright%29+%2B+%5Cleft%5B%5Cbegin%7Bsmallmatrix%7D%5Cmu%5C%5C%5Cbold%7B0%7D%5Cend%7Bsmallmatrix%7D%5Cright%5D%5Cright%29++&amp;bg=ffffff&amp;fg=333333&amp;s=2" alt="\left[\begin{smallmatrix}\mathbb{I} &amp; \bold{0}\end{smallmatrix}\right] \left(\left[\begin{smallmatrix}\Sigma &amp; \bold{0}\\\bold{0} &amp; R\end{smallmatrix}\right] \left[\begin{smallmatrix}H^T\\\mathbb{I}\end{smallmatrix}\right] \left(\left[\begin{smallmatrix}H &amp; \mathbb{I}\end{smallmatrix}\right] \left[\begin{smallmatrix}\Sigma &amp; \bold{0}\\\bold{0} &amp; R\end{smallmatrix}\right] \left[\begin{smallmatrix}H^T\\\mathbb{I}\end{smallmatrix}\right]\right)^{-1} \left( \left[\begin{smallmatrix}H &amp; \mathbb{I}\end{smallmatrix}\right] \left[\begin{smallmatrix}\mu\\\bold{0}\end{smallmatrix}\right] - data\right) + \left[\begin{smallmatrix}\mu\\\bold{0}\end{smallmatrix}\right]\right)  " class="latex" title="\left[\begin{smallmatrix}\mathbb{I} &amp; \bold{0}\end{smallmatrix}\right] \left(\left[\begin{smallmatrix}\Sigma &amp; \bold{0}\\\bold{0} &amp; R\end{smallmatrix}\right] \left[\begin{smallmatrix}H^T\\\mathbb{I}\end{smallmatrix}\right] \left(\left[\begin{smallmatrix}H &amp; \mathbb{I}\end{smallmatrix}\right] \left[\begin{smallmatrix}\Sigma &amp; \bold{0}\\\bold{0} &amp; R\end{smallmatrix}\right] \left[\begin{smallmatrix}H^T\\\mathbb{I}\end{smallmatrix}\right]\right)^{-1} \left( \left[\begin{smallmatrix}H &amp; \mathbb{I}\end{smallmatrix}\right] \left[\begin{smallmatrix}\mu\\\bold{0}\end{smallmatrix}\right] - data\right) + \left[\begin{smallmatrix}\mu\\\bold{0}\end{smallmatrix}\right]\right)  " /></p>
 <p><img src="http://s0.wp.com/latex.php?latex=%5Cleft%5B%5Cbegin%7Bsmallmatrix%7D%5Cmathbb%7BI%7D+%26+%5Cbold%7B0%7D%5Cend%7Bsmallmatrix%7D%5Cright%5D+%5Cleft%28%5Cmathbb%7BI%7D+-+%5Cleft%5B%5Cbegin%7Bsmallmatrix%7D%5CSigma+%26+%5Cbold%7B0%7D%5C%5C%5Cbold%7B0%7D+%26+R%5Cend%7Bsmallmatrix%7D%5Cright%5D+%5Cleft%5B%5Cbegin%7Bsmallmatrix%7DH%5ET%5C%5C%5Cmathbb%7BI%7D%5Cend%7Bsmallmatrix%7D%5Cright%5D+%5Cleft%28%5Cleft%5B%5Cbegin%7Bsmallmatrix%7DH+%26+%5Cmathbb%7BI%7D%5Cend%7Bsmallmatrix%7D%5Cright%5D+%5Cleft%5B%5Cbegin%7Bsmallmatrix%7D%5CSigma+%26+%5Cbold%7B0%7D%5C%5C%5Cbold%7B0%7D+%26+R%5Cend%7Bsmallmatrix%7D%5Cright%5D+%5Cleft%5B%5Cbegin%7Bsmallmatrix%7DH%5ET%5C%5C%5Cmathbb%7BI%7D%5Cend%7Bsmallmatrix%7D%5Cright%5D%5Cright%29%5E%7B-1%7D+%5Cleft%5B%5Cbegin%7Bsmallmatrix%7DH+%26+%5Cmathbb%7BI%7D%5Cend%7Bsmallmatrix%7D%5Cright%5D%5Cright%29+%5Cleft%5B%5Cbegin%7Bsmallmatrix%7D%5CSigma+%26+%5Cbold%7B0%7D%5C%5C%5Cbold%7B0%7D+%26+R%5Cend%7Bsmallmatrix%7D%5Cright%5D+%5Cleft%5B%5Cbegin%7Bsmallmatrix%7D%5Cmathbb%7BI%7D%5C%5C%5Cbold%7B0%7D%5Cend%7Bsmallmatrix%7D%5Cright%5D++&amp;bg=ffffff&amp;fg=333333&amp;s=2" alt="\left[\begin{smallmatrix}\mathbb{I} &amp; \bold{0}\end{smallmatrix}\right] \left(\mathbb{I} - \left[\begin{smallmatrix}\Sigma &amp; \bold{0}\\\bold{0} &amp; R\end{smallmatrix}\right] \left[\begin{smallmatrix}H^T\\\mathbb{I}\end{smallmatrix}\right] \left(\left[\begin{smallmatrix}H &amp; \mathbb{I}\end{smallmatrix}\right] \left[\begin{smallmatrix}\Sigma &amp; \bold{0}\\\bold{0} &amp; R\end{smallmatrix}\right] \left[\begin{smallmatrix}H^T\\\mathbb{I}\end{smallmatrix}\right]\right)^{-1} \left[\begin{smallmatrix}H &amp; \mathbb{I}\end{smallmatrix}\right]\right) \left[\begin{smallmatrix}\Sigma &amp; \bold{0}\\\bold{0} &amp; R\end{smallmatrix}\right] \left[\begin{smallmatrix}\mathbb{I}\\\bold{0}\end{smallmatrix}\right]  " class="latex" title="\left[\begin{smallmatrix}\mathbb{I} &amp; \bold{0}\end{smallmatrix}\right] \left(\mathbb{I} - \left[\begin{smallmatrix}\Sigma &amp; \bold{0}\\\bold{0} &amp; R\end{smallmatrix}\right] \left[\begin{smallmatrix}H^T\\\mathbb{I}\end{smallmatrix}\right] \left(\left[\begin{smallmatrix}H &amp; \mathbb{I}\end{smallmatrix}\right] \left[\begin{smallmatrix}\Sigma &amp; \bold{0}\\\bold{0} &amp; R\end{smallmatrix}\right] \left[\begin{smallmatrix}H^T\\\mathbb{I}\end{smallmatrix}\right]\right)^{-1} \left[\begin{smallmatrix}H &amp; \mathbb{I}\end{smallmatrix}\right]\right) \left[\begin{smallmatrix}\Sigma &amp; \bold{0}\\\bold{0} &amp; R\end{smallmatrix}\right] \left[\begin{smallmatrix}\mathbb{I}\\\bold{0}\end{smallmatrix}\right]  " /></p>
-<pre class="brush: python;"># Again, this block matrix expression can be collapsed to the following
+<p></p><pre class="brush: python;"># Again, this block matrix expression can be collapsed to the following
 &gt;&gt;&gt; block_collapse(Density(X, Eq(H*X+noise, data) ))
 μ + Σ⋅H'⋅(R + H⋅Σ⋅H')^-1⋅(-H⋅μ + -data) ,
 (I + -Σ⋅H'⋅(R + H⋅Σ⋅H')^-1⋅H)⋅Σ
-</pre>
+</pre><p></p>
 <p><img src="http://s0.wp.com/latex.php?latex=%5Cbegin%7Bsmallmatrix%7D%5Cmu+%2B+%5CSigma+H%5ET+%5Cleft%28R+%2B+H+%5CSigma+H%5ET%5Cright%29%5E%7B-1%7D+%5Cleft%28++H+%5Cmu+-+data%5Cright%29%5Cend%7Bsmallmatrix%7D+&amp;bg=ffffff&amp;fg=333333&amp;s=2" alt="\begin{smallmatrix}\mu + \Sigma H^T \left(R + H \Sigma H^T\right)^{-1} \left(  H \mu - data\right)\end{smallmatrix} " class="latex" title="\begin{smallmatrix}\mu + \Sigma H^T \left(R + H \Sigma H^T\right)^{-1} \left(  H \mu - data\right)\end{smallmatrix} " /></p>
 <p><img src="http://s0.wp.com/latex.php?latex=%5Cbegin%7Bsmallmatrix%7D%5Cleft%28%5Cmathbb%7BI%7D+-+%5CSigma+H%5ET+%5Cleft%28R+%2B+H+%5CSigma+H%5ET%5Cright%29%5E%7B-1%7D+H%5Cright%29+%5CSigma%5Cend%7Bsmallmatrix%7D+&amp;bg=ffffff&amp;fg=333333&amp;s=2" alt="\begin{smallmatrix}\left(\mathbb{I} - \Sigma H^T \left(R + H \Sigma H^T\right)^{-1} H\right) \Sigma\end{smallmatrix} " class="latex" title="\begin{smallmatrix}\left(\mathbb{I} - \Sigma H^T \left(R + H \Sigma H^T\right)^{-1} H\right) \Sigma\end{smallmatrix} " /></p>
 <p>This is the multivariate case of my <a href="http://sympystats.wordpress.com/2011/07/02/a-lesson-in-data-assimilation-using-sympy/">previous post on data assimilation</a>. Effectively all I’ve done here is baked in the logic behind the<a href="http://en.wikipedia.org/wiki/Kalman_filter"> Kalman Filter</a> and exposed it through my statistics operators Density, Given, etc… so that it has become more approachable.</p>
@@ -3189,46 +3258,6 @@ This last week, most of the coding I have done has been working on getting repre
 </div>
 
 
-
-</div>
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://sympystats.wordpress.com" title="sympy-stats">Matthew Rocklin</a></h3>
-
-
-<div class="entrygroup" id="http://sympystats.wordpress.com/?p=200">
-<h4 lang="en"><a href="http://sympystats.wordpress.com/2011/07/19/matrix-expressions/">Matrix Expressions</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>Linear algebra is important. It is a language which both humans and computers understand well which we can use to describe a large class of important problems. Linear Algebra is an alternative approach to communicate with computers – alternative to writing code.</p>
-<p>Matrices are used in a number of contexts and, understandably, SymPy represents them in a few ways. You can represent a matrix or linear operator with a Symbol or you can write out a matrix’s components explicitly with a Matrix object. Thanks to recent work by Sherjil <a href="http://sherjilozair.wordpress.com/">over here</a>, Matrix objects are quickly becoming more powerful.</p>
-<p>Recently I’ve wanted to build up purely symbolic matrix expressions using Symbol but kept running into problems because I didn’t want to add things to the SymPy core Expr that were specific to matrices.  The standard SymPy Expr wasn’t really designed with Matrices in mind and I found that this was holding me back a bit.</p>
-<p>I decided to branch off a MatrixExpr class that, while much less stable, is open to experimentation. It’s been lots of fun so far. I’ve used it for my GSoC project to build up large expressions using block matrices.</p>
-<p>I’ll have examples in a future post related to my GSoC project. For now if you’d like to check it out my code resides here:</p>
-<p><a href="https://github.com/mrocklin/sympy/tree/matrix_expr/sympy/matrices">https://github.com/mrocklin/sympy/tree/matrix_expr/sympy/matrices</a></p>
-<p>There is a MatrixExpr class with associated MatrixSymbol, MatAdd, MatMul, MatPow, Inverse, Transpose, Identity, ZeroMatrix objects. All the things you need for basic expressions. Most of the logic still depends on the subclassed Add, Mul, Pow classes with a little bit added on.</p>
-<p>Also, because my GSoC project needed it I built a fun BlockMatrix class that holds MatrixExpr’s and can be freely mixed with normal MatrixExprs in an expression.</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/sympystats.wordpress.com/200/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/sympystats.wordpress.com/200/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godelicious/sympystats.wordpress.com/200/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/delicious/sympystats.wordpress.com/200/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/sympystats.wordpress.com/200/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/facebook/sympystats.wordpress.com/200/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/sympystats.wordpress.com/200/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/twitter/sympystats.wordpress.com/200/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gostumble/sympystats.wordpress.com/200/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/stumble/sympystats.wordpress.com/200/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godigg/sympystats.wordpress.com/200/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/digg/sympystats.wordpress.com/200/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/goreddit/sympystats.wordpress.com/200/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/reddit/sympystats.wordpress.com/200/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=sympystats.wordpress.com&amp;blog=22550280&amp;post=200&amp;subd=sympystats&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://sympystats.wordpress.com/2011/07/19/matrix-expressions/">by mrocklin at July 19, 2011 11:12 PM</a>
-</p>
-</div>
-</div>
-
-
 </div>
 
 </div>
@@ -3282,7 +3311,7 @@ This last week, most of the coding I have done has been working on getting repre
 <a href="http://www.blogger.com/feeds/9135222751616024074/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://mattjcurry.blogspot.com/" class="message" title="no activity in 7 days">Matthew Curry</a>
 </li>
 <li>
-<a href="http://sympystats.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sympystats.wordpress.com" class="message" title="no activity in 7 days">Matthew Rocklin</a>
+<a href="http://sympystats.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sympystats.wordpress.com" title="sympy-stats">Matthew Rocklin</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/2520472460430880330/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sympy.blogspot.com/" class="message" title="no activity in 7 days">Official SymPy blog</a>
@@ -3318,7 +3347,7 @@ This last week, most of the coding I have done has been working on getting repre
 
 <p>
 <strong>Last updated:</strong><br>
-February 07, 2012 04:00 AM<br>
+February 07, 2012 04:20 AM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>

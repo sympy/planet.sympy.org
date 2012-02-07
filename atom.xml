@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2012-02-07T04:00:19Z</updated>
+  <updated>2012-02-07T04:20:17Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,65 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry xml:lang="en">
+    <id>http://sympystats.wordpress.com/?p=241</id>
+    <link href="http://sympystats.wordpress.com/2012/02/06/sympy-stats-is-in/" rel="alternate" type="text/html"/>
+    <title>sympy.stats is in</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Development It seems there was a flurry of development over the winter holidays. Tom’s Meijer-G integration code was merged into master giving SymPy an incredibly powerful definite integration engine. This encouraged me to finish up the pull request for random … <a href="http://sympystats.wordpress.com/2012/02/06/sympy-stats-is-in/">Continue reading <span class="meta-nav">→</span></a><img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=sympystats.wordpress.com&amp;blog=22550280&amp;post=241&amp;subd=sympystats&amp;ref=&amp;feed=1" width="1"/></div>
+    </summary>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><h3>Development</h3>
+<p>It seems there was a flurry of development over the winter holidays.</p>
+<p>Tom’s Meijer-G integration code was merged into master giving SymPy an incredibly powerful definite integration engine. This encouraged me to finish up the pull request for random variables.</p>
+<p>Earlier this morning we finally merged it in and sympy.stats is now in master. If you’re interested please play with it and generate feedback. At the very least it should be able to solve many of your introductory stats homework problems :)</p>
+<p>Actually, I tried using it for a non-trivial example last month and generated an integral which killed the integration engine (mostly this was due to a combination of trigonometric and delta functions). However, I still really wanted the result. The standard solution to analytically intractable statistics problems is to sample. This pushed me to build a monte carlo engine into sympy stats.</p>
+<h3>Sampling</h3>
+<p>The family of stats functions P, E, Var, Density, Given, now have a new member, Sample. You can generate a random sample of any random expression as follows</p>
+<p/><pre class="brush: python;">&gt;&gt;&gt; from sympy.stats import *
+&gt;&gt;&gt; X, Y = Die(6), Die(6)
+&gt;&gt;&gt; roll = X+Y
+&gt;&gt;&gt; Sample(roll)
+10
+&gt;&gt;&gt; Sample(roll)
+5
+&gt;&gt;&gt; Sample(X, roll&gt;10) # Sample X given that X+Y&gt;10
+6
+</pre><p/>
+<p>Sampling is of course more fail-proof than solving integrals and so expressions can be made arbitrarily complex without issue. This sampling mechanism is also built into the probability and expectation functions using the keyword “numsamples”</p>
+<p/><pre class="brush: python;">&gt;&gt;&gt; from sympy.stats import *
+&gt;&gt;&gt; X, Y = Normal(0, 1), Normal(0, 1)
+&gt;&gt;&gt; P(X&gt;Y)
+1/2
+&gt;&gt;&gt; P(X&gt;Y, numsamples = 1000)
+499 
+────
+1000
+&gt;&gt;&gt; E(X+Y)
+0
+&gt;&gt;&gt; E(X+Y, numsamples = 1000)
+-0.0334982435603208
+</pre><p/>
+<h3>Future</h3>
+<p>GSoC 2012 was announced a couple days ago. I’m excited to see what projects are proposed. </p>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/sympystats.wordpress.com/241/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/sympystats.wordpress.com/241/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/sympystats.wordpress.com/241/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/sympystats.wordpress.com/241/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/sympystats.wordpress.com/241/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/sympystats.wordpress.com/241/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/sympystats.wordpress.com/241/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/sympystats.wordpress.com/241/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/sympystats.wordpress.com/241/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/sympystats.wordpress.com/241/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/sympystats.wordpress.com/241/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/sympystats.wordpress.com/241/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/sympystats.wordpress.com/241/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/sympystats.wordpress.com/241/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=sympystats.wordpress.com&amp;blog=22550280&amp;post=241&amp;subd=sympystats&amp;ref=&amp;feed=1" width="1"/></div>
+    </content>
+    <updated>2012-02-07T04:03:22Z</updated>
+    <category term="Uncategorized"/>
+    <author>
+      <name>mrocklin</name>
+    </author>
+    <source>
+      <id>http://sympystats.wordpress.com</id>
+      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
+      <link href="http://sympystats.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://sympystats.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://sympystats.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <subtitle>Just another WordPress.com site</subtitle>
+      <title>sympy-stats</title>
+      <updated>2012-02-07T04:20:16Z</updated>
+    </source>
+  </entry>
 
   <entry>
     <id>tag:blogger.com,1999:blog-6568744196982634289.post-7881611169286097799</id>
@@ -167,7 +226,7 @@
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-02-07T04:00:09Z</updated>
+      <updated>2012-02-07T04:20:08Z</updated>
     </source>
   </entry>
 
@@ -239,7 +298,7 @@
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-02-07T04:00:09Z</updated>
+      <updated>2012-02-07T04:20:09Z</updated>
     </source>
   </entry>
 
@@ -270,7 +329,7 @@
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-02-07T04:00:09Z</updated>
+      <updated>2012-02-07T04:20:08Z</updated>
     </source>
   </entry>
 
@@ -317,7 +376,7 @@
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-02-07T04:00:10Z</updated>
+      <updated>2012-02-07T04:20:09Z</updated>
     </source>
   </entry>
 
@@ -957,7 +1016,7 @@ x**(S(4)/5)
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-02-07T04:00:09Z</updated>
+      <updated>2012-02-07T04:20:09Z</updated>
     </source>
   </entry>
 
@@ -986,7 +1045,7 @@ x**(S(4)/5)
       <link href="http://saptman.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My symply awesome gsoc summer</subtitle>
       <title>saptman</title>
-      <updated>2012-02-07T04:00:19Z</updated>
+      <updated>2012-02-07T04:20:17Z</updated>
     </source>
   </entry>
 
@@ -1035,7 +1094,7 @@ Wavefunction(-2**(1/2)*hbar*I*pi*n*(1/L)**(1/2)*cos(pi*n*x_2/L)/L, x_2)</pre>
       <link href="http://lazovichsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My adventures during GSoC 2011</subtitle>
       <title>Tomo Lazovich's SymPy Blog</title>
-      <updated>2012-02-07T04:00:16Z</updated>
+      <updated>2012-02-07T04:20:15Z</updated>
     </source>
   </entry>
 
@@ -1068,7 +1127,7 @@ Wavefunction(-2**(1/2)*hbar*I*pi*n*(1/L)**(1/2)*cos(pi*n*x_2/L)/L, x_2)</pre>
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>gilbertgede</title>
-      <updated>2012-02-07T04:00:15Z</updated>
+      <updated>2012-02-07T04:20:13Z</updated>
     </source>
   </entry>
 
@@ -1101,7 +1160,7 @@ Wavefunction(-2**(1/2)*hbar*I*pi*n*(1/L)**(1/2)*cos(pi*n*x_2/L)/L, x_2)</pre>
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-02-07T04:00:18Z</updated>
+      <updated>2012-02-07T04:20:16Z</updated>
     </source>
   </entry>
 
@@ -1168,7 +1227,7 @@ Wavefunction(-2**(1/2)*hbar*I*pi*n*(1/L)**(1/2)*cos(pi*n*x_2/L)/L, x_2)</pre>
       <link href="http://nessgrh.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My GSoC Project</subtitle>
       <title>nessgrh</title>
-      <updated>2012-02-07T04:00:14Z</updated>
+      <updated>2012-02-07T04:20:12Z</updated>
     </source>
   </entry>
 
@@ -1262,7 +1321,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-02-07T04:00:09Z</updated>
+      <updated>2012-02-07T04:20:08Z</updated>
     </source>
   </entry>
 
@@ -1295,7 +1354,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://lazovichsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My adventures during GSoC 2011</subtitle>
       <title>Tomo Lazovich's SymPy Blog</title>
-      <updated>2012-02-07T04:00:16Z</updated>
+      <updated>2012-02-07T04:20:15Z</updated>
     </source>
   </entry>
 
@@ -1328,7 +1387,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>gilbertgede</title>
-      <updated>2012-02-07T04:00:15Z</updated>
+      <updated>2012-02-07T04:20:13Z</updated>
     </source>
   </entry>
 
@@ -1384,7 +1443,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://nessgrh.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My GSoC Project</subtitle>
       <title>nessgrh</title>
-      <updated>2012-02-07T04:00:14Z</updated>
+      <updated>2012-02-07T04:20:12Z</updated>
     </source>
   </entry>
 
@@ -1475,7 +1534,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://nessgrh.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My GSoC Project</subtitle>
       <title>nessgrh</title>
-      <updated>2012-02-07T04:00:14Z</updated>
+      <updated>2012-02-07T04:20:12Z</updated>
     </source>
   </entry>
 
@@ -1503,7 +1562,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-02-07T04:00:19Z</updated>
+      <updated>2012-02-07T04:20:16Z</updated>
     </source>
   </entry>
 
@@ -1571,7 +1630,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://sherjilozair.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://sherjilozair.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>Sherjil Ozair</title>
-      <updated>2012-02-07T04:00:17Z</updated>
+      <updated>2012-02-07T04:20:15Z</updated>
     </source>
   </entry>
 
@@ -1602,7 +1661,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://lazovichsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My adventures during GSoC 2011</subtitle>
       <title>Tomo Lazovich's SymPy Blog</title>
-      <updated>2012-02-07T04:00:16Z</updated>
+      <updated>2012-02-07T04:20:14Z</updated>
     </source>
   </entry>
 
@@ -1630,7 +1689,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://saptman.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My symply awesome gsoc summer</subtitle>
       <title>saptman</title>
-      <updated>2012-02-07T04:00:19Z</updated>
+      <updated>2012-02-07T04:20:17Z</updated>
     </source>
   </entry>
 
@@ -1701,7 +1760,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>gilbertgede</title>
-      <updated>2012-02-07T04:00:15Z</updated>
+      <updated>2012-02-07T04:20:13Z</updated>
     </source>
   </entry>
 
@@ -1849,7 +1908,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-02-07T04:00:10Z</updated>
+      <updated>2012-02-07T04:20:09Z</updated>
     </source>
   </entry>
 
@@ -1918,7 +1977,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-02-07T04:00:19Z</updated>
+      <updated>2012-02-07T04:20:16Z</updated>
     </source>
   </entry>
 
@@ -1985,7 +2044,7 @@ x**4 + 2*x**3*y + 2*x**3 + x**2*y**2 + 4*x**2*y + x**2 + 2*x*y**2 + 2*x*y + y**2
       <link href="http://nessgrh.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My GSoC Project</subtitle>
       <title>nessgrh</title>
-      <updated>2012-02-07T04:00:14Z</updated>
+      <updated>2012-02-07T04:20:12Z</updated>
     </source>
   </entry>
 
@@ -2114,7 +2173,7 @@ Out[2]:
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-02-07T04:00:10Z</updated>
+      <updated>2012-02-07T04:20:09Z</updated>
     </source>
   </entry>
 
@@ -2477,7 +2536,7 @@ print A.subs(v, 5).eigenvals()</pre>
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>gilbertgede</title>
-      <updated>2012-02-07T04:00:15Z</updated>
+      <updated>2012-02-07T04:20:14Z</updated>
     </source>
   </entry>
 
@@ -2506,7 +2565,7 @@ print A.subs(v, 5).eigenvals()</pre>
       <link href="http://saptman.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My symply awesome gsoc summer</subtitle>
       <title>saptman</title>
-      <updated>2012-02-07T04:00:19Z</updated>
+      <updated>2012-02-07T04:20:17Z</updated>
     </source>
   </entry>
 
@@ -2574,7 +2633,7 @@ print A.subs(v, 5).eigenvals()</pre>
       <link href="http://nessgrh.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My GSoC Project</subtitle>
       <title>nessgrh</title>
-      <updated>2012-02-07T04:00:14Z</updated>
+      <updated>2012-02-07T04:20:12Z</updated>
     </source>
   </entry>
 
@@ -2634,7 +2693,7 @@ print A.subs(v, 5).eigenvals()</pre>
       <link href="http://nessgrh.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My GSoC Project</subtitle>
       <title>nessgrh</title>
-      <updated>2012-02-07T04:00:14Z</updated>
+      <updated>2012-02-07T04:20:12Z</updated>
     </source>
   </entry>
 
@@ -2648,7 +2707,7 @@ print A.subs(v, 5).eigenvals()</pre>
 <p>The probability density of a multivariate normal random variable is proportional to the following:</p>
 <p><img alt="f(X) = e^{ \left(- \mu + X\right)^T \Sigma^{-1} \left(- \mu + X\right)} " class="latex" src="http://s0.wp.com/latex.php?latex=f%28X%29+%3D+e%5E%7B+%5Cleft%28-+%5Cmu+%2B+X%5Cright%29%5ET+%5CSigma%5E%7B-1%7D+%5Cleft%28-+%5Cmu+%2B+X%5Cright%29%7D+&amp;bg=ffffff&amp;fg=333333&amp;s=3" title="f(X) = e^{ \left(- \mu + X\right)^T \Sigma^{-1} \left(- \mu + X\right)} "/></p>
 <p>Where <img alt="X" class="latex" src="http://s0.wp.com/latex.php?latex=X&amp;bg=ffffff&amp;fg=333333&amp;s=0" title="X"/> is an n-dimensional state vector, <img alt="\mu" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cmu&amp;bg=ffffff&amp;fg=333333&amp;s=0" title="\mu"/> is the mean of the distribution, and <img alt="\Sigma" class="latex" src="http://s0.wp.com/latex.php?latex=%5CSigma&amp;bg=ffffff&amp;fg=333333&amp;s=0" title="\Sigma"/> is an n by n covariance matrix. Pictorally a 2-D density might be represented like this:</p>
-<p style="text-align: center;"><a href="http://sympystats.files.wordpress.com/2011/07/mvn.png"><img alt="" class="aligncenter size-full wp-image-195" height="320" src="http://sympystats.files.wordpress.com/2011/07/mvn.png?w=448&amp;h=320" title="mvn" width="448"/></a>With contour lines showing decreasing probability levels dropping off around the mean (blue x). This distribution is entirely defined by the two quantities, <img alt="\mu" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cmu&amp;bg=ffffff&amp;fg=333333&amp;s=0" title="\mu"/> which gives the center of the distribution and <img alt="\Sigma" class="latex" src="http://s0.wp.com/latex.php?latex=%5CSigma&amp;bg=ffffff&amp;fg=333333&amp;s=0" title="\Sigma"/> which effectively gives the shape of the ellipses. That is, rather than carry around the functional form above, we can simply define X as <img alt="X \sim N(\mu, \Sigma)" class="latex" src="http://s0.wp.com/latex.php?latex=X+%5Csim+N%28%5Cmu%2C+%5CSigma%29&amp;bg=ffffff&amp;fg=333333&amp;s=0" title="X \sim N(\mu, \Sigma)"/> and forget the rest.</p>
+<p style="text-align: center;"><a href="http://sympystats.files.wordpress.com/2011/07/mvn.png"><img alt="" class="aligncenter size-full wp-image-195" src="http://sympystats.files.wordpress.com/2011/07/mvn.png?w=640" title="mvn"/></a>With contour lines showing decreasing probability levels dropping off around the mean (blue x). This distribution is entirely defined by the two quantities, <img alt="\mu" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cmu&amp;bg=ffffff&amp;fg=333333&amp;s=0" title="\mu"/> which gives the center of the distribution and <img alt="\Sigma" class="latex" src="http://s0.wp.com/latex.php?latex=%5CSigma&amp;bg=ffffff&amp;fg=333333&amp;s=0" title="\Sigma"/> which effectively gives the shape of the ellipses. That is, rather than carry around the functional form above, we can simply define X as <img alt="X \sim N(\mu, \Sigma)" class="latex" src="http://s0.wp.com/latex.php?latex=X+%5Csim+N%28%5Cmu%2C+%5CSigma%29&amp;bg=ffffff&amp;fg=333333&amp;s=0" title="X \sim N(\mu, \Sigma)"/> and forget the rest.</p>
 <p>Multivariate normals are convenient for three reasons</p>
 <ol>
 <li>They are easy to represent – we only need a mean and covariance matrix</li>
@@ -2664,7 +2723,7 @@ print A.subs(v, 5).eigenvals()</pre>
 <p>Multivariate Normals (MVNs) have been a goal of mine for some time while working on this project. They’re where this project starts to intersect with my actual work. I do lots of manipulations on MVNs and would like to stop dealing with all the matrix algebra.</p>
 <p>In order to build them correctly it was clear I would need a relatively powerful symbolic matrix expression system. I’ve been working on something over at <a href="https://github.com/mrocklin/sympy/tree/matrix_expr/sympy/matrices">this branch</a>.</p>
 <p>Now we can represent symbolic matrices and, using them, represent MVN Random Variables</p>
-<pre class="brush: python;"># Lets make a Multivariate Normal Random Variable
+<p/><pre class="brush: python;"># Lets make a Multivariate Normal Random Variable
 &gt;&gt;&gt; mu = MatrixSymbol('mu', n, 1) # n by 1 mean vector
 &gt;&gt;&gt; Sigma = MatrixSymbol('Sigma', n, n) # n by n covariance matrix
 &gt;&gt;&gt; X = Normal(mu, Sigma, 'X') # a multivariate normal random variable
@@ -2697,14 +2756,14 @@ print A.subs(v, 5).eigenvals()</pre>
 &gt;&gt;&gt; data = MatrixSymbol('data', k, 1)
 &gt;&gt;&gt; Density(X ,  Eq(H*X+noise, data)  ) # Density of X given  HX+noise==data
 # I'm switching to the latex printer for this
-</pre>
+</pre><p/>
 <p><img alt="\left[\begin{smallmatrix}\mathbb{I} &amp; \bold{0}\end{smallmatrix}\right] \left(\left[\begin{smallmatrix}\Sigma &amp; \bold{0}\\\bold{0} &amp; R\end{smallmatrix}\right] \left[\begin{smallmatrix}H^T\\\mathbb{I}\end{smallmatrix}\right] \left(\left[\begin{smallmatrix}H &amp; \mathbb{I}\end{smallmatrix}\right] \left[\begin{smallmatrix}\Sigma &amp; \bold{0}\\\bold{0} &amp; R\end{smallmatrix}\right] \left[\begin{smallmatrix}H^T\\\mathbb{I}\end{smallmatrix}\right]\right)^{-1} \left( \left[\begin{smallmatrix}H &amp; \mathbb{I}\end{smallmatrix}\right] \left[\begin{smallmatrix}\mu\\\bold{0}\end{smallmatrix}\right] - data\right) + \left[\begin{smallmatrix}\mu\\\bold{0}\end{smallmatrix}\right]\right)  " class="latex" src="http://s0.wp.com/latex.php?latex=%5Cleft%5B%5Cbegin%7Bsmallmatrix%7D%5Cmathbb%7BI%7D+%26+%5Cbold%7B0%7D%5Cend%7Bsmallmatrix%7D%5Cright%5D+%5Cleft%28%5Cleft%5B%5Cbegin%7Bsmallmatrix%7D%5CSigma+%26+%5Cbold%7B0%7D%5C%5C%5Cbold%7B0%7D+%26+R%5Cend%7Bsmallmatrix%7D%5Cright%5D+%5Cleft%5B%5Cbegin%7Bsmallmatrix%7DH%5ET%5C%5C%5Cmathbb%7BI%7D%5Cend%7Bsmallmatrix%7D%5Cright%5D+%5Cleft%28%5Cleft%5B%5Cbegin%7Bsmallmatrix%7DH+%26+%5Cmathbb%7BI%7D%5Cend%7Bsmallmatrix%7D%5Cright%5D+%5Cleft%5B%5Cbegin%7Bsmallmatrix%7D%5CSigma+%26+%5Cbold%7B0%7D%5C%5C%5Cbold%7B0%7D+%26+R%5Cend%7Bsmallmatrix%7D%5Cright%5D+%5Cleft%5B%5Cbegin%7Bsmallmatrix%7DH%5ET%5C%5C%5Cmathbb%7BI%7D%5Cend%7Bsmallmatrix%7D%5Cright%5D%5Cright%29%5E%7B-1%7D+%5Cleft%28+%5Cleft%5B%5Cbegin%7Bsmallmatrix%7DH+%26+%5Cmathbb%7BI%7D%5Cend%7Bsmallmatrix%7D%5Cright%5D+%5Cleft%5B%5Cbegin%7Bsmallmatrix%7D%5Cmu%5C%5C%5Cbold%7B0%7D%5Cend%7Bsmallmatrix%7D%5Cright%5D+-+data%5Cright%29+%2B+%5Cleft%5B%5Cbegin%7Bsmallmatrix%7D%5Cmu%5C%5C%5Cbold%7B0%7D%5Cend%7Bsmallmatrix%7D%5Cright%5D%5Cright%29++&amp;bg=ffffff&amp;fg=333333&amp;s=2" title="\left[\begin{smallmatrix}\mathbb{I} &amp; \bold{0}\end{smallmatrix}\right] \left(\left[\begin{smallmatrix}\Sigma &amp; \bold{0}\\\bold{0} &amp; R\end{smallmatrix}\right] \left[\begin{smallmatrix}H^T\\\mathbb{I}\end{smallmatrix}\right] \left(\left[\begin{smallmatrix}H &amp; \mathbb{I}\end{smallmatrix}\right] \left[\begin{smallmatrix}\Sigma &amp; \bold{0}\\\bold{0} &amp; R\end{smallmatrix}\right] \left[\begin{smallmatrix}H^T\\\mathbb{I}\end{smallmatrix}\right]\right)^{-1} \left( \left[\begin{smallmatrix}H &amp; \mathbb{I}\end{smallmatrix}\right] \left[\begin{smallmatrix}\mu\\\bold{0}\end{smallmatrix}\right] - data\right) + \left[\begin{smallmatrix}\mu\\\bold{0}\end{smallmatrix}\right]\right)  "/></p>
 <p><img alt="\left[\begin{smallmatrix}\mathbb{I} &amp; \bold{0}\end{smallmatrix}\right] \left(\mathbb{I} - \left[\begin{smallmatrix}\Sigma &amp; \bold{0}\\\bold{0} &amp; R\end{smallmatrix}\right] \left[\begin{smallmatrix}H^T\\\mathbb{I}\end{smallmatrix}\right] \left(\left[\begin{smallmatrix}H &amp; \mathbb{I}\end{smallmatrix}\right] \left[\begin{smallmatrix}\Sigma &amp; \bold{0}\\\bold{0} &amp; R\end{smallmatrix}\right] \left[\begin{smallmatrix}H^T\\\mathbb{I}\end{smallmatrix}\right]\right)^{-1} \left[\begin{smallmatrix}H &amp; \mathbb{I}\end{smallmatrix}\right]\right) \left[\begin{smallmatrix}\Sigma &amp; \bold{0}\\\bold{0} &amp; R\end{smallmatrix}\right] \left[\begin{smallmatrix}\mathbb{I}\\\bold{0}\end{smallmatrix}\right]  " class="latex" src="http://s0.wp.com/latex.php?latex=%5Cleft%5B%5Cbegin%7Bsmallmatrix%7D%5Cmathbb%7BI%7D+%26+%5Cbold%7B0%7D%5Cend%7Bsmallmatrix%7D%5Cright%5D+%5Cleft%28%5Cmathbb%7BI%7D+-+%5Cleft%5B%5Cbegin%7Bsmallmatrix%7D%5CSigma+%26+%5Cbold%7B0%7D%5C%5C%5Cbold%7B0%7D+%26+R%5Cend%7Bsmallmatrix%7D%5Cright%5D+%5Cleft%5B%5Cbegin%7Bsmallmatrix%7DH%5ET%5C%5C%5Cmathbb%7BI%7D%5Cend%7Bsmallmatrix%7D%5Cright%5D+%5Cleft%28%5Cleft%5B%5Cbegin%7Bsmallmatrix%7DH+%26+%5Cmathbb%7BI%7D%5Cend%7Bsmallmatrix%7D%5Cright%5D+%5Cleft%5B%5Cbegin%7Bsmallmatrix%7D%5CSigma+%26+%5Cbold%7B0%7D%5C%5C%5Cbold%7B0%7D+%26+R%5Cend%7Bsmallmatrix%7D%5Cright%5D+%5Cleft%5B%5Cbegin%7Bsmallmatrix%7DH%5ET%5C%5C%5Cmathbb%7BI%7D%5Cend%7Bsmallmatrix%7D%5Cright%5D%5Cright%29%5E%7B-1%7D+%5Cleft%5B%5Cbegin%7Bsmallmatrix%7DH+%26+%5Cmathbb%7BI%7D%5Cend%7Bsmallmatrix%7D%5Cright%5D%5Cright%29+%5Cleft%5B%5Cbegin%7Bsmallmatrix%7D%5CSigma+%26+%5Cbold%7B0%7D%5C%5C%5Cbold%7B0%7D+%26+R%5Cend%7Bsmallmatrix%7D%5Cright%5D+%5Cleft%5B%5Cbegin%7Bsmallmatrix%7D%5Cmathbb%7BI%7D%5C%5C%5Cbold%7B0%7D%5Cend%7Bsmallmatrix%7D%5Cright%5D++&amp;bg=ffffff&amp;fg=333333&amp;s=2" title="\left[\begin{smallmatrix}\mathbb{I} &amp; \bold{0}\end{smallmatrix}\right] \left(\mathbb{I} - \left[\begin{smallmatrix}\Sigma &amp; \bold{0}\\\bold{0} &amp; R\end{smallmatrix}\right] \left[\begin{smallmatrix}H^T\\\mathbb{I}\end{smallmatrix}\right] \left(\left[\begin{smallmatrix}H &amp; \mathbb{I}\end{smallmatrix}\right] \left[\begin{smallmatrix}\Sigma &amp; \bold{0}\\\bold{0} &amp; R\end{smallmatrix}\right] \left[\begin{smallmatrix}H^T\\\mathbb{I}\end{smallmatrix}\right]\right)^{-1} \left[\begin{smallmatrix}H &amp; \mathbb{I}\end{smallmatrix}\right]\right) \left[\begin{smallmatrix}\Sigma &amp; \bold{0}\\\bold{0} &amp; R\end{smallmatrix}\right] \left[\begin{smallmatrix}\mathbb{I}\\\bold{0}\end{smallmatrix}\right]  "/></p>
-<pre class="brush: python;"># Again, this block matrix expression can be collapsed to the following
+<p/><pre class="brush: python;"># Again, this block matrix expression can be collapsed to the following
 &gt;&gt;&gt; block_collapse(Density(X, Eq(H*X+noise, data) ))
 μ + Σ⋅H'⋅(R + H⋅Σ⋅H')^-1⋅(-H⋅μ + -data) ,
 (I + -Σ⋅H'⋅(R + H⋅Σ⋅H')^-1⋅H)⋅Σ
-</pre>
+</pre><p/>
 <p><img alt="\begin{smallmatrix}\mu + \Sigma H^T \left(R + H \Sigma H^T\right)^{-1} \left(  H \mu - data\right)\end{smallmatrix} " class="latex" src="http://s0.wp.com/latex.php?latex=%5Cbegin%7Bsmallmatrix%7D%5Cmu+%2B+%5CSigma+H%5ET+%5Cleft%28R+%2B+H+%5CSigma+H%5ET%5Cright%29%5E%7B-1%7D+%5Cleft%28++H+%5Cmu+-+data%5Cright%29%5Cend%7Bsmallmatrix%7D+&amp;bg=ffffff&amp;fg=333333&amp;s=2" title="\begin{smallmatrix}\mu + \Sigma H^T \left(R + H \Sigma H^T\right)^{-1} \left(  H \mu - data\right)\end{smallmatrix} "/></p>
 <p><img alt="\begin{smallmatrix}\left(\mathbb{I} - \Sigma H^T \left(R + H \Sigma H^T\right)^{-1} H\right) \Sigma\end{smallmatrix} " class="latex" src="http://s0.wp.com/latex.php?latex=%5Cbegin%7Bsmallmatrix%7D%5Cleft%28%5Cmathbb%7BI%7D+-+%5CSigma+H%5ET+%5Cleft%28R+%2B+H+%5CSigma+H%5ET%5Cright%29%5E%7B-1%7D+H%5Cright%29+%5CSigma%5Cend%7Bsmallmatrix%7D+&amp;bg=ffffff&amp;fg=333333&amp;s=2" title="\begin{smallmatrix}\left(\mathbb{I} - \Sigma H^T \left(R + H \Sigma H^T\right)^{-1} H\right) \Sigma\end{smallmatrix} "/></p>
 <p>This is the multivariate case of my <a href="http://sympystats.wordpress.com/2011/07/02/a-lesson-in-data-assimilation-using-sympy/">previous post on data assimilation</a>. Effectively all I’ve done here is baked in the logic behind the<a href="http://en.wikipedia.org/wiki/Kalman_filter"> Kalman Filter</a> and exposed it through my statistics operators Density, Given, etc… so that it has become more approachable.</p>
@@ -2733,7 +2792,7 @@ print A.subs(v, 5).eigenvals()</pre>
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-02-07T04:00:18Z</updated>
+      <updated>2012-02-07T04:20:16Z</updated>
     </source>
   </entry>
 
@@ -2771,41 +2830,7 @@ print A.subs(v, 5).eigenvals()</pre>
       <link href="http://lazovichsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My adventures during GSoC 2011</subtitle>
       <title>Tomo Lazovich's SymPy Blog</title>
-      <updated>2012-02-07T04:00:16Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://sympystats.wordpress.com/?p=200</id>
-    <link href="http://sympystats.wordpress.com/2011/07/19/matrix-expressions/" rel="alternate" type="text/html"/>
-    <title>Matrix Expressions</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Linear algebra is important. It is a language which both humans and computers understand well which we can use to describe a large class of important problems. Linear Algebra is an alternative approach to communicate with computers – alternative to … <a href="http://sympystats.wordpress.com/2011/07/19/matrix-expressions/">Continue reading <span class="meta-nav">→</span></a><img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=sympystats.wordpress.com&amp;blog=22550280&amp;post=200&amp;subd=sympystats&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Linear algebra is important. It is a language which both humans and computers understand well which we can use to describe a large class of important problems. Linear Algebra is an alternative approach to communicate with computers – alternative to writing code.</p>
-<p>Matrices are used in a number of contexts and, understandably, SymPy represents them in a few ways. You can represent a matrix or linear operator with a Symbol or you can write out a matrix’s components explicitly with a Matrix object. Thanks to recent work by Sherjil <a href="http://sherjilozair.wordpress.com/">over here</a>, Matrix objects are quickly becoming more powerful.</p>
-<p>Recently I’ve wanted to build up purely symbolic matrix expressions using Symbol but kept running into problems because I didn’t want to add things to the SymPy core Expr that were specific to matrices.  The standard SymPy Expr wasn’t really designed with Matrices in mind and I found that this was holding me back a bit.</p>
-<p>I decided to branch off a MatrixExpr class that, while much less stable, is open to experimentation. It’s been lots of fun so far. I’ve used it for my GSoC project to build up large expressions using block matrices.</p>
-<p>I’ll have examples in a future post related to my GSoC project. For now if you’d like to check it out my code resides here:</p>
-<p><a href="https://github.com/mrocklin/sympy/tree/matrix_expr/sympy/matrices">https://github.com/mrocklin/sympy/tree/matrix_expr/sympy/matrices</a></p>
-<p>There is a MatrixExpr class with associated MatrixSymbol, MatAdd, MatMul, MatPow, Inverse, Transpose, Identity, ZeroMatrix objects. All the things you need for basic expressions. Most of the logic still depends on the subclassed Add, Mul, Pow classes with a little bit added on.</p>
-<p>Also, because my GSoC project needed it I built a fun BlockMatrix class that holds MatrixExpr’s and can be freely mixed with normal MatrixExprs in an expression.</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/sympystats.wordpress.com/200/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/sympystats.wordpress.com/200/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/sympystats.wordpress.com/200/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/sympystats.wordpress.com/200/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/sympystats.wordpress.com/200/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/sympystats.wordpress.com/200/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/sympystats.wordpress.com/200/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/sympystats.wordpress.com/200/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/sympystats.wordpress.com/200/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/sympystats.wordpress.com/200/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/sympystats.wordpress.com/200/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/sympystats.wordpress.com/200/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/sympystats.wordpress.com/200/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/sympystats.wordpress.com/200/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=sympystats.wordpress.com&amp;blog=22550280&amp;post=200&amp;subd=sympystats&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2011-07-19T23:12:43Z</updated>
-    <category term="Uncategorized"/>
-    <author>
-      <name>mrocklin</name>
-    </author>
-    <source>
-      <id>http://sympystats.wordpress.com</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://sympystats.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://sympystats.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://sympystats.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>Just another WordPress.com site</subtitle>
-      <title>sympy-stats</title>
-      <updated>2012-02-07T04:00:18Z</updated>
+      <updated>2012-02-07T04:20:14Z</updated>
     </source>
   </entry>
 </feed>
