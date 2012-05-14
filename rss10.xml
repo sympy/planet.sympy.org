@@ -13,6 +13,7 @@
 
 	<items>
 		<rdf:Seq>
+			<rdf:li rdf:resource="http://catchmrbharath.github.com/programming/2012/05/14/region-plots-with-interval-arithmetic" />
 			<rdf:li rdf:resource="http://angadhsympy.wordpress.com/?p=7" />
 			<rdf:li rdf:resource="http://amakelov.wordpress.com/?p=4" />
 			<rdf:li rdf:resource="http://amakelov.wordpress.com/?p=1" />
@@ -72,11 +73,24 @@
 			<rdf:li rdf:resource="http://saptman.wordpress.com/?p=29" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-8510171342300140296.post-8561852009544025205" />
 			<rdf:li rdf:resource="http://gilbertgede.wordpress.com/?p=76" />
-			<rdf:li rdf:resource="http://asmeurersympy.wordpress.com/?p=1016" />
 		</rdf:Seq>
 	</items>
 </channel>
 
+<item rdf:about="http://catchmrbharath.github.com/programming/2012/05/14/region-plots-with-interval-arithmetic">
+	<title>Bharath M R: Region Plots with Interval Arithmetic</title>
+	<link>http://catchmrbharath.github.com/programming/2012/05/14/region-plots-with-interval-arithmetic</link>
+	<content:encoded>&lt;p&gt;My GSoC project is to provide support for implicit plotting using interval arithmetic. As mpmath already has a very good interval arithmetic library, I wanted to try out how efficient the algorithm is going to be using the mpmath interval arithmetic library. I wanted to get an idea on the time required for plotting and also wanted to decide whether to write my own interval arithmetic library or use the existing mpmath library and add additional things to it. I have a basic implementation which supports only the mpmath interval arithmetic functions. The results look promising and I am guessing a separate implementation for plotting will be faster and I will be able to add features more easily.I have an image of &lt;span&gt; $y &amp;gt; 1/x$ &lt;/span&gt; with the interval edges below. The image below was plotted so with a resolution of 1024x1024. It is possible to see how the intervals are subdivided more and more when it reaches the edge of a region.&lt;/p&gt;
+&lt;img width=&quot;600&quot; src=&quot;http://catchmrbharath.github.com/images/14052012/figwithedge.png&quot; height=&quot;400&quot; /&gt;
+&lt;p&gt;It took 1.57 seconds to render this image which is decently fast. I observed that if the independent regions are less and large, then the time take for the plot to be rendered is high. I tried &lt;span&gt; $cos(y) &amp;gt; sin(x)$ &lt;/span&gt; which took about 5.3 seconds to render.&lt;/p&gt;
+&lt;img width=&quot;600&quot; src=&quot;http://catchmrbharath.github.com/images/14052012/cosysinx.png&quot; height=&quot;400&quot; /&gt;
+&lt;p&gt;I wanted to try what the maximum time it takes to render something. So I tried plotting &lt;span&gt; $sin^{2}x+cos^{2}x$ &lt;/span&gt;less than 1. As the arithmetic is done on intervals, it is not possible for the algorithm to decide that the expression is not true throughout the interval. So it goes on subdividing more and more, until it reaches a dimension of 1 pixel. For a resolution of 512X512, it took 120 seconds to render. If there are a lot of evaluations in the expression, then it might increase, but we should be expecting times around 120 seconds.&lt;/p&gt;
+
+&lt;p&gt;Another problem that I have to address is rasterization. I am really not getting any ideas on how to avoid rasterization. One way is to handle the zoom event in matplotlib and change the data to match the zoom. But for complicated graphs, revaluating might take a lot of time, which is bad.&lt;/p&gt;
+&lt;img width=&quot;600&quot; src=&quot;http://catchmrbharath.github.com/images/14052012/figraster.png&quot; height=&quot;400&quot; /&gt;
+&lt;p&gt;We can see that if there is a way of interpolating over the rectangular edges, then we will have a plot without rasterization. I haven’t got any foolproof idea to implement this interpolation as there will be many independent regions. So if you have any idea, then please comment or mail me :). The code for plotting can be found &lt;a href=&quot;https://gist.github.com/2695079&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;</content:encoded>
+	<dc:date>2012-05-14T07:00:00+00:00</dc:date>
+</item>
 <item rdf:about="http://angadhsympy.wordpress.com/?p=7">
 	<title>Angadh Nanjangud: GSoC 2012 Post 1</title>
 	<link>http://angadhsympy.wordpress.com/2012/05/12/gsoc-2012-post-1/</link>
@@ -1090,135 +1104,6 @@ Now I’d like to update &lt;img src=&quot;http://s0.wp.com/latex.php?latex=P&am
 &lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/gilbertgede.wordpress.com/76/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/gilbertgede.wordpress.com/76/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/godelicious/gilbertgede.wordpress.com/76/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/delicious/gilbertgede.wordpress.com/76/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/gofacebook/gilbertgede.wordpress.com/76/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/facebook/gilbertgede.wordpress.com/76/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/gotwitter/gilbertgede.wordpress.com/76/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/twitter/gilbertgede.wordpress.com/76/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/gostumble/gilbertgede.wordpress.com/76/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/stumble/gilbertgede.wordpress.com/76/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/godigg/gilbertgede.wordpress.com/76/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/digg/gilbertgede.wordpress.com/76/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/goreddit/gilbertgede.wordpress.com/76/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/reddit/gilbertgede.wordpress.com/76/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=gilbertgede.wordpress.com&amp;amp;blog=22677911&amp;amp;post=76&amp;amp;subd=gilbertgede&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;&lt;div class=&quot;sharedaddy sd-like-enabled&quot;&gt;&lt;/div&gt;</content:encoded>
 	<dc:date>2011-07-30T06:00:01+00:00</dc:date>
 	<dc:creator>gilbertgede</dc:creator>
-</item>
-<item rdf:about="http://asmeurersympy.wordpress.com/?p=1016">
-	<title>Aaron Meurer: SymPy 0.7.1 Released</title>
-	<link>http://asmeurersympy.wordpress.com/2011/07/30/sympy-0-7-1-released/</link>
-	<content:encoded>&lt;p&gt;&lt;em&gt;Cross posted on the &lt;a href=&quot;http://sympy.blogspot.com/2011/07/sympy-071-released.html&quot;&gt;official SymPy Blog&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;SymPy 0.7.1 has been released on July 29, 2011. It is available at&lt;/p&gt;
-&lt;p&gt;&lt;a href=&quot;http://sympy.org&quot;&gt;http://sympy.org&lt;br /&gt;
-&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;The source distribution can be downloaded from:&lt;br /&gt;
-&lt;a href=&quot;http://code.google.com/p/sympy/downloads/detail?name=sympy-0.7.1.tar.gz&quot;&gt;http://code.google.com/p/sympy/downloads/detail?name=sympy-0.7.1.tar.gz&lt;br /&gt;
-&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;You can get the Windows installer here:&lt;br /&gt;
-&lt;a href=&quot;http://code.google.com/p/sympy/downloads/detail?name=sympy-0.7.1.win32.exe&quot;&gt;http://code.google.com/p/sympy/downloads/detail?name=sympy-0.7.1.win32.exe&lt;br /&gt;
-&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;And the html documentation here:&lt;br /&gt;
-&lt;a href=&quot;http://code.google.com/p/sympy/downloads/detail?name=sympy-0.7.1-docs-html.zip&quot;&gt;http://code.google.com/p/sympy/downloads/detail?name=sympy-0.7.1-docs-html.zip&lt;br /&gt;
-&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;&lt;span style=&quot;font-weight: bold;&quot;&gt;About SymPy&lt;br /&gt;
-&lt;/span&gt;&lt;/p&gt;
-&lt;p&gt;SymPy is a Python library for symbolic mathematics. It aims to become a full-featured computer algebra system (CAS) while keeping the code as simple as possible in order to be comprehensible and easily extensible. SymPy is written entirely in Python.&lt;/p&gt;
-&lt;p&gt;&lt;span style=&quot;font-weight: bold;&quot;&gt;Release notes&lt;br /&gt;
-&lt;/span&gt;&lt;/p&gt;
-&lt;p&gt;&lt;span style=&quot;font-weight: bold;&quot;&gt;Major changes&lt;/span&gt;&lt;/p&gt;
-&lt;p&gt;- Python 2.4 is no longer supported.  SymPy will not work at all in&lt;br /&gt;
-  Python 2.4.  If you still need to use SymPy under Python 2.4 for some&lt;br /&gt;
-  reason, you will need to use SymPy 0.7.0 or earlier.&lt;/p&gt;
-&lt;p&gt;- The Pyglet plotting library is now an (optional) external dependency.&lt;br /&gt;
-  Previously, we shipped a version of Pyglet with SymPy, but this was&lt;br /&gt;
-  old and buggy.  The plan is to eventually make the plotting in SymPy&lt;br /&gt;
-  much more modular, so that it supports many backends, but this has not&lt;br /&gt;
-  been done yet.  For now, still only Pyglet is directly supported.&lt;br /&gt;
-  Note that Pyglet is only an optional dependency and is only needed for&lt;br /&gt;
-  plotting. The rest of SymPy can still be used without any dependencies&lt;br /&gt;
-  (except for Python).&lt;/p&gt;
-&lt;p&gt;- isympy now works with the new IPython 0.11.&lt;/p&gt;
-&lt;p&gt;- mpmath has been updated to 0.17.  See the corresponding mpmath release&lt;br /&gt;
-  notes at http://mpmath.googlecode.com/svn/trunk/CHANGES.&lt;/p&gt;
-&lt;p&gt;- Added a Subs object for representing unevaluated substitutions.  This&lt;br /&gt;
-  finally lets us represent derivatives evaluated at a point, i.e.,&lt;br /&gt;
-  `diff(f(x), x).subs(x, 0)` returns `Subs(Derivative(f(_x), _x), (_x,), (0,))`.&lt;br /&gt;
-  This also means that SymPy can now correctly compute the chain rule&lt;br /&gt;
-  when this functionality is required, such as with `f(g(x)).diff(x)`.&lt;/p&gt;
-&lt;p&gt;&lt;span style=&quot;font-weight: bold;&quot;&gt;Hypergeometric functions/Meijer G-Functions&lt;/span&gt;&lt;/p&gt;
-&lt;p&gt;- Added classes hyper() and meijerg() to represent Hypergeometric and Meijer G-functions, respectively. They support numerical evaluation (using mpmath) and symbolic differentiation (not with respect to the parameters).&lt;/p&gt;
-&lt;p&gt;- Added an algorithm for rewriting hypergeometric and meijer g-functions in terms of more familiar, named special functions. It is accessible via the function hyperexpand(), or also via expand_func(). This algorithm recognises many elementary functions, and also complete and incomplete gamma functions, bessel functions, and error functions. It can easily be extended to handle more classes of special functions.&lt;/p&gt;
-&lt;p&gt;&lt;span style=&quot;font-weight: bold;&quot;&gt;Sets&lt;/span&gt;&lt;/p&gt;
-&lt;p&gt;- Added FiniteSet class to mimic python set behavior while also interacting with existing Intervals and Unions&lt;/p&gt;
-&lt;p&gt;- FiniteSets and Intervals interact so that, for example `Interval(0, 10) – FiniteSet(0, 5)` produces `(0, 5) U (5, 10]`&lt;/p&gt;
-&lt;p&gt;- FiniteSets also handle non-numerical objects so the following is possible `{1, 2, ‘one’, ‘two’, {a, b}}`&lt;/p&gt;
-&lt;p&gt;- Added ProductSet to handle Cartesian products of sets&lt;/p&gt;
-&lt;p&gt;- Create using the `*` operator, i.e. `twodice = FiniteSet(1, 2, 3, 4, 5, 6) * FiniteSet(1, 2, 3, 4, 5, 6) or square = Interval(0, 1) * Interval(0, 1)`&lt;/p&gt;
-&lt;p&gt;- pow operator also works as expected: `R3 = Interval(-oo, oo)**3 ; (3, -5, 0) in R3 == True`&lt;/p&gt;
-&lt;p&gt;- Subtraction, union, measurement all work taking complex intersections into account. &lt;/p&gt;
-&lt;p&gt;- Added as_relational method to sets, producing boolean statements using And, Or, Eq, Lt, Gt, etc…&lt;/p&gt;
-&lt;p&gt;- Changed reduce_poly_inequalities to return unions of sets rather than lists of sets&lt;/p&gt;
-&lt;p&gt;&lt;span style=&quot;font-weight: bold;&quot;&gt;Iterables&lt;/span&gt;&lt;/p&gt;
-&lt;p&gt;- Added generating routines for integer partitions and binary partitions. The routine for integer partitions takes 3 arguments, the number itself, the maximum possible element allowed in the partitions generated and the maximum possible number of elements that will be in the partition. Binary partitions are characterized by containing only powers of two.&lt;/p&gt;
-&lt;p&gt;- Added generating routine for multi-set partitions. Given a multiset, the algorithm implemented will generate all possible partitions of that multi-set.&lt;/p&gt;
-&lt;p&gt;- Added generating routines for bell permutations, derangements, and involutions. A bell permutation is one in which the cycles that compose it consist of integers in a decreasing order. A derangement is a permutation such that the ith element is not at the ith position. An involution is a permutation that when multiplied by itself gives the identity permutation.&lt;/p&gt;
-&lt;p&gt;- Added generating routine for unrestricted necklaces. An unrestricted necklace is an a-ary string of n characters, each of a possible types. These have been characterized by the parameters n and k in the routine.&lt;/p&gt;
-&lt;p&gt;- Added generating routine for oriented forests. This is an implementation of algorithm S in TAOCP Vol 4A.&lt;/p&gt;
-&lt;p&gt;&lt;span style=&quot;font-weight: bold;&quot;&gt;xyz Spin bases&lt;/span&gt;&lt;/p&gt;
-&lt;p&gt;- The represent, rewrite and InnerProduct logic has been improved to work between any two spin bases. This was done by utilizing the Wigner-D matrix, implemented in the WignerD class, in defining the changes between the various bases. Representing a state, i.e. `represent(JzKet(1,0), basis=Jx)`, can be used to give the vector representation of any get in any of the x/y/z bases for numerical values of j and m in the spin eigenstate. Similarly, rewriting states into different bases, i.e. `JzKet(1,0).rewrite(‘Jx’)`, will write the states as a linear combination of elements of the given basis. Because this relies on the represent function, this only works for numerical j and m values. The inner product of two eigenstates in different bases can be evaluated, i.e. `InnerProduct(JzKet(1,0),JxKet(1,1))`. When two different bases are used, one state is rewritten into the other basis, so this requires numerical values of j and m, but innerproducts of states in the same basis can still be done symbolically.&lt;/p&gt;
-&lt;p&gt;- The `Rotation.D` and `Rotation.d` methods, representing the Wigner-D function and the Wigner small-d function, return an instance of the WignerD class, which can be evaluated with the `doit()` method to give the corresponding matrix element of the Wigner-D matrix.&lt;/p&gt;
-&lt;p&gt;&lt;span style=&quot;font-weight: bold;&quot;&gt;Other changes&lt;/span&gt;&lt;/p&gt;
-&lt;p&gt;- We now use MathJax in our docs. MathJax renders LaTeX math entierly in&lt;br /&gt;
-  the browser using Javascript.  This means that the math is much more&lt;br /&gt;
-  readable than the previous png math, which uses images.  MathJax is&lt;br /&gt;
-  only supported on modern browsers, so LaTeX math in the docs may not&lt;br /&gt;
-  work on older browsers.&lt;/p&gt;
-&lt;p&gt;- nroots() now lets you set the precision of computations&lt;/p&gt;
-&lt;p&gt;- Added support for gmpy and mpmath’s types to sympify()&lt;/p&gt;
-&lt;p&gt;- Fix some bugs with lambdify()&lt;/p&gt;
-&lt;p&gt;- Fix a bug with as_independent and non-commutative symbols.&lt;/p&gt;
-&lt;p&gt;- Fix a bug with collect (issue 2516)&lt;/p&gt;
-&lt;p&gt;- Many fixes relating to porting SymPy to Python 3.  Thanks to our GSoC&lt;br /&gt;
-  student Vladimir Perić, this task is almost completed.&lt;/p&gt;
-&lt;p&gt;- Some people were retroactively added to the AUTHORS file.&lt;/p&gt;
-&lt;p&gt;- Added a solver for a special case of the Riccati equation in the ODE&lt;br /&gt;
-  module.&lt;/p&gt;
-&lt;p&gt;- Iterated derivatives are pretty printed in a concise way.&lt;/p&gt;
-&lt;p&gt;- Fix a bug with integrating functions with multiple DiracDeltas.&lt;/p&gt;
-&lt;p&gt;- Add support for Matrix.norm() that works for Matrices (not just vectors).&lt;/p&gt;
-&lt;p&gt;- Improvements to the Groebner bases algorithm.&lt;/p&gt;
-&lt;p&gt;- Plot.saveimage now supports a StringIO outfile&lt;/p&gt;
-&lt;p&gt;- Expr.as_ordered_terms now supports non lex orderings.&lt;/p&gt;
-&lt;p&gt;- diff now canonicalizes the order of differentiation symbols.  This is&lt;br /&gt;
-  so it can simplify expressions like `f(x, y).diff(x, y) – f(x,&lt;br /&gt;
-  y).diff(y, x)`.  If you want to create a Derivative object without&lt;br /&gt;
-  sorting the args, you should create it explicitly with `Derivative`,&lt;br /&gt;
-  so that you will get `Derivative(f(x, y), x, y) != Derivative(f(x, y), y, x)`.&lt;br /&gt;
-  Note that internally, derivatives that can be computed are always&lt;br /&gt;
-  computed in the order that they are given in.&lt;/p&gt;
-&lt;p&gt;- Added functions `is_sequence()` and `iterable()` for determining if&lt;br /&gt;
-  something is an ordered iterable or normal iterable, respectively.&lt;/p&gt;
-&lt;p&gt;- Enabled an option in Sphinx that adds a `source` link next to each function, which links to a copy of the source code for that function.&lt;/p&gt;
-&lt;p&gt;In addition to the more noticeable changes listed above, there have been numerous other smaller additions, improvements and bug fixes in the ~300 commits in this release. See the git log for a full list of all changes.  The command `git log sympy-0.7.0..sympy-0.7.1` will show all commits made between this release and the last. You can also see the issues closed since the last release [here](http://code.google.com/p/sympy/issues/list?can=1&amp;amp;q=closed-after%3A2010%2F6%2F13+closed-before%3A2011%2F7%2F30&amp;amp;sort=-closed&amp;amp;colspec=ID+Type+Status+Priority+Milestone+Owner+Summary+Stars+Closed&amp;amp;cells=tiles).&lt;/p&gt;
-&lt;p&gt;&lt;span style=&quot;font-weight: bold;&quot;&gt;Authors&lt;/span&gt;&lt;/p&gt;
-&lt;p&gt;The following people contributed at least one patch to this release (names are given in alphabetical order by last name).  A total of 26 people contributed to this release.  People with a * by their names contributed a patch for the first time for this release.  Five people contributed for the first time for this release.  &lt;/p&gt;
-&lt;p&gt;Thanks to everyone who contributed to this release!&lt;/p&gt;
-&lt;p&gt;* Tom Bachmann&lt;br /&gt;
-* Ondřej Čertík&lt;br /&gt;
-* Renato Coutinho&lt;br /&gt;
-* Bill Flynn&lt;br /&gt;
-* Bradley Froehle*&lt;br /&gt;
-* Gilbert Gede&lt;br /&gt;
-* Brian Granger&lt;br /&gt;
-* Emma Hogan*&lt;br /&gt;
-* Yuri Karadzhov&lt;br /&gt;
-* Stefan Krastanov*&lt;br /&gt;
-* Ronan Lamy&lt;br /&gt;
-* Tomo Lazovich&lt;br /&gt;
-* Sam Magura*&lt;br /&gt;
-* Saptarshi Mandal&lt;br /&gt;
-* Aaron Meurer&lt;br /&gt;
-* Sherjil Ozair&lt;br /&gt;
-* Mateusz Paprocki&lt;br /&gt;
-* Vladimir Perić&lt;br /&gt;
-* Mario Pernici&lt;br /&gt;
-* Nicolas Pourcelot&lt;br /&gt;
-* Min Ragan-Kelley*&lt;br /&gt;
-* Matthew Rocklin&lt;br /&gt;
-* Chris Smith&lt;br /&gt;
-* Vinzent Steinberg&lt;br /&gt;
-* Sean Vig&lt;br /&gt;
-* Thomas Wiecki&lt;/p&gt;
-&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/asmeurersympy.wordpress.com/1016/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/asmeurersympy.wordpress.com/1016/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/godelicious/asmeurersympy.wordpress.com/1016/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/delicious/asmeurersympy.wordpress.com/1016/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/gofacebook/asmeurersympy.wordpress.com/1016/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/facebook/asmeurersympy.wordpress.com/1016/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/gotwitter/asmeurersympy.wordpress.com/1016/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/twitter/asmeurersympy.wordpress.com/1016/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/gostumble/asmeurersympy.wordpress.com/1016/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/stumble/asmeurersympy.wordpress.com/1016/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/godigg/asmeurersympy.wordpress.com/1016/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/digg/asmeurersympy.wordpress.com/1016/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/goreddit/asmeurersympy.wordpress.com/1016/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/reddit/asmeurersympy.wordpress.com/1016/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;amp;blog=7467151&amp;amp;post=1016&amp;amp;subd=asmeurersympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
-	<dc:date>2011-07-30T05:19:14+00:00</dc:date>
-	<dc:creator>Aaron Meurer</dc:creator>
 </item>
 
 </rdf:RDF>
