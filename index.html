@@ -23,6 +23,82 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>May 15, 2012</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://rhoforsympy.wordpress.com" title="rhoforsympy">Guru Devanla</a></h3>
+
+
+<div class="entrygroup" id="http://rhoforsympy.wordpress.com/?p=16">
+<h4 lang="en"><a href="http://rhoforsympy.wordpress.com/2012/05/15/plan-for-first-4-weeks-post-1/">Plan for first 4 weeks : Post 1</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p>As part of first set of steps (first 4 weeks) in the project plan, my initial proposal was to achieve the following specific goals:<br />
+(These goals are listed also with respect using the current implementation of density operators at this branch: <a href="https://github.com/ellisonbg/sympy/commit/d43f10bd899b5e4dcd75876a1b6a9e82333e0f57" target="_blank" title="densityop">densityOp branch at ellisongb@github</a></p>
+<ul>
+<li>Start with density.py<br />
+Make it work with different bases by aligning the current implementation with representation logic.</li>
+<li>Come up with an proposal/implementation for density matrices specific to qubits. ( Do we need a specific version for qubits? )</li>
+<li>Update TensorProduct.py for multi-qubit states.</li>
+</ul>
+<p>The above tasks currently has been planned for the first 4 weeks of the project. For each of the above tasks, I will provide 2 sections in this blog and subsequent blog posts. In the first section, I describe my understanding of current implementation and in the second section I list out what is needed (kind of list out requirements, and then propose the implementation idea).</p>
+<h3>What is currently available in Density.py? ( from the above git branch)</h3>
+<ul>
+<li>Currently, density.py has the basic function prototypes. <br />
+The current density object accepts any kind of input. That is, there is no restriction on objects to be strictly of type ‘State’ or ‘Ket’.</li>
+<li>Also, when we use Qubit’s as argument to the density object, what gets printed is not accurate. For example,
+</li><li>
+<img src="https://rhoforsympy.files.wordpress.com/2012/05/screenshot-2.png?w=500" alt="Example of output for Density" /><p></p>
+</li><li>The doit() method and represent() method do not execute successfully.</li>
+</ul>
+<h3>Next steps for density.py</h3>
+<ul>
+<li> Add eval() function <br />
+     Validate the arguments passed to the constructor. Only instances of type ‘State’ will be accepted.<br /> If any QExpr is passed as argument, then QExpr will have to be simplified and checked if final QExpr object is an instance of type ‘State’. Alternatively, we could just check if passed states are of type ‘Ket’. This step takes care of creation of density matrices.</li>
+<li> Update doit() : The current implementation currently errors out. We will work on this to fix it.</li>
+<li> Update _represent() : The current implementation errors out. Also, the current implementation expands the density operator (thus producing the matrix) before the original represent() method is invoked. The approach, we plan to take is call the represent method for each of the states in the density op.<br />
+Say, Density([ ket1,p1 ] , [ket2, p2], [ket3,p3] ), then would way do change of basis using represent would be to do the following:<br />
+(the following code, is just pseudo-code) <p></p>
+<p></p><pre class="brush: python;">_represent(self, **options)
+  states = []
+  for each state in density matrix
+   states.append(represent(state, **options)
+  return Density(states, probabilities )
+</pre><p></p>
+<p><i>(My understanding is the probabilities of each state should not get affected during change of basis. Is this correct?)</i></p>
+</li>
+<li> Add test cases. Of course, this step will be step 0.</li>
+</ul>
+<p>
+My next blog post will have similar structure of discussion for the next 2  topics. My hope is by end of this week, these details are spec’d out enough so that I can exactly say what I will deliver at end of each of the first 4 weeks.</p>
+<p>
+P.S: I plan to provide detailed plan for remaining tasks as we approach the specific week for corresponding task.</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/rhoforsympy.wordpress.com/16/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/rhoforsympy.wordpress.com/16/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godelicious/rhoforsympy.wordpress.com/16/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/delicious/rhoforsympy.wordpress.com/16/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/rhoforsympy.wordpress.com/16/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/facebook/rhoforsympy.wordpress.com/16/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/rhoforsympy.wordpress.com/16/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/twitter/rhoforsympy.wordpress.com/16/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gostumble/rhoforsympy.wordpress.com/16/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/stumble/rhoforsympy.wordpress.com/16/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godigg/rhoforsympy.wordpress.com/16/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/digg/rhoforsympy.wordpress.com/16/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/goreddit/rhoforsympy.wordpress.com/16/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/reddit/rhoforsympy.wordpress.com/16/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;blog=34650270&amp;post=16&amp;subd=rhoforsympy&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://rhoforsympy.wordpress.com/2012/05/15/plan-for-first-4-weeks-post-1/">by grdvnl at May 15, 2012 11:42 PM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>May 14, 2012</h2>
 
 
@@ -1852,7 +1928,7 @@ x**(S(4)/5)
 <p>A beautiful summer is coming to an end and I am at the last leg of my Gsoc. I must apologize for the erratic posts but its mostly because I was “busy” with other things (mostly enjoying myself in the US of A, eating steaks, going out for barbecues, and enjoying the beautiful Maryland summer weather.)</p>
 <p>In the last few weeks I spent a bit of time cleaning up Gray code. It went through a few API changes and I hope to have the subsets and partitions branches merged in within this week. I also implemented a demo of the Permutations branch that involves Polyhedron rotations. I hope to show one involving a Rubik’s cube when I have the Permutation group module in (more on that in a while). I also implemented a residue class and a residue group module as that was missing in the number theory branch of Sympy. That branch needs an overhaul both in terms of functionality as well as the code that is already there and I hope I can get some momentum going in that direction with the code I have written. I also wrote some generators for Permutation groups. This is fairly easy to do now, the basic algorithm is to generate all permutations and filter out those that do not fit the criteria. Of course, generating all permutations is inefficient, and some generators have certain special properties that we can use. For example, the Cyclic group can be generated in linear time as that simply involves a single rotation. Alternating group however requires the generation of all even permutations. Some group generators will probably make use of the specialized algorithms that have been implemented in the iterables section of Sympy.</p>
 <p>I have also managed to implement the Schreier sims algorithm but its extremely ugly and unpythonic for now. Algorithms for generating orbits and stabilizer chains are also there but they are fairly inefficient. I hope to clean them up and submit them for a pull request in this week before the hard pencils down date.</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godelicious/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/delicious/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/facebook/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/twitter/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gostumble/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/stumble/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godigg/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/digg/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/goreddit/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/reddit/saptman.wordpress.com/32/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=saptman.wordpress.com&amp;blog=23040289&amp;post=32&amp;subd=saptman&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /><div class="sharedaddy sd-like-enabled"></div></div>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godelicious/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/delicious/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/facebook/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/twitter/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gostumble/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/stumble/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godigg/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/digg/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/goreddit/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/reddit/saptman.wordpress.com/32/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=saptman.wordpress.com&amp;blog=23040289&amp;post=32&amp;subd=saptman&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -2601,7 +2677,7 @@ In the last week, one of the main things I did was to submit a pull request for 
 <div class="content" lang="en">
 <p>This week I implemented generational routines for Fixed density Lyndon words, necklaces and Debruijn cycles. Its still not completely tested so caveat emptor! You can check it out in my iterables branch. Apart from this I got the Permutations branch merged in this week. This was a long standing pull request and will allow folks to do all sorts of stuff that combinatorica allows for Permutations. Currently some graph related stuff is missing but that will be taken care of once I clean up my NetworkX branch. I still need to clean up the Partitions and Subsets pulls which will add another large chunk to the combinatorics module.</p>
 <p>I will probably spend this week cleaning up older pull requests rather than creating newer ones. Even so, those interested can keep track of my permutation_groups branch where most of my work related to that will go.</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/saptman.wordpress.com/29/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/saptman.wordpress.com/29/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godelicious/saptman.wordpress.com/29/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/delicious/saptman.wordpress.com/29/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/saptman.wordpress.com/29/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/facebook/saptman.wordpress.com/29/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/saptman.wordpress.com/29/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/twitter/saptman.wordpress.com/29/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gostumble/saptman.wordpress.com/29/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/stumble/saptman.wordpress.com/29/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godigg/saptman.wordpress.com/29/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/digg/saptman.wordpress.com/29/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/goreddit/saptman.wordpress.com/29/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/reddit/saptman.wordpress.com/29/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=saptman.wordpress.com&amp;blog=23040289&amp;post=29&amp;subd=saptman&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /><div class="sharedaddy sd-like-enabled"></div></div>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/saptman.wordpress.com/29/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/saptman.wordpress.com/29/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godelicious/saptman.wordpress.com/29/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/delicious/saptman.wordpress.com/29/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/saptman.wordpress.com/29/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/facebook/saptman.wordpress.com/29/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/saptman.wordpress.com/29/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/twitter/saptman.wordpress.com/29/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gostumble/saptman.wordpress.com/29/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/stumble/saptman.wordpress.com/29/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godigg/saptman.wordpress.com/29/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/digg/saptman.wordpress.com/29/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/goreddit/saptman.wordpress.com/29/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/reddit/saptman.wordpress.com/29/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=saptman.wordpress.com&amp;blog=23040289&amp;post=29&amp;subd=saptman&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -2647,43 +2723,6 @@ This last week I made some good headway towards finishing up the coupled spin st
 
 <p class="date">
 <a href="http://seanvig.blogspot.com/2011/07/finishing-current-coupled-spin-work.html">by Sean Vig (noreply@blogger.com) at July 30, 2011 08:45 AM</a>
-</p>
-</div>
-</div>
-
-
-
-</div>
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://gilbertgede.wordpress.com" title="gilbertgede">Gilbert Gede</a></h3>
-
-
-<div class="entrygroup" id="http://gilbertgede.wordpress.com/?p=76">
-<h4 lang="en"><a href="http://gilbertgede.wordpress.com/2011/07/30/gsoc-week-10/">GSoC, Week 10</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>Week 10….?</p>
-<p>This week, there really isn’t that much to report. Week 10 was supposed to be finishing up the pretty and LaTeX printer, and I have done most of that. Tests and documentation need to be written for both though; I think I’ve learned that things haven’t really been coded successfully until you’ve done those two steps.</p>
-<p>I also got some more work done with the documentation. It’s a little further behind than I had hoped for, but it’s coming along. I definitely need to redo the images I have throughout it so far; they are just scans of sketches I have done, and are of low-quality. There also needs to be a lot more talk about linearization in the documentation. That in fact leads to the last two big coding things.</p>
-<p>I think the last two major things are: more work in linearization and code output for numeric integration. The linearization routine still needs some work; mainly in dealing with situations where the qdot’s are defined with coefficients that depend on the q’s. The question of what to do with user defined dynamic symbols (such as forces or specified position) is also still up in the air. Forces will probably be easy to linearize (or really, take the partial with respect to), but with a specified position, it becomes more complicated; during the process of forming the equations of motion, most likely the derivative of that specified position will be brought into the expressions. I haven’t really decided what to do in this situation, as clearly some distance (say, l), and its derivative (say, l’) are not independent. I’m not sure if adding the position as a system state is the right thing to do here. I think I’ll play around with some simple examples to see what makes the most sense, and consult some other people. The part about code output also relates here, in that I need to decide how to deal with this situation (a value and its derivative). I can imagine just putting both as empty for the user to fill in, and telling them to do it the right way. Hopefully I’ll have this figured out more by next week. I also do need to write the code output stuff. I don’t think it will be that hard, I just have to make the decisions about the formats of of the output. The size of the expressions generated can be problematic though, taking tens of minutes to print out. I’m also not sure how to deal with this situation. Hopefully I can again find out more information on this issue by next weekend.</p>
-<p> </p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/gilbertgede.wordpress.com/76/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/gilbertgede.wordpress.com/76/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godelicious/gilbertgede.wordpress.com/76/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/delicious/gilbertgede.wordpress.com/76/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/gilbertgede.wordpress.com/76/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/facebook/gilbertgede.wordpress.com/76/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/gilbertgede.wordpress.com/76/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/twitter/gilbertgede.wordpress.com/76/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gostumble/gilbertgede.wordpress.com/76/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/stumble/gilbertgede.wordpress.com/76/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godigg/gilbertgede.wordpress.com/76/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/digg/gilbertgede.wordpress.com/76/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/goreddit/gilbertgede.wordpress.com/76/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/reddit/gilbertgede.wordpress.com/76/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=gilbertgede.wordpress.com&amp;blog=22677911&amp;post=76&amp;subd=gilbertgede&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /><div class="sharedaddy sd-like-enabled"></div></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://gilbertgede.wordpress.com/2011/07/30/gsoc-week-10/">by gilbertgede at July 30, 2011 06:00 AM</a>
 </p>
 </div>
 </div>
@@ -2745,7 +2784,7 @@ This last week I made some good headway towards finishing up the coupled spin st
 <a href="http://gilbertgede.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://gilbertgede.wordpress.com" class="message" title="no activity in 7 days">Gilbert Gede</a>
 </li>
 <li>
-<a href="http://rhoforsympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://rhoforsympy.wordpress.com" class="message" title="no activity in 7 days">Guru Devanla</a>
+<a href="http://rhoforsympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://rhoforsympy.wordpress.com" title="rhoforsympy">Guru Devanla</a>
 </li>
 <li>
 <a href="http://f1728.wordpress.com/category/SymPy/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://f1728.wordpress.com" class="message" title="no activity in 7 days">Jeremias Yehdegho</a>
@@ -2796,7 +2835,7 @@ This last week I made some good headway towards finishing up the coupled spin st
 
 <p>
 <strong>Last updated:</strong><br>
-May 15, 2012 11:40 PM<br>
+May 16, 2012 12:20 AM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>

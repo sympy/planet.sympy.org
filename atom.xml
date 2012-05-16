@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2012-05-15T23:40:27Z</updated>
+  <updated>2012-05-16T00:20:19Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,72 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry xml:lang="en">
+    <id>http://rhoforsympy.wordpress.com/?p=16</id>
+    <link href="http://rhoforsympy.wordpress.com/2012/05/15/plan-for-first-4-weeks-post-1/" rel="alternate" type="text/html"/>
+    <title>Plan for first 4 weeks : Post 1</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">As part of first set of steps (first 4 weeks) in the project plan, my initial proposal was to achieve the following specific goals: (These goals are listed also with respect using the current implementation of density operators at this branch: densityOp branch at ellisongb@github Start with density.py Make it work with different bases by [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;blog=34650270&amp;post=16&amp;subd=rhoforsympy&amp;ref=&amp;feed=1" width="1"/></div>
+    </summary>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>As part of first set of steps (first 4 weeks) in the project plan, my initial proposal was to achieve the following specific goals:<br/>
+(These goals are listed also with respect using the current implementation of density operators at this branch: <a href="https://github.com/ellisonbg/sympy/commit/d43f10bd899b5e4dcd75876a1b6a9e82333e0f57" target="_blank" title="densityop">densityOp branch at ellisongb@github</a></p>
+<ul>
+<li>Start with density.py<br/>
+Make it work with different bases by aligning the current implementation with representation logic.</li>
+<li>Come up with an proposal/implementation for density matrices specific to qubits. ( Do we need a specific version for qubits? )</li>
+<li>Update TensorProduct.py for multi-qubit states.</li>
+</ul>
+<p>The above tasks currently has been planned for the first 4 weeks of the project. For each of the above tasks, I will provide 2 sections in this blog and subsequent blog posts. In the first section, I describe my understanding of current implementation and in the second section I list out what is needed (kind of list out requirements, and then propose the implementation idea).</p>
+<h3>What is currently available in Density.py? ( from the above git branch)</h3>
+<ul>
+<li>Currently, density.py has the basic function prototypes. <br/>
+The current density object accepts any kind of input. That is, there is no restriction on objects to be strictly of type ‘State’ or ‘Ket’.</li>
+<li>Also, when we use Qubit’s as argument to the density object, what gets printed is not accurate. For example,
+</li><li>
+<img alt="Example of output for Density" src="https://rhoforsympy.files.wordpress.com/2012/05/screenshot-2.png?w=500"/><p/>
+</li><li>The doit() method and represent() method do not execute successfully.</li>
+</ul>
+<h3>Next steps for density.py</h3>
+<ul>
+<li> Add eval() function <br/>
+     Validate the arguments passed to the constructor. Only instances of type ‘State’ will be accepted.<br/> If any QExpr is passed as argument, then QExpr will have to be simplified and checked if final QExpr object is an instance of type ‘State’. Alternatively, we could just check if passed states are of type ‘Ket’. This step takes care of creation of density matrices.</li>
+<li> Update doit() : The current implementation currently errors out. We will work on this to fix it.</li>
+<li> Update _represent() : The current implementation errors out. Also, the current implementation expands the density operator (thus producing the matrix) before the original represent() method is invoked. The approach, we plan to take is call the represent method for each of the states in the density op.<br/>
+Say, Density([ ket1,p1 ] , [ket2, p2], [ket3,p3] ), then would way do change of basis using represent would be to do the following:<br/>
+(the following code, is just pseudo-code) <p/>
+<p/><pre class="brush: python;">_represent(self, **options)
+  states = []
+  for each state in density matrix
+   states.append(represent(state, **options)
+  return Density(states, probabilities )
+</pre><p/>
+<p><i>(My understanding is the probabilities of each state should not get affected during change of basis. Is this correct?)</i></p>
+</li>
+<li> Add test cases. Of course, this step will be step 0.</li>
+</ul>
+<p>
+My next blog post will have similar structure of discussion for the next 2  topics. My hope is by end of this week, these details are spec’d out enough so that I can exactly say what I will deliver at end of each of the first 4 weeks.</p>
+<p>
+P.S: I plan to provide detailed plan for remaining tasks as we approach the specific week for corresponding task.</p>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/rhoforsympy.wordpress.com/16/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/rhoforsympy.wordpress.com/16/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/rhoforsympy.wordpress.com/16/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/rhoforsympy.wordpress.com/16/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/rhoforsympy.wordpress.com/16/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/rhoforsympy.wordpress.com/16/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/rhoforsympy.wordpress.com/16/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/rhoforsympy.wordpress.com/16/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/rhoforsympy.wordpress.com/16/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/rhoforsympy.wordpress.com/16/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/rhoforsympy.wordpress.com/16/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/rhoforsympy.wordpress.com/16/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/rhoforsympy.wordpress.com/16/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/rhoforsympy.wordpress.com/16/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;blog=34650270&amp;post=16&amp;subd=rhoforsympy&amp;ref=&amp;feed=1" width="1"/></div>
+    </content>
+    <updated>2012-05-15T23:42:39Z</updated>
+    <category term="GSoc"/>
+    <author>
+      <name>grdvnl</name>
+    </author>
+    <source>
+      <id>http://rhoforsympy.wordpress.com</id>
+      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
+      <link href="http://rhoforsympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://rhoforsympy.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://rhoforsympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <subtitle>..where we discuss density operators wrt SymPy</subtitle>
+      <title>rhoforsympy</title>
+      <updated>2012-05-16T00:20:19Z</updated>
+    </source>
+  </entry>
 
   <entry>
     <id>http://catchmrbharath.github.com/programming/2012/05/14/region-plots-with-interval-arithmetic</id>
@@ -35,7 +101,7 @@
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-05-15T23:40:27Z</updated>
+      <updated>2012-05-16T00:20:18Z</updated>
     </source>
   </entry>
 
@@ -66,7 +132,7 @@
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-05-15T23:40:27Z</updated>
+      <updated>2012-05-16T00:20:18Z</updated>
     </source>
   </entry>
 
@@ -95,7 +161,7 @@
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>Aleksandar Makelov</title>
-      <updated>2012-05-15T23:40:27Z</updated>
+      <updated>2012-05-16T00:20:19Z</updated>
     </source>
   </entry>
 
@@ -123,7 +189,7 @@
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>Aleksandar Makelov</title>
-      <updated>2012-05-15T23:40:27Z</updated>
+      <updated>2012-05-16T00:20:19Z</updated>
     </source>
   </entry>
 
@@ -149,7 +215,7 @@
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-05-15T23:40:27Z</updated>
+      <updated>2012-05-16T00:20:18Z</updated>
     </source>
   </entry>
 
@@ -215,7 +281,7 @@
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-05-15T23:40:26Z</updated>
+      <updated>2012-05-16T00:20:18Z</updated>
     </source>
   </entry>
 
@@ -243,7 +309,7 @@
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-05-15T23:40:26Z</updated>
+      <updated>2012-05-16T00:20:18Z</updated>
     </source>
   </entry>
 
@@ -270,7 +336,7 @@
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-05-15T23:40:27Z</updated>
+      <updated>2012-05-16T00:20:19Z</updated>
     </source>
   </entry>
 
@@ -389,7 +455,7 @@ Devanla, Brian Granger (co-mentor Sean Vig)<br/>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-05-15T23:40:27Z</updated>
+      <updated>2012-05-16T00:20:19Z</updated>
     </source>
   </entry>
 
@@ -452,7 +518,7 @@ def _intersect(self, other):
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-05-15T23:40:25Z</updated>
+      <updated>2012-05-16T00:20:17Z</updated>
     </source>
   </entry>
 
@@ -580,7 +646,7 @@ def _intersect(self, other):
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-05-15T23:40:25Z</updated>
+      <updated>2012-05-16T00:20:17Z</updated>
     </source>
   </entry>
 
@@ -738,7 +804,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-05-15T23:40:17Z</updated>
+      <updated>2012-05-16T00:20:08Z</updated>
     </source>
   </entry>
 
@@ -810,7 +876,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-05-15T23:40:17Z</updated>
+      <updated>2012-05-16T00:20:08Z</updated>
     </source>
   </entry>
 
@@ -841,7 +907,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-05-15T23:40:17Z</updated>
+      <updated>2012-05-16T00:20:08Z</updated>
     </source>
   </entry>
 
@@ -888,7 +954,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-05-15T23:40:17Z</updated>
+      <updated>2012-05-16T00:20:08Z</updated>
     </source>
   </entry>
 
@@ -1524,7 +1590,7 @@ x**(S(4)/5)
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-05-15T23:40:17Z</updated>
+      <updated>2012-05-16T00:20:08Z</updated>
     </source>
   </entry>
 
@@ -1537,7 +1603,7 @@ x**(S(4)/5)
     <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>A beautiful summer is coming to an end and I am at the last leg of my Gsoc. I must apologize for the erratic posts but its mostly because I was “busy” with other things (mostly enjoying myself in the US of A, eating steaks, going out for barbecues, and enjoying the beautiful Maryland summer weather.)</p>
 <p>In the last few weeks I spent a bit of time cleaning up Gray code. It went through a few API changes and I hope to have the subsets and partitions branches merged in within this week. I also implemented a demo of the Permutations branch that involves Polyhedron rotations. I hope to show one involving a Rubik’s cube when I have the Permutation group module in (more on that in a while). I also implemented a residue class and a residue group module as that was missing in the number theory branch of Sympy. That branch needs an overhaul both in terms of functionality as well as the code that is already there and I hope I can get some momentum going in that direction with the code I have written. I also wrote some generators for Permutation groups. This is fairly easy to do now, the basic algorithm is to generate all permutations and filter out those that do not fit the criteria. Of course, generating all permutations is inefficient, and some generators have certain special properties that we can use. For example, the Cyclic group can be generated in linear time as that simply involves a single rotation. Alternating group however requires the generation of all even permutations. Some group generators will probably make use of the specialized algorithms that have been implemented in the iterables section of Sympy.</p>
 <p>I have also managed to implement the Schreier sims algorithm but its extremely ugly and unpythonic for now. Algorithms for generating orbits and stabilizer chains are also there but they are fairly inefficient. I hope to clean them up and submit them for a pull request in this week before the hard pencils down date.</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/saptman.wordpress.com/32/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/saptman.wordpress.com/32/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/saptman.wordpress.com/32/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/saptman.wordpress.com/32/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/saptman.wordpress.com/32/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/saptman.wordpress.com/32/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/saptman.wordpress.com/32/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/saptman.wordpress.com/32/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/saptman.wordpress.com/32/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/saptman.wordpress.com/32/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/saptman.wordpress.com/32/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/saptman.wordpress.com/32/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/saptman.wordpress.com/32/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/saptman.wordpress.com/32/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=saptman.wordpress.com&amp;blog=23040289&amp;post=32&amp;subd=saptman&amp;ref=&amp;feed=1" width="1"/><div class="sharedaddy sd-like-enabled"/></div>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/saptman.wordpress.com/32/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/saptman.wordpress.com/32/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/saptman.wordpress.com/32/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/saptman.wordpress.com/32/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/saptman.wordpress.com/32/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/saptman.wordpress.com/32/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/saptman.wordpress.com/32/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/saptman.wordpress.com/32/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/saptman.wordpress.com/32/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/saptman.wordpress.com/32/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/saptman.wordpress.com/32/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/saptman.wordpress.com/32/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/saptman.wordpress.com/32/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/saptman.wordpress.com/32/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=saptman.wordpress.com&amp;blog=23040289&amp;post=32&amp;subd=saptman&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
     <updated>2011-08-14T21:25:54Z</updated>
     <category term="Uncategorized"/>
@@ -1553,7 +1619,7 @@ x**(S(4)/5)
       <link href="http://saptman.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My symply awesome gsoc summer</subtitle>
       <title>saptman</title>
-      <updated>2012-05-15T23:40:26Z</updated>
+      <updated>2012-05-16T00:20:18Z</updated>
     </source>
   </entry>
 
@@ -1602,7 +1668,7 @@ Wavefunction(-2**(1/2)*hbar*I*pi*n*(1/L)**(1/2)*cos(pi*n*x_2/L)/L, x_2)</pre>
       <link href="http://lazovichsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My adventures during GSoC 2011</subtitle>
       <title>Tomo Lazovich's SymPy Blog</title>
-      <updated>2012-05-15T23:40:23Z</updated>
+      <updated>2012-05-16T00:20:15Z</updated>
     </source>
   </entry>
 
@@ -1635,7 +1701,7 @@ Wavefunction(-2**(1/2)*hbar*I*pi*n*(1/L)**(1/2)*cos(pi*n*x_2/L)/L, x_2)</pre>
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>gilbertgede</title>
-      <updated>2012-05-15T23:40:22Z</updated>
+      <updated>2012-05-16T00:20:14Z</updated>
     </source>
   </entry>
 
@@ -1668,7 +1734,7 @@ Wavefunction(-2**(1/2)*hbar*I*pi*n*(1/L)**(1/2)*cos(pi*n*x_2/L)/L, x_2)</pre>
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-05-15T23:40:25Z</updated>
+      <updated>2012-05-16T00:20:17Z</updated>
     </source>
   </entry>
 
@@ -1733,7 +1799,7 @@ Wavefunction(-2**(1/2)*hbar*I*pi*n*(1/L)**(1/2)*cos(pi*n*x_2/L)/L, x_2)</pre>
       <link href="http://nessgrh.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My GSoC Project</subtitle>
       <title>nessgrh</title>
-      <updated>2012-05-15T23:40:21Z</updated>
+      <updated>2012-05-16T00:20:12Z</updated>
     </source>
   </entry>
 
@@ -1827,7 +1893,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-05-15T23:40:17Z</updated>
+      <updated>2012-05-16T00:20:08Z</updated>
     </source>
   </entry>
 
@@ -1860,7 +1926,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://lazovichsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My adventures during GSoC 2011</subtitle>
       <title>Tomo Lazovich's SymPy Blog</title>
-      <updated>2012-05-15T23:40:23Z</updated>
+      <updated>2012-05-16T00:20:15Z</updated>
     </source>
   </entry>
 
@@ -1893,7 +1959,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>gilbertgede</title>
-      <updated>2012-05-15T23:40:22Z</updated>
+      <updated>2012-05-16T00:20:14Z</updated>
     </source>
   </entry>
 
@@ -1949,7 +2015,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://nessgrh.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My GSoC Project</subtitle>
       <title>nessgrh</title>
-      <updated>2012-05-15T23:40:21Z</updated>
+      <updated>2012-05-16T00:20:13Z</updated>
     </source>
   </entry>
 
@@ -2038,7 +2104,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://nessgrh.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My GSoC Project</subtitle>
       <title>nessgrh</title>
-      <updated>2012-05-15T23:40:21Z</updated>
+      <updated>2012-05-16T00:20:12Z</updated>
     </source>
   </entry>
 
@@ -2066,7 +2132,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-05-15T23:40:25Z</updated>
+      <updated>2012-05-16T00:20:17Z</updated>
     </source>
   </entry>
 
@@ -2134,7 +2200,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://sherjilozair.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://sherjilozair.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>Sherjil Ozair</title>
-      <updated>2012-05-15T23:40:24Z</updated>
+      <updated>2012-05-16T00:20:16Z</updated>
     </source>
   </entry>
 
@@ -2165,7 +2231,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://lazovichsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My adventures during GSoC 2011</subtitle>
       <title>Tomo Lazovich's SymPy Blog</title>
-      <updated>2012-05-15T23:40:23Z</updated>
+      <updated>2012-05-16T00:20:15Z</updated>
     </source>
   </entry>
 
@@ -2177,7 +2243,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
     </summary>
     <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>This week I implemented generational routines for Fixed density Lyndon words, necklaces and Debruijn cycles. Its still not completely tested so caveat emptor! You can check it out in my iterables branch. Apart from this I got the Permutations branch merged in this week. This was a long standing pull request and will allow folks to do all sorts of stuff that combinatorica allows for Permutations. Currently some graph related stuff is missing but that will be taken care of once I clean up my NetworkX branch. I still need to clean up the Partitions and Subsets pulls which will add another large chunk to the combinatorics module.</p>
 <p>I will probably spend this week cleaning up older pull requests rather than creating newer ones. Even so, those interested can keep track of my permutation_groups branch where most of my work related to that will go.</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/saptman.wordpress.com/29/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/saptman.wordpress.com/29/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/saptman.wordpress.com/29/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/saptman.wordpress.com/29/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/saptman.wordpress.com/29/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/saptman.wordpress.com/29/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/saptman.wordpress.com/29/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/saptman.wordpress.com/29/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/saptman.wordpress.com/29/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/saptman.wordpress.com/29/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/saptman.wordpress.com/29/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/saptman.wordpress.com/29/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/saptman.wordpress.com/29/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/saptman.wordpress.com/29/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=saptman.wordpress.com&amp;blog=23040289&amp;post=29&amp;subd=saptman&amp;ref=&amp;feed=1" width="1"/><div class="sharedaddy sd-like-enabled"/></div>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/saptman.wordpress.com/29/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/saptman.wordpress.com/29/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/saptman.wordpress.com/29/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/saptman.wordpress.com/29/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/saptman.wordpress.com/29/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/saptman.wordpress.com/29/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/saptman.wordpress.com/29/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/saptman.wordpress.com/29/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/saptman.wordpress.com/29/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/saptman.wordpress.com/29/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/saptman.wordpress.com/29/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/saptman.wordpress.com/29/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/saptman.wordpress.com/29/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/saptman.wordpress.com/29/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=saptman.wordpress.com&amp;blog=23040289&amp;post=29&amp;subd=saptman&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
     <updated>2011-07-31T01:45:27Z</updated>
     <category term="Uncategorized"/>
@@ -2193,7 +2259,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://saptman.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My symply awesome gsoc summer</subtitle>
       <title>saptman</title>
-      <updated>2012-05-15T23:40:26Z</updated>
+      <updated>2012-05-16T00:20:18Z</updated>
     </source>
   </entry>
 
@@ -2230,39 +2296,6 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <subtitle>Developing Wigner-3nj Symbols in SymPy</subtitle>
       <title>Sean Vig's 2011 GSoC Project</title>
       <updated>2012-05-15T06:01:13Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://gilbertgede.wordpress.com/?p=76</id>
-    <link href="http://gilbertgede.wordpress.com/2011/07/30/gsoc-week-10/" rel="alternate" type="text/html"/>
-    <title>GSoC, Week 10</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Week 10….? This week, there really isn’t that much to report. Week 10 was supposed to be finishing up the pretty and LaTeX printer, and I have done most of that. Tests and documentation need to be written for both though; I think I’ve learned that things haven’t really been coded successfully until you’ve done [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=gilbertgede.wordpress.com&amp;blog=22677911&amp;post=76&amp;subd=gilbertgede&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Week 10….?</p>
-<p>This week, there really isn’t that much to report. Week 10 was supposed to be finishing up the pretty and LaTeX printer, and I have done most of that. Tests and documentation need to be written for both though; I think I’ve learned that things haven’t really been coded successfully until you’ve done those two steps.</p>
-<p>I also got some more work done with the documentation. It’s a little further behind than I had hoped for, but it’s coming along. I definitely need to redo the images I have throughout it so far; they are just scans of sketches I have done, and are of low-quality. There also needs to be a lot more talk about linearization in the documentation. That in fact leads to the last two big coding things.</p>
-<p>I think the last two major things are: more work in linearization and code output for numeric integration. The linearization routine still needs some work; mainly in dealing with situations where the qdot’s are defined with coefficients that depend on the q’s. The question of what to do with user defined dynamic symbols (such as forces or specified position) is also still up in the air. Forces will probably be easy to linearize (or really, take the partial with respect to), but with a specified position, it becomes more complicated; during the process of forming the equations of motion, most likely the derivative of that specified position will be brought into the expressions. I haven’t really decided what to do in this situation, as clearly some distance (say, l), and its derivative (say, l’) are not independent. I’m not sure if adding the position as a system state is the right thing to do here. I think I’ll play around with some simple examples to see what makes the most sense, and consult some other people. The part about code output also relates here, in that I need to decide how to deal with this situation (a value and its derivative). I can imagine just putting both as empty for the user to fill in, and telling them to do it the right way. Hopefully I’ll have this figured out more by next week. I also do need to write the code output stuff. I don’t think it will be that hard, I just have to make the decisions about the formats of of the output. The size of the expressions generated can be problematic though, taking tens of minutes to print out. I’m also not sure how to deal with this situation. Hopefully I can again find out more information on this issue by next weekend.</p>
-<p> </p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/gilbertgede.wordpress.com/76/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/gilbertgede.wordpress.com/76/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/gilbertgede.wordpress.com/76/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/gilbertgede.wordpress.com/76/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/gilbertgede.wordpress.com/76/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/gilbertgede.wordpress.com/76/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/gilbertgede.wordpress.com/76/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/gilbertgede.wordpress.com/76/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/gilbertgede.wordpress.com/76/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/gilbertgede.wordpress.com/76/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/gilbertgede.wordpress.com/76/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/gilbertgede.wordpress.com/76/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/gilbertgede.wordpress.com/76/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/gilbertgede.wordpress.com/76/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=gilbertgede.wordpress.com&amp;blog=22677911&amp;post=76&amp;subd=gilbertgede&amp;ref=&amp;feed=1" width="1"/><div class="sharedaddy sd-like-enabled"/></div>
-    </content>
-    <updated>2011-07-30T06:00:01Z</updated>
-    <category term="GSoC 2011"/>
-    <category term="PyDy"/>
-    <category term="SymPy"/>
-    <author>
-      <name>gilbertgede</name>
-    </author>
-    <source>
-      <id>http://gilbertgede.wordpress.com</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://gilbertgede.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://gilbertgede.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://gilbertgede.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>Just another WordPress.com site</subtitle>
-      <title>gilbertgede</title>
-      <updated>2012-05-15T23:40:22Z</updated>
     </source>
   </entry>
 </feed>
