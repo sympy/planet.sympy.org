@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2012-05-25T18:20:23Z</updated>
+  <updated>2012-05-25T19:20:22Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,61 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry xml:lang="en">
+    <id>http://rhoforsympy.wordpress.com/?p=76</id>
+    <link href="http://rhoforsympy.wordpress.com/2012/05/25/week-1-report-initial-set-of-routines-for-density-operators/" rel="alternate" type="text/html"/>
+    <title>Week 1 Report : Initial set of routines for Density Operators</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Today I submitted a pull request What went into this weeks pull request The framework and routines were inherited from Brian’s github branch. The  _eval_args function was added.  I went back-and-forth on deciding if we needed strong checks to make sure the states used to build density objects should be strictly KetBase and Qubits. But, [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;blog=34650270&amp;post=76&amp;subd=rhoforsympy&amp;ref=&amp;feed=1" width="1"/></div>
+    </summary>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Today I submitted a <a href="https://github.com/sympy/sympy/pull/1312" target="_blank">pull</a> request</p>
+<p><span style="text-decoration: underline;">What went into this weeks pull request</span></p>
+<p>The framework and routines were inherited from Brian’s github branch.</p>
+<ul>
+<li>The  _eval_args function was added.  I went back-and-forth on deciding if we needed strong checks to make sure the states used to build density objects should be strictly <strong>KetBase</strong> and <strong>Qubits</strong>. But, there were scenarios where just symbols could be used for states, or even QExpr could be used. So, discarded that check.   But, this would mean Density objects could have arbitrary objects for states.  <em>Flip side to this is,  represent() on density objects which do not have a KetBase object does not work very well. </em>For example, having ‘mul’ expressions for ‘state’ creates problems in represent functions. But, my assumption is represent function need not handle such scenarios.                                                                                                                                    Similarly, I went back and forth regarding checking for valid values for probabilities. Then, I dropped those validations as well.</li>
+<li>Added test routines for all public facing methods in density.py. Some methods from original DensityOp branch are not in this pull request. I will add them back in future requests.</li>
+<li>I also created a minor <a href="https://github.com/sympy/sympy/pull/1311" target="_blank">pull</a> request for minor printing changes that were in the original densityOp branch. This takes care of changes to the latex() in operator.py. I will add checks for density operator after this pull request is accepted.</li>
+<li>Added test routines for changes related to density in qapply.py. These checks will have to be extended after I make density operators work well with Qubits.</li>
+<li>Added doc strings.</li>
+</ul>
+<p><span style="text-decoration: underline;">Where I spent a my time while trying to accomplish this weeks tasks:</span></p>
+<ul>
+<li>Understanding the process-function call flow of _eval_args,   _print methods.</li>
+<li>Getting familiarized with operator.py , represent(), and qapply().</li>
+</ul>
+<p>(The following point is also a question for my next task)</p>
+<ul>
+<li>The way  <em>_qsympify_sequence(seq)</em> method is implemented, it treats any Qubit() passed as state to Density as a sequence object. Therefore, the Qubit object is lost and a tuple is replaced instead of the Qubit object. This needs to a fixed or a work around decided so that Qubits can be provided as states to Density objects.</li>
+</ul>
+<p><span style="text-decoration: underline;">My next steps ( plan for next week’s pull request):</span></p>
+<ul>
+<li>Discuss with the mentor team and see how to approach the problem with Qubits being converted to sequence. ( in next 2 days )</li>
+<li>Add remaining functionality into density.py ( entropy, reduced trace operations ) ( should be completed by middle of next week )</li>
+<li>Blog about the implementation details of changes to tensorproduct.py with respect to what we would need for density operators.  I hope to also have this part implemented by end of next week.</li>
+<li>Address issues with the current pull request. I plan to have this as the top priority task and work on this every time it comes back to me.</li>
+</ul>
+<p><span style="text-decoration: underline;">Misc:</span></p>
+<p>I gave a lightening talk at Google Chicago office this week regarding my GSoC 2012 project and there was lot of interest in Sympy. Particularly, folks were very excited to know about  <a href="http://live.sympy.org" target="_blank">Sympy Live</a> website which I spoke about in the presentation.</p>
+<p>Also, met one of our Sympy contributors <a href="https://github.com/mrocklin">Matthew Rocklin</a>  at the meeting. Nice to meet someone you know only as an email-id, in person!</p>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/rhoforsympy.wordpress.com/76/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/rhoforsympy.wordpress.com/76/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/rhoforsympy.wordpress.com/76/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/rhoforsympy.wordpress.com/76/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/rhoforsympy.wordpress.com/76/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/rhoforsympy.wordpress.com/76/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/rhoforsympy.wordpress.com/76/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/rhoforsympy.wordpress.com/76/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/rhoforsympy.wordpress.com/76/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/rhoforsympy.wordpress.com/76/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/rhoforsympy.wordpress.com/76/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/rhoforsympy.wordpress.com/76/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/rhoforsympy.wordpress.com/76/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/rhoforsympy.wordpress.com/76/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;blog=34650270&amp;post=76&amp;subd=rhoforsympy&amp;ref=&amp;feed=1" width="1"/></div>
+    </content>
+    <updated>2012-05-25T19:06:15Z</updated>
+    <category term="GSoc"/>
+    <author>
+      <name>grdvnl</name>
+    </author>
+    <source>
+      <id>http://rhoforsympy.wordpress.com</id>
+      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
+      <link href="http://rhoforsympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://rhoforsympy.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://rhoforsympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <subtitle>..where we discuss density operators wrt SymPy</subtitle>
+      <title>rhoforsympy</title>
+      <updated>2012-05-25T19:20:22Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en">
     <id>http://scolobb.wordpress.com/?p=26</id>
@@ -35,7 +90,7 @@
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-05-25T18:20:22Z</updated>
+      <updated>2012-05-25T19:20:21Z</updated>
     </source>
   </entry>
 
@@ -101,7 +156,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-05-25T18:20:22Z</updated>
+      <updated>2012-05-25T19:20:22Z</updated>
     </source>
   </entry>
 
@@ -129,7 +184,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-05-25T18:20:22Z</updated>
+      <updated>2012-05-25T19:20:21Z</updated>
     </source>
   </entry>
 
@@ -206,7 +261,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-05-25T18:20:22Z</updated>
+      <updated>2012-05-25T19:20:21Z</updated>
     </source>
   </entry>
 
@@ -235,7 +290,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>Aleksandar Makelov</title>
-      <updated>2012-05-25T18:20:23Z</updated>
+      <updated>2012-05-25T19:20:22Z</updated>
     </source>
   </entry>
 
@@ -263,7 +318,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>Aleksandar Makelov</title>
-      <updated>2012-05-25T18:20:23Z</updated>
+      <updated>2012-05-25T19:20:22Z</updated>
     </source>
   </entry>
 
@@ -289,7 +344,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-05-25T18:20:22Z</updated>
+      <updated>2012-05-25T19:20:21Z</updated>
     </source>
   </entry>
 
@@ -355,7 +410,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-05-25T18:20:22Z</updated>
+      <updated>2012-05-25T19:20:21Z</updated>
     </source>
   </entry>
 
@@ -383,7 +438,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-05-25T18:20:22Z</updated>
+      <updated>2012-05-25T19:20:21Z</updated>
     </source>
   </entry>
 
@@ -410,7 +465,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-05-25T18:20:22Z</updated>
+      <updated>2012-05-25T19:20:22Z</updated>
     </source>
   </entry>
 
@@ -529,7 +584,7 @@ Devanla, Brian Granger (co-mentor Sean Vig)<br/>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-05-25T18:20:22Z</updated>
+      <updated>2012-05-25T19:20:22Z</updated>
     </source>
   </entry>
 
@@ -592,7 +647,7 @@ def _intersect(self, other):
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-05-25T18:20:21Z</updated>
+      <updated>2012-05-25T19:20:20Z</updated>
     </source>
   </entry>
 
@@ -720,7 +775,7 @@ def _intersect(self, other):
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-05-25T18:20:21Z</updated>
+      <updated>2012-05-25T19:20:20Z</updated>
     </source>
   </entry>
 
@@ -878,7 +933,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-05-25T18:20:13Z</updated>
+      <updated>2012-05-25T19:20:11Z</updated>
     </source>
   </entry>
 
@@ -950,7 +1005,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-05-25T18:20:13Z</updated>
+      <updated>2012-05-25T19:20:11Z</updated>
     </source>
   </entry>
 
@@ -981,7 +1036,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-05-25T18:20:13Z</updated>
+      <updated>2012-05-25T19:20:11Z</updated>
     </source>
   </entry>
 
@@ -1028,7 +1083,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-05-25T18:20:14Z</updated>
+      <updated>2012-05-25T19:20:11Z</updated>
     </source>
   </entry>
 
@@ -1664,7 +1719,7 @@ x**(S(4)/5)
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-05-25T18:20:13Z</updated>
+      <updated>2012-05-25T19:20:11Z</updated>
     </source>
   </entry>
 
@@ -1693,7 +1748,7 @@ x**(S(4)/5)
       <link href="http://saptman.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My symply awesome gsoc summer</subtitle>
       <title>saptman</title>
-      <updated>2012-05-25T18:20:21Z</updated>
+      <updated>2012-05-25T19:20:20Z</updated>
     </source>
   </entry>
 
@@ -1742,7 +1797,7 @@ Wavefunction(-2**(1/2)*hbar*I*pi*n*(1/L)**(1/2)*cos(pi*n*x_2/L)/L, x_2)</pre>
       <link href="http://lazovichsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My adventures during GSoC 2011</subtitle>
       <title>Tomo Lazovich's SymPy Blog</title>
-      <updated>2012-05-25T18:20:19Z</updated>
+      <updated>2012-05-25T19:20:17Z</updated>
     </source>
   </entry>
 
@@ -1775,7 +1830,7 @@ Wavefunction(-2**(1/2)*hbar*I*pi*n*(1/L)**(1/2)*cos(pi*n*x_2/L)/L, x_2)</pre>
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>gilbertgede</title>
-      <updated>2012-05-25T18:20:18Z</updated>
+      <updated>2012-05-25T19:20:16Z</updated>
     </source>
   </entry>
 
@@ -1808,7 +1863,7 @@ Wavefunction(-2**(1/2)*hbar*I*pi*n*(1/L)**(1/2)*cos(pi*n*x_2/L)/L, x_2)</pre>
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-05-25T18:20:21Z</updated>
+      <updated>2012-05-25T19:20:20Z</updated>
     </source>
   </entry>
 
@@ -1873,7 +1928,7 @@ Wavefunction(-2**(1/2)*hbar*I*pi*n*(1/L)**(1/2)*cos(pi*n*x_2/L)/L, x_2)</pre>
       <link href="http://nessgrh.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My GSoC Project</subtitle>
       <title>nessgrh</title>
-      <updated>2012-05-25T18:20:17Z</updated>
+      <updated>2012-05-25T19:20:15Z</updated>
     </source>
   </entry>
 
@@ -1967,7 +2022,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-05-25T18:20:13Z</updated>
+      <updated>2012-05-25T19:20:11Z</updated>
     </source>
   </entry>
 
@@ -2000,7 +2055,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://lazovichsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My adventures during GSoC 2011</subtitle>
       <title>Tomo Lazovich's SymPy Blog</title>
-      <updated>2012-05-25T18:20:19Z</updated>
+      <updated>2012-05-25T19:20:17Z</updated>
     </source>
   </entry>
 
@@ -2033,7 +2088,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>gilbertgede</title>
-      <updated>2012-05-25T18:20:18Z</updated>
+      <updated>2012-05-25T19:20:16Z</updated>
     </source>
   </entry>
 
@@ -2089,7 +2144,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://nessgrh.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My GSoC Project</subtitle>
       <title>nessgrh</title>
-      <updated>2012-05-25T18:20:17Z</updated>
+      <updated>2012-05-25T19:20:15Z</updated>
     </source>
   </entry>
 
@@ -2178,7 +2233,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://nessgrh.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My GSoC Project</subtitle>
       <title>nessgrh</title>
-      <updated>2012-05-25T18:20:17Z</updated>
+      <updated>2012-05-25T19:20:15Z</updated>
     </source>
   </entry>
 
@@ -2206,7 +2261,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-05-25T18:20:21Z</updated>
+      <updated>2012-05-25T19:20:20Z</updated>
     </source>
   </entry>
 
@@ -2274,38 +2329,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://sherjilozair.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://sherjilozair.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>Sherjil Ozair</title>
-      <updated>2012-05-25T18:20:20Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://lazovichsympy.wordpress.com/?p=83</id>
-    <link href="http://lazovichsympy.wordpress.com/2011/07/31/incorporating-wavefunction-and-differentialoperator-into-representations/" rel="alternate" type="text/html"/>
-    <title>Incorporating Wavefunction and DifferentialOperator into representations</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">This post is a bit late because I’ve been experiencing some computer troubles recently. Since my last post, the represent branch has been merged into sympy master! There are still some issues with representing continuous bases that need to be ironed out, so I have started a represent2 branch to deal with some of these [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=lazovichsympy.wordpress.com&amp;blog=22774068&amp;post=83&amp;subd=lazovichsympy&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>This post is a bit late because I’ve been experiencing some computer troubles recently.</p>
-<p>Since my last post, the represent branch has been merged into sympy master! There are still some issues with representing continuous bases that need to be ironed out, so I have started a <a href="https://github.com/lazovich/sympy/tree/represent2" title="represent2">represent2</a> branch to deal with some of these changes.</p>
-<p>The first commits in the branch are some simple fixes to docstrings and cleanup of the interfaces of Wavefunction (Wf) and DifferentialOperator (DO). Of note are the addition of an _eval_expand to Wf and DO, so that we can do simplifications like expand(Wavefunction((x+y)**2, x, y)) == Wavefunction(x**2, x, y) + Wavefunction(y**2, x, y) + Wavefunction(2*x*y, x, y).</p>
-<p>The biggest tasks for represent2 are to incorporate the new Wf and DO classes into the internal represent logic of classes in quantum. Another big task is to simplify the logic of represent. In particular, rep_innerproduct and rep_expectation will become helper functions rather than being called from the main represent logic. This simplifies the main logic, but retains these methods to be called from the internal _represent methods. This is important because these functions know about proper indexing to form representations in these very standard forms, and this means we don’t have to reproduce that logic internally.</p>
-<p>Both of these tasks are proving to be quite tricky and time consuming. I hope to have them done in the next couple of days. If that is the case, I expect to be able to rapidly move on to implementing coordinate systems and finally getting some example textbook quantum systems up and running. With only a few weeks of GSoC left, I’ll have to work extra hard to make that happen. Modifying the represent logic is taking much longer than expected, but we’re dealing with very complicated logic here and we want to make sure its robust. I’m confident, though, that I can have a nice finished product by the end of GSoC.</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/lazovichsympy.wordpress.com/83/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/lazovichsympy.wordpress.com/83/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/lazovichsympy.wordpress.com/83/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/lazovichsympy.wordpress.com/83/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/lazovichsympy.wordpress.com/83/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/lazovichsympy.wordpress.com/83/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/lazovichsympy.wordpress.com/83/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/lazovichsympy.wordpress.com/83/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/lazovichsympy.wordpress.com/83/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/lazovichsympy.wordpress.com/83/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/lazovichsympy.wordpress.com/83/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/lazovichsympy.wordpress.com/83/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/lazovichsympy.wordpress.com/83/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/lazovichsympy.wordpress.com/83/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=lazovichsympy.wordpress.com&amp;blog=22774068&amp;post=83&amp;subd=lazovichsympy&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2011-07-31T21:37:05Z</updated>
-    <category term="Uncategorized"/>
-    <author>
-      <name>lazovich</name>
-    </author>
-    <source>
-      <id>http://lazovichsympy.wordpress.com</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://lazovichsympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://lazovichsympy.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://lazovichsympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://lazovichsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>My adventures during GSoC 2011</subtitle>
-      <title>Tomo Lazovich's SymPy Blog</title>
-      <updated>2012-05-25T18:20:19Z</updated>
+      <updated>2012-05-25T19:20:18Z</updated>
     </source>
   </entry>
 </feed>
