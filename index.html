@@ -33,6 +33,52 @@
 
 
 
+<h3><a href="http://amakelov.wordpress.com" title="Aleksandar Makelov">Aleksandar Makelov</a></h3>
+
+
+<div class="entrygroup" id="http://amakelov.wordpress.com/?p=9">
+<h4 lang="en"><a href="http://amakelov.wordpress.com/2012/05/26/google-summer-of-code-2012-week-1/">Google Summer of Code 2012: Week 1</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p>Hi everyone,</p>
+<p>Here is a brief summary of what I’ve been doing for the first six days of my GSoC.</p>
+<p>Since there was already some work done on computational group theory in the module sympy.combinatorics, mainly in the files perm_groups.py and permutations.py, I got to know what the code is doing and made some minor improvements (improved docstrings, removed some duplicate functionality.) In particular, the implementation of the Schreier-Sims algorithm took most of my time, and I still have to analyze its complexity (it seems a bit slow). Anyway, I found the following <a href="http://www.m8j.net/%28All%29Schreier%20Sims%20Algorithm" target="_blank">files</a> particularly useful in making my way through the code.</p>
+<p>Since there were already a lot of things implemented, this interfered with the <a href="http://google-melange.appspot.com/gsoc/proposal/review/google/gsoc2012/amakelov/1" target="_blank">schedule</a> I had set for myself on my GSoC application. So after a quick change of plans, I decided to:</p>
+<ul>
+<li>implement constructors for four of the basic types of groups (symmetric, cyclic, dihedral, alternating) in order to be able to use groups of fairly large size for testing and comparing the complexity of the different algorithms for computation with groups</li>
+<li>Evaluate the more basic functionality already implemented (read: all but Schreier-Sims), in particular at orbits and stabilizers. It turned out that the implementations currently in sympy are slower than the ones suggested in [1], so I rewrote these and added implementations for the Schreier vector and some other orbit-related computations.</li>
+</ul>
+<p>In the near future (today and tomorrow), I’ll implement a procedure for taking direct products of several groups (so that I can have even more examples of groups for testing and playing around) and Monte Carlo testing if a given permutation group is large (the symmetric or the alternating group). You’re welcome to take a look at my branch labeled <a href="https://github.com/amakelov/sympy/tree/week1" target="_blank">week1</a>, and I’ll do a pull request in the next couple of days.</p>
+<p>In the more distant future, I’ll dive into Schreier-Sims and take a look at the implementation offered in [1] (and maybe [2]?) in order to try to compare it with the existing one. Also, the randomized version of Schreier-Sims (the output of which can then be quickly tested with the deterministic version, [1] says) is promised to be significantly faster so it is a must-have. And I feel that there is some more optimization that can be done in permutations.py and perm_groups.py.</p>
+<p>And about the changes in the interface I wanted to implement – my main pain right now is that singleton cycles have to be included in the cyclic form of a permutation. But the cyclic form itself is not heavily used in the rest of the functionality, so it is not such a pressing issue. Also, I feel that possible changes in the interface need some more careful thinking on my part… Do we want our group action to be on the left or on the right (GAP and MAGMA do it on the right, as I gather from [1])? Do we want to label the underlying set for a permutation by 0,1,…, n-1 or 1,2,…,n?…</p>
+<p>Anyway, I’m really enthusiastic about my project and hope that we’ll have some nice and reasonably fast algorithms in CGT by the end of the summer!</p>
+<p>[1] Derek F. Holt, Bettina Eick, Bettina, Eamonn A. O’Brien, “Handbook of computational group theory”, Discrete Mathematics and its Applications (Boca Raton). Chapman &amp; Hall/CRC, Boca Raton, FL, 2005. ISBN 1-58488-372-3</p>
+<p>[2] Permutation Group Algorithms, Ákos Seress, Cambridge University Press</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/amakelov.wordpress.com/9/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/amakelov.wordpress.com/9/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godelicious/amakelov.wordpress.com/9/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/delicious/amakelov.wordpress.com/9/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/amakelov.wordpress.com/9/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/facebook/amakelov.wordpress.com/9/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/amakelov.wordpress.com/9/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/twitter/amakelov.wordpress.com/9/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gostumble/amakelov.wordpress.com/9/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/stumble/amakelov.wordpress.com/9/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godigg/amakelov.wordpress.com/9/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/digg/amakelov.wordpress.com/9/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/goreddit/amakelov.wordpress.com/9/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/reddit/amakelov.wordpress.com/9/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;blog=35896871&amp;post=9&amp;subd=amakelov&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://amakelov.wordpress.com/2012/05/26/google-summer-of-code-2012-week-1/">by amakelov at May 26, 2012 01:10 PM</a>
+</p>
+</div>
+</div>
+
+
+
+</div>
+<div class="channelgroup">
+
+
+
+
+
+
+
 <h3><a href="http://angadhsympy.wordpress.com" title="GSoC 2012 blog">Angadh Nanjangud</a></h3>
 
 
@@ -2724,51 +2770,6 @@ In the last week, one of the main things I did was to submit a pull request for 
 </div>
 
 
-
-</div>
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://f1728.wordpress.com" title="f1728 » SymPy">Jeremias Yehdegho</a></h3>
-
-
-<div class="entrygroup" id="http://f1728.wordpress.com/?p=216">
-<h4 lang="en"><a href="http://f1728.wordpress.com/2011/08/05/week-11/">Week 11</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>This week I tried to write the faster FGLM I mentioned last week. This isn’t so easy because the only source that properly describes this algorithm are Jean-Charles Faugère’s <a href="http://www-salsa.lip6.fr/~jcf/Teaching/index.html">lecture notes</a> (it is mentioned very vaguely in the original FGLM paper) but there are some errors in the <code>update</code> function. The purpose of the function is to avoid determining whether <img src="http://s0.wp.com/latex.php?latex=NF%28x_i+m%29&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="NF(x_i m)" class="latex" title="NF(x_i m)" /> is in the vectorspace spanned by <img src="http://s0.wp.com/latex.php?latex=v_1%2C+%5Cldots%2C+v_s&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="v_1, \ldots, v_s" class="latex" title="v_1, \ldots, v_s" /> by using <code>solve</code>.</p>
-<p>This can be done more efficiently by having a matrix <img src="http://s0.wp.com/latex.php?latex=P&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="P" class="latex" title="P" />, which maps the old basis to the new basis. This matrix is constructed iteratively, such that before every <code>update</code> call <img src="http://s0.wp.com/latex.php?latex=P+v_i+%3D+e_i&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="P v_i = e_i" class="latex" title="P v_i = e_i" /> for <img src="http://s0.wp.com/latex.php?latex=i+%5Cin+%5C%7B1%2C+%5Cldots%2C+s%5C%7D&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="i \in \{1, \ldots, s\}" class="latex" title="i \in \{1, \ldots, s\}" /> and <img src="http://s0.wp.com/latex.php?latex=P+v_%7Bs%2B1%7D+%3D+%5Clambda&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="P v_{s+1} = \lambda" class="latex" title="P v_{s+1} = \lambda" />, which has not the desired shape, and afterwards <img src="http://s0.wp.com/latex.php?latex=P+v_i+%3D+e_i&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="P v_i = e_i" class="latex" title="P v_i = e_i" /> for <img src="http://s0.wp.com/latex.php?latex=i+%5Cin+%5C%7B1%2C+%5Cldots%2C+s+%2B+1%5C%7D&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="i \in \{1, \ldots, s + 1\}" class="latex" title="i \in \{1, \ldots, s + 1\}" />. So instead of having to use <code>solve</code> (<img src="http://s0.wp.com/latex.php?latex=O%28dim%5E3%29&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="O(dim^3)" class="latex" title="O(dim^3)" />), matrix multiplication and changing some entries of a matrix would suffice (<img src="http://s0.wp.com/latex.php?latex=O%28dim%5E2%29&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="O(dim^2)" class="latex" title="O(dim^2)" />).</p>
-<p>Now I have the problem that there are some errors in the description of the algorithm (and I am too stupid to fix them… so far):</p>
-<p>First of all, it says <img src="http://s0.wp.com/latex.php?latex=%5Calpha+%3A%3D+%5Cfrac%7BP_%7Bj%2Ck%7D%7D%7BP_%7Bk%2Ck%7D%7D&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="\alpha := \frac{P_{j,k}}{P_{k,k}}" class="latex" title="\alpha := \frac{P_{j,k}}{P_{k,k}}" />, which should be <img src="http://s0.wp.com/latex.php?latex=%5Cfrac%7BP_%7Bk%2C+j%7D%7D%7B%5Clambda_k%7D&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="\frac{P_{k, j}}{\lambda_k}" class="latex" title="\frac{P_{k, j}}{\lambda_k}" /> because then <img src="http://s0.wp.com/latex.php?latex=%28P+v_%7Bs%2B1%7D%29_%7Bs%2B1%7D+%3D+1&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="(P v_{s+1})_{s+1} = 1" class="latex" title="(P v_{s+1})_{s+1} = 1" /> as desired. Then, some more indices seem to have the wrong order, at least with the current code I can convert a few more systems correctly. Currently, all old <img src="http://s0.wp.com/latex.php?latex=v_i&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="v_i" class="latex" title="v_i" /> map to <img src="http://s0.wp.com/latex.php?latex=e_i&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="e_i" class="latex" title="e_i" /> but <img src="http://s0.wp.com/latex.php?latex=P+v_%7Bs%2B1%7D&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="P v_{s+1}" class="latex" title="P v_{s+1}" /> has non-zero entries apart from the <img src="http://s0.wp.com/latex.php?latex=%28s%2B1%29&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="(s+1)" class="latex" title="(s+1)" />-th. I dunno.</p>
-<p>To give an example of the performance improvements for a small problem (for which the algorithm gives the correct result):</p>
-<pre class="brush: python;">&gt;&gt;&gt; F=[x**3+x+1, y**2+1, z - (x**2 + y)]
-&gt;&gt;&gt; G=groebner(F, x, y, z, order='grlex')
-&gt;&gt;&gt; %timeit fglm(G, "lex", x,y,z, order='grlex')  # old
-1 loops, best of 3: 822 ms per loop
-&gt;&gt;&gt; %timeit fglm(G, x,y,z, order='grlex')
-10 loops, best of 3: 45.1 ms per loop
-</pre>
-<p>This also due to using <code>sdp</code>s everywhere, whereas the old code had to convert between several representations. </p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/f1728.wordpress.com/216/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/f1728.wordpress.com/216/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godelicious/f1728.wordpress.com/216/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/delicious/f1728.wordpress.com/216/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/f1728.wordpress.com/216/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/facebook/f1728.wordpress.com/216/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/f1728.wordpress.com/216/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/twitter/f1728.wordpress.com/216/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gostumble/f1728.wordpress.com/216/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/stumble/f1728.wordpress.com/216/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godigg/f1728.wordpress.com/216/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/digg/f1728.wordpress.com/216/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/goreddit/f1728.wordpress.com/216/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/reddit/f1728.wordpress.com/216/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=f1728.wordpress.com&amp;blog=22515617&amp;post=216&amp;subd=f1728&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /><div class="sharedaddy"></div></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://f1728.wordpress.com/2011/08/05/week-11/">by f1728 at August 05, 2011 01:03 PM</a>
-</p>
-</div>
-</div>
-
-
 </div>
 
 </div>
@@ -2786,7 +2787,7 @@ In the last week, one of the main things I did was to submit a pull request for 
 <a href="http://www.blogger.com/feeds/936818886435977143/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://addisoncugini.blogspot.com/" class="message" title="no activity in 7 days">Addison Cugini</a>
 </li>
 <li>
-<a href="http://amakelov.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://amakelov.wordpress.com" class="message" title="no activity in 7 days">Aleksandar Makelov</a>
+<a href="http://amakelov.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://amakelov.wordpress.com" title="Aleksandar Makelov">Aleksandar Makelov</a>
 </li>
 <li>
 <a href="http://angadhsympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://angadhsympy.wordpress.com" title="GSoC 2012 blog">Angadh Nanjangud</a>
@@ -2879,7 +2880,7 @@ In the last week, one of the main things I did was to submit a pull request for 
 
 <p>
 <strong>Last updated:</strong><br>
-May 26, 2012 10:40 AM<br>
+May 26, 2012 01:20 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
