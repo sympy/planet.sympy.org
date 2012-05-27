@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2012-05-27T11:00:21Z</updated>
+  <updated>2012-05-27T11:20:19Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -47,7 +47,71 @@
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>Aleksandar Makelov</title>
-      <updated>2012-05-27T11:00:21Z</updated>
+      <updated>2012-05-27T11:20:18Z</updated>
+    </source>
+  </entry>
+
+  <entry>
+    <id>http://catchmrbharath.github.com/programming/2012/05/26/adaptive-sampling-for-2d-plots</id>
+    <link href="http://catchmrbharath.github.com/programming/2012/05/26/adaptive-sampling-for-2d-plots" rel="alternate" type="text/html"/>
+    <title>Adaptive sampling for 2D plots</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>This was my first week of GSoC and I spent time on experimenting with adaptive sampling. The major idea explored were what constitutes a condition for which we need not sample more to obtain an accurate plot. I started with the idea of the area of the triangle formed by the three consecutive points to be less than a tolerance value. This worked nicely but did oversampling unnecessarily. The problem with it was the area of the triangle was dependent on the distance between the points which made the condition dependent on the lengths and hence oversampled even though the line formed by the three points was almost collinear. So the obvious next idea was to check the angle formed by the three points and see whether it forms an angle near to 180 degree. There were three versions of the above algorithm implemented, out of which one was the iterative version of a recursive solution. The iterative version is <a href="https://github.com/Krastanov/sympy/pull/5">here</a>. Considering Stefan Krastanov’s suggestion, I implemented a recursive solution which samples 5 additional points between two points instead of a single point. The idea was to use numpy’s quick evaluations of an array and also arrive at the straight line condition faster. Also, this reuses most of the code written before. The code for the following can be found <a href="https://github.com/catchmrbharath/sympy/tree/adaptnew">here</a>. The snippet of the code is as follows:</p>
+<div class="highlight"><pre><code class="python">    <span class="k">def</span> <span class="nf">get_adapt_segments</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">vectorized_lambdify</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">var</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">expr</span><span class="p">)</span>
+        <span class="n">list_segments</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="n">segment</span><span class="p">,</span> <span class="n">depth</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">depth</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
+                <span class="n">list_segments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_sampling</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">*</span><span class="n">segment</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">num</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span>
+                <span class="n">new_segments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_segments</span><span class="p">((</span><span class="n">new_sampling</span><span class="p">,</span> <span class="n">f</span><span class="p">(</span><span class="n">new_sampling</span><span class="p">)))</span>
+                <span class="k">for</span> <span class="n">segmentA</span><span class="p">,</span> <span class="n">segmentB</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">new_segments</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">new_segments</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">flat</span><span class="p">(</span><span class="n">segmentA</span><span class="p">,</span> <span class="n">segmentB</span><span class="p">):</span>
+                        <span class="n">sample</span><span class="p">(</span><span class="n">segmentA</span><span class="p">,</span> <span class="n">depth</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">list_segments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">segmentA</span><span class="p">)</span>
+                <span class="c">#sample the last segment</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">flat</span><span class="p">(</span><span class="n">new_segments</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">new_segments</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+                    <span class="n">sample</span><span class="p">(</span><span class="n">new_segments</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">depth</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">list_segments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_segments</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+        <span class="n">yvalues</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+        <span class="n">segments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_segments</span><span class="p">((</span><span class="n">points</span><span class="p">,</span> <span class="n">yvalues</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">segment</span> <span class="ow">in</span> <span class="n">segments</span><span class="p">:</span>
+            <span class="n">sample</span><span class="p">(</span><span class="n">segment</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">list_segments</span>
+
+
+<span class="k">def</span> <span class="nf">flat</span><span class="p">(</span><span class="n">segmentA</span><span class="p">,</span> <span class="n">segmentB</span><span class="p">):</span>
+    <span class="n">vectorA</span> <span class="o">=</span> <span class="n">segmentA</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">segmentA</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">vectorB</span> <span class="o">=</span> <span class="n">segmentB</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">segmentB</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">costheta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">vectorA</span><span class="p">,</span> <span class="n">vectorB</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vectorA</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vectorB</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">costheta</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.0005</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+</code></pre>
+</div>
+<p>The major problem with the above approach is the way that the rightmost point / segment is handled. The rightmost segment does not have another right segment to decide whether it forms a 180 degree angle or not. Hence it is assumed straight if the previous segment and the present segment forms a straight line. Most of the time this fails to sample further for the end segment thought it should have sampled. The problem can be seen in an plot of <span> $y = sin(x^{2})$ </span></p>
+<img height="400" src="http://catchmrbharath.github.com/images/26052012/plot.png" width="600"/>
+<p>The last method used is symmetric and gives better results, but it is quite ugly. The branch is <a href="https://github.com/catchmrbharath/sympy/tree/complexplot">here</a>.(EDIT: changed the link). It uses some amount of random sampling to avoid aliased results. The plot of <span> $y = sin(x^{2})$ </span> renders very accurately. Feel free to experiment with it and if there is a better method, you can comment below :).</p>
+<img height="400" src="http://catchmrbharath.github.com/images/26052012/betterplot.png" width="600"/>
+<p>I think I will get an non - ugly code ready by the tomorrow and wait for Stefan’s branch to get merged before submitting this method as pull request. This week has been lots of experimentation. I think I will spend the next week getting a basic version of Interval Arithmetic ready using numpy.</p></div>
+    </summary>
+    <updated>2012-05-26T07:00:00Z</updated>
+    <published>2012-05-26T07:00:00Z</published>
+    <source>
+      <author>
+        <name>Bharath M R</name>
+      </author>
+      <link href="" rel="alternate" type="text/html"/>
+      <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
+      <subtitle>Posts categorized as 'programming'</subtitle>
+      <title>- Programming</title>
+      <updated>2012-05-27T11:20:18Z</updated>
     </source>
   </entry>
 
@@ -76,7 +140,7 @@
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-05-27T11:00:20Z</updated>
+      <updated>2012-05-27T11:20:17Z</updated>
     </source>
   </entry>
 
@@ -131,7 +195,7 @@
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-05-27T11:00:20Z</updated>
+      <updated>2012-05-27T11:20:18Z</updated>
     </source>
   </entry>
 
@@ -159,7 +223,7 @@
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-05-27T11:00:19Z</updated>
+      <updated>2012-05-27T11:20:17Z</updated>
     </source>
   </entry>
 
@@ -225,7 +289,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-05-27T11:00:20Z</updated>
+      <updated>2012-05-27T11:20:18Z</updated>
     </source>
   </entry>
 
@@ -253,7 +317,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-05-27T11:00:20Z</updated>
+      <updated>2012-05-27T11:20:18Z</updated>
     </source>
   </entry>
 
@@ -330,7 +394,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-05-27T11:00:20Z</updated>
+      <updated>2012-05-27T11:20:17Z</updated>
     </source>
   </entry>
 
@@ -359,7 +423,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>Aleksandar Makelov</title>
-      <updated>2012-05-27T11:00:21Z</updated>
+      <updated>2012-05-27T11:20:18Z</updated>
     </source>
   </entry>
 
@@ -387,7 +451,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>Aleksandar Makelov</title>
-      <updated>2012-05-27T11:00:21Z</updated>
+      <updated>2012-05-27T11:20:18Z</updated>
     </source>
   </entry>
 
@@ -413,7 +477,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-05-27T11:00:20Z</updated>
+      <updated>2012-05-27T11:20:18Z</updated>
     </source>
   </entry>
 
@@ -479,7 +543,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-05-27T11:00:19Z</updated>
+      <updated>2012-05-27T11:20:17Z</updated>
     </source>
   </entry>
 
@@ -507,7 +571,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-05-27T11:00:19Z</updated>
+      <updated>2012-05-27T11:20:17Z</updated>
     </source>
   </entry>
 
@@ -534,7 +598,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-05-27T11:00:20Z</updated>
+      <updated>2012-05-27T11:20:18Z</updated>
     </source>
   </entry>
 
@@ -653,7 +717,7 @@ Devanla, Brian Granger (co-mentor Sean Vig)<br/>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-05-27T11:00:20Z</updated>
+      <updated>2012-05-27T11:20:18Z</updated>
     </source>
   </entry>
 
@@ -716,7 +780,7 @@ def _intersect(self, other):
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-05-27T11:00:18Z</updated>
+      <updated>2012-05-27T11:20:16Z</updated>
     </source>
   </entry>
 
@@ -844,7 +908,7 @@ def _intersect(self, other):
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-05-27T11:00:18Z</updated>
+      <updated>2012-05-27T11:20:16Z</updated>
     </source>
   </entry>
 
@@ -1002,7 +1066,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-05-27T11:00:09Z</updated>
+      <updated>2012-05-27T11:20:08Z</updated>
     </source>
   </entry>
 
@@ -1074,7 +1138,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-05-27T11:00:09Z</updated>
+      <updated>2012-05-27T11:20:08Z</updated>
     </source>
   </entry>
 
@@ -1105,7 +1169,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-05-27T11:00:09Z</updated>
+      <updated>2012-05-27T11:20:08Z</updated>
     </source>
   </entry>
 
@@ -1152,7 +1216,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-05-27T11:00:09Z</updated>
+      <updated>2012-05-27T11:20:08Z</updated>
     </source>
   </entry>
 
@@ -1788,7 +1852,7 @@ x**(S(4)/5)
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-05-27T11:00:09Z</updated>
+      <updated>2012-05-27T11:20:08Z</updated>
     </source>
   </entry>
 
@@ -1801,7 +1865,7 @@ x**(S(4)/5)
     <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>A beautiful summer is coming to an end and I am at the last leg of my Gsoc. I must apologize for the erratic posts but its mostly because I was “busy” with other things (mostly enjoying myself in the US of A, eating steaks, going out for barbecues, and enjoying the beautiful Maryland summer weather.)</p>
 <p>In the last few weeks I spent a bit of time cleaning up Gray code. It went through a few API changes and I hope to have the subsets and partitions branches merged in within this week. I also implemented a demo of the Permutations branch that involves Polyhedron rotations. I hope to show one involving a Rubik’s cube when I have the Permutation group module in (more on that in a while). I also implemented a residue class and a residue group module as that was missing in the number theory branch of Sympy. That branch needs an overhaul both in terms of functionality as well as the code that is already there and I hope I can get some momentum going in that direction with the code I have written. I also wrote some generators for Permutation groups. This is fairly easy to do now, the basic algorithm is to generate all permutations and filter out those that do not fit the criteria. Of course, generating all permutations is inefficient, and some generators have certain special properties that we can use. For example, the Cyclic group can be generated in linear time as that simply involves a single rotation. Alternating group however requires the generation of all even permutations. Some group generators will probably make use of the specialized algorithms that have been implemented in the iterables section of Sympy.</p>
 <p>I have also managed to implement the Schreier sims algorithm but its extremely ugly and unpythonic for now. Algorithms for generating orbits and stabilizer chains are also there but they are fairly inefficient. I hope to clean them up and submit them for a pull request in this week before the hard pencils down date.</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/saptman.wordpress.com/32/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/saptman.wordpress.com/32/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/saptman.wordpress.com/32/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/saptman.wordpress.com/32/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/saptman.wordpress.com/32/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/saptman.wordpress.com/32/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/saptman.wordpress.com/32/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/saptman.wordpress.com/32/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/saptman.wordpress.com/32/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/saptman.wordpress.com/32/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/saptman.wordpress.com/32/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/saptman.wordpress.com/32/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/saptman.wordpress.com/32/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/saptman.wordpress.com/32/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=saptman.wordpress.com&amp;blog=23040289&amp;post=32&amp;subd=saptman&amp;ref=&amp;feed=1" width="1"/><div class="sharedaddy sd-like-enabled"/></div>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/saptman.wordpress.com/32/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/saptman.wordpress.com/32/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/saptman.wordpress.com/32/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/saptman.wordpress.com/32/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/saptman.wordpress.com/32/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/saptman.wordpress.com/32/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/saptman.wordpress.com/32/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/saptman.wordpress.com/32/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/saptman.wordpress.com/32/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/saptman.wordpress.com/32/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/saptman.wordpress.com/32/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/saptman.wordpress.com/32/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/saptman.wordpress.com/32/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/saptman.wordpress.com/32/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=saptman.wordpress.com&amp;blog=23040289&amp;post=32&amp;subd=saptman&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
     <updated>2011-08-14T21:25:54Z</updated>
     <category term="Uncategorized"/>
@@ -1817,7 +1881,7 @@ x**(S(4)/5)
       <link href="http://saptman.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My symply awesome gsoc summer</subtitle>
       <title>saptman</title>
-      <updated>2012-05-27T11:00:19Z</updated>
+      <updated>2012-05-27T11:20:16Z</updated>
     </source>
   </entry>
 
@@ -1866,7 +1930,7 @@ Wavefunction(-2**(1/2)*hbar*I*pi*n*(1/L)**(1/2)*cos(pi*n*x_2/L)/L, x_2)</pre>
       <link href="http://lazovichsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My adventures during GSoC 2011</subtitle>
       <title>Tomo Lazovich's SymPy Blog</title>
-      <updated>2012-05-27T11:00:16Z</updated>
+      <updated>2012-05-27T11:20:14Z</updated>
     </source>
   </entry>
 
@@ -1899,7 +1963,7 @@ Wavefunction(-2**(1/2)*hbar*I*pi*n*(1/L)**(1/2)*cos(pi*n*x_2/L)/L, x_2)</pre>
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>gilbertgede</title>
-      <updated>2012-05-27T11:00:15Z</updated>
+      <updated>2012-05-27T11:20:13Z</updated>
     </source>
   </entry>
 
@@ -1932,7 +1996,7 @@ Wavefunction(-2**(1/2)*hbar*I*pi*n*(1/L)**(1/2)*cos(pi*n*x_2/L)/L, x_2)</pre>
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-05-27T11:00:18Z</updated>
+      <updated>2012-05-27T11:20:16Z</updated>
     </source>
   </entry>
 
@@ -1997,7 +2061,7 @@ Wavefunction(-2**(1/2)*hbar*I*pi*n*(1/L)**(1/2)*cos(pi*n*x_2/L)/L, x_2)</pre>
       <link href="http://nessgrh.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My GSoC Project</subtitle>
       <title>nessgrh</title>
-      <updated>2012-05-27T11:00:13Z</updated>
+      <updated>2012-05-27T11:20:11Z</updated>
     </source>
   </entry>
 
@@ -2091,7 +2155,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-05-27T11:00:09Z</updated>
+      <updated>2012-05-27T11:20:08Z</updated>
     </source>
   </entry>
 
@@ -2124,7 +2188,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://lazovichsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My adventures during GSoC 2011</subtitle>
       <title>Tomo Lazovich's SymPy Blog</title>
-      <updated>2012-05-27T11:00:16Z</updated>
+      <updated>2012-05-27T11:20:14Z</updated>
     </source>
   </entry>
 
@@ -2157,7 +2221,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>gilbertgede</title>
-      <updated>2012-05-27T11:00:15Z</updated>
+      <updated>2012-05-27T11:20:13Z</updated>
     </source>
   </entry>
 
@@ -2213,7 +2277,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://nessgrh.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My GSoC Project</subtitle>
       <title>nessgrh</title>
-      <updated>2012-05-27T11:00:13Z</updated>
+      <updated>2012-05-27T11:20:12Z</updated>
     </source>
   </entry>
 
@@ -2302,35 +2366,7 @@ Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.
       <link href="http://nessgrh.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My GSoC Project</subtitle>
       <title>nessgrh</title>
-      <updated>2012-05-27T11:00:13Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://sympystats.wordpress.com/?p=237</id>
-    <link href="http://sympystats.wordpress.com/2011/08/05/week-11-testing-cleaning/" rel="alternate" type="text/html"/>
-    <title>Week 11: Testing, cleaning</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">I’m increasing testing coverage and fixing errors in my random variables branch. I’m not sure how to proceed with the matrix expressions ideas. On one hand I should wait until the community comes to a consensus about what SymPy Matrix … <a href="http://sympystats.wordpress.com/2011/08/05/week-11-testing-cleaning/">Continue reading <span class="meta-nav">→</span></a><img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=sympystats.wordpress.com&amp;blog=22550280&amp;post=237&amp;subd=sympystats&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>I’m increasing testing coverage and fixing errors in my random variables branch.</p>
-<p>I’m not sure how to proceed with the matrix expressions ideas. On one hand I should wait until the community comes to a consensus about what SymPy Matrix Expressions should be (or even if they should be at all). On the other hand I don’t ever see this consensus happening. How do I spur on a decision here?</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/sympystats.wordpress.com/237/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/sympystats.wordpress.com/237/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/sympystats.wordpress.com/237/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/sympystats.wordpress.com/237/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/sympystats.wordpress.com/237/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/sympystats.wordpress.com/237/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/sympystats.wordpress.com/237/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/sympystats.wordpress.com/237/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/sympystats.wordpress.com/237/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/sympystats.wordpress.com/237/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/sympystats.wordpress.com/237/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/sympystats.wordpress.com/237/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/sympystats.wordpress.com/237/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/sympystats.wordpress.com/237/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=sympystats.wordpress.com&amp;blog=22550280&amp;post=237&amp;subd=sympystats&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2011-08-05T13:26:14Z</updated>
-    <category term="Uncategorized"/>
-    <author>
-      <name>mrocklin</name>
-    </author>
-    <source>
-      <id>http://sympystats.wordpress.com</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://sympystats.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://sympystats.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://sympystats.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>Just another WordPress.com site</subtitle>
-      <title>sympy-stats</title>
-      <updated>2012-05-27T11:00:18Z</updated>
+      <updated>2012-05-27T11:20:12Z</updated>
     </source>
   </entry>
 </feed>
