@@ -23,6 +23,114 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>May 27, 2012</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://krastanov.wordpress.com" title="Stefan's Blog » SymPy">Stefan Krastanov</a></h3>
+
+
+<div class="entrygroup" id="http://krastanov.wordpress.com/?p=307">
+<h4 lang="en"><a href="http://krastanov.wordpress.com/2012/05/27/scalar-and-vector-fields-in-sympy-first-steps/">Scalar and Vector Fields in SymPy – First Steps</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p>The Differential Geometry module for SymPy already supports some interesting basic operations. However, it would be appropriate to describe its structure before giving any examples.</p>
+<p>First of all, there are the <code>Manifold</code> and <code>Patch</code> classes which are just placeholders. They contain all the coordinate charts that are defined on the patch and do not provide, for instance, any topological information. This leads us to the <code>CoordSystem</code> class which contains all the coordinate transformation logic. For example, if I want to define the <img src="http://s0.wp.com/latex.php?latex=%5Cmathbb%7BR%7D%5E2+&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" alt="\mathbb{R}^2 " class="latex" title="\mathbb{R}^2 " /> euclidean manifold together with the polar and Cartesian coordinate systems I would do:</p>
+<p></p><pre class="brush: python;">R2 = Manifold('R^2', 2)
+# Patch and coordinate systems.
+R2_origin = Patch('R^2_o', R2)
+R2_r = CoordSystem('R^2_r', R2_origin)
+R2_p = CoordSystem('R^2_p', R2_origin)
+
+# Connecting the coordinate charts.
+x, y, r, theta = [Dummy(s) for s in ['x', 'y', 'r', 'theta']]
+R2_r.connect_to(R2_p, [x, y],
+                      [sqrt(x**2 + y**2), atan2(y, x)],
+                inverse=False, fill_in_gaps=False)
+R2_p.connect_to(R2_r, [r, theta],
+                      [r*cos(theta), r*sin(theta)],
+                inverse=False, fill_in_gaps=False)
+</pre><p></p>
+<p>All following examples will be about the <img src="http://s0.wp.com/latex.php?latex=%5Cmathbb%7BR%7D%5E2+&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" alt="\mathbb{R}^2 " class="latex" title="\mathbb{R}^2 " /> manifold which is already implemented in the code for the module. Also, notice the use of the <code>inverse</code> and <code>fill_in_gaps</code> flags. When they are set to <code>True</code> the <code>CoordSystem</code> classes try to automatically deduce the inverse transformations using SymPy’s <code>solve</code> function.</p>
+<p>Now that we have a manifold we would like to create some fields on it and define some points that belong to the manifold. The points are implemented in the <code>Point</code> class. You need to specify some coordinates when you define the point, however after that the object is completely coordinate-system-idependent.</p>
+<p></p><pre class="brush: python;"># You need to specify coordinates in some coordinate system
+p = Point(R2_p, [r0, theta0])
+</pre><p></p>
+<p>Then one can define fields. <code>ScalarField</code> takes points to real numbers and <code>VectorField</code> is an operator on <code>ScalarField</code> taking a scalar field to another scalar field by applying a directional derivative. For example, here <code>x</code> and <code>y</code> are the scalar fields taking a point and returning it’s coordinate and <code>d_dx</code> and <code>d_dy</code> are the vector fields <img src="http://s0.wp.com/latex.php?latex=%5Cfrac%7B%5Cpartial%7D%7B%5Cpartial+x%7D&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" alt="\frac{\partial}{\partial x}" class="latex" title="\frac{\partial}{\partial x}" /> and <img src="http://s0.wp.com/latex.php?latex=%5Cfrac%7B%5Cpartial%7D%7B%5Cpartial+y%7D&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" alt="\frac{\partial}{\partial y}" class="latex" title="\frac{\partial}{\partial y}" />. <code>R2_r</code> is the Cartesian coordinate system and <code>R2_p</code> is the polar one.</p>
+<p></p><pre class="brush: python;">R2_r.x(p) == r0*cos(theta0)
+# R2_r.d_dx(R2_r.x) is a also scalar field
+R2_r.d_dx(R2_r.x)(p) == 1
+</pre><p></p>
+<p>Looking at how can these fields be defined:</p>
+<p></p><pre class="brush: python;"># For a ScalarField you provide the transformation in some coordinate system
+R2_r.x = ScalarField(R2_r, [x0, y0], x0)
+#                     /      |        ^-------- the result
+#     the coord system     the coordinates
+
+# For a VectorField you provide the components in some coordinate system
+R2_r.d_dx = VectorField(R2_r, [x0, y0], [1, 0])
+#                        /      |         ^-------- the components
+#         the coord system     the coordinates
+</pre><p></p>
+<p>Obviously one can define much more interesting fields. For instance the potential due to a point charge at the origin is:</p>
+<p></p><pre class="brush: python;">potential = ScalarField(R2_p, [r0, thata0], -1/r0)
+# And to reiterate, the definition does not limit you
+# to use it only in this coordinate system. For instance:
+potential(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2)
+</pre><p></p>
+<p>However there is another more intuitive way to do it:</p>
+<p></p><pre class="brush: python;"># R2_p.r is the scalar field that takes a point and returns the r coordinate
+potential2 = 1/R2_p.r
+potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
+</pre><p></p>
+<p>And this new object <code>potential2</code> is not an instance of <code>ScalarField</code>. It is actually a normal SymPy expression tree that contains a <code>ScalarField</code> somewhere in its leafs (namely in this case it is <code>Pow(R2_p.r, -1)</code>). However, due to the change to one of the base classes of SymPy that I did in this <a href="https://github.com/sympy/sympy/pull/1299" target="_blank" title="Make Expr recursively callable">pull request</a> it is now possible for such tree to be a python callable, by recursively applying the argument to each callable leaf in the tree. This change is still debated and it may be reverted.</p>
+<p>Vector fields can also be build in this manner. However, they pose a problem. What happens when you multiply a vector field and a scalar field? This operation should give another vector field. And here is a possible problem with the approach of recursively callable expressions trees:</p>
+<p></p><pre class="brush: python;"># Naively this operation will call a scalar field on
+# another scalar field which is nonsense:
+(R2_r.x * R2_r.d_dx)(R2_r.x) == R2_r.x(R2_r.x) * R2_r.d_dx(R2_r.x)
+#                         nonsense----^
+</pre><p></p>
+<p>The current solution is for <code>scalar_field(not_point)</code> to return the callable itself. Thus we have:</p>
+<p></p><pre class="brush: python;">(R2_r.x * R2_r.d_dx)(R2_r.x) == R2_r.x * R2_r.d_dx(R2_r.x)
+#\________________/ \______/    \_______________________/
+#   vector field        ^---scalar fields---^
+</pre><p></p>
+<p>This way there is no need for complicated logic in <code>__mul__ nor is there need for addition subclasses of </code><code>Expr</code> in order to accommodate this behavior.</p>
+<p>There is not much more to be said about the structure of the module. There are some other nice things already implemented like integral curves, however I will discuss these in a later post.</p>
+<p>Among the things that should be done at some point:</p>
+<ul>
+<li>Should vector fields be callable on points? If yes, what the result should be? An abstract vector, a tuple of coordinates in a certain coordinate system, something else?</li>
+<li>There are many expressions generated by this code that are not simple enough. I should work on the simplification routines and on the differential geometry module itself in order to get more canonical expressions.</li>
+<li>The last point is also valid about the solvers: some coordinate transformations are too complicated for the solvers to find the inverse transformation.</li>
+<li><code>Manifold</code> and <code>Patch</code> have <code>name</code> attributes. Are these necessary? What is the role of <code>name</code> attributes in SymPy besides printing?</li>
+<li>Start using <code>Lambda</code> where applicable.</li>
+<li>Follow better the class structure of SymPy.</li>
+</ul>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/krastanov.wordpress.com/307/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/krastanov.wordpress.com/307/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godelicious/krastanov.wordpress.com/307/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/delicious/krastanov.wordpress.com/307/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/krastanov.wordpress.com/307/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/facebook/krastanov.wordpress.com/307/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/krastanov.wordpress.com/307/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/twitter/krastanov.wordpress.com/307/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gostumble/krastanov.wordpress.com/307/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/stumble/krastanov.wordpress.com/307/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godigg/krastanov.wordpress.com/307/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/digg/krastanov.wordpress.com/307/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/goreddit/krastanov.wordpress.com/307/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/reddit/krastanov.wordpress.com/307/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=krastanov.wordpress.com&amp;blog=15251174&amp;post=307&amp;subd=krastanov&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://krastanov.wordpress.com/2012/05/27/scalar-and-vector-fields-in-sympy-first-steps/">by Stefan Krastanov at May 27, 2012 01:04 PM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>May 26, 2012</h2>
 
 <div class="channelgroup">
@@ -401,9 +509,9 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
 
 
 <div class="entrygroup" id="http://krastanov.wordpress.com/?p=298">
-<h4 lang="bg"><a href="http://krastanov.wordpress.com/2012/05/14/differential-geometry-in-sympy-my-gsoc-project/">Differential Geometry in SymPy – my GSoC project</a></h4>
+<h4 lang="en"><a href="http://krastanov.wordpress.com/2012/05/14/differential-geometry-in-sympy-my-gsoc-project/">Differential Geometry in SymPy – my GSoC project</a></h4>
 <div class="entry">
-<div class="content" lang="bg">
+<div class="content" lang="en">
 <p>The next few moths will be interesting. I got accepted in the Google Summer of Code program and I am already starting to worry (irrationally) about the project and the schedule. I will be working on a differential geometry module for SymPy (and time permitting, some more advanced tensor algebra).</p>
 <p>Basically, I want to create the boilerplate that will permit defining some scalar/vector/form/tensor field in an arbitrary coordinate system, then doing some coordinate-system-independent operations on the field (with hopefully coordinate-system-independent simplifications) and, finally, getting the equations describing the final result in another arbitrary coordinate system.</p>
 <p>With this in mind, the details about the project can be seen on <a href="https://github.com/sympy/sympy/wiki/GSoC-2012-Application-Stefan-Krastanov%3A-Vector-Analysis" target="_blank">the proposal page</a>. Most of it (all except the tensor algebra that I may work on at the end) is based on the work of <a href="http://groups.csail.mit.edu/mac/users/gjs/" target="_blank">Gerald Jay Sussman</a> and <a href="http://groups.csail.mit.edu/mac/users/wisdom/" target="_blank">Jack Wisdom</a> on <a href="http://dspace.mit.edu/handle/1721.1/30520" target="_blank">“Functional Differential Geometry”</a>. I suppose that this project started as a part of their superb book <a href="http://mitpress.mit.edu/sicm/" target="_blank">“Structure and Interpretation of Classical Mechanics”</a> (I really have to read this book if I am to call myself a physicist) and the accompanying <a href="http://groups.csail.mit.edu/mac/users/gjs/6946/linux-install.htm" target="_blank">“Scheme Mechanics”</a> software. By the way, reading the Scheme code is a wonderful experience. This language is beautiful! The authors are also actively updating their code and a newer, more detailed paper on the project can be found <a href="http://krastanov.wordpress.com/category/sympy-2/feed/groups.csail.mit.edu/mac/users/gjs/6946/calculus-indexed.pdf" target="_blank">here</a>.</p>
@@ -2232,7 +2340,7 @@ x**(S(4)/5)
 <p>A beautiful summer is coming to an end and I am at the last leg of my Gsoc. I must apologize for the erratic posts but its mostly because I was “busy” with other things (mostly enjoying myself in the US of A, eating steaks, going out for barbecues, and enjoying the beautiful Maryland summer weather.)</p>
 <p>In the last few weeks I spent a bit of time cleaning up Gray code. It went through a few API changes and I hope to have the subsets and partitions branches merged in within this week. I also implemented a demo of the Permutations branch that involves Polyhedron rotations. I hope to show one involving a Rubik’s cube when I have the Permutation group module in (more on that in a while). I also implemented a residue class and a residue group module as that was missing in the number theory branch of Sympy. That branch needs an overhaul both in terms of functionality as well as the code that is already there and I hope I can get some momentum going in that direction with the code I have written. I also wrote some generators for Permutation groups. This is fairly easy to do now, the basic algorithm is to generate all permutations and filter out those that do not fit the criteria. Of course, generating all permutations is inefficient, and some generators have certain special properties that we can use. For example, the Cyclic group can be generated in linear time as that simply involves a single rotation. Alternating group however requires the generation of all even permutations. Some group generators will probably make use of the specialized algorithms that have been implemented in the iterables section of Sympy.</p>
 <p>I have also managed to implement the Schreier sims algorithm but its extremely ugly and unpythonic for now. Algorithms for generating orbits and stabilizer chains are also there but they are fairly inefficient. I hope to clean them up and submit them for a pull request in this week before the hard pencils down date.</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godelicious/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/delicious/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/facebook/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/twitter/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gostumble/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/stumble/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godigg/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/digg/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/goreddit/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/reddit/saptman.wordpress.com/32/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=saptman.wordpress.com&amp;blog=23040289&amp;post=32&amp;subd=saptman&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /><div class="sharedaddy sd-like-enabled"></div></div>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godelicious/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/delicious/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/facebook/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/twitter/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gostumble/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/stumble/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godigg/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/digg/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/goreddit/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/reddit/saptman.wordpress.com/32/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=saptman.wordpress.com&amp;blog=23040289&amp;post=32&amp;subd=saptman&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -2741,69 +2849,6 @@ In the last week, one of the main things I did was to submit a pull request for 
 </div>
 
 </div>
-<div class="daygroup">
-<h2>August 05, 2011</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://nessgrh.wordpress.com" title="nessgrh">Tom Bachmann</a></h3>
-
-
-<div class="entrygroup" id="http://nessgrh.wordpress.com/?p=351">
-<h4 lang="en"><a href="http://nessgrh.wordpress.com/2011/08/05/status-update%e2%80%94week-11/">Status Update—Week 11</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>The end of GSOC is rapidly approaching, so this was one further busy week. Here is what I did:</p>
-<ul>
-<li>Fix some bugs in meijerint, uncovered by statistical integrals,</li>
-<li>Optimise meijerint and hyperexpand,</li>
-<li>Implement exponential integrals.</li>
-</ul>
-<p>Before I go into details, let me stake out a final list of things I hope to do before the end of summer:</p>
-<ol>
-<li>Fix a test failure in meijerint. (explained below)</li>
-<li>Think about branching again. In particular, investigate how we can come up with “nice” answers.</li>
-<li>Investigate why hyperexpand results are sometimes ridiculously complicated.</li>
-</ol>
-<p>Let’s now turn to what I did. First Matthew reported some bugs in my integration code, mostly related to how real variables are converted into polar ones (that is, they were not, which is wrong). I took the opportunity to test lots of integrals that seemed to be important for statistics, e.g. <a href="http://pastebin.com/raw.php?i=WRyYNrFr">these</a>, computing various moments of the normal, exponential and chi-squared distributions.</p>
-<p>Then I started to optimise my code. First I created a script (sympy/benchmark/bench_meijerint.py) which basically times all the individual integrals from the tests. This allowed me to quickly isolate biggest performance problems. <a href="http://pastebin.com/raw.php?i=ZSQb4GfZ">This</a> is the output of the first run, and <a href="http://pastebin.com/raw.php?i=XrDDQf8Y">this</a> is the output with my new optimisations. Let me go through the first few entries on both lists.</p>
-<ul>
-<li>
-<pre>LT((t-apos)**bpos*exp(-cpos*(t-apos))*Heaviside(t-apos), t, s)</pre>
-<p>This was my biggest worry, for two reasons. Firstly it seems fairly common—this is just a very basic laplace transform (though with many parameters). Second it is surprisingly hard—in order to do it, the algorithm has to expand the exponential, then bracket the two exponentials as G1, and the rest as G2. However, it turns out that a few tweaks allow us to recognise fairly quickly that the integral won’t be doable without expansion (because <img src="http://s0.wp.com/latex.php?latex=e%5E%7Bc%2At+%2B+d%7D&amp;bg=FFFFFF&amp;fg=000000&amp;s=0" alt="e^{c*t + d}" class="latex" title="e^{c*t + d}" /> is not in the tables), and then a few improvements to the heuristics make us try things in a reasonable order. Thus this laplace transform is comfortably down in the second list; from 4.8 to 0.5 seconds.</p></li>
-<li>
-<pre>MT(bessely(a, sqrt(x))**2, x, s)</pre>
-<p>and similar mellin transforms involving bessel functions or logarithms are slow for three reasons: (1) Hyperexpand(), is fairly slow to realise that a certain expansion <em>cannot</em> be done. This means that any “mis-step” the algorithm does is quite costly. (2) there tend to be confluent g-functions involved, for which we need series expansions (for computing residues), and these are slow. (3) Combsimp used to be slow. I improved combsimp, and I rewrote the residue function to use series expansions a bit more cleverly. I also improved hyperexpand a bit; the results are fairly noticable, but not as satisfying as for the laplace transform.</p></li>
-<li>
-<pre>E((x+y-1)**2)</pre>
-<p>This computes a certain statistical double integral in two ways, and it is not actually that slow. By my calculation the code winds up doing about 40 integrals (splitting integrals along the real line into two patrs, expanding the binomial, doing a double integral in two steps, and finally doing it all over again the other way round), putting the time for every single integral well into a sensible range.</p></li>
-</ul>
-<p>I should mention that during this optimisations the path taken by meijerint was changed slightly, causing a test failure in test_meijerint which is actually fairly difficult to correct. So much for robust code…</p>
-<p>Finally I implemented exponential integrals. This was quite good fun; let’s just look at a few <a href="http://pastebin.com/raw.php?i=1Lm7nmC4">examples</a>. A few things can be said here. The answers are sometimes messy; often expand() already yields a lot of cancellation. The noticable exception is the integral representation of the generalised exponential integral with two parameters, here more tricks are necessary (but I don’t really think there is any way to know in advance that expressing everything in terms of expint yields such a nice answer, short from recognising the integral). At one stage I’m using a polar variable, this is to allow <img src="http://s0.wp.com/latex.php?latex=%5Clog%28u%5E2%29&amp;bg=FFFFFF&amp;fg=000000&amp;s=0" alt="\log(u^2)" class="latex" title="\log(u^2)" /> to expand (alternatively one could safely use force here). The laplace transforms are a nice example where answers come out much messier than they have to (the other exponential integrals are mostly as bad es Si, noticable exception being e1). Some of the definite integrals illustrate a similar problem.</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/nessgrh.wordpress.com/351/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/nessgrh.wordpress.com/351/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godelicious/nessgrh.wordpress.com/351/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/delicious/nessgrh.wordpress.com/351/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/nessgrh.wordpress.com/351/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/facebook/nessgrh.wordpress.com/351/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/nessgrh.wordpress.com/351/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/twitter/nessgrh.wordpress.com/351/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gostumble/nessgrh.wordpress.com/351/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/stumble/nessgrh.wordpress.com/351/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godigg/nessgrh.wordpress.com/351/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/digg/nessgrh.wordpress.com/351/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/goreddit/nessgrh.wordpress.com/351/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/reddit/nessgrh.wordpress.com/351/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=nessgrh.wordpress.com&amp;blog=22546379&amp;post=351&amp;subd=nessgrh&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /><div class="sharedaddy sd-like-enabled"></div></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://nessgrh.wordpress.com/2011/08/05/status-update%e2%80%94week-11/">by nessgrh at August 05, 2011 10:08 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -2893,7 +2938,7 @@ In the last week, one of the main things I did was to submit a pull request for 
 <a href="http://sherjilozair.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sherjilozair.wordpress.com" class="message" title="no activity in 7 days">Sherjil Ozair</a>
 </li>
 <li>
-<a href="http://krastanov.wordpress.com/category/sympy-2/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://krastanov.wordpress.com" class="message" title="no activity in 7 days">Stefan Krastanov</a>
+<a href="http://krastanov.wordpress.com/category/sympy-2/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://krastanov.wordpress.com" title="Stefan's Blog » SymPy">Stefan Krastanov</a>
 </li>
 <li>
 <a href="http://nessgrh.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://nessgrh.wordpress.com" class="message" title="no activity in 7 days">Tom Bachmann</a>
@@ -2911,7 +2956,7 @@ In the last week, one of the main things I did was to submit a pull request for 
 
 <p>
 <strong>Last updated:</strong><br>
-May 27, 2012 01:00 PM<br>
+May 27, 2012 01:20 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
