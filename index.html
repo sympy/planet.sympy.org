@@ -25,6 +25,42 @@
 <div class="daygroup">
 <h2>June 03, 2012</h2>
 
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://krastanov.wordpress.com" title="Stefan's Blog » SymPy">Stefan Krastanov</a></h3>
+
+
+<div class="entrygroup" id="http://krastanov.wordpress.com/?p=333">
+<h4 lang="en"><a href="http://krastanov.wordpress.com/2012/06/04/consistent-output-from-the-sympy-solvers-and-some-ideas-about-the-ode-solver/">Consistent output from the SymPy solvers (and some ideas about the ODE solver)</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p>The work on the differential geometry module has not progressed much this week. I have fixed some minor issues, docstrings and naming conventions, however I have not done much with respect to the implementation of form fields as there are still some questions about the design to be ironed out.</p>
+<p>Instead I focused on studying two of the features that SymPy presents and that I will use heavily. The first is the simplification routine that I will discuss another time. The second one is the different solvers implement in SymPy.</p>
+<p>First of all, I have a very hard time getting used to the various output that the solvers provide. The algebraic equations solver, for example, can return either an empty list or a None instance if there is no solution. If there are solutions it can return a list of tuples of solutions, or a list of dictionaries of solutions, or a list of solutions if there is only one variable to solve for, or the solution itself if the solution is unique… Thankfully, a remedy for this was implemented by Christopher Smith. In <a href="https://github.com/sympy/sympy/pull/1324" target="_blank">pull request 1324</a> he provided some flags that force the solver to return the solutions in a canonical form. I am very grateful for his work and I hope that in the not too distant future what he has done will become the default behavior. I also hope that the solver will get refactored, because internally it is still a mess of different possible outputs that are canonicalized only at the very end. It is possible that I will work on this later.</p>
+<p>Then there is the ODE module. I already need this solver in order to work with the integral curves that my code produces[1]. It is a very advanced solver written a few years ago by Aaron Meurer as part of his GSoC project. However, it still does not support systems of ODEs or solving for initial conditions. With Aaron’s help I have started those. The main difficulty is that I am covering only the simplest cases, however the new API must be futureproof. Moreover, here I again have a problem with the various outputs that can be produced by the ODE solver. Solutions are always returned as Equation instances (which is necessary, as some solutions can be in implicit form), however if there are multiple solutions they are returned in a list, while single solutions are returned themselves (not in a list). Anyway, the structure of the ODE module is straightforward so this should not be too hard to work around.</p>
+<p>This week I will probably finish my work with the ODE solver and proceed to the form fields.</p>
+<p>[1] The code on the differential geometry side is ready, however before showing it I will first extend the ODE solver in order to have more interesting examples.</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/krastanov.wordpress.com/333/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/krastanov.wordpress.com/333/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godelicious/krastanov.wordpress.com/333/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/delicious/krastanov.wordpress.com/333/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/krastanov.wordpress.com/333/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/facebook/krastanov.wordpress.com/333/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/krastanov.wordpress.com/333/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/twitter/krastanov.wordpress.com/333/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gostumble/krastanov.wordpress.com/333/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/stumble/krastanov.wordpress.com/333/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godigg/krastanov.wordpress.com/333/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/digg/krastanov.wordpress.com/333/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/goreddit/krastanov.wordpress.com/333/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/reddit/krastanov.wordpress.com/333/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=krastanov.wordpress.com&amp;blog=15251174&amp;post=333&amp;subd=krastanov&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://krastanov.wordpress.com/2012/06/04/consistent-output-from-the-sympy-solvers-and-some-ideas-about-the-ode-solver/">by Stefan Krastanov at June 03, 2012 10:14 PM</a>
+</p>
+</div>
+</div>
+
+
 
 
 <div class="entrygroup" id="http://catchmrbharath.github.com/programming/2012/06/03/gsoc-week-2">
@@ -2769,7 +2805,7 @@ The biggest development this week was working out what is needed to get the coup
 <p>Time flies by … I feel like I just started hyperexpand() yesterday (not quite actually; but you get the idea *g*). I’ve been moving around this week, so I wasn’t terribly productive so far. I did, however, compute (reasonably) neat representations for all the <img src="http://s0.wp.com/latex.php?latex=%7B%7D_pF_%7Bp-1%7D&amp;bg=FFFFFF&amp;fg=000000&amp;s=0" alt="{}_pF_{p-1}" class="latex" title="{}_pF_{p-1}" /> in the hyperexpand() table. These <a href="http://pastebin.com/raw.php?i=fv9BNEMe">examples</a> demonstrate the kind of neat answers this can yield (compare to some of the examples from last week) [actually the tables contain some much more complicated functions, but I was not yet able to come up with interesting integrals that yield these answers *g*].</p>
 <p>My final plan, beyond mere cleanup and bugfixing, is to do something along the way of simplifying convergence conditions. This won’t be anything fancy (I’m thinking of peep-hole optimisation); my goal is to make mess like the <a href="http://pastebin.com/raw.php?i=dYdgefP9">following</a> somewhat less horrific. I hope to have a final pull request ready by sunday night. Then I will finally slow down and relax; work towards merging my branches; perhaps review some other GSOC pull requests.</p>
 <p>Quite a summer.</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/nessgrh.wordpress.com/366/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/nessgrh.wordpress.com/366/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godelicious/nessgrh.wordpress.com/366/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/delicious/nessgrh.wordpress.com/366/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/nessgrh.wordpress.com/366/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/facebook/nessgrh.wordpress.com/366/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/nessgrh.wordpress.com/366/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/twitter/nessgrh.wordpress.com/366/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gostumble/nessgrh.wordpress.com/366/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/stumble/nessgrh.wordpress.com/366/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godigg/nessgrh.wordpress.com/366/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/digg/nessgrh.wordpress.com/366/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/goreddit/nessgrh.wordpress.com/366/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/reddit/nessgrh.wordpress.com/366/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=nessgrh.wordpress.com&amp;blog=22546379&amp;post=366&amp;subd=nessgrh&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /><div class="sharedaddy sd-like-enabled"></div></div>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/nessgrh.wordpress.com/366/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/nessgrh.wordpress.com/366/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godelicious/nessgrh.wordpress.com/366/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/delicious/nessgrh.wordpress.com/366/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/nessgrh.wordpress.com/366/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/facebook/nessgrh.wordpress.com/366/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/nessgrh.wordpress.com/366/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/twitter/nessgrh.wordpress.com/366/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gostumble/nessgrh.wordpress.com/366/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/stumble/nessgrh.wordpress.com/366/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godigg/nessgrh.wordpress.com/366/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/digg/nessgrh.wordpress.com/366/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/goreddit/nessgrh.wordpress.com/366/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/reddit/nessgrh.wordpress.com/366/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=nessgrh.wordpress.com&amp;blog=22546379&amp;post=366&amp;subd=nessgrh&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -2779,48 +2815,6 @@ The biggest development this week was working out what is needed to get the coup
 
 <p class="date">
 <a href="http://nessgrh.wordpress.com/2011/08/12/last-status-update-probably/">by nessgrh at August 12, 2011 06:22 PM</a>
-</p>
-</div>
-</div>
-
-
-
-</div>
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://f1728.wordpress.com" title="f1728 » SymPy">Jeremias Yehdegho</a></h3>
-
-
-<div class="entrygroup" id="http://f1728.wordpress.com/?p=234">
-<h4 lang="en"><a href="http://f1728.wordpress.com/2011/08/12/week-12/">Week 12</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>Hi everyone, welcome to one of the last updates. This week I finally finished FGLM without having to use <code>solve</code>, which makes it quite fast. The problem I had was the following:</p>
-<p>Suppose you’re given a sequence of non-zero vectors <img src="http://s0.wp.com/latex.php?latex=v_1+%3D+%281%2C+0%2C+%5Cldots%2C+0%29%5Et%2C+%5Cldots%2C+v_r&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="v_1 = (1, 0, \ldots, 0)^t, \ldots, v_r" class="latex" title="v_1 = (1, 0, \ldots, 0)^t, \ldots, v_r" /> one after the other. You know <img src="http://s0.wp.com/latex.php?latex=n+%3C+r&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="n &lt; r" class="latex" title="n &lt; r" /> of them are linearly independant and thus you consider them to be a basis of the spanned space. Now you would like to iteratively determine of a new vector <img src="http://s0.wp.com/latex.php?latex=v_s&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="v_s" class="latex" title="v_s" /> is linearly dependant on <img src="http://s0.wp.com/latex.php?latex=v_1%2C+%5Cldots%2C+v_%7Bs-1%7D&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="v_1, \ldots, v_{s-1}" class="latex" title="v_1, \ldots, v_{s-1}" /> and if not, add it to your basis.<br />
-You could do this by solving the following system <img src="http://s0.wp.com/latex.php?latex=%5Csum_%7Bi%3D1%7D%5E%7Bs-1%7D+%5Clambda_i+v_i+%3D+v_s&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="\sum_{i=1}^{s-1} \lambda_i v_i = v_s" class="latex" title="\sum_{i=1}^{s-1} \lambda_i v_i = v_s" /> but this will be a relatively expensive operation and it can be done better:</p>
-<p>Let <img src="http://s0.wp.com/latex.php?latex=P&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="P" class="latex" title="P" /> be the <img src="http://s0.wp.com/latex.php?latex=n+%5Ctimes+n&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="n \times n" class="latex" title="n \times n" /> identity matrix. At the beginning, it maps <img src="http://s0.wp.com/latex.php?latex=v_1&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="v_1" class="latex" title="v_1" /> to <img src="http://s0.wp.com/latex.php?latex=P+v_1+%3D+v_1+%3D+e_1&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="P v_1 = v_1 = e_1" class="latex" title="P v_1 = v_1 = e_1" />, which is correct.</p>
-<p>Suppose now, that <img src="http://s0.wp.com/latex.php?latex=P+%5Ctilde%7Bv%7D_i+%3D+e_i&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="P \tilde{v}_i = e_i" class="latex" title="P \tilde{v}_i = e_i" /> for all <img src="http://s0.wp.com/latex.php?latex=i+%5Cin+%5C%7B1%2C+%5Cldots%2C+s-1%5C%7D&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="i \in \{1, \ldots, s-1\}" class="latex" title="i \in \{1, \ldots, s-1\}" />, then the following can occur: Either <img src="http://s0.wp.com/latex.php?latex=P+%5Ctilde%7Bv%7D_s&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="P \tilde{v}_s" class="latex" title="P \tilde{v}_s" /> has no non-zero entries after the <img src="http://s0.wp.com/latex.php?latex=s-1&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="s-1" class="latex" title="s-1" />-th, which means that <img src="http://s0.wp.com/latex.php?latex=%5Ctilde%7Bv%7D_s&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="\tilde{v}_s" class="latex" title="\tilde{v}_s" /> is an element of the vector space spanned by <img src="http://s0.wp.com/latex.php?latex=%5C%7B%5Ctilde%7Bv%7D_1%2C+%5Cldots%2C+%5Ctilde%7Bv%7D_%7Bs-1%7D%5C%7D&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="\{\tilde{v}_1, \ldots, \tilde{v}_{s-1}\}" class="latex" title="\{\tilde{v}_1, \ldots, \tilde{v}_{s-1}\}" /> and thus can be discarded, or it has a non-zero entry after the <img src="http://s0.wp.com/latex.php?latex=s-1&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="s-1" class="latex" title="s-1" />-th and is thus linearly independant from the previous vectors.<br />
-Now I’d like to update <img src="http://s0.wp.com/latex.php?latex=P&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="P" class="latex" title="P" />, such that <img src="http://s0.wp.com/latex.php?latex=P+%5Ctilde%7Bv%7D_i+%3D+e_i&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="P \tilde{v}_i = e_i" class="latex" title="P \tilde{v}_i = e_i" /> for all <img src="http://s0.wp.com/latex.php?latex=i+%5Cin+%5C%7B1%2C+%5Cldots%2C+s%5C%7D&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="i \in \{1, \ldots, s\}" class="latex" title="i \in \{1, \ldots, s\}" />. Let <img src="http://s0.wp.com/latex.php?latex=k&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="k" class="latex" title="k" /> be the smallest index greater than <img src="http://s0.wp.com/latex.php?latex=s&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="s" class="latex" title="s" /> such that <img src="http://s0.wp.com/latex.php?latex=%28P+%5Ctilde%7Bv%7D_s%29_k&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="(P \tilde{v}_s)_k" class="latex" title="(P \tilde{v}_s)_k" /> is non-zero and <img src="http://s0.wp.com/latex.php?latex=%5Clambda+%3D+P+%5Ctilde%7Bv%7D_s&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="\lambda = P \tilde{v}_s" class="latex" title="\lambda = P \tilde{v}_s" />. Then</p>
-<p><img src="http://s0.wp.com/latex.php?latex=P_%7Bi%2Cj%7D+%3D+%5Cbegin%7Bcases%7D+%5Cfrac%7BP_%7Bk%2C+j%7D%7D%7B%5Clambda_k%7D++%26+%5Cmbox%7Bif+%7D+i+%3D+s%5C%5C+P_%7Bs%2Cj%7D+-+%5Cfrac%7BP_%7Bk%2Cj%7D%7D%7B%5Clambda_k%7D+%5Clambda_i++%26+%5Cmbox%7Bif+%7D+i+%3D+k%5C%5C+P_%7Bi%2Cj%7D+-+%5Cfrac%7BP_%7Bk%2Cj%7D%7D%7B%5Clambda_k%7D+%5Clambda%7Bi%7D++%26+%5Cmbox%7Botherwise%7D%5Cend%7Bcases%7D&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="P_{i,j} = \begin{cases} \frac{P_{k, j}}{\lambda_k}  &amp; \mbox{if } i = s\\ P_{s,j} - \frac{P_{k,j}}{\lambda_k} \lambda_i  &amp; \mbox{if } i = k\\ P_{i,j} - \frac{P_{k,j}}{\lambda_k} \lambda{i}  &amp; \mbox{otherwise}\end{cases}" class="latex" title="P_{i,j} = \begin{cases} \frac{P_{k, j}}{\lambda_k}  &amp; \mbox{if } i = s\\ P_{s,j} - \frac{P_{k,j}}{\lambda_k} \lambda_i  &amp; \mbox{if } i = k\\ P_{i,j} - \frac{P_{k,j}}{\lambda_k} \lambda{i}  &amp; \mbox{otherwise}\end{cases}" /></p>
-<p>This new <img src="http://s0.wp.com/latex.php?latex=P&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="P" class="latex" title="P" /> has the desired properties (just multiply it with <img src="http://s0.wp.com/latex.php?latex=%5Ctilde%7Bv%7D_1%2C+%5Cldots%2C+%5Ctilde%7Bv%7D_s&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="\tilde{v}_1, \ldots, \tilde{v}_s" class="latex" title="\tilde{v}_1, \ldots, \tilde{v}_s" />). Instead of having to use <code>solve</code>, multiply with <img src="http://s0.wp.com/latex.php?latex=P&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="P" class="latex" title="P" /> and look if enough coefficients at the end are <img src="http://s0.wp.com/latex.php?latex=0&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="0" class="latex" title="0" />, if so, the vector is linearly dependant on the previous, if not, add it to the basis and update the matrix <img src="http://s0.wp.com/latex.php?latex=P&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="P" class="latex" title="P" />.</p>
-<p>Being reluctant and not thinking about this thoroughly before trying to write code cost a lot of time. :/</p>
-<p>Anyway, other than FGLM I wrote some documentation (which was overdue… sorry) and tried to improve rational simplification a bit (without much success).</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/f1728.wordpress.com/234/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/f1728.wordpress.com/234/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godelicious/f1728.wordpress.com/234/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/delicious/f1728.wordpress.com/234/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/f1728.wordpress.com/234/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/facebook/f1728.wordpress.com/234/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/f1728.wordpress.com/234/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/twitter/f1728.wordpress.com/234/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gostumble/f1728.wordpress.com/234/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/stumble/f1728.wordpress.com/234/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godigg/f1728.wordpress.com/234/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/digg/f1728.wordpress.com/234/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/goreddit/f1728.wordpress.com/234/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/reddit/f1728.wordpress.com/234/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=f1728.wordpress.com&amp;blog=22515617&amp;post=234&amp;subd=f1728&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /><div class="sharedaddy"></div></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://f1728.wordpress.com/2011/08/12/week-12/">by f1728 at August 12, 2011 03:40 PM</a>
 </p>
 </div>
 </div>
@@ -2918,7 +2912,7 @@ Now I’d like to update <img src="http://s0.wp.com/latex.php?latex=P&amp;bg=fff
 <a href="http://sherjilozair.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sherjilozair.wordpress.com" class="message" title="no activity in 7 days">Sherjil Ozair</a>
 </li>
 <li>
-<a href="http://krastanov.wordpress.com/category/sympy-2/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://krastanov.wordpress.com" class="message" title="no activity in 7 days">Stefan Krastanov</a>
+<a href="http://krastanov.wordpress.com/category/sympy-2/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://krastanov.wordpress.com" title="Stefan's Blog » SymPy">Stefan Krastanov</a>
 </li>
 <li>
 <a href="http://nessgrh.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://nessgrh.wordpress.com" class="message" title="no activity in 7 days">Tom Bachmann</a>
@@ -2936,7 +2930,7 @@ Now I’d like to update <img src="http://s0.wp.com/latex.php?latex=P&amp;bg=fff
 
 <p>
 <strong>Last updated:</strong><br>
-June 03, 2012 09:00 PM<br>
+June 03, 2012 10:20 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2012-06-03T21:00:17Z</updated>
+  <updated>2012-06-03T22:20:18Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,44 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry xml:lang="en">
+    <id>http://krastanov.wordpress.com/?p=333</id>
+    <link href="http://krastanov.wordpress.com/2012/06/04/consistent-output-from-the-sympy-solvers-and-some-ideas-about-the-ode-solver/" rel="alternate" type="text/html"/>
+    <title>Consistent output from the SymPy solvers (and some ideas about the ODE solver)</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">The work on the differential geometry module has not progressed much this week. I have fixed some minor issues, docstrings and naming conventions, however I have not done much with respect to the implementation of form fields as there are still some questions about the design to be ironed out. Instead I focused on studying [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=krastanov.wordpress.com&amp;blog=15251174&amp;post=333&amp;subd=krastanov&amp;ref=&amp;feed=1" width="1"/></div>
+    </summary>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>The work on the differential geometry module has not progressed much this week. I have fixed some minor issues, docstrings and naming conventions, however I have not done much with respect to the implementation of form fields as there are still some questions about the design to be ironed out.</p>
+<p>Instead I focused on studying two of the features that SymPy presents and that I will use heavily. The first is the simplification routine that I will discuss another time. The second one is the different solvers implement in SymPy.</p>
+<p>First of all, I have a very hard time getting used to the various output that the solvers provide. The algebraic equations solver, for example, can return either an empty list or a None instance if there is no solution. If there are solutions it can return a list of tuples of solutions, or a list of dictionaries of solutions, or a list of solutions if there is only one variable to solve for, or the solution itself if the solution is unique… Thankfully, a remedy for this was implemented by Christopher Smith. In <a href="https://github.com/sympy/sympy/pull/1324" target="_blank">pull request 1324</a> he provided some flags that force the solver to return the solutions in a canonical form. I am very grateful for his work and I hope that in the not too distant future what he has done will become the default behavior. I also hope that the solver will get refactored, because internally it is still a mess of different possible outputs that are canonicalized only at the very end. It is possible that I will work on this later.</p>
+<p>Then there is the ODE module. I already need this solver in order to work with the integral curves that my code produces[1]. It is a very advanced solver written a few years ago by Aaron Meurer as part of his GSoC project. However, it still does not support systems of ODEs or solving for initial conditions. With Aaron’s help I have started those. The main difficulty is that I am covering only the simplest cases, however the new API must be futureproof. Moreover, here I again have a problem with the various outputs that can be produced by the ODE solver. Solutions are always returned as Equation instances (which is necessary, as some solutions can be in implicit form), however if there are multiple solutions they are returned in a list, while single solutions are returned themselves (not in a list). Anyway, the structure of the ODE module is straightforward so this should not be too hard to work around.</p>
+<p>This week I will probably finish my work with the ODE solver and proceed to the form fields.</p>
+<p>[1] The code on the differential geometry side is ready, however before showing it I will first extend the ODE solver in order to have more interesting examples.</p>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/krastanov.wordpress.com/333/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/krastanov.wordpress.com/333/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/krastanov.wordpress.com/333/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/krastanov.wordpress.com/333/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/krastanov.wordpress.com/333/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/krastanov.wordpress.com/333/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/krastanov.wordpress.com/333/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/krastanov.wordpress.com/333/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/krastanov.wordpress.com/333/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/krastanov.wordpress.com/333/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/krastanov.wordpress.com/333/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/krastanov.wordpress.com/333/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/krastanov.wordpress.com/333/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/krastanov.wordpress.com/333/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=krastanov.wordpress.com&amp;blog=15251174&amp;post=333&amp;subd=krastanov&amp;ref=&amp;feed=1" width="1"/></div>
+    </content>
+    <updated>2012-06-03T22:14:40Z</updated>
+    <category term="SymPy"/>
+    <category term="differential geometry"/>
+    <category term="gsoc"/>
+    <category term="ode"/>
+    <category term="solver"/>
+    <category term="symbolic algebra"/>
+    <category term="sympy"/>
+    <author>
+      <name>Stefan Krastanov</name>
+    </author>
+    <source>
+      <id>http://krastanov.wordpress.com</id>
+      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
+      <link href="http://krastanov.wordpress.com/category/sympy-2/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://krastanov.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://krastanov.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://krastanov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <subtitle>Just another WordPress.com site</subtitle>
+      <title>Stefan's Blog » SymPy</title>
+      <updated>2012-06-03T22:20:17Z</updated>
+    </source>
+  </entry>
 
   <entry>
     <id>http://catchmrbharath.github.com/programming/2012/06/03/gsoc-week-2</id>
@@ -27,7 +65,7 @@
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-03T21:00:16Z</updated>
+      <updated>2012-06-03T22:20:16Z</updated>
     </source>
   </entry>
 
@@ -73,7 +111,7 @@
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging</title>
-      <updated>2012-06-03T21:00:17Z</updated>
+      <updated>2012-06-03T22:20:17Z</updated>
     </source>
   </entry>
 
@@ -120,7 +158,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-03T21:00:16Z</updated>
+      <updated>2012-06-03T22:20:16Z</updated>
     </source>
   </entry>
 
@@ -147,7 +185,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-03T21:00:16Z</updated>
+      <updated>2012-06-03T22:20:15Z</updated>
     </source>
   </entry>
 
@@ -196,7 +234,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-03T21:00:16Z</updated>
+      <updated>2012-06-03T22:20:15Z</updated>
     </source>
   </entry>
 
@@ -301,7 +339,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://krastanov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-05-27T13:20:20Z</updated>
+      <updated>2012-06-03T22:20:17Z</updated>
     </source>
   </entry>
 
@@ -341,7 +379,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging</title>
-      <updated>2012-06-03T21:00:17Z</updated>
+      <updated>2012-06-03T22:20:17Z</updated>
     </source>
   </entry>
 
@@ -405,7 +443,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-03T21:00:16Z</updated>
+      <updated>2012-06-03T22:20:16Z</updated>
     </source>
   </entry>
 
@@ -434,7 +472,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-03T21:00:16Z</updated>
+      <updated>2012-06-03T22:20:15Z</updated>
     </source>
   </entry>
 
@@ -489,7 +527,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-03T21:00:16Z</updated>
+      <updated>2012-06-03T22:20:16Z</updated>
     </source>
   </entry>
 
@@ -517,7 +555,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-03T21:00:15Z</updated>
+      <updated>2012-06-03T22:20:15Z</updated>
     </source>
   </entry>
 
@@ -583,7 +621,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-03T21:00:16Z</updated>
+      <updated>2012-06-03T22:20:16Z</updated>
     </source>
   </entry>
 
@@ -611,7 +649,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-03T21:00:16Z</updated>
+      <updated>2012-06-03T22:20:16Z</updated>
     </source>
   </entry>
 
@@ -657,7 +695,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://krastanov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-05-27T13:20:20Z</updated>
+      <updated>2012-06-03T22:20:17Z</updated>
     </source>
   </entry>
 
@@ -688,7 +726,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-03T21:00:16Z</updated>
+      <updated>2012-06-03T22:20:15Z</updated>
     </source>
   </entry>
 
@@ -717,7 +755,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging</title>
-      <updated>2012-06-03T21:00:17Z</updated>
+      <updated>2012-06-03T22:20:17Z</updated>
     </source>
   </entry>
 
@@ -771,7 +809,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-03T21:00:16Z</updated>
+      <updated>2012-06-03T22:20:16Z</updated>
     </source>
   </entry>
 
@@ -837,7 +875,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-03T21:00:16Z</updated>
+      <updated>2012-06-03T22:20:15Z</updated>
     </source>
   </entry>
 
@@ -865,7 +903,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-03T21:00:16Z</updated>
+      <updated>2012-06-03T22:20:15Z</updated>
     </source>
   </entry>
 
@@ -892,7 +930,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-03T21:00:17Z</updated>
+      <updated>2012-06-03T22:20:16Z</updated>
     </source>
   </entry>
 
@@ -1011,7 +1049,7 @@ Devanla, Brian Granger (co-mentor Sean Vig)<br/>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-03T21:00:17Z</updated>
+      <updated>2012-06-03T22:20:16Z</updated>
     </source>
   </entry>
 
@@ -1074,7 +1112,7 @@ def _intersect(self, other):
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-06-03T21:00:15Z</updated>
+      <updated>2012-06-03T22:20:14Z</updated>
     </source>
   </entry>
 
@@ -1202,7 +1240,7 @@ def _intersect(self, other):
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-06-03T21:00:15Z</updated>
+      <updated>2012-06-03T22:20:14Z</updated>
     </source>
   </entry>
 
@@ -1360,7 +1398,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-03T21:00:08Z</updated>
+      <updated>2012-06-03T22:20:07Z</updated>
     </source>
   </entry>
 
@@ -1432,7 +1470,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-03T21:00:08Z</updated>
+      <updated>2012-06-03T22:20:07Z</updated>
     </source>
   </entry>
 
@@ -1463,7 +1501,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-03T21:00:08Z</updated>
+      <updated>2012-06-03T22:20:07Z</updated>
     </source>
   </entry>
 
@@ -1510,7 +1548,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-03T21:00:08Z</updated>
+      <updated>2012-06-03T22:20:07Z</updated>
     </source>
   </entry>
 
@@ -2146,7 +2184,7 @@ x**(S(4)/5)
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-03T21:00:08Z</updated>
+      <updated>2012-06-03T22:20:07Z</updated>
     </source>
   </entry>
 
@@ -2175,7 +2213,7 @@ x**(S(4)/5)
       <link href="http://saptman.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My symply awesome gsoc summer</subtitle>
       <title>saptman</title>
-      <updated>2012-06-03T21:00:15Z</updated>
+      <updated>2012-06-03T22:20:14Z</updated>
     </source>
   </entry>
 
@@ -2224,7 +2262,7 @@ Wavefunction(-2**(1/2)*hbar*I*pi*n*(1/L)**(1/2)*cos(pi*n*x_2/L)/L, x_2)</pre>
       <link href="http://lazovichsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My adventures during GSoC 2011</subtitle>
       <title>Tomo Lazovich's SymPy Blog</title>
-      <updated>2012-06-03T21:00:13Z</updated>
+      <updated>2012-06-03T22:20:12Z</updated>
     </source>
   </entry>
 
@@ -2257,7 +2295,7 @@ Wavefunction(-2**(1/2)*hbar*I*pi*n*(1/L)**(1/2)*cos(pi*n*x_2/L)/L, x_2)</pre>
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>gilbertgede</title>
-      <updated>2012-06-03T21:00:12Z</updated>
+      <updated>2012-06-03T22:20:11Z</updated>
     </source>
   </entry>
 
@@ -2290,7 +2328,7 @@ Wavefunction(-2**(1/2)*hbar*I*pi*n*(1/L)**(1/2)*cos(pi*n*x_2/L)/L, x_2)</pre>
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-06-03T21:00:15Z</updated>
+      <updated>2012-06-03T22:20:14Z</updated>
     </source>
   </entry>
 
@@ -2339,7 +2377,7 @@ Wavefunction(-2**(1/2)*hbar*I*pi*n*(1/L)**(1/2)*cos(pi*n*x_2/L)/L, x_2)</pre>
     <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Time flies by … I feel like I just started hyperexpand() yesterday (not quite actually; but you get the idea *g*). I’ve been moving around this week, so I wasn’t terribly productive so far. I did, however, compute (reasonably) neat representations for all the <img alt="{}_pF_{p-1}" class="latex" src="http://s0.wp.com/latex.php?latex=%7B%7D_pF_%7Bp-1%7D&amp;bg=FFFFFF&amp;fg=000000&amp;s=0" title="{}_pF_{p-1}"/> in the hyperexpand() table. These <a href="http://pastebin.com/raw.php?i=fv9BNEMe">examples</a> demonstrate the kind of neat answers this can yield (compare to some of the examples from last week) [actually the tables contain some much more complicated functions, but I was not yet able to come up with interesting integrals that yield these answers *g*].</p>
 <p>My final plan, beyond mere cleanup and bugfixing, is to do something along the way of simplifying convergence conditions. This won’t be anything fancy (I’m thinking of peep-hole optimisation); my goal is to make mess like the <a href="http://pastebin.com/raw.php?i=dYdgefP9">following</a> somewhat less horrific. I hope to have a final pull request ready by sunday night. Then I will finally slow down and relax; work towards merging my branches; perhaps review some other GSOC pull requests.</p>
 <p>Quite a summer.</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/nessgrh.wordpress.com/366/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/nessgrh.wordpress.com/366/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/nessgrh.wordpress.com/366/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/nessgrh.wordpress.com/366/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/nessgrh.wordpress.com/366/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/nessgrh.wordpress.com/366/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/nessgrh.wordpress.com/366/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/nessgrh.wordpress.com/366/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/nessgrh.wordpress.com/366/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/nessgrh.wordpress.com/366/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/nessgrh.wordpress.com/366/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/nessgrh.wordpress.com/366/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/nessgrh.wordpress.com/366/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/nessgrh.wordpress.com/366/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=nessgrh.wordpress.com&amp;blog=22546379&amp;post=366&amp;subd=nessgrh&amp;ref=&amp;feed=1" width="1"/><div class="sharedaddy sd-like-enabled"/></div>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/nessgrh.wordpress.com/366/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/nessgrh.wordpress.com/366/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/nessgrh.wordpress.com/366/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/nessgrh.wordpress.com/366/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/nessgrh.wordpress.com/366/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/nessgrh.wordpress.com/366/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/nessgrh.wordpress.com/366/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/nessgrh.wordpress.com/366/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/nessgrh.wordpress.com/366/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/nessgrh.wordpress.com/366/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/nessgrh.wordpress.com/366/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/nessgrh.wordpress.com/366/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/nessgrh.wordpress.com/366/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/nessgrh.wordpress.com/366/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=nessgrh.wordpress.com&amp;blog=22546379&amp;post=366&amp;subd=nessgrh&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
     <updated>2011-08-12T18:22:27Z</updated>
     <category term="Uncategorized"/>
@@ -2355,42 +2393,7 @@ Wavefunction(-2**(1/2)*hbar*I*pi*n*(1/L)**(1/2)*cos(pi*n*x_2/L)/L, x_2)</pre>
       <link href="http://nessgrh.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My GSoC Project</subtitle>
       <title>nessgrh</title>
-      <updated>2012-06-03T21:00:11Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://f1728.wordpress.com/?p=234</id>
-    <link href="http://f1728.wordpress.com/2011/08/12/week-12/" rel="alternate" type="text/html"/>
-    <title>Week 12</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Hi everyone, welcome to one of the last updates. This week I finally finished FGLM without having to use solve, which makes it quite fast. The problem I had was the following: Suppose you’re given a sequence of non-zero vectors one after the other. You know of them are linearly independant and thus you consider [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=f1728.wordpress.com&amp;blog=22515617&amp;post=234&amp;subd=f1728&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Hi everyone, welcome to one of the last updates. This week I finally finished FGLM without having to use <code>solve</code>, which makes it quite fast. The problem I had was the following:</p>
-<p>Suppose you’re given a sequence of non-zero vectors <img alt="v_1 = (1, 0, \ldots, 0)^t, \ldots, v_r" class="latex" src="http://s0.wp.com/latex.php?latex=v_1+%3D+%281%2C+0%2C+%5Cldots%2C+0%29%5Et%2C+%5Cldots%2C+v_r&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="v_1 = (1, 0, \ldots, 0)^t, \ldots, v_r"/> one after the other. You know <img alt="n &lt; r" class="latex" src="http://s0.wp.com/latex.php?latex=n+%3C+r&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="n &lt; r"/> of them are linearly independant and thus you consider them to be a basis of the spanned space. Now you would like to iteratively determine of a new vector <img alt="v_s" class="latex" src="http://s0.wp.com/latex.php?latex=v_s&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="v_s"/> is linearly dependant on <img alt="v_1, \ldots, v_{s-1}" class="latex" src="http://s0.wp.com/latex.php?latex=v_1%2C+%5Cldots%2C+v_%7Bs-1%7D&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="v_1, \ldots, v_{s-1}"/> and if not, add it to your basis.<br/>
-You could do this by solving the following system <img alt="\sum_{i=1}^{s-1} \lambda_i v_i = v_s" class="latex" src="http://s0.wp.com/latex.php?latex=%5Csum_%7Bi%3D1%7D%5E%7Bs-1%7D+%5Clambda_i+v_i+%3D+v_s&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="\sum_{i=1}^{s-1} \lambda_i v_i = v_s"/> but this will be a relatively expensive operation and it can be done better:</p>
-<p>Let <img alt="P" class="latex" src="http://s0.wp.com/latex.php?latex=P&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="P"/> be the <img alt="n \times n" class="latex" src="http://s0.wp.com/latex.php?latex=n+%5Ctimes+n&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="n \times n"/> identity matrix. At the beginning, it maps <img alt="v_1" class="latex" src="http://s0.wp.com/latex.php?latex=v_1&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="v_1"/> to <img alt="P v_1 = v_1 = e_1" class="latex" src="http://s0.wp.com/latex.php?latex=P+v_1+%3D+v_1+%3D+e_1&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="P v_1 = v_1 = e_1"/>, which is correct.</p>
-<p>Suppose now, that <img alt="P \tilde{v}_i = e_i" class="latex" src="http://s0.wp.com/latex.php?latex=P+%5Ctilde%7Bv%7D_i+%3D+e_i&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="P \tilde{v}_i = e_i"/> for all <img alt="i \in \{1, \ldots, s-1\}" class="latex" src="http://s0.wp.com/latex.php?latex=i+%5Cin+%5C%7B1%2C+%5Cldots%2C+s-1%5C%7D&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="i \in \{1, \ldots, s-1\}"/>, then the following can occur: Either <img alt="P \tilde{v}_s" class="latex" src="http://s0.wp.com/latex.php?latex=P+%5Ctilde%7Bv%7D_s&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="P \tilde{v}_s"/> has no non-zero entries after the <img alt="s-1" class="latex" src="http://s0.wp.com/latex.php?latex=s-1&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="s-1"/>-th, which means that <img alt="\tilde{v}_s" class="latex" src="http://s0.wp.com/latex.php?latex=%5Ctilde%7Bv%7D_s&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="\tilde{v}_s"/> is an element of the vector space spanned by <img alt="\{\tilde{v}_1, \ldots, \tilde{v}_{s-1}\}" class="latex" src="http://s0.wp.com/latex.php?latex=%5C%7B%5Ctilde%7Bv%7D_1%2C+%5Cldots%2C+%5Ctilde%7Bv%7D_%7Bs-1%7D%5C%7D&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="\{\tilde{v}_1, \ldots, \tilde{v}_{s-1}\}"/> and thus can be discarded, or it has a non-zero entry after the <img alt="s-1" class="latex" src="http://s0.wp.com/latex.php?latex=s-1&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="s-1"/>-th and is thus linearly independant from the previous vectors.<br/>
-Now I’d like to update <img alt="P" class="latex" src="http://s0.wp.com/latex.php?latex=P&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="P"/>, such that <img alt="P \tilde{v}_i = e_i" class="latex" src="http://s0.wp.com/latex.php?latex=P+%5Ctilde%7Bv%7D_i+%3D+e_i&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="P \tilde{v}_i = e_i"/> for all <img alt="i \in \{1, \ldots, s\}" class="latex" src="http://s0.wp.com/latex.php?latex=i+%5Cin+%5C%7B1%2C+%5Cldots%2C+s%5C%7D&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="i \in \{1, \ldots, s\}"/>. Let <img alt="k" class="latex" src="http://s0.wp.com/latex.php?latex=k&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="k"/> be the smallest index greater than <img alt="s" class="latex" src="http://s0.wp.com/latex.php?latex=s&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="s"/> such that <img alt="(P \tilde{v}_s)_k" class="latex" src="http://s0.wp.com/latex.php?latex=%28P+%5Ctilde%7Bv%7D_s%29_k&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="(P \tilde{v}_s)_k"/> is non-zero and <img alt="\lambda = P \tilde{v}_s" class="latex" src="http://s0.wp.com/latex.php?latex=%5Clambda+%3D+P+%5Ctilde%7Bv%7D_s&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="\lambda = P \tilde{v}_s"/>. Then</p>
-<p><img alt="P_{i,j} = \begin{cases} \frac{P_{k, j}}{\lambda_k}  &amp; \mbox{if } i = s\\ P_{s,j} - \frac{P_{k,j}}{\lambda_k} \lambda_i  &amp; \mbox{if } i = k\\ P_{i,j} - \frac{P_{k,j}}{\lambda_k} \lambda{i}  &amp; \mbox{otherwise}\end{cases}" class="latex" src="http://s0.wp.com/latex.php?latex=P_%7Bi%2Cj%7D+%3D+%5Cbegin%7Bcases%7D+%5Cfrac%7BP_%7Bk%2C+j%7D%7D%7B%5Clambda_k%7D++%26+%5Cmbox%7Bif+%7D+i+%3D+s%5C%5C+P_%7Bs%2Cj%7D+-+%5Cfrac%7BP_%7Bk%2Cj%7D%7D%7B%5Clambda_k%7D+%5Clambda_i++%26+%5Cmbox%7Bif+%7D+i+%3D+k%5C%5C+P_%7Bi%2Cj%7D+-+%5Cfrac%7BP_%7Bk%2Cj%7D%7D%7B%5Clambda_k%7D+%5Clambda%7Bi%7D++%26+%5Cmbox%7Botherwise%7D%5Cend%7Bcases%7D&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="P_{i,j} = \begin{cases} \frac{P_{k, j}}{\lambda_k}  &amp; \mbox{if } i = s\\ P_{s,j} - \frac{P_{k,j}}{\lambda_k} \lambda_i  &amp; \mbox{if } i = k\\ P_{i,j} - \frac{P_{k,j}}{\lambda_k} \lambda{i}  &amp; \mbox{otherwise}\end{cases}"/></p>
-<p>This new <img alt="P" class="latex" src="http://s0.wp.com/latex.php?latex=P&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="P"/> has the desired properties (just multiply it with <img alt="\tilde{v}_1, \ldots, \tilde{v}_s" class="latex" src="http://s0.wp.com/latex.php?latex=%5Ctilde%7Bv%7D_1%2C+%5Cldots%2C+%5Ctilde%7Bv%7D_s&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="\tilde{v}_1, \ldots, \tilde{v}_s"/>). Instead of having to use <code>solve</code>, multiply with <img alt="P" class="latex" src="http://s0.wp.com/latex.php?latex=P&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="P"/> and look if enough coefficients at the end are <img alt="0" class="latex" src="http://s0.wp.com/latex.php?latex=0&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="0"/>, if so, the vector is linearly dependant on the previous, if not, add it to the basis and update the matrix <img alt="P" class="latex" src="http://s0.wp.com/latex.php?latex=P&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="P"/>.</p>
-<p>Being reluctant and not thinking about this thoroughly before trying to write code cost a lot of time. :/</p>
-<p>Anyway, other than FGLM I wrote some documentation (which was overdue… sorry) and tried to improve rational simplification a bit (without much success).</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/f1728.wordpress.com/234/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/f1728.wordpress.com/234/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/f1728.wordpress.com/234/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/f1728.wordpress.com/234/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/f1728.wordpress.com/234/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/f1728.wordpress.com/234/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/f1728.wordpress.com/234/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/f1728.wordpress.com/234/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/f1728.wordpress.com/234/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/f1728.wordpress.com/234/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/f1728.wordpress.com/234/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/f1728.wordpress.com/234/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/f1728.wordpress.com/234/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/f1728.wordpress.com/234/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=f1728.wordpress.com&amp;blog=22515617&amp;post=234&amp;subd=f1728&amp;ref=&amp;feed=1" width="1"/><div class="sharedaddy"/></div>
-    </content>
-    <updated>2011-08-12T15:40:02Z</updated>
-    <category term="SymPy"/>
-    <author>
-      <name>f1728</name>
-    </author>
-    <source>
-      <id>http://f1728.wordpress.com</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://f1728.wordpress.com/category/SymPy/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://f1728.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://f1728.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://f1728.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <title>f1728 » SymPy</title>
-      <updated>2011-08-12T15:40:14Z</updated>
+      <updated>2012-06-03T22:20:10Z</updated>
     </source>
   </entry>
 </feed>
