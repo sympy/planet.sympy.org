@@ -23,6 +23,69 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>June 07, 2012</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://amakelov.wordpress.com" title="Not really blogging">Aleksandar Makelov</a></h3>
+
+
+<div class="entrygroup" id="http://amakelov.wordpress.com/?p=34">
+<h4 lang="en"><a href="http://amakelov.wordpress.com/2012/06/07/gsoc-setting-up-the-environment/">GSoC: Setting up the environment</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p><em><strong>A guide from a newbie</strong></em></p>
+<p>So you’re gonna be coding? Well, coding and Linux go really well together… they say.</p>
+<p>But if you like how everything in Windows seems to work without you thinking too much about it, don’t despair!</p>
+<p>Because there are these amazing things called <a href="http://en.wikipedia.org/wiki/Virtual_machine" target="_blank">virtual machines</a> that allow you to run two operating systems simultaneously on the same computer…</p>
+<p>wait what?!… Yes, this is possible. Actually, the idea turns out to be quite <a href="http://www.extremetech.com/computing/72186-virtual-machines-vmware-part-i/2" target="_blank">old</a>, and, it seems, backed up by some fairly sophisticated <a href="http://developers.slashdot.org/story/02/06/25/1223234/virtual-machine-design-and-implementation-in-cc" target="_blank">theory</a> (so it’s not surprising that virtual machines feel like <a href="http://www.quotationspage.com/quote/776.html" target="_blank">magic</a>).</p>
+<p>I personally use the <a href="http://en.wikipedia.org/wiki/Hypervisor" target="_blank">hypervisor </a><a href="https://www.virtualbox.org/" target="_blank">Virtual Box</a> and the <a href="http://en.wikipedia.org/wiki/Ubuntu_%28operating_system%29" target="_blank">Ubuntu</a> operating system as a guest OS. The following simple <a href="http://www.psychocats.net/ubuntu/virtualbox" target="_blank">guide</a> got Ubuntu installed and running inside the VM in about half an hour. It is important to decide how you’re going to split your machine’s resources between the host OS and the guest OS, mainly the CPU and RAM, but you can always revert the changes if you find something is not quite balanced. I have the following on my machine:</p>
+<p>CPU: Intel Core i3 M 350 @ 2.27 GHz</p>
+<p>RAM: 4.00 GB</p>
+<p>ATI Mobility Radeon HD 5145 512 MB</p>
+<p style="text-align: right;">running under Windows 7.</p>
+<p>I assigned as much as I could to my VM, this being 1.75GB of RAM, 2 CPUs and 128MB of video memory. It has been running pretty smoothly for all my programming/web browsing purposes so far (unless when I try to compute something ridiculously huge, but that’s sort of expected); the host OS is also performing smoothly for web browsing, and that’s quite enough for me at the moment.</p>
+<p>Next, you <em>want </em>to get the <a href="http://www.virtualbox.org/manual/ch04.html" target="_blank">guest additions installed</a> because they make the VM seem even more magical (and, what is probably more important from a practical perspective, more user-friendly).</p>
+<p>Setting up <strong>shared folders</strong> is also really convenient – and changing the contents of the folder in one OS can immediately be seen in the other (see? <a href="http://www.youtube.com/watch?v=YWf5BLUOhNM&amp;ob=av2n" target="_blank">magic!</a>). It took me some time to figure out the cryptic command</p>
+<p><code>mount -t vboxsf [-o OPTIONS] sharename mountpoint</code></p>
+<p>found in the Shared Folders menu of VirtualBox, but, in short, what you have to do is open a terminal in your Ubuntu guest OS and use</p>
+<p><code>sudo mount -t vboxsf sharename path</code></p>
+<p>where sharename is only <strong>the name</strong> of your shared folder as you created <strong>in your host OS</strong> (for me, it is in the C:\Users\Username\.VirtualBox folder, so for example if you want to share C:\Users\Username\.VirtualBox\shared you should use shared for sharename), and path is the full path, relative to your home directory, to the folder as which you want the shared folder to appear <strong>in your guest OS</strong>. Be careful, since mounting the shared folder will <strong>erase</strong> whatever there is in the folder pointed to by path (this happened to me once, but restarting the guest OS undid the changes). Also, the folder pointed to by path must exist by the time of mounting.</p>
+<p>Next, the <strong>coding tools</strong>. For editing code, I shamelessly use gedit that comes with Ubuntu (probably a very bad idea in general, but we’ll see where this is goes). Since I’m writing code for a large enough project to care about trailing whitespace and stuff, I found the following <a href="https://gitorious.org/gedit-trailing-spaces" target="_blank">two</a> <a href="https://github.com/jonleighton/gedit-trailsave" target="_blank">plugins</a> really helpful for automatically getting rid of these brats – you can download them directly from the git repository and copy the relevant files in the relevant folders, as per <a href="https://live.gnome.org/Gedit/Plugins" target="_blank">this</a>).</p>
+<p>Which leads us to version control, and <a href="http://en.wikipedia.org/wiki/Git_%28software%29" target="_blank"><strong>git</strong></a>. I don’t really know git, but I’m getting used to it, and the following <a href="http://gitref.org/" target="_blank">reference</a> has been helpful so far (though it doesn’t provide information about some of the more advanced commands). Beyond that, you should basically scream for help, google stuff if you’re not sure, and, most importantly, get your hands on it (this approach seems to work for a surprising number of things in life).</p>
+<p>And finally, <a href="http://www.youtube.com/watch?v=anwy2MPT5RE" target="_blank"><strong>python</strong></a>. I recently started using the <a href="https://github.com/ipython/ipython" target="_blank">ipython</a> interpreter (you can download the development version from github, or a stable release from their <a href="http://ipython.org/" target="_blank">website</a>). It has some really nice features, for example</p>
+<p><code>%load_ext autoreload</code></p>
+<p><code>%autoreload</code></p>
+<p>reloads the modules currently imported so that any changes made after the interpreter was started are taken into account. Or<br />
+<code><br />
+%timeit(my_function())</code></p>
+<p>which runs some function my_function() several times to record the time of computation more precisely.</p>
+<p>Well, that’s it for now. If I find any other useful additions to my environment, or anything nontrivial that I had to do in order to make my life as a programmer easier, I’ll try to put it up here, for my own reference and for anyone who may be struggling with the same problems.</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/amakelov.wordpress.com/34/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/amakelov.wordpress.com/34/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godelicious/amakelov.wordpress.com/34/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/delicious/amakelov.wordpress.com/34/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/amakelov.wordpress.com/34/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/facebook/amakelov.wordpress.com/34/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/amakelov.wordpress.com/34/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/twitter/amakelov.wordpress.com/34/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gostumble/amakelov.wordpress.com/34/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/stumble/amakelov.wordpress.com/34/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godigg/amakelov.wordpress.com/34/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/digg/amakelov.wordpress.com/34/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/goreddit/amakelov.wordpress.com/34/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/reddit/amakelov.wordpress.com/34/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;blog=35896871&amp;post=34&amp;subd=amakelov&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://amakelov.wordpress.com/2012/06/07/gsoc-setting-up-the-environment/">by amakelov at June 07, 2012 06:54 PM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>June 03, 2012</h2>
 
 <div class="channelgroup">
@@ -2599,7 +2662,7 @@ x**(S(4)/5)
 <p>A beautiful summer is coming to an end and I am at the last leg of my Gsoc. I must apologize for the erratic posts but its mostly because I was “busy” with other things (mostly enjoying myself in the US of A, eating steaks, going out for barbecues, and enjoying the beautiful Maryland summer weather.)</p>
 <p>In the last few weeks I spent a bit of time cleaning up Gray code. It went through a few API changes and I hope to have the subsets and partitions branches merged in within this week. I also implemented a demo of the Permutations branch that involves Polyhedron rotations. I hope to show one involving a Rubik’s cube when I have the Permutation group module in (more on that in a while). I also implemented a residue class and a residue group module as that was missing in the number theory branch of Sympy. That branch needs an overhaul both in terms of functionality as well as the code that is already there and I hope I can get some momentum going in that direction with the code I have written. I also wrote some generators for Permutation groups. This is fairly easy to do now, the basic algorithm is to generate all permutations and filter out those that do not fit the criteria. Of course, generating all permutations is inefficient, and some generators have certain special properties that we can use. For example, the Cyclic group can be generated in linear time as that simply involves a single rotation. Alternating group however requires the generation of all even permutations. Some group generators will probably make use of the specialized algorithms that have been implemented in the iterables section of Sympy.</p>
 <p>I have also managed to implement the Schreier sims algorithm but its extremely ugly and unpythonic for now. Algorithms for generating orbits and stabilizer chains are also there but they are fairly inefficient. I hope to clean them up and submit them for a pull request in this week before the hard pencils down date.</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godelicious/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/delicious/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/facebook/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/twitter/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gostumble/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/stumble/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godigg/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/digg/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/goreddit/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/reddit/saptman.wordpress.com/32/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=saptman.wordpress.com&amp;blog=23040289&amp;post=32&amp;subd=saptman&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /><div class="sharedaddy sd-like-enabled"></div></div>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godelicious/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/delicious/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/facebook/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/twitter/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gostumble/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/stumble/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godigg/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/digg/saptman.wordpress.com/32/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/goreddit/saptman.wordpress.com/32/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/reddit/saptman.wordpress.com/32/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=saptman.wordpress.com&amp;blog=23040289&amp;post=32&amp;subd=saptman&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -2784,45 +2847,6 @@ The biggest development this week was working out what is needed to get the coup
 </div>
 
 </div>
-<div class="daygroup">
-<h2>August 12, 2011</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://nessgrh.wordpress.com" title="nessgrh">Tom Bachmann</a></h3>
-
-
-<div class="entrygroup" id="http://nessgrh.wordpress.com/?p=366">
-<h4 lang="en"><a href="http://nessgrh.wordpress.com/2011/08/12/last-status-update-probably/">Last Status Update (Probably)</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>Time flies by … I feel like I just started hyperexpand() yesterday (not quite actually; but you get the idea *g*). I’ve been moving around this week, so I wasn’t terribly productive so far. I did, however, compute (reasonably) neat representations for all the <img src="http://s0.wp.com/latex.php?latex=%7B%7D_pF_%7Bp-1%7D&amp;bg=FFFFFF&amp;fg=000000&amp;s=0" alt="{}_pF_{p-1}" class="latex" title="{}_pF_{p-1}" /> in the hyperexpand() table. These <a href="http://pastebin.com/raw.php?i=fv9BNEMe">examples</a> demonstrate the kind of neat answers this can yield (compare to some of the examples from last week) [actually the tables contain some much more complicated functions, but I was not yet able to come up with interesting integrals that yield these answers *g*].</p>
-<p>My final plan, beyond mere cleanup and bugfixing, is to do something along the way of simplifying convergence conditions. This won’t be anything fancy (I’m thinking of peep-hole optimisation); my goal is to make mess like the <a href="http://pastebin.com/raw.php?i=dYdgefP9">following</a> somewhat less horrific. I hope to have a final pull request ready by sunday night. Then I will finally slow down and relax; work towards merging my branches; perhaps review some other GSOC pull requests.</p>
-<p>Quite a summer.</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/nessgrh.wordpress.com/366/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/nessgrh.wordpress.com/366/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godelicious/nessgrh.wordpress.com/366/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/delicious/nessgrh.wordpress.com/366/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/nessgrh.wordpress.com/366/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/facebook/nessgrh.wordpress.com/366/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/nessgrh.wordpress.com/366/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/twitter/nessgrh.wordpress.com/366/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gostumble/nessgrh.wordpress.com/366/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/stumble/nessgrh.wordpress.com/366/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godigg/nessgrh.wordpress.com/366/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/digg/nessgrh.wordpress.com/366/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/goreddit/nessgrh.wordpress.com/366/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/reddit/nessgrh.wordpress.com/366/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=nessgrh.wordpress.com&amp;blog=22546379&amp;post=366&amp;subd=nessgrh&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /><div class="sharedaddy sd-like-enabled"></div></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://nessgrh.wordpress.com/2011/08/12/last-status-update-probably/">by nessgrh at August 12, 2011 06:22 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -2921,7 +2945,7 @@ The biggest development this week was working out what is needed to get the coup
 <a href="http://lazovichsympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://lazovichsympy.wordpress.com" class="message" title="no activity in 7 days">Tomo Lazovich</a>
 </li>
 <li>
-<a href="http://www.vperic.blogspot.com/feeds/posts/default/-/SymPy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://vperic.blogspot.com/search/label/SymPy" class="message" title="no activity in 7 days">Vladimir Perić</a>
+<a href="http://www.blogger.com/feeds/8814696591561172392/posts/default/-/SymPy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://vperic.blogspot.com/search/label/SymPy" class="message" title="no activity in 7 days">Vladimir Perić</a>
 </li>
 <li>
 <a href="http://ojensen.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://ojensen.wordpress.com" class="message" title="no activity in 7 days">Øyvind Jensen</a>
@@ -2930,7 +2954,7 @@ The biggest development this week was working out what is needed to get the coup
 
 <p>
 <strong>Last updated:</strong><br>
-June 07, 2012 06:20 PM<br>
+June 07, 2012 07:20 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
