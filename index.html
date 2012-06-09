@@ -23,6 +23,55 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>June 09, 2012</h2>
+
+
+
+<div class="entrygroup" id="http://catchmrbharath.github.com/programming/2012/06/09/gsoc-week-3">
+<h4><a href="http://catchmrbharath.github.com/programming/2012/06/09/gsoc-week-3">GSoC Week 3</a></h4>
+<div class="entry">
+<div class="content">
+<p>I have almost finished with the basic framework of implicit plotting based on interval arithmetic. The module implements both continuity tracking and domain tracking. Hence it does not plot points which are not there in the domain of the function. The functionalities are best illustrated by plots. There are also a couple of limitations that I encountered, which I think is difficult to avoid. I will illustrate both the functionality and the problems through plots.</p>
+<img width="600" src="http://catchmrbharath.github.com/images/09062012/img1.png" height="400" />
+<p>The above image illustrates a plot which does domain tracking and continuity tracking. It is not possible for interval arithmetic without tracking, to decide whether to draw the plots near zero. But with continuity tracking we get an accurate plot.</p>
+<img width="600" src="http://catchmrbharath.github.com/images/09062012/img2.png" height="400" />
+<p>The above plot is that of $y = \frac{1}{\tan{\left (x \right )}}$ . It is possible to see the small discontinuity near multiples of $\pi / 2$ as $\pi / 2$ is not there in the domain of the expression.</p>
+<img width="600" src="http://catchmrbharath.github.com/images/09062012/img3.png" height="400" />
+<p>The above plot illustrates how sqrt does not plot anything outside its domain. Even though it appears not that significant, it becomes significant when the huge expression is provided as the argument to the function.</p>
+
+<p><strong>Illustrations of more plots</strong></p>
+
+<p>Plot of $y^{2}=x^{3}-x$ <img width="600" src="http://catchmrbharath.github.com/images/09062012/img4.png" height="400" /></p>
+<img width="600" src="http://catchmrbharath.github.com/images/09062012/img5.png" height="400" />
+<p>The above plot took 19.26 seconds to render.</p>
+
+<h2 id="problems">Problems</h2>
+
+<p>The problem with plots using interval arithmetic is that the errors increases with the length of the expression as the it takes the lowest and the uppermost bounds. It is possible to see the effect of errors in the following plot. It is possible to see the line thickens when the expression reaches a maximum or an minimum. This is due to the error creeping in. The interval becomes wide even at the smallest of the x interval.</p>
+<img width="600" src="http://catchmrbharath.github.com/images/09062012/img6.png" height="400" />
+<p>It is better illustrated in the plot below. It is possible to see the width of the line increasing and then decreasing. <img width="600" src="http://catchmrbharath.github.com/images/09062012/img7.png" height="400" /></p>
+
+<p>Then next problem is that of rasterization. In order to avoid rasterization I tried using the Matplotlib’s <code>contourf</code> function which implements the marching squares algorithm. Though it smoothens the curves, still there is fair bit of rasterization. The plot below is a zoomed version of $y=sin(x)$ <img width="600" src="http://catchmrbharath.github.com/images/09062012/img8.png" height="400" /></p>
+
+<p>Presently the plotting function supports plotting of expressions containing <code>cos</code>, <code>sin</code>, <code>tan</code>, <code>exp</code>, <code>log</code>, <code>sqrt</code>, <code>atan</code>. Implementing more functions is fairly easy. I should be able to finish most of the expressions that can be implemented in the next week. I will look into implementing plotting implicit equations for expressions which cannot be implemented using interval arithmetic.</p></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://catchmrbharath.github.com/programming/2012/06/09/gsoc-week-3">June 09, 2012 07:00 AM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>June 08, 2012</h2>
 
 <div class="channelgroup">
@@ -2824,47 +2873,6 @@ Wavefunction(-2**(1/2)*hbar*I*pi*n*(1/L)**(1/2)*cos(pi*n*x_2/L)/L, x_2)</pre>
 </div>
 
 </div>
-<div class="daygroup">
-<h2>August 13, 2011</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://gilbertgede.wordpress.com" title="gilbertgede">Gilbert Gede</a></h3>
-
-
-<div class="entrygroup" id="http://gilbertgede.wordpress.com/?p=82">
-<h4 lang="en"><a href="http://gilbertgede.wordpress.com/2011/08/13/gsoc-week-12/">GSoC, Week 12</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>Well, this past week was the final “full” week of the 2011 Google Summer of Code. The ‘soft’ pencils down date is Monday.</p>
-<p>This week, I mostly rewrote interfaces to some functions and classes. I should probably go back through previous blog posts and update those to show how they are different, so if anyone comes across this in the future, there won’t be example code which doesn’t work. I also tried to finish up the documentation this week. I decided a little late in the week to add another page, a “advanced/future interfaces” page, to describe how some functions/classes have different interfaces (and their advantages/disadvantages) as well as some discussed extensions to the current interface (that probably won’t be implemented right now). Some of these things were: more ways to access basis vectors, more printing options, and more ways to initialize the Kane object. Like I said, I don’t think I’ll be able to implement these now. I think I’ll try and do those three things this Fall though.</p>
-<p>I also went through an example of bringing non-contributing forces into evidence (I discussed this topic a little in last week’s blog post). With the changes to the Kane interface it has ended up working out quite nicely. I put some code for this into the examples section, so hopefully it will be relatively easy for others to figure out. I didn’t make as much progress as I’d like with the code output function, but I think it can do an adequate job at the moment. I also spent most of a day rebasing all of my code of the latest master. I’m not sure what I did wrong, but somehow, I managed to get double commits again, so I took care of this. I think it might have been how I branched, rebased on one branch, then merged? It took some time to sort out.</p>
-<p>I see there being two more things to do. The first is updating the images I have in the documentation; they’re all hand-drawn and of low quality. I plan on spending a little time this weekend on that, as well as Monday. The other thing is updating my pull request, getting others to look at it, and making necessary changes (and hopefully during this time, I’ll be able to check out other people’s pull requests and help them). Working with the pull request will probably take longer than updating the images…</p>
-<p>Anyways, this is the last required blog post, but I think I’ll do at least one more as part of the Summer of Code, to wrap things up, and maybe introduce one more example.</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/gilbertgede.wordpress.com/82/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/gilbertgede.wordpress.com/82/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godelicious/gilbertgede.wordpress.com/82/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/delicious/gilbertgede.wordpress.com/82/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/gilbertgede.wordpress.com/82/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/facebook/gilbertgede.wordpress.com/82/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/gilbertgede.wordpress.com/82/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/twitter/gilbertgede.wordpress.com/82/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gostumble/gilbertgede.wordpress.com/82/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/stumble/gilbertgede.wordpress.com/82/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godigg/gilbertgede.wordpress.com/82/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/digg/gilbertgede.wordpress.com/82/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/goreddit/gilbertgede.wordpress.com/82/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/reddit/gilbertgede.wordpress.com/82/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=gilbertgede.wordpress.com&amp;blog=22677911&amp;post=82&amp;subd=gilbertgede&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /><div class="sharedaddy sd-like-enabled"></div></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://gilbertgede.wordpress.com/2011/08/13/gsoc-week-12/">by gilbertgede at August 13, 2011 03:46 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -2972,7 +2980,7 @@ Wavefunction(-2**(1/2)*hbar*I*pi*n*(1/L)**(1/2)*cos(pi*n*x_2/L)/L, x_2)</pre>
 
 <p>
 <strong>Last updated:</strong><br>
-June 09, 2012 03:20 PM<br>
+June 09, 2012 04:40 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
