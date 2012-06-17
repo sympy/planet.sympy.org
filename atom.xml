@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2012-06-16T22:40:19Z</updated>
+  <updated>2012-06-17T10:00:30Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -20,9 +20,9 @@
     <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Since <a href="https://github.com/sympy/sympy/pull/1338">my implementation</a> of the base classes of category theory has received an “almost good to go” status, I am now fully transitioning into the second stage of <a href="https://github.com/sympy/sympy/wiki/GSoC-2012-Application-Sergiu-Ivanov:-Category-Theory-Module">my project</a>: drawing diagrams.  I expect this stage to be considerably more thrilling since during it I am going to write some actual functionality, i.e., code that does something useful™.</p>
 <p>Well, I guess I don’t really have to expect anything any more, since I am already thrilled: a couple days ago I found an awesome LaTeX package, <a href="http://www.tug.org/applications/Xy-pic/">Xy-pic</a>, which allows typesetting precisely what I need: diagrams with grid-like layout.  This Wikipedia <a href="http://en.wikipedia.org/wiki/File:First_isomorphism_theorem_(plain).svg">page</a> shows how easy it is do produce a commutative diagram with this package.  My initial plan was to go with <a href="http://www.texample.net/tikz/">TikZ</a>, which is also awesome, but it is much better for more general drawing tasks.  With TikZ, it would have been necessary to manually arrange objects in the diagram in a grid, place text over arrows, and decide as to how the arrows should curve.  This is not the most difficult part of the diagram drawing business, but it is always nice to use some stuff which someone else has already done (better).</p>
 <p>In this post I will try to outline how I see the implementation of the diagram drawing functionality now, after I have went through the review process of my first large chunk of code in SymPy.</p>
-<p>According to the <a href="https://github.com/sympy/sympy/wiki/GSoC-2012-Application-Sergiu-Ivanov:-Category-Theory-Module">proposal</a>, the process of drawing a diagram includes two stages.  After the first stage, the matrix which will serve as the outline of the visual representation of the diagram should be constructed.  I plan to have the whole first stage done in the <tt>DiagramOutline</tt> class, which will be constructed from a <tt>Diagram</tt> and will act a lot like a matrix in that it will be possible to see its dimensions and what lies at a position given by rectangular coordinates.  It will also be possible to find out which morphisms connect a certain node in the matrix to other nodes, and whether it is likely that it overlaps with other morphisms or not.  Here the job of <tt>DiagramOutline</tt> ends.  A minor remark is nevertheless due before proceeding to the actual drawing.  In the proposal I stated that certain objects which don’t fit easily in the existing matrix will be arranged in a circle around the existing structure.  I have abolished this, because it will break the idea of typesetting the diagram in a matrix, which makes the whole thing considerably harder to handle.  Instead, these “unfitting” objects will be placed along one of the four edges of the frame of the diagram, while the morphisms going into these objects will be marked with the flag which shows that they may overlap with other morphisms.</p>
-<p>The second stage of the diagram drawing process is actually typesetting the diagram matrix using Xy-pic.  This part should be pretty straightforward, since it is basically about putting the matrix that has resulted from the first stage into an Xy-pic matrix.  I plan to have the second stage of drawing implemented in the class <tt>DiagramOutlineDrawer</tt>.  This class will contain the method <tt>draw_outline</tt>, which will return an Xy-pic representation of a <tt>DiagramOutline</tt>.  The drawer class will have a dictionary of morphism name formatters, which will associate a property to a function of one string argument.  For example, the property “exists” may be associated to a function which prepends its argument with the mathematical symbol “exists”.  The drawer class will also have a dictionary of morphism styles, which will map string properties to arrow styles.  I have also considered taking advantage of the fact that morphism properties are not enforced to be strings, and putting some additional formatting information into those properties.  I am not yet sure that it is necessary, though, so I don’t include this into the plan.</p>
-<p>Now, there are some changes to the timeline in the proposal, which are caused in part by the fact that I have spent so much time on bringing my first pull request up to scratch, and in part by the fact that I now have a slightly different vision on how to implement the drawing.  Thus I plan to spend the coming week, June 18 – June 24, on implementing <tt>DiagramOutline</tt>.  Then, in the next week, June 25 – July 1, I plan to implement <tt>DiagramOutlineDrawer</tt> and extensively test both classes.  The week July 2 – July 8 I reserve for getting my changes merged.  Not that I expect to spend a whole week on this; but I’d rather allocate slightly more time, with some reserve, than make promises which I may fail to fulfill.</p>
+<p>According to the <a href="https://github.com/sympy/sympy/wiki/GSoC-2012-Application-Sergiu-Ivanov:-Category-Theory-Module">proposal</a>, the process of drawing a diagram includes two stages.  After the first stage, the matrix which will serve as the outline of the visual representation of the diagram should be constructed.  I plan to have the whole first stage done in the <tt>DiagramGrid</tt> class, which will be constructed from a <tt>Diagram</tt> and will act a lot like a matrix in that it will be possible to see its dimensions and what lies at a position given by rectangular coordinates.  It will also be possible to find out which morphisms connect a certain node in the matrix to other nodes, and whether it is likely that it overlaps with other morphisms or not.  Here the job of <tt>DiagramGrid</tt> ends.  A minor remark is nevertheless due before proceeding to the actual drawing.  In the proposal I stated that certain objects which don’t fit easily in the existing matrix will be arranged in a circle around the existing structure.  I have abolished this, because it will break the idea of typesetting the diagram in a matrix, which makes the whole thing considerably harder to handle.  Instead, these “unfitting” objects will be placed along one of the four edges of the frame of the diagram, while the morphisms going into these objects will be marked with the flag which shows that they may overlap with other morphisms.</p>
+<p>The second stage of the diagram drawing process is actually typesetting the diagram matrix using Xy-pic.  This part should be pretty straightforward, since it is basically about putting the matrix that has resulted from the first stage into an Xy-pic matrix.  I plan to have the second stage of drawing implemented in the class <tt>DiagramGridDrawer</tt>.  This class will contain the method <tt>draw_outline</tt>, which will return an Xy-pic representation of a <tt>DiagramGrid</tt>.  The drawer class will have a dictionary of morphism name formatters, which will associate a property to a function of one string argument.  For example, the property “exists” may be associated to a function which prepends its argument with the mathematical symbol “exists”.  The drawer class will also have a dictionary of morphism styles, which will map string properties to arrow styles.  I have also considered taking advantage of the fact that morphism properties are not enforced to be strings, and putting some additional formatting information into those properties.  I am not yet sure that it is necessary, though, so I don’t include this into the plan.</p>
+<p>Now, there are some changes to the timeline in the proposal, which are caused in part by the fact that I have spent so much time on bringing my first pull request up to scratch, and in part by the fact that I now have a slightly different vision on how to implement the drawing.  Thus I plan to spend the coming week, June 18 – June 24, on implementing <tt>DiagramGrid</tt>.  Then, in the next week, June 25 – July 1, I plan to implement <tt>DiagramGridDrawer</tt> and extensively test both classes.  The week July 2 – July 8 I reserve for getting my changes merged.  Not that I expect to spend a whole week on this; but I’d rather allocate slightly more time, with some reserve, than make promises which I may fail to fulfill.</p>
 <p>I would like to explicitly remark the fact that the changes to the timeline do not delay the moment when I plan to have the drawing functionality ready.  Therefore I’m still not too far astray from my planned timing <img alt=":-)" class="wp-smiley" src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif"/> </p>
 <br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/200/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/200/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/scolobb.wordpress.com/200/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/scolobb.wordpress.com/200/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/scolobb.wordpress.com/200/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/scolobb.wordpress.com/200/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/scolobb.wordpress.com/200/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/scolobb.wordpress.com/200/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/scolobb.wordpress.com/200/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/scolobb.wordpress.com/200/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/scolobb.wordpress.com/200/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/scolobb.wordpress.com/200/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/scolobb.wordpress.com/200/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/scolobb.wordpress.com/200/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=200&amp;subd=scolobb&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
@@ -45,7 +45,7 @@
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-16T22:40:16Z</updated>
+      <updated>2012-06-17T10:00:18Z</updated>
     </source>
   </entry>
 
@@ -75,7 +75,7 @@
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-16T22:40:17Z</updated>
+      <updated>2012-06-17T10:00:19Z</updated>
     </source>
   </entry>
 
@@ -110,7 +110,7 @@
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-16T22:40:16Z</updated>
+      <updated>2012-06-17T10:00:18Z</updated>
     </source>
   </entry>
 
@@ -153,7 +153,7 @@ sudo python setup.py develop
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-16T22:40:07Z</updated>
+      <updated>2012-06-17T10:00:10Z</updated>
     </source>
   </entry>
 
@@ -188,7 +188,7 @@ sudo python setup.py develop
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging</title>
-      <updated>2012-06-16T22:40:18Z</updated>
+      <updated>2012-06-17T10:00:29Z</updated>
     </source>
   </entry>
 
@@ -237,7 +237,7 @@ sudo python setup.py develop
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-16T22:40:16Z</updated>
+      <updated>2012-06-17T10:00:19Z</updated>
     </source>
   </entry>
 
@@ -274,7 +274,7 @@ sudo python setup.py develop
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-16T22:40:18Z</updated>
+      <updated>2012-06-17T10:00:29Z</updated>
     </source>
   </entry>
 
@@ -316,7 +316,7 @@ sudo python setup.py develop
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-16T22:40:17Z</updated>
+      <updated>2012-06-17T10:00:28Z</updated>
     </source>
   </entry>
 
@@ -343,7 +343,7 @@ sudo python setup.py develop
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-16T22:40:17Z</updated>
+      <updated>2012-06-17T10:00:19Z</updated>
     </source>
   </entry>
 
@@ -401,7 +401,7 @@ sudo python setup.py develop
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging</title>
-      <updated>2012-06-16T22:40:18Z</updated>
+      <updated>2012-06-17T10:00:29Z</updated>
     </source>
   </entry>
 
@@ -454,7 +454,7 @@ sudo python setup.py develop
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging</title>
-      <updated>2012-06-16T22:40:18Z</updated>
+      <updated>2012-06-17T10:00:29Z</updated>
     </source>
   </entry>
 
@@ -512,7 +512,7 @@ sudo python setup.py develop
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-16T22:40:17Z</updated>
+      <updated>2012-06-17T10:00:28Z</updated>
     </source>
   </entry>
 
@@ -558,7 +558,7 @@ sudo python setup.py develop
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging</title>
-      <updated>2012-06-16T22:40:18Z</updated>
+      <updated>2012-06-17T10:00:29Z</updated>
     </source>
   </entry>
 
@@ -605,7 +605,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-16T22:40:18Z</updated>
+      <updated>2012-06-17T10:00:29Z</updated>
     </source>
   </entry>
 
@@ -632,7 +632,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-16T22:40:17Z</updated>
+      <updated>2012-06-17T10:00:19Z</updated>
     </source>
   </entry>
 
@@ -681,7 +681,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-16T22:40:16Z</updated>
+      <updated>2012-06-17T10:00:18Z</updated>
     </source>
   </entry>
 
@@ -826,7 +826,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging</title>
-      <updated>2012-06-16T22:40:18Z</updated>
+      <updated>2012-06-17T10:00:29Z</updated>
     </source>
   </entry>
 
@@ -890,7 +890,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-16T22:40:17Z</updated>
+      <updated>2012-06-17T10:00:28Z</updated>
     </source>
   </entry>
 
@@ -919,7 +919,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-16T22:40:17Z</updated>
+      <updated>2012-06-17T10:00:19Z</updated>
     </source>
   </entry>
 
@@ -974,7 +974,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-16T22:40:18Z</updated>
+      <updated>2012-06-17T10:00:29Z</updated>
     </source>
   </entry>
 
@@ -1002,7 +1002,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-16T22:40:16Z</updated>
+      <updated>2012-06-17T10:00:18Z</updated>
     </source>
   </entry>
 
@@ -1068,7 +1068,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-16T22:40:18Z</updated>
+      <updated>2012-06-17T10:00:29Z</updated>
     </source>
   </entry>
 
@@ -1096,7 +1096,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-16T22:40:17Z</updated>
+      <updated>2012-06-17T10:00:28Z</updated>
     </source>
   </entry>
 
@@ -1173,7 +1173,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-16T22:40:17Z</updated>
+      <updated>2012-06-17T10:00:19Z</updated>
     </source>
   </entry>
 
@@ -1202,7 +1202,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging</title>
-      <updated>2012-06-16T22:40:18Z</updated>
+      <updated>2012-06-17T10:00:29Z</updated>
     </source>
   </entry>
 
@@ -1256,7 +1256,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-16T22:40:17Z</updated>
+      <updated>2012-06-17T10:00:28Z</updated>
     </source>
   </entry>
 
@@ -1322,7 +1322,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-16T22:40:16Z</updated>
+      <updated>2012-06-17T10:00:18Z</updated>
     </source>
   </entry>
 
@@ -1350,7 +1350,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-16T22:40:16Z</updated>
+      <updated>2012-06-17T10:00:18Z</updated>
     </source>
   </entry>
 
@@ -1377,7 +1377,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-16T22:40:18Z</updated>
+      <updated>2012-06-17T10:00:29Z</updated>
     </source>
   </entry>
 
@@ -1496,7 +1496,7 @@ Devanla, Brian Granger (co-mentor Sean Vig)<br/>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-16T22:40:18Z</updated>
+      <updated>2012-06-17T10:00:29Z</updated>
     </source>
   </entry>
 
@@ -1559,7 +1559,7 @@ def _intersect(self, other):
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-06-16T22:40:14Z</updated>
+      <updated>2012-06-17T10:00:17Z</updated>
     </source>
   </entry>
 
@@ -1687,7 +1687,7 @@ def _intersect(self, other):
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-06-16T22:40:14Z</updated>
+      <updated>2012-06-17T10:00:17Z</updated>
     </source>
   </entry>
 
@@ -1845,7 +1845,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-16T22:40:07Z</updated>
+      <updated>2012-06-17T10:00:09Z</updated>
     </source>
   </entry>
 
@@ -1917,7 +1917,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-16T22:40:07Z</updated>
+      <updated>2012-06-17T10:00:09Z</updated>
     </source>
   </entry>
 
@@ -1948,7 +1948,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-16T22:40:07Z</updated>
+      <updated>2012-06-17T10:00:09Z</updated>
     </source>
   </entry>
 
@@ -1995,7 +1995,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-16T22:40:07Z</updated>
+      <updated>2012-06-17T10:00:10Z</updated>
     </source>
   </entry>
 
