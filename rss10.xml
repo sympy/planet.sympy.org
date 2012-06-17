@@ -13,6 +13,7 @@
 
 	<items>
 		<rdf:Seq>
+			<rdf:li rdf:resource="http://krastanov.wordpress.com/?p=336" />
 			<rdf:li rdf:resource="http://scolobb.wordpress.com/?p=200" />
 			<rdf:li rdf:resource="http://angadhsympy.wordpress.com/2012/06/16/gsoc-2012-post-5-35/" />
 			<rdf:li rdf:resource="http://scolobb.wordpress.com/?p=186" />
@@ -72,11 +73,188 @@
 			<rdf:li rdf:resource="http://fseoane.net/blog/?p=1062" />
 			<rdf:li rdf:resource="http://dlpeterson.com/blog/?p=172" />
 			<rdf:li rdf:resource="http://fseoane.net/blog/?p=1048" />
-			<rdf:li rdf:resource="http://fseoane.net/blog/?p=1017" />
 		</rdf:Seq>
 	</items>
 </channel>
 
+<item rdf:about="http://krastanov.wordpress.com/?p=336">
+	<title>Stefan Krastanov: Integral Curves of Vector Fields in SymPy</title>
+	<link>http://krastanov.wordpress.com/2012/06/17/integral-curves-of-vector-fields-in-sympy/</link>
+	<content:encoded>&lt;p&gt;A week or two ago I implemented some basic functionality for work with integral curves of vector fields. However, I needed to make additional changes in other parts of SymPy in order for the ODE solver to work with systems of equations and with initial conditions. I also wanted to get my plotting module merged so I can show some visualizations if necessary.&lt;/p&gt;
+&lt;p&gt;Now that all this is ready (even though not everything is merged in SymPy master) I can show you some of the most basic capabilities implemented in the differential geometry module. First, we start with the boilerplate:&lt;/p&gt;
+&lt;h3&gt;A Simple Field&lt;/h3&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; from sympy.diffgeom import *
+&amp;gt;&amp;gt;&amp;gt; from sympy.diffgeom.Rn import * # This gives me:
+                                    #   - R2_p - the polar coord system
+                                    #   - R2_r - the rectangular coord system
+                                    #   - x,y,r,theta - the base scalar fields
+                                    #   - e_x, ... - the base vector fields
+&amp;gt;&amp;gt;&amp;gt; # Define some fields to play with
+&amp;gt;&amp;gt;&amp;gt; # (these are the same fields, defined in two different ways):
+&amp;gt;&amp;gt;&amp;gt; vector_field_circular_p = R2_p.e_theta
+&amp;gt;&amp;gt;&amp;gt; vector_field_circular_r = -R2.y*R2.e_x + R2.x*R2.e_y
+&amp;gt;&amp;gt;&amp;gt; # Define the same point in two different ways
+&amp;gt;&amp;gt;&amp;gt; point_p = R2_p.point([1,pi/2])
+&amp;gt;&amp;gt;&amp;gt; point_r = R2_r.point([0,1])
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;p&gt;The r index is for rectangular coordinate systems and the p index is for polar.&lt;/p&gt;
+&lt;p&gt;Now using &lt;code&gt;intcurve_diffequ&lt;/code&gt; we can generate the differential equations for the integral curve. This function also generates the required initial conditions:&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; #        vector field      free parameter for    starting point
+&amp;gt;&amp;gt;&amp;gt; #                  |        the curve     |     /          coord system
+&amp;gt;&amp;gt;&amp;gt; #                  v                      v    v      v-- for the equation
+&amp;gt;&amp;gt;&amp;gt; intcurve_diffequ(vector_field_circular_p, t, point_p, R2_p)
+   d            d
+([ ──(f₀(t)),   ──(f₁(t)) - 1  ],
+   dt           dt
+
+                        π
+ [f₀(0) - 1,    f₁(0) - ─      ])
+                        2
+
+&amp;gt;&amp;gt;&amp;gt; intcurve_diffequ(vector_field_circular_p, t, point_p, R2_r)
+           d                     d
+([ f₁(t) + ──(f₀(t)),   -f₀(t) + ──(f₁(t))  ],
+           dt                    dt
+
+ [ f₀(0),               f₁(0) - 1           ])
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;p&gt;Here we have equations for the functions &lt;img src=&quot;http://s0.wp.com/latex.php?latex=f_0&amp;amp;bg=f3f3f3&amp;amp;fg=888888&amp;amp;s=0&quot; alt=&quot;f_0&quot; class=&quot;latex&quot; title=&quot;f_0&quot; /&gt; and &lt;img src=&quot;http://s0.wp.com/latex.php?latex=f_1&amp;amp;bg=f3f3f3&amp;amp;fg=888888&amp;amp;s=0&quot; alt=&quot;f_1&quot; class=&quot;latex&quot; title=&quot;f_1&quot; /&gt; which are by convention the names that &lt;code&gt;intcurve_diffequ&lt;/code&gt; gives for the first and second coordinate.&lt;/p&gt;
+&lt;p&gt;The cool thing is that we can mix the coordinate systems in any way we wish. The code will automatically make the needed coordinate transformation and return the equations in the demanded coordinate system independently of the coordinate systems in which the input objects were defined (at worst you will need to call some simplification routines):&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; a = intcurve_diffequ(vector_field_circular_p, t, point_p, R2_r)
+&amp;gt;&amp;gt;&amp;gt; a == intcurve_diffequ(vector_field_circular_p, t, point_r, R2_r)
+True
+&amp;gt;&amp;gt;&amp;gt; a == intcurve_diffequ(vector_field_circular_r, t, point_r, R2_r)
+True
+&amp;gt;&amp;gt;&amp;gt; a == intcurve_diffequ(vector_field_circular_r, t, point_p, R2_r)
+True
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;p&gt;Solving the equations actually gives (this solver is not yet in SymPy master as of the time of writing):&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; equ_r, init_r = intcurve_diffequ(vector_field_circular_r, t, point_r, R2_r)
+&amp;gt;&amp;gt;&amp;gt; sol_r = dsolve(equ_r+init_r, [Function('f_0')(t), Function('f_1')(t)])
+&amp;gt;&amp;gt;&amp;gt; [simplify(s.rewrite(sin)) for s in sol_r] # some simplification
+[f₀(t) = -sin(t), f₁(t) = cos(t)]             # is necessary because
+                                              # dsolve returned complex
+                                              # exponentials
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;p&gt;Even simpler:&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; equ_p, init_p = intcurve_diffequ(vector_field_circular_p, t, point_p, R2_p)
+&amp;gt;&amp;gt;&amp;gt; dsolve(equ_p+init_p, [Function('f_0')(t), Function('f_1')(t)])
+[f₀(t) = 1,
+             π
+ f₁(t) = t + ─
+             2]
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;p&gt;This is obviously just a circle (did I mentioned that the vector field that I defined is circular). There is no need to plot it as it is fairly simple. However a slight change will render the field a bit more interesting:&lt;/p&gt;
+&lt;h3&gt;Radial Component&lt;/h3&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; # A circular field that also pushes in radial direction
+&amp;gt;&amp;gt;&amp;gt; # towards an equilibrium radius.
+&amp;gt;&amp;gt;&amp;gt; v_field = R2.e_theta + (r0 - R2.r)*R2.e_r
+&amp;gt;&amp;gt;&amp;gt; # An initial position slightly away from the
+&amp;gt;&amp;gt;&amp;gt; # equilibrium one.
+&amp;gt;&amp;gt;&amp;gt; start_point = R2_p.point([r0+delta, 0])
+&amp;gt;&amp;gt;&amp;gt; equ, init = intcurve_diffequ(v_field, t, start_point)
+&amp;gt;&amp;gt;&amp;gt; equ
+                d            d
+[ -r₀ + f₀(t) + ──(f₀(t)),   ──(f₁(t)) - 1 ]
+                dt           dt
+
+&amp;gt;&amp;gt;&amp;gt; init
+[-δ - r₀ + f₀(0), f₁(0)]
+
+&amp;gt;&amp;gt;&amp;gt; dsolve(equ+init, [Function('f_0')(t), Function('f_1')(t)])
+            -t
+[f₀(t) = δ⋅ℯ   + r₀, f₁(t) = t]
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;p&gt;This gives a spiral tending towards the equilibrium radius &lt;img src=&quot;http://s0.wp.com/latex.php?latex=r_0&amp;amp;bg=f3f3f3&amp;amp;fg=888888&amp;amp;s=0&quot; alt=&quot;r_0&quot; class=&quot;latex&quot; title=&quot;r_0&quot; /&gt;. Let us extract the coordinates from these equations and plot the resulting curve:&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; intcurve_coords = [eq.rhs for eq in dsolve(equ+init, [Function('f_0')(t), Function('f_1')(t)])]
+&amp;gt;&amp;gt;&amp;gt; intcurve_coords
+    -t
+[δ⋅ℯ   + r₀, t]
+
+&amp;gt;&amp;gt;&amp;gt; # We need this in Cartesian coordinates for the plot routine.
+&amp;gt;&amp;gt;&amp;gt; # We could have solved for Cartesian coordinates since the
+&amp;gt;&amp;gt;&amp;gt; # beginning, however our current approach permits us to see
+&amp;gt;&amp;gt;&amp;gt; # how to use the `CoordSys` classes to change coordinate systems:
+&amp;gt;&amp;gt;&amp;gt; coords_in_cartesian = R2_p.point(intcurve_coords).coords(R2_r)
+&amp;gt;&amp;gt;&amp;gt; coords_in_cartesian
+⎡⎛   -t     ⎞       ⎤
+⎢⎝δ⋅ℯ   + r₀⎠⋅cos(t)⎥
+⎢                   ⎥
+⎢⎛   -t     ⎞       ⎥
+⎣⎝δ⋅ℯ   + r₀⎠⋅sin(t)⎦
+
+&amp;gt;&amp;gt;&amp;gt; # Substitute numerical values for the plots:
+&amp;gt;&amp;gt;&amp;gt; x,y = coords_in_cartesian.subs({delta:0.5, r0:1})
+&amp;gt;&amp;gt;&amp;gt; plot(x,y, (t,0,4*pi))
+Plot object containing:
+[0]: parametric cartesian line:
+      ((1 + 0.5*exp(-t))*cos(t), (1 + 0.5*exp(-t))*sin(t))
+      for t over (0.0, 12.566370614359172)
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://krastanov.files.wordpress.com/2012/06/integral_curve.png&quot;&gt;&lt;img src=&quot;https://krastanov.files.wordpress.com/2012/06/integral_curve.png?w=300&amp;amp;h=225&quot; title=&quot;integral_curve&quot; height=&quot;225&quot; width=&quot;300&quot; alt=&quot;simple integral curve&quot; class=&quot;aligncenter size-medium wp-image-354&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;This is all great, but what happens if one has to work with more complicated fields. For instance the following simple field will not permit analytical solution:&lt;/p&gt;
+&lt;h3&gt;No Analytical Solution&lt;/h3&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; v_field = R2.e_theta + r0*sin(1 - R2.r/r0)*R2.e_r
+&amp;gt;&amp;gt;&amp;gt; equ, init = intcurve_diffequ(v_field, t, start_point)
+&amp;gt;&amp;gt;&amp;gt; equ
+[
+        ⎛    f₀(t)⎞   d
+- r₀⋅sin⎜1 - ─────⎟ + ──(f₀(t))
+        ⎝      r₀ ⎠   dt       ,
+
+d
+──(f₁(t)) - 1
+dt           ]
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;p&gt;For cases like this one the user can take advantage of one of the numerical ODE solvers from scipy. Or sticking to symbolic work he can use the &lt;code&gt;intcurve_series&lt;/code&gt; function that gives the series expansion for the curve:&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; intcurve_series(v_field, t, start_point, n=1)
+⎡δ + r₀⎤
+⎢      ⎥
+⎣  0   ⎦
+
+&amp;gt;&amp;gt;&amp;gt; intcurve_series(v_field, t, start_point, n=2)
+⎡            ⎛    δ + r₀⎞     ⎤
+⎢δ + r₀⋅t⋅sin⎜1 - ──────⎟ + r₀⎥
+⎢            ⎝      r₀  ⎠     ⎥
+⎢                             ⎥
+⎣              t              ⎦
+
+&amp;gt;&amp;gt;&amp;gt; intcurve_series(v_field, t, start_point, n=4, coeffs=True)
+[
+⎡δ + r₀⎤
+⎢      ⎥
+⎣  0   ⎦,
+
+⎡        ⎛    δ + r₀⎞⎤
+⎢r₀⋅t⋅sin⎜1 - ──────⎟⎥
+⎢        ⎝      r₀  ⎠⎥
+⎢                    ⎥
+⎣         t          ⎦,
+
+⎡     2    ⎛    δ + r₀⎞    ⎛    δ + r₀⎞⎤
+⎢-r₀⋅t ⋅sin⎜1 - ──────⎟⋅cos⎜1 - ──────⎟⎥
+⎢          ⎝      r₀  ⎠    ⎝      r₀  ⎠⎥
+⎢──────────────────────────────────────⎥
+⎢                  2                   ⎥
+⎢                                      ⎥
+⎣                  0                   ⎦,
+
+⎡      ⎛     2                  2            ⎞                ⎤
+⎢    3 ⎜      ⎛    δ + r₀⎞       ⎛    δ + r₀⎞⎟    ⎛    δ + r₀⎞⎥
+⎢r₀⋅t ⋅⎜- sin ⎜1 - ──────⎟ + cos ⎜1 - ──────⎟⎟⋅sin⎜1 - ──────⎟⎥
+⎢      ⎝      ⎝      r₀  ⎠       ⎝      r₀  ⎠⎠    ⎝      r₀  ⎠⎥
+⎢─────────────────────────────────────────────────────────────⎥
+⎢                              6                              ⎥
+⎢                                                             ⎥
+⎣                              0                              ⎦]
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;p&gt;However these series do not always converge to the solution, so care should be taken.&lt;/p&gt;
+&lt;p&gt;There are other amusing possibilities already implemented, however I will write about them another time.&lt;/p&gt;
+&lt;p&gt;If you want to suggest more interesting examples, please do so in the comments.&lt;/p&gt;
+&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/krastanov.wordpress.com/336/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/krastanov.wordpress.com/336/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/godelicious/krastanov.wordpress.com/336/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/delicious/krastanov.wordpress.com/336/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/gofacebook/krastanov.wordpress.com/336/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/facebook/krastanov.wordpress.com/336/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/gotwitter/krastanov.wordpress.com/336/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/twitter/krastanov.wordpress.com/336/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/gostumble/krastanov.wordpress.com/336/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/stumble/krastanov.wordpress.com/336/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/godigg/krastanov.wordpress.com/336/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/digg/krastanov.wordpress.com/336/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/goreddit/krastanov.wordpress.com/336/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/reddit/krastanov.wordpress.com/336/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=krastanov.wordpress.com&amp;amp;blog=15251174&amp;amp;post=336&amp;amp;subd=krastanov&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
+	<dc:date>2012-06-17T20:40:16+00:00</dc:date>
+	<dc:creator>Stefan Krastanov</dc:creator>
+</item>
 <item rdf:about="http://scolobb.wordpress.com/?p=200">
 	<title>Sergiu Ivanov: The Matrix</title>
 	<link>http://scolobb.wordpress.com/2012/06/17/the-matrix/</link>
@@ -1210,16 +1388,6 @@ That last one is a real doozy.  Try saying that 5 times real fast, then explain 
 &lt;p&gt;Almost two years have elapsed since the first 0.1 release. During this time, we did a lot of refactoring and broke the API several times. However, I’ve seen some concerns about API stability both at the EuroScipy conference and in the mailing list where I’ve realized we need to provide an API that does not break in every release, and do this in a way that the project remains fun for developers.&lt;/p&gt;
 &lt;p&gt; That’s why I’m extremely glad to see that although this release is big in changes, these have been made in a more organized manner. Yes, we’ve broken the API once again, but now there’s a compatibility layer that ensures that code written for 0.8 will continue working with the new release. &lt;/p&gt;</content:encoded>
 	<dc:date>2011-10-02T09:19:57+00:00</dc:date>
-	<dc:creator>fabian</dc:creator>
-</item>
-<item rdf:about="http://fseoane.net/blog/?p=1017">
-	<title>Fabian Pedregosa: Reworked example gallery for scikit-learn</title>
-	<link>http://fseoane.net/blog/2011/reworked-example-gallery-for-scikit-learn/</link>
-	<content:encoded>&lt;p&gt;I’ve been working lately in improving the scikit-learn example gallery to show also a small thumbnail of the plotted result. Here is what the gallery looks like now&lt;/p&gt;
-&lt;p&gt;&lt;a href=&quot;http://scikit-learn.sourceforge.net/dev/auto_examples/index.html&quot;&gt;&lt;img src=&quot;http://fseoane.net/blog/wp-content/uploads/2011/09/Screenshot-Examples-—-scikit-learn-v0.9-git-documentation-Google-Chrome.png&quot; alt=&quot;&quot; width=&quot;600&quot; title=&quot;Screenshot-Examples&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p&gt;And the real thing should be already displayed in the &lt;a href=&quot;http://scikit-learn.sourceforge.net/dev/auto_examples/index.html&quot;&gt;development documentation&lt;/a&gt;. The next thing is to add a static image to those that don’t generate any result, examples such as the &lt;a href=&quot;http://scikit-learn.sourceforge.net/dev/auto_examples/applications/svm_gui.html&quot;&gt;SVM GUI&lt;/a&gt; should have an image to display.&lt;/p&gt;</content:encoded>
-	<dc:date>2011-09-04T18:09:02+00:00</dc:date>
 	<dc:creator>fabian</dc:creator>
 </item>
 
