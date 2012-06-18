@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2012-06-17T21:00:22Z</updated>
+  <updated>2012-06-18T00:40:20Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,49 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry xml:lang="en">
+    <id>http://amakelov.wordpress.com/?p=130</id>
+    <link href="http://amakelov.wordpress.com/2012/06/18/google-summer-of-code-2012-week-4/" rel="alternate" type="text/html"/>
+    <title>Google Summer of Code 2012: Week 4</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Hi everyone, Here’s a brief summary of what I’ve been doing for the 4-th week of my GSoC. This week, like the previous one, was not intense in terms of coding. Here’s what I have up and running, basically what I was talking about last week: A working implementation of the randomized Schreier-Sims algorithm. This <a class="excerpt-more-link" href="http://amakelov.wordpress.com/2012/06/18/google-summer-of-code-2012-week-4/">[…]</a><img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;blog=35896871&amp;post=130&amp;subd=amakelov&amp;ref=&amp;feed=1" width="1"/></div>
+    </summary>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Hi everyone,</p>
+<p>Here’s a brief summary of what I’ve been doing for the 4-th week of my GSoC.</p>
+<p>This week, like the previous one, was not intense in terms of coding. Here’s what I have up and running, basically what I was talking about last week:</p>
+<ul>
+<li>A working implementation of the randomized Schreier-Sims algorithm. This still needs to be integrated with the deterministic version of the algorithm, using the fields  _base, _coset_repr, _coset_repr_n, stabilizers_gens so that a result from the randomized algorithm can be verified deterministically. Also, it’s been <a href="http://amakelov.wordpress.com/2012/06/10/google-summer-of-code-2012-week-3/#comments" target="_blank">suggested </a>that we have a function that determines the base and transversal elements for the basic orbits by a given generating set that is known to be strong. This won’t be hard to implement, and will be helpful for the Butler-Portugal algorithm for tensor canonicalization – see <a href="https://github.com/sympy/sympy/pull/1326#issuecomment-6236332" target="_blank">this</a> pull request for more information if you are interested! For more on bases and strong generating sets, see [1], pp.101-119</li>
+<li>A function <img alt="\text{DirectProduct(*groups)}" class="latex" src="http://s0.wp.com/latex.php?latex=%5Ctext%7BDirectProduct%28%2Agroups%29%7D&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="\text{DirectProduct(*groups)}"/> that constructs the direct product of several groups. For more than two groups, <img alt="\text{DirectProduct}(G_1,\ldots, G_n)" class="latex" src="http://s0.wp.com/latex.php?latex=%5Ctext%7BDirectProduct%7D%28G_1%2C%5Cldots%2C+G_n%29&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="\text{DirectProduct}(G_1,\ldots, G_n)"/> is several times faster than calling <img alt="G_1*\ldots * G_n" class="latex" src="http://s0.wp.com/latex.php?latex=G_1%2A%5Cldots+%2A+G_n&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="G_1*\ldots * G_n"/> (benchmarked it), thus it makes sense to have such a function. This is later used in constructing an arbitrary abelian group by its cycle decomposition.</li>
+<li>A function for calculating the degree of transitivity of a permutation group. The idea is very brute-force: we look at the orbit of a <img alt="k+1" class="latex" src="http://s0.wp.com/latex.php?latex=k%2B1&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="k+1"/>-tuple <img alt="(0, 1, \ldots, k)" class="latex" src="http://s0.wp.com/latex.php?latex=%280%2C+1%2C+%5Cldots%2C+k%29&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="(0, 1, \ldots, k)"/> for <img alt="k = 0, 1, \ldots, n-1" class="latex" src="http://s0.wp.com/latex.php?latex=k+%3D+0%2C+1%2C+%5Cldots%2C+n-1&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="k = 0, 1, \ldots, n-1"/> and check if it spans all possible <img alt="k+1" class="latex" src="http://s0.wp.com/latex.php?latex=k%2B1&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="k+1"/>-tuples. This is really bad since the number of tuples is growing like <img alt="n^{k+1}" class="latex" src="http://s0.wp.com/latex.php?latex=n%5E%7Bk%2B1%7D&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="n^{k+1}"/>, hence the complexity is <img alt="O(n^{k+1}r)" class="latex" src="http://s0.wp.com/latex.php?latex=O%28n%5E%7Bk%2B1%7Dr%29&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="O(n^{k+1}r)"/> where <img alt="k" class="latex" src="http://s0.wp.com/latex.php?latex=k&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="k"/> is the degree of transitivity, <img alt="r" class="latex" src="http://s0.wp.com/latex.php?latex=r&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="r"/> is the number of generators. It seems that some sort of randomization that checks only several randomly chosen tuples for membership in the orbit will decrease the complexity, but to make sure we still need to do all the checks if the random tuples pass, which is again <img alt="O(n^{k+1}r)" class="latex" src="http://s0.wp.com/latex.php?latex=O%28n%5E%7Bk%2B1%7Dr%29&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="O(n^{k+1}r)"/>. Some bound on the probability will be good to know here.</li>
+</ul>
+<p>The main focus this week was on several discussions about future changes in the permutation groups module, and on making some more effort to get my code so far merged <img alt=":)" class="wp-smiley" src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif"/>  :</p>
+<ul>
+<li>In <a href="https://groups.google.com/forum/?fromgroups#!topic/sympy/dpeN1Z9pf9c" target="_blank">this</a> post to the mailing list, it was suggested to implement an algorithm for intersecting subgroups of a given group so that it can be used in the tensor canonicalization algorithm (again, see <a href="https://github.com/sympy/sympy/pull/1326#issuecomment-6236332" target="_blank">here</a>). This is done in [1] but seems fairly complicated and opens the subject of backtrack searches in permutation groups; I’ll try to figure it out and implement it this coming week.</li>
+<li>In <a href="https://groups.google.com/forum/?fromgroups#!topic/sympy/2el1T0ZY-Z4" target="_blank">this</a> post to the mailing list, we discussed ways of testing randomized algorithms (and there are a lot of them involved in computational group theory), and an agreement was reached that some sort of manual setting of the randomized output (via an additional argument) is a sensible approach.</li>
+<li>In <a href="https://groups.google.com/forum/?fromgroups#!topic/sympy/xRXpKZuvpzg" target="_blank">this</a> post to the mailing list, we discussed some changes in interface in the permutations module. Even though not everybody agrees with what I last suggested, I’ll carry these changes out and see how things unfold (i.e., whether people are happy)</li>
+<li>Finally, my work from week 1 is, I hope, ready to be merged, now that I’ve made the changes suggested in the discussion of the <a href="https://github.com/sympy/sympy/pull/1319" target="_blank">pull request</a> . I (finally) got familiar with the sphinx system and building the docs for sympy, and with all the conventions for writing docstrings (and convinced myself that I’ve been writing them the wrong way, I’ll fix all the docstrings in the module in the future). By the way, I installed the sphinx system in a virtualenv at the suggestion of S. Krastanov, and found the following <a href="http://iamzed.com/2009/05/07/a-primer-on-virtualenv/" target="_blank">guide </a>really helpful in the process. When the week1 branch gets merged, a pull request with the week2 code will follow shortly, and then with the rest of the code so far…</li>
+<li>And in <a href="https://groups.google.com/forum/?fromgroups#!topic/sympy/bc2viXVsVmU" target="_blank">this </a>discussion, there were some more changes suggested, for example David proposed isolating the named groups (Symmetric, Dihedral, …) in a separate module, which I’m going to do in one of the next pull requests.</li>
+</ul>
+<p>So, that’s it for now. Next week I’ll focus on getting some more of my code merged and backtrack searches.</p>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/amakelov.wordpress.com/130/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/amakelov.wordpress.com/130/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/amakelov.wordpress.com/130/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/amakelov.wordpress.com/130/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/amakelov.wordpress.com/130/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/amakelov.wordpress.com/130/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/amakelov.wordpress.com/130/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/amakelov.wordpress.com/130/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/amakelov.wordpress.com/130/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/amakelov.wordpress.com/130/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/amakelov.wordpress.com/130/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/amakelov.wordpress.com/130/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/amakelov.wordpress.com/130/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/amakelov.wordpress.com/130/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;blog=35896871&amp;post=130&amp;subd=amakelov&amp;ref=&amp;feed=1" width="1"/></div>
+    </content>
+    <updated>2012-06-18T00:30:18Z</updated>
+    <category term="Uncategorized"/>
+    <author>
+      <name>amakelov</name>
+    </author>
+    <source>
+      <id>http://amakelov.wordpress.com</id>
+      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
+      <link href="http://amakelov.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://amakelov.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://amakelov.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <subtitle>A. Makelov</subtitle>
+      <title>Not really blogging</title>
+      <updated>2012-06-18T00:40:19Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en">
     <id>http://krastanov.wordpress.com/?p=336</id>
@@ -249,7 +292,7 @@ dt           ]
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-17T21:00:19Z</updated>
+      <updated>2012-06-18T00:40:17Z</updated>
     </source>
   </entry>
 
@@ -279,7 +322,7 @@ dt           ]
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-17T21:00:19Z</updated>
+      <updated>2012-06-18T00:40:17Z</updated>
     </source>
   </entry>
 
@@ -314,7 +357,7 @@ dt           ]
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-17T21:00:19Z</updated>
+      <updated>2012-06-18T00:40:17Z</updated>
     </source>
   </entry>
 
@@ -357,7 +400,7 @@ sudo python setup.py develop
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-17T21:00:10Z</updated>
+      <updated>2012-06-18T00:40:08Z</updated>
     </source>
   </entry>
 
@@ -392,7 +435,7 @@ sudo python setup.py develop
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging</title>
-      <updated>2012-06-17T21:00:21Z</updated>
+      <updated>2012-06-18T00:40:19Z</updated>
     </source>
   </entry>
 
@@ -441,7 +484,7 @@ sudo python setup.py develop
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-17T21:00:19Z</updated>
+      <updated>2012-06-18T00:40:17Z</updated>
     </source>
   </entry>
 
@@ -478,7 +521,7 @@ sudo python setup.py develop
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-17T21:00:20Z</updated>
+      <updated>2012-06-18T00:40:18Z</updated>
     </source>
   </entry>
 
@@ -520,7 +563,7 @@ sudo python setup.py develop
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-17T21:00:20Z</updated>
+      <updated>2012-06-18T00:40:18Z</updated>
     </source>
   </entry>
 
@@ -547,7 +590,7 @@ sudo python setup.py develop
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-17T21:00:19Z</updated>
+      <updated>2012-06-18T00:40:17Z</updated>
     </source>
   </entry>
 
@@ -605,7 +648,7 @@ sudo python setup.py develop
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging</title>
-      <updated>2012-06-17T21:00:21Z</updated>
+      <updated>2012-06-18T00:40:19Z</updated>
     </source>
   </entry>
 
@@ -658,7 +701,7 @@ sudo python setup.py develop
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging</title>
-      <updated>2012-06-17T21:00:21Z</updated>
+      <updated>2012-06-18T00:40:19Z</updated>
     </source>
   </entry>
 
@@ -716,7 +759,7 @@ sudo python setup.py develop
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-17T21:00:20Z</updated>
+      <updated>2012-06-18T00:40:18Z</updated>
     </source>
   </entry>
 
@@ -762,7 +805,7 @@ sudo python setup.py develop
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging</title>
-      <updated>2012-06-17T21:00:21Z</updated>
+      <updated>2012-06-18T00:40:19Z</updated>
     </source>
   </entry>
 
@@ -809,7 +852,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-17T21:00:20Z</updated>
+      <updated>2012-06-18T00:40:18Z</updated>
     </source>
   </entry>
 
@@ -836,7 +879,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-17T21:00:19Z</updated>
+      <updated>2012-06-18T00:40:17Z</updated>
     </source>
   </entry>
 
@@ -885,7 +928,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-17T21:00:19Z</updated>
+      <updated>2012-06-18T00:40:17Z</updated>
     </source>
   </entry>
 
@@ -1030,7 +1073,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging</title>
-      <updated>2012-06-17T21:00:21Z</updated>
+      <updated>2012-06-18T00:40:19Z</updated>
     </source>
   </entry>
 
@@ -1094,7 +1137,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-17T21:00:20Z</updated>
+      <updated>2012-06-18T00:40:18Z</updated>
     </source>
   </entry>
 
@@ -1123,7 +1166,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-17T21:00:19Z</updated>
+      <updated>2012-06-18T00:40:17Z</updated>
     </source>
   </entry>
 
@@ -1178,7 +1221,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-17T21:00:20Z</updated>
+      <updated>2012-06-18T00:40:18Z</updated>
     </source>
   </entry>
 
@@ -1206,7 +1249,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-17T21:00:19Z</updated>
+      <updated>2012-06-18T00:40:17Z</updated>
     </source>
   </entry>
 
@@ -1272,7 +1315,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-17T21:00:20Z</updated>
+      <updated>2012-06-18T00:40:18Z</updated>
     </source>
   </entry>
 
@@ -1300,7 +1343,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-17T21:00:20Z</updated>
+      <updated>2012-06-18T00:40:18Z</updated>
     </source>
   </entry>
 
@@ -1377,7 +1420,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-17T21:00:19Z</updated>
+      <updated>2012-06-18T00:40:17Z</updated>
     </source>
   </entry>
 
@@ -1406,7 +1449,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging</title>
-      <updated>2012-06-17T21:00:21Z</updated>
+      <updated>2012-06-18T00:40:19Z</updated>
     </source>
   </entry>
 
@@ -1460,7 +1503,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-17T21:00:20Z</updated>
+      <updated>2012-06-18T00:40:18Z</updated>
     </source>
   </entry>
 
@@ -1526,7 +1569,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-17T21:00:18Z</updated>
+      <updated>2012-06-18T00:40:17Z</updated>
     </source>
   </entry>
 
@@ -1554,7 +1597,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-17T21:00:19Z</updated>
+      <updated>2012-06-18T00:40:17Z</updated>
     </source>
   </entry>
 
@@ -1581,7 +1624,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-17T21:00:20Z</updated>
+      <updated>2012-06-18T00:40:18Z</updated>
     </source>
   </entry>
 
@@ -1700,7 +1743,7 @@ Devanla, Brian Granger (co-mentor Sean Vig)<br/>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-17T21:00:20Z</updated>
+      <updated>2012-06-18T00:40:18Z</updated>
     </source>
   </entry>
 
@@ -1763,7 +1806,7 @@ def _intersect(self, other):
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-06-17T21:00:17Z</updated>
+      <updated>2012-06-18T00:40:15Z</updated>
     </source>
   </entry>
 
@@ -1891,7 +1934,7 @@ def _intersect(self, other):
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-06-17T21:00:17Z</updated>
+      <updated>2012-06-18T00:40:15Z</updated>
     </source>
   </entry>
 
@@ -2049,7 +2092,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-17T21:00:10Z</updated>
+      <updated>2012-06-18T00:40:07Z</updated>
     </source>
   </entry>
 
@@ -2121,7 +2164,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-17T21:00:10Z</updated>
+      <updated>2012-06-18T00:40:07Z</updated>
     </source>
   </entry>
 
@@ -2152,7 +2195,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-17T21:00:10Z</updated>
+      <updated>2012-06-18T00:40:07Z</updated>
     </source>
   </entry>
 
@@ -2199,7 +2242,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-17T21:00:10Z</updated>
+      <updated>2012-06-18T00:40:08Z</updated>
     </source>
   </entry>
 
@@ -2510,32 +2553,6 @@ That last one is a real doozy.  Try saying that 5 times real fast, then explain 
       <subtitle>Mechanical Engineering PhD. candidate, UC Davis</subtitle>
       <title>Dale Peterson</title>
       <updated>2011-12-07T09:00:13Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://fseoane.net/blog/?p=1048</id>
-    <link href="http://fseoane.net/blog/2011/scikit-learn-0-9/" rel="alternate" type="text/html"/>
-    <title>scikit-learn 0.9</title>
-    <summary>Last week we released a new version of scikit-learn. The Changelog is particularly impressive, yet personally this release is important for other reasons. This will probably be my last release as a paid engineer. I’m starting a PhD next month, and although I plan to continue contributing to the project and make a few more [...]</summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Last week we released a new version of scikit-learn. The <a href="http://scikit-learn.sourceforge.net/stable/whats_new.html">Changelog is particularly impressive</a>, yet personally this release is important for other reasons. </p>
-<p>This will probably be my last release as a paid engineer. I’m starting a PhD next month, and although I plan to continue contributing to the project and make a few more releases, I will certainly have less time to devote to it. Luckily, I received a lot of help from the community while preparing the release, from Changelog writing to build of Windows binaries, thus I expect the transition to go smoothly.</p>
-<p>Almost two years have elapsed since the first 0.1 release. During this time, we did a lot of refactoring and broke the API several times. However, I’ve seen some concerns about API stability both at the EuroScipy conference and in the mailing list where I’ve realized we need to provide an API that does not break in every release, and do this in a way that the project remains fun for developers.</p>
-<p> That’s why I’m extremely glad to see that although this release is big in changes, these have been made in a more organized manner. Yes, we’ve broken the API once again, but now there’s a compatibility layer that ensures that code written for 0.8 will continue working with the new release. </p></div>
-    </content>
-    <updated>2011-10-02T09:19:57Z</updated>
-    <category term="General"/>
-    <category term="scikit-learn"/>
-    <author>
-      <name>fabian</name>
-    </author>
-    <source>
-      <id>http://fseoane.net/blog</id>
-      <link href="http://fseoane.net/blog/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://fseoane.net/blog" rel="alternate" type="text/html"/>
-      <subtitle>mostly about programming, machine learning and such</subtitle>
-      <title>I say things</title>
-      <updated>2012-05-14T23:00:09Z</updated>
     </source>
   </entry>
 </feed>
