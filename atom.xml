@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2012-06-23T09:20:22Z</updated>
+  <updated>2012-06-23T13:20:24Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -39,7 +39,7 @@
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-23T09:20:20Z</updated>
+      <updated>2012-06-23T13:20:21Z</updated>
     </source>
   </entry>
 
@@ -83,7 +83,7 @@
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging</title>
-      <updated>2012-06-23T09:20:22Z</updated>
+      <updated>2012-06-23T13:20:23Z</updated>
     </source>
   </entry>
 
@@ -96,26 +96,26 @@
     <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>A week or two ago I implemented some basic functionality for work with integral curves of vector fields. However, I needed to make additional changes in other parts of SymPy in order for the ODE solver to work with systems of equations and with initial conditions. I also wanted to get my plotting module merged so I can show some visualizations if necessary.</p>
 <p>Now that all this is ready (even though not everything is merged in SymPy master) I can show you some of the most basic capabilities implemented in the differential geometry module. First, we start with the boilerplate:</p>
 <h3>A Simple Field</h3>
-<p/><pre class="brush: python;">&gt;&gt;&gt; from sympy.diffgeom import *
-&gt;&gt;&gt; from sympy.diffgeom.Rn import * # This gives me:
+<p/><pre class="brush: python;">from sympy.diffgeom import *
+from sympy.diffgeom.Rn import * # This gives me:
                                     #   - R2_p - the polar coord system
                                     #   - R2_r - the rectangular coord system
                                     #   - x,y,r,theta - the base scalar fields
                                     #   - e_x, ... - the base vector fields
-&gt;&gt;&gt; # Define some fields to play with
-&gt;&gt;&gt; # (these are the same fields, defined in two different ways):
-&gt;&gt;&gt; vector_field_circular_p = R2_p.e_theta
-&gt;&gt;&gt; vector_field_circular_r = -R2.y*R2.e_x + R2.x*R2.e_y
-&gt;&gt;&gt; # Define the same point in two different ways
-&gt;&gt;&gt; point_p = R2_p.point([1,pi/2])
-&gt;&gt;&gt; point_r = R2_r.point([0,1])
+# Define some fields to play with
+# (these are the same fields, defined in two different ways):
+vector_field_circular_p = R2_p.e_theta
+vector_field_circular_r = -R2.y*R2.e_x + R2.x*R2.e_y
+# Define the same point in two different ways
+point_p = R2_p.point([1,pi/2])
+point_r = R2_r.point([0,1])
 </pre><p/>
 <p>The r index is for rectangular coordinate systems and the p index is for polar.</p>
 <p>Now using <code>intcurve_diffequ</code> we can generate the differential equations for the integral curve. This function also generates the required initial conditions:</p>
-<p/><pre class="brush: python;">&gt;&gt;&gt; #        vector field      free parameter for    starting point
-&gt;&gt;&gt; #                  |        the curve     |     /          coord system
-&gt;&gt;&gt; #                  v                      v    v      v-- for the equation
-&gt;&gt;&gt; intcurve_diffequ(vector_field_circular_p, t, point_p, R2_p)
+<p/><pre class="brush: python;">#        vector field      free parameter for    starting point
+#                  |        the curve     |     /          coord system
+#                  v                      v    v      v-- for the equation
+intcurve_diffequ(vector_field_circular_p, t, point_p, R2_p)
    d            d
 ([ ──(f₀(t)),   ──(f₁(t)) - 1  ],
    dt           dt
@@ -124,7 +124,7 @@
  [f₀(0) - 1,    f₁(0) - ─      ])
                         2
 
-&gt;&gt;&gt; intcurve_diffequ(vector_field_circular_p, t, point_p, R2_r)
+intcurve_diffequ(vector_field_circular_p, t, point_p, R2_r)
            d                     d
 ([ f₁(t) + ──(f₀(t)),   -f₀(t) + ──(f₁(t))  ],
            dt                    dt
@@ -133,25 +133,25 @@
 </pre><p/>
 <p>Here we have equations for the functions <img alt="f_0" class="latex" src="http://s0.wp.com/latex.php?latex=f_0&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="f_0"/> and <img alt="f_1" class="latex" src="http://s0.wp.com/latex.php?latex=f_1&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="f_1"/> which are by convention the names that <code>intcurve_diffequ</code> gives for the first and second coordinate.</p>
 <p>The cool thing is that we can mix the coordinate systems in any way we wish. The code will automatically make the needed coordinate transformation and return the equations in the demanded coordinate system independently of the coordinate systems in which the input objects were defined (at worst you will need to call some simplification routines):</p>
-<p/><pre class="brush: python;">&gt;&gt;&gt; a = intcurve_diffequ(vector_field_circular_p, t, point_p, R2_r)
-&gt;&gt;&gt; a == intcurve_diffequ(vector_field_circular_p, t, point_r, R2_r)
+<p/><pre class="brush: python;">a = intcurve_diffequ(vector_field_circular_p, t, point_p, R2_r)
+a == intcurve_diffequ(vector_field_circular_p, t, point_r, R2_r)
 True
-&gt;&gt;&gt; a == intcurve_diffequ(vector_field_circular_r, t, point_r, R2_r)
+a == intcurve_diffequ(vector_field_circular_r, t, point_r, R2_r)
 True
-&gt;&gt;&gt; a == intcurve_diffequ(vector_field_circular_r, t, point_p, R2_r)
+a == intcurve_diffequ(vector_field_circular_r, t, point_p, R2_r)
 True
 </pre><p/>
 <p>Solving the equations actually gives (this solver is not yet in SymPy master as of the time of writing):</p>
-<p/><pre class="brush: python;">&gt;&gt;&gt; equ_r, init_r = intcurve_diffequ(vector_field_circular_r, t, point_r, R2_r)
-&gt;&gt;&gt; sol_r = dsolve(equ_r+init_r, [Function('f_0')(t), Function('f_1')(t)])
-&gt;&gt;&gt; [simplify(s.rewrite(sin)) for s in sol_r] # some simplification
+<p/><pre class="brush: python;">equ_r, init_r = intcurve_diffequ(vector_field_circular_r, t, point_r, R2_r)
+sol_r = dsolve(equ_r+init_r, [Function('f_0')(t), Function('f_1')(t)])
+[simplify(s.rewrite(sin)) for s in sol_r] # some simplification
 [f₀(t) = -sin(t), f₁(t) = cos(t)]             # is necessary because
                                               # dsolve returned complex
                                               # exponentials
 </pre><p/>
 <p>Even simpler:</p>
-<p/><pre class="brush: python;">&gt;&gt;&gt; equ_p, init_p = intcurve_diffequ(vector_field_circular_p, t, point_p, R2_p)
-&gt;&gt;&gt; dsolve(equ_p+init_p, [Function('f_0')(t), Function('f_1')(t)])
+<p/><pre class="brush: python;">equ_p, init_p = intcurve_diffequ(vector_field_circular_p, t, point_p, R2_p)
+dsolve(equ_p+init_p, [Function('f_0')(t), Function('f_1')(t)])
 [f₀(t) = 1,
              π
  f₁(t) = t + ─
@@ -159,46 +159,46 @@ True
 </pre><p/>
 <p>This is obviously just a circle (did I mentioned that the vector field that I defined is circular). There is no need to plot it as it is fairly simple. However a slight change will render the field a bit more interesting:</p>
 <h3>Radial Component</h3>
-<p/><pre class="brush: python;">&gt;&gt;&gt; # A circular field that also pushes in radial direction
-&gt;&gt;&gt; # towards an equilibrium radius.
-&gt;&gt;&gt; v_field = R2.e_theta + (r0 - R2.r)*R2.e_r
-&gt;&gt;&gt; # An initial position slightly away from the
-&gt;&gt;&gt; # equilibrium one.
-&gt;&gt;&gt; start_point = R2_p.point([r0+delta, 0])
-&gt;&gt;&gt; equ, init = intcurve_diffequ(v_field, t, start_point)
-&gt;&gt;&gt; equ
+<p/><pre class="brush: python;"># A circular field that also pushes in radial direction
+# towards an equilibrium radius.
+v_field = R2.e_theta + (r0 - R2.r)*R2.e_r
+# An initial position slightly away from the
+# equilibrium one.
+start_point = R2_p.point([r0+delta, 0])
+equ, init = intcurve_diffequ(v_field, t, start_point)
+equ
                 d            d
 [ -r₀ + f₀(t) + ──(f₀(t)),   ──(f₁(t)) - 1 ]
                 dt           dt
 
-&gt;&gt;&gt; init
+init
 [-δ - r₀ + f₀(0), f₁(0)]
 
-&gt;&gt;&gt; dsolve(equ+init, [Function('f_0')(t), Function('f_1')(t)])
+dsolve(equ+init, [Function('f_0')(t), Function('f_1')(t)])
             -t
 [f₀(t) = δ⋅ℯ   + r₀, f₁(t) = t]
 </pre><p/>
 <p>This gives a spiral tending towards the equilibrium radius <img alt="r_0" class="latex" src="http://s0.wp.com/latex.php?latex=r_0&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="r_0"/>. Let us extract the coordinates from these equations and plot the resulting curve:</p>
-<p/><pre class="brush: python;">&gt;&gt;&gt; intcurve_coords = [eq.rhs for eq in dsolve(equ+init, [Function('f_0')(t), Function('f_1')(t)])]
-&gt;&gt;&gt; intcurve_coords
+<p/><pre class="brush: python;">intcurve_coords = [eq.rhs for eq in dsolve(equ+init, [Function('f_0')(t), Function('f_1')(t)])]
+intcurve_coords
     -t
 [δ⋅ℯ   + r₀, t]
 
-&gt;&gt;&gt; # We need this in Cartesian coordinates for the plot routine.
-&gt;&gt;&gt; # We could have solved for Cartesian coordinates since the
-&gt;&gt;&gt; # beginning, however our current approach permits us to see
-&gt;&gt;&gt; # how to use the `CoordSys` classes to change coordinate systems:
-&gt;&gt;&gt; coords_in_cartesian = R2_p.point(intcurve_coords).coords(R2_r)
-&gt;&gt;&gt; coords_in_cartesian
+# We need this in Cartesian coordinates for the plot routine.
+# We could have solved for Cartesian coordinates since the
+# beginning, however our current approach permits us to see
+# how to use the `CoordSys` classes to change coordinate systems:
+coords_in_cartesian = R2_p.point(intcurve_coords).coords(R2_r)
+coords_in_cartesian
 ⎡⎛   -t     ⎞       ⎤
 ⎢⎝δ⋅ℯ   + r₀⎠⋅cos(t)⎥
 ⎢                   ⎥
 ⎢⎛   -t     ⎞       ⎥
 ⎣⎝δ⋅ℯ   + r₀⎠⋅sin(t)⎦
 
-&gt;&gt;&gt; # Substitute numerical values for the plots:
-&gt;&gt;&gt; x,y = coords_in_cartesian.subs({delta:0.5, r0:1})
-&gt;&gt;&gt; plot(x,y, (t,0,4*pi))
+# Substitute numerical values for the plots:
+x,y = coords_in_cartesian.subs({delta:0.5, r0:1})
+plot(x,y, (t,0,4*pi))
 Plot object containing:
 [0]: parametric cartesian line:
       ((1 + 0.5*exp(-t))*cos(t), (1 + 0.5*exp(-t))*sin(t))
@@ -207,9 +207,9 @@ Plot object containing:
 <p><a href="https://krastanov.files.wordpress.com/2012/06/integral_curve.png"><img alt="simple integral curve" class="aligncenter size-medium wp-image-354" height="225" src="https://krastanov.files.wordpress.com/2012/06/integral_curve.png?w=300&amp;h=225" title="integral_curve" width="300"/></a></p>
 <p>This is all great, but what happens if one has to work with more complicated fields. For instance the following simple field will not permit analytical solution:</p>
 <h3>No Analytical Solution</h3>
-<p/><pre class="brush: python;">&gt;&gt;&gt; v_field = R2.e_theta + r0*sin(1 - R2.r/r0)*R2.e_r
-&gt;&gt;&gt; equ, init = intcurve_diffequ(v_field, t, start_point)
-&gt;&gt;&gt; equ
+<p/><pre class="brush: python;">v_field = R2.e_theta + r0*sin(1 - R2.r/r0)*R2.e_r
+equ, init = intcurve_diffequ(v_field, t, start_point)
+equ
 [
         ⎛    f₀(t)⎞   d
 - r₀⋅sin⎜1 - ─────⎟ + ──(f₀(t))
@@ -220,19 +220,19 @@ d
 dt           ]
 </pre><p/>
 <p>For cases like this one the user can take advantage of one of the numerical ODE solvers from scipy. Or sticking to symbolic work he can use the <code>intcurve_series</code> function that gives the series expansion for the curve:</p>
-<p/><pre class="brush: python;">&gt;&gt;&gt; intcurve_series(v_field, t, start_point, n=1)
+<p/><pre class="brush: python;">intcurve_series(v_field, t, start_point, n=1)
 ⎡δ + r₀⎤
 ⎢      ⎥
 ⎣  0   ⎦
 
-&gt;&gt;&gt; intcurve_series(v_field, t, start_point, n=2)
+intcurve_series(v_field, t, start_point, n=2)
 ⎡            ⎛    δ + r₀⎞     ⎤
 ⎢δ + r₀⋅t⋅sin⎜1 - ──────⎟ + r₀⎥
 ⎢            ⎝      r₀  ⎠     ⎥
 ⎢                             ⎥
 ⎣              t              ⎦
 
-&gt;&gt;&gt; intcurve_series(v_field, t, start_point, n=4, coeffs=True)
+intcurve_series(v_field, t, start_point, n=4, coeffs=True)
 [
 ⎡δ + r₀⎤
 ⎢      ⎥
@@ -267,6 +267,7 @@ dt           ]
 <br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/krastanov.wordpress.com/336/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/krastanov.wordpress.com/336/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/krastanov.wordpress.com/336/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/krastanov.wordpress.com/336/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/krastanov.wordpress.com/336/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/krastanov.wordpress.com/336/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/krastanov.wordpress.com/336/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/krastanov.wordpress.com/336/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/krastanov.wordpress.com/336/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/krastanov.wordpress.com/336/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/krastanov.wordpress.com/336/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/krastanov.wordpress.com/336/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/krastanov.wordpress.com/336/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/krastanov.wordpress.com/336/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=krastanov.wordpress.com&amp;blog=15251174&amp;post=336&amp;subd=krastanov&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
     <updated>2012-06-17T20:40:16Z</updated>
+    <category term="GSoC - diffgeom"/>
     <category term="SymPy"/>
     <category term="differential geometry"/>
     <category term="gsoc"/>
@@ -287,7 +288,7 @@ dt           ]
       <link href="http://krastanov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-06-17T21:00:22Z</updated>
+      <updated>2012-06-23T13:20:24Z</updated>
     </source>
   </entry>
 
@@ -325,7 +326,7 @@ dt           ]
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-23T09:20:19Z</updated>
+      <updated>2012-06-23T13:20:20Z</updated>
     </source>
   </entry>
 
@@ -355,7 +356,7 @@ dt           ]
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-23T09:20:20Z</updated>
+      <updated>2012-06-23T13:20:21Z</updated>
     </source>
   </entry>
 
@@ -390,7 +391,7 @@ dt           ]
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-23T09:20:19Z</updated>
+      <updated>2012-06-23T13:20:20Z</updated>
     </source>
   </entry>
 
@@ -433,7 +434,7 @@ sudo python setup.py develop
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-23T09:20:10Z</updated>
+      <updated>2012-06-23T13:20:10Z</updated>
     </source>
   </entry>
 
@@ -468,7 +469,7 @@ sudo python setup.py develop
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging</title>
-      <updated>2012-06-23T09:20:22Z</updated>
+      <updated>2012-06-23T13:20:23Z</updated>
     </source>
   </entry>
 
@@ -517,7 +518,7 @@ sudo python setup.py develop
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-23T09:20:19Z</updated>
+      <updated>2012-06-23T13:20:20Z</updated>
     </source>
   </entry>
 
@@ -554,7 +555,7 @@ sudo python setup.py develop
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-23T09:20:21Z</updated>
+      <updated>2012-06-23T13:20:22Z</updated>
     </source>
   </entry>
 
@@ -596,7 +597,7 @@ sudo python setup.py develop
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-23T09:20:20Z</updated>
+      <updated>2012-06-23T13:20:21Z</updated>
     </source>
   </entry>
 
@@ -623,7 +624,7 @@ sudo python setup.py develop
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-23T09:20:20Z</updated>
+      <updated>2012-06-23T13:20:21Z</updated>
     </source>
   </entry>
 
@@ -681,7 +682,7 @@ sudo python setup.py develop
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging</title>
-      <updated>2012-06-23T09:20:22Z</updated>
+      <updated>2012-06-23T13:20:23Z</updated>
     </source>
   </entry>
 
@@ -734,7 +735,7 @@ sudo python setup.py develop
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging</title>
-      <updated>2012-06-23T09:20:22Z</updated>
+      <updated>2012-06-23T13:20:23Z</updated>
     </source>
   </entry>
 
@@ -753,6 +754,7 @@ sudo python setup.py develop
 <br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/krastanov.wordpress.com/333/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/krastanov.wordpress.com/333/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/krastanov.wordpress.com/333/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/krastanov.wordpress.com/333/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/krastanov.wordpress.com/333/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/krastanov.wordpress.com/333/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/krastanov.wordpress.com/333/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/krastanov.wordpress.com/333/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/krastanov.wordpress.com/333/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/krastanov.wordpress.com/333/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/krastanov.wordpress.com/333/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/krastanov.wordpress.com/333/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/krastanov.wordpress.com/333/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/krastanov.wordpress.com/333/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=krastanov.wordpress.com&amp;blog=15251174&amp;post=333&amp;subd=krastanov&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
     <updated>2012-06-03T22:14:40Z</updated>
+    <category term="GSoC - diffgeom"/>
     <category term="SymPy"/>
     <category term="differential geometry"/>
     <category term="gsoc"/>
@@ -772,7 +774,7 @@ sudo python setup.py develop
       <link href="http://krastanov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-06-17T21:00:22Z</updated>
+      <updated>2012-06-23T13:20:24Z</updated>
     </source>
   </entry>
 
@@ -792,7 +794,7 @@ sudo python setup.py develop
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-23T09:20:20Z</updated>
+      <updated>2012-06-23T13:20:21Z</updated>
     </source>
   </entry>
 
@@ -838,7 +840,7 @@ sudo python setup.py develop
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging</title>
-      <updated>2012-06-23T09:20:22Z</updated>
+      <updated>2012-06-23T13:20:23Z</updated>
     </source>
   </entry>
 
@@ -885,7 +887,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-23T09:20:21Z</updated>
+      <updated>2012-06-23T13:20:22Z</updated>
     </source>
   </entry>
 
@@ -912,7 +914,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-23T09:20:20Z</updated>
+      <updated>2012-06-23T13:20:21Z</updated>
     </source>
   </entry>
 
@@ -961,7 +963,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-23T09:20:19Z</updated>
+      <updated>2012-06-23T13:20:20Z</updated>
     </source>
   </entry>
 
@@ -1046,6 +1048,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
 <br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/krastanov.wordpress.com/307/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/krastanov.wordpress.com/307/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/krastanov.wordpress.com/307/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/krastanov.wordpress.com/307/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/krastanov.wordpress.com/307/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/krastanov.wordpress.com/307/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/krastanov.wordpress.com/307/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/krastanov.wordpress.com/307/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/krastanov.wordpress.com/307/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/krastanov.wordpress.com/307/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/krastanov.wordpress.com/307/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/krastanov.wordpress.com/307/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/krastanov.wordpress.com/307/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/krastanov.wordpress.com/307/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=krastanov.wordpress.com&amp;blog=15251174&amp;post=307&amp;subd=krastanov&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
     <updated>2012-05-27T13:04:42Z</updated>
+    <category term="GSoC - diffgeom"/>
     <category term="SymPy"/>
     <category term="differential geometry"/>
     <category term="gsoc"/>
@@ -1066,7 +1069,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://krastanov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-06-17T21:00:22Z</updated>
+      <updated>2012-06-23T13:20:24Z</updated>
     </source>
   </entry>
 
@@ -1106,7 +1109,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging</title>
-      <updated>2012-06-23T09:20:22Z</updated>
+      <updated>2012-06-23T13:20:23Z</updated>
     </source>
   </entry>
 
@@ -1170,7 +1173,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-23T09:20:20Z</updated>
+      <updated>2012-06-23T13:20:21Z</updated>
     </source>
   </entry>
 
@@ -1199,7 +1202,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-23T09:20:20Z</updated>
+      <updated>2012-06-23T13:20:21Z</updated>
     </source>
   </entry>
 
@@ -1254,7 +1257,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-23T09:20:21Z</updated>
+      <updated>2012-06-23T13:20:22Z</updated>
     </source>
   </entry>
 
@@ -1282,7 +1285,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-23T09:20:19Z</updated>
+      <updated>2012-06-23T13:20:20Z</updated>
     </source>
   </entry>
 
@@ -1348,7 +1351,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-23T09:20:21Z</updated>
+      <updated>2012-06-23T13:20:22Z</updated>
     </source>
   </entry>
 
@@ -1376,7 +1379,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-23T09:20:21Z</updated>
+      <updated>2012-06-23T13:20:21Z</updated>
     </source>
   </entry>
 
@@ -1404,6 +1407,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
 <br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/krastanov.wordpress.com/298/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/krastanov.wordpress.com/298/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/krastanov.wordpress.com/298/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/krastanov.wordpress.com/298/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/krastanov.wordpress.com/298/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/krastanov.wordpress.com/298/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/krastanov.wordpress.com/298/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/krastanov.wordpress.com/298/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/krastanov.wordpress.com/298/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/krastanov.wordpress.com/298/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/krastanov.wordpress.com/298/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/krastanov.wordpress.com/298/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/krastanov.wordpress.com/298/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/krastanov.wordpress.com/298/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=krastanov.wordpress.com&amp;blog=15251174&amp;post=298&amp;subd=krastanov&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
     <updated>2012-05-13T23:15:15Z</updated>
+    <category term="GSoC - diffgeom"/>
     <category term="SymPy"/>
     <category term="differential geometry"/>
     <category term="gsoc"/>
@@ -1422,7 +1426,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://krastanov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-06-17T21:00:22Z</updated>
+      <updated>2012-06-23T13:20:24Z</updated>
     </source>
   </entry>
 
@@ -1453,7 +1457,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-23T09:20:20Z</updated>
+      <updated>2012-06-23T13:20:21Z</updated>
     </source>
   </entry>
 
@@ -1482,7 +1486,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging</title>
-      <updated>2012-06-23T09:20:22Z</updated>
+      <updated>2012-06-23T13:20:23Z</updated>
     </source>
   </entry>
 
@@ -1536,7 +1540,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-23T09:20:20Z</updated>
+      <updated>2012-06-23T13:20:21Z</updated>
     </source>
   </entry>
 
@@ -1602,7 +1606,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-23T09:20:19Z</updated>
+      <updated>2012-06-23T13:20:20Z</updated>
     </source>
   </entry>
 
@@ -1630,7 +1634,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-23T09:20:19Z</updated>
+      <updated>2012-06-23T13:20:20Z</updated>
     </source>
   </entry>
 
@@ -1657,7 +1661,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-23T09:20:21Z</updated>
+      <updated>2012-06-23T13:20:22Z</updated>
     </source>
   </entry>
 
@@ -1776,7 +1780,7 @@ Devanla, Brian Granger (co-mentor Sean Vig)<br/>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-23T09:20:21Z</updated>
+      <updated>2012-06-23T13:20:22Z</updated>
     </source>
   </entry>
 
@@ -1839,7 +1843,7 @@ def _intersect(self, other):
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-06-23T09:20:18Z</updated>
+      <updated>2012-06-23T13:20:19Z</updated>
     </source>
   </entry>
 
@@ -1968,7 +1972,7 @@ def _intersect(self, other):
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-06-23T09:20:18Z</updated>
+      <updated>2012-06-23T13:20:19Z</updated>
     </source>
   </entry>
 
@@ -2126,7 +2130,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-23T09:20:10Z</updated>
+      <updated>2012-06-23T13:20:10Z</updated>
     </source>
   </entry>
 
@@ -2198,7 +2202,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-23T09:20:10Z</updated>
+      <updated>2012-06-23T13:20:10Z</updated>
     </source>
   </entry>
 
@@ -2229,7 +2233,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-23T09:20:10Z</updated>
+      <updated>2012-06-23T13:20:10Z</updated>
     </source>
   </entry>
 
@@ -2276,7 +2280,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-23T09:20:10Z</updated>
+      <updated>2012-06-23T13:20:10Z</updated>
     </source>
   </entry>
 
