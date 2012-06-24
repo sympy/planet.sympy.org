@@ -25,6 +25,70 @@
 <div class="daygroup">
 <h2>June 24, 2012</h2>
 
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://amakelov.wordpress.com" title="Not really blogging">Aleksandar Makelov</a></h3>
+
+
+<div class="entrygroup" id="http://amakelov.wordpress.com/?p=147">
+<h4 lang="en"><a href="http://amakelov.wordpress.com/2012/06/24/google-summer-of-code-2012-week-5/">Google Summer of Code 2012: Week 5</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p>Hi everyone,</p>
+<p>here’s a brief summary of what I’ve been doing for the fifth week of my GSoC.</p>
+<ul>
+<li>Firstly, I finally had <a href="https://github.com/sympy/sympy/pull/1319" target="_blank">my first pull request</a> merged; it’s all my fault I didn’t complain about it on the mailing list earlier : ) I had to fix a bunch of things on it (stuff like documentation using sphinx and some improvements in code quality, mainly docstrings), and now I’m really happy to have my first major contribution to sympy merged with the master branch. Thanks to everyone who helped in reviewing it – <a href="https://github.com/Krastanov" target="_blank">Stefan</a>, <a href="https://github.com/pernici" target="_blank">Mario</a>, <a href="https://github.com/ness01" target="_blank">Tom</a>, <a href="https://github.com/mrocklin" target="_blank">Matthew</a>, and of course my mentor <a href="https://github.com/wdjoyner" target="_blank">David</a>.</li>
+<li>Secondly, my next pull request, mainly containing work from weeks 2 and 5. After some moderate rebasing over the fixes from my first pull request, it is available <a href="https://github.com/sympy/sympy/pull/1377" target="_blank">here</a>. Apart from implementations of <a href="http://amakelov.wordpress.com/2012/06/02/google-summer-of-code-2012-week-2/" target="_blank">what I did in week 2</a>, it addresses the issue of testing randomized algorithms ( which is still being discussed <a href="https://groups.google.com/forum/?fromgroups#!topic/sympy/2el1T0ZY-Z4" target="_blank">here</a> ), and splits the generators for the named groups (symmetric, dihedral,…) in a separate file (which is probably going to contain more and more constructors for some well-known groups as time goes by). The PR looks longer than it is ( : ) read: any help in the review process will be appreciated), mainly because some 250 lines were copied to a new file in order to accommodate the named groups module. I hope that this time I did a better job at splitting the different parts of the PR into several commits.</li>
+<li>Finally, I started work on algorithms for backtrack searches in groups. These include stuff like printing all group elements (sort of boring, but you have to start somewhere), searching for subgroups of elements satisfying a given property, finding normalizers and centralizers,  intersection of subgroups,… In general, backtrack searches tend to be slow since all the elements in the group have to be visited, but there are ways of skipping large numbers of them. Also, for some problems in computational group theory, backtrack searches are the best we have today. They are described in [1], 4.6., and I’m currently following the exposition offered there. After two days of debugging, I finally got the function PRINTELEMENTS described in 4.6.1 of [1] to work; it turned out that the current implementation of the Schreier-Sims algorithm sets the field _coset_repr of an object of class PermutationGroup in sympy.combinatorics.perm_groups.py in a way that was unexpected to me. This little digression might help anyone else trying to understand the perm_groups file better. So for example consider the following:</li>
+</ul>
+<p><code>In [297]: S = SymmetricGroup(4)</code></p>
+<p><code>In [298]: S.schreier_sims()</code></p>
+<p><code>In [299]: S._coset_repr</code><br />
+<code>Out[299]:</code><br />
+<code>[[[0, 1, 2, 3], [1, 2, 3, 0], [2, 3, 0, 1], [3, 0, 1, 2]],</code><br />
+<code>[[0, 1, 2, 3], [0, 2, 1, 3], [0, 3, 1, 2]],</code><br />
+<code>[[0, 1, 2, 3], [0, 1, 3, 2]]]</code><br />
+<code><br />
+In [300]: S._base</code><br />
+<code>Out[300]: [0, 1, 2]</code></p>
+<p>From this and similar examples I concluded that the i-th component of _coset_repr is a transversal of the i-th basic orbit of the group S and tried to use this in PRINTELEMENTS. However, consired the following example:</p>
+<p><code>In [302]: G = PermutationGroup([Permutation([[0, 1, 2, 3], [4], [5]]), Permutation([[1, 3], [0], [2], [4], [5]]), Permutation([[0], [1], [2], [3], [4, 5]])])</code></p><code>
+<p>In [303]: G.schreier_sims()</p>
+<p>In [304]: G._base<br />
+Out[304]: [0, 1, 4]</p>
+</code><p><code>In [305]: G._coset_repr<br />
+Out[305]:<br />
+[[[0, 1, 2, 3, 4, 5],<br />
+[1, 2, 3, 0, 4, 5],<br />
+[2, 3, 0, 1, 4, 5],<br />
+[3, 0, 1, 2, 4, 5]],<br />
+[[0, 1, 2, 3, 4, 5], [0, 3, 2, 1, 4, 5]],<br />
+[[0, 1, 2, 3, 4, 5]],<br />
+[[0, 1, 2, 3, 4, 5]],<br />
+[[0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 5, 4]]]</code></p>
+<p>Here, the first two components of _coset_repr are as I expected, but the 3rd and 4th are something I didn’t expect to be there (I expected to get the 5th component instead of the 3rd, and no more components). Hence at present the behaviour of _coset_repr is not too clear to me. The current solution is to use the randomized version of the Schreier-Sims algorithm to get a base and a strong generating set. Another option would be to use the generators from the attribute _stabilizers_gens, but I haven’t tried that yet. Anyway, PRINTELEMENTS works now, and the order in which the elements of the group are visited (lexicographically with respect to the image of the base, in an ordering of <img src="http://s0.wp.com/latex.php?latex=%5COmega+%3D+%5C%7B0%2C+1%2C%5Cldots%2C+n-1%5C%7D&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="\Omega = \{0, 1,\ldots, n-1\}" class="latex" title="\Omega = \{0, 1,\ldots, n-1\}" /> in which base points come first) is used in most of the following backtrack searches, so a large part of this algorithm will be reused in subsequent algorithms ( I hope : ) ). My description of the situation assumed some knowledge of the theory behind the Schreier-Sims algorithm, so if something is not quite clear feel free to ask in the comments!</p>
+<p>That’s it for now. Next week, I’ll continue with backtrack searches, and hopefully will implement the subgroup intersection routine (it seems formidable right now)… and put some more effort into getting the second pull request merged – I’ve got a lot to catch up with in terms of getting my code in sympy : ) .</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/amakelov.wordpress.com/147/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/amakelov.wordpress.com/147/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godelicious/amakelov.wordpress.com/147/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/delicious/amakelov.wordpress.com/147/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/amakelov.wordpress.com/147/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/facebook/amakelov.wordpress.com/147/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/amakelov.wordpress.com/147/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/twitter/amakelov.wordpress.com/147/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gostumble/amakelov.wordpress.com/147/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/stumble/amakelov.wordpress.com/147/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godigg/amakelov.wordpress.com/147/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/digg/amakelov.wordpress.com/147/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/goreddit/amakelov.wordpress.com/147/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/reddit/amakelov.wordpress.com/147/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;blog=35896871&amp;post=147&amp;subd=amakelov&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://amakelov.wordpress.com/2012/06/24/google-summer-of-code-2012-week-5/">by amakelov at June 24, 2012 09:19 PM</a>
+</p>
+</div>
+</div>
+
+
 
 
 <div class="entrygroup" id="http://catchmrbharath.github.com/programming/2012/06/24/gsoc-week-5">
@@ -2907,44 +2971,6 @@ As expected, my work with Sympy slowed drastically once school started, but neve
 </div>
 
 </div>
-<div class="daygroup">
-<h2>October 30, 2011</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://dlpeterson.com/blog" title="Dale Peterson">Dale Peterson</a></h3>
-
-
-<div class="entrygroup" id="http://dlpeterson.com/blog/?p=175">
-<h4 lang="en"><a href="http://dlpeterson.com/blog/?p=175">The price of a single stitch</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>About 2 months ago on a Saturday evening, I was working on my bike and cut the middle joint of my index finger.  The cut was deep enough, and the hacksaw was dirty enough, that I knew that I needed get it looked by a doctor.  I looked up my health benefits on my insurance card and tried to find a clinic that was open at 9pm on a Saturday night.  Nothing was open anywhere.  So, my options were to wait until Monday, or go to the ER.  I choose to go to the ER.  They weren’t busy and I was in and out in less than 45 minutes.  They cleaned the wound and put a single stitch in it, then put a bit of neosporin on it and put a band aid on it.</p>
-<p>The total cost?  $1060.71.  Seriously?  Luckily I am insured, and I am only responsible for $100 of that.  I don’t know what the cost would have been if I had gone to a clinic during normal business hours (8am-5pm on a weekday).  </p>
-<p>If I didn’t have insurance, would I have gone?  I don’t think so.  With national unemployment at 9.1% it is a safe bet that at least 1 in 10, probably 1 in 5, either don’t have health insurance or have insurance that wouldn’t cover enough for them to be able to afford such a trip to the hospital to get a relatively minor finger injury taken care of properly.  So 1 in 5 wouldn’t get such a serious injury taken care of.  Imagine if it were a more serious injury.  This system is broken.</p></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://dlpeterson.com/blog/?p=175">by luke at October 30, 2011 06:26 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -3034,7 +3060,7 @@ As expected, my work with Sympy slowed drastically once school started, but neve
 <a href="http://sherjilozair.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sherjilozair.wordpress.com" class="message" title="no activity in 7 days">Sherjil Ozair</a>
 </li>
 <li>
-<a href="http://krastanov.wordpress.com/category/sympy-2/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://krastanov.wordpress.com" title="Stefan's Blog » SymPy">Stefan Krastanov</a>
+<a href="http://krastanov.wordpress.com/category/sympy-2/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://krastanov.wordpress.com" class="message" title="no activity in 7 days">Stefan Krastanov</a>
 </li>
 <li>
 <a href="http://nessgrh.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://nessgrh.wordpress.com" class="message" title="no activity in 7 days">Tom Bachmann</a>
@@ -3052,7 +3078,7 @@ As expected, my work with Sympy slowed drastically once school started, but neve
 
 <p>
 <strong>Last updated:</strong><br>
-June 24, 2012 05:20 PM<br>
+June 24, 2012 09:20 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
