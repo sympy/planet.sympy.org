@@ -13,6 +13,7 @@
 
 	<items>
 		<rdf:Seq>
+			<rdf:li rdf:resource="http://catchmrbharath.github.com/programming/2012/06/24/gsoc-week-5" />
 			<rdf:li rdf:resource="http://angadhsympy.wordpress.com/?p=217" />
 			<rdf:li rdf:resource="http://amakelov.wordpress.com/?p=130" />
 			<rdf:li rdf:resource="http://krastanov.wordpress.com/?p=336" />
@@ -72,11 +73,18 @@
 			<rdf:li rdf:resource="http://fseoane.net/blog/?p=1128" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-8814696591561172392.post-7396657487035470347" />
 			<rdf:li rdf:resource="http://dlpeterson.com/blog/?p=175" />
-			<rdf:li rdf:resource="http://fseoane.net/blog/?p=1062" />
 		</rdf:Seq>
 	</items>
 </channel>
 
+<item rdf:about="http://catchmrbharath.github.com/programming/2012/06/24/gsoc-week-5">
+	<title>Bharath M R: Gsoc week 5</title>
+	<link>http://catchmrbharath.github.com/programming/2012/06/24/gsoc-week-5</link>
+	<content:encoded>&lt;p&gt;This week has been mostly bug fixing and working on migrating the sympy ipython profile to sympy. I also wanted to add the functionality of &lt;code&gt;ipython -c qtconsole&lt;/code&gt;. So it has been mostly hanging in the ipython irc, asking them lots of questions on how ipython works. I am really thankful to minrk who patiently taught me how to do most of the stuff. There are a few problems that I am facing, but I think I will have the qtconsole ready in a day.&lt;/p&gt;
+
+&lt;p&gt;I also submitted a pull request #1370 for my initial work on implicit plotting. Except for the bug of changing line thickness, it works pretty nicely. Please feel free to play with it and comment on the pull request if you encounter any bugs.&lt;/p&gt;</content:encoded>
+	<dc:date>2012-06-24T07:00:00+00:00</dc:date>
+</item>
 <item rdf:about="http://angadhsympy.wordpress.com/?p=217">
 	<title>Angadh Nanjangud: GSoC 2012 Post 6</title>
 	<link>http://angadhsympy.wordpress.com/2012/06/23/gsoc-2012-post-6-26/</link>
@@ -1388,21 +1396,6 @@ def _intersect(self, other):
 &lt;p&gt;If I didn’t have insurance, would I have gone?  I don’t think so.  With national unemployment at 9.1% it is a safe bet that at least 1 in 10, probably 1 in 5, either don’t have health insurance or have insurance that wouldn’t cover enough for them to be able to afford such a trip to the hospital to get a relatively minor finger injury taken care of properly.  So 1 in 5 wouldn’t get such a serious injury taken care of.  Imagine if it were a more serious injury.  This system is broken.&lt;/p&gt;</content:encoded>
 	<dc:date>2011-10-30T18:26:18+00:00</dc:date>
 	<dc:creator>luke</dc:creator>
-</item>
-<item rdf:about="http://fseoane.net/blog/?p=1062">
-	<title>Fabian Pedregosa: qr_multiply function in scipy.linalg</title>
-	<link>http://fseoane.net/blog/2011/qr_multiply-function-in-scipy-linalg/</link>
-	<content:encoded>&lt;p&gt;In scipy’s development version there’s a new function closely related to the &lt;a href=&quot;http://en.wikipedia.org/wiki/QR_decomposition&quot;&gt;QR-decomposition&lt;/a&gt; of a matrix and to the least-squares solution of a linear system.&lt;/p&gt;
-&lt;p&gt;What this function does is to compute the QR-decomposition of a matrix and then multiply the resulting orthogonal factor by another arbitrary matrix. In pseudocode:&lt;/p&gt;
-&lt;div style=&quot;overflow: auto; white-space: nowrap; width: 435px;&quot; class=&quot;codecolorer-container python default&quot;&gt;&lt;div style=&quot;&quot; class=&quot;python codecolorer&quot;&gt;&lt;span style=&quot;color: #ff7700; font-weight: bold;&quot;&gt;def&lt;/span&gt; qr_multiply&lt;span style=&quot;color: black;&quot;&gt;(&lt;/span&gt;X, Y&lt;span style=&quot;color: black;&quot;&gt;)&lt;/span&gt;:&lt;br /&gt;
-    Q, R = qr&lt;span style=&quot;color: black;&quot;&gt;(&lt;/span&gt;X&lt;span style=&quot;color: black;&quot;&gt;)&lt;/span&gt;&lt;br /&gt;
-    &lt;span style=&quot;color: #ff7700; font-weight: bold;&quot;&gt;return&lt;/span&gt; dot&lt;span style=&quot;color: black;&quot;&gt;(&lt;/span&gt;Q.&lt;span style=&quot;color: black;&quot;&gt;T&lt;/span&gt;, Y&lt;span style=&quot;color: black;&quot;&gt;)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;but unlike this naive implementation, &lt;code&gt;qr_multiply&lt;/code&gt; is able to do all this &lt;b&gt;without&lt;/b&gt; explicitly computing the orthogonal Q matrix, resulting both in memory and time saving. In the following picture I measured the memory consumption as a function of time of running this computation on a 1.000 x 1.000 matrix X and a vector Y (full code can be found &lt;a href=&quot;https://gist.github.com/1287168&quot;&gt;here&lt;/a&gt;):&lt;/p&gt;
-&lt;p&gt;&lt;a href=&quot;http://fseoane.net/blog/wp-content/uploads/2011/10/qr_multiply1.png&quot;&gt;&lt;img src=&quot;http://fseoane.net/blog/wp-content/uploads/2011/10/qr_multiply1-300x225.png&quot; title=&quot;Memory usage for a QR multiplication&quot; height=&quot;225&quot; width=&quot;300&quot; alt=&quot;&quot; class=&quot;aligncenter size-medium wp-image-1076&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;It can be seen that not only &lt;code&gt;qr_multiply&lt;/code&gt; is almost twice as fast as the naive approach, but also that the memory consumption is significantly reduced, since the orthogonal factor is never explicitly computed.&lt;/p&gt;
-&lt;p&gt;Credit for implementing the qr_multiply function goes to &lt;a href=&quot;https://github.com/tecki&quot;&gt;Martin Teichmann&lt;/a&gt;. &lt;/p&gt;</content:encoded>
-	<dc:date>2011-10-14T14:44:10+00:00</dc:date>
-	<dc:creator>fabian</dc:creator>
 </item>
 
 </rdf:RDF>
