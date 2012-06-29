@@ -8,6 +8,164 @@
 	<description>Planet SymPy - http://planet.sympy.org/</description>
 
 <item>
+	<title>Stefan Krastanov: Part 1: What is a Tensor and How is it Implemented in the diffgeom SymPy module?</title>
+	<guid isPermaLink="false">http://krastanov.wordpress.com/?p=409</guid>
+	<link>http://krastanov.wordpress.com/2012/06/30/part-1-what-is-a-tensor-and-how-is-it-implemented-in-the-diffgeom-sympy-module/</link>
+	<description>&lt;h2&gt;The Math&lt;/h2&gt;
+&lt;p&gt;The notion of “a tensor” is commonly defined in two different ways. The first definition goes roughly like this (“roughly” means “do not tell this to your math teacher”):&lt;/p&gt;
+&lt;blockquote&gt;&lt;p&gt;A tensor is a geometrical object that can be represented in some coordinate system as an n-dimensional array (it is not the array itself). The quantities in that array depend on the coordinate system in which the representation is done, however there is a precise rule on how these quantities change if we switch to another coordinate system. It is this rule that defines what a tensor (and in particular a vector or a 1-form) is.&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;The other definition, less used by physicists and more used by mathematicians is (again roughly) the following:&lt;/p&gt;
+&lt;blockquote&gt;&lt;p&gt;A tensor is the tensor product of forms and vectors. Forms and vectors are themselves given nice geometrical definitions.&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;It is this second definition that is used in the diffgeom SymPy module. Naturally, we need to define “tensor product”, “vector” and “form” in order to use this definition. Indeed, the structure of the module follows closely these mathematical definitions.&lt;/p&gt;
+&lt;p&gt;Disclaimer: I have used and will use the words tensor and tensor field interchangeably. In order for this post to make any sense to you, ensure that you understand the difference and are able to find out the exact meaning from the context. The same goes also for vector / vector field and form / form field.&lt;/p&gt;
+&lt;h2&gt;The Implementation&lt;/h2&gt;
+&lt;p&gt;To create the mathematical structure of differential geometry or its implementation in a CAS like SymPy we need to build up the ladder of object definitions. Each new and more interesting notion will depend on the definition of the previous. Hence we start with the boilerplate object “Manifold” and on it we define a “Patch” (the diffgeom module implements all this boilerplate for commonly used manifold, however in order to explain how it works, we will redo everything from scratch):&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;m = Manifold('my_manifold', 2) # A 2D manifold called 'my_manifold'
+p = Patch('my_patch', m) # A patch called 'my_patch'
+ &lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;p&gt;The first object that does something marginally interesting is the “Coordinate System”. Its role is to permit the parametrization of points on the patch by a tuple of numbers:&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;cs_r = CoordSystem('R', p) # A coordinate system called 'R' (for rectangular)
+point = cs_r.point([1,1]) # A point with coordinates (1, 1)
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;p&gt;If you have two or more coordinate systems you can tell the computer how to transform a tuple of numbers from one system to another:&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;cs_p = CoordSystem('P', p)
+cs_r.connect_to(cs_p, [x, y], [sqrt(x**2+y**2), atan2(y,x)])
+cs_p.connect_to(cs_r, [r, t], [r*cos(t), r*sin(t)], inverse=False)
+# Now the point instances know how to transform their coordinate tuples:
+point.coords(cs_p)
+# output:
+#⎡  ___⎤
+#⎢╲╱ 2 ⎥
+#⎢     ⎥
+#⎢  π  ⎥
+#⎢  ─  ⎥
+#⎣  4  ⎦
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;p&gt;However, differential geometry is not about calculating coordinates of points in different systems. It is about working with fields. Thus, we will focus on a single coordinate system from now on, and to be explicit about its complete independence of whether we want rectangular or other coordinates, we will just call it ‘c’ and leave it unconnected to other coordinate systems.&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;c = CoordSystem('c', p)
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;h3&gt;Scalar Field&lt;/h3&gt;
+&lt;p&gt;We continue to build up our ladder of definitions in order to obtain a more interesting and useful theory/implementation. The next step is the “scalar field”. A scalar field is a mapping from the manifold (the set of points) to the real numbers (yes, just reals (maybe complex), the rest brings unnecessary complexity). Each coordinate system brings with itself the basic scalar fields (i.e. coordinate functions), that correspond to the mappings from a point to an element of its coordinate tuple. These basic scalar fields are implemented internally as BaseScalarField instances (this is however invisible to the user).&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt; c.coord_functions()
+# output: [c₀, c₁]
+point = c.point([a, b])
+c.coord_function(0)(point)
+# output: a
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;p&gt;You can build more complicated fields by using the base scalar fields. This does not produce an instance of some new ScalarField class. The BaseScalarField instances just become a part of the expression tree of an ordinary Expr instance (the base for building expressions in SymPy).&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;c0, c1 = c.coord_functions()
+field = f(c0, 3*c1)/sin(c0)*c1**2
+f
+# output:
+#               -1       2
+#f(c₀, 3⋅c₁)⋅sin  (c₀)⋅c₁
+field(point)
+# output:
+# 2
+#b ⋅f(a, 3⋅b)
+#────────────
+#   sin(a)
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;h3&gt;Vector Field&lt;/h3&gt;
+&lt;p&gt;Then comes the vector field which is defined as an element of the set of differential operators over the scalar fields. All elements of this set can be build up as linear combinations of base vector fields. The base vector fields correspond to the partial derivatives with respect to the base scalar fields. They are implemented in the BaseVectorField class, which also is invisible to the user.&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;c.base_vectors()
+# output: [∂_c_0, ∂_c_1]
+e_c0, e_c1 = c.base_vectors()
+e_c0(c0)
+# output: 1
+e_c0(c1)
+# output: 0
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;p&gt;One can also use more complicated fields (again, no need for new VectorField class, just being part of the expression tree of Expr):&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;v_field = c1*e_c0 + f(c0)*e_c1
+v_field
+# output: f(c₀)⋅∂_c_1 + c₁⋅∂_c_0
+s_field = g(c0, c1)
+v_field(s_field)
+# output:
+#      ⎛ d            ⎞│           ⎛ d            ⎞│
+#f(c₀)⋅⎜───(g(c₀, ξ₂))⎟│      + c₁⋅⎜───(g(ξ₁, c₁))⎟│
+#      ⎝dξ₂           ⎠│ξ₂=c₁      ⎝dξ₁           ⎠│ξ₁=c₀
+v_field(s_field)(point)
+# output:
+#  ⎛ d           ⎞│            ⎛ d           ⎞│
+#b⋅⎜───(g(ξ₁, b))⎟│     + f(a)⋅⎜───(g(a, ξ₂))⎟│
+#  ⎝dξ₁          ⎠│ξ₁=a        ⎝dξ₂          ⎠│ξ₂=b
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;h3&gt;1-Form Field and Differential&lt;/h3&gt;
+&lt;p&gt;The final ingredient needed for the basis of differential geometry is the 1-form field. A 1-form field is a linear mapping from the set of vector fields to the set of reals. The interesting thing is that all 1-forms can be build-up from linear combinations of the differentials of the base scalar fields.&lt;/p&gt;
+&lt;p&gt;There is the need to define what a differential is. The differential &lt;img src=&quot;http://s0.wp.com/latex.php?latex=df&amp;amp;bg=f3f3f3&amp;amp;fg=888888&amp;amp;s=0&quot; alt=&quot;df&quot; class=&quot;latex&quot; title=&quot;df&quot; /&gt; of the scalar field &lt;img src=&quot;http://s0.wp.com/latex.php?latex=f&amp;amp;bg=f3f3f3&amp;amp;fg=888888&amp;amp;s=0&quot; alt=&quot;f&quot; class=&quot;latex&quot; title=&quot;f&quot; /&gt; is the 1-form field which has the following property: for every vector field &lt;img src=&quot;http://s0.wp.com/latex.php?latex=v&amp;amp;bg=f3f3f3&amp;amp;fg=888888&amp;amp;s=0&quot; alt=&quot;v&quot; class=&quot;latex&quot; title=&quot;v&quot; /&gt; one has &lt;img src=&quot;http://s0.wp.com/latex.php?latex=df%28v%29+%3D+v%28f%29&amp;amp;bg=f3f3f3&amp;amp;fg=888888&amp;amp;s=0&quot; alt=&quot;df(v) = v(f)&quot; class=&quot;latex&quot; title=&quot;df(v) = v(f)&quot; /&gt;.&lt;/p&gt;
+&lt;p&gt;In the diffgeom module the differential is implemented as the Differential class. The differentials of the base scalar fields are accessible with the base_oneforms() method, however one can construct the differential of whatever scalar field they wish. There is, as always, no dedicated OneFormField class. Everything is build up with Expr instances.&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;c.base_oneforms()
+# output: [ⅆ c₀, ⅆ c₁]
+dc0, dc1 = c.base_oneforms()
+dc0(e_c0), dc1(e_c0)
+# output: (1, 0)
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;p&gt;And building up more complicated expressions:&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;f_field = g(c0)*dc1 + 2*dc0
+f_field(v_field)
+# output: g(c₀)⋅f(c₀) + 2⋅c₁
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;h3&gt;The Rest&lt;/h3&gt;
+&lt;p&gt;Now that we have the basic building blocks in order to construct higher order tensors we use tensor and wedge products. More about them in part 2.&lt;/p&gt;
+&lt;h2&gt;What if I Need to Work with a Number of Different Coordinate Systems&lt;/h2&gt;
+&lt;p&gt;The only difference is that the chain rule of differentiation will be necessary. One can express the same statement in a more implementation independent way as “The rule for transformation of coordinates will need to be applied”. Anyhow, it works:&lt;/p&gt;
+&lt;p&gt;Examples from the already implemented &lt;img src=&quot;http://s0.wp.com/latex.php?latex=R%5E2&amp;amp;bg=f3f3f3&amp;amp;fg=888888&amp;amp;s=0&quot; alt=&quot;R^2&quot; class=&quot;latex&quot; title=&quot;R^2&quot; /&gt; module.&lt;/p&gt;
+&lt;h3&gt;Points Defined in one Coordinate System and Evaluated in Another&lt;/h3&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;point_r = R2_r.point([x0, y0])
+point_p = R2_p.point([r0, theta0])
+R2.x(point_r)
+# output: x₀
+R2.x(point_p)
+# output: r₀⋅cos(θ₀)
+trigsimp((R2.x**2 + R2.y**2 + g(R2.theta))(point_p))
+# output:
+#  2
+#r₀  + g(θ₀)
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;h3&gt;Vector Fields Operating on Scalar Fields&lt;/h3&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;R2.e_x(R2.theta)
+# output:
+#            -1
+#   ⎛ 2    2⎞
+#-y⋅⎝x  + y ⎠
+R2.e_theta(R2.y)
+# output: cos(θ)⋅r
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;h3&gt;1-Form Fields Operating on Vector Fields&lt;/h3&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;R2.dr(R2.e_x)
+# output:
+#         -1/2
+#⎛ 2    2⎞
+#⎝x  + y ⎠    ⋅x
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;h2&gt;What if I Need an Unspecified Arbitrary Coordinate System&lt;/h2&gt;
+&lt;p&gt;If it is just one coordinate system, nothing; all the examples in the first part were for a completely arbitrary system. If you want two systems with an arbitrary transformation rules between them, just use an arbitrary function when you connect them:&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;m = Manifold('my_manifold', 2)
+p = Patch('my_patch', m)
+cs_a = CoordSystem('a', p)
+cs_b = CoordSystem('b', p)
+cs_a.connect_to(cs_b, [x, y], [f(x,y), g(x,y)], inverse=False)
+cs_a.base_vector(1)(cs_b.coord_function(0))
+# output:
+#⎛ d            ⎞│
+#⎜───(f(a₀, ξ₁))⎟│
+#⎝dξ₁           ⎠│ξ₁=a₁
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;h2&gt;How Does This Relate to the Scheme Code by &lt;a href=&quot;http://groups.csail.mit.edu/mac/users/gjs/&quot; target=&quot;_blank&quot;&gt;Gerald Jay Sussman&lt;/a&gt; and &lt;a href=&quot;http://groups.csail.mit.edu/mac/users/wisdom/&quot; target=&quot;_blank&quot;&gt;Jack Wisdom&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;The diffgeom module is based in its entirety on the work of &lt;a href=&quot;http://groups.csail.mit.edu/mac/users/gjs/&quot; target=&quot;_blank&quot;&gt;Gerald Jay Sussman&lt;/a&gt; and &lt;a href=&quot;http://groups.csail.mit.edu/mac/users/wisdom/&quot; target=&quot;_blank&quot;&gt;Jack Wisdom&lt;/a&gt; on &lt;a href=&quot;http://dspace.mit.edu/handle/1721.1/30520&quot; target=&quot;_blank&quot;&gt;“Functional Differential Geometry”&lt;/a&gt;. The only substantial difference (in what is already implemented) is how the diffgeom module treats operations on fields. Both the diffgeom module and the original Scheme code behave like this:&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: plain;&quot;&gt;scalar_field(point) ---&amp;gt; an expression representing a real number
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;p&gt;However, the original scheme implementation and the SymPy module behave differently in these cases:&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: plain;&quot;&gt; vector_field(scalar_field)
+form_field(vector_field)
+ &lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;p&gt;As far as I know, the original Scheme code produces an opaque object. It indeed represents a scalar field, however &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cpartial_x%28x%29&amp;amp;bg=f3f3f3&amp;amp;fg=888888&amp;amp;s=0&quot; alt=&quot;\partial_x(x)&quot; class=&quot;latex&quot; title=&quot;\partial_x(x)&quot; /&gt; will not produce directly &lt;img src=&quot;http://s0.wp.com/latex.php?latex=1&amp;amp;bg=f3f3f3&amp;amp;fg=888888&amp;amp;s=0&quot; alt=&quot;1&quot; class=&quot;latex&quot; title=&quot;1&quot; /&gt;. Instead it produces an object that returns 1 when evaluated at a point. The diffgeom module does this evaluation at the time at which one calls &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cpartial_x%28x%29&amp;amp;bg=f3f3f3&amp;amp;fg=888888&amp;amp;s=0&quot; alt=&quot;\partial_x(x)&quot; class=&quot;latex&quot; title=&quot;\partial_x(x)&quot; /&gt; without the need to evaluate at a point, thus the result is explicit and not encapsulated in an opaque object.&lt;/p&gt;
+&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/krastanov.wordpress.com/409/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/krastanov.wordpress.com/409/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/godelicious/krastanov.wordpress.com/409/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/delicious/krastanov.wordpress.com/409/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/gofacebook/krastanov.wordpress.com/409/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/facebook/krastanov.wordpress.com/409/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/gotwitter/krastanov.wordpress.com/409/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/twitter/krastanov.wordpress.com/409/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/gostumble/krastanov.wordpress.com/409/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/stumble/krastanov.wordpress.com/409/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/godigg/krastanov.wordpress.com/409/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/digg/krastanov.wordpress.com/409/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/goreddit/krastanov.wordpress.com/409/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/reddit/krastanov.wordpress.com/409/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=krastanov.wordpress.com&amp;amp;blog=15251174&amp;amp;post=409&amp;amp;subd=krastanov&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
+	<pubDate>Fri, 29 Jun 2012 22:36:38 +0000</pubDate>
+</item>
+<item>
 	<title>Aleksandar Makelov: Illuminatus!</title>
 	<guid isPermaLink="false">http://amakelov.wordpress.com/?p=165</guid>
 	<link>http://amakelov.wordpress.com/2012/06/27/illuminatus/</link>
@@ -1407,17 +1565,6 @@ def _intersect(self, other):
 	<link>http://dlpeterson.com/blog/?p=190</link>
 	<description>&lt;p&gt;&lt;a href=&quot;http://dlpeterson.com/blog/wp-content/uploads/2011/11/Screenshot-11252011-082207-PM.png&quot;&gt;&lt;img src=&quot;http://dlpeterson.com/blog/wp-content/uploads/2011/11/Screenshot-11252011-082207-PM.png&quot; alt=&quot;&quot; width=&quot;221&quot; class=&quot;aligncenter size-full wp-image-191&quot; height=&quot;359&quot; /&gt;&lt;/a&gt;&lt;/p&gt;</description>
 	<pubDate>Sat, 26 Nov 2011 04:28:29 +0000</pubDate>
-</item>
-<item>
-	<title>Dale Peterson: Success in court</title>
-	<guid isPermaLink="true">http://dlpeterson.com/blog/?p=187</guid>
-	<link>http://dlpeterson.com/blog/?p=187</link>
-	<description>&lt;p&gt;I pleaded not guilty to a bicycle stop sign violation in Yolo county today.  The judge found there to be reasonable doubt, and I was found not guilty.&lt;/p&gt;
-&lt;p&gt;I was cited for failure to stop at the stop sign while headed eastbound at the intersection of East 8th street and J street, Davis, CA.  The citation occurred at 9:05am on a weekday.  The officer stated the indisputable facts of the case, and the key to my argument was that he was on the west side of J street, about 100 feet north of E 8th street, facing south.  I was coming to the intersection from the officers right, but I was in the bike lane next to the cars, so his view of me would be obstructed by automobile traffic had there been any.  I asked him if he recalled there being traffic at the intersection at the time of the incident.  He responded that he didn’t recall there being any.  I asked him also whether he would be able to see through the cars to see whether I stopped.  He responded that he couldn’t testify whether or not he could.  I then presented my case, which is as follows.&lt;/p&gt;
-&lt;p&gt;I commute by bicycle and pass through this intersection 2-4 times per day.  I know the stop signs are there and I know that I stop for them.  In the particular day in question, I recall there being traffic and being adjacent to cars (on the south side of eastbound traffic) as I approached the intersection.  I recall stopping, as I always do at that intersection.  I disputed the officer’s testimony that he could see me approach the intersection without slowing down and that I went through the intersection without stopping.  I argued that he couldn’t have seen me not stop because there were cars in between him and I.  I also reemphasized that I frequent this intersection a lot and that I always stop.  The officer responded by repeating his original statements but didn’t really add anything new to what he originally testified.  I responded by emphasizing that I know for a fact that there was traffic since it was 9:05am, and that there was no way he could have seen whether or not I stopped from his position, and that I pass through that intersection frequently and always stop.&lt;/p&gt;
-&lt;p&gt;The judge stated that he found there to be reasonable doubt of my guilt and that since there was no further evidence, I was found not guilty.&lt;/p&gt;
-&lt;p&gt;So, it was worth making 2 trips to the Yolo courthouse because I saved myself $200 and also avoided points being added to my DMV record.&lt;/p&gt;</description>
-	<pubDate>Wed, 23 Nov 2011 22:08:16 +0000</pubDate>
 </item>
 
 </channel>

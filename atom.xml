@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2012-06-27T12:40:20Z</updated>
+  <updated>2012-06-29T22:40:23Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,187 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry xml:lang="en">
+    <id>http://krastanov.wordpress.com/?p=409</id>
+    <link href="http://krastanov.wordpress.com/2012/06/30/part-1-what-is-a-tensor-and-how-is-it-implemented-in-the-diffgeom-sympy-module/" rel="alternate" type="text/html"/>
+    <title>Part 1: What is a Tensor and How is it Implemented in the diffgeom SymPy module?</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">The Math The notion of “a tensor” is commonly defined in two different ways. The first definition goes roughly like this (“roughly” means “do not tell this to your math teacher”): A tensor is a geometrical object that can be represented in some coordinate system as an n-dimensional array (it is not the array itself). [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=krastanov.wordpress.com&amp;blog=15251174&amp;post=409&amp;subd=krastanov&amp;ref=&amp;feed=1" width="1"/></div>
+    </summary>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><h2>The Math</h2>
+<p>The notion of “a tensor” is commonly defined in two different ways. The first definition goes roughly like this (“roughly” means “do not tell this to your math teacher”):</p>
+<blockquote><p>A tensor is a geometrical object that can be represented in some coordinate system as an n-dimensional array (it is not the array itself). The quantities in that array depend on the coordinate system in which the representation is done, however there is a precise rule on how these quantities change if we switch to another coordinate system. It is this rule that defines what a tensor (and in particular a vector or a 1-form) is.</p></blockquote>
+<p>The other definition, less used by physicists and more used by mathematicians is (again roughly) the following:</p>
+<blockquote><p>A tensor is the tensor product of forms and vectors. Forms and vectors are themselves given nice geometrical definitions.</p></blockquote>
+<p>It is this second definition that is used in the diffgeom SymPy module. Naturally, we need to define “tensor product”, “vector” and “form” in order to use this definition. Indeed, the structure of the module follows closely these mathematical definitions.</p>
+<p>Disclaimer: I have used and will use the words tensor and tensor field interchangeably. In order for this post to make any sense to you, ensure that you understand the difference and are able to find out the exact meaning from the context. The same goes also for vector / vector field and form / form field.</p>
+<h2>The Implementation</h2>
+<p>To create the mathematical structure of differential geometry or its implementation in a CAS like SymPy we need to build up the ladder of object definitions. Each new and more interesting notion will depend on the definition of the previous. Hence we start with the boilerplate object “Manifold” and on it we define a “Patch” (the diffgeom module implements all this boilerplate for commonly used manifold, however in order to explain how it works, we will redo everything from scratch):</p>
+<p/><pre class="brush: python;">m = Manifold('my_manifold', 2) # A 2D manifold called 'my_manifold'
+p = Patch('my_patch', m) # A patch called 'my_patch'
+ </pre><p/>
+<p>The first object that does something marginally interesting is the “Coordinate System”. Its role is to permit the parametrization of points on the patch by a tuple of numbers:</p>
+<p/><pre class="brush: python;">cs_r = CoordSystem('R', p) # A coordinate system called 'R' (for rectangular)
+point = cs_r.point([1,1]) # A point with coordinates (1, 1)
+</pre><p/>
+<p>If you have two or more coordinate systems you can tell the computer how to transform a tuple of numbers from one system to another:</p>
+<p/><pre class="brush: python;">cs_p = CoordSystem('P', p)
+cs_r.connect_to(cs_p, [x, y], [sqrt(x**2+y**2), atan2(y,x)])
+cs_p.connect_to(cs_r, [r, t], [r*cos(t), r*sin(t)], inverse=False)
+# Now the point instances know how to transform their coordinate tuples:
+point.coords(cs_p)
+# output:
+#⎡  ___⎤
+#⎢╲╱ 2 ⎥
+#⎢     ⎥
+#⎢  π  ⎥
+#⎢  ─  ⎥
+#⎣  4  ⎦
+</pre><p/>
+<p>However, differential geometry is not about calculating coordinates of points in different systems. It is about working with fields. Thus, we will focus on a single coordinate system from now on, and to be explicit about its complete independence of whether we want rectangular or other coordinates, we will just call it ‘c’ and leave it unconnected to other coordinate systems.</p>
+<p/><pre class="brush: python;">c = CoordSystem('c', p)
+</pre><p/>
+<h3>Scalar Field</h3>
+<p>We continue to build up our ladder of definitions in order to obtain a more interesting and useful theory/implementation. The next step is the “scalar field”. A scalar field is a mapping from the manifold (the set of points) to the real numbers (yes, just reals (maybe complex), the rest brings unnecessary complexity). Each coordinate system brings with itself the basic scalar fields (i.e. coordinate functions), that correspond to the mappings from a point to an element of its coordinate tuple. These basic scalar fields are implemented internally as BaseScalarField instances (this is however invisible to the user).</p>
+<p/><pre class="brush: python;"> c.coord_functions()
+# output: [c₀, c₁]
+point = c.point([a, b])
+c.coord_function(0)(point)
+# output: a
+</pre><p/>
+<p>You can build more complicated fields by using the base scalar fields. This does not produce an instance of some new ScalarField class. The BaseScalarField instances just become a part of the expression tree of an ordinary Expr instance (the base for building expressions in SymPy).</p>
+<p/><pre class="brush: python;">c0, c1 = c.coord_functions()
+field = f(c0, 3*c1)/sin(c0)*c1**2
+f
+# output:
+#               -1       2
+#f(c₀, 3⋅c₁)⋅sin  (c₀)⋅c₁
+field(point)
+# output:
+# 2
+#b ⋅f(a, 3⋅b)
+#────────────
+#   sin(a)
+</pre><p/>
+<h3>Vector Field</h3>
+<p>Then comes the vector field which is defined as an element of the set of differential operators over the scalar fields. All elements of this set can be build up as linear combinations of base vector fields. The base vector fields correspond to the partial derivatives with respect to the base scalar fields. They are implemented in the BaseVectorField class, which also is invisible to the user.</p>
+<p/><pre class="brush: python;">c.base_vectors()
+# output: [∂_c_0, ∂_c_1]
+e_c0, e_c1 = c.base_vectors()
+e_c0(c0)
+# output: 1
+e_c0(c1)
+# output: 0
+</pre><p/>
+<p>One can also use more complicated fields (again, no need for new VectorField class, just being part of the expression tree of Expr):</p>
+<p/><pre class="brush: python;">v_field = c1*e_c0 + f(c0)*e_c1
+v_field
+# output: f(c₀)⋅∂_c_1 + c₁⋅∂_c_0
+s_field = g(c0, c1)
+v_field(s_field)
+# output:
+#      ⎛ d            ⎞│           ⎛ d            ⎞│
+#f(c₀)⋅⎜───(g(c₀, ξ₂))⎟│      + c₁⋅⎜───(g(ξ₁, c₁))⎟│
+#      ⎝dξ₂           ⎠│ξ₂=c₁      ⎝dξ₁           ⎠│ξ₁=c₀
+v_field(s_field)(point)
+# output:
+#  ⎛ d           ⎞│            ⎛ d           ⎞│
+#b⋅⎜───(g(ξ₁, b))⎟│     + f(a)⋅⎜───(g(a, ξ₂))⎟│
+#  ⎝dξ₁          ⎠│ξ₁=a        ⎝dξ₂          ⎠│ξ₂=b
+</pre><p/>
+<h3>1-Form Field and Differential</h3>
+<p>The final ingredient needed for the basis of differential geometry is the 1-form field. A 1-form field is a linear mapping from the set of vector fields to the set of reals. The interesting thing is that all 1-forms can be build-up from linear combinations of the differentials of the base scalar fields.</p>
+<p>There is the need to define what a differential is. The differential <img alt="df" class="latex" src="http://s0.wp.com/latex.php?latex=df&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="df"/> of the scalar field <img alt="f" class="latex" src="http://s0.wp.com/latex.php?latex=f&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="f"/> is the 1-form field which has the following property: for every vector field <img alt="v" class="latex" src="http://s0.wp.com/latex.php?latex=v&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="v"/> one has <img alt="df(v) = v(f)" class="latex" src="http://s0.wp.com/latex.php?latex=df%28v%29+%3D+v%28f%29&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="df(v) = v(f)"/>.</p>
+<p>In the diffgeom module the differential is implemented as the Differential class. The differentials of the base scalar fields are accessible with the base_oneforms() method, however one can construct the differential of whatever scalar field they wish. There is, as always, no dedicated OneFormField class. Everything is build up with Expr instances.</p>
+<p/><pre class="brush: python;">c.base_oneforms()
+# output: [ⅆ c₀, ⅆ c₁]
+dc0, dc1 = c.base_oneforms()
+dc0(e_c0), dc1(e_c0)
+# output: (1, 0)
+</pre><p/>
+<p>And building up more complicated expressions:</p>
+<p/><pre class="brush: python;">f_field = g(c0)*dc1 + 2*dc0
+f_field(v_field)
+# output: g(c₀)⋅f(c₀) + 2⋅c₁
+</pre><p/>
+<h3>The Rest</h3>
+<p>Now that we have the basic building blocks in order to construct higher order tensors we use tensor and wedge products. More about them in part 2.</p>
+<h2>What if I Need to Work with a Number of Different Coordinate Systems</h2>
+<p>The only difference is that the chain rule of differentiation will be necessary. One can express the same statement in a more implementation independent way as “The rule for transformation of coordinates will need to be applied”. Anyhow, it works:</p>
+<p>Examples from the already implemented <img alt="R^2" class="latex" src="http://s0.wp.com/latex.php?latex=R%5E2&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="R^2"/> module.</p>
+<h3>Points Defined in one Coordinate System and Evaluated in Another</h3>
+<p/><pre class="brush: python;">point_r = R2_r.point([x0, y0])
+point_p = R2_p.point([r0, theta0])
+R2.x(point_r)
+# output: x₀
+R2.x(point_p)
+# output: r₀⋅cos(θ₀)
+trigsimp((R2.x**2 + R2.y**2 + g(R2.theta))(point_p))
+# output:
+#  2
+#r₀  + g(θ₀)
+</pre><p/>
+<h3>Vector Fields Operating on Scalar Fields</h3>
+<p/><pre class="brush: python;">R2.e_x(R2.theta)
+# output:
+#            -1
+#   ⎛ 2    2⎞
+#-y⋅⎝x  + y ⎠
+R2.e_theta(R2.y)
+# output: cos(θ)⋅r
+</pre><p/>
+<h3>1-Form Fields Operating on Vector Fields</h3>
+<p/><pre class="brush: python;">R2.dr(R2.e_x)
+# output:
+#         -1/2
+#⎛ 2    2⎞
+#⎝x  + y ⎠    ⋅x
+</pre><p/>
+<h2>What if I Need an Unspecified Arbitrary Coordinate System</h2>
+<p>If it is just one coordinate system, nothing; all the examples in the first part were for a completely arbitrary system. If you want two systems with an arbitrary transformation rules between them, just use an arbitrary function when you connect them:</p>
+<p/><pre class="brush: python;">m = Manifold('my_manifold', 2)
+p = Patch('my_patch', m)
+cs_a = CoordSystem('a', p)
+cs_b = CoordSystem('b', p)
+cs_a.connect_to(cs_b, [x, y], [f(x,y), g(x,y)], inverse=False)
+cs_a.base_vector(1)(cs_b.coord_function(0))
+# output:
+#⎛ d            ⎞│
+#⎜───(f(a₀, ξ₁))⎟│
+#⎝dξ₁           ⎠│ξ₁=a₁
+</pre><p/>
+<h2>How Does This Relate to the Scheme Code by <a href="http://groups.csail.mit.edu/mac/users/gjs/" target="_blank">Gerald Jay Sussman</a> and <a href="http://groups.csail.mit.edu/mac/users/wisdom/" target="_blank">Jack Wisdom</a></h2>
+<p>The diffgeom module is based in its entirety on the work of <a href="http://groups.csail.mit.edu/mac/users/gjs/" target="_blank">Gerald Jay Sussman</a> and <a href="http://groups.csail.mit.edu/mac/users/wisdom/" target="_blank">Jack Wisdom</a> on <a href="http://dspace.mit.edu/handle/1721.1/30520" target="_blank">“Functional Differential Geometry”</a>. The only substantial difference (in what is already implemented) is how the diffgeom module treats operations on fields. Both the diffgeom module and the original Scheme code behave like this:</p>
+<p/><pre class="brush: plain;">scalar_field(point) ---&gt; an expression representing a real number
+</pre><p/>
+<p>However, the original scheme implementation and the SymPy module behave differently in these cases:</p>
+<p/><pre class="brush: plain;"> vector_field(scalar_field)
+form_field(vector_field)
+ </pre><p/>
+<p>As far as I know, the original Scheme code produces an opaque object. It indeed represents a scalar field, however <img alt="\partial_x(x)" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cpartial_x%28x%29&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="\partial_x(x)"/> will not produce directly <img alt="1" class="latex" src="http://s0.wp.com/latex.php?latex=1&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="1"/>. Instead it produces an object that returns 1 when evaluated at a point. The diffgeom module does this evaluation at the time at which one calls <img alt="\partial_x(x)" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cpartial_x%28x%29&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="\partial_x(x)"/> without the need to evaluate at a point, thus the result is explicit and not encapsulated in an opaque object.</p>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/krastanov.wordpress.com/409/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/krastanov.wordpress.com/409/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/krastanov.wordpress.com/409/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/krastanov.wordpress.com/409/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/krastanov.wordpress.com/409/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/krastanov.wordpress.com/409/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/krastanov.wordpress.com/409/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/krastanov.wordpress.com/409/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/krastanov.wordpress.com/409/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/krastanov.wordpress.com/409/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/krastanov.wordpress.com/409/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/krastanov.wordpress.com/409/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/krastanov.wordpress.com/409/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/krastanov.wordpress.com/409/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=krastanov.wordpress.com&amp;blog=15251174&amp;post=409&amp;subd=krastanov&amp;ref=&amp;feed=1" width="1"/></div>
+    </content>
+    <updated>2012-06-29T22:36:38Z</updated>
+    <category term="GSoC - diffgeom"/>
+    <category term="differential geometry"/>
+    <category term="gsoc"/>
+    <category term="symbolic algebra"/>
+    <category term="sympy"/>
+    <author>
+      <name>Stefan Krastanov</name>
+    </author>
+    <source>
+      <id>http://krastanov.wordpress.com</id>
+      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
+      <link href="http://krastanov.wordpress.com/category/sympy-2/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://krastanov.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://krastanov.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://krastanov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <subtitle>Just another WordPress.com site</subtitle>
+      <title>Stefan's Blog » SymPy</title>
+      <updated>2012-06-29T22:40:23Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en">
     <id>http://amakelov.wordpress.com/?p=165</id>
@@ -49,6 +230,10 @@
     <updated>2012-06-27T12:16:50Z</updated>
     <category term="Inspiration"/>
     <category term="Literature"/>
+    <category term="Fiction"/>
+    <category term="Humor"/>
+    <category term="Illuminatus! Trilogy"/>
+    <category term="Robert Anton Wilson"/>
     <author>
       <name>amakelov</name>
     </author>
@@ -61,7 +246,7 @@
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging</title>
-      <updated>2012-06-27T12:40:20Z</updated>
+      <updated>2012-06-27T14:40:24Z</updated>
     </source>
   </entry>
 
@@ -99,7 +284,7 @@
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-27T12:40:18Z</updated>
+      <updated>2012-06-29T22:40:22Z</updated>
     </source>
   </entry>
 
@@ -139,7 +324,7 @@
       <link href="http://krastanov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-06-24T22:40:20Z</updated>
+      <updated>2012-06-29T22:40:23Z</updated>
     </source>
   </entry>
 
@@ -194,13 +379,13 @@ Out[305]:<br/>
     <source>
       <id>http://amakelov.wordpress.com</id>
       <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://amakelov.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://amakelov.wordpress.com/category/google-summer-of-code-2012/feed/" rel="self" type="application/atom+xml"/>
       <link href="http://amakelov.wordpress.com" rel="alternate" type="text/html"/>
       <link href="http://amakelov.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
-      <title>Not really blogging</title>
-      <updated>2012-06-27T12:40:20Z</updated>
+      <title>Not really blogging » Google Summer of Code 2012</title>
+      <updated>2012-06-28T12:00:29Z</updated>
     </source>
   </entry>
 
@@ -222,7 +407,7 @@ Out[305]:<br/>
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-27T12:40:18Z</updated>
+      <updated>2012-06-29T22:40:21Z</updated>
     </source>
   </entry>
 
@@ -254,7 +439,7 @@ Out[305]:<br/>
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-27T12:40:17Z</updated>
+      <updated>2012-06-29T22:40:21Z</updated>
     </source>
   </entry>
 
@@ -292,13 +477,13 @@ Out[305]:<br/>
     <source>
       <id>http://amakelov.wordpress.com</id>
       <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://amakelov.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://amakelov.wordpress.com/category/google-summer-of-code-2012/feed/" rel="self" type="application/atom+xml"/>
       <link href="http://amakelov.wordpress.com" rel="alternate" type="text/html"/>
       <link href="http://amakelov.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
-      <title>Not really blogging</title>
-      <updated>2012-06-27T12:40:20Z</updated>
+      <title>Not really blogging » Google Summer of Code 2012</title>
+      <updated>2012-06-28T12:00:29Z</updated>
     </source>
   </entry>
 
@@ -483,7 +668,6 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
     </content>
     <updated>2012-06-17T20:40:16Z</updated>
     <category term="GSoC - diffgeom"/>
-    <category term="SymPy"/>
     <category term="differential geometry"/>
     <category term="gsoc"/>
     <category term="integral curve"/>
@@ -503,7 +687,7 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
       <link href="http://krastanov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-06-24T22:40:20Z</updated>
+      <updated>2012-06-29T22:40:23Z</updated>
     </source>
   </entry>
 
@@ -541,7 +725,7 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-27T12:40:16Z</updated>
+      <updated>2012-06-29T22:40:20Z</updated>
     </source>
   </entry>
 
@@ -571,7 +755,7 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-27T12:40:17Z</updated>
+      <updated>2012-06-29T22:40:21Z</updated>
     </source>
   </entry>
 
@@ -606,7 +790,7 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-27T12:40:17Z</updated>
+      <updated>2012-06-29T22:40:20Z</updated>
     </source>
   </entry>
 
@@ -649,7 +833,7 @@ sudo python setup.py develop
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-27T12:40:08Z</updated>
+      <updated>2012-06-29T22:40:11Z</updated>
     </source>
   </entry>
 
@@ -678,13 +862,13 @@ sudo python setup.py develop
     <source>
       <id>http://amakelov.wordpress.com</id>
       <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://amakelov.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://amakelov.wordpress.com/category/google-summer-of-code-2012/feed/" rel="self" type="application/atom+xml"/>
       <link href="http://amakelov.wordpress.com" rel="alternate" type="text/html"/>
       <link href="http://amakelov.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
-      <title>Not really blogging</title>
-      <updated>2012-06-27T12:40:20Z</updated>
+      <title>Not really blogging » Google Summer of Code 2012</title>
+      <updated>2012-06-28T12:00:29Z</updated>
     </source>
   </entry>
 
@@ -715,11 +899,11 @@ sudo python setup.py develop
     </content>
     <updated>2012-06-10T21:09:58Z</updated>
     <category term="SymPy"/>
-    <category term="base classes"/>
-    <category term="diagram"/>
-    <category term="gotcha"/>
     <category term="morphism"/>
     <category term="object"/>
+    <category term="diagram"/>
+    <category term="base classes"/>
+    <category term="gotcha"/>
     <category term="testing"/>
     <author>
       <name>scolobb</name>
@@ -733,7 +917,7 @@ sudo python setup.py develop
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-27T12:40:17Z</updated>
+      <updated>2012-06-29T22:40:20Z</updated>
     </source>
   </entry>
 
@@ -770,7 +954,7 @@ sudo python setup.py develop
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-27T12:40:18Z</updated>
+      <updated>2012-06-29T22:40:22Z</updated>
     </source>
   </entry>
 
@@ -812,7 +996,7 @@ sudo python setup.py develop
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-27T12:40:18Z</updated>
+      <updated>2012-06-29T22:40:21Z</updated>
     </source>
   </entry>
 
@@ -839,7 +1023,7 @@ sudo python setup.py develop
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-27T12:40:17Z</updated>
+      <updated>2012-06-29T22:40:21Z</updated>
     </source>
   </entry>
 
@@ -885,6 +1069,9 @@ sudo python setup.py develop
     <updated>2012-06-07T22:44:48Z</updated>
     <category term="Inspiration"/>
     <category term="Mathematics"/>
+    <category term="Induction"/>
+    <category term="Logic"/>
+    <category term="Problem"/>
     <author>
       <name>amakelov</name>
     </author>
@@ -897,7 +1084,7 @@ sudo python setup.py develop
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging</title>
-      <updated>2012-06-27T12:40:20Z</updated>
+      <updated>2012-06-27T14:40:23Z</updated>
     </source>
   </entry>
 
@@ -950,7 +1137,7 @@ sudo python setup.py develop
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging</title>
-      <updated>2012-06-27T12:40:20Z</updated>
+      <updated>2012-06-27T14:40:23Z</updated>
     </source>
   </entry>
 
@@ -970,7 +1157,6 @@ sudo python setup.py develop
     </content>
     <updated>2012-06-03T22:14:40Z</updated>
     <category term="GSoC - diffgeom"/>
-    <category term="SymPy"/>
     <category term="differential geometry"/>
     <category term="gsoc"/>
     <category term="ode"/>
@@ -989,7 +1175,7 @@ sudo python setup.py develop
       <link href="http://krastanov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-06-24T22:40:20Z</updated>
+      <updated>2012-06-29T22:40:23Z</updated>
     </source>
   </entry>
 
@@ -1009,7 +1195,7 @@ sudo python setup.py develop
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-27T12:40:18Z</updated>
+      <updated>2012-06-29T22:40:21Z</updated>
     </source>
   </entry>
 
@@ -1049,13 +1235,13 @@ sudo python setup.py develop
     <source>
       <id>http://amakelov.wordpress.com</id>
       <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://amakelov.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://amakelov.wordpress.com/category/google-summer-of-code-2012/feed/" rel="self" type="application/atom+xml"/>
       <link href="http://amakelov.wordpress.com" rel="alternate" type="text/html"/>
       <link href="http://amakelov.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
-      <title>Not really blogging</title>
-      <updated>2012-06-27T12:40:20Z</updated>
+      <title>Not really blogging » Google Summer of Code 2012</title>
+      <updated>2012-06-28T12:00:29Z</updated>
     </source>
   </entry>
 
@@ -1102,7 +1288,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-27T12:40:18Z</updated>
+      <updated>2012-06-29T22:40:22Z</updated>
     </source>
   </entry>
 
@@ -1129,7 +1315,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-27T12:40:17Z</updated>
+      <updated>2012-06-29T22:40:21Z</updated>
     </source>
   </entry>
 
@@ -1178,7 +1364,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-27T12:40:16Z</updated>
+      <updated>2012-06-29T22:40:20Z</updated>
     </source>
   </entry>
 
@@ -1264,7 +1450,6 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
     </content>
     <updated>2012-05-27T13:04:42Z</updated>
     <category term="GSoC - diffgeom"/>
-    <category term="SymPy"/>
     <category term="differential geometry"/>
     <category term="gsoc"/>
     <category term="integral curve"/>
@@ -1284,7 +1469,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://krastanov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-06-24T22:40:20Z</updated>
+      <updated>2012-06-29T22:40:23Z</updated>
     </source>
   </entry>
 
@@ -1318,13 +1503,13 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
     <source>
       <id>http://amakelov.wordpress.com</id>
       <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://amakelov.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://amakelov.wordpress.com/category/google-summer-of-code-2012/feed/" rel="self" type="application/atom+xml"/>
       <link href="http://amakelov.wordpress.com" rel="alternate" type="text/html"/>
       <link href="http://amakelov.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
-      <title>Not really blogging</title>
-      <updated>2012-06-27T12:40:20Z</updated>
+      <title>Not really blogging » Google Summer of Code 2012</title>
+      <updated>2012-06-28T12:00:29Z</updated>
     </source>
   </entry>
 
@@ -1388,7 +1573,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-27T12:40:18Z</updated>
+      <updated>2012-06-29T22:40:21Z</updated>
     </source>
   </entry>
 
@@ -1417,7 +1602,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-27T12:40:17Z</updated>
+      <updated>2012-06-29T22:40:21Z</updated>
     </source>
   </entry>
 
@@ -1472,7 +1657,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-27T12:40:18Z</updated>
+      <updated>2012-06-29T22:40:22Z</updated>
     </source>
   </entry>
 
@@ -1500,7 +1685,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-27T12:40:16Z</updated>
+      <updated>2012-06-29T22:40:20Z</updated>
     </source>
   </entry>
 
@@ -1566,7 +1751,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-27T12:40:18Z</updated>
+      <updated>2012-06-29T22:40:22Z</updated>
     </source>
   </entry>
 
@@ -1594,7 +1779,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-27T12:40:18Z</updated>
+      <updated>2012-06-29T22:40:21Z</updated>
     </source>
   </entry>
 
@@ -1623,7 +1808,6 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
     </content>
     <updated>2012-05-13T23:15:15Z</updated>
     <category term="GSoC - diffgeom"/>
-    <category term="SymPy"/>
     <category term="differential geometry"/>
     <category term="gsoc"/>
     <category term="symbolic algebra"/>
@@ -1641,7 +1825,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://krastanov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-06-24T22:40:20Z</updated>
+      <updated>2012-06-29T22:40:23Z</updated>
     </source>
   </entry>
 
@@ -1672,7 +1856,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-27T12:40:17Z</updated>
+      <updated>2012-06-29T22:40:21Z</updated>
     </source>
   </entry>
 
@@ -1695,13 +1879,13 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
     <source>
       <id>http://amakelov.wordpress.com</id>
       <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://amakelov.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://amakelov.wordpress.com/category/google-summer-of-code-2012/feed/" rel="self" type="application/atom+xml"/>
       <link href="http://amakelov.wordpress.com" rel="alternate" type="text/html"/>
       <link href="http://amakelov.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
-      <title>Not really blogging</title>
-      <updated>2012-06-27T12:40:20Z</updated>
+      <title>Not really blogging » Google Summer of Code 2012</title>
+      <updated>2012-06-28T12:00:29Z</updated>
     </source>
   </entry>
 
@@ -1755,7 +1939,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-27T12:40:18Z</updated>
+      <updated>2012-06-29T22:40:21Z</updated>
     </source>
   </entry>
 
@@ -1821,7 +2005,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-27T12:40:16Z</updated>
+      <updated>2012-06-29T22:40:20Z</updated>
     </source>
   </entry>
 
@@ -1849,7 +2033,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-27T12:40:16Z</updated>
+      <updated>2012-06-29T22:40:20Z</updated>
     </source>
   </entry>
 
@@ -1876,7 +2060,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-27T12:40:18Z</updated>
+      <updated>2012-06-29T22:40:22Z</updated>
     </source>
   </entry>
 
@@ -1995,7 +2179,7 @@ Devanla, Brian Granger (co-mentor Sean Vig)<br/>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-27T12:40:18Z</updated>
+      <updated>2012-06-29T22:40:22Z</updated>
     </source>
   </entry>
 
@@ -2058,7 +2242,7 @@ def _intersect(self, other):
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-06-27T12:40:15Z</updated>
+      <updated>2012-06-29T22:40:19Z</updated>
     </source>
   </entry>
 
@@ -2187,7 +2371,7 @@ def _intersect(self, other):
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-06-27T12:40:15Z</updated>
+      <updated>2012-06-29T22:40:19Z</updated>
     </source>
   </entry>
 
@@ -2345,7 +2529,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-27T12:40:08Z</updated>
+      <updated>2012-06-29T22:40:11Z</updated>
     </source>
   </entry>
 
@@ -2417,7 +2601,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-27T12:40:08Z</updated>
+      <updated>2012-06-29T22:40:11Z</updated>
     </source>
   </entry>
 
@@ -2448,7 +2632,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-27T12:40:07Z</updated>
+      <updated>2012-06-29T22:40:11Z</updated>
     </source>
   </entry>
 
@@ -2495,7 +2679,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-27T12:40:08Z</updated>
+      <updated>2012-06-29T22:40:12Z</updated>
     </source>
   </entry>
 
@@ -2601,33 +2785,6 @@ def _intersect(self, other):
     <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p><a href="http://dlpeterson.com/blog/wp-content/uploads/2011/11/Screenshot-11252011-082207-PM.png"><img alt="" class="aligncenter size-full wp-image-191" height="359" src="http://dlpeterson.com/blog/wp-content/uploads/2011/11/Screenshot-11252011-082207-PM.png" width="221"/></a></p></div>
     </content>
     <updated>2011-11-26T04:28:29Z</updated>
-    <category term="Uncategorized"/>
-    <author>
-      <name>luke</name>
-    </author>
-    <source>
-      <id>http://dlpeterson.com/blog</id>
-      <link href="http://dlpeterson.com/blog/?feed=rss2" rel="self" type="application/atom+xml"/>
-      <link href="http://dlpeterson.com/blog" rel="alternate" type="text/html"/>
-      <subtitle>Mechanical Engineering PhD. candidate, UC Davis</subtitle>
-      <title>Dale Peterson</title>
-      <updated>2011-12-07T09:00:13Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://dlpeterson.com/blog/?p=187</id>
-    <link href="http://dlpeterson.com/blog/?p=187" rel="alternate" type="text/html"/>
-    <title>Success in court</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>I pleaded not guilty to a bicycle stop sign violation in Yolo county today. The judge found there to be reasonable doubt, and I was found not guilty.</p> <p>I was cited for failure to stop at the stop sign while headed eastbound at the intersection of East 8th street and J street, Davis, CA. <span style="color: #777;"> . . . → Read More: <a href="http://dlpeterson.com/blog/?p=187">Success in court</a></span></p></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>I pleaded not guilty to a bicycle stop sign violation in Yolo county today.  The judge found there to be reasonable doubt, and I was found not guilty.</p>
-<p>I was cited for failure to stop at the stop sign while headed eastbound at the intersection of East 8th street and J street, Davis, CA.  The citation occurred at 9:05am on a weekday.  The officer stated the indisputable facts of the case, and the key to my argument was that he was on the west side of J street, about 100 feet north of E 8th street, facing south.  I was coming to the intersection from the officers right, but I was in the bike lane next to the cars, so his view of me would be obstructed by automobile traffic had there been any.  I asked him if he recalled there being traffic at the intersection at the time of the incident.  He responded that he didn’t recall there being any.  I asked him also whether he would be able to see through the cars to see whether I stopped.  He responded that he couldn’t testify whether or not he could.  I then presented my case, which is as follows.</p>
-<p>I commute by bicycle and pass through this intersection 2-4 times per day.  I know the stop signs are there and I know that I stop for them.  In the particular day in question, I recall there being traffic and being adjacent to cars (on the south side of eastbound traffic) as I approached the intersection.  I recall stopping, as I always do at that intersection.  I disputed the officer’s testimony that he could see me approach the intersection without slowing down and that I went through the intersection without stopping.  I argued that he couldn’t have seen me not stop because there were cars in between him and I.  I also reemphasized that I frequent this intersection a lot and that I always stop.  The officer responded by repeating his original statements but didn’t really add anything new to what he originally testified.  I responded by emphasizing that I know for a fact that there was traffic since it was 9:05am, and that there was no way he could have seen whether or not I stopped from his position, and that I pass through that intersection frequently and always stop.</p>
-<p>The judge stated that he found there to be reasonable doubt of my guilt and that since there was no further evidence, I was found not guilty.</p>
-<p>So, it was worth making 2 trips to the Yolo courthouse because I saved myself $200 and also avoided points being added to my DMV record.</p></div>
-    </content>
-    <updated>2011-11-23T22:08:16Z</updated>
     <category term="Uncategorized"/>
     <author>
       <name>luke</name>
