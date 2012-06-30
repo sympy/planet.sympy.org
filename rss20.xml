@@ -365,46 +365,49 @@ point_r = R2_r.point([0,1])
 #                  |        the curve     |     /          coord system
 #                  v                      v    v      v-- for the equation
 intcurve_diffequ(vector_field_circular_p, t, point_p, R2_p)
-   d            d
-([ ──(f₀(t)),   ──(f₁(t)) - 1  ],
-   dt           dt
-
-                        π
- [f₀(0) - 1,    f₁(0) - ─      ])
-                        2
+# output:
+#   d            d
+#([ ──(f₀(t)),   ──(f₁(t)) - 1  ],
+#   dt           dt
+#
+#                        π
+# [f₀(0) - 1,    f₁(0) - ─      ])
+#                        2
 
 intcurve_diffequ(vector_field_circular_p, t, point_p, R2_r)
-           d                     d
-([ f₁(t) + ──(f₀(t)),   -f₀(t) + ──(f₁(t))  ],
-           dt                    dt
-
- [ f₀(0),               f₁(0) - 1           ])
+# output:
+#           d                     d
+#([ f₁(t) + ──(f₀(t)),   -f₀(t) + ──(f₁(t))  ],
+#           dt                    dt
+#
+# [ f₀(0),               f₁(0) - 1           ])
 &lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
 &lt;p&gt;Here we have equations for the functions &lt;img src=&quot;http://s0.wp.com/latex.php?latex=f_0&amp;amp;bg=f3f3f3&amp;amp;fg=888888&amp;amp;s=0&quot; alt=&quot;f_0&quot; class=&quot;latex&quot; title=&quot;f_0&quot; /&gt; and &lt;img src=&quot;http://s0.wp.com/latex.php?latex=f_1&amp;amp;bg=f3f3f3&amp;amp;fg=888888&amp;amp;s=0&quot; alt=&quot;f_1&quot; class=&quot;latex&quot; title=&quot;f_1&quot; /&gt; which are by convention the names that &lt;code&gt;intcurve_diffequ&lt;/code&gt; gives for the first and second coordinate.&lt;/p&gt;
 &lt;p&gt;The cool thing is that we can mix the coordinate systems in any way we wish. The code will automatically make the needed coordinate transformation and return the equations in the demanded coordinate system independently of the coordinate systems in which the input objects were defined (at worst you will need to call some simplification routines):&lt;/p&gt;
 &lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;a = intcurve_diffequ(vector_field_circular_p, t, point_p, R2_r)
 a == intcurve_diffequ(vector_field_circular_p, t, point_r, R2_r)
-True
+# True
 a == intcurve_diffequ(vector_field_circular_r, t, point_r, R2_r)
-True
+# True
 a == intcurve_diffequ(vector_field_circular_r, t, point_p, R2_r)
-True
+# True
 &lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
 &lt;p&gt;Solving the equations actually gives (this solver is not yet in SymPy master as of the time of writing):&lt;/p&gt;
 &lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;equ_r, init_r = intcurve_diffequ(vector_field_circular_r, t, point_r, R2_r)
 sol_r = dsolve(equ_r+init_r, [Function('f_0')(t), Function('f_1')(t)])
 [simplify(s.rewrite(sin)) for s in sol_r] # some simplification
-[f₀(t) = -sin(t), f₁(t) = cos(t)]             # is necessary because
+#[f₀(t) = -sin(t), f₁(t) = cos(t)]            # is necessary because
                                               # dsolve returned complex
                                               # exponentials
 &lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
 &lt;p&gt;Even simpler:&lt;/p&gt;
 &lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;equ_p, init_p = intcurve_diffequ(vector_field_circular_p, t, point_p, R2_p)
 dsolve(equ_p+init_p, [Function('f_0')(t), Function('f_1')(t)])
-[f₀(t) = 1,
-             π
- f₁(t) = t + ─
-             2]
+# output:
+#[f₀(t) = 1,
+#             π
+# f₁(t) = t + ─
+#             2]
 &lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
 &lt;p&gt;This is obviously just a circle (did I mentioned that the vector field that I defined is circular). There is no need to plot it as it is fairly simple. However a slight change will render the field a bit more interesting:&lt;/p&gt;
 &lt;h3&gt;Radial Component&lt;/h3&gt;
@@ -416,22 +419,22 @@ v_field = R2.e_theta + (r0 - R2.r)*R2.e_r
 start_point = R2_p.point([r0+delta, 0])
 equ, init = intcurve_diffequ(v_field, t, start_point)
 equ
-                d            d
-[ -r₀ + f₀(t) + ──(f₀(t)),   ──(f₁(t)) - 1 ]
-                dt           dt
+#                d            d
+#[ -r₀ + f₀(t) + ──(f₀(t)),   ──(f₁(t)) - 1 ]
+#                dt           dt
 
 init
-[-δ - r₀ + f₀(0), f₁(0)]
+#[-δ - r₀ + f₀(0), f₁(0)]
 
 dsolve(equ+init, [Function('f_0')(t), Function('f_1')(t)])
-            -t
-[f₀(t) = δ⋅ℯ   + r₀, f₁(t) = t]
+#            -t
+#[f₀(t) = δ⋅ℯ   + r₀, f₁(t) = t]
 &lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
 &lt;p&gt;This gives a spiral tending towards the equilibrium radius &lt;img src=&quot;http://s0.wp.com/latex.php?latex=r_0&amp;amp;bg=f3f3f3&amp;amp;fg=888888&amp;amp;s=0&quot; alt=&quot;r_0&quot; class=&quot;latex&quot; title=&quot;r_0&quot; /&gt;. Let us extract the coordinates from these equations and plot the resulting curve:&lt;/p&gt;
 &lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;intcurve_coords = [eq.rhs for eq in dsolve(equ+init, [Function('f_0')(t), Function('f_1')(t)])]
 intcurve_coords
-    -t
-[δ⋅ℯ   + r₀, t]
+#    -t
+#[δ⋅ℯ   + r₀, t]
 
 # We need this in Cartesian coordinates for the plot routine.
 # We could have solved for Cartesian coordinates since the
@@ -439,19 +442,19 @@ intcurve_coords
 # how to use the `CoordSys` classes to change coordinate systems:
 coords_in_cartesian = R2_p.point(intcurve_coords).coords(R2_r)
 coords_in_cartesian
-⎡⎛   -t     ⎞       ⎤
-⎢⎝δ⋅ℯ   + r₀⎠⋅cos(t)⎥
-⎢                   ⎥
-⎢⎛   -t     ⎞       ⎥
-⎣⎝δ⋅ℯ   + r₀⎠⋅sin(t)⎦
+#⎡⎛   -t     ⎞       ⎤
+#⎢⎝δ⋅ℯ   + r₀⎠⋅cos(t)⎥
+#⎢                   ⎥
+#⎢⎛   -t     ⎞       ⎥
+#⎣⎝δ⋅ℯ   + r₀⎠⋅sin(t)⎦
 
 # Substitute numerical values for the plots:
 x,y = coords_in_cartesian.subs({delta:0.5, r0:1})
 plot(x,y, (t,0,4*pi))
-Plot object containing:
-[0]: parametric cartesian line:
-      ((1 + 0.5*exp(-t))*cos(t), (1 + 0.5*exp(-t))*sin(t))
-      for t over (0.0, 12.566370614359172)
+#Plot object containing:
+#[0]: parametric cartesian line:
+#      ((1 + 0.5*exp(-t))*cos(t), (1 + 0.5*exp(-t))*sin(t))
+#      for t over (0.0, 12.566370614359172)
 &lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
 &lt;p&gt;&lt;a href=&quot;https://krastanov.files.wordpress.com/2012/06/integral_curve.png&quot;&gt;&lt;img src=&quot;https://krastanov.files.wordpress.com/2012/06/integral_curve.png?w=300&amp;amp;h=225&quot; title=&quot;integral_curve&quot; height=&quot;225&quot; width=&quot;300&quot; alt=&quot;simple integral curve&quot; class=&quot;aligncenter size-medium wp-image-354&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;This is all great, but what happens if one has to work with more complicated fields. For instance the following simple field will not permit analytical solution:&lt;/p&gt;
@@ -459,56 +462,56 @@ Plot object containing:
 &lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;v_field = R2.e_theta + r0*sin(1 - R2.r/r0)*R2.e_r
 equ, init = intcurve_diffequ(v_field, t, start_point)
 equ
-[
-        ⎛    f₀(t)⎞   d
-- r₀⋅sin⎜1 - ─────⎟ + ──(f₀(t))
-        ⎝      r₀ ⎠   dt       ,
-
-d
-──(f₁(t)) - 1
-dt           ]
+#[
+#        ⎛    f₀(t)⎞   d
+#- r₀⋅sin⎜1 - ─────⎟ + ──(f₀(t))
+#        ⎝      r₀ ⎠   dt       ,
+#
+#d
+#──(f₁(t)) - 1
+#dt           ]
 &lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
 &lt;p&gt;For cases like this one the user can take advantage of one of the numerical ODE solvers from scipy. Or sticking to symbolic work he can use the &lt;code&gt;intcurve_series&lt;/code&gt; function that gives the series expansion for the curve:&lt;/p&gt;
 &lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;intcurve_series(v_field, t, start_point, n=1)
-⎡δ + r₀⎤
-⎢      ⎥
-⎣  0   ⎦
+#⎡δ + r₀⎤
+#⎢      ⎥
+#⎣  0   ⎦
 
 intcurve_series(v_field, t, start_point, n=2)
-⎡            ⎛    δ + r₀⎞     ⎤
-⎢δ + r₀⋅t⋅sin⎜1 - ──────⎟ + r₀⎥
-⎢            ⎝      r₀  ⎠     ⎥
-⎢                             ⎥
-⎣              t              ⎦
+#⎡            ⎛    δ + r₀⎞     ⎤
+#⎢δ + r₀⋅t⋅sin⎜1 - ──────⎟ + r₀⎥
+#⎢            ⎝      r₀  ⎠     ⎥
+#⎢                             ⎥
+#⎣              t              ⎦
 
 intcurve_series(v_field, t, start_point, n=4, coeffs=True)
-[
-⎡δ + r₀⎤
-⎢      ⎥
-⎣  0   ⎦,
-
-⎡        ⎛    δ + r₀⎞⎤
-⎢r₀⋅t⋅sin⎜1 - ──────⎟⎥
-⎢        ⎝      r₀  ⎠⎥
-⎢                    ⎥
-⎣         t          ⎦,
-
-⎡     2    ⎛    δ + r₀⎞    ⎛    δ + r₀⎞⎤
-⎢-r₀⋅t ⋅sin⎜1 - ──────⎟⋅cos⎜1 - ──────⎟⎥
-⎢          ⎝      r₀  ⎠    ⎝      r₀  ⎠⎥
-⎢──────────────────────────────────────⎥
-⎢                  2                   ⎥
-⎢                                      ⎥
-⎣                  0                   ⎦,
-
-⎡      ⎛     2                  2            ⎞                ⎤
-⎢    3 ⎜      ⎛    δ + r₀⎞       ⎛    δ + r₀⎞⎟    ⎛    δ + r₀⎞⎥
-⎢r₀⋅t ⋅⎜- sin ⎜1 - ──────⎟ + cos ⎜1 - ──────⎟⎟⋅sin⎜1 - ──────⎟⎥
-⎢      ⎝      ⎝      r₀  ⎠       ⎝      r₀  ⎠⎠    ⎝      r₀  ⎠⎥
-⎢─────────────────────────────────────────────────────────────⎥
-⎢                              6                              ⎥
-⎢                                                             ⎥
-⎣                              0                              ⎦]
+#[
+#⎡δ + r₀⎤
+#⎢      ⎥
+#⎣  0   ⎦,
+#
+#⎡        ⎛    δ + r₀⎞⎤
+#⎢r₀⋅t⋅sin⎜1 - ──────⎟⎥
+#⎢        ⎝      r₀  ⎠⎥
+#⎢                    ⎥
+#⎣         t          ⎦,
+#
+#⎡     2    ⎛    δ + r₀⎞    ⎛    δ + r₀⎞⎤
+#⎢-r₀⋅t ⋅sin⎜1 - ──────⎟⋅cos⎜1 - ──────⎟⎥
+#⎢          ⎝      r₀  ⎠    ⎝      r₀  ⎠⎥
+#⎢──────────────────────────────────────⎥
+#⎢                  2                   ⎥
+#⎢                                      ⎥
+#⎣                  0                   ⎦,
+#
+#⎡      ⎛     2                  2            ⎞                ⎤
+#⎢    3 ⎜      ⎛    δ + r₀⎞       ⎛    δ + r₀⎞⎟    ⎛    δ + r₀⎞⎥
+#⎢r₀⋅t ⋅⎜- sin ⎜1 - ──────⎟ + cos ⎜1 - ──────⎟⎟⋅sin⎜1 - ──────⎟⎥
+#⎢      ⎝      ⎝      r₀  ⎠       ⎝      r₀  ⎠⎠    ⎝      r₀  ⎠⎥
+#⎢─────────────────────────────────────────────────────────────⎥
+#⎢                              6                              ⎥
+#⎢                                                             ⎥
+#⎣                              0                              ⎦]
 &lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
 &lt;p&gt;However these series do not always converge to the solution, so care should be taken.&lt;/p&gt;
 &lt;p&gt;There are other amusing possibilities already implemented, however I will write about them another time.&lt;/p&gt;
