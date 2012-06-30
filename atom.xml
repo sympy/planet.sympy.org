@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2012-06-29T22:40:23Z</updated>
+  <updated>2012-06-30T09:20:19Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,40 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry xml:lang="en">
+    <id>http://angadhsympy.wordpress.com/2012/06/30/gsoc-2012-post-7-22/</id>
+    <link href="http://angadhsympy.wordpress.com/2012/06/30/gsoc-2012-post-7-22/" rel="alternate" type="text/html"/>
+    <title>GSoC 2012 Post 7</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Another week and more things learned. A new functionality was added this week to mechanics- the partial velocities function. This function basically spits out a list of lists of partial velocities. A little background on the use of partial velocities in determining equations of motion- Partial velocities are used in Kane’s method to determine, what [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=angadhsympy.wordpress.com&amp;blog=35620584&amp;post=263&amp;subd=angadhsympy&amp;ref=&amp;feed=1" width="1"/></div>
+    </summary>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Another week and more things learned. A new functionality was added this week to mechanics- the partial velocities function. This function basically spits out a list of lists of partial velocities.</p>
+<p>A little background on the use of partial velocities in determining equations of motion- Partial velocities are used in Kane’s method to determine, what Kane calls, generalized active force and generalized inertia force. A partial velocity is defined as the partial derivative of a velocity (or angular velocity) vector with respect to an independent generalized speed, which is a scalar. The outcome of these partial velocities is thus a vector. As many of these can be computed as may be relevant to the system. Then these partial velocities of the points are dotted with the appropriate active and inertial forces at those points.</p>
+<p>As easy and straightforward as that may sound in terms of implementation, I found it a bit of a tedious task to decide what was the best way for implementing it. It’s one thing to write code that is for stand alone purposes and where you have creative reign but it is another when it comes to writing code that must replace chunks of existing code.</p>
+<p>At first, when I wrote out this function, it was just spitting out a list of partial velocities. That wasn’t too hard. But then Jason in the comment on last week’s post suggested that changes be made into the Kane class so that the partial velocities function be incorporated into it. So as it stood, my function was useless for anything else but looking at partial velocities. So back to the drawing board!</p>
+<p>In the mechanics package, the scalar equations that are computed are stored in a matrix. So, I thought what would be ideal is to get a matrix of partial velocities that would mimic the partial velocities table that we get when we try to derive equations of motion by hand. So I went about doing that. Finally when I tested my code, I was getting an error message I couldn’t figure out. Now it was time to debug the code but with an error message that I couldn’t really grasp. I guess I went about trying to decipher the error in an unconventional way, where I went and rewrote each line of my code into the test file. But this was good because I finally figured out the issue with the function- The Matrix package in sympy doesn’t accept objects which are of the Vector class type that we typically use to represent vectors in mechanics.</p>
+<p>Speaking about this with Gilbert finally led to the conclusion that nested lists would be best in this case. So after having written the same function several times, I was finally able to rewrite the function successfully and a pertinent PR opened. Currently I have been looking at the Kane.py module to see how to incorporate this function into it. In theory it shouldn’t be hard because the math that needs to be done fits right in, but it could be a bit more tedious than I recognize. But I’m confident that the function itself will not have to be tweaked to be used which is a good sign.</p>
+<p>So this upcoming week, I will find a way to use this functionality in the Kane class. I will also be meeting with Gilbert and we will determine a plan in terms of how to implement a Lagrange class which is one of the major goals for this summer.</p>
+<div> </div>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/angadhsympy.wordpress.com/263/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/angadhsympy.wordpress.com/263/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/angadhsympy.wordpress.com/263/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/angadhsympy.wordpress.com/263/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/angadhsympy.wordpress.com/263/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/angadhsympy.wordpress.com/263/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/angadhsympy.wordpress.com/263/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/angadhsympy.wordpress.com/263/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/angadhsympy.wordpress.com/263/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/angadhsympy.wordpress.com/263/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/angadhsympy.wordpress.com/263/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/angadhsympy.wordpress.com/263/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/angadhsympy.wordpress.com/263/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/angadhsympy.wordpress.com/263/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=angadhsympy.wordpress.com&amp;blog=35620584&amp;post=263&amp;subd=angadhsympy&amp;ref=&amp;feed=1" width="1"/></div>
+    </content>
+    <updated>2012-06-30T09:17:23Z</updated>
+    <category term="Uncategorized"/>
+    <author>
+      <name>angadhn</name>
+    </author>
+    <source>
+      <id>http://angadhsympy.wordpress.com</id>
+      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
+      <link href="http://angadhsympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://angadhsympy.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://angadhsympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
+      <title>GSoC 2012 blog</title>
+      <updated>2012-06-30T09:20:17Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en">
     <id>http://krastanov.wordpress.com/?p=409</id>
@@ -188,7 +222,7 @@ form_field(vector_field)
       <link href="http://krastanov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-06-29T22:40:23Z</updated>
+      <updated>2012-06-29T23:00:24Z</updated>
     </source>
   </entry>
 
@@ -284,7 +318,7 @@ form_field(vector_field)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-29T22:40:22Z</updated>
+      <updated>2012-06-30T09:20:19Z</updated>
     </source>
   </entry>
 
@@ -324,7 +358,7 @@ form_field(vector_field)
       <link href="http://krastanov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-06-29T22:40:23Z</updated>
+      <updated>2012-06-29T23:00:24Z</updated>
     </source>
   </entry>
 
@@ -407,7 +441,7 @@ Out[305]:<br/>
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-29T22:40:21Z</updated>
+      <updated>2012-06-30T09:20:18Z</updated>
     </source>
   </entry>
 
@@ -439,7 +473,7 @@ Out[305]:<br/>
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-29T22:40:21Z</updated>
+      <updated>2012-06-30T09:20:17Z</updated>
     </source>
   </entry>
 
@@ -687,7 +721,7 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
       <link href="http://krastanov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-06-29T22:40:23Z</updated>
+      <updated>2012-06-29T23:00:24Z</updated>
     </source>
   </entry>
 
@@ -725,7 +759,7 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-29T22:40:20Z</updated>
+      <updated>2012-06-30T09:20:17Z</updated>
     </source>
   </entry>
 
@@ -755,7 +789,7 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-29T22:40:21Z</updated>
+      <updated>2012-06-30T09:20:17Z</updated>
     </source>
   </entry>
 
@@ -790,7 +824,7 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-29T22:40:20Z</updated>
+      <updated>2012-06-30T09:20:17Z</updated>
     </source>
   </entry>
 
@@ -833,7 +867,7 @@ sudo python setup.py develop
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-29T22:40:11Z</updated>
+      <updated>2012-06-30T09:20:08Z</updated>
     </source>
   </entry>
 
@@ -899,11 +933,11 @@ sudo python setup.py develop
     </content>
     <updated>2012-06-10T21:09:58Z</updated>
     <category term="SymPy"/>
+    <category term="base classes"/>
+    <category term="diagram"/>
+    <category term="gotcha"/>
     <category term="morphism"/>
     <category term="object"/>
-    <category term="diagram"/>
-    <category term="base classes"/>
-    <category term="gotcha"/>
     <category term="testing"/>
     <author>
       <name>scolobb</name>
@@ -917,7 +951,7 @@ sudo python setup.py develop
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-29T22:40:20Z</updated>
+      <updated>2012-06-30T09:20:17Z</updated>
     </source>
   </entry>
 
@@ -954,7 +988,7 @@ sudo python setup.py develop
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-29T22:40:22Z</updated>
+      <updated>2012-06-30T09:20:19Z</updated>
     </source>
   </entry>
 
@@ -996,7 +1030,7 @@ sudo python setup.py develop
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-29T22:40:21Z</updated>
+      <updated>2012-06-30T09:20:18Z</updated>
     </source>
   </entry>
 
@@ -1023,7 +1057,7 @@ sudo python setup.py develop
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-29T22:40:21Z</updated>
+      <updated>2012-06-30T09:20:17Z</updated>
     </source>
   </entry>
 
@@ -1175,7 +1209,7 @@ sudo python setup.py develop
       <link href="http://krastanov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-06-29T22:40:23Z</updated>
+      <updated>2012-06-29T23:00:24Z</updated>
     </source>
   </entry>
 
@@ -1195,7 +1229,7 @@ sudo python setup.py develop
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-29T22:40:21Z</updated>
+      <updated>2012-06-30T09:20:18Z</updated>
     </source>
   </entry>
 
@@ -1288,7 +1322,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-29T22:40:22Z</updated>
+      <updated>2012-06-30T09:20:18Z</updated>
     </source>
   </entry>
 
@@ -1315,7 +1349,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-29T22:40:21Z</updated>
+      <updated>2012-06-30T09:20:17Z</updated>
     </source>
   </entry>
 
@@ -1364,7 +1398,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-29T22:40:20Z</updated>
+      <updated>2012-06-30T09:20:17Z</updated>
     </source>
   </entry>
 
@@ -1469,7 +1503,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://krastanov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-06-29T22:40:23Z</updated>
+      <updated>2012-06-29T23:00:25Z</updated>
     </source>
   </entry>
 
@@ -1573,7 +1607,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-29T22:40:21Z</updated>
+      <updated>2012-06-30T09:20:18Z</updated>
     </source>
   </entry>
 
@@ -1602,7 +1636,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-29T22:40:21Z</updated>
+      <updated>2012-06-30T09:20:17Z</updated>
     </source>
   </entry>
 
@@ -1657,7 +1691,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-29T22:40:22Z</updated>
+      <updated>2012-06-30T09:20:19Z</updated>
     </source>
   </entry>
 
@@ -1685,7 +1719,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-29T22:40:20Z</updated>
+      <updated>2012-06-30T09:20:17Z</updated>
     </source>
   </entry>
 
@@ -1751,7 +1785,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-29T22:40:22Z</updated>
+      <updated>2012-06-30T09:20:18Z</updated>
     </source>
   </entry>
 
@@ -1779,7 +1813,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-29T22:40:21Z</updated>
+      <updated>2012-06-30T09:20:18Z</updated>
     </source>
   </entry>
 
@@ -1825,7 +1859,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://krastanov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-06-29T22:40:23Z</updated>
+      <updated>2012-06-29T23:00:24Z</updated>
     </source>
   </entry>
 
@@ -1856,7 +1890,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-06-29T22:40:21Z</updated>
+      <updated>2012-06-30T09:20:17Z</updated>
     </source>
   </entry>
 
@@ -1939,7 +1973,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-06-29T22:40:21Z</updated>
+      <updated>2012-06-30T09:20:18Z</updated>
     </source>
   </entry>
 
@@ -2005,7 +2039,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-29T22:40:20Z</updated>
+      <updated>2012-06-30T09:20:16Z</updated>
     </source>
   </entry>
 
@@ -2033,7 +2067,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-06-29T22:40:20Z</updated>
+      <updated>2012-06-30T09:20:17Z</updated>
     </source>
   </entry>
 
@@ -2060,7 +2094,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-29T22:40:22Z</updated>
+      <updated>2012-06-30T09:20:19Z</updated>
     </source>
   </entry>
 
@@ -2179,7 +2213,7 @@ Devanla, Brian Granger (co-mentor Sean Vig)<br/>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-06-29T22:40:22Z</updated>
+      <updated>2012-06-30T09:20:18Z</updated>
     </source>
   </entry>
 
@@ -2242,7 +2276,7 @@ def _intersect(self, other):
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-06-29T22:40:19Z</updated>
+      <updated>2012-06-30T09:20:15Z</updated>
     </source>
   </entry>
 
@@ -2371,7 +2405,7 @@ def _intersect(self, other):
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-06-29T22:40:19Z</updated>
+      <updated>2012-06-30T09:20:15Z</updated>
     </source>
   </entry>
 
@@ -2529,7 +2563,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-29T22:40:11Z</updated>
+      <updated>2012-06-30T09:20:08Z</updated>
     </source>
   </entry>
 
@@ -2601,7 +2635,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-29T22:40:11Z</updated>
+      <updated>2012-06-30T09:20:08Z</updated>
     </source>
   </entry>
 
@@ -2632,7 +2666,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-29T22:40:11Z</updated>
+      <updated>2012-06-30T09:20:08Z</updated>
     </source>
   </entry>
 
@@ -2679,7 +2713,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-06-29T22:40:12Z</updated>
+      <updated>2012-06-30T09:20:08Z</updated>
     </source>
   </entry>
 
@@ -2773,29 +2807,6 @@ def _intersect(self, other):
       <subtitle>Developing Wigner-3nj Symbols in SymPy</subtitle>
       <title>Sean Vig's 2011 GSoC Project</title>
       <updated>2012-05-19T05:58:44Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://dlpeterson.com/blog/?p=190</id>
-    <link href="http://dlpeterson.com/blog/?p=190" rel="alternate" type="text/html"/>
-    <title>Sad</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p><a href="http://dlpeterson.com/blog/wp-content/uploads/2011/11/Screenshot-11252011-082207-PM.png"><img alt="" class="aligncenter size-full wp-image-191" height="359" src="http://dlpeterson.com/blog/wp-content/uploads/2011/11/Screenshot-11252011-082207-PM.png" width="221"/></a></p></div>
-    </content>
-    <updated>2011-11-26T04:28:29Z</updated>
-    <category term="Uncategorized"/>
-    <author>
-      <name>luke</name>
-    </author>
-    <source>
-      <id>http://dlpeterson.com/blog</id>
-      <link href="http://dlpeterson.com/blog/?feed=rss2" rel="self" type="application/atom+xml"/>
-      <link href="http://dlpeterson.com/blog" rel="alternate" type="text/html"/>
-      <subtitle>Mechanical Engineering PhD. candidate, UC Davis</subtitle>
-      <title>Dale Peterson</title>
-      <updated>2011-12-07T09:00:13Z</updated>
     </source>
   </entry>
 </feed>
