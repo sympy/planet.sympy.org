@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2012-07-02T17:20:55Z</updated>
+  <updated>2012-07-02T21:01:28Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,53 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry xml:lang="en">
+    <id>http://scolobb.wordpress.com/?p=220</id>
+    <link href="http://scolobb.wordpress.com/2012/07/02/the-layout/" rel="alternate" type="text/html"/>
+    <title>The Layout</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">I haven’t posted in quite some time, because I have been totally absorbed by implementing the functionality to lay out diagrams. I am painfully close to having finished it; however, I’ve been that close to it for a couple days already, and that’s something which drives me crazy OK, it’s time to take a general [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=220&amp;subd=scolobb&amp;ref=&amp;feed=1" width="1"/></div>
+    </summary>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>I haven’t posted in quite some time, because I have been totally absorbed by implementing the functionality to lay out diagrams.  I am painfully close to having finished it; however, I’ve been that close to it for a couple days already, and that’s something which drives me crazy <img alt=":-)" class="wp-smiley" src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif"/> </p>
+<p>OK, it’s time to take a general look over what has been done.  In the end, I will describe my short-term further plans a bit.</p>
+<p>First of all, the goal.  When you want to lay out a (commutative) diagram, you should really aim at grid layout.  This is how people normally typeset diagrams in articles, and this is the thing the semblance of which I would be happy to achieve.  The resulting grid layout is one of the traits of diagrams which make the task of automatically drawing them different from the task of automatically drawing a graph.  The other specific feature is that, when you get a diagram, you can (and you should) actually throw away those morphisms which are not really interesting.  In the following sections, I will try to describe the philosophy behind the functionality I have implemented, for each bit in part.</p>
+<p>The first stage of the algorithm is to remove the <b>uninteresting morphisms</b>.  At this stage, those composite morphisms which have no properties are discarded; identity morphisms without properties are discarded as well.  In fact, this corresponds pretty well to how people draw diagrams.  This first stage ends by merging the premises and the conclusions of the diagram into a single container.  This is because, at drawing, the distinction between premises and conclusions is not important at all, since all interesting morphisms should make their way into the final picture.</p>
+<p>At the second stage, the algorithm abstracts morphisms away, in favour of unoriented edges between objects.  The code builds the so-called <b>skeleton</b> of the diagram (that’s an ad-hoc name).  The skeleton is a graph which has all objects of the diagram as vertices.  Between two vertices of the skeleton there is an <em>undirected</em> edge, if these objects are connected by an (interesting) morphism.  Notice how we discard the direction of the connection.  After all edges corresponding to morphisms have been added, the skeleton is further completed in the following way.  An edge is added between any two objects <img alt="A" class="latex" src="http://s0.wp.com/latex.php?latex=A&amp;bg=000000&amp;fg=b8babb&amp;s=0" title="A"/> and <img alt="C" class="latex" src="http://s0.wp.com/latex.php?latex=C&amp;bg=000000&amp;fg=b8babb&amp;s=0" title="C"/> for which there exists and object <img alt="B" class="latex" src="http://s0.wp.com/latex.php?latex=B&amp;bg=000000&amp;fg=b8babb&amp;s=0" title="B"/> such that <img alt="A" class="latex" src="http://s0.wp.com/latex.php?latex=A&amp;bg=000000&amp;fg=b8babb&amp;s=0" title="A"/> and <img alt="B" class="latex" src="http://s0.wp.com/latex.php?latex=B&amp;bg=000000&amp;fg=b8babb&amp;s=0" title="B"/> are connected with an interesting morphism and <img alt="B" class="latex" src="http://s0.wp.com/latex.php?latex=B&amp;bg=000000&amp;fg=b8babb&amp;s=0" title="B"/> and <img alt="C" class="latex" src="http://s0.wp.com/latex.php?latex=C&amp;bg=000000&amp;fg=b8babb&amp;s=0" title="C"/> are connected with an interesting morphism.  This is <em>not</em> the transitive closure of the graph, it is only the first step of it.  The new edges are dummy edges, in the sense that they may not correspond to interesting morphisms.</p>
+<p>The next stage is the first key stage of the algorithm.  The skeleton is tesselated into triangles, which will eventually be used to get as many right angles in the layout as possible.  Here is when the dummy edges come into play.  Their presence assures that the diagram can be completely split into triangles.  For those who have read my <a href="https://github.com/sympy/sympy/wiki/GSoC-2012-Application-Sergiu-Ivanov:-Category-Theory-Module">proposal</a>, I will remark that all the stages of diagram analysis I described <em>after</em> laying out the triangles are actually unnecessary, namely because of these dummy edges, which guarantee that we have sufficiently many triangles.  Yet, dummy edges are indeed dummy, in the sense that most of them will not appear in the final diagram.  This makes the triangles we find in the skeleton unevenly interesting to us.  Triangles which have more than one dummy edge are totally extra, because they would distract the attention of the code from  triangles with more meaningful edges and would mess things up, generally.  Therefore, such triangles are immediately dropped.</p>
+<p>Once the “triangulating” stage is complete, the core of the algorithm comes into play.  Basically, the idea is to pick one of the triangles, pick one of its edges and put it on a grid, horizontally, remembering that it is in the fringe.  Then, iteratively, “<b>weld</b>” interesting triangles to the fringe, eventually placing all objects of the diagram on the grid.  This part is the trickiest part of the whole algorithm, so prepare to hear a talk about a lot of magic <img alt=":-)" class="wp-smiley" src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif"/>  </p>
+<p>Any triangle is placed on the grid as a right-angled triangle, with the perpendicular edges being horizontal and vertical.  This assures that we keep “quite” close to the desired grid layout.  Whenever a triangle is placed on the grid, the objects which form its vertices are recorded as already placed.  Then, those triangles which only contain objects which have already been placed (uninteresting triangles) are dropped.  That is, once the places of some objects are decided, those objects are never considered again.  This may constitute a point of future improvement, of course, because objects are often drawn in several copies to make the diagram look clearer.</p>
+<p>When placing the triangle on the grid, the code attempts to assure that as many interesting (not dummy) edges as possible will be drawn horizontally or vertically.  There is some dark magic in the code which detects such situations, but I hope that after following the trail of comments and just reading the code itself, the whole thing should become rather clear.</p>
+<p>Now, since the algorithm is essentially greedy, there can be situations when all edges to which the remaining triangles could have been welded, have already been positioned inside the structure and it is now impossible to find the welding edge.  In this case, the algorithm attempts to attach a triangle to the existing structure by a vertex only.  If such a possibility is found, an edge (the <b>pseudopod</b>) of the triangle is placed as vertically (or horizontally) as possible and then the welding process can be continued, since there already is a welding edge.</p>
+<p>Let’s now focus on what happens to the fringe.  When a new triangle is welded, the two new edges are added to the fringe.  No edges are deleted however, because the welding edge might still have some free space to its other part.  Edges are deleted from the fringe only when they are detected as possible welding edges, but when the algorithm finds that there is no space around them actually.  I have considered several possibilities of correcting the fringe on different occasions; my conclusions so far have been that it’s not generally worth it, performance-wise.  This question however should be better investigated, including doing some complexity analysis.</p>
+<p>You might have noticed that I do not in any way treat the situation when a pseudopod cannot be grown.  I have not encountered such situations during the testing yet, so I decided not to attempt to handle them before I have actually seen an example.  Taking into consideration that I am going to work with diagrams rather intensively later, if such situations are possible, I will indeed run into them.  I must confess that I haven’t considered the problem theoretically yet, though <img alt=":-)" class="wp-smiley" src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif"/> </p>
+<p>The description of the essential parts of the algorithm is complete here, so I’m passing over to the overview of the remaining problems and further short-term plans.</p>
+<p>Tom Bachmann, my mentor, has suggested that I describe the steps of the algorithm in the docs which come with the source code.  I will do this shortly.  I believe it is essential to write such documentation as soon as possible, despite the abundant (hopefully) comments in the code.</p>
+<p>My immediately next task is, however, producing the actual <a href="http://www.tug.org/applications/Xy-pic/">Xy-pic</a> code.  I expect that getting this done at a basic level shouldn’t be hard.  However, drawing longer morphisms and avoiding intersections for as much as possible may prove a rather hard task to achieve.</p>
+<p>Oh, and the almost forgotten conclusion: I now essentially have the core of the automatic diagram plotting functionality, since laying out objects is the most difficult part of the affair.</p>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/220/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/220/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/scolobb.wordpress.com/220/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/scolobb.wordpress.com/220/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/scolobb.wordpress.com/220/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/scolobb.wordpress.com/220/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/scolobb.wordpress.com/220/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/scolobb.wordpress.com/220/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/scolobb.wordpress.com/220/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/scolobb.wordpress.com/220/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/scolobb.wordpress.com/220/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/scolobb.wordpress.com/220/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/scolobb.wordpress.com/220/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/scolobb.wordpress.com/220/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=220&amp;subd=scolobb&amp;ref=&amp;feed=1" width="1"/></div>
+    </content>
+    <updated>2012-07-02T20:42:12Z</updated>
+    <category term="SymPy"/>
+    <category term="automatic plotting"/>
+    <category term="category theory"/>
+    <category term="diagrams"/>
+    <category term="gotcha"/>
+    <category term="grid layout"/>
+    <author>
+      <name>scolobb</name>
+    </author>
+    <source>
+      <id>http://scolobb.wordpress.com</id>
+      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
+      <link href="http://scolobb.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://scolobb.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://scolobb.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <subtitle>Reports of quests for adventures and coadventures</subtitle>
+      <title>Coaquarium</title>
+      <updated>2012-07-02T21:01:16Z</updated>
+    </source>
+  </entry>
 
   <entry>
     <id>http://catchmrbharath.github.com/programming/2012/07/02/gsoc-week-6</id>
@@ -47,7 +94,7 @@
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-02T17:20:51Z</updated>
+      <updated>2012-07-02T21:01:24Z</updated>
     </source>
   </entry>
 
@@ -90,7 +137,7 @@
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-02T17:20:54Z</updated>
+      <updated>2012-07-02T21:01:27Z</updated>
     </source>
   </entry>
 
@@ -161,7 +208,7 @@
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-02T17:20:48Z</updated>
+      <updated>2012-07-02T21:01:20Z</updated>
     </source>
   </entry>
 
@@ -438,7 +485,7 @@ form_field(vector_field)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-02T17:20:54Z</updated>
+      <updated>2012-07-02T21:01:28Z</updated>
     </source>
   </entry>
 
@@ -561,7 +608,7 @@ Out[305]:<br/>
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-02T17:20:50Z</updated>
+      <updated>2012-07-02T21:01:23Z</updated>
     </source>
   </entry>
 
@@ -593,7 +640,7 @@ Out[305]:<br/>
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-02T17:20:48Z</updated>
+      <updated>2012-07-02T21:01:20Z</updated>
     </source>
   </entry>
 
@@ -882,7 +929,7 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-02T17:20:47Z</updated>
+      <updated>2012-07-02T21:01:15Z</updated>
     </source>
   </entry>
 
@@ -912,7 +959,7 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-02T17:20:48Z</updated>
+      <updated>2012-07-02T21:01:20Z</updated>
     </source>
   </entry>
 
@@ -947,7 +994,7 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-02T17:20:47Z</updated>
+      <updated>2012-07-02T21:01:16Z</updated>
     </source>
   </entry>
 
@@ -990,7 +1037,7 @@ sudo python setup.py develop
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-07-02T17:20:18Z</updated>
+      <updated>2012-07-02T21:00:23Z</updated>
     </source>
   </entry>
 
@@ -1074,7 +1121,7 @@ sudo python setup.py develop
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-02T17:20:47Z</updated>
+      <updated>2012-07-02T21:01:17Z</updated>
     </source>
   </entry>
 
@@ -1111,7 +1158,7 @@ sudo python setup.py develop
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-02T17:20:54Z</updated>
+      <updated>2012-07-02T21:01:27Z</updated>
     </source>
   </entry>
 
@@ -1153,7 +1200,7 @@ sudo python setup.py develop
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-02T17:20:50Z</updated>
+      <updated>2012-07-02T21:01:23Z</updated>
     </source>
   </entry>
 
@@ -1180,7 +1227,7 @@ sudo python setup.py develop
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-02T17:20:48Z</updated>
+      <updated>2012-07-02T21:01:20Z</updated>
     </source>
   </entry>
 
@@ -1352,7 +1399,7 @@ sudo python setup.py develop
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-02T17:20:50Z</updated>
+      <updated>2012-07-02T21:01:23Z</updated>
     </source>
   </entry>
 
@@ -1445,7 +1492,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-02T17:20:54Z</updated>
+      <updated>2012-07-02T21:01:27Z</updated>
     </source>
   </entry>
 
@@ -1472,7 +1519,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-02T17:20:48Z</updated>
+      <updated>2012-07-02T21:01:20Z</updated>
     </source>
   </entry>
 
@@ -1521,7 +1568,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-02T17:20:46Z</updated>
+      <updated>2012-07-02T21:01:15Z</updated>
     </source>
   </entry>
 
@@ -1730,7 +1777,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-02T17:20:50Z</updated>
+      <updated>2012-07-02T21:01:23Z</updated>
     </source>
   </entry>
 
@@ -1759,7 +1806,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-02T17:20:48Z</updated>
+      <updated>2012-07-02T21:01:19Z</updated>
     </source>
   </entry>
 
@@ -1814,7 +1861,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-02T17:20:54Z</updated>
+      <updated>2012-07-02T21:01:28Z</updated>
     </source>
   </entry>
 
@@ -1842,7 +1889,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-02T17:20:47Z</updated>
+      <updated>2012-07-02T21:01:15Z</updated>
     </source>
   </entry>
 
@@ -1908,7 +1955,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-02T17:20:54Z</updated>
+      <updated>2012-07-02T21:01:27Z</updated>
     </source>
   </entry>
 
@@ -1936,7 +1983,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-02T17:20:51Z</updated>
+      <updated>2012-07-02T21:01:24Z</updated>
     </source>
   </entry>
 
@@ -2013,7 +2060,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-02T17:20:48Z</updated>
+      <updated>2012-07-02T21:01:19Z</updated>
     </source>
   </entry>
 
@@ -2096,7 +2143,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-02T17:20:50Z</updated>
+      <updated>2012-07-02T21:01:23Z</updated>
     </source>
   </entry>
 
@@ -2162,7 +2209,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-02T17:20:46Z</updated>
+      <updated>2012-07-02T21:01:15Z</updated>
     </source>
   </entry>
 
@@ -2190,7 +2237,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-02T17:20:47Z</updated>
+      <updated>2012-07-02T21:01:16Z</updated>
     </source>
   </entry>
 
@@ -2217,7 +2264,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-02T17:20:54Z</updated>
+      <updated>2012-07-02T21:01:28Z</updated>
     </source>
   </entry>
 
@@ -2336,7 +2383,7 @@ Devanla, Brian Granger (co-mentor Sean Vig)<br/>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-02T17:20:54Z</updated>
+      <updated>2012-07-02T21:01:27Z</updated>
     </source>
   </entry>
 
@@ -2399,7 +2446,7 @@ def _intersect(self, other):
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-07-02T17:20:42Z</updated>
+      <updated>2012-07-02T21:01:06Z</updated>
     </source>
   </entry>
 
@@ -2528,7 +2575,7 @@ def _intersect(self, other):
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-07-02T17:20:42Z</updated>
+      <updated>2012-07-02T21:01:06Z</updated>
     </source>
   </entry>
 
@@ -2686,7 +2733,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-07-02T17:20:17Z</updated>
+      <updated>2012-07-02T21:00:21Z</updated>
     </source>
   </entry>
 
@@ -2758,7 +2805,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-07-02T17:20:18Z</updated>
+      <updated>2012-07-02T21:00:22Z</updated>
     </source>
   </entry>
 
@@ -2789,54 +2836,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-07-02T17:20:17Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://asmeurersympy.wordpress.com/?p=1059</id>
-    <link href="http://asmeurersympy.wordpress.com/2011/12/20/vim-vs-emacs-part-1/" rel="alternate" type="text/html"/>
-    <title>Vim vs. Emacs (Part 1)</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">So about a month or so ago, I decided that I needed to start learning a command line text editor. XCode, the editor I had been using for Python files, didn’t work very well with the new version (in particular, the essential plugin that I’d been using to clear trailing whitespace on save doesn’t yet [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1059&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>So about a month or so ago, I decided that I needed to start learning a command line text editor.  XCode, the editor I had been using for Python files, didn’t work very well with the new version (in particular, the <a href="http://asmeurersympy.wordpress.com/2009/12/29/automatically-remove-trailing-whitespace-in-xcode/">essential plugin</a> that I’d been using to clear trailing whitespace on save doesn’t yet work in XCode 4).  I’d been using TextWrangler for other things, and started to switch to it for Python editing too.  As far as free GUI text editors on the Mac go, TextWrangler is the best.  </p>
-<p>But I’d seen some of the nice features that vim has, like automatically keeping all lines under 80 characters, on a friend’s computer, and I decided that I should try it.</p>
-<p>Now, I had had a little prior experience with both vim and emacs, but all that I remembered was for vim that <code>i</code> inserts and <code>ZZ</code> quits (for when I accidentally open it) and for emacs, that <code>M-X doctor</code> starts the psychiatrist. </p>
-<p>So I’ve decided to try them out, doing it cold turkey.  To make sure that I choose the better one, I’ve decided to try both.  So, starting about a week ago, I’ve been using nothing but vim for all my text editing.  Starting in January, I will try using emacs, and after two weeks, I will see what I like better.</p>
-<p>My opinions so far on vim:</p>
-<li>The tutorials suck.  The best tutorial is <code>vimtutor</code> (type that in the command line), which I think comes with vim.  It’s not bad, but it leaves out a few things that I would consider to be essential to a tutorial, for example, how to scroll (answer: use CTRL-D and CTRL-U).  I started the emacs tutorial a while back, and while I never finished it, from what I remember, it was much better (and I also remember that the first thing it talked about was how to scroll by more than one line at a time). It also left out the <code>.</code> command, which I think is rather useful.  I did print out <a href="http://www.viemu.com/a_vi_vim_graphical_cheat_sheet_tutorial.html">this cheatsheet</a> and have it sitting next to me on my desk.  That has helped a lot.  I hope I can find something similar for emacs when I get to it.</li>
-<li>vim is too line oriented.  vi started out as an extension to ed, the line editor, so this is not surprising.  But I still can’t understand why pressing <code>l</code> at the end of a line can’t bring me to the beginning of the next line.  Maybe I’m just still doing it wrong (supposedly, you should rarely use <code>h</code> and <code>l</code> over more efficient moving commands).  </li>
-<li>Somewhat related to the last point, vim really likes to ring the terminal bell a lot. To quote <a href="http://en.wikipedia.org/wiki/Editor_war">Wikipedia</a>, “vi has two modes – ‘beep repeatedly’ and ‘break everything’”</li>
-<li>I managed to customize it to the point of usability (there are still several things I need to go in and figure out how to fix).  See https://github.com/asmeurer/dotfiles for my .vimrc and .vim/ files.  I found a decent Python syntax file, but it’s actually not that great.  I modified it to color single quoted strings different from double quoted strings (a feature I missed from Xcode). I still need to make a better color scheme (preferably the same as Xcode’s midnight), but this is enough work that I’ve put it off.</li>
-<li>Pressing ESC all the time is really annoying.  Sometimes, I just arrow over, even though I know you’re not “supposed to”, just because my fingers don’t want to reach over and press ESC.  I’m also really used to using control sequences to move around while typing, which of course doesn’t work in vim.  In fact, so far, I’m suspecting that I’ll like emacs better.  But I’ve vowed to give both a fair chance.  But so far, my impression is that vim is a great for text <em>editing</em>, but not so hot for text <em>writing</em> (unless you always write text perfectly, so that you never need to leave insert mode until you are done typing).  Just the simple act of deleting a mistyped word (yes, word, that happens a lot when you are decently fast touch typist) takes several keystrokes, when it should in my opinion only take one (two if you count the meta-key).</li>
-<li>The customizability is really nice.  So far, everything that I’ve thought of to change has been changeable.  Also, language is easy enough to understand that I was able to modify the Python syntax file without any difficulty.  </li>
-<li>I like how it syntax highlights virtually everything I throw at it. </li>
-<p>If there are any vim experts out there reading this, I have some questions:</p>
-<li>Is there an easy way to get a list of and jump to a function/class definition in a Python file?  In Xcode and TextWrangler, there was a nice popup at the top of the window that I could access these from.  In vim, so far the best I’ve found is searching for it, which isn’t very efficient.</li>
-<li>I got TAB to indent 4 spaces in Python, but for some reason, when I create a new line after a <code>:</code>, it puts 8 extra spaces. I wouldn’t be surprised if this is the result of some mismatch/error in <a href="https://github.com/asmeurer/dotfiles">my .vimrc or .vim/ files</a>, but I don’t know how to fix it</li>
-<li>Any useful tricks to share?  Especially for editing Python files.</li>
-<li>How long did it take you to become reasonably efficient with vim?</li>
-<p><strong>EDIT: I thought of some more questions:</strong></p>
-<li>Is there a way to make vim consider camelCase to be word boundaries?</li>
-<p>Finally, if anyone else is thinking of starting vim, I have some useful things I’ve already found in my .vimrc. So you might take a look at that, and add the ones that you like to your .vimrc.  Finally, if you are on Mac OS X, you should use <a href="http://www.iterm2.com/#/section/home">iTerm2</a>.  Actually, you should use this regardless of what text editor you use.  It’s a very good Terminal.app replacement that has virtually all the features (with a couple of exceptions) as Terminal.app, and a ton of extra ones.  The one I want to mention here is mouse reporting support, so you can use your mouse to do things in vim.  This is very useful, as sometimes, e.g., when selecting text, using the mouse is just more efficient.  Also, if you get frustrated trying to remember the commands that will move around you faster than <code>h</code>, <code>j</code>, <code>k</code>, and <code>l</code>, you can just click on where you want to go.</p>
-<p>:wq</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/asmeurersympy.wordpress.com/1059/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/asmeurersympy.wordpress.com/1059/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/asmeurersympy.wordpress.com/1059/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/asmeurersympy.wordpress.com/1059/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/asmeurersympy.wordpress.com/1059/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/asmeurersympy.wordpress.com/1059/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/asmeurersympy.wordpress.com/1059/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/asmeurersympy.wordpress.com/1059/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/asmeurersympy.wordpress.com/1059/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/asmeurersympy.wordpress.com/1059/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/asmeurersympy.wordpress.com/1059/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/asmeurersympy.wordpress.com/1059/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/asmeurersympy.wordpress.com/1059/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/asmeurersympy.wordpress.com/1059/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1059&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2011-12-20T08:17:43Z</updated>
-    <category term="Uncategorized"/>
-    <author>
-      <name>Aaron Meurer</name>
-    </author>
-    <source>
-      <id>http://asmeurersympy.wordpress.com</id>
-      <logo>http://1.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=http%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
-      <link href="http://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
-      <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-07-02T17:20:18Z</updated>
+      <updated>2012-07-02T21:00:21Z</updated>
     </source>
   </entry>
 </feed>

@@ -25,6 +25,52 @@
 <div class="daygroup">
 <h2>July 02, 2012</h2>
 
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://scolobb.wordpress.com" title="Coaquarium">Sergiu Ivanov</a></h3>
+
+
+<div class="entrygroup" id="http://scolobb.wordpress.com/?p=220">
+<h4 lang="en"><a href="http://scolobb.wordpress.com/2012/07/02/the-layout/">The Layout</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p>I haven’t posted in quite some time, because I have been totally absorbed by implementing the functionality to lay out diagrams.  I am painfully close to having finished it; however, I’ve been that close to it for a couple days already, and that’s something which drives me crazy <img src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif" alt=":-)" class="wp-smiley" /> </p>
+<p>OK, it’s time to take a general look over what has been done.  In the end, I will describe my short-term further plans a bit.</p>
+<p>First of all, the goal.  When you want to lay out a (commutative) diagram, you should really aim at grid layout.  This is how people normally typeset diagrams in articles, and this is the thing the semblance of which I would be happy to achieve.  The resulting grid layout is one of the traits of diagrams which make the task of automatically drawing them different from the task of automatically drawing a graph.  The other specific feature is that, when you get a diagram, you can (and you should) actually throw away those morphisms which are not really interesting.  In the following sections, I will try to describe the philosophy behind the functionality I have implemented, for each bit in part.</p>
+<p>The first stage of the algorithm is to remove the <b>uninteresting morphisms</b>.  At this stage, those composite morphisms which have no properties are discarded; identity morphisms without properties are discarded as well.  In fact, this corresponds pretty well to how people draw diagrams.  This first stage ends by merging the premises and the conclusions of the diagram into a single container.  This is because, at drawing, the distinction between premises and conclusions is not important at all, since all interesting morphisms should make their way into the final picture.</p>
+<p>At the second stage, the algorithm abstracts morphisms away, in favour of unoriented edges between objects.  The code builds the so-called <b>skeleton</b> of the diagram (that’s an ad-hoc name).  The skeleton is a graph which has all objects of the diagram as vertices.  Between two vertices of the skeleton there is an <em>undirected</em> edge, if these objects are connected by an (interesting) morphism.  Notice how we discard the direction of the connection.  After all edges corresponding to morphisms have been added, the skeleton is further completed in the following way.  An edge is added between any two objects <img src="http://s0.wp.com/latex.php?latex=A&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="A" class="latex" title="A" /> and <img src="http://s0.wp.com/latex.php?latex=C&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="C" class="latex" title="C" /> for which there exists and object <img src="http://s0.wp.com/latex.php?latex=B&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="B" class="latex" title="B" /> such that <img src="http://s0.wp.com/latex.php?latex=A&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="A" class="latex" title="A" /> and <img src="http://s0.wp.com/latex.php?latex=B&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="B" class="latex" title="B" /> are connected with an interesting morphism and <img src="http://s0.wp.com/latex.php?latex=B&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="B" class="latex" title="B" /> and <img src="http://s0.wp.com/latex.php?latex=C&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="C" class="latex" title="C" /> are connected with an interesting morphism.  This is <em>not</em> the transitive closure of the graph, it is only the first step of it.  The new edges are dummy edges, in the sense that they may not correspond to interesting morphisms.</p>
+<p>The next stage is the first key stage of the algorithm.  The skeleton is tesselated into triangles, which will eventually be used to get as many right angles in the layout as possible.  Here is when the dummy edges come into play.  Their presence assures that the diagram can be completely split into triangles.  For those who have read my <a href="https://github.com/sympy/sympy/wiki/GSoC-2012-Application-Sergiu-Ivanov:-Category-Theory-Module">proposal</a>, I will remark that all the stages of diagram analysis I described <em>after</em> laying out the triangles are actually unnecessary, namely because of these dummy edges, which guarantee that we have sufficiently many triangles.  Yet, dummy edges are indeed dummy, in the sense that most of them will not appear in the final diagram.  This makes the triangles we find in the skeleton unevenly interesting to us.  Triangles which have more than one dummy edge are totally extra, because they would distract the attention of the code from  triangles with more meaningful edges and would mess things up, generally.  Therefore, such triangles are immediately dropped.</p>
+<p>Once the “triangulating” stage is complete, the core of the algorithm comes into play.  Basically, the idea is to pick one of the triangles, pick one of its edges and put it on a grid, horizontally, remembering that it is in the fringe.  Then, iteratively, “<b>weld</b>” interesting triangles to the fringe, eventually placing all objects of the diagram on the grid.  This part is the trickiest part of the whole algorithm, so prepare to hear a talk about a lot of magic <img src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif" alt=":-)" class="wp-smiley" />  </p>
+<p>Any triangle is placed on the grid as a right-angled triangle, with the perpendicular edges being horizontal and vertical.  This assures that we keep “quite” close to the desired grid layout.  Whenever a triangle is placed on the grid, the objects which form its vertices are recorded as already placed.  Then, those triangles which only contain objects which have already been placed (uninteresting triangles) are dropped.  That is, once the places of some objects are decided, those objects are never considered again.  This may constitute a point of future improvement, of course, because objects are often drawn in several copies to make the diagram look clearer.</p>
+<p>When placing the triangle on the grid, the code attempts to assure that as many interesting (not dummy) edges as possible will be drawn horizontally or vertically.  There is some dark magic in the code which detects such situations, but I hope that after following the trail of comments and just reading the code itself, the whole thing should become rather clear.</p>
+<p>Now, since the algorithm is essentially greedy, there can be situations when all edges to which the remaining triangles could have been welded, have already been positioned inside the structure and it is now impossible to find the welding edge.  In this case, the algorithm attempts to attach a triangle to the existing structure by a vertex only.  If such a possibility is found, an edge (the <b>pseudopod</b>) of the triangle is placed as vertically (or horizontally) as possible and then the welding process can be continued, since there already is a welding edge.</p>
+<p>Let’s now focus on what happens to the fringe.  When a new triangle is welded, the two new edges are added to the fringe.  No edges are deleted however, because the welding edge might still have some free space to its other part.  Edges are deleted from the fringe only when they are detected as possible welding edges, but when the algorithm finds that there is no space around them actually.  I have considered several possibilities of correcting the fringe on different occasions; my conclusions so far have been that it’s not generally worth it, performance-wise.  This question however should be better investigated, including doing some complexity analysis.</p>
+<p>You might have noticed that I do not in any way treat the situation when a pseudopod cannot be grown.  I have not encountered such situations during the testing yet, so I decided not to attempt to handle them before I have actually seen an example.  Taking into consideration that I am going to work with diagrams rather intensively later, if such situations are possible, I will indeed run into them.  I must confess that I haven’t considered the problem theoretically yet, though <img src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif" alt=":-)" class="wp-smiley" /> </p>
+<p>The description of the essential parts of the algorithm is complete here, so I’m passing over to the overview of the remaining problems and further short-term plans.</p>
+<p>Tom Bachmann, my mentor, has suggested that I describe the steps of the algorithm in the docs which come with the source code.  I will do this shortly.  I believe it is essential to write such documentation as soon as possible, despite the abundant (hopefully) comments in the code.</p>
+<p>My immediately next task is, however, producing the actual <a href="http://www.tug.org/applications/Xy-pic/">Xy-pic</a> code.  I expect that getting this done at a basic level shouldn’t be hard.  However, drawing longer morphisms and avoiding intersections for as much as possible may prove a rather hard task to achieve.</p>
+<p>Oh, and the almost forgotten conclusion: I now essentially have the core of the automatic diagram plotting functionality, since laying out objects is the most difficult part of the affair.</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/220/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/220/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godelicious/scolobb.wordpress.com/220/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/delicious/scolobb.wordpress.com/220/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/scolobb.wordpress.com/220/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/facebook/scolobb.wordpress.com/220/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/scolobb.wordpress.com/220/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/twitter/scolobb.wordpress.com/220/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gostumble/scolobb.wordpress.com/220/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/stumble/scolobb.wordpress.com/220/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godigg/scolobb.wordpress.com/220/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/digg/scolobb.wordpress.com/220/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/goreddit/scolobb.wordpress.com/220/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/reddit/scolobb.wordpress.com/220/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=220&amp;subd=scolobb&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://scolobb.wordpress.com/2012/07/02/the-layout/">by scolobb at July 02, 2012 08:42 PM</a>
+</p>
+</div>
+</div>
+
+
 
 
 <div class="entrygroup" id="http://catchmrbharath.github.com/programming/2012/07/02/gsoc-week-6">
@@ -3150,63 +3196,6 @@ As of today, I'm happy to report that my last pull request for angular momentum 
 </div>
 
 </div>
-<div class="daygroup">
-<h2>December 20, 2011</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
-
-
-<div class="entrygroup" id="http://asmeurersympy.wordpress.com/?p=1059">
-<h4 lang="en"><a href="http://asmeurersympy.wordpress.com/2011/12/20/vim-vs-emacs-part-1/">Vim vs. Emacs (Part 1)</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>So about a month or so ago, I decided that I needed to start learning a command line text editor.  XCode, the editor I had been using for Python files, didn’t work very well with the new version (in particular, the <a href="http://asmeurersympy.wordpress.com/2009/12/29/automatically-remove-trailing-whitespace-in-xcode/">essential plugin</a> that I’d been using to clear trailing whitespace on save doesn’t yet work in XCode 4).  I’d been using TextWrangler for other things, and started to switch to it for Python editing too.  As far as free GUI text editors on the Mac go, TextWrangler is the best.  </p>
-<p>But I’d seen some of the nice features that vim has, like automatically keeping all lines under 80 characters, on a friend’s computer, and I decided that I should try it.</p>
-<p>Now, I had had a little prior experience with both vim and emacs, but all that I remembered was for vim that <code>i</code> inserts and <code>ZZ</code> quits (for when I accidentally open it) and for emacs, that <code>M-X doctor</code> starts the psychiatrist. </p>
-<p>So I’ve decided to try them out, doing it cold turkey.  To make sure that I choose the better one, I’ve decided to try both.  So, starting about a week ago, I’ve been using nothing but vim for all my text editing.  Starting in January, I will try using emacs, and after two weeks, I will see what I like better.</p>
-<p>My opinions so far on vim:</p>
-<li>The tutorials suck.  The best tutorial is <code>vimtutor</code> (type that in the command line), which I think comes with vim.  It’s not bad, but it leaves out a few things that I would consider to be essential to a tutorial, for example, how to scroll (answer: use CTRL-D and CTRL-U).  I started the emacs tutorial a while back, and while I never finished it, from what I remember, it was much better (and I also remember that the first thing it talked about was how to scroll by more than one line at a time). It also left out the <code>.</code> command, which I think is rather useful.  I did print out <a href="http://www.viemu.com/a_vi_vim_graphical_cheat_sheet_tutorial.html">this cheatsheet</a> and have it sitting next to me on my desk.  That has helped a lot.  I hope I can find something similar for emacs when I get to it.</li>
-<li>vim is too line oriented.  vi started out as an extension to ed, the line editor, so this is not surprising.  But I still can’t understand why pressing <code>l</code> at the end of a line can’t bring me to the beginning of the next line.  Maybe I’m just still doing it wrong (supposedly, you should rarely use <code>h</code> and <code>l</code> over more efficient moving commands).  </li>
-<li>Somewhat related to the last point, vim really likes to ring the terminal bell a lot. To quote <a href="http://en.wikipedia.org/wiki/Editor_war">Wikipedia</a>, “vi has two modes – ‘beep repeatedly’ and ‘break everything’”</li>
-<li>I managed to customize it to the point of usability (there are still several things I need to go in and figure out how to fix).  See https://github.com/asmeurer/dotfiles for my .vimrc and .vim/ files.  I found a decent Python syntax file, but it’s actually not that great.  I modified it to color single quoted strings different from double quoted strings (a feature I missed from Xcode). I still need to make a better color scheme (preferably the same as Xcode’s midnight), but this is enough work that I’ve put it off.</li>
-<li>Pressing ESC all the time is really annoying.  Sometimes, I just arrow over, even though I know you’re not “supposed to”, just because my fingers don’t want to reach over and press ESC.  I’m also really used to using control sequences to move around while typing, which of course doesn’t work in vim.  In fact, so far, I’m suspecting that I’ll like emacs better.  But I’ve vowed to give both a fair chance.  But so far, my impression is that vim is a great for text <em>editing</em>, but not so hot for text <em>writing</em> (unless you always write text perfectly, so that you never need to leave insert mode until you are done typing).  Just the simple act of deleting a mistyped word (yes, word, that happens a lot when you are decently fast touch typist) takes several keystrokes, when it should in my opinion only take one (two if you count the meta-key).</li>
-<li>The customizability is really nice.  So far, everything that I’ve thought of to change has been changeable.  Also, language is easy enough to understand that I was able to modify the Python syntax file without any difficulty.  </li>
-<li>I like how it syntax highlights virtually everything I throw at it. </li>
-<p>If there are any vim experts out there reading this, I have some questions:</p>
-<li>Is there an easy way to get a list of and jump to a function/class definition in a Python file?  In Xcode and TextWrangler, there was a nice popup at the top of the window that I could access these from.  In vim, so far the best I’ve found is searching for it, which isn’t very efficient.</li>
-<li>I got TAB to indent 4 spaces in Python, but for some reason, when I create a new line after a <code>:</code>, it puts 8 extra spaces. I wouldn’t be surprised if this is the result of some mismatch/error in <a href="https://github.com/asmeurer/dotfiles">my .vimrc or .vim/ files</a>, but I don’t know how to fix it</li>
-<li>Any useful tricks to share?  Especially for editing Python files.</li>
-<li>How long did it take you to become reasonably efficient with vim?</li>
-<p><strong>EDIT: I thought of some more questions:</strong></p>
-<li>Is there a way to make vim consider camelCase to be word boundaries?</li>
-<p>Finally, if anyone else is thinking of starting vim, I have some useful things I’ve already found in my .vimrc. So you might take a look at that, and add the ones that you like to your .vimrc.  Finally, if you are on Mac OS X, you should use <a href="http://www.iterm2.com/#/section/home">iTerm2</a>.  Actually, you should use this regardless of what text editor you use.  It’s a very good Terminal.app replacement that has virtually all the features (with a couple of exceptions) as Terminal.app, and a ton of extra ones.  The one I want to mention here is mouse reporting support, so you can use your mouse to do things in vim.  This is very useful, as sometimes, e.g., when selecting text, using the mouse is just more efficient.  Also, if you get frustrated trying to remember the commands that will move around you faster than <code>h</code>, <code>j</code>, <code>k</code>, and <code>l</code>, you can just click on where you want to go.</p>
-<p>:wq</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/asmeurersympy.wordpress.com/1059/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/asmeurersympy.wordpress.com/1059/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godelicious/asmeurersympy.wordpress.com/1059/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/delicious/asmeurersympy.wordpress.com/1059/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/asmeurersympy.wordpress.com/1059/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/facebook/asmeurersympy.wordpress.com/1059/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/asmeurersympy.wordpress.com/1059/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/twitter/asmeurersympy.wordpress.com/1059/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gostumble/asmeurersympy.wordpress.com/1059/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/stumble/asmeurersympy.wordpress.com/1059/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godigg/asmeurersympy.wordpress.com/1059/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/digg/asmeurersympy.wordpress.com/1059/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/goreddit/asmeurersympy.wordpress.com/1059/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/reddit/asmeurersympy.wordpress.com/1059/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1059&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://asmeurersympy.wordpress.com/2011/12/20/vim-vs-emacs-part-1/">by Aaron Meurer at December 20, 2011 08:17 AM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -3290,7 +3279,7 @@ As of today, I'm happy to report that my last pull request for angular momentum 
 <a href="http://seanvig.blogspot.com/feeds/posts/default/-/sympy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://seanvig.blogspot.com/search/label/sympy" class="message" title="no activity in 7 days">Sean Vig</a>
 </li>
 <li>
-<a href="http://scolobb.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://scolobb.wordpress.com" class="message" title="no activity in 7 days">Sergiu Ivanov</a>
+<a href="http://scolobb.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://scolobb.wordpress.com" title="Coaquarium">Sergiu Ivanov</a>
 </li>
 <li>
 <a href="http://sherjilozair.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sherjilozair.wordpress.com" class="message" title="no activity in 7 days">Sherjil Ozair</a>
@@ -3314,7 +3303,7 @@ As of today, I'm happy to report that my last pull request for angular momentum 
 
 <p>
 <strong>Last updated:</strong><br>
-July 02, 2012 05:21 PM<br>
+July 02, 2012 09:01 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
