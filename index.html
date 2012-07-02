@@ -23,6 +23,53 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>July 02, 2012</h2>
+
+
+
+<div class="entrygroup" id="http://catchmrbharath.github.com/programming/2012/07/02/gsoc-week-6">
+<h4><a href="http://catchmrbharath.github.com/programming/2012/07/02/gsoc-week-6">GSoC Week 6</a></h4>
+<div class="entry">
+<div class="content">
+<p>I have been trying to improve the implicit plotting module during this week. But I have hit a road block. I almost ran out of ideas to solve the problem.</p>
+
+<p>Description:</p>
+
+<p>The implicit plotting algorithm I implemented works something like below:</p>
+
+<p>1) Get x and y interval. If it satisfies the expression throughout the interval, then plot it.</p>
+
+<p>2) If it does not satisfy, throw away the intervals.</p>
+
+<p>3) If it partially satisfies, then recursively subdivide into four intervals, and try again.</p>
+
+<p>For cases of equality, the first point never holds true due to floating point errors. So we go on eliminating regions, and after a certain depth, plot the remaining region. These are the regions where there is at least one solution. This is the reason why the plots are rasterized. But there is an inherent bigger problem here. In the cases of expressions like $x^{3}$ even if the x interval is small, the resulting interval after computation will be large. Sometimes, due to these large intervals, there might be lots of y and x intervals which satisfy because of these errors. Even if we make x interval really small, the corresponding y interval will be large, ie the line widths become large. The explanation is more of a guess rather than the right explanation.</p>
+
+<p>Examples:</p>
+
+<p>Plot of $x^{y}=y^{x}$ <img width="600" src="http://catchmrbharath.github.com/images/02072012/fig1.png" height="400" /> Even if I increase my depth of recursion to higher values, the thickness becomes less, but doesn’t vanish. The plot actually should have been two separate curves.</p>
+<img width="600" src="http://catchmrbharath.github.com/images/02072012/fig3.png" height="400" />
+<p>The Mac OSX’s Grapher uses a similar algorithm(A guess because they have similar rasterization) but takes care of the line widths.</p>
+
+<p>If you feel you know where the problem is, please comment or email me. :)</p></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://catchmrbharath.github.com/programming/2012/07/02/gsoc-week-6">July 02, 2012 07:00 AM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>July 01, 2012</h2>
 
 <div class="channelgroup">
@@ -3160,42 +3207,6 @@ As of today, I'm happy to report that my last pull request for angular momentum 
 </div>
 
 </div>
-<div class="daygroup">
-<h2>December 13, 2011</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://sympy.blogspot.com/" title="The Official SymPy Blog">Official SymPy blog</a></h3>
-
-
-<div class="entrygroup" id="tag:blogger.com,1999:blog-2520472460430880330.post-84564291301844126">
-<h4><a href="http://sympy.blogspot.com/2011/12/google-summer-of-code-2011-wrap-up.html">Google Summer of Code 2011 Wrap-Up</a></h4>
-<div class="entry">
-<div class="content">
-<span style="font-style: italic;">(Cross-posted on the <a href="http://google-opensource.blogspot.com/2011/12/students-add-to-sympy.html">Google Open Source Blog</a>)</span><br /><br /><a href="http://sympy.org/">SymPy</a> is a computer algebra system (CAS) written in pure Python. The core allows basic manipulation of expressions (like differentiation or expansion) and it contains many modules for common tasks (limits, integrals, differential equations, series, matrices, quantum physics, geometry, plotting, and code generation).<br /><br />SymPy has participated in the <span style="font-style: italic;"><a href="http://code.google.com/soc/">Google Summer of Code</a></span> program in previous years under the umbrellas of <a href="http://www.python.org/psf/">Python Software Foundation</a>, Portland State University, and the <a href="http://www.stsci.edu/portal/">Space Telescope Science Institute</a>, where we were very successful. In fact, several of our core developers, including four of the mentors from this year, started working with SymPy as Google Summer of Code students. This was our first year participating as a standalone organization, and we would like to share our experience.<br /><br />As part of the application process we required each student to submit a patch (as a GitHub pull request) that had to be reviewed and accepted. This allowed us to see that each applicant knew how to use git as well as communicate effectively during the review process.This also encouraged only serious applicants to apply. We had over 10 mentors available and we ended up with 9 students, all of whom were successful at final evaluations.<br /><br /><a href="http://nessgrh.wordpress.com/">Tom Bachmann</a> - <a href="https://github.com/sympy/sympy/wiki/GSoC-2011-Report-Tom-Bachmann%3A-Definite-Integration">Definite Integration using Meijer G-functions</a>, mentored by Aaron Meurer<br /> Tom implemented an algorithm for computing symbolic definite integrals that uses so-called <a href="http://en.wikipedia.org/wiki/Meijer_g-function">Meijer G-functions</a>. This is the state-of-the-art algorithm for computing definite integrals, and indeed the results of his project are very impressive. This project has pushed SymPy forward a long way to becoming the strongest open source computer algebra system with respect to symbolic definite integration.<br /><br /><a href="http://vperic.blogspot.com/">Vladimir Peric</a> - <a href="https://github.com/sympy/sympy/wiki/GSoC-2011-Application%3A-Vladimir-Peri%C4%87%3A-Porting-to-Python-3">Porting to Python 3</a>, mentored by Ronan Lamy<br /> Vladimir ported SymPy to work on Python 3 and ported all testing infrastructure so that SymPy gets regularly tested in Python 2.x, 3.2 and PyPy. Thanks to Vladimir’s work, the next version of SymPy, 0.7.2, which will hopefully be released later this year, will work in both Python 2 and Python 3, and it may support PyPy as well.<br /><br /><a href="http://gilbertgede.wordpress.com/">Gilbert Gede</a> - <a href="https://github.com/sympy/sympy/wiki/GSoC-2011-Report-Gilbert-Gede%3A-PyDy">PyDy</a>, mentored by Luke Peterson<br /> Gilbert implemented a physics module to assist in generating symbolic equations of motion for complex multibody systems using Kane's Method. He expanded on the code written by his mentor, Luke, in 2009, and the module can now generate equations of motion for a bicycle. Gilbert also wrote very thorough documentation both for the Kane’s Method and the module in SymPy.<br /><br /><a href="http://lazovichsympy.wordpress.com/">Tomo Lazovich</a> - <a href="https://github.com/sympy/sympy/wiki/GSoC-2011-Report-Tomo-Lazovich%3A-Position-and-Momentum-Bases-for-QM">Position and Momentum Bases for Quantum Mechanics</a>, mentored by Brian Granger<br /> Tomo has greatly improved the quantum mechanics module by implementing position/momentum representations for operators and eigenstates in various coordinate systems (including cartesian, cylindrical, and spherical) that allows you to easily represent many of the "textbook" quantum mechanics systems, including particle in a box, simple harmonic oscillator, hydrogen atom, etc.<br /><br /><a href="http://saptman.wordpress.com/">Saptarshi Mandal</a> - <a href="https://github.com/sympy/sympy/wiki/Gsoc-2011-report-saptarshi-mandal%3A-combinatorics-package-for-sympy">Combinatorics package for Sympy</a>, mentored by Christian Muise<br /> Saptarshi’s project was to mimic the various capabilities of Combinatorica, a Mathematica package for combinatorics. Most of the functionality involving elementary combinatorial objects such as Permutations, Partitions, Subsets, Gray codes and Prufer codes are complete.<br /><br /><a href="http://sherjilozair.wordpress.com/">Sherjil Ozair</a> - <a href="https://github.com/sympy/sympy/wiki/GSoC-2011-Report-Sherjil-Ozair%3A-Symbolic-Linear-Algebra">Symbolic Linear Algebra</a>, mentored by Vinzent Steinberg<br /> Sherjil improved the speed of the linear algebra module by using efficient coefficient types for values of entries of matrices. Previously, SymPy used generic expressions in this place, which slowed down computations considerably and caused trouble with solving of the zero equivalence problem. He also implemented sparse matrix representation and unified the API with dense matrices. In addition, Sherjil also added a few linear algebra related algorithms (e.g. Cholesky decomposition).<br /><br /><a href="http://sympystats.wordpress.com/">Matthew Rocklin</a> - <a href="https://github.com/sympy/sympy/wiki/GSoC-2011-Report-Matthew-Rocklin%3A-Random-Variables">SymPy Stats: Random Variables</a>, mentored by Andy Terrel<br /> Matthew improved the statistics module to use symbolics and introduced a Random Variable type, with support for finite, continuous, and multivariable normal random variables. With these you can symbolically compute things like probabilities of a given condition, conditional spaces, and expectation values. As a side consequence of this project, he also improved some of our Sets classes and implemented a MatrixExpr class, which allows you to compute with matrices symbolically, including computing with block matrices.<br /><br /><a href="http://seanvig.blogspot.com/">Sean Vig </a>- <a href="https://github.com/sympy/sympy/wiki/GSoC-2011-Report-Sean-Vig-Symbolic-Clebsch-Gordon-coefficients%3AWigner-symbols-and-Implementing-Addition-of-Spin-Angular-Momenta">Symbolic Clebsch-Gordon coefficients/Wigner symbols and Implementing Addition of Spin Angular Momenta</a>, mentored by Ondřej Čertík<br /> Sean was working on the quantum mechanics module and has implemented symbolic Clebsch-Gordan coefficients, Wigner D function, and related mathematical concepts that are used very often in quantum physics when dealing with angular momentum and then the necessary classes to support coupled spin algebra.<br /><br /><a href="https://f1728.wordpress.com/">Jeremias Yehdegho</a> - <a href="https://github.com/sympy/sympy/wiki/GSoC-2011-Report-Jeremias-Yehdegho%3A-Implementing-F5">Implementing F5</a>, mentored by Mateusz Paprocki<br /> Jeremias worked on implementing algorithms related to <a href="http://en.wikipedia.org/wiki/Groebner_bases">Groebner bases</a>. Groebner bases are a useful tool in many areas of computer algebra. He implemented the F5B algorithm, which is an improved version of the classical Buchberger’s algorithm that was previously implemented in SymPy, and an algorithm for converting Groebner bases between different orders of monomials and worked on applications of Groebner bases. This allowed for handling problems of much larger size in SymPy.<br /><br />The full report can be found <a href="https://github.com/sympy/sympy/wiki/Gsoc-2011-report">here</a>, where each student wrote a wiki page about their experience during the summer and you can also find their blogs and links to applications. Each student was required to blog about their progress each week and all blogs were synchronized at <a href="http://planet.sympy.org/">planet.sympy.org</a>.<br /><br />In previous years, there was usually one student from each summer who became a regular contributor and also a mentor for the next year. It has been a rewarding experience for the whole SymPy community.<div class="blogger-post-footer"><img src="https://blogger.googleusercontent.com/tracker/2520472460430880330-84564291301844126?l=sympy.blogspot.com" alt="" width="1" height="1" /></div></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://sympy.blogspot.com/2011/12/google-summer-of-code-2011-wrap-up.html">by Aaron Meurer (noreply@blogger.com) at December 13, 2011 12:10 AM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -3216,7 +3227,7 @@ As of today, I'm happy to report that my last pull request for angular momentum 
 <a href="http://angadhsympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://angadhsympy.wordpress.com" title="GSoC 2012 blog">Angadh Nanjangud</a>
 </li>
 <li>
-<a href="http://catchmrbharath.github.com/programming.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a class="message" title="no activity in 7 days">Bharath M R</a>
+<a href="http://catchmrbharath.github.com/programming.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a title="- Programming">Bharath M R</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/267967203861801529/posts/default/-/SymPy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://straightupcoding.blogspot.com/search/label/SymPy" class="message" title="no activity in 7 days">Brian Jorgensen</a>
@@ -3303,7 +3314,7 @@ As of today, I'm happy to report that my last pull request for angular momentum 
 
 <p>
 <strong>Last updated:</strong><br>
-July 02, 2012 02:21 PM<br>
+July 02, 2012 05:21 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
