@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2012-07-07T14:00:53Z</updated>
+  <updated>2012-07-08T15:40:43Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,96 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry xml:lang="en">
+    <id>http://amakelov.wordpress.com/?p=266</id>
+    <link href="http://amakelov.wordpress.com/2012/07/08/google-summer-of-code-2012-week-7/" rel="alternate" type="text/html"/>
+    <title>Google Summer of Code 2012: Week 7</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Hi all, here’s a brief summary of what I’ve been doing during the 7th week of my GSoC, as well as a general overview of what’s going on and where things are going with computational group theory in sympy. Things I did during the week. This week I focused on: improving the existing code for <a class="excerpt-more-link" href="http://amakelov.wordpress.com/2012/07/08/google-summer-of-code-2012-week-7/">[…]</a><img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;blog=35896871&amp;post=266&amp;subd=amakelov&amp;ref=&amp;feed=1" width="1"/></div>
+    </summary>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Hi all,</p>
+<p>here’s a brief summary of what I’ve been doing during the 7th week of my GSoC, as well as a general overview of what’s going on and where things are going with computational group theory in sympy.</p>
+<p><strong>Things I did during the week.</strong></p>
+<p>This week I focused on:</p>
+<ul>
+<li>improving the existing code for the functions I recently added – the randomized Schreier-Sims algorithm, the function BASESWAP that changes two points in a base, and the PRINTELEMENTS function (I talk about these <a href="http://amakelov.wordpress.com/2012/06/24/google-summer-of-code-2012-week-5/" target="_blank">here</a> and <a href="http://amakelov.wordpress.com/2012/06/18/google-summer-of-code-2012-week-4/" target="_blank">here</a>). I included some comments in the bodies of the functions since these tend to be quite long. Also, I adopted some new naming conventions for handling all the structures related to a base and a strong generating set. It’d be nice if this naming convention is used throughout the combinatorics module (which for now depends mostly on me, as it seems <img alt=":)" class="wp-smiley" src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif"/>  ), and it’d be nice if people provide some feedback on the names I chose. So here we go:</li>
+<li>making possible the interaction with the deterministic Schreier-Sims algorithm. After some insights from <a href="https://github.com/pernici" target="_blank">Mario</a> on the values returned by his implementation, I extracted from it the data necessary to make the algorihtms described in [1] that use a base and strong generating set possible.</li>
+<li>splitting the code further, with the sympy.combinatorics.util file which now holds the internal functions used to handle permutaion groups (this can be later expanded with other internal functions across the combinatorics module).</li>
+<li>Finally, adding docstrings, tests and making a pull request which is available <a href="https://github.com/sympy/sympy/pull/1406#issuecomment-6812223" target="_blank">here </a>. It’s about 1300 lines of code, which is sort of bad, but I can remove some of the stuff and keep it for a future pull request.</li>
+</ul>
+<p>So here are the <em><strong>naming conventions for working with a BSGS:</strong></em></p>
+<p><strong>degree</strong> – the degree of the permutation group.</p>
+<p><strong>base</strong> – This is sort of obvious. A base for a permutation group <img alt="G" class="latex" src="http://s0.wp.com/latex.php?latex=G&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="G"/> is an ordered tuple of points <img alt="(b_1, b_2,\ldots, b_k) " class="latex" src="http://s0.wp.com/latex.php?latex=%28b_1%2C+b_2%2C%5Cldots%2C+b_k%29+&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="(b_1, b_2,\ldots, b_k) "/> such that no group element <img alt="g \in G" class="latex" src="http://s0.wp.com/latex.php?latex=g+%5Cin+G&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="g \in G"/> fixes all the points <img alt="b_1, b_2, \ldots, b_k" class="latex" src="http://s0.wp.com/latex.php?latex=b_1%2C+b_2%2C+%5Cldots%2C+b_k&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="b_1, b_2, \ldots, b_k"/> (the significance of the ordering will become apparent later). This is implemented as a list.</p>
+<p><strong>base_len</strong> – the number of elements in a base.</p>
+<p><strong>strong_gens</strong> – the strong generating set (relative to some base). This is implemented as a list of Perm objects.</p>
+<p><strong>basic_stabilizers</strong> – For a base <img alt="(b_1, b_2,\ldots, b_k) " class="latex" src="http://s0.wp.com/latex.php?latex=%28b_1%2C+b_2%2C%5Cldots%2C+b_k%29+&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="(b_1, b_2,\ldots, b_k) "/>, the basic stabilizers are defined as <img alt="G^{(i)} = G_{b_1, \ldots, b_{i-1}} := \{ g \in G | g(b_1) = b_1, \ldots, g(b_{i-1}) = b_{i-1}\}" class="latex" src="http://s0.wp.com/latex.php?latex=G%5E%7B%28i%29%7D+%3D+G_%7Bb_1%2C+%5Cldots%2C+b_%7Bi-1%7D%7D+%3A%3D+%5C%7B+g+%5Cin+G+%7C+g%28b_1%29+%3D+b_1%2C+%5Cldots%2C+g%28b_%7Bi-1%7D%29+%3D+b_%7Bi-1%7D%5C%7D&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="G^{(i)} = G_{b_1, \ldots, b_{i-1}} := \{ g \in G | g(b_1) = b_1, \ldots, g(b_{i-1}) = b_{i-1}\}"/> for <img alt="i \in \{1, 2, \ldots, k\}" class="latex" src="http://s0.wp.com/latex.php?latex=i+%5Cin+%5C%7B1%2C+2%2C+%5Cldots%2C+k%5C%7D&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="i \in \{1, 2, \ldots, k\}"/> so that we have <img alt="G^{(1)} = G" class="latex" src="http://s0.wp.com/latex.php?latex=G%5E%7B%281%29%7D+%3D+G&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="G^{(1)} = G"/>. This is implemented as a list of permutation groups.</p>
+<p><strong>distr_gens</strong> – the strong generators distributed according to the basic stabilizers. This means: for a base <img alt="(b_1, b_2,\ldots, b_k) " class="latex" src="http://s0.wp.com/latex.php?latex=%28b_1%2C+b_2%2C%5Cldots%2C+b_k%29+&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="(b_1, b_2,\ldots, b_k) "/> and a strong generating set <img alt="S= \{ g_1, g_2, \ldots, g_t\}" class="latex" src="http://s0.wp.com/latex.php?latex=S%3D+%5C%7B+g_1%2C+g_2%2C+%5Cldots%2C+g_t%5C%7D&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="S= \{ g_1, g_2, \ldots, g_t\}"/>, distribute the <img alt="g_i" class="latex" src="http://s0.wp.com/latex.php?latex=g_i&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="g_i"/> in sets <img alt="S^{(i)} = G^{(i)} \cap S" class="latex" src="http://s0.wp.com/latex.php?latex=S%5E%7B%28i%29%7D+%3D+G%5E%7B%28i%29%7D+%5Ccap+S&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="S^{(i)} = G^{(i)} \cap S"/> for <img alt="i \in \{1, 2,\ldots, k\}" class="latex" src="http://s0.wp.com/latex.php?latex=i+%5Cin+%5C%7B1%2C+2%2C%5Cldots%2C+k%5C%7D&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="i \in \{1, 2,\ldots, k\}"/> where the <img alt="G^{(i)}" class="latex" src="http://s0.wp.com/latex.php?latex=G%5E%7B%28i%29%7D&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="G^{(i)}"/> are defined as above. This is implemented as a list of lists holding the elements of the <img alt="S^{(i)}" class="latex" src="http://s0.wp.com/latex.php?latex=S%5E%7B%28i%29%7D&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="S^{(i)}"/></p>
+<p><strong>basic_orbits</strong> – these are the orbits of <img alt="b_i" class="latex" src="http://s0.wp.com/latex.php?latex=b_i&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="b_i"/> under <img alt="G^{(i)}" class="latex" src="http://s0.wp.com/latex.php?latex=G%5E%7B%28i%29%7D&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="G^{(i)}"/>. These are implemented as a list of lists, being the list of lists of keys for the basic transversals, see below.</p>
+<p><strong>basic_transversals</strong> – these are transversals for the basic orbits. Notice that the choice for these may not (and in most cases won’t be) unique. For one thing, it depends on the set of strong generators present (which is also not uniquely determined for a given base). They are implemented as a list of dictionaries indexed according to the base <img alt="(b_1, b_2,\ldots, b_k) " class="latex" src="http://s0.wp.com/latex.php?latex=%28b_1%2C+b_2%2C%5Cldots%2C+b_k%29+&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="(b_1, b_2,\ldots, b_k) "/>, with keys – the elements of the basic orbits, and values – transversal elements sending the current <img alt="b_i" class="latex" src="http://s0.wp.com/latex.php?latex=b_i&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="b_i"/> to the key.</p>
+<p>I wrote functions extracting <strong>basic_orbits, basic_transversals, basic_stabilizers, distr_gens</strong> from only a base and strong generating set, as well as functions for extracting all of them from a base, strong generating set, and a part of them, so that if any of them is available, it can be supplied in order to avoid recalculations.</p>
+<p>Also, there is a straightforward test _verify_bsgs in sympy.combinatorics.util that tests a sequence of points and group elements for being a base and strong generating set. It simply verifies the definition of a base and strong generating set relative to it. There will likely be other ways to do that in the future – more effective, but surely more complicated and thus error-prone. This will serve as a robust testing tool</p>
+<p><strong>Where we are.</strong></p>
+<p>So, here’s a checklist of what I’ve promised in my <a href="http://www.google-melange.com/gsoc/proposal/review/google/gsoc2012/amakelov/1" target="_blank">proposal</a> on the melange website, and which parts of it have already been implemented. This is reading the optimistic timeline. This all pertains to permutation groups, unless specified:</p>
+<ul>
+<li>handling different representations – NO</li>
+<li>excluding singleton cycles from the cycle decomposition – NO</li>
+<li>powers and orders of elements – YES. This was actually already there for permutations.</li>
+<li>orbits – YES.</li>
+<li>stabilizers – YES.</li>
+<li>schreier vectors – YES.</li>
+<li>randomized Schreier-Sims algorithm – YES</li>
+<li>handling bases and strong generating sets – YES</li>
+<li>membership testing – YES (the function _strip in sympy.combinatorics.util)</li>
+<li>rewriting algorithm – NO.</li>
+<li>actions on cosets – NO.</li>
+<li>quotient groups – NO.</li>
+<li>order of a group – YES. This was already there.</li>
+<li>subgroup testing – NO.</li>
+<li>coset enumeration by the Todd-Coxeter algorithm &amp; consequences – NO.</li>
+<li>primitivity testing – YES.</li>
+<li>finding (minimal) block systems – YES.</li>
+<li>general backtrack search for a certain property – No, however easy to do by modifying PRINTELEMENTS.</li>
+<li>outputting all group elements – YES. This was already there, however PRINTELEMENTS does it in lexicographical order according to a base.</li>
+<li>Sylow subgroups – NO.</li>
+<li>calculating the center – NO.</li>
+<li>pointwise stabilizers (of more than one point, see above) – NO.</li>
+<li>change of base – YES.</li>
+<li>product groups – YES.</li>
+<li>more on finitely presented groups (…) – NO.</li>
+<li>the p-core – NO.</li>
+<li>the solvable radical – NO.</li>
+<li>database of known groups – NO.</li>
+</ul>
+<p><strong>Things yet to be done.</strong></p>
+<p>Apart from the things that got a “NO” on the list above, the following currently come to mind:</p>
+<ul>
+<li>Work on removing redundant generators from a strong/any generating set, as described in [1].</li>
+<li>Precompute more properties for the groups in the named groups module (transitivity degrees, bases and strong generating sets, etc.)</li>
+<li>Add more groups to the named groups module.</li>
+<li>Fix the issues pointed out in the review of <a href="https://github.com/sympy/sympy/pull/1377" target="_blank">my second pull request</a>.</li>
+<li>Finally do something for handling representations of finite groups over vector spaces, like working with character tables. It’d be cool to have a function that computes the conjugacy classes for a given group, but I don’t know right now how possible that is.</li>
+<li>Finally implement the group intersection algorithm… I’m currently starting to work my way through the SUBGROUPSEARCH function which is fundamental for implementing backtracking algorithms for group intersection, centralizers, etc.</li>
+</ul>
+<p>Well, that’s it for now it seems. If anything else pops up soon, I’ll add it here!</p>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/amakelov.wordpress.com/266/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/amakelov.wordpress.com/266/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/amakelov.wordpress.com/266/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/amakelov.wordpress.com/266/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/amakelov.wordpress.com/266/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/amakelov.wordpress.com/266/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/amakelov.wordpress.com/266/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/amakelov.wordpress.com/266/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/amakelov.wordpress.com/266/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/amakelov.wordpress.com/266/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/amakelov.wordpress.com/266/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/amakelov.wordpress.com/266/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/amakelov.wordpress.com/266/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/amakelov.wordpress.com/266/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;blog=35896871&amp;post=266&amp;subd=amakelov&amp;ref=&amp;feed=1" width="1"/></div>
+    </content>
+    <updated>2012-07-08T15:29:12Z</updated>
+    <category term="Google Summer of Code 2012"/>
+    <author>
+      <name>amakelov</name>
+    </author>
+    <source>
+      <id>http://amakelov.wordpress.com</id>
+      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
+      <link href="http://amakelov.wordpress.com/category/google-summer-of-code-2012/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://amakelov.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://amakelov.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <subtitle>A. Makelov</subtitle>
+      <title>Not really blogging » Google Summer of Code 2012</title>
+      <updated>2012-07-08T15:40:43Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en">
     <id>http://angadhsympy.wordpress.com/2012/07/07/another-week-ha-18/</id>
@@ -38,7 +128,7 @@
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-07T14:00:48Z</updated>
+      <updated>2012-07-08T15:40:36Z</updated>
     </source>
   </entry>
 
@@ -85,7 +175,7 @@
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-07T14:00:46Z</updated>
+      <updated>2012-07-08T15:40:34Z</updated>
     </source>
   </entry>
 
@@ -125,7 +215,7 @@
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-07T14:00:50Z</updated>
+      <updated>2012-07-08T15:40:38Z</updated>
     </source>
   </entry>
 
@@ -168,7 +258,7 @@
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-07T14:00:52Z</updated>
+      <updated>2012-07-08T15:40:39Z</updated>
     </source>
   </entry>
 
@@ -207,7 +297,7 @@
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2012-07-06T14:20:44Z</updated>
+      <updated>2012-07-08T15:40:43Z</updated>
     </source>
   </entry>
 
@@ -241,7 +331,7 @@
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-07T14:00:48Z</updated>
+      <updated>2012-07-08T15:40:36Z</updated>
     </source>
   </entry>
 
@@ -518,7 +608,7 @@ form_field(vector_field)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-07T14:00:53Z</updated>
+      <updated>2012-07-08T15:40:40Z</updated>
     </source>
   </entry>
 
@@ -619,7 +709,7 @@ Out[305]:<br/>
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2012-07-06T14:20:45Z</updated>
+      <updated>2012-07-08T15:40:43Z</updated>
     </source>
   </entry>
 
@@ -641,7 +731,7 @@ Out[305]:<br/>
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-07T14:00:49Z</updated>
+      <updated>2012-07-08T15:40:37Z</updated>
     </source>
   </entry>
 
@@ -673,7 +763,7 @@ Out[305]:<br/>
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-07T14:00:48Z</updated>
+      <updated>2012-07-08T15:40:36Z</updated>
     </source>
   </entry>
 
@@ -717,7 +807,7 @@ Out[305]:<br/>
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2012-07-06T14:20:44Z</updated>
+      <updated>2012-07-08T15:40:43Z</updated>
     </source>
   </entry>
 
@@ -962,7 +1052,7 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-07T14:00:46Z</updated>
+      <updated>2012-07-08T15:40:34Z</updated>
     </source>
   </entry>
 
@@ -992,7 +1082,7 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-07T14:00:48Z</updated>
+      <updated>2012-07-08T15:40:36Z</updated>
     </source>
   </entry>
 
@@ -1027,7 +1117,7 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-07T14:00:46Z</updated>
+      <updated>2012-07-08T15:40:35Z</updated>
     </source>
   </entry>
 
@@ -1070,7 +1160,7 @@ sudo python setup.py develop
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-07-07T14:00:24Z</updated>
+      <updated>2012-07-08T15:40:12Z</updated>
     </source>
   </entry>
 
@@ -1105,7 +1195,7 @@ sudo python setup.py develop
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2012-07-06T14:20:45Z</updated>
+      <updated>2012-07-08T15:40:43Z</updated>
     </source>
   </entry>
 
@@ -1154,7 +1244,7 @@ sudo python setup.py develop
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-07T14:00:46Z</updated>
+      <updated>2012-07-08T15:40:35Z</updated>
     </source>
   </entry>
 
@@ -1191,7 +1281,7 @@ sudo python setup.py develop
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-07T14:00:52Z</updated>
+      <updated>2012-07-08T15:40:39Z</updated>
     </source>
   </entry>
 
@@ -1233,7 +1323,7 @@ sudo python setup.py develop
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-07T14:00:49Z</updated>
+      <updated>2012-07-08T15:40:38Z</updated>
     </source>
   </entry>
 
@@ -1260,7 +1350,7 @@ sudo python setup.py develop
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-07T14:00:48Z</updated>
+      <updated>2012-07-08T15:40:36Z</updated>
     </source>
   </entry>
 
@@ -1432,7 +1522,7 @@ sudo python setup.py develop
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-07T14:00:49Z</updated>
+      <updated>2012-07-08T15:40:37Z</updated>
     </source>
   </entry>
 
@@ -1478,7 +1568,7 @@ sudo python setup.py develop
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2012-07-06T14:20:44Z</updated>
+      <updated>2012-07-08T15:40:43Z</updated>
     </source>
   </entry>
 
@@ -1525,7 +1615,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-07T14:00:52Z</updated>
+      <updated>2012-07-08T15:40:39Z</updated>
     </source>
   </entry>
 
@@ -1552,7 +1642,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-07T14:00:48Z</updated>
+      <updated>2012-07-08T15:40:36Z</updated>
     </source>
   </entry>
 
@@ -1601,7 +1691,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-07T14:00:46Z</updated>
+      <updated>2012-07-08T15:40:34Z</updated>
     </source>
   </entry>
 
@@ -1746,7 +1836,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2012-07-06T14:20:45Z</updated>
+      <updated>2012-07-08T15:40:43Z</updated>
     </source>
   </entry>
 
@@ -1810,7 +1900,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-07T14:00:50Z</updated>
+      <updated>2012-07-08T15:40:38Z</updated>
     </source>
   </entry>
 
@@ -1839,7 +1929,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-07T14:00:48Z</updated>
+      <updated>2012-07-08T15:40:36Z</updated>
     </source>
   </entry>
 
@@ -1894,7 +1984,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-07T14:00:52Z</updated>
+      <updated>2012-07-08T15:40:40Z</updated>
     </source>
   </entry>
 
@@ -1922,7 +2012,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-07T14:00:46Z</updated>
+      <updated>2012-07-08T15:40:34Z</updated>
     </source>
   </entry>
 
@@ -1988,7 +2078,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-07T14:00:52Z</updated>
+      <updated>2012-07-08T15:40:39Z</updated>
     </source>
   </entry>
 
@@ -2016,7 +2106,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-07T14:00:50Z</updated>
+      <updated>2012-07-08T15:40:38Z</updated>
     </source>
   </entry>
 
@@ -2093,7 +2183,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-07T14:00:48Z</updated>
+      <updated>2012-07-08T15:40:36Z</updated>
     </source>
   </entry>
 
@@ -2122,7 +2212,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2012-07-06T14:20:45Z</updated>
+      <updated>2012-07-08T15:40:43Z</updated>
     </source>
   </entry>
 
@@ -2176,7 +2266,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-07T14:00:49Z</updated>
+      <updated>2012-07-08T15:40:38Z</updated>
     </source>
   </entry>
 
@@ -2242,7 +2332,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-07T14:00:46Z</updated>
+      <updated>2012-07-08T15:40:34Z</updated>
     </source>
   </entry>
 
@@ -2270,7 +2360,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-07T14:00:46Z</updated>
+      <updated>2012-07-08T15:40:34Z</updated>
     </source>
   </entry>
 
@@ -2297,7 +2387,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-07T14:00:52Z</updated>
+      <updated>2012-07-08T15:40:39Z</updated>
     </source>
   </entry>
 
@@ -2416,7 +2506,7 @@ Devanla, Brian Granger (co-mentor Sean Vig)<br/>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-07T14:00:52Z</updated>
+      <updated>2012-07-08T15:40:39Z</updated>
     </source>
   </entry>
 
@@ -2479,7 +2569,7 @@ def _intersect(self, other):
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-07-07T14:00:42Z</updated>
+      <updated>2012-07-08T15:40:30Z</updated>
     </source>
   </entry>
 
@@ -2608,7 +2698,7 @@ def _intersect(self, other):
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-07-07T14:00:42Z</updated>
+      <updated>2012-07-08T15:40:30Z</updated>
     </source>
   </entry>
 
@@ -2766,79 +2856,7 @@ def _intersect(self, other):
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-07-07T14:00:23Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://asmeurersympy.wordpress.com/?p=1070</id>
-    <link href="http://asmeurersympy.wordpress.com/2012/01/03/vim-vs-emacs-part-2/" rel="alternate" type="text/html"/>
-    <title>Vim vs. Emacs (Part 2)</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">As I noted in part 1, I have decided to switch to a command line text editor. I decided that, to be fair, I would try both vim and emacs. And to force myself to learn them, I decided to use them cold-turkey. Since I’m going cold-turkey, I am doing this over my break from [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1070&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>As I noted in <a href="http://asmeurersympy.wordpress.com/2011/12/20/vim-vs-emacs-part-1/">part 1</a>, I have decided to switch to a command line text editor.  I decided that, to be fair, I would try both vim and emacs.  And to force myself to learn them, I decided to use them cold-turkey.  </p>
-<p>Since I’m going cold-turkey, I am doing this over my break from classes, so that I can weed out any difficulties during a period when I can live with slow text editing if necessary.  This is a one month break.  I have reached (roughly) the half way point.  For the first half, I used nothing but vim to edit text.  Now, I will use nothing but emacs.</p>
-<p>Now that I’ve stopped using vim (for now anyway), my view of it isn’t much different from what I wrote in the first part.  A lot of things there were addressed by commenters (or rather commenter).  I still feel that it’s not an a method of text editing that fits my head.  My entire life, I’ve used text editors where typing inserts text, and various control characters do things like move around faster.  </p>
-<p>Enter emacs. It does exactly this.  Also a ton more.</p>
-<p>I’ve only been using emacs for two days, but here are my impressions so far:</p>
-<li><strong>The tutorial is better.</strong>  When you start emacs, it tells you how to start the tutorial.  Just type <code>C-h t</code> (if you don’t already know, in emacs <code>C-</code> means <code>CTRL-</code> and <code>M-</code> means <code>ALT-</code>).  Like I said last time, the very first thing you learn is how to scroll by more than one line at a time.  That turns out to be a very useful thing to do.  Also, the emacs tutorial did a better job of explaining how to use multiple files at once in emacs, which is something that I still don’t really know how to do very well in vim.
-<p>I have to give the vim tutorial some credit for one thing, though.  It has better interactive examples.  For example, in the vim tutorial, you have stuff like </p>
-<p/><pre class="brush: plain;">  1. Move the cursor to the second line in the phrase below.
-  2. Type  dd  to delete the line.
-  3. Now move to the fourth line.
-  4. Type   2dd   to delete two lines.
-
----&gt;  1)  Roses are red,
----&gt;  2)  Mud is fun,
----&gt;  3)  Violets are blue,
----&gt;  4)  I have a car,
----&gt;  5)  Clocks tell time,
----&gt;  6)  Sugar is sweet
----&gt;  7)  And so are you.
-</pre><p/>
-<p>whereas in the emacs tutorial, you just have</p>
-<p/><pre class="brush: plain;">&gt;&gt; Kill a line, move around, kill another line.
-   Then do C-y to get back the second killed line.
-   Then do M-y and it will be replaced by the first killed line.
-   Do more M-y's and see what you get.  Keep doing them until
-   the second kill line comes back, and then a few more.
-   If you like, you can try giving M-y positive and negative
-   arguments.
-</pre><p/>
-<p>which is a little more vague.  So I have to give vim credit for that.  </p></li>
-<li><strong>Everything’s a buffer.</strong> This line from the emacs tutorial really stuck with me: “ANY text you see in an Emacs window is always part of some buffer.”  Emacs has really a awesome editing model, even simple things like <code>M-f</code> and <code>M-b</code> to move around words at a time, or <code>M-DEL</code> to delete whole words make things <strong>way</strong> faster.  Vim of course has all of these too, albiet in a different way, but they aren’t everywhere.  In emacs, everything is a buffer, which just means that everything supports all the standard emacs commands.  So if you type <code>M-x</code> (roughly the equivalent of vim’s <code>:</code>) and start typing a command, you can move around and edit your command with emacs commands.  One of the things that bothered me about vim was that when I was typing something with <code>:</code>, I couldn’t use vim’s text moving/modifying commands to manipulate the text.  Typing ESC just canceled the command.
-<p>Exceptions: There are at least two exceptions I’ve found to this rule.  First, if you do a search with <code>C-s</code> or <code>C-r</code>, no control commands work.  If you type a search string, and then type <code>M-DEL</code> to try to delete the last word in your search string, you will instead delete the word where the cursor is!  The solution I think is to use something like <code>M-x re-builder</code> instead.  This was a little slow in my tests.</p>
-<p>Second, the emacs manual is presented in the <code>info</code> program, which uses completely different key commands from every other program.  This irked me quite a bit, because as soon as I finished the emacs tutorial, it pointed me to the manual, which was in <code>info</code>.  Then, the first thing in <code>info</code> is a tutorial on how to use <code>info</code>!  I opted to skip this.  If I need any information on emacs, I’ll just do a Google search anyway, so I found this to be a waste of time.</p></li>
-<li><strong>It’s a little slower.</strong> I do notice a speed difference between emacs and vim.  vim is much more lightweight, and it shows.  Starting up emacs takes a second or two.  Also, since a lot of the features are more interactive, they suffer from a speed delay.  It’s not nearly slow enough to be a serious issue, though, and it’s still way faster than the GUI program I was using before (start up time).
-<p>The emacs tutorial suggests using <code>C-z</code> whenever you want to only temporarily close emacs.  This seems like a good idea, and has worked pretty well for me so far (though I still usually close the whole thing with <code>C-x C-c</code> out of habit).</p>
-<p>On a related note, I noticed that doing type-ahead while waiting for emacs to start up didn’t always work, whereas it always worked in vim (I do this, e.g., when waiting for the editor to start up when writing commit messages).</p></li>
-<li><strong>It’s way more user-friendly.</strong> Note that this is of course a relative term.  I mean more user-friendly than vim, and pretty user-friendly for a command line program.  Obviously, the most user-friendly text editors are the GUI ones used by the majority of the population (for that very reason).  Actually, both vim and emacs are user-unfriendly in that if you accidentally open them and don’t know what they are or how to use them, you have no idea how to close them.  But even <code>less</code> (i.e., <code>man</code>) is technically like this.
-<p>I’m not even referring to the different editing “modes” of the two editors, though you could easily argue that emacs style editing is more user-friendly than vim style editing. What I mean here is that emacs interaction is nice. When you type <code>:</code> in vim, start typing a command, and type <code>TAB</code>, it enters the first completion, regardless if it’s unique.  Pressing <code>TAB</code> multiple times give the rest.  In emacs, if you type <code>M-x</code> and start typing a command and type <code>TAB</code>, it pops up a temporary window with the list of all completions.  It even colors the next character, so you can easily see what to type next to get what you want.  As soon as you enter the command, the window disappears. (yes, I know about <code>CTRL-D</code> in vim, but to me tab completion should <em>always</em> work like it does in bash: complete characters if and only if they are unique in the list of completions)</p>
-<p>By the way, when I said everything’s a buffer, I mean everything.  If you want, you can exit the <code>M-x</code> entry (type <code>C-g</code>), type <code>C-x C-b</code> to show the list of buffers, <code>C-x o</code> to switch to it, scroll down to “Completions”, press Enter, and actually get in the completion list, as a buffer (there’s probably a less complicated way to get to it, by the way).  You can then do whatever your heart fancies with it (save it to a file, copy it, whatever).</p></li>
-<li><strong>Customization is harder.</strong> This was expected, since I already knew that emacs used lisp.  vim uses a language that is really easy to understand.  I was able to modify all the vim plugins I installed very easily.  If you want to change a setting globally in vim, just Google it and add one line to your .vimrc.   In emacs, everything is in Emacs Lisp.  I suppose prior experience with Lisp would probably help here.
-<p>In the vim tutorial, near the end, it told how to create a .vimrc file, and even gave a very useful sample one as a starter.  In emacs, it took me a while to figure out how to do the equivalent (it took me a few Google searches just to figure out that the name of the configuration file in emacs is .emacs).  </p>
-<p>Actually, the emacs equivalent is way better than in vim, but it isn’t really mentioned anywhere. It took me probably a dozen Google searches before I learned about it (granted, I was looking for things in the same way I did for vim, lines to add to .emacs). What you have to do is type <code>M-x configure</code>.  This opens what is basically a huge preferences dialog for emacs.  You can then go through and set just about every settable emacs setting from there.  The interface is very nice, as it’s interactive and tells you all about each setting.  And you never have to touch Lisp.  I’m still going through it, so I can’t comment more on it yet.  But I recommend doing <code>M-x configure</code> as soon as you have finished the tutorial and have gotten used to editing with emacs, as you are invariably going to want to change some things (though I should note that emacs generally has nicer defaults than vim).</p></li>
-<li><strong>Better text editing methodology?</strong> Like I’ve already mentioned a bunch of times, the emacs editing model seems to fit my head better than the vim model.  In emacs, you type text, and it inserts the text.  If you want to do some advanced modification or move around, you type a control sequence.  In vim, you type characters, and it does modifications or moves around.  If you want to type text, you type <code>i</code> (or one of a few other characters) and type it.  Then, if you want to move around or modify the text, you have to press <code>ESC</code>.  This so-called “modular editing” doesn’t seem to work for me.  For one thing, I like to rapidly switch back and forth between these two “modes” (editing and inserting) when I write things.  I type too fast and write something wrong, and have to delete some stuff. The <code>M-DEL</code> emacs command is probably my most used (this also works in Mac OS X text dialogs, so I’m used to it already).  In vim, there is <code>CTRL-w</code> and a few others, but if I want to do something more advanced, like rearranging a sentence, then half of my key presses would be <code>ESC</code> or <code>i</code>, i.e., just moving between the modes.  In emacs, I can always have my pinky by Control and Alt (especially as soon as I remap CAPS-LOCK to Control).
-<p>Also, it really irks me how in vim, if you are at the end of a line and press <code>l</code> (or right-arrow), instead of moving to the beginning of the next line, it beeps!  In emacs, if you are at the end of a the line and type <code>C-f</code>, it moves to the beginning of the next line (actually, it technically moves just beyond the line, in case you want to append, which is another annoying thing about vim: you have to use <code>A</code>, not <code>i</code>,  to add text to the end of a line). </p></li>
-<p>Well, that’s it for now.  I will hold off on the questions until after I go through all the customizations, as it seems that, unlike vim, emacs has many things already built-in (but we already knew that, didn’t we :).  So I have just one question for readers: does anyone know of a really good emacs cheatsheet?  The <a href="http://www.viemu.com/a_vi_vim_graphical_cheat_sheet_tutorial.html">one I used for vim</a> was really awesome, but I haven’t found anything equal for emacs.  I find myself searching the tutorial whenever I forget something, which is not very efficient, so I would appreciate something better. Otherwise, I’ll just find something decent and print it out, as it would be better than nothing.</p>
-<p>And if anyone cares, you can see what I’ve got for my .emacs file so far at <a href="https://github.com/asmeurer/dotfiles/blob/master/.emacs">https://github.com/asmeurer/dotfiles/blob/master/.emacs</a>.</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/asmeurersympy.wordpress.com/1070/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/asmeurersympy.wordpress.com/1070/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/asmeurersympy.wordpress.com/1070/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/asmeurersympy.wordpress.com/1070/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/asmeurersympy.wordpress.com/1070/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/asmeurersympy.wordpress.com/1070/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/asmeurersympy.wordpress.com/1070/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/asmeurersympy.wordpress.com/1070/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/asmeurersympy.wordpress.com/1070/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/asmeurersympy.wordpress.com/1070/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/asmeurersympy.wordpress.com/1070/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/asmeurersympy.wordpress.com/1070/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/asmeurersympy.wordpress.com/1070/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/asmeurersympy.wordpress.com/1070/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1070&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2012-01-03T07:30:37Z</updated>
-    <category term="Uncategorized"/>
-    <author>
-      <name>Aaron Meurer</name>
-    </author>
-    <source>
-      <id>http://asmeurersympy.wordpress.com</id>
-      <logo>http://1.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=http%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
-      <link href="http://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
-      <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-07-07T14:00:23Z</updated>
+      <updated>2012-07-08T15:40:11Z</updated>
     </source>
   </entry>
 </feed>
