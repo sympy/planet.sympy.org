@@ -13,6 +13,7 @@
 
 	<items>
 		<rdf:Seq>
+			<rdf:li rdf:resource="http://catchmrbharath.github.com/programming/2012/07/09/gsoc-week-7" />
 			<rdf:li rdf:resource="http://rhoforsympy.wordpress.com/?p=181" />
 			<rdf:li rdf:resource="http://scolobb.wordpress.com/?p=238" />
 			<rdf:li rdf:resource="http://krastanov.wordpress.com/?p=447" />
@@ -72,11 +73,32 @@
 			<rdf:li rdf:resource="http://sympystats.wordpress.com/?p=257" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-2520472460430880330.post-798629723236480051" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-8814696591561172392.post-4829631852742579231" />
-			<rdf:li rdf:resource="http://sympystats.wordpress.com/?p=241" />
 		</rdf:Seq>
 	</items>
 </channel>
 
+<item rdf:about="http://catchmrbharath.github.com/programming/2012/07/09/gsoc-week-7">
+	<title>Bharath M R: GSoC week 7</title>
+	<link>http://catchmrbharath.github.com/programming/2012/07/09/gsoc-week-7</link>
+	<content:encoded>&lt;p&gt;This week has been quite eventful. The implicit plotting module is almost done. I added the functionality of combining expressions using the &lt;code&gt;And&lt;/code&gt; and &lt;code&gt;Or&lt;/code&gt; statements. Now you can do&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;
+plot_implicit(And(Eq(y, exp(x)), y - x &amp;gt; 2)
+&lt;/code&gt; and get a plot as below. So now you can combine any number of equations / inequalities and plot it. I think its possible to do a lot of cool stuff combining equations / inequalities. &lt;img width=&quot;600&quot; src=&quot;http://catchmrbharath.github.com/images/09072012/fig1.png&quot; height=&quot;400&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Plotting through interval math is awesome but is also very limited. You cannot add support to &lt;code&gt;re()&lt;/code&gt;, to functions that you cannot characterize as monotonic in certain regions. But we always encounter such functions. So there should be some fall back algorithm to plot such plots. I implemented the fall back algorithm last week. The idea is borrowed from sage implicit plots. We convert an equation / inequality into a function which returns 1 if it satisfies and -1 if it doesn’t satisfy. So if you are plotting an equality then you plot using the &lt;code&gt;contour&lt;/code&gt; command of matplotlib, and instruct it to plot only the zero contour. If its an inequality then plotting the region with two colors gives the plot required.&lt;/p&gt;
+
+&lt;p&gt;These are examples from the fallback algorithm.&lt;/p&gt;
+
+&lt;p&gt;Plot of $y^{2}=x^{3}-x$ &lt;img width=&quot;600&quot; src=&quot;http://catchmrbharath.github.com/images/09072012/fig2.png&quot; height=&quot;400&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The plot with interval arithmetic is more precise. &lt;img width=&quot;600&quot; src=&quot;http://catchmrbharath.github.com/images/09072012/fig3.png&quot; height=&quot;400&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I haven’t finished with the tests. Once I finish the tests I can send a pull request. The pull request will be pretty big, but most of the things have been reviewed in my previous pull request. This is just an extension of the previous pull request.&lt;/p&gt;
+
+&lt;p&gt;There are certain problems with the module though. The line width problem which I mentioned in my previous blog post, cannot be fixed. So you will have to change to the fall back method if the line width becomes large. Also the fall back algorithm cannot plot boolean combinations of equations / inequalities. So the two methods complement each other largely. So the next question would be whether we can choose one of the two intelligently. I guess the answer is No. That decision must be taken by the user. But most of the times the interval math approach works very nicely.&lt;/p&gt;</content:encoded>
+	<dc:date>2012-07-09T07:00:00+00:00</dc:date>
+</item>
 <item rdf:about="http://rhoforsympy.wordpress.com/?p=181">
 	<title>Guru Devanla: Week 7: Tr operations on Qubits</title>
 	<link>http://rhoforsympy.wordpress.com/2012/07/09/week-7-tr-operations-on-qubits/</link>
@@ -1644,46 +1666,6 @@ def _intersect(self, other):
 	<content:encoded>Google Code-in is the high-school equivalent of the Google Summer of Code. The program ran from Nov 21st to Jan 16th, though we've only now gotten around to sending &lt;a href=&quot;https://groups.google.com/group/sympy/browse_thread/thread/fde434aa771fd5eb/c3220755357b032a&quot;&gt;a &quot;summary&quot; mail to the list about it&lt;/a&gt;. As Aaron noted, we've had some translation work, some work on SymPy Live and a bevy of documentation and code improvements. With 176 tasks completed, I'd say the whole project was a success for SymPy. I was involved as a mentor, so here are some general thoughts and observations about the process. &lt;br /&gt; &lt;br /&gt;&lt;b&gt;E-mail spam.&lt;/b&gt; In SymPy we didn't have a clean separation of mentor duties (eg. KDE only allowed tasks for which someone volunteered to mentor), so the initial idea was to add all (most) mentors to all tasks. This meant a lot of mails, an effect worsened by the fact that each commenter to the issue starts another &quot;conversation&quot; when viewed from Gmail (which I even &lt;a href=&quot;https://code.google.com/p/soc/issues/detail?id=1388&quot;&gt;reported to Melange&lt;/a&gt; as a feature request/bug). At the height of activity, I could get upwards of 30-40 mails (&quot;conversations&quot;) daily, which by far dwarfed my other mail traffic. Then, because each comment is basically a separate mail, I wasted a lot of time looking at issue that someone already addressed (again, most mentors could handle most tasks). For the second round of tasks I didn't add myself to each task, otherwise I'm sure I'd have gotten even more spam. The bug I reported in Melange was fixed, so hopefully this will be less of an issue next year. &lt;br /&gt; &lt;br /&gt;&lt;b&gt;Being a mentor takes a lot of time.&lt;/b&gt; Partly a consequence of above, partly due to all the work being done, but being a mentor took a lot of time. Many students were unfamiliar with git (and didn't want to read the instructions on development workflow on our excellently-written (in my opinion) &lt;a href=&quot;https://github.com/sympy/sympy/wiki/GCI-2011-Landing&quot;&gt;GCI Landing Page&lt;/a&gt;) and solving issues with them was a constant topic on IRC. Students also lacked follow-through with comments (or, occasionally, expected the work handed down to them) which didn't help. Finally, many students were very anxious, and didn't appreciate that we are all volunteers and cannot be around 24/7. All of this resulted in a process that was frustrating at times and stressful for mentors.  &lt;br /&gt; &lt;br /&gt;Regardless of all of the above, &lt;b&gt;a lot of work was done&lt;/b&gt; for SymPy. While I didn't look at the stats, my feeling is that the biggest improvement could be seen in our SymPy Live interface (and our webpage) and our documentation. Yes, we also saw some code improvements, but they were probably a smaller part of the overall contribution (though by no means less important). Interestingly, I think this exposes the two types of tasks the GCI contest is well-suited to: tasks where there is no &quot;in-house&quot; expertise (anything web related in our case) and uninteresting tasks/chores (writing documentation, in our case and probably for most projects). In the first case, we managed to attract experienced developers who could improve our webpage much faster and better than any of the core developers. Writing documentation is also an important task, but one that is shunned by most developers. Still, it is mostly simple work and (more importantly) doesn't usually require in-depth understanding of the code. This made it ideally suited for new contributors. The financial award (100$ for every 3 completed tasks, up to 500$) was enough of a motivation for students. The all-around improvements to our documentation are probably the single biggest advantage of our participation in GCI. &lt;br /&gt; &lt;br /&gt;&lt;b&gt;Translations.&lt;/b&gt; In GCI, tasks were divided into categories and we needed to have at least 5 tasks in every category. While we managed to &quot;fill-up&quot; most categories, Translation was probably the biggest problem. As a, basically, command-line library, it does not make a lot of sense for SymPy to be translated in other languages. In the end, we created tasks for translating our webpage and tutorial to the languages covered by the development team and some of these were done, but I consider this a waste of time. Though this issue is &quot;near and dear&quot; to me (I'm not a native speaker of English), I'm of the opinion that it would be impossible for someone without at least a basic knowledge of English to program with SymPy. Simply, however much effort we put into translating, the class and method names will remain in English and there's no helping that. I very much doubt the newly translated documents will be even used and they're bound to fall behind as the original document changes. We also had to start using gettext to manage the translations, which is a non-trivial amount of work (and there are still some issues). In my opinion, it adds another layer of complexity (however small) for very little gain. &lt;br /&gt; &lt;br /&gt;In &lt;b&gt;conclusion&lt;/b&gt;: did we get stuff done? Yes, without a doubt. Would we have gotten more if the mentors used their mentoring time for coding? Perhaps, but not necessarily. Are some of the students going to keep contributing? Most likely not. Still, I would consider the whole program, and our participation in it, a &lt;b&gt;success&lt;/b&gt;. Ideas for next year could be focusing more on stuff none of the core developers can do (eg. the website work), but we can't really say how far along will SymPy development progress during this year or which tasks might be available to students. Hopefully, more people will volunteer to mentor next year, which would help with most issues I raised here. It is interesting, though, that even with our normally very fast development process we couldn't handle the influx of student work. It'd be interesting to see how other organizations coped. &lt;br /&gt; &lt;br /&gt;Here's to another GCI this year!&lt;div class=&quot;blogger-post-footer&quot;&gt;&lt;img src=&quot;https://blogger.googleusercontent.com/tracker/8814696591561172392-4829631852742579231?l=vperic.blogspot.com&quot; alt=&quot;&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;&lt;/div&gt;</content:encoded>
 	<dc:date>2012-02-10T16:27:46+00:00</dc:date>
 	<dc:creator>Vladimir Perić</dc:creator>
-</item>
-<item rdf:about="http://sympystats.wordpress.com/?p=241">
-	<title>Matthew Rocklin: sympy.stats is in</title>
-	<link>http://sympystats.wordpress.com/2012/02/06/sympy-stats-is-in/</link>
-	<content:encoded>&lt;h3&gt;Development&lt;/h3&gt;
-&lt;p&gt;It seems there was a flurry of development over the winter holidays.&lt;/p&gt;
-&lt;p&gt;Tom’s Meijer-G integration code was merged into master giving SymPy an incredibly powerful definite integration engine. This encouraged me to finish up the pull request for random variables.&lt;/p&gt;
-&lt;p&gt;Earlier this morning we finally merged it in and sympy.stats is now in master. If you’re interested please play with it and generate feedback. At the very least it should be able to solve many of your introductory stats homework problems :)&lt;/p&gt;
-&lt;p&gt;Actually, I tried using it for a non-trivial example last month and generated an integral which killed the integration engine (mostly this was due to a combination of trigonometric and delta functions). However, I still really wanted the result. The standard solution to analytically intractable statistics problems is to sample. This pushed me to build a monte carlo engine into sympy stats.&lt;/p&gt;
-&lt;h3&gt;Sampling&lt;/h3&gt;
-&lt;p&gt;The family of stats functions P, E, Var, Density, Given, now have a new member, Sample. You can generate a random sample of any random expression as follows&lt;/p&gt;
-&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; from sympy.stats import *
-&amp;gt;&amp;gt;&amp;gt; X, Y = Die(6), Die(6)
-&amp;gt;&amp;gt;&amp;gt; roll = X+Y
-&amp;gt;&amp;gt;&amp;gt; Sample(roll)
-10
-&amp;gt;&amp;gt;&amp;gt; Sample(roll)
-5
-&amp;gt;&amp;gt;&amp;gt; Sample(X, roll&amp;gt;10) # Sample X given that X+Y&amp;gt;10
-6
-&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
-&lt;p&gt;Sampling is of course more fail-proof than solving integrals and so expressions can be made arbitrarily complex without issue. This sampling mechanism is also built into the probability and expectation functions using the keyword “numsamples”&lt;/p&gt;
-&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; from sympy.stats import *
-&amp;gt;&amp;gt;&amp;gt; X, Y = Normal(0, 1), Normal(0, 1)
-&amp;gt;&amp;gt;&amp;gt; P(X&amp;gt;Y)
-1/2
-&amp;gt;&amp;gt;&amp;gt; P(X&amp;gt;Y, numsamples = 1000)
-499 
-────
-1000
-&amp;gt;&amp;gt;&amp;gt; E(X+Y)
-0
-&amp;gt;&amp;gt;&amp;gt; E(X+Y, numsamples = 1000)
--0.0334982435603208
-&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
-&lt;h3&gt;Future&lt;/h3&gt;
-&lt;p&gt;GSoC 2012 was announced a couple days ago. I’m excited to see what projects are proposed. &lt;/p&gt;
-&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/sympystats.wordpress.com/241/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/sympystats.wordpress.com/241/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/godelicious/sympystats.wordpress.com/241/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/delicious/sympystats.wordpress.com/241/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/gofacebook/sympystats.wordpress.com/241/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/facebook/sympystats.wordpress.com/241/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/gotwitter/sympystats.wordpress.com/241/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/twitter/sympystats.wordpress.com/241/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/gostumble/sympystats.wordpress.com/241/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/stumble/sympystats.wordpress.com/241/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/godigg/sympystats.wordpress.com/241/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/digg/sympystats.wordpress.com/241/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/goreddit/sympystats.wordpress.com/241/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/reddit/sympystats.wordpress.com/241/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=sympystats.wordpress.com&amp;amp;blog=22550280&amp;amp;post=241&amp;amp;subd=sympystats&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
-	<dc:date>2012-02-07T04:03:22+00:00</dc:date>
-	<dc:creator>mrocklin</dc:creator>
 </item>
 
 </rdf:RDF>

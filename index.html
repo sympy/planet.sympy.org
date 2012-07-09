@@ -25,6 +25,45 @@
 <div class="daygroup">
 <h2>July 09, 2012</h2>
 
+
+
+<div class="entrygroup" id="http://catchmrbharath.github.com/programming/2012/07/09/gsoc-week-7">
+<h4><a href="http://catchmrbharath.github.com/programming/2012/07/09/gsoc-week-7">GSoC week 7</a></h4>
+<div class="entry">
+<div class="content">
+<p>This week has been quite eventful. The implicit plotting module is almost done. I added the functionality of combining expressions using the <code>And</code> and <code>Or</code> statements. Now you can do</p>
+
+<p><code>
+plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
+</code> and get a plot as below. So now you can combine any number of equations / inequalities and plot it. I think its possible to do a lot of cool stuff combining equations / inequalities. <img width="600" src="http://catchmrbharath.github.com/images/09072012/fig1.png" height="400" /></p>
+
+<p>Plotting through interval math is awesome but is also very limited. You cannot add support to <code>re()</code>, to functions that you cannot characterize as monotonic in certain regions. But we always encounter such functions. So there should be some fall back algorithm to plot such plots. I implemented the fall back algorithm last week. The idea is borrowed from sage implicit plots. We convert an equation / inequality into a function which returns 1 if it satisfies and -1 if it doesn’t satisfy. So if you are plotting an equality then you plot using the <code>contour</code> command of matplotlib, and instruct it to plot only the zero contour. If its an inequality then plotting the region with two colors gives the plot required.</p>
+
+<p>These are examples from the fallback algorithm.</p>
+
+<p>Plot of $y^{2}=x^{3}-x$ <img width="600" src="http://catchmrbharath.github.com/images/09072012/fig2.png" height="400" /></p>
+
+<p>The plot with interval arithmetic is more precise. <img width="600" src="http://catchmrbharath.github.com/images/09072012/fig3.png" height="400" /></p>
+
+<p>I haven’t finished with the tests. Once I finish the tests I can send a pull request. The pull request will be pretty big, but most of the things have been reviewed in my previous pull request. This is just an extension of the previous pull request.</p>
+
+<p>There are certain problems with the module though. The line width problem which I mentioned in my previous blog post, cannot be fixed. So you will have to change to the fall back method if the line width becomes large. Also the fall back algorithm cannot plot boolean combinations of equations / inequalities. So the two methods complement each other largely. So the next question would be whether we can choose one of the two intelligently. I guess the answer is No. That decision must be taken by the user. But most of the times the interval math approach works very nicely.</p></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://catchmrbharath.github.com/programming/2012/07/09/gsoc-week-7">July 09, 2012 07:00 AM</a>
+</p>
+</div>
+</div>
+
+
+
+</div>
 <div class="channelgroup">
 
 
@@ -3128,75 +3167,6 @@ Google Code-in is the high-school equivalent of the Google Summer of Code. The p
 </div>
 
 </div>
-<div class="daygroup">
-<h2>February 07, 2012</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://sympystats.wordpress.com" title="sympy-stats">Matthew Rocklin</a></h3>
-
-
-<div class="entrygroup" id="http://sympystats.wordpress.com/?p=241">
-<h4 lang="en"><a href="http://sympystats.wordpress.com/2012/02/06/sympy-stats-is-in/">sympy.stats is in</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<h3>Development</h3>
-<p>It seems there was a flurry of development over the winter holidays.</p>
-<p>Tom’s Meijer-G integration code was merged into master giving SymPy an incredibly powerful definite integration engine. This encouraged me to finish up the pull request for random variables.</p>
-<p>Earlier this morning we finally merged it in and sympy.stats is now in master. If you’re interested please play with it and generate feedback. At the very least it should be able to solve many of your introductory stats homework problems :)</p>
-<p>Actually, I tried using it for a non-trivial example last month and generated an integral which killed the integration engine (mostly this was due to a combination of trigonometric and delta functions). However, I still really wanted the result. The standard solution to analytically intractable statistics problems is to sample. This pushed me to build a monte carlo engine into sympy stats.</p>
-<h3>Sampling</h3>
-<p>The family of stats functions P, E, Var, Density, Given, now have a new member, Sample. You can generate a random sample of any random expression as follows</p>
-<p></p><pre class="brush: python;">&gt;&gt;&gt; from sympy.stats import *
-&gt;&gt;&gt; X, Y = Die(6), Die(6)
-&gt;&gt;&gt; roll = X+Y
-&gt;&gt;&gt; Sample(roll)
-10
-&gt;&gt;&gt; Sample(roll)
-5
-&gt;&gt;&gt; Sample(X, roll&gt;10) # Sample X given that X+Y&gt;10
-6
-</pre><p></p>
-<p>Sampling is of course more fail-proof than solving integrals and so expressions can be made arbitrarily complex without issue. This sampling mechanism is also built into the probability and expectation functions using the keyword “numsamples”</p>
-<p></p><pre class="brush: python;">&gt;&gt;&gt; from sympy.stats import *
-&gt;&gt;&gt; X, Y = Normal(0, 1), Normal(0, 1)
-&gt;&gt;&gt; P(X&gt;Y)
-1/2
-&gt;&gt;&gt; P(X&gt;Y, numsamples = 1000)
-499 
-────
-1000
-&gt;&gt;&gt; E(X+Y)
-0
-&gt;&gt;&gt; E(X+Y, numsamples = 1000)
--0.0334982435603208
-</pre><p></p>
-<h3>Future</h3>
-<p>GSoC 2012 was announced a couple days ago. I’m excited to see what projects are proposed. </p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/sympystats.wordpress.com/241/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/sympystats.wordpress.com/241/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godelicious/sympystats.wordpress.com/241/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/delicious/sympystats.wordpress.com/241/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/sympystats.wordpress.com/241/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/facebook/sympystats.wordpress.com/241/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/sympystats.wordpress.com/241/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/twitter/sympystats.wordpress.com/241/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gostumble/sympystats.wordpress.com/241/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/stumble/sympystats.wordpress.com/241/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godigg/sympystats.wordpress.com/241/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/digg/sympystats.wordpress.com/241/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/goreddit/sympystats.wordpress.com/241/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/reddit/sympystats.wordpress.com/241/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=sympystats.wordpress.com&amp;blog=22550280&amp;post=241&amp;subd=sympystats&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://sympystats.wordpress.com/2012/02/06/sympy-stats-is-in/">by mrocklin at February 07, 2012 04:03 AM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -3304,7 +3274,7 @@ Google Code-in is the high-school equivalent of the Google Summer of Code. The p
 
 <p>
 <strong>Last updated:</strong><br>
-July 09, 2012 04:40 AM<br>
+July 09, 2012 05:20 AM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
