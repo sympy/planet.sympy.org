@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2012-07-16T21:21:13Z</updated>
+  <updated>2012-07-16T21:41:05Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,51 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry xml:lang="en">
+    <id>http://scolobb.wordpress.com/?p=259</id>
+    <link href="http://scolobb.wordpress.com/2012/07/17/the-almost-there-chapter-1/" rel="alternate" type="text/html"/>
+    <title>The Almost There (Chapter 1)</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">This week I have come ridiculously close to finalising the second major part of my GSoC work: diagram plotting. Before submitting the two pull requests, I only have to add proper docstrings to a couple classes and to integrate the plotting with sympy.printing.preview for easier use. (Well, there also is a FiniteSet-related issue, but I [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=259&amp;subd=scolobb&amp;ref=&amp;feed=1" width="1"/></div>
+    </summary>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>This week I have come ridiculously close to finalising the second major part of my GSoC work: diagram plotting.  Before submitting the two pull requests, I only have to add proper docstrings to a couple classes and to integrate the plotting with <tt>sympy.printing.preview</tt> for easier use.  (Well, there also is a <tt>FiniteSet</tt>-related issue, but I hope to be able to fix it more or less swiftly.)  The main functionality is ready, however, and that gives me hopes <img alt=":-)" class="wp-smiley" src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif"/> </p>
+<p>In terms of material progress, this week has been rather unimpressive: I haven’t written that many lines of code and that which I have written has introduced seemingly inessential changes to the aspect of the diagrams.  Nevertheless, I think this week can be marked as one of the most thought-intensive.</p>
+<p>In the beginning of this week I have extended the drawing of curved morphisms to take into account the situations when there are multiple morphisms between the same two pair of objects.  This allows to automatically typeset diagrams such as Diagram 1.<br/>
+</p><div class="wp-caption alignright" id="attachment_260" style="width: 210px;"><a href="http://scolobb.files.wordpress.com/2012/07/multiple-curved.png"><img alt="A diagram with multiple curved morphisms." class="size-medium wp-image-260" height="292" src="http://scolobb.files.wordpress.com/2012/07/multiple-curved.png?w=300&amp;h=292" title="Diagram 1" width="300"/></a><p class="wp-caption-text">Diagram 1. Multiple curved morphisms.</p></div><p/>
+<p>The next two days I have been smashing my head against the simplest approach to the problem of positioning morphisms labels such that they don’t get intersected by morphisms.  The upsetting part is that, despite the amount of thinking I have done and the amount of code and comments I have written, the actual output hasn’t really got much better.  (It may be considered to be a success, though, that it hasn’t got much worse either <img alt=":-)" class="wp-smiley" src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif"/>  ).  Consider Diagram 2.  No special care about the position of the labels is taken.<br/>
+</p><div class="wp-caption alignright" id="attachment_264" style="width: 168px;"><a href="http://scolobb.files.wordpress.com/2012/07/triangle-simple.png"><img alt="Diagram 2.  Arbitrary placement of morphism labels." class="size-full wp-image-264" src="http://scolobb.files.wordpress.com/2012/07/triangle-simple.png?w=549" title="Diagram 2"/></a><p class="wp-caption-text">Diagram 2.  Arbitrary placement of morphism labels.</p></div><p/>
+<p>Now consider Diagram 3; notice that the labels are now on the outer sides of the diagram.  The trick basically (very basically) consists in detecting those morphisms which form the outer edges of the diagram and then placing their labels on the proper side.  While for vertical and horizontal morphisms the procedure is pretty straightforward, for diagonal morphisms I resolved to apply some basic ideas from analytic geometry and yes, I even do floating-point computations (although I of course try to do them as little as possible).  Nevertheless, the approach I have implemented feels very far from perfect.  I hope though that I have managed to achieve some balance between code that works sufficiently fast and well and code that is intelligible.  Note that the positioning of the labels of the morphsisms which are in the bowels of the visual structure of the diagram remains pretty arbitrary, which may sometimes get ugly.<br/>
+</p><div class="wp-caption alignright" id="attachment_267" style="width: 154px;"><a href="http://scolobb.files.wordpress.com/2012/07/triangle-positioned.png"><img alt="Diagram 3.  Explicit positioning of labels of outer morphisms." class="size-full wp-image-267" src="http://scolobb.files.wordpress.com/2012/07/triangle-positioned.png?w=549" title="Diagram 3"/></a><p class="wp-caption-text">Diagram 3.  Explicit positioning of labels of outer morphisms.</p></div><p/>
+<p>The next feature I have added is the possibility to draw “loop” morphisms, i.e., morphisms which have the same domains and codomains.  While proper layout of such morphisms is not guaranteed for very crowded diagrams, this functionality is of some use, as can be seen in Diagram 4.<br/>
+</p><div class="wp-caption alignright" id="attachment_272" style="width: 230px;"><a href="http://scolobb.files.wordpress.com/2012/07/many-loops.png"><img alt="Diagram 4. Typesetting of loop morphisms." class="size-medium wp-image-272" height="255" src="http://scolobb.files.wordpress.com/2012/07/many-loops.png?w=300&amp;h=255" title="Diagram 4" width="300"/></a><p class="wp-caption-text">Diagram 4. Typesetting of loop morphisms.</p></div><p/>
+<p>Finally, I have implemented the support for custom arrow formatters.  Arrow formatters are associated to morphisms properties.  Whenever a morphism with some properties is typeset, after the necessary thinking has been carried out, the resulting data is passed to the formatter.  The formatter is free to modify anything it wants in order to influence the appearance of the arrow.  A common usage is shown in Diagram 5.  This effect was achieved with a two-line formatter.<br/>
+</p><div class="wp-caption alignright" id="attachment_275" style="width: 210px;"><a href="http://scolobb.files.wordpress.com/2012/07/formatter.png"><img alt="Diagram 5. Use of formatters" class="size-full wp-image-275" src="http://scolobb.files.wordpress.com/2012/07/formatter.png?w=549" title="Diagram 5"/></a><p class="wp-caption-text">Diagram 5. Use of formatters</p></div><p/>
+<p>I must confess that dealing with hash randomisation-related issues takes up much more time that I always expect.  I have been constantly getting back to certain bits of my code and adding new and new invocations of <tt>sorted</tt> to assure stable output.  Working on this, as well as on some obscure tuning of small details of the diagram is actually what has consumed the bulk of my time this week.  The visual input of such modifications is usually minimal; yet, I do believe they bear a rather important role.</p>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/259/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/259/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=259&amp;subd=scolobb&amp;ref=&amp;feed=1" width="1"/></div>
+    </content>
+    <updated>2012-07-16T21:32:25Z</updated>
+    <category term="SymPy"/>
+    <category term="automatic plotting"/>
+    <category term="category theory"/>
+    <category term="curved arrows"/>
+    <category term="diagram drawing"/>
+    <category term="label positioning"/>
+    <category term="xy-pic"/>
+    <author>
+      <name>scolobb</name>
+    </author>
+    <source>
+      <id>http://scolobb.wordpress.com</id>
+      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
+      <link href="http://scolobb.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://scolobb.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://scolobb.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <subtitle>Reports of quests for adventures and coadventures</subtitle>
+      <title>Coaquarium</title>
+      <updated>2012-07-16T21:40:55Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en">
     <id>http://rhoforsympy.wordpress.com/?p=197</id>
@@ -42,7 +87,7 @@
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-16T21:21:12Z</updated>
+      <updated>2012-07-16T21:41:04Z</updated>
     </source>
   </entry>
 
@@ -115,13 +160,13 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-16T21:21:10Z</updated>
+      <updated>2012-07-16T21:41:01Z</updated>
     </source>
   </entry>
 
   <entry xml:lang="en">
     <id>http://asmeurersympy.wordpress.com/?p=1112</id>
-    <link href="https://asmeurersympy.wordpress.com/2012/07/09/emacs-7-months-later/" rel="alternate" type="text/html"/>
+    <link href="http://asmeurersympy.wordpress.com/2012/07/09/emacs-7-months-later/" rel="alternate" type="text/html"/>
     <title>Emacs: 7 months later</title>
     <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">In my final post about my switching to Emacs, a commenter, Scott, asked me, “It has been a while since you started using Emacs. I’m just curious. How is your experience so far now that you have more experience and a more complete configuration?” My reply was getting quite long, so I figured it would [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1112&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" width="1"/></div>
     </summary>
@@ -149,15 +194,15 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <name>Aaron Meurer</name>
     </author>
     <source>
-      <id>https://asmeurersympy.wordpress.com</id>
-      <logo>https://secure.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=https%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
-      <link href="https://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="https://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="https://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="https://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <id>http://asmeurersympy.wordpress.com</id>
+      <logo>http://1.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=http%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
+      <link href="http://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-07-16T21:20:20Z</updated>
+      <updated>2012-07-16T21:40:18Z</updated>
     </source>
   </entry>
 
@@ -201,7 +246,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-16T21:21:13Z</updated>
+      <updated>2012-07-16T21:41:04Z</updated>
     </source>
   </entry>
 
@@ -225,7 +270,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
 <div class="wp-caption alignright" id="attachment_247" style="width: 279px;"><a href="http://scolobb.files.wordpress.com/2012/07/cube1.png"><img alt="" class="size-medium wp-image-247" height="300" src="http://scolobb.files.wordpress.com/2012/07/cube1.png?w=269&amp;h=300" title="The automatic plot of a moderately complex diagram" width="269"/></a><p class="wp-caption-text">The automatic plot of a moderately complex diagram</p></div>
 <p>There is a bit of work left, however.  First of all, notice how the arrow curving from <img alt="A_7" class="latex" src="http://s0.wp.com/latex.php?latex=A_7&amp;bg=000000&amp;fg=b8babb&amp;s=0" title="A_7"/> to <img alt="A_8" class="latex" src="http://s0.wp.com/latex.php?latex=A_8&amp;bg=000000&amp;fg=b8babb&amp;s=0" title="A_8"/> is too close to the objects it passes by.  I plan to solve this by increasing the default amount of curving.  Further, nothing will currently be done if another morphism between these two objects is added, which results in ugly overlaps.  Yet another important problem is positioning of the labels of the morphisms: some of them are too loose in space and it is hard to understand which arrow they belong to.  The label <img alt="f_{10}" class="latex" src="http://s0.wp.com/latex.php?latex=f_%7B10%7D&amp;bg=000000&amp;fg=b8babb&amp;s=0" title="f_{10}"/> is even crossed by the arrow <img alt="f_7" class="latex" src="http://s0.wp.com/latex.php?latex=f_7&amp;bg=000000&amp;fg=b8babb&amp;s=0" title="f_7"/>.  Unfortunately, I don’t expect to solve all of these problems with positioning of morphisms labels, because, in many cases, it would be necessary to know the actual graphical information, which is impossible at the current level of abstraction.</p>
 <p>Thus my immediate plans are to fix the problems I have enumerated to as a complete extent as possible, and to then submit the layout functionality and the actual drawing functionality as two pull requests, to facilitate review.</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/238/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/238/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/scolobb.wordpress.com/238/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/scolobb.wordpress.com/238/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/scolobb.wordpress.com/238/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/scolobb.wordpress.com/238/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/scolobb.wordpress.com/238/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/scolobb.wordpress.com/238/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/scolobb.wordpress.com/238/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/scolobb.wordpress.com/238/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/scolobb.wordpress.com/238/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/scolobb.wordpress.com/238/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/scolobb.wordpress.com/238/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/scolobb.wordpress.com/238/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=238&amp;subd=scolobb&amp;ref=&amp;feed=1" width="1"/></div>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/238/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/238/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=238&amp;subd=scolobb&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
     <updated>2012-07-08T23:03:30Z</updated>
     <category term="SymPy"/>
@@ -248,7 +293,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-16T21:21:04Z</updated>
+      <updated>2012-07-16T21:40:56Z</updated>
     </source>
   </entry>
 
@@ -415,7 +460,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-16T21:21:07Z</updated>
+      <updated>2012-07-16T21:40:59Z</updated>
     </source>
   </entry>
 
@@ -441,7 +486,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
 <p>Tom Bachmann, my mentor, has suggested that I describe the steps of the algorithm in the docs which come with the source code.  I will do this shortly.  I believe it is essential to write such documentation as soon as possible, despite the abundant (hopefully) comments in the code.</p>
 <p>My immediately next task is, however, producing the actual <a href="http://www.tug.org/applications/Xy-pic/">Xy-pic</a> code.  I expect that getting this done at a basic level shouldn’t be hard.  However, drawing longer morphisms and avoiding intersections for as much as possible may prove a rather hard task to achieve.</p>
 <p>Oh, and the almost forgotten conclusion: I now essentially have the core of the automatic diagram plotting functionality, since laying out objects is the most difficult part of the affair.</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/220/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/220/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/scolobb.wordpress.com/220/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/scolobb.wordpress.com/220/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/scolobb.wordpress.com/220/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/scolobb.wordpress.com/220/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/scolobb.wordpress.com/220/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/scolobb.wordpress.com/220/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/scolobb.wordpress.com/220/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/scolobb.wordpress.com/220/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/scolobb.wordpress.com/220/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/scolobb.wordpress.com/220/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/scolobb.wordpress.com/220/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/scolobb.wordpress.com/220/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=220&amp;subd=scolobb&amp;ref=&amp;feed=1" width="1"/></div>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/220/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/220/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=220&amp;subd=scolobb&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
     <updated>2012-07-02T20:42:12Z</updated>
     <category term="SymPy"/>
@@ -462,7 +507,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-16T21:21:04Z</updated>
+      <updated>2012-07-16T21:40:55Z</updated>
     </source>
   </entry>
 
@@ -502,7 +547,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-16T21:21:10Z</updated>
+      <updated>2012-07-16T21:41:01Z</updated>
     </source>
   </entry>
 
@@ -545,7 +590,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-16T21:21:13Z</updated>
+      <updated>2012-07-16T21:41:04Z</updated>
     </source>
   </entry>
 
@@ -618,7 +663,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-16T21:21:07Z</updated>
+      <updated>2012-07-16T21:40:58Z</updated>
     </source>
   </entry>
 
@@ -895,7 +940,7 @@ form_field(vector_field)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-16T21:21:13Z</updated>
+      <updated>2012-07-16T21:41:04Z</updated>
     </source>
   </entry>
 
@@ -1018,7 +1063,7 @@ Out[305]:<br/>
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-16T21:21:09Z</updated>
+      <updated>2012-07-16T21:41:01Z</updated>
     </source>
   </entry>
 
@@ -1050,7 +1095,7 @@ Out[305]:<br/>
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-16T21:21:07Z</updated>
+      <updated>2012-07-16T21:40:58Z</updated>
     </source>
   </entry>
 
@@ -1318,7 +1363,7 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
 <p>The second stage of the diagram drawing process is actually typesetting the diagram matrix using Xy-pic.  This part should be pretty straightforward, since it is basically about putting the matrix that has resulted from the first stage into an Xy-pic matrix.  I plan to have the second stage of drawing implemented in the class <tt>DiagramGridDrawer</tt>.  This class will contain the method <tt>draw_outline</tt>, which will return an Xy-pic representation of a <tt>DiagramGrid</tt>.  The drawer class will have a dictionary of morphism name formatters, which will associate a property to a function of one string argument.  For example, the property “exists” may be associated to a function which prepends its argument with the mathematical symbol “exists”.  The drawer class will also have a dictionary of morphism styles, which will map string properties to arrow styles.  I have also considered taking advantage of the fact that morphism properties are not enforced to be strings, and putting some additional formatting information into those properties.  I am not yet sure that it is necessary, though, so I don’t include this into the plan.</p>
 <p>Now, there are some changes to the timeline in the proposal, which are caused in part by the fact that I have spent so much time on bringing my first pull request up to scratch, and in part by the fact that I now have a slightly different vision on how to implement the drawing.  Thus I plan to spend the coming week, June 18 – June 24, on implementing <tt>DiagramGrid</tt>.  Then, in the next week, June 25 – July 1, I plan to implement <tt>DiagramGridDrawer</tt> and extensively test both classes.  The week July 2 – July 8 I reserve for getting my changes merged.  Not that I expect to spend a whole week on this; but I’d rather allocate slightly more time, with some reserve, than make promises which I may fail to fulfill.</p>
 <p>I would like to explicitly remark the fact that the changes to the timeline do not delay the moment when I plan to have the drawing functionality ready.  Therefore I’m still not too far astray from my planned timing <img alt=":-)" class="wp-smiley" src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif"/> </p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/200/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/200/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/scolobb.wordpress.com/200/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/scolobb.wordpress.com/200/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/scolobb.wordpress.com/200/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/scolobb.wordpress.com/200/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/scolobb.wordpress.com/200/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/scolobb.wordpress.com/200/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/scolobb.wordpress.com/200/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/scolobb.wordpress.com/200/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/scolobb.wordpress.com/200/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/scolobb.wordpress.com/200/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/scolobb.wordpress.com/200/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/scolobb.wordpress.com/200/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=200&amp;subd=scolobb&amp;ref=&amp;feed=1" width="1"/></div>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/200/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/200/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=200&amp;subd=scolobb&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
     <updated>2012-06-16T22:34:34Z</updated>
     <category term="SymPy"/>
@@ -1339,7 +1384,7 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-16T21:21:03Z</updated>
+      <updated>2012-07-16T21:40:55Z</updated>
     </source>
   </entry>
 
@@ -1369,7 +1414,7 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-16T21:21:07Z</updated>
+      <updated>2012-07-16T21:40:58Z</updated>
     </source>
   </entry>
 
@@ -1385,7 +1430,7 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
 <p>Besides this change, I’ve done numerous corrections and enhancements, which have hopefully brought my code up to scratch.  I have received the relieving “almost good to go” comment from my mentor; sounds almost unbelievable <img alt=":-)" class="wp-smiley" src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif"/> </p>
 <p>The downside of this is that I have spent on grooming my code <em>considerably</em> more time than I initially expected.  This means that I have to hurry up with the next sections of my timeline.</p>
 <p>This week I have also found something which will hopefully make implementing the diagram drawing functionality more piece-of-cakely: <a href="http://www.tug.org/applications/Xy-pic/">Xy-pic</a>.  My next bit of effort will therefore be directed towards mastering this package and adapting my initial plan to this (rather radical) change of strategy.  This will be reflected in the next blog post, which is due to come soon.  Very soon <img alt=";-)" class="wp-smiley" src="http://s1.wp.com/wp-includes/images/smilies/icon_wink.gif"/> </p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/186/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/186/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/scolobb.wordpress.com/186/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/scolobb.wordpress.com/186/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/scolobb.wordpress.com/186/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/scolobb.wordpress.com/186/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/scolobb.wordpress.com/186/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/scolobb.wordpress.com/186/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/scolobb.wordpress.com/186/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/scolobb.wordpress.com/186/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/scolobb.wordpress.com/186/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/scolobb.wordpress.com/186/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/scolobb.wordpress.com/186/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/scolobb.wordpress.com/186/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=186&amp;subd=scolobb&amp;ref=&amp;feed=1" width="1"/></div>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/186/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/186/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=186&amp;subd=scolobb&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
     <updated>2012-06-15T22:55:50Z</updated>
     <category term="SymPy"/>
@@ -1404,13 +1449,13 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-16T21:21:04Z</updated>
+      <updated>2012-07-16T21:40:55Z</updated>
     </source>
   </entry>
 
   <entry xml:lang="en">
     <id>https://asmeurersympy.wordpress.com/?p=1109</id>
-    <link href="https://asmeurersympy.wordpress.com/2012/06/14/how-to-install-the-development-version-of-ipython-qtconsole-and-notebook-in-ubuntu/" rel="alternate" type="text/html"/>
+    <link href="http://asmeurersympy.wordpress.com/2012/06/14/how-to-install-the-development-version-of-ipython-qtconsole-and-notebook-in-ubuntu/" rel="alternate" type="text/html"/>
     <title>How to install the development version of IPython Qtconsole and Notebook in Ubuntu</title>
     <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Both the awesome IPython notebook and Qtconsole are in the Ubuntu repositories, so if you just want to use the stable released versions, you can just do and be on your way. But the git development version has a lot of cool new features, and you may not want to wait for 0.13 to be [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1109&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" width="1"/></div>
     </summary>
@@ -1439,15 +1484,15 @@ sudo python setup.py develop
       <name>Aaron Meurer</name>
     </author>
     <source>
-      <id>https://asmeurersympy.wordpress.com</id>
-      <logo>https://secure.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=https%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
-      <link href="https://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="https://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="https://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="https://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <id>http://asmeurersympy.wordpress.com</id>
+      <logo>http://1.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=http%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
+      <link href="http://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-07-16T21:20:20Z</updated>
+      <updated>2012-07-16T21:40:18Z</updated>
     </source>
   </entry>
 
@@ -1509,7 +1554,7 @@ sudo python setup.py develop
 <p>And finally, as I promised, I’ll tell how to state that <img alt="f_1:A\rightarrow B" class="latex" src="http://s0.wp.com/latex.php?latex=f_1%3AA%5Crightarrow+B&amp;bg=000000&amp;fg=b8babb&amp;s=0" title="f_1:A\rightarrow B"/> and <img alt="f_2:A\rightarrow B" class="latex" src="http://s0.wp.com/latex.php?latex=f_2%3AA%5Crightarrow+B&amp;bg=000000&amp;fg=b8babb&amp;s=0" title="f_2:A\rightarrow B"/> are equal, despite different names.  Well, just create a diagram with these two morphisms and assert it as commutative <img alt=":-)" class="wp-smiley" src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif"/> </p>
 <p>And yet even more finally, I’d like to tell about a bit of programming experience I have found exhilarating this week.   I’ve learnt a very cool lesson: write your tests before the implementation whenever possible!  There’s no better formal way to write a specification than to write tests.  I was totally amazed at how this practice streamlined my workflow!</p>
 <p>Image source: <a href="http://en.wikipedia.org/wiki/File:Commutative_square.svg">http://en.wikipedia.org/wiki/File:Commutative_square.svg</a></p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/119/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/119/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/scolobb.wordpress.com/119/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/scolobb.wordpress.com/119/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/scolobb.wordpress.com/119/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/scolobb.wordpress.com/119/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/scolobb.wordpress.com/119/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/scolobb.wordpress.com/119/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/scolobb.wordpress.com/119/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/scolobb.wordpress.com/119/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/scolobb.wordpress.com/119/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/scolobb.wordpress.com/119/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/scolobb.wordpress.com/119/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/scolobb.wordpress.com/119/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=119&amp;subd=scolobb&amp;ref=&amp;feed=1" width="1"/></div>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/119/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/119/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=119&amp;subd=scolobb&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
     <updated>2012-06-10T21:09:58Z</updated>
     <category term="SymPy"/>
@@ -1531,7 +1576,7 @@ sudo python setup.py develop
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-16T21:21:04Z</updated>
+      <updated>2012-07-16T21:40:56Z</updated>
     </source>
   </entry>
 
@@ -1568,7 +1613,7 @@ sudo python setup.py develop
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-16T21:21:12Z</updated>
+      <updated>2012-07-16T21:41:04Z</updated>
     </source>
   </entry>
 
@@ -1610,7 +1655,7 @@ sudo python setup.py develop
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-16T21:21:10Z</updated>
+      <updated>2012-07-16T21:41:01Z</updated>
     </source>
   </entry>
 
@@ -1637,7 +1682,7 @@ sudo python setup.py develop
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-16T21:21:07Z</updated>
+      <updated>2012-07-16T21:40:59Z</updated>
     </source>
   </entry>
 
@@ -1809,7 +1854,7 @@ sudo python setup.py develop
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-16T21:21:09Z</updated>
+      <updated>2012-07-16T21:41:01Z</updated>
     </source>
   </entry>
 
@@ -1902,7 +1947,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-16T21:21:12Z</updated>
+      <updated>2012-07-16T21:41:04Z</updated>
     </source>
   </entry>
 
@@ -1929,7 +1974,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-16T21:21:07Z</updated>
+      <updated>2012-07-16T21:40:58Z</updated>
     </source>
   </entry>
 
@@ -1957,7 +2002,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
 <p>On the overall, I feel that I haven’t yet fully adapted to my current “job”, but I expect to free myself from this feeling over the next couple of days <img alt=":-)" class="wp-smiley" src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif"/> </p>
 <p><strong>UPDATED </strong>To mention a better pretty-printed version of a morphism (see first comment).</p>
 <p><strong>UPDATED</strong> To included a more correct way to represent morphism composition as string (see first reply to first comment).</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/106/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/106/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/scolobb.wordpress.com/106/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/scolobb.wordpress.com/106/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/scolobb.wordpress.com/106/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/scolobb.wordpress.com/106/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/scolobb.wordpress.com/106/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/scolobb.wordpress.com/106/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/scolobb.wordpress.com/106/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/scolobb.wordpress.com/106/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/scolobb.wordpress.com/106/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/scolobb.wordpress.com/106/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/scolobb.wordpress.com/106/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/scolobb.wordpress.com/106/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=106&amp;subd=scolobb&amp;ref=&amp;feed=1" width="1"/></div>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/106/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/106/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=106&amp;subd=scolobb&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
     <updated>2012-06-01T21:41:39Z</updated>
     <category term="SymPy"/>
@@ -1978,7 +2023,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-16T21:21:03Z</updated>
+      <updated>2012-07-16T21:40:55Z</updated>
     </source>
   </entry>
 
@@ -2187,7 +2232,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-16T21:21:10Z</updated>
+      <updated>2012-07-16T21:41:01Z</updated>
     </source>
   </entry>
 
@@ -2216,7 +2261,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-16T21:21:07Z</updated>
+      <updated>2012-07-16T21:40:58Z</updated>
     </source>
   </entry>
 
@@ -2271,7 +2316,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-16T21:21:13Z</updated>
+      <updated>2012-07-16T21:41:04Z</updated>
     </source>
   </entry>
 
@@ -2283,7 +2328,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
     </summary>
     <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>I seem to be finally able to afford more time to work for SymPy every day, so I am hastily working through a simulacrum of a community bonding period.  The official coding period has already begun, but I have afforded for a week of delay with my own start in the <a href="https://github.com/sympy/sympy/wiki/GSoC-2012-Application-Sergiu-Ivanov:-Category-Theory-Module">proposal</a>.  I am currently working on fixing a couple important issues with <em>re, im</em>, and their interaction with <em>as_real_imag()</em> functions (Pull Request <a href="https://github.com/sympy/sympy/pull/1304">1304</a>).</p>
 <p>The good news pertaining to my own project is that we seem to have settled on a name for the module which I am going to add: c<em>ategories</em>.  I am very enthusiastic about starting my work on it; this event is going to happen within a day or two, and that’s very cool <img alt=":-)" class="wp-smiley" src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif"/> </p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/26/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/26/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/scolobb.wordpress.com/26/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/scolobb.wordpress.com/26/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/scolobb.wordpress.com/26/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/scolobb.wordpress.com/26/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/scolobb.wordpress.com/26/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/scolobb.wordpress.com/26/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/scolobb.wordpress.com/26/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/scolobb.wordpress.com/26/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/scolobb.wordpress.com/26/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/scolobb.wordpress.com/26/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/scolobb.wordpress.com/26/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/scolobb.wordpress.com/26/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=26&amp;subd=scolobb&amp;ref=&amp;feed=1" width="1"/></div>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/26/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/26/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=26&amp;subd=scolobb&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
     <updated>2012-05-24T20:24:47Z</updated>
     <category term="SymPy"/>
@@ -2299,7 +2344,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-16T21:21:03Z</updated>
+      <updated>2012-07-16T21:40:55Z</updated>
     </source>
   </entry>
 
@@ -2365,7 +2410,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-16T21:21:12Z</updated>
+      <updated>2012-07-16T21:41:04Z</updated>
     </source>
   </entry>
 
@@ -2393,7 +2438,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-16T21:21:10Z</updated>
+      <updated>2012-07-16T21:41:01Z</updated>
     </source>
   </entry>
 
@@ -2470,7 +2515,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-16T21:21:07Z</updated>
+      <updated>2012-07-16T21:40:58Z</updated>
     </source>
   </entry>
 
@@ -2553,7 +2598,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-16T21:21:10Z</updated>
+      <updated>2012-07-16T21:41:01Z</updated>
     </source>
   </entry>
 
@@ -2600,13 +2645,13 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
     </summary>
     <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>So, I have been accepted as a <a href="http://www.google-melange.com/gsoc/homepage/google/gsoc2012" target="_blank">Google Summer of Code</a> student to <a href="http://sympy.org/en/index.html" target="_blank">SymPy</a>.  The coolest part is that I have been accepted with a very experimental project concerned with category theory (the proposal is <a href="https://github.com/sympy/sympy/wiki/GSoC-2012-Application-Sergiu-Ivanov:-Category-Theory-Module" target="_blank">here</a>), for which I am very thankfull to all mentors of SymPy and, in particular, to the project leader <a href="http://asmeurersympy.wordpress.com/" target="_blank">Aaron Meurer</a>.</p>
 <p>I am still busy with my university affairs now, so I’ll only be doing minor fixes while my the semester hasn’t finished at the end of May.  However, I plan to become more active in about a week, when a lot of deadlines which I have now will have expired.</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/21/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/21/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/scolobb.wordpress.com/21/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/scolobb.wordpress.com/21/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/scolobb.wordpress.com/21/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/scolobb.wordpress.com/21/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/scolobb.wordpress.com/21/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/scolobb.wordpress.com/21/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/scolobb.wordpress.com/21/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/scolobb.wordpress.com/21/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/scolobb.wordpress.com/21/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/scolobb.wordpress.com/21/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/scolobb.wordpress.com/21/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/scolobb.wordpress.com/21/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=21&amp;subd=scolobb&amp;ref=&amp;feed=1" width="1"/></div>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/21/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/21/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=21&amp;subd=scolobb&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
     <updated>2012-04-27T18:30:08Z</updated>
     <category term="SymPy"/>
-    <category term="category theory"/>
     <category term="gsoc"/>
     <category term="sympy"/>
+    <category term="category theory"/>
     <author>
       <name>scolobb</name>
     </author>
@@ -2619,7 +2664,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-16T21:21:03Z</updated>
+      <updated>2012-07-16T21:40:55Z</updated>
     </source>
   </entry>
 
@@ -2631,7 +2676,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
     </summary>
     <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Welcome to <a href="https://wordpress.com/">WordPress.com</a>! This is your very first post. Click the Edit link to modify or delete it, or <a href="http://scolobb.wordpress.com/wp-admin/post-new.php" title="Direct link to Add New in the Admin Dashboard">start a new post</a>. If you like, use this post to tell readers why you started this blog and what you plan to do with it.</p>
 <p>Happy blogging!</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/1/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/1/"/></a> <a href="http://feeds.wordpress.com/1.0/godelicious/scolobb.wordpress.com/1/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/delicious/scolobb.wordpress.com/1/"/></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/scolobb.wordpress.com/1/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/facebook/scolobb.wordpress.com/1/"/></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/scolobb.wordpress.com/1/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/twitter/scolobb.wordpress.com/1/"/></a> <a href="http://feeds.wordpress.com/1.0/gostumble/scolobb.wordpress.com/1/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/stumble/scolobb.wordpress.com/1/"/></a> <a href="http://feeds.wordpress.com/1.0/godigg/scolobb.wordpress.com/1/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/digg/scolobb.wordpress.com/1/"/></a> <a href="http://feeds.wordpress.com/1.0/goreddit/scolobb.wordpress.com/1/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/reddit/scolobb.wordpress.com/1/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=1&amp;subd=scolobb&amp;ref=&amp;feed=1" width="1"/></div>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/1/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/1/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=1&amp;subd=scolobb&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
     <updated>2012-04-27T17:47:24Z</updated>
     <category term="Uncategorized"/>
@@ -2647,7 +2692,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-16T21:21:04Z</updated>
+      <updated>2012-07-16T21:40:55Z</updated>
     </source>
   </entry>
 
@@ -2674,7 +2719,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-16T21:21:13Z</updated>
+      <updated>2012-07-16T21:41:04Z</updated>
     </source>
   </entry>
 
@@ -2766,34 +2811,6 @@ Devanla, Brian Granger (co-mentor Sean Vig)<br/>
       <link href="http://wdjoyner.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>Yet Another Mathblog » sympy</title>
       <updated>2012-07-06T16:00:41Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://rhoforsympy.wordpress.com/?p=1</id>
-    <link href="http://rhoforsympy.wordpress.com/2012/04/05/gsocintro/" rel="alternate" type="text/html"/>
-    <title>Hello GSOC Reviewers!</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Hello there!  I plan to use this blog to communicate with the Sympy community regarding the progress I make on the project. I plan to update this blog atleast on a weekly basis, and sometime more frequently if I find something interesting and important to share!<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;blog=34650270&amp;post=1&amp;subd=rhoforsympy&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Hello there!  I plan to use this blog to communicate with the Sympy community regarding the progress I make on the project. I plan to update this blog atleast on a weekly basis, and sometime more frequently if I find something interesting and important to share!</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/rhoforsympy.wordpress.com/1/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/rhoforsympy.wordpress.com/1/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;blog=34650270&amp;post=1&amp;subd=rhoforsympy&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2012-04-05T19:28:27Z</updated>
-    <category term="GSoc"/>
-    <category term="gsoc"/>
-    <author>
-      <name>grdvnl</name>
-    </author>
-    <source>
-      <id>http://rhoforsympy.wordpress.com</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://rhoforsympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://rhoforsympy.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://rhoforsympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>..where we discuss density operators wrt SymPy</subtitle>
-      <title>rhoforsympy</title>
-      <updated>2012-07-16T21:21:12Z</updated>
     </source>
   </entry>
 </feed>
