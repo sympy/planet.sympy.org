@@ -704,31 +704,40 @@ form_field(vector_field)
 &lt;li&gt;Secondly, my next pull request, mainly containing work from weeks 2 and 5. After some moderate rebasing over the fixes from my first pull request, it is available &lt;a href=&quot;https://github.com/sympy/sympy/pull/1377&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. Apart from implementations of &lt;a href=&quot;http://amakelov.wordpress.com/2012/06/02/google-summer-of-code-2012-week-2/&quot; target=&quot;_blank&quot;&gt;what I did in week 2&lt;/a&gt;, it addresses the issue of testing randomized algorithms ( which is still being discussed &lt;a href=&quot;https://groups.google.com/forum/?fromgroups#!topic/sympy/2el1T0ZY-Z4&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt; ), and splits the generators for the named groups (symmetric, dihedral,…) in a separate file (which is probably going to contain more and more constructors for some well-known groups as time goes by). The PR looks longer than it is ( : ) read: any help in the review process will be appreciated), mainly because some 250 lines were copied to a new file in order to accommodate the named groups module. I hope that this time I did a better job at splitting the different parts of the PR into several commits.&lt;/li&gt;
 &lt;li&gt;Finally, I started work on algorithms for backtrack searches in groups. These include stuff like printing all group elements (sort of boring, but you have to start somewhere), searching for subgroups of elements satisfying a given property, finding normalizers and centralizers,  intersection of subgroups,… In general, backtrack searches tend to be slow since all the elements in the group have to be visited, but there are ways of skipping large numbers of them. Also, for some problems in computational group theory, backtrack searches are the best we have today. They are described in [1], 4.6., and I’m currently following the exposition offered there. After two days of debugging, I finally got the function PRINTELEMENTS described in 4.6.1 of [1] to work; it turned out that the current implementation of the Schreier-Sims algorithm sets the field _coset_repr of an object of class PermutationGroup in sympy.combinatorics.perm_groups.py in a way that was unexpected to me. This little digression might help anyone else trying to understand the perm_groups file better. So for example consider the following:&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;code&gt;In [297]: S = SymmetricGroup(4)&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;In [298]: S.schreier_sims()&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;In [299]: S._coset_repr&lt;/code&gt;&lt;br /&gt;
-&lt;code&gt;Out[299]:&lt;/code&gt;&lt;br /&gt;
-&lt;code&gt;[[[0, 1, 2, 3], [1, 2, 3, 0], [2, 3, 0, 1], [3, 0, 1, 2]],&lt;/code&gt;&lt;br /&gt;
-&lt;code&gt;[[0, 1, 2, 3], [0, 2, 1, 3], [0, 3, 1, 2]],&lt;/code&gt;&lt;br /&gt;
-&lt;code&gt;[[0, 1, 2, 3], [0, 1, 3, 2]]]&lt;/code&gt;&lt;br /&gt;
-&lt;code&gt;&lt;br /&gt;
-In [300]: S._base&lt;/code&gt;&lt;br /&gt;
-&lt;code&gt;Out[300]: [0, 1, 2]&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;In [297]: S = SymmetricGroup(4)
+
+In [298]: S.schreier_sims()
+
+In [299]: S._coset_repr
+Out[299]:
+[[[0, 1, 2, 3], [1, 2, 3, 0], [2, 3, 0, 1], [3, 0, 1, 2]],
+[[0, 1, 2, 3], [0, 2, 1, 3], [0, 3, 1, 2]],
+[[0, 1, 2, 3], [0, 1, 3, 2]]]
+ 
+ In [300]: S._base
+Out[300]: [0, 1, 2]
+
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
 &lt;p&gt;From this and similar examples I concluded that the i-th component of _coset_repr is a transversal of the i-th basic orbit of the group S and tried to use this in PRINTELEMENTS. However, consired the following example:&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;In [302]: G = PermutationGroup([Permutation([[0, 1, 2, 3], [4], [5]]), Permutation([[1, 3], [0], [2], [4], [5]]), Permutation([[0], [1], [2], [3], [4, 5]])])&lt;/code&gt;&lt;/p&gt;&lt;code&gt;
-&lt;p&gt;In [303]: G.schreier_sims()&lt;/p&gt;
-&lt;p&gt;In [304]: G._base&lt;br /&gt;
-Out[304]: [0, 1, 4]&lt;/p&gt;
-&lt;/code&gt;&lt;p&gt;&lt;code&gt;In [305]: G._coset_repr&lt;br /&gt;
-Out[305]:&lt;br /&gt;
-[[[0, 1, 2, 3, 4, 5],&lt;br /&gt;
-[1, 2, 3, 0, 4, 5],&lt;br /&gt;
-[2, 3, 0, 1, 4, 5],&lt;br /&gt;
-[3, 0, 1, 2, 4, 5]],&lt;br /&gt;
-[[0, 1, 2, 3, 4, 5], [0, 3, 2, 1, 4, 5]],&lt;br /&gt;
-[[0, 1, 2, 3, 4, 5]],&lt;br /&gt;
-[[0, 1, 2, 3, 4, 5]],&lt;br /&gt;
-[[0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 5, 4]]]&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;In [302]: G = PermutationGroup([Permutation([[0, 1, 2, 3], [4], [5]]), Permutation([[1, 3], [0], [2], [4], [5]]), Permutation([[0], [1], [2], [3], [4, 5]])])
+
+In [303]: G.schreier_sims()
+
+In [304]: G._base
+ Out[304]: [0, 1, 4]
+
+In [305]: G._coset_repr
+ Out[305]:
+ [[[0, 1, 2, 3, 4, 5],
+ [1, 2, 3, 0, 4, 5],
+ [2, 3, 0, 1, 4, 5],
+ [3, 0, 1, 2, 4, 5]],
+ [[0, 1, 2, 3, 4, 5], [0, 3, 2, 1, 4, 5]],
+ [[0, 1, 2, 3, 4, 5]],
+ [[0, 1, 2, 3, 4, 5]],
+ [[0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 5, 4]]]
+
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
 &lt;p&gt;Here, the first two components of _coset_repr are as I expected, but the 3rd and 4th are something I didn’t expect to be there (I expected to get the 5th component instead of the 3rd, and no more components). Hence at present the behaviour of _coset_repr is not too clear to me. The current solution is to use the randomized version of the Schreier-Sims algorithm to get a base and a strong generating set. Another option would be to use the generators from the attribute _stabilizers_gens, but I haven’t tried that yet. Anyway, PRINTELEMENTS works now (edit: there are many other algorithms present for printing all the elements of a group, but this one is significant for the implementation of backtrack searches), and the order in which the elements of the group are visited (lexicographically with respect to the image of the base, in an ordering of &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5COmega+%3D+%5C%7B0%2C+1%2C%5Cldots%2C+n-1%5C%7D&amp;amp;bg=fafad3&amp;amp;fg=6f5e4e&amp;amp;s=0&quot; alt=&quot;\Omega = \{0, 1,\ldots, n-1\}&quot; class=&quot;latex&quot; title=&quot;\Omega = \{0, 1,\ldots, n-1\}&quot; /&gt; in which base points come first) is used in most of the following backtrack searches, so a large part of this algorithm will be reused in subsequent algorithms ( I hope : ) ). My description of the situation assumed some knowledge of the theory behind the Schreier-Sims algorithm, so if something is not quite clear feel free to ask in the comments!&lt;/p&gt;
 &lt;p&gt;That’s it for now. Next week, I’ll continue with backtrack searches, and hopefully will implement the subgroup intersection routine (it seems formidable right now)… and put some more effort into getting the second pull request merged – I’ve got a lot to catch up with in terms of getting my code in sympy : ) .&lt;/p&gt;
 &lt;p&gt;[1] Derek F. Holt, Bettina Eick, Bettina, Eamonn A. O’Brien, “Handbook of computational group theory”, Discrete Mathematics and its Applications (Boca Raton). Chapman &amp;amp; Hall/CRC, Boca Raton, FL, 2005. ISBN 1-58488-372-3&lt;/p&gt;
