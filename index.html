@@ -23,6 +23,55 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>July 21, 2012</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://scolobb.wordpress.com" title="Coaquarium">Sergiu Ivanov</a></h3>
+
+
+<div class="entrygroup" id="http://scolobb.wordpress.com/?p=285">
+<h4 lang="en"><a href="http://scolobb.wordpress.com/2012/07/22/the-polish-and-further-planning/">The Polish and Further Planning</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p>I am currently working on getting my two pull requests into <tt>master</tt>.  Right now, the efforts have been concentrated on the first pull request, concerned with diagram layout.  Among the minor fixes, there came a number of more important changes, which I am going to shortly describe in this post, before I get to my further plans.</p>
+<p>Among the changes worth mentioning are some updates to the choice of internal data structures of <tt>DiagramGrid</tt>.  Previously, <tt>FiniteSet</tt> was used to store any sets.  Following my mentor’s suggestion, though, I have refactored the code to only use <tt>FiniteSet</tt> when something needs to be stored in <tt>Basic.args</tt>.  On all other occasions, the built-ins <tt>set</tt> and <tt>frozenset</tt> are used, depending on whether a mutable set or an immutable hashable container is needed.</p>
+<p>The other change bearing no fundamental importance but still worth mentioning is the transition to storing undirected edges as two-element <tt>frozenset</tt>‘s.  Previously, edges were stored as two-element tuples which caused a bit of hassle in what concerned recognizing the equality of <tt>(A, B)</tt> and <tt>(B, A)</tt>.  The choice of <tt>frozenset</tt> has brought in more elegant code.  In terms of performance, I do not think that this transition has had a really important impact, since I didn’t really keep performance in mind when writing other parts of the code anyway.  (I am mainly referring to the construction of the skeleton of the diagram and splitting it into triangles.)will l</p>
+<p>Among more significant improvements, I will list the support for disconnected diagrams, one-object diagrams, and, the pinnacle, graceful handling of the situations when growing a pseudopod fails.  Before you start thinking abut who the hell would need disconnected or one-object diagrams, I will remind/introduce the process and the necessity of pseudopods in diagram layout (Hey, that did sound like rubbish, did it <img src="http://s0.wp.com/wp-includes/images/smilies/icon_biggrin.gif" alt=":-D" class="wp-smiley" />  )</p>
+<p>The layout algorithm essentially considers the slightly augmented underlying undirected graph of the diagram and splits it into as many triangles as it can.  Then it tries to sort those triangles according to some rather heuristic (i.e., arbitrary) priority metric, picks them one by one, in this order, and tries to place them on the plane, edge to edge.  The strategy being pure greedy, at some point in time it may happen that there are still triangles, but there are no free edges on the plane to which they could be attached.  In this situation, the algorithm attempts to attach one of the remaining triangles by a vertex, that is, it tries to find such a vertex already in the plane, which also belongs to one of the remaining triangles.  Finally, the algorithm adds an edge of the found triangle to the plane and restarts the process of picking triangles and attaching them by edges.  This new added edge is referred to as <em>pseudopod</em>.</p>
+<p>Now, what happens when a pseudopod cannot be grown?  Initially, I was under the impression that it is rather hard to construct such a diagram.  However, it turned out to be rather easy.  Consider the set of objects <img src="http://s0.wp.com/latex.php?latex=%5C%7BA%5C%7D%5Ccup%5C%7BA_i%5Cmid+1%5Cleq+i%5Cleq+10%5C%7D&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="\{A\}\cup\{A_i\mid 1\leq i\leq 10\}" class="latex" title="\{A\}\cup\{A_i\mid 1\leq i\leq 10\}" /> and the set of morphisms <img src="http://s0.wp.com/latex.php?latex=%5C%7Bf_i%3AA%5Crightarrow+A_i%5Cmid+1%5Cleq+i%5Cleq+10%5C%7D&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="\{f_i:A\rightarrow A_i\mid 1\leq i\leq 10\}" class="latex" title="\{f_i:A\rightarrow A_i\mid 1\leq i\leq 10\}" />.  <tt>DiagramGrid</tt> will lay out the first 8 of the <img src="http://s0.wp.com/latex.php?latex=A_i&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="A_i" class="latex" title="A_i" /> quite all right: as one would expect, <img src="http://s0.wp.com/latex.php?latex=A&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="A" class="latex" title="A" /> gets to be the center of a 3×3 square, whose borders consist of the 8 <img src="http://s0.wp.com/latex.php?latex=A_i&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="A_i" class="latex" title="A_i" />‘s.  However, the last two <img src="http://s0.wp.com/latex.php?latex=A_i&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="A_i" class="latex" title="A_i" />‘s condition the situation when there are triangles left, but no pseudopods can be grown.</p>
+<p>In an attempt to address this problem, I have considered various possible strategies, and have chosen the following one.  When no pseudopod can be grown, take the set of all objects that have not yet been placed and construct from them a subdiagram of the diagram to plot.  Lay that diagram out recursively and then attach the resulting grid to the initial diagram.</p>
+<p>One important remark is due here.  This strategy is a “oh, gosh, things have gone very bad” strategy, in that is is applied only when all other approaches have failed and in that it does not really guarantee the nice look of the final diagram.  However, it does provide a graceful handling of the specific situations and I do believe that the output is still going to look acceptable.</p>
+<p>While the idea itself is rather simple, it is necessary to pay attention to what subtleties it actually brings around.  First of all, the subdiagram constructed from the remaining objects is <em>not</em> necessarily connected.  That’s easy to see even in the example I have shown in the previous paragraphs.  Furthermore, the constructed diagrams do not necessarily have non-loop morphisms!  (By abuse of graph theoretic terminology, I call a morphism with the same domain and codomain a <em>loop</em> morphism).  That is, addressing pseudopod extension failures brings about the necessity to handle disconnected diagrams and one-object diagrams.</p>
+<p>There is not much to say about the support of disconnected diagrams and one-object diagrams, but that I have implemented support for these two cases as well.  The latter case is handled trivially, while the former case employs standard depth-first search of the underlying undirected graph and separate layout of the connected components.  The components are currently dumbly positioned side by side, in a line, and a comment in the source code evokes the possibility of using groups to get a different layout.  I’m open to suggestions of further improvements in this area, though.</p>
+<p>It’s time to speak about my plans.  I have spent more than initially expected on handling pseudopod growth failures.  This means that there are still some suggestions by my mentor waiting to get fixed (I haven’t read them yet; hopefully, nothing fundamental there <img src="http://s0.wp.com/wp-includes/images/smilies/icon_biggrin.gif" alt=":-D" class="wp-smiley" />  ). Further, I absolutely must fix the problem with the sort key of <tt>FiniteSet</tt>.  I have been talking about fixing it for about two weeks already, and it doesn’t seem to require that much effort.  It is essential that this fix be done, though, since, without it, tests in the <tt>categories</tt> module fail half of the time.  Finally, I will fix how morphisms are currently pretty printed by removing the use of wide Unicode symbols.  These activities will not hopefully take me more than 2 days, at the very most.</p>
+<p>Next comes the other exciting part of my project, deciding the commutativity of diagrams.  I have provided the general idea of the algorithm in my <a href="https://github.com/sympy/sympy/wiki/GSoC-2012-Application-Sergiu-Ivanov:-Category-Theory-Module">proposal</a>.  Given that I am currently about two weeks behind the schedule in my proposal, and that I will still need to spend time on getting the code in the pull requests up to snuff, I’m really feeling very wary about planning my own time.  However, since deciding the algorithm for deciding the commutativity of diagrams I describe in the proposals <em>seems</em> to be rather straightforward, I think I will have at least a basic working version of it two weeks from now, that is, by August 5.  Allowing another week as buffer time and yet another week for merging the corresponding pull request, I do expect to be in time for the firm pencils-down date.</p>
+<p>One last remark to make is that after the official end of the GSoC timeframe, I will still have at least one week of rather spare time (I actually expect to have about 2.5 to 3 weeks of time), which means that I will bring the code to a sufficiently polished state despite any possible lags.</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/285/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/285/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=285&amp;subd=scolobb&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://scolobb.wordpress.com/2012/07/22/the-polish-and-further-planning/">by scolobb at July 21, 2012 11:21 PM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>July 18, 2012</h2>
 
 <div class="channelgroup">
@@ -3133,69 +3182,6 @@ Google has announced the results for Google Summer of Code.  I am proud to annou
 </div>
 
 
-
-</div>
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://fseoane.net/blog" title="I say things">Fabian Pedregosa</a></h3>
-
-
-<div class="entrygroup" id="http://fseoane.net/blog/?p=1164">
-<h4 lang="en"><a href="http://fseoane.net/blog/2012/line-by-line-report-of-memory-usage/">line-by-line memory usage of a Python program</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>My newest project is a Python library for monitoring memory consumption of arbitrary process, and one of its most useful features is the line-by-line analysis of memory usage for Python code.</p>
-<p>I wrote a basic prototype six months ago after being surprised by the lack of related tools. I wanted to  <a href="http://fseoane.net/blog/2011/qr_multiply-function-in-scipy-linalg/">plot memory consumption</a> of a couple of Python functions but did not find a python module to do the job. I came to the conclusion that there is no standard way to get the memory usage of the Python interpreter from within Python, so I resorted to reading for from <code>/proc/$PID/statm</code>. From there on I realized that one the fetching of memory is done, making a line-by-line report wouldn’t be hard. </p>
-<p>Back to today. I’ve been using the line-by-line memory monitoring to diagnose poor memory management (hidden temporaries, unused allocation, etc.) for some time. It seems to work on two different computers, so full of confidence as I am, I’ll write a blog post about it …</p>
-<h2>How to use it?</h2>
-<p>The easiest way to get it is to install from the Python Package Index:</p>
-<div style="overflow: auto; white-space: nowrap; width: 435px;" class="codecolorer-container bash default"><div style="" class="bash codecolorer">    $ easy_install <span style="color: #660033;">-U</span> memory_profiler <span style="color: #666666; font-style: italic;"># pip install -U memory_profiler</span></div></div>
-<p>but other options include fetching the latests from <a href="https://github.com/fabianp/memory_profiler">github</a> or dropping it on your current working directory or somewhere else on your PYTHONPATH since it consist of a single file.</p>
-<p>Then next step is to write some python code to profile. It can be just about any function, but for the purpose of this blog post I’ll create a function my_func() with mostly memory allocations and save it to a file named example.py:</p>
-<div style="overflow: auto; white-space: nowrap; width: 435px;" class="codecolorer-container python default"><div style="" class="python codecolorer"><span style="color: #ff7700; font-weight: bold;">import</span> numpy <span style="color: #ff7700; font-weight: bold;">as</span> np<br />
-<br />
-@<span style="color: #dc143c;">profile</span><br />
-<span style="color: #ff7700; font-weight: bold;">def</span> my_func<span style="color: black;">(</span><span style="color: black;">)</span>:<br />
-    a = np.<span style="color: black;">zeros</span><span style="color: black;">(</span><span style="color: black;">(</span><span style="color: #ff4500;">100</span>, <span style="color: #ff4500;">100</span><span style="color: black;">)</span><span style="color: black;">)</span><br />
-    b = np.<span style="color: black;">zeros</span><span style="color: black;">(</span><span style="color: black;">(</span><span style="color: #ff4500;">1000</span>, <span style="color: #ff4500;">1000</span><span style="color: black;">)</span><span style="color: black;">)</span><br />
-    c = np.<span style="color: black;">zeros</span><span style="color: black;">(</span><span style="color: black;">(</span><span style="color: #ff4500;">10000</span>, <span style="color: #ff4500;">1000</span><span style="color: black;">)</span><span style="color: black;">)</span><br />
-    <span style="color: #ff7700; font-weight: bold;">return</span> a, b, c<br />
-<br />
-<span style="color: #ff7700; font-weight: bold;">if</span> __name__ == <span style="color: #483d8b;">'__main__'</span>:<br />
-    my_func<span style="color: black;">(</span><span style="color: black;">)</span></div></div>
-<p>Note that I’ve decorated the function with @profile. This tells the profiler to look into function my_func and gather the memory consumption for each line.</p>
-<h2>Wake up the cookie monster</h2>
-<p>To start profiling and output the result to stdout, run the script as usual and append the options “-m memory_profiler -l -v” to the python interpreter.</p>
-<div style="overflow: auto; white-space: nowrap; width: 435px;" class="codecolorer-container bash default"><div style="" class="bash codecolorer">$ python <span style="color: #660033;">-m</span> memory_profiler <span style="color: #660033;">-l</span> <span style="color: #660033;">-v</span> example.py<br />
-Line <span style="color: #666666; font-style: italic;">#    Mem usage   Line Contents</span><br />
-===================================<br />
-     <span style="color: #000000;">3</span>                <span style="color: #000000; font-weight: bold;">@</span>profile<br />
-     <span style="color: #000000;">4</span>     <span style="color: #000000;">13.68</span> MB   def my_func<span style="color: #7a0874; font-weight: bold;">(</span><span style="color: #7a0874; font-weight: bold;">)</span>:<br />
-     <span style="color: #000000;">5</span>     <span style="color: #000000;">13.77</span> MB       a = np.zeros<span style="color: #7a0874; font-weight: bold;">(</span><span style="color: #7a0874; font-weight: bold;">(</span><span style="color: #000000;">100</span>, <span style="color: #000000;">100</span><span style="color: #7a0874; font-weight: bold;">)</span><span style="color: #7a0874; font-weight: bold;">)</span><br />
-     <span style="color: #000000;">6</span>     <span style="color: #000000;">21.40</span> MB       b = np.zeros<span style="color: #7a0874; font-weight: bold;">(</span><span style="color: #7a0874; font-weight: bold;">(</span><span style="color: #000000;">1000</span>, <span style="color: #000000;">1000</span><span style="color: #7a0874; font-weight: bold;">)</span><span style="color: #7a0874; font-weight: bold;">)</span><br />
-     <span style="color: #000000;">7</span>     <span style="color: #000000;">97.70</span> MB       c = np.zeros<span style="color: #7a0874; font-weight: bold;">(</span><span style="color: #7a0874; font-weight: bold;">(</span><span style="color: #000000;">10000</span>, <span style="color: #000000;">1000</span><span style="color: #7a0874; font-weight: bold;">)</span><span style="color: #7a0874; font-weight: bold;">)</span><br />
-     <span style="color: #000000;">8</span>     <span style="color: #000000;">97.70</span> MB       <span style="color: #7a0874; font-weight: bold;">return</span> a, b, c</div></div>
-<p>voilá! Each line is prefixed by the memory usage in MB of the Python interpreter after that line has been executed.</p></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://fseoane.net/blog/2012/line-by-line-report-of-memory-usage/">by fabian at April 24, 2012 05:04 AM</a>
-</p>
-</div>
-</div>
-
-
 </div>
 
 </div>
@@ -3306,7 +3292,7 @@ Line <span style="color: #666666; font-style: italic;">#    Mem usage   Line 
 
 <p>
 <strong>Last updated:</strong><br>
-July 21, 2012 10:40 PM<br>
+July 21, 2012 11:40 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
