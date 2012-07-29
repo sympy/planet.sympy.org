@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2012-07-29T19:21:10Z</updated>
+  <updated>2012-07-29T19:41:11Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,64 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry xml:lang="en">
+    <id>http://scolobb.wordpress.com/?p=308</id>
+    <link href="http://scolobb.wordpress.com/2012/07/29/the-reflection-about-inference/" rel="alternate" type="text/html"/>
+    <title>The Reflection about Inference</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">This week I have been working both on fixing some existing code (including diagram layout) and on better understanding the code that I am going to write next. As far as the fixes are concerned, I have further polished the diagram layout code, including the addition of some pretty printing for DiagramGrid. I didn’t initially [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=308&amp;subd=scolobb&amp;ref=&amp;feed=1" width="1"/></div>
+    </summary>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>This week I have been working both on fixing some existing code (including <a href="https://github.com/sympy/sympy/pull/1429">diagram layout</a>) and on better understanding the code that I am going to write next.  As far as the fixes are concerned, I have further polished the diagram layout code, including the addition of some pretty printing for <tt>DiagramGrid</tt>.  I didn’t initially expect pretty printing to be useful for this class; however, it turned out that being able to quickly glance at the grid itself was very helpful in certain situations.</p>
+<p>Something which makes me very content is that I have finally submitted a fix for the sort key problem for unordered collections.  The essence of the problem is as follows.  With hash randomisation enabled, the order of <tt>Basic.args</tt> changes on every run.  On the other hand, <tt>Basic.sort_key</tt> traverses the arguments in the order in which they are stored; therefore, sort keys are dependent on the actual order of the arguments.  This has given me trouble when working on laying out diagrams, specifically, in handling groups.  The thing is that the group handling code relies on <tt>FiniteSet</tt> (this maybe isn’t the best idea, but that’s a different story, really <img alt=":-)" class="wp-smiley" src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif"/> ): groups are eventually converted to <tt>FiniteSet</tt>‘s of <tt>FiniteSet</tt>‘s.  To assure stable output, the collection of <tt>FiniteSet</tt>‘s is <em>sorted</em>.  However, due to the influence of hash randomisation on sort keys, this sorting would <em>not</em> actually produce the desired consequences.  There was a similar problem in the same block of functionality which had to do with sorting <tt>Diagram</tt>‘s; the issue there was that a <tt>Diagram</tt> stores <tt>Dict</tt>‘s which, being unordered collections, were subject to the same sort key trouble.  Pull request <a href="https://github.com/sympy/sympy/pull/1446">#1446</a> fixes all of these issues and, finally, the diagram drawing code almost always passes all of its tests.</p>
+<p>It is worth mentioning that while the fix for the sort key problem was not included in the <a href="https://github.com/sympy/sympy/pull/1429">#1429</a>, I was inclined to classify all problems as related to <tt>FiniteSet.sort_key</tt>.  With the fix in the branch, it turned out that there were some other subtle sorting issues, which I am still fixing.</p>
+<p>I have also sent pull request <a href="https://github.com/sympy/sympy/pull/1440">#1440</a> which fixes the pretty printing of morphisms and diagrams, introduced by myself in <a href="https://github.com/sympy/sympy/pull/1338">#1338</a>.  Initially, I would use short Unicode arrows for pretty printing morphisms, but Tom and I have arrived at the conclusion that these arrows look too condensed.  I have then chosen to use long Unicode arrows; it turned out however that Unicode characters which span more than one symbol are not rendered consistently across different machines.  On my computer, the longer arrow would overlap with the next character in line; on Tom’s, it would not.  Aaron has suggested building up arrows out of em dashes and black right-pointing triangles, and this seems to work better, although it still looks ugly with some fonts (e.g., the default font in <em>rxvt-unicode</em>, as reported by Tom).</p>
+<p>I have also promised to implement variable-length horizontal arrows.  I have decided to postpone this for now, however, in order to better focus on my GSoC project.  I will keep that task in mind, however, and will most probably return to it in a couple of days.</p>
+<p>As for deciding the commutativity of diagrams, I have run into an unexpected conceptual problem, arising from the fundamental difference between diagrams with conclusions and without conclusions.  Before explaining the problem, I will remind the description of these two types of constructions.  A commutative diagram is a collection of morphisms (which usually form a connected directed graph) with the property that composing all morphisms along any two paths between any two objects produces the same composite morphism.  While being quite general, in category theory it is customary to produce statements like “if there are such morphisms, there exist such morphisms, and the diagram is commutative”.  This statement is clearly an implication.  The class <tt>Diagram</tt> is a representation of the second type of statement and contains sets of premise morphisms and conclusion morphisms.  <tt>Diagram</tt> is also conventionally capable of representing simple commutativity if no conclusions are specified.</p>
+<p>While I was initially quite comfortable with using <tt>Diagram</tt> for both types of statements, I am really inclined to considering the creation of two separate classes now.  Thus I plan to rename <tt>Diagram</tt> to <tt>Implication</tt> and add a different  <tt>Diagram</tt> which will represent what I used to call “commutative diagram without conclusions”.  That is, <tt>Diagram</tt> will hold only one collection of morphisms.</p>
+<p>With this separation, it is immediately clear that, in the context of my model, the question “Is this diagram commutative?” actually incorporates two totally different questions:</p>
+<ol>
+<li>Is this <tt>Diagram</tt> commutative?</li>
+<li>Is this <tt>Implication</tt> true and commutative?</li>
+</ol>
+<p>Fortunately for me ( <img alt=":-)" class="wp-smiley" src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif"/>  ), this newly-discovered separation does not remove the possibility of answering both questions with almost the same algorithm.  I will start with question (1) to further stress the difference between the semantics of diagrams and implications.</p>
+<p>Consider a collection of <tt>Diagram</tt>‘s and <tt>Implication</tt>‘s known to be commutative.  (By saying “an <tt>Implication</tt> is commutative” I will abuse the terminology and mean “an <tt>Implication</tt> is true and commutative.”)  We need to decide whether the target <tt>Diagram</tt> is commutative.  The algorithm I will describe is based on <a href="http://en.wikipedia.org/wiki/Backward_chaining">backward chaining</a> and is therefore recursive.  A recursive step consists of two stages: the <em>commutativity</em> stage and the <em>inference</em> stage.  The goal of the commutativity stage is to decide whether the current version of the target <tt>Diagram</tt> is commutative; the goal of the inference stage is to see whether applying one of the <tt>Implication</tt>‘s will make the target <tt>Diagram</tt> commutative.</p>
+<p>The commutativity stage starts with taking every morphism of the target <tt>Diagram</tt> and putting each of them into its own commutative subdiagram.  Now, for each commutative subdiagram, the algorithm will pick a subset of morphisms and will then put the subsets together to form another subdiagram.  This subdiagram will then be compared with each of the <tt>Diagram</tt>‘s known to be commutative.  If a match is found, the subdiagram is added to the set of commutative subdiagrams.  Then, all possible “absorptions” among the diagrams are performed (i.e., if subdiagram <img alt="A" class="latex" src="http://s0.wp.com/latex.php?latex=A&amp;bg=000000&amp;fg=b8babb&amp;s=0" title="A"/> is a subdiagram of <img alt="B" class="latex" src="http://s0.wp.com/latex.php?latex=B&amp;bg=000000&amp;fg=b8babb&amp;s=0" title="B"/>, the subdiagram <img alt="A" class="latex" src="http://s0.wp.com/latex.php?latex=A&amp;bg=000000&amp;fg=b8babb&amp;s=0" title="A"/> is removed from the collection of subdiagrams (for obvious reasons)) and the iteration returns to its start, where it picks subsets of the new subdiagrams.  Since the number of morphisms in the diagram is finite, this process is finite.  If, in the end, the collection of commutative subdiagrams contains only the target diagram, it is deemed commutative.</p>
+<p>Note that this alrogithm is very similar to one of the methods of finding all prime implicants of a boolean function (we called that Blake-Poretski algorithm at the university, but I cannot find any references on my Internet).  I have considered the possibilities of directly converting the commutativity stage to a boolean function minimisation problem, but I haven’t found a sufficiently elegant way yet.</p>
+<p>The inference stage exactly follows the idea of backward chaining.  For each <tt>Implication</tt> an attempt is made to find the embedding of the premises into the target <tt>Diagram</tt>.  If such an embedding is found, the corresponding conclusions are added to a copy of the target <tt>Diagram</tt> and a recursive examination of the modified <tt>Diagram</tt> is made.  The found embedding of one of the <tt>Implication</tt>‘s plus the added conclusions are propagated down the recursion tree as commutative subdiagrams.  The commutative stages of the following recursive calls will take their commutativity for granted.</p>
+<p>If one of these recursive calls returns a positive result, this positive result is propagated up the call stack.  If neither of the recursive calls returned a positive result, or if no embedding of an <tt>Implication</tt> has been found in a certain recursive call, a negative result is returned from this recursive call.</p>
+<p>Note that it actually was the inference stage that I described in my original GSoC <a href="https://github.com/sympy/sympy/wiki/GSoC-2012-Application-Sergiu-Ivanov:-Category-Theory-Module">proposal</a>.</p>
+<p>Before showing how to answer question (2), I would like to analyse the algorithm idea I have just presented a little bit.  One can see that the commutativity and inference stages are <em>very</em> different; so different, in fact, that they are almost independent.  Therefore, these two bits of functionality will live in separate pieces of code, and will be later combined to function together.  I will start by defining two internal classes, <tt>_CommutativityStage</tt> and <tt>_InferenceStage</tt> which will host the corresponding functions.  The code that will actually combine the two will either be a global function or a class; this will be clearer later and is not important at the moment.</p>
+<p>Question (2) now: “Is the given <tt>Implication</tt> true (and commutative)?”.  In this case, one should start from the premises of the given <tt>Implication</tt> and apply the same strategy as in answering question (1).  Here, however, the terminal criterion is that the target <tt>Diagram</tt> (obtained from the premises of the original <tt>Implication</tt>) is commutative <em>and</em> contains the conclusions of the original <tt>Implication</tt>.</p>
+<p>A remark about comparing diagrams is due here: this is nothing but the <a href="http://en.wikipedia.org/wiki/Subgraph_isomorphism_problem">subgraph isomorphism problem</a>.  I have already found <a href="http://scolobb.wordpress.com/feed/software.nju.edu.cn/lingzong/papers/SGI.pdf">this paper</a> (haven’t read it yet), but I’m open to other paper suggestions in this regard <img alt=":-)" class="wp-smiley" src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif"/> </p>
+<p>It is necessary to keep in mind that, besides finding the subgraph isomporphism proper, the code will have to pay attention to morphism properties as well.</p>
+<p>Now, the most attentive readers might have already remarked that semantically splitting the class <tt>Diagram</tt> into two will impact diagram drawing.  Yet, the impact will be rather modest, since the drawing code already knows how to deal with something similar to <tt>Implication</tt>; adding explicit support for new <tt>Diagram</tt> is going to require minimal effort.</p>
+<p>In this blog post, I recognize that my initial class model was flawed in yet another place.  I try to see this is as a sign of personal progress, though <img alt=":-)" class="wp-smiley" src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif"/> </p>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/308/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/308/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=308&amp;subd=scolobb&amp;ref=&amp;feed=1" width="1"/></div>
+    </content>
+    <updated>2012-07-29T19:20:53Z</updated>
+    <category term="SymPy"/>
+    <category term="backward chaining"/>
+    <category term="deciding commutativity"/>
+    <category term="diagram layout"/>
+    <category term="pretty printing"/>
+    <category term="sort key"/>
+    <category term="string representation"/>
+    <category term="subgraph isomorphism problem"/>
+    <author>
+      <name>scolobb</name>
+    </author>
+    <source>
+      <id>http://scolobb.wordpress.com</id>
+      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
+      <link href="http://scolobb.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://scolobb.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://scolobb.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <subtitle>Reports of quests for adventures and coadventures</subtitle>
+      <title>Coaquarium</title>
+      <updated>2012-07-29T19:41:01Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en">
     <id>http://angadhsympy.wordpress.com/?p=305</id>
@@ -37,7 +95,7 @@
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-29T19:21:02Z</updated>
+      <updated>2012-07-29T19:41:04Z</updated>
     </source>
   </entry>
 
@@ -79,7 +137,7 @@
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-29T19:21:05Z</updated>
+      <updated>2012-07-29T19:41:06Z</updated>
     </source>
   </entry>
 
@@ -492,7 +550,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-29T19:20:59Z</updated>
+      <updated>2012-07-29T19:41:00Z</updated>
     </source>
   </entry>
 
@@ -542,7 +600,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-29T19:21:09Z</updated>
+      <updated>2012-07-29T19:41:10Z</updated>
     </source>
   </entry>
 
@@ -587,7 +645,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-29T19:20:59Z</updated>
+      <updated>2012-07-29T19:41:00Z</updated>
     </source>
   </entry>
 
@@ -622,7 +680,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-29T19:21:09Z</updated>
+      <updated>2012-07-29T19:41:10Z</updated>
     </source>
   </entry>
 
@@ -695,7 +753,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-29T19:21:05Z</updated>
+      <updated>2012-07-29T19:41:06Z</updated>
     </source>
   </entry>
 
@@ -737,7 +795,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-07-29T19:20:16Z</updated>
+      <updated>2012-07-29T19:40:17Z</updated>
     </source>
   </entry>
 
@@ -781,7 +839,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-29T19:21:09Z</updated>
+      <updated>2012-07-29T19:41:10Z</updated>
     </source>
   </entry>
 
@@ -828,7 +886,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-29T19:20:59Z</updated>
+      <updated>2012-07-29T19:41:01Z</updated>
     </source>
   </entry>
 
@@ -1005,7 +1063,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-29T19:21:02Z</updated>
+      <updated>2012-07-29T19:41:04Z</updated>
     </source>
   </entry>
 
@@ -1052,7 +1110,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-29T19:20:59Z</updated>
+      <updated>2012-07-29T19:41:01Z</updated>
     </source>
   </entry>
 
@@ -1092,7 +1150,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-29T19:21:06Z</updated>
+      <updated>2012-07-29T19:41:07Z</updated>
     </source>
   </entry>
 
@@ -1135,7 +1193,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-29T19:21:09Z</updated>
+      <updated>2012-07-29T19:41:10Z</updated>
     </source>
   </entry>
 
@@ -1208,7 +1266,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-29T19:21:02Z</updated>
+      <updated>2012-07-29T19:41:04Z</updated>
     </source>
   </entry>
 
@@ -1485,7 +1543,7 @@ form_field(vector_field)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-29T19:21:10Z</updated>
+      <updated>2012-07-29T19:41:11Z</updated>
     </source>
   </entry>
 
@@ -1617,7 +1675,7 @@ In [305]: G._coset_repr
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-29T19:21:05Z</updated>
+      <updated>2012-07-29T19:41:06Z</updated>
     </source>
   </entry>
 
@@ -1649,7 +1707,7 @@ In [305]: G._coset_repr
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-29T19:21:02Z</updated>
+      <updated>2012-07-29T19:41:04Z</updated>
     </source>
   </entry>
 
@@ -1938,7 +1996,7 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-29T19:20:59Z</updated>
+      <updated>2012-07-29T19:41:00Z</updated>
     </source>
   </entry>
 
@@ -1968,7 +2026,7 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-29T19:21:03Z</updated>
+      <updated>2012-07-29T19:41:04Z</updated>
     </source>
   </entry>
 
@@ -2003,7 +2061,7 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-29T19:20:59Z</updated>
+      <updated>2012-07-29T19:41:01Z</updated>
     </source>
   </entry>
 
@@ -2046,7 +2104,7 @@ sudo python setup.py develop
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-07-29T19:20:16Z</updated>
+      <updated>2012-07-29T19:40:17Z</updated>
     </source>
   </entry>
 
@@ -2130,7 +2188,7 @@ sudo python setup.py develop
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-29T19:21:00Z</updated>
+      <updated>2012-07-29T19:41:01Z</updated>
     </source>
   </entry>
 
@@ -2167,7 +2225,7 @@ sudo python setup.py develop
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-29T19:21:09Z</updated>
+      <updated>2012-07-29T19:41:10Z</updated>
     </source>
   </entry>
 
@@ -2209,7 +2267,7 @@ sudo python setup.py develop
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-29T19:21:05Z</updated>
+      <updated>2012-07-29T19:41:06Z</updated>
     </source>
   </entry>
 
@@ -2236,7 +2294,7 @@ sudo python setup.py develop
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-29T19:21:03Z</updated>
+      <updated>2012-07-29T19:41:04Z</updated>
     </source>
   </entry>
 
@@ -2408,7 +2466,7 @@ sudo python setup.py develop
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-29T19:21:05Z</updated>
+      <updated>2012-07-29T19:41:06Z</updated>
     </source>
   </entry>
 
@@ -2501,7 +2559,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-29T19:21:09Z</updated>
+      <updated>2012-07-29T19:41:10Z</updated>
     </source>
   </entry>
 
@@ -2528,7 +2586,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-29T19:21:02Z</updated>
+      <updated>2012-07-29T19:41:04Z</updated>
     </source>
   </entry>
 
@@ -2577,7 +2635,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-29T19:20:59Z</updated>
+      <updated>2012-07-29T19:41:00Z</updated>
     </source>
   </entry>
 
@@ -2786,7 +2844,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-29T19:21:06Z</updated>
+      <updated>2012-07-29T19:41:07Z</updated>
     </source>
   </entry>
 
@@ -2815,7 +2873,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-29T19:21:02Z</updated>
+      <updated>2012-07-29T19:41:03Z</updated>
     </source>
   </entry>
 
@@ -2870,7 +2928,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-29T19:21:09Z</updated>
+      <updated>2012-07-29T19:41:10Z</updated>
     </source>
   </entry>
 
@@ -2898,7 +2956,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-29T19:20:59Z</updated>
+      <updated>2012-07-29T19:41:01Z</updated>
     </source>
   </entry>
 
@@ -2964,7 +3022,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-29T19:21:09Z</updated>
+      <updated>2012-07-29T19:41:10Z</updated>
     </source>
   </entry>
 
@@ -2992,7 +3050,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-29T19:21:06Z</updated>
+      <updated>2012-07-29T19:41:07Z</updated>
     </source>
   </entry>
 
@@ -3069,36 +3127,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-29T19:21:02Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://amakelov.wordpress.com/?p=4</id>
-    <link href="http://amakelov.wordpress.com/2012/05/11/gsoc-2012-computational-group-theory/" rel="alternate" type="text/html"/>
-    <title>GSoC 2012: Computational Group Theory</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">And so it happened that by some weird accident I was accepted into GSoC 2012 to implement CGT – and Group Theory is a part of mathematics that I particularly enjoy. Until a few days ago I was pretty busy working for my exams, but in the next few weeks I should be able to <a class="excerpt-more-link" href="http://amakelov.wordpress.com/2012/05/11/gsoc-2012-computational-group-theory/">[…]</a><img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;blog=35896871&amp;post=4&amp;subd=amakelov&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>And so it happened that by some weird accident I was accepted into GSoC 2012 to implement CGT – and Group Theory is a part of mathematics that I particularly enjoy. Until a few days ago I was pretty busy working for my exams, but in the next few weeks I should be able to start preparing for my project.</p>
-<p>I hope that the timeline I’ve set to myself is not too impossible to do, and that I’ll be able to implement everything I promised in it.</p>
-<p>Finally, I’d like to thank all the people that make sympy possible, and all the people that liked my application, and especially my mentor – David Joyner, and my co-mentor – Aaron Meurer, for their enthusiasm!</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/amakelov.wordpress.com/4/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/amakelov.wordpress.com/4/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;blog=35896871&amp;post=4&amp;subd=amakelov&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2012-05-11T00:52:19Z</updated>
-    <category term="Google Summer of Code 2012"/>
-    <author>
-      <name>amakelov</name>
-    </author>
-    <source>
-      <id>http://amakelov.wordpress.com</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://amakelov.wordpress.com/category/google-summer-of-code-2012/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://amakelov.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://amakelov.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>A. Makelov</subtitle>
-      <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2012-07-26T20:41:04Z</updated>
+      <updated>2012-07-29T19:41:03Z</updated>
     </source>
   </entry>
 </feed>
