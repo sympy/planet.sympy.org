@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2012-07-30T13:40:44Z</updated>
+  <updated>2012-07-30T14:00:50Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,78 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry xml:lang="en">
+    <id>http://amakelov.wordpress.com/?p=429</id>
+    <link href="http://amakelov.wordpress.com/2012/07/30/google-summer-of-code-2012-week-10/" rel="alternate" type="text/html"/>
+    <title>Google Summer of Code 2012: Week 10</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Hi all, here’s a brief summary of what I’ve been doing during the 10th week of my GSoC. Though I fixed a bug in the SUBGROUPSEARCH function during the week, I ran some more comprehensive tests as I had planned to, and some of them broke the function. If you’re particularly interested, something like that <a class="excerpt-more-link" href="http://amakelov.wordpress.com/2012/07/30/google-summer-of-code-2012-week-10/">[…]</a><img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;blog=35896871&amp;post=429&amp;subd=amakelov&amp;ref=&amp;feed=1" width="1"/></div>
+    </summary>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Hi all,</p>
+<p>here’s a brief summary of what I’ve been doing during the 10th week of my GSoC.</p>
+<ul>
+<li>Though I fixed a bug in the SUBGROUPSEARCH function during the week, I ran some more comprehensive tests as I had planned to, and some of them broke the function. If you’re particularly interested, something like that will work:<br/>
+<pre class="brush: python; wrap-lines: false;">In [87]: S = SymmetricGroup(5)
+In [88]: prop_fix_3 = lambda x: x(3) == 3
+In [89]: %autoreload
+In [90]: S.subgroup_search(prop_fix_3)
+---------------------------------------------------------------------------
+StopIteration                             Traceback (most recent call last)
+&lt;ipython-input-90-6b85aa1285b8&gt; in &lt;module&gt;()
+----&gt; 1 S.subgroup_search(prop_fix_3)
+
+/home/alexander/workspace/sympy/sympy/combinatorics/perm_groups.py in subgroup_search(self, prop, base, strong_gens, tests, init_subgroup)
+2660
+2661                 # this function maintains a partial BSGS structure up to position l
+-&gt; 2662                 _insert_point_in_base(res, res_base, res_strong_gens, l, new_point, distr_gens=res_distr_gens, basic_orbits=res_basic_orbits, transversals=res_transversals)
+2663                 # find the l+1-th basic stabilizer
+2664                 new_stab = PermutationGroup(res_distr_gens[l + 1])
+
+/home/alexander/workspace/sympy/sympy/combinatorics/util.py in _insert_point_in_base(group, base, strong_gens, pos, point, distr_gens, basic_orbits, transversals)
+423     # baseswap with the partial BSGS structures. Notice that we need only
+424     # the orbit and transversal of the new point under the last stabilizer
+--&gt; 425     new_base, new_strong_gens = group.baseswap(partial_base, strong_gens, pos, randomized=False, transversals=partial_transversals, basic_orbits=partial_basic_orbits, distr_gens=partial_distr_gens)
+426     # amend the basic orbits and transversals
+427     stab_pos = PermutationGroup(distr_gens[pos])
+
+/home/alexander/workspace/sympy/sympy/combinatorics/perm_groups.py in baseswap(self, base, strong_gens, pos, randomized, transversals, basic_orbits, distr_gens)
+2472             # ruling out member of the basic orbit of base[pos] along the way
+2473             while len(current_group.orbit(base[pos])) != size:
+-&gt; 2474                 gamma = iter(Gamma).next()
+2475                 x = transversals[pos][gamma]
+2476                 x_inverse = ~x
+
+StopIteration:
+
+
+</pre><p/>
+<p>The reason is certainly the change of base performed on line 11 in the pseudocode (this is also indicated in my code on my local week6 branch <a href="https://github.com/amakelov/sympy/tree/week6" target="_blank">here</a> ). The use of the function BASESWAP there is what gets us into trouble. It is meant to be applied to  base and a strong generating set relative to it, switch two consecutive base points and change the generating set accordinly.  However, in subgroup_search the goal is to change a base <img alt="(b_1, b_2, \ldots, b_l, \ldots, b_k)" class="latex" src="http://s0.wp.com/latex.php?latex=%28b_1%2C+b_2%2C+%5Cldots%2C+b_l%2C+%5Cldots%2C+b_k%29&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="(b_1, b_2, \ldots, b_l, \ldots, b_k)"/> to <img alt="(b_1, b_2, \ldots, b_l', \ldots, b_k)" class="latex" src="http://s0.wp.com/latex.php?latex=%28b_1%2C+b_2%2C+%5Cldots%2C+b_l%27%2C+%5Cldots%2C+b_k%29&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="(b_1, b_2, \ldots, b_l', \ldots, b_k)"/> where <img alt="b_l'" class="latex" src="http://s0.wp.com/latex.php?latex=b_l%27&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="b_l'"/> is a new point. The book ([1]) mentions that this is done by using BASESWAP but doesn’t provide any details. My strategy is the following: I cut the base so that it becomes <img alt="(b_1, b_2,\ldots, b_l)" class="latex" src="http://s0.wp.com/latex.php?latex=%28b_1%2C+b_2%2C%5Cldots%2C+b_l%29&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="(b_1, b_2,\ldots, b_l)"/> and cut the correponding data structures – the strong generators <strong>strong_gens</strong>, the <strong>basic_orbits, </strong> the <strong>transversals</strong>, and the strong generators distributed according to membership in basic stabilizers <strong>distr_gens </strong>(I know, I still have to rename this to strong_gens_distr). Then I append the point <img alt="b_l'" class="latex" src="http://s0.wp.com/latex.php?latex=b_l%27&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="b_l'"/> so that the base is <img alt="(b_1, b_2, \ldots, b_l, b_l')" class="latex" src="http://s0.wp.com/latex.php?latex=%28b_1%2C+b_2%2C+%5Cldots%2C+b_l%2C+b_l%27%29&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="(b_1, b_2, \ldots, b_l, b_l')"/> and calculate an orbit and transversal for $b_l’$ under the stabilzier of <img alt="b_1, b_2, \ldots, b_l" class="latex" src="http://s0.wp.com/latex.php?latex=b_1%2C+b_2%2C+%5Cldots%2C+b_l&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="b_1, b_2, \ldots, b_l"/>. Finally I apply BASESWAP to this new base in order to switch the two rightmost points. Then I go back to <img alt="(b_1, b_2, \ldots, b_l', \ldots, b_k)" class="latex" src="http://s0.wp.com/latex.php?latex=%28b_1%2C+b_2%2C+%5Cldots%2C+b_l%27%2C+%5Cldots%2C+b_k%29&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="(b_1, b_2, \ldots, b_l', \ldots, b_k)"/> by appending what I had cut in the start and calculating a transversal/orbit for <img alt="b_{l+1}" class="latex" src="http://s0.wp.com/latex.php?latex=b_%7Bl%2B1%7D&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="b_{l+1}"/> under the stabilizer just found, that of <img alt="b_1, \ldots, b_l'" class="latex" src="http://s0.wp.com/latex.php?latex=b_1%2C+%5Cldots%2C+b_l%27&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="b_1, \ldots, b_l'"/>. Obviously, the resulting BSGS structures are valid only up to position <img alt="l" class="latex" src="http://s0.wp.com/latex.php?latex=l&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="l"/>, and that’s all the information we can acquire without another application of baseswap or finding another stabilizer ( and in general, finding a stabilizer is a computationally hard task relative to calculating orbits/transversals). The entire purpose of this use of BASESWAP in SUBGROUPSEARCH is to obtain generators for the stabilizer of <img alt="b_1, b_2, \ldots, b_l'" class="latex" src="http://s0.wp.com/latex.php?latex=b_1%2C+b_2%2C+%5Cldots%2C+b_l%27&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="b_1, b_2, \ldots, b_l'"/> and maintain a base/strong generating set that are valid up to a certain position. There are many such base changes performed on the same base throughout the course of the function and something goes wrong along the way. I still have to figure out why and where.</p></li>
+<li><strong>The good news</strong>: There is a straightforward alternative to using BASESWAP: maintain a list of generators for each of the basic stabilizers in <img alt="(b_1, b_2, \ldots, b_k)" class="latex" src="http://s0.wp.com/latex.php?latex=%28b_1%2C+b_2%2C+%5Cldots%2C+b_k%29&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="(b_1, b_2, \ldots, b_k)"/> and change it accordingly as the base is changed, using the function stabilizer() in sympy/combinatorics/perm_groups.py. For each base chaand he does not mention base change in the context of subgroup searching.nge we have to calculate one more stabilizer, so that’s not terrible. It is also sort of suggested in <a href="http://www.google.com/url?sa=t&amp;rct=j&amp;q=&amp;esrc=s&amp;source=web&amp;cd=1&amp;ved=0CFIQFjAA&amp;url=http%3A%2F%2Fwww.math.colostate.edu%2F~hulpke%2FCGT%2Fcgtnotes.pdf&amp;ei=u48WUN24M4jf4QS2q4GgBg&amp;usg=AFQjCNHasgOmBkx2AetpE0_-92TFjSyU3A" target="_blank">“Notes on Computational Group Theory”</a> by Alexander Hulpke (page 34). The problem with this approach is that stabilizer() tends to return a group with many generators, and repeated applications keep increasing this number. However, using this <strong>removed the bug from SUBGROUPSEARCH. </strong>As before, more comprehensive tests are on the way : )</li>
+<li><strong>Yet another alternative : </strong>we can use the incremental Schreier-Sims algorithm with the new base <img alt="(b_1, \ldots, b_l', \ldots, b_k)" class="latex" src="http://s0.wp.com/latex.php?latex=%28b_1%2C+%5Cldots%2C+b_l%27%2C+%5Cldots%2C+b_k%29&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="(b_1, \ldots, b_l', \ldots, b_k)"/> and the strong generating set for <img alt="(b_1, \ldots, b_l, \ldots, b_k)" class="latex" src="http://s0.wp.com/latex.php?latex=%28b_1%2C+%5Cldots%2C+b_l%2C+%5Cldots%2C+b_k%29&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="(b_1, \ldots, b_l, \ldots, b_k)"/>. There will likely be redundant generators after that, and it will probably involve more computation than finding a single stabilizer. However, in the long run (since there are many base changes performed) this might perform faster (due to the increasing number of generators that stabilizer() tends to create). I have not tried that approach yet.</li>
+<li>Other than that, I had <a href="https://github.com/sympy/sympy/pull/1406" target="_blank">my latest major pull request</a> merged! Thanks a lot to <a href="https://github.com/Krastanov" target="_blank">Stefan</a> and my mentor <a href="https://github.com/wdjoyner" target="_blank">David</a> for the review! That was the largest one so far…</li>
+<li>I started reading about some of the applications of subgroup search; subgroup intersection seems to be the easiest to implement, so I’ll probably go for it first.</li>
+</ul>
+<p>That’s it for now : )</p>
+<p> </p>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/amakelov.wordpress.com/429/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/amakelov.wordpress.com/429/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;blog=35896871&amp;post=429&amp;subd=amakelov&amp;ref=&amp;feed=1" width="1"/></div>
+    </content>
+    <updated>2012-07-30T13:46:30Z</updated>
+    <category term="Google Summer of Code 2012"/>
+    <author>
+      <name>amakelov</name>
+    </author>
+    <source>
+      <id>http://amakelov.wordpress.com</id>
+      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
+      <link href="http://amakelov.wordpress.com/category/google-summer-of-code-2012/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://amakelov.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://amakelov.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <subtitle>A. Makelov</subtitle>
+      <title>Not really blogging » Google Summer of Code 2012</title>
+      <updated>2012-07-30T14:00:49Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en">
     <id>http://rhoforsympy.wordpress.com/?p=222</id>
@@ -40,7 +112,7 @@
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-30T13:40:43Z</updated>
+      <updated>2012-07-30T14:00:45Z</updated>
     </source>
   </entry>
 
@@ -99,7 +171,7 @@
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-30T13:40:38Z</updated>
+      <updated>2012-07-30T14:00:41Z</updated>
     </source>
   </entry>
 
@@ -129,7 +201,7 @@
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-30T13:40:40Z</updated>
+      <updated>2012-07-30T14:00:42Z</updated>
     </source>
   </entry>
 
@@ -171,7 +243,7 @@
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-30T13:40:41Z</updated>
+      <updated>2012-07-30T14:00:43Z</updated>
     </source>
   </entry>
 
@@ -379,7 +451,7 @@ Out[128]: False
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2012-07-26T20:41:05Z</updated>
+      <updated>2012-07-30T14:00:49Z</updated>
     </source>
   </entry>
 
@@ -564,14 +636,14 @@ Out[128]: False
     </content>
     <updated>2012-07-21T23:21:49Z</updated>
     <category term="SymPy"/>
-    <category term="automatic plotting"/>
     <category term="category theory"/>
-    <category term="deciding commutativity"/>
-    <category term="diagram layout"/>
+    <category term="timeline"/>
+    <category term="automatic plotting"/>
     <category term="grid layout"/>
+    <category term="deciding commutativity"/>
     <category term="internal data structures"/>
     <category term="layout algorithm"/>
-    <category term="timeline"/>
+    <category term="diagram layout"/>
     <author>
       <name>scolobb</name>
     </author>
@@ -584,7 +656,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-30T13:40:38Z</updated>
+      <updated>2012-07-30T14:00:40Z</updated>
     </source>
   </entry>
 
@@ -634,7 +706,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-30T13:40:43Z</updated>
+      <updated>2012-07-30T14:00:45Z</updated>
     </source>
   </entry>
 
@@ -679,7 +751,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-30T13:40:38Z</updated>
+      <updated>2012-07-30T14:00:40Z</updated>
     </source>
   </entry>
 
@@ -714,7 +786,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-30T13:40:43Z</updated>
+      <updated>2012-07-30T14:00:45Z</updated>
     </source>
   </entry>
 
@@ -751,7 +823,7 @@ Out[128]: False
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2012-07-26T20:41:04Z</updated>
+      <updated>2012-07-30T14:00:49Z</updated>
     </source>
   </entry>
 
@@ -787,13 +859,13 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-30T13:40:41Z</updated>
+      <updated>2012-07-30T14:00:43Z</updated>
     </source>
   </entry>
 
   <entry xml:lang="en">
     <id>http://asmeurersympy.wordpress.com/?p=1112</id>
-    <link href="http://asmeurersympy.wordpress.com/2012/07/09/emacs-7-months-later/" rel="alternate" type="text/html"/>
+    <link href="https://asmeurersympy.wordpress.com/2012/07/09/emacs-7-months-later/" rel="alternate" type="text/html"/>
     <title>Emacs: 7 months later</title>
     <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">In my final post about my switching to Emacs, a commenter, Scott, asked me, “It has been a while since you started using Emacs. I’m just curious. How is your experience so far now that you have more experience and a more complete configuration?” My reply was getting quite long, so I figured it would [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1112&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" width="1"/></div>
     </summary>
@@ -821,15 +893,15 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <name>Aaron Meurer</name>
     </author>
     <source>
-      <id>http://asmeurersympy.wordpress.com</id>
-      <logo>http://1.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=http%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
-      <link href="http://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <id>https://asmeurersympy.wordpress.com</id>
+      <logo>https://secure.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=https%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
+      <link href="https://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="https://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="https://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="https://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-07-30T13:40:12Z</updated>
+      <updated>2012-07-30T14:00:20Z</updated>
     </source>
   </entry>
 
@@ -873,7 +945,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-30T13:40:44Z</updated>
+      <updated>2012-07-30T14:00:45Z</updated>
     </source>
   </entry>
 
@@ -920,7 +992,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-30T13:40:38Z</updated>
+      <updated>2012-07-30T14:00:41Z</updated>
     </source>
   </entry>
 
@@ -1066,7 +1138,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2012-07-26T20:41:04Z</updated>
+      <updated>2012-07-30T14:00:49Z</updated>
     </source>
   </entry>
 
@@ -1097,7 +1169,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-30T13:40:40Z</updated>
+      <updated>2012-07-30T14:00:42Z</updated>
     </source>
   </entry>
 
@@ -1144,7 +1216,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-30T13:40:38Z</updated>
+      <updated>2012-07-30T14:00:41Z</updated>
     </source>
   </entry>
 
@@ -1184,7 +1256,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-30T13:40:42Z</updated>
+      <updated>2012-07-30T14:00:44Z</updated>
     </source>
   </entry>
 
@@ -1227,7 +1299,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-30T13:40:44Z</updated>
+      <updated>2012-07-30T14:00:45Z</updated>
     </source>
   </entry>
 
@@ -1266,7 +1338,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2012-07-26T20:41:04Z</updated>
+      <updated>2012-07-30T14:00:49Z</updated>
     </source>
   </entry>
 
@@ -1300,7 +1372,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-30T13:40:40Z</updated>
+      <updated>2012-07-30T14:00:42Z</updated>
     </source>
   </entry>
 
@@ -1577,7 +1649,7 @@ form_field(vector_field)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-30T13:40:44Z</updated>
+      <updated>2012-07-30T14:00:45Z</updated>
     </source>
   </entry>
 
@@ -1687,7 +1759,7 @@ In [305]: G._coset_repr
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2012-07-26T20:41:04Z</updated>
+      <updated>2012-07-30T14:00:49Z</updated>
     </source>
   </entry>
 
@@ -1709,7 +1781,7 @@ In [305]: G._coset_repr
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-30T13:40:41Z</updated>
+      <updated>2012-07-30T14:00:43Z</updated>
     </source>
   </entry>
 
@@ -1741,7 +1813,7 @@ In [305]: G._coset_repr
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-30T13:40:40Z</updated>
+      <updated>2012-07-30T14:00:42Z</updated>
     </source>
   </entry>
 
@@ -1785,7 +1857,7 @@ In [305]: G._coset_repr
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2012-07-26T20:41:04Z</updated>
+      <updated>2012-07-30T14:00:49Z</updated>
     </source>
   </entry>
 
@@ -2030,7 +2102,7 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-30T13:40:38Z</updated>
+      <updated>2012-07-30T14:00:40Z</updated>
     </source>
   </entry>
 
@@ -2060,7 +2132,7 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-30T13:40:40Z</updated>
+      <updated>2012-07-30T14:00:42Z</updated>
     </source>
   </entry>
 
@@ -2095,13 +2167,13 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-30T13:40:38Z</updated>
+      <updated>2012-07-30T14:00:41Z</updated>
     </source>
   </entry>
 
   <entry xml:lang="en">
     <id>https://asmeurersympy.wordpress.com/?p=1109</id>
-    <link href="http://asmeurersympy.wordpress.com/2012/06/14/how-to-install-the-development-version-of-ipython-qtconsole-and-notebook-in-ubuntu/" rel="alternate" type="text/html"/>
+    <link href="https://asmeurersympy.wordpress.com/2012/06/14/how-to-install-the-development-version-of-ipython-qtconsole-and-notebook-in-ubuntu/" rel="alternate" type="text/html"/>
     <title>How to install the development version of IPython Qtconsole and Notebook in Ubuntu</title>
     <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Both the awesome IPython notebook and Qtconsole are in the Ubuntu repositories, so if you just want to use the stable released versions, you can just do and be on your way. But the git development version has a lot of cool new features, and you may not want to wait for 0.13 to be [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1109&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" width="1"/></div>
     </summary>
@@ -2130,15 +2202,15 @@ sudo python setup.py develop
       <name>Aaron Meurer</name>
     </author>
     <source>
-      <id>http://asmeurersympy.wordpress.com</id>
-      <logo>http://1.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=http%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
-      <link href="http://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <id>https://asmeurersympy.wordpress.com</id>
+      <logo>https://secure.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=https%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
+      <link href="https://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="https://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="https://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="https://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-07-30T13:40:12Z</updated>
+      <updated>2012-07-30T14:00:20Z</updated>
     </source>
   </entry>
 
@@ -2173,7 +2245,7 @@ sudo python setup.py develop
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2012-07-26T20:41:05Z</updated>
+      <updated>2012-07-30T14:00:49Z</updated>
     </source>
   </entry>
 
@@ -2222,7 +2294,7 @@ sudo python setup.py develop
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-30T13:40:39Z</updated>
+      <updated>2012-07-30T14:00:41Z</updated>
     </source>
   </entry>
 
@@ -2259,7 +2331,7 @@ sudo python setup.py develop
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-30T13:40:43Z</updated>
+      <updated>2012-07-30T14:00:45Z</updated>
     </source>
   </entry>
 
@@ -2301,7 +2373,7 @@ sudo python setup.py develop
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-30T13:40:41Z</updated>
+      <updated>2012-07-30T14:00:43Z</updated>
     </source>
   </entry>
 
@@ -2328,7 +2400,7 @@ sudo python setup.py develop
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-30T13:40:40Z</updated>
+      <updated>2012-07-30T14:00:42Z</updated>
     </source>
   </entry>
 
@@ -2500,7 +2572,7 @@ sudo python setup.py develop
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-30T13:40:41Z</updated>
+      <updated>2012-07-30T14:00:43Z</updated>
     </source>
   </entry>
 
@@ -2546,7 +2618,7 @@ sudo python setup.py develop
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2012-07-26T20:41:04Z</updated>
+      <updated>2012-07-30T14:00:49Z</updated>
     </source>
   </entry>
 
@@ -2593,7 +2665,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-30T13:40:43Z</updated>
+      <updated>2012-07-30T14:00:45Z</updated>
     </source>
   </entry>
 
@@ -2620,7 +2692,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-30T13:40:40Z</updated>
+      <updated>2012-07-30T14:00:42Z</updated>
     </source>
   </entry>
 
@@ -2669,7 +2741,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-30T13:40:38Z</updated>
+      <updated>2012-07-30T14:00:40Z</updated>
     </source>
   </entry>
 
@@ -2814,7 +2886,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2012-07-26T20:41:04Z</updated>
+      <updated>2012-07-30T14:00:49Z</updated>
     </source>
   </entry>
 
@@ -2878,7 +2950,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-30T13:40:42Z</updated>
+      <updated>2012-07-30T14:00:43Z</updated>
     </source>
   </entry>
 
@@ -2907,7 +2979,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-07-30T13:40:40Z</updated>
+      <updated>2012-07-30T14:00:42Z</updated>
     </source>
   </entry>
 
@@ -2962,7 +3034,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-30T13:40:44Z</updated>
+      <updated>2012-07-30T14:00:45Z</updated>
     </source>
   </entry>
 
@@ -2990,7 +3062,7 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-07-30T13:40:38Z</updated>
+      <updated>2012-07-30T14:00:41Z</updated>
     </source>
   </entry>
 
@@ -3056,7 +3128,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-07-30T13:40:43Z</updated>
+      <updated>2012-07-30T14:00:45Z</updated>
     </source>
   </entry>
 
@@ -3084,53 +3156,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-07-30T13:40:42Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://krastanov.wordpress.com/?p=298</id>
-    <link href="http://krastanov.wordpress.com/2012/05/14/differential-geometry-in-sympy-my-gsoc-project/" rel="alternate" type="text/html"/>
-    <title>Differential Geometry in SymPy – my GSoC project</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">The next few moths will be interesting. I got accepted in the Google Summer of Code program and I am already starting to worry (irrationally) about the project and the schedule. I will be working on a differential geometry module for SymPy (and time permitting, some more advanced tensor algebra). Basically, I want to create [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=krastanov.wordpress.com&amp;blog=15251174&amp;post=298&amp;subd=krastanov&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>The next few moths will be interesting. I got accepted in the Google Summer of Code program and I am already starting to worry (irrationally) about the project and the schedule. I will be working on a differential geometry module for SymPy (and time permitting, some more advanced tensor algebra).</p>
-<p>Basically, I want to create the boilerplate that will permit defining some scalar/vector/form/tensor field in an arbitrary coordinate system, then doing some coordinate-system-independent operations on the field (with hopefully coordinate-system-independent simplifications) and, finally, getting the equations describing the final result in another arbitrary coordinate system.</p>
-<p>With this in mind, the details about the project can be seen on <a href="https://github.com/sympy/sympy/wiki/GSoC-2012-Application-Stefan-Krastanov%3A-Vector-Analysis" target="_blank">the proposal page</a>. Most of it (all except the tensor algebra that I may work on at the end) is based on the work of <a href="http://groups.csail.mit.edu/mac/users/gjs/" target="_blank">Gerald Jay Sussman</a> and <a href="http://groups.csail.mit.edu/mac/users/wisdom/" target="_blank">Jack Wisdom</a> on <a href="http://dspace.mit.edu/handle/1721.1/30520" target="_blank">“Functional Differential Geometry”</a>. I suppose that this project started as a part of their superb book <a href="http://mitpress.mit.edu/sicm/" target="_blank">“Structure and Interpretation of Classical Mechanics”</a> (I really have to read this book if I am to call myself a physicist) and the accompanying <a href="http://groups.csail.mit.edu/mac/users/gjs/6946/linux-install.htm" target="_blank">“Scheme Mechanics”</a> software. By the way, reading the Scheme code is a wonderful experience. This language is beautiful! The authors are also actively updating their code and a newer, more detailed paper on the project can be found <a href="http://krastanov.wordpress.com/category/sympy-2/feed/groups.csail.mit.edu/mac/users/gjs/6946/calculus-indexed.pdf" target="_blank">here</a>.</p>
-<p>Most of my work will be reading the Scheme code and tracing corner cases in SymPy. My workflow will probably consist of implementing some notion from “Functional Differential Geometry” in SymPy and only when I get to semi-working state comparing with the original Scheme code for ideas, then repeating the process on the next part of the system. This way I will be less susceptible to implementing Scheme idioms in Python.</p>
-<p>Writing the final version of each function/class of my module will probably take very little time. Most of the time will be dedicated to removing/studying corner cases and assumptions in SymPy’s codebase (more about these later) and experimenting with different approaches for the module structure (and of course reading/deciphering the work of Wisdom and Sussman).</p>
-<p>Finally, I will speak a bit about the aforementioned corner cases and assumptions in the SymPy’s codebase. There are the obvious things like having to derive from Expr if you want to be able to have your class as a part of a symbolic expression. Then there is the fact that Basic (and its subclasses like Expr) do some magic with the arguments for the constructor (saved in <code>expr._args</code>) in order to automagically have:</p>
-<ul>
-<li>rebuildable expression with <code>eval(srepr(expr))==expr</code></li>
-<li>rebuildable expression with <code>type(expr)(*expr._args)</code></li>
-<li>some magic with the <code>_hashable_content()</code> method in order to (presumably) have efficient cashing</li>
-</ul>
-<p>These details make it a bit unclear how to implement things like <code>CoordinateSystem</code> objects which learn during their existence how to transform to other coordinate systems (thus their implementation in code is a mutable object) but at the same time they are the same mathematical object. Anyway, from what I have seen just having a persistent hash and a correct <code>srepr</code> should be enough. I wonder how tabu it is to change your <code>_args</code> after the creation of the class. Why I need to worry about caching (thus the hash) and rebuilding (thus the <code>srepr</code>) is still unclear to me, but I will dedicate whole posts to them later on when I have the explanation. The caching is presumably for performance. It is the need for all that fancy magic that does not permit duck typing in SymPy. If you do not subclass Basic, you can not be part of SymPy, no matter the interfaces that you support.</p>
-<p>Then there is the question of using the container subclasses of <code>Expr</code>. Things like <code>Add</code> and <code>Mul</code>, which I would have expected to be just containers. However, they are not. They also do some partial canonicalization, but at the moment their exact role (and more importantly, what they <strong>don’t</strong> do) is very unclear to me. There was much discussion about AST trees and canonicalization on the mailing list, if you are interested, and how exactly to separate the different duties that <code>Add</code> and <code>Mul</code> have, but as this is enough work for another GSoC I decided to just stop thinking about that and use them in the simples way possible: just as containers.</p>
-<p>There is one drawback to this approach. The sum of two vector fields for example is still a vector field and the object that represents the sum should have all the methods of the object representing one of the fields, however <code>Add</code> does not have the same methods as <code>VectorField</code>. The solution that was already used in the matrix module was to create classes like <code>MatrixAdd</code>, and the same was done in the quantum physics module. However, I fear such proliferation of classes for it becomes unsustainable as the number of different modules grows. What happens when I want to combine two objects from the disjoint modules? This is why I simply use <code>Add</code> and <code>Mul</code> and implement helper functions that are not part of the class. These helper functions will ideally be merged in some future canonicalizer that comes about from separating the container and canonicalization parts of <code>Add</code> and <code>Mul</code>.</p>
-<p>One last remark is that I will probably have to work on sympify and the sympification of matrices, as I will use coordinate tuples (column vectors) quite often. Then there is the distinction between Application and Function and all the magic with metaclasses that seems very hard to justify. But probably I will write entire posts in which I try to understand why the metaclasses in the core are necessary.</p>
-<br/>  <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=krastanov.wordpress.com&amp;blog=15251174&amp;post=298&amp;subd=krastanov&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2012-05-13T23:15:15Z</updated>
-    <category term="GSoC - diffgeom"/>
-    <category term="differential geometry"/>
-    <category term="gsoc"/>
-    <category term="symbolic algebra"/>
-    <category term="sympy"/>
-    <category term="vector analysis"/>
-    <author>
-      <name>Stefan Krastanov</name>
-    </author>
-    <source>
-      <id>http://krastanov.wordpress.com</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://krastanov.wordpress.com/category/sympy-2/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://krastanov.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://krastanov.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://krastanov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>Just another WordPress.com site</subtitle>
-      <title>Stefan's Blog » SymPy</title>
-      <updated>2012-07-28T21:41:06Z</updated>
+      <updated>2012-07-30T14:00:44Z</updated>
     </source>
   </entry>
 </feed>
