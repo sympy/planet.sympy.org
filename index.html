@@ -76,16 +76,14 @@ StopIteration                             Traceback 
 
 StopIteration:
 
-
 </pre><p></p>
 <p>The reason is certainly the change of base performed on line 11 in the pseudocode (this is also indicated in my code on my local week6 branch <a href="https://github.com/amakelov/sympy/tree/week6" target="_blank">here</a> ). The use of the function BASESWAP there is what gets us into trouble. It is meant to be applied to  base and a strong generating set relative to it, switch two consecutive base points and change the generating set accordinly.  However, in subgroup_search the goal is to change a base <img src="http://s0.wp.com/latex.php?latex=%28b_1%2C+b_2%2C+%5Cldots%2C+b_l%2C+%5Cldots%2C+b_k%29&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="(b_1, b_2, \ldots, b_l, \ldots, b_k)" class="latex" title="(b_1, b_2, \ldots, b_l, \ldots, b_k)" /> to <img src="http://s0.wp.com/latex.php?latex=%28b_1%2C+b_2%2C+%5Cldots%2C+b_l%27%2C+%5Cldots%2C+b_k%29&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="(b_1, b_2, \ldots, b_l', \ldots, b_k)" class="latex" title="(b_1, b_2, \ldots, b_l', \ldots, b_k)" /> where <img src="http://s0.wp.com/latex.php?latex=b_l%27&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="b_l'" class="latex" title="b_l'" /> is a new point. The book ([1]) mentions that this is done by using BASESWAP but doesn’t provide any details. My strategy is the following: I cut the base so that it becomes <img src="http://s0.wp.com/latex.php?latex=%28b_1%2C+b_2%2C%5Cldots%2C+b_l%29&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="(b_1, b_2,\ldots, b_l)" class="latex" title="(b_1, b_2,\ldots, b_l)" /> and cut the correponding data structures – the strong generators <strong>strong_gens</strong>, the <strong>basic_orbits, </strong> the <strong>transversals</strong>, and the strong generators distributed according to membership in basic stabilizers <strong>distr_gens </strong>(I know, I still have to rename this to strong_gens_distr). Then I append the point <img src="http://s0.wp.com/latex.php?latex=b_l%27&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="b_l'" class="latex" title="b_l'" /> so that the base is <img src="http://s0.wp.com/latex.php?latex=%28b_1%2C+b_2%2C+%5Cldots%2C+b_l%2C+b_l%27%29&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="(b_1, b_2, \ldots, b_l, b_l')" class="latex" title="(b_1, b_2, \ldots, b_l, b_l')" /> and calculate an orbit and transversal for $b_l’$ under the stabilzier of <img src="http://s0.wp.com/latex.php?latex=b_1%2C+b_2%2C+%5Cldots%2C+b_l&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="b_1, b_2, \ldots, b_l" class="latex" title="b_1, b_2, \ldots, b_l" />. Finally I apply BASESWAP to this new base in order to switch the two rightmost points. Then I go back to <img src="http://s0.wp.com/latex.php?latex=%28b_1%2C+b_2%2C+%5Cldots%2C+b_l%27%2C+%5Cldots%2C+b_k%29&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="(b_1, b_2, \ldots, b_l', \ldots, b_k)" class="latex" title="(b_1, b_2, \ldots, b_l', \ldots, b_k)" /> by appending what I had cut in the start and calculating a transversal/orbit for <img src="http://s0.wp.com/latex.php?latex=b_%7Bl%2B1%7D&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="b_{l+1}" class="latex" title="b_{l+1}" /> under the stabilizer just found, that of <img src="http://s0.wp.com/latex.php?latex=b_1%2C+%5Cldots%2C+b_l%27&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="b_1, \ldots, b_l'" class="latex" title="b_1, \ldots, b_l'" />. Obviously, the resulting BSGS structures are valid only up to position <img src="http://s0.wp.com/latex.php?latex=l&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="l" class="latex" title="l" />, and that’s all the information we can acquire without another application of baseswap or finding another stabilizer ( and in general, finding a stabilizer is a computationally hard task relative to calculating orbits/transversals). The entire purpose of this use of BASESWAP in SUBGROUPSEARCH is to obtain generators for the stabilizer of <img src="http://s0.wp.com/latex.php?latex=b_1%2C+b_2%2C+%5Cldots%2C+b_l%27&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="b_1, b_2, \ldots, b_l'" class="latex" title="b_1, b_2, \ldots, b_l'" /> and maintain a base/strong generating set that are valid up to a certain position. There are many such base changes performed on the same base throughout the course of the function and something goes wrong along the way. I still have to figure out why and where.</p></li>
-<li><strong>The good news</strong>: There is a straightforward alternative to using BASESWAP: maintain a list of generators for each of the basic stabilizers in <img src="http://s0.wp.com/latex.php?latex=%28b_1%2C+b_2%2C+%5Cldots%2C+b_k%29&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="(b_1, b_2, \ldots, b_k)" class="latex" title="(b_1, b_2, \ldots, b_k)" /> and change it accordingly as the base is changed, using the function stabilizer() in sympy/combinatorics/perm_groups.py. For each base chaand he does not mention base change in the context of subgroup searching.nge we have to calculate one more stabilizer, so that’s not terrible. It is also sort of suggested in <a href="http://www.google.com/url?sa=t&amp;rct=j&amp;q=&amp;esrc=s&amp;source=web&amp;cd=1&amp;ved=0CFIQFjAA&amp;url=http%3A%2F%2Fwww.math.colostate.edu%2F~hulpke%2FCGT%2Fcgtnotes.pdf&amp;ei=u48WUN24M4jf4QS2q4GgBg&amp;usg=AFQjCNHasgOmBkx2AetpE0_-92TFjSyU3A" target="_blank">“Notes on Computational Group Theory”</a> by Alexander Hulpke (page 34). The problem with this approach is that stabilizer() tends to return a group with many generators, and repeated applications keep increasing this number. However, using this <strong>removed the bug from SUBGROUPSEARCH. </strong>As before, more comprehensive tests are on the way : )</li>
+<li><strong>The good news</strong>: There is a straightforward alternative to using BASESWAP: maintain a list of generators for each of the basic stabilizers in <img src="http://s0.wp.com/latex.php?latex=%28b_1%2C+b_2%2C+%5Cldots%2C+b_k%29&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="(b_1, b_2, \ldots, b_k)" class="latex" title="(b_1, b_2, \ldots, b_k)" /> and change it accordingly as the base is changed, using the function stabilizer() in sympy/combinatorics/perm_groups.py. For each base change we have to calculate one more stabilizer, so that’s not terrible. It is also sort of suggested in <a href="http://www.google.com/url?sa=t&amp;rct=j&amp;q=&amp;esrc=s&amp;source=web&amp;cd=1&amp;ved=0CFIQFjAA&amp;url=http%3A%2F%2Fwww.math.colostate.edu%2F~hulpke%2FCGT%2Fcgtnotes.pdf&amp;ei=u48WUN24M4jf4QS2q4GgBg&amp;usg=AFQjCNHasgOmBkx2AetpE0_-92TFjSyU3A" target="_blank">“Notes on Computational Group Theory”</a> by Alexander Hulpke (page 34). The problem with this approach is that stabilizer() tends to return a group with many generators, and repeated applications keep increasing this number. However, using this <strong>removed the bug from SUBGROUPSEARCH. </strong>As before, more comprehensive tests are on the way : )</li>
 <li><strong>Yet another alternative : </strong>we can use the incremental Schreier-Sims algorithm with the new base <img src="http://s0.wp.com/latex.php?latex=%28b_1%2C+%5Cldots%2C+b_l%27%2C+%5Cldots%2C+b_k%29&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="(b_1, \ldots, b_l', \ldots, b_k)" class="latex" title="(b_1, \ldots, b_l', \ldots, b_k)" /> and the strong generating set for <img src="http://s0.wp.com/latex.php?latex=%28b_1%2C+%5Cldots%2C+b_l%2C+%5Cldots%2C+b_k%29&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="(b_1, \ldots, b_l, \ldots, b_k)" class="latex" title="(b_1, \ldots, b_l, \ldots, b_k)" />. There will likely be redundant generators after that, and it will probably involve more computation than finding a single stabilizer. However, in the long run (since there are many base changes performed) this might perform faster (due to the increasing number of generators that stabilizer() tends to create). I have not tried that approach yet.</li>
 <li>Other than that, I had <a href="https://github.com/sympy/sympy/pull/1406" target="_blank">my latest major pull request</a> merged! Thanks a lot to <a href="https://github.com/Krastanov" target="_blank">Stefan</a> and my mentor <a href="https://github.com/wdjoyner" target="_blank">David</a> for the review! That was the largest one so far…</li>
 <li>I started reading about some of the applications of subgroup search; subgroup intersection seems to be the easiest to implement, so I’ll probably go for it first.</li>
 </ul>
 <p>That’s it for now : )</p>
-<p> </p>
 <br />  <a href="http://feeds.wordpress.com/1.0/gocomments/amakelov.wordpress.com/429/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/amakelov.wordpress.com/429/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;blog=35896871&amp;post=429&amp;subd=amakelov&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
@@ -948,11 +946,11 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
 
 
 
-<h3><a href="https://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
+<h3><a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
 
 
 <div class="entrygroup" id="http://asmeurersympy.wordpress.com/?p=1112">
-<h4 lang="en"><a href="https://asmeurersympy.wordpress.com/2012/07/09/emacs-7-months-later/">Emacs: 7 months later</a></h4>
+<h4 lang="en"><a href="http://asmeurersympy.wordpress.com/2012/07/09/emacs-7-months-later/">Emacs: 7 months later</a></h4>
 <div class="entry">
 <div class="content" lang="en">
 <p>In my <a href="http://asmeurersympy.wordpress.com/2012/01/13/vim-vs-emacs-part-3/">final post</a> about my switching to Emacs, a <a href="http://asmeurersympy.wordpress.com/2012/01/13/vim-vs-emacs-part-3/#comment-544">commenter</a>, Scott, asked me, “It has been a while since you started using Emacs. I’m just curious. How is your experience so far now that you have more experience and a more complete configuration?”  My reply was getting quite long, so I figured it would be best suited as a new post.</p>
@@ -980,7 +978,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
 
 
 <p class="date">
-<a href="https://asmeurersympy.wordpress.com/2012/07/09/emacs-7-months-later/">by Aaron Meurer at July 09, 2012 05:24 AM</a>
+<a href="http://asmeurersympy.wordpress.com/2012/07/09/emacs-7-months-later/">by Aaron Meurer at July 09, 2012 05:24 AM</a>
 </p>
 </div>
 </div>
@@ -2393,11 +2391,11 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
 
 
 
-<h3><a href="https://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
+<h3><a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
 
 
 <div class="entrygroup" id="https://asmeurersympy.wordpress.com/?p=1109">
-<h4 lang="en"><a href="https://asmeurersympy.wordpress.com/2012/06/14/how-to-install-the-development-version-of-ipython-qtconsole-and-notebook-in-ubuntu/">How to install the development version of IPython Qtconsole and Notebook in Ubuntu</a></h4>
+<h4 lang="en"><a href="http://asmeurersympy.wordpress.com/2012/06/14/how-to-install-the-development-version-of-ipython-qtconsole-and-notebook-in-ubuntu/">How to install the development version of IPython Qtconsole and Notebook in Ubuntu</a></h4>
 <div class="entry">
 <div class="content" lang="en">
 <p>Both the awesome <a href="http://ipython.org/ipython-doc/dev/interactive/htmlnotebook.html">IPython notebook</a> and <a href="http://ipython.org/ipython-doc/stable/interactive/qtconsole.html">Qtconsole</a> are in the Ubuntu repositories, so if you just want to use the stable released versions, you can just do</p>
@@ -2426,7 +2424,7 @@ sudo python setup.py develop
 
 
 <p class="date">
-<a href="https://asmeurersympy.wordpress.com/2012/06/14/how-to-install-the-development-version-of-ipython-qtconsole-and-notebook-in-ubuntu/">by Aaron Meurer at June 14, 2012 05:49 AM</a>
+<a href="http://asmeurersympy.wordpress.com/2012/06/14/how-to-install-the-development-version-of-ipython-qtconsole-and-notebook-in-ubuntu/">by Aaron Meurer at June 14, 2012 05:49 AM</a>
 </p>
 </div>
 </div>
@@ -3512,7 +3510,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
 <h2>Subscriptions</h2>
 <ul>
 <li>
-<a href="https://asmeurersympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="https://asmeurersympy.wordpress.com" class="message" title="no activity in 7 days">Aaron Meurer</a>
+<a href="http://asmeurersympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://asmeurersympy.wordpress.com" class="message" title="no activity in 7 days">Aaron Meurer</a>
 </li>
 <li>
 <a href="http://addisoncugini.blogspot.com/feeds/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://addisoncugini.blogspot.com/" class="message" title="no activity in 7 days">Addison Cugini</a>
@@ -3611,7 +3609,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
 
 <p>
 <strong>Last updated:</strong><br>
-July 31, 2012 11:01 AM<br>
+July 31, 2012 11:21 AM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
