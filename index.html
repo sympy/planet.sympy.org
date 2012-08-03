@@ -23,6 +23,48 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>August 03, 2012</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://rhoforsympy.wordpress.com" title="rhoforsympy">Guru Devanla</a></h3>
+
+
+<div class="entrygroup" id="http://rhoforsympy.wordpress.com/?p=235">
+<h4 lang="en"><a href="http://rhoforsympy.wordpress.com/2012/08/03/week-11-fidelity-of-quantum-states/">Week 11:  Fidelity of quantum states</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p>As discussed in my previous weeks report, this week I started addressing some of the issues in the pending PR’s and all the pending PRs were merged!</p>
+<p>In addition to getting the pending PRs accepted, I have stated working on 2 other tasks. One of them, that was completed is the feature to compute Fidelity (<a href="https://github.com/sympy/sympy/pull/1459">PR 1459</a>) of quantum states.  Some screen-shots follow (taken from notebook examples available with code base)</p>
+<p>For the next week, my plan is to finish up work on the implementation of Shor’s algorithm available <a href="https://github.com/addisonc/sympy/blob/addison-main/sympy/physics/quantum/shor.py">here</a>.</p>
+<p>Here are some examples of using the fidelity function:</p>
+<p><a href="http://rhoforsympy.files.wordpress.com/2012/08/fidelity_ket.png"><img src="http://rhoforsympy.files.wordpress.com/2012/08/fidelity_ket.png?w=500&amp;h=382" title="fidelity_ket" height="382" width="500" alt="" class="alignleft size-full wp-image-238" /></a></p>
+<p><a href="http://rhoforsympy.files.wordpress.com/2012/08/fidelity-qubit2.png"><img src="http://rhoforsympy.files.wordpress.com/2012/08/fidelity-qubit2.png?w=500&amp;h=369" title="fidelity-qubit" height="369" width="500" alt="" class="alignleft size-full wp-image-243" /></a></p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/rhoforsympy.wordpress.com/235/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/rhoforsympy.wordpress.com/235/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;blog=34650270&amp;post=235&amp;subd=rhoforsympy&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://rhoforsympy.wordpress.com/2012/08/03/week-11-fidelity-of-quantum-states/">by grdvnl at August 03, 2012 09:19 PM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>August 01, 2012</h2>
 
 <div class="channelgroup">
@@ -3438,82 +3480,6 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
 </div>
 
 </div>
-<div class="daygroup">
-<h2>May 15, 2012</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://rhoforsympy.wordpress.com" title="rhoforsympy">Guru Devanla</a></h3>
-
-
-<div class="entrygroup" id="http://rhoforsympy.wordpress.com/?p=16">
-<h4 lang="en"><a href="http://rhoforsympy.wordpress.com/2012/05/15/plan-for-first-4-weeks-post-1/">Plan for first 4 weeks : Post 1</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>As part of first set of steps (first 4 weeks) in the project plan, my initial proposal was to achieve the following specific goals:<br />
-(These goals are listed also with respect using the current implementation of density operators at this branch: <a href="https://github.com/ellisonbg/sympy/commit/d43f10bd899b5e4dcd75876a1b6a9e82333e0f57" target="_blank" title="densityop">densityOp branch at ellisongb@github</a></p>
-<ul>
-<li>Start with density.py<br />
-Make it work with different bases by aligning the current implementation with representation logic.</li>
-<li>Come up with an proposal/implementation for density matrices specific to qubits. ( Do we need a specific version for qubits? )</li>
-<li>Update TensorProduct.py for multi-qubit states.</li>
-</ul>
-<p>The above tasks currently has been planned for the first 4 weeks of the project. For each of the above tasks, I will provide 2 sections in this blog and subsequent blog posts. In the first section, I describe my understanding of current implementation and in the second section I list out what is needed (kind of list out requirements, and then propose the implementation idea).</p>
-<h3>What is currently available in Density.py? ( from the above git branch)</h3>
-<ul>
-<li>Currently, density.py has the basic function prototypes. <br />
-The current density object accepts any kind of input. That is, there is no restriction on objects to be strictly of type ‘State’ or ‘Ket’.</li>
-<li>Also, when we use Qubit’s as argument to the density object, what gets printed is not accurate. For example,
-</li><li>
-<img src="https://rhoforsympy.files.wordpress.com/2012/05/screenshot-2.png?w=500" alt="Example of output for Density" /><p></p>
-</li><li>The doit() method and represent() method do not execute successfully.</li>
-</ul>
-<h3>Next steps for density.py</h3>
-<ul>
-<li> Add eval() function <br />
-     Validate the arguments passed to the constructor. Only instances of type ‘State’ will be accepted.<br /> If any QExpr is passed as argument, then QExpr will have to be simplified and checked if final QExpr object is an instance of type ‘State’. Alternatively, we could just check if passed states are of type ‘Ket’. This step takes care of creation of density matrices.</li>
-<li> Update doit() : The current implementation currently errors out. We will work on this to fix it.</li>
-<li> Update _represent() : The current implementation errors out. Also, the current implementation expands the density operator (thus producing the matrix) before the original represent() method is invoked. The approach, we plan to take is call the represent method for each of the states in the density op.<br />
-Say, Density([ ket1,p1 ] , [ket2, p2], [ket3,p3] ), then would way do change of basis using represent would be to do the following:<br />
-(the following code, is just pseudo-code) <p></p>
-<p></p><pre class="brush: python;">_represent(self, **options)
-  states = []
-  for each state in density matrix
-   states.append(represent(state, **options)
-  return Density(states, probabilities )
-</pre><p></p>
-<p><i>(My understanding is the probabilities of each state should not get affected during change of basis. Is this correct?)</i></p>
-</li>
-<li> Add test cases. Of course, this step will be step 0.</li>
-</ul>
-<p>
-My next blog post will have similar structure of discussion for the next 2  topics. My hope is by end of this week, these details are spec’d out enough so that I can exactly say what I will deliver at end of each of the first 4 weeks.</p>
-<p>
-P.S: I plan to provide detailed plan for remaining tasks as we approach the specific week for corresponding task.</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/rhoforsympy.wordpress.com/16/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/rhoforsympy.wordpress.com/16/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;blog=34650270&amp;post=16&amp;subd=rhoforsympy&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://rhoforsympy.wordpress.com/2012/05/15/plan-for-first-4-weeks-post-1/">by grdvnl at May 15, 2012 11:42 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -3621,7 +3587,7 @@ P.S: I plan to provide detailed plan for remaining tasks as we approach the spec
 
 <p>
 <strong>Last updated:</strong><br>
-August 02, 2012 02:41 AM<br>
+August 03, 2012 09:20 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
