@@ -8,6 +8,19 @@
 	<description>Planet SymPy - http://planet.sympy.org/</description>
 
 <item>
+	<title>Bharath M R: GSOC week 11</title>
+	<guid isPermaLink="true">http://catchmrbharath.github.com/programming/2012/08/05/gsoc-week-11</guid>
+	<link>http://catchmrbharath.github.com/programming/2012/08/05/gsoc-week-11</link>
+	<description>&lt;p&gt;I got my adaptive sampling branch merged last week. Now the plots are sampled adaptively and is more accurate. I also added a lot of tests to the implicit plotting branch and the coverage now is greater than 90%.&lt;/p&gt;
+
+&lt;p&gt;One of the major things decided in the previous week was to restructure the plot function. Presently &lt;code&gt;plot&lt;/code&gt; is a single function, which depending on its input, renders an 2d or an 3d plot. Though it plots the right kind of plot, the &lt;code&gt;plot&lt;/code&gt; function is quite complex and it was decided to split the plot function into smaller functions that plots a particular type of plot. I tried an approach where all 2D plots are plotted by a &lt;code&gt;plot2d&lt;/code&gt; function, the 3D plots by &lt;code&gt;plot3D&lt;/code&gt; and the existing &lt;code&gt;plot_implicit&lt;/code&gt; plots to plot regions and implicit equations. Aaron mentioned that the API is still very complex as I was using tuples and lists to differentiate between a parametric plot and a 2d line plot and he was right. It is a bit complex and it was decided to have a functions for each kind of plot.&lt;/p&gt;
+
+&lt;p&gt;I think i can have the new plot functions as an PR by next week and I would like to try getting a Mayavi backend ready by the end of my GSoC period.&lt;/p&gt;
+
+&lt;p&gt;I forgot to mention why I deviated from my what I said I would do in my GSoC application. I tried getting a svgfig backend ready for almost one and a half week, and it was quite difficult. svgfig is not being updated and I had a hard time getting the axis ticks labelling to work most of the time. I wrote to the project maintainer many times and he helped me with a lot of things, but the library was not polished enough to use it with Sympy Live. So plotting for SymPy Live should be attempted with a javascript plotting library rather than a python backend. If we get matplotlib support on GAE, then it would be awesome.&lt;/p&gt;</description>
+	<pubDate>Sun, 05 Aug 2012 07:00:00 +0000</pubDate>
+</item>
+<item>
 	<title>Angadh Nanjangud: GSoC Blog Post</title>
 	<guid isPermaLink="true">http://angadhsympy.wordpress.com/2012/08/04/gsoc-blog-post-58/</guid>
 	<link>http://angadhsympy.wordpress.com/2012/08/04/gsoc-blog-post-58/</link>
@@ -1893,42 +1906,6 @@ potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
 &lt;p&gt;I think that is all for now. I’m working a little overtime with school to get my duties as a TA finished so that I can dedicate begin working on the Summer of Code by my proposed start date of June 5th. See you next week!&lt;/p&gt;
 &lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/angadhsympy.wordpress.com/55/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/angadhsympy.wordpress.com/55/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=angadhsympy.wordpress.com&amp;amp;blog=35620584&amp;amp;post=55&amp;amp;subd=angadhsympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
 	<pubDate>Sat, 26 May 2012 04:44:11 +0000</pubDate>
-</item>
-<item>
-	<title>Guru Devanla: Week 1 Report : Initial set of routines for Density Operators</title>
-	<guid isPermaLink="false">http://rhoforsympy.wordpress.com/?p=76</guid>
-	<link>http://rhoforsympy.wordpress.com/2012/05/25/week-1-report-initial-set-of-routines-for-density-operators/</link>
-	<description>&lt;p&gt;Today I submitted a &lt;a href=&quot;https://github.com/sympy/sympy/pull/1312&quot; target=&quot;_blank&quot;&gt;pull&lt;/a&gt; request&lt;/p&gt;
-&lt;p&gt;&lt;span style=&quot;text-decoration: underline;&quot;&gt;What went into this weeks pull request&lt;/span&gt;&lt;/p&gt;
-&lt;p&gt;The framework and routines were inherited from Brian’s github branch.&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;The  _eval_args function was added.  I went back-and-forth on deciding if we needed strong checks to make sure the states used to build density objects should be strictly &lt;strong&gt;KetBase&lt;/strong&gt; and &lt;strong&gt;Qubits&lt;/strong&gt;. But, there were scenarios where just symbols could be used for states, or even QExpr could be used. So, discarded that check.   But, this would mean Density objects could have arbitrary objects for states.  &lt;em&gt;Flip side to this is,  represent() on density objects which do not have a KetBase object does not work very well. &lt;/em&gt;For example, having ‘mul’ expressions for ‘state’ creates problems in represent functions. But, my assumption is represent function need not handle such scenarios.                                                                                                                                    Similarly, I went back and forth regarding checking for valid values for probabilities. Then, I dropped those validations as well.&lt;/li&gt;
-&lt;li&gt;Added test routines for all public facing methods in density.py. Some methods from original DensityOp branch are not in this pull request. I will add them back in future requests.&lt;/li&gt;
-&lt;li&gt;I also created a minor &lt;a href=&quot;https://github.com/sympy/sympy/pull/1311&quot; target=&quot;_blank&quot;&gt;pull&lt;/a&gt; request for minor printing changes that were in the original densityOp branch. This takes care of changes to the latex() in operator.py. I will add checks for density operator after this pull request is accepted.&lt;/li&gt;
-&lt;li&gt;Added test routines for changes related to density in qapply.py. These checks will have to be extended after I make density operators work well with Qubits.&lt;/li&gt;
-&lt;li&gt;Added doc strings.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;span style=&quot;text-decoration: underline;&quot;&gt;Where I spent a my time while trying to accomplish this weeks tasks:&lt;/span&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Understanding the process-function call flow of _eval_args,   _print methods.&lt;/li&gt;
-&lt;li&gt;Getting familiarized with operator.py , represent(), and qapply().&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;(The following point is also a question for my next task)&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;The way  &lt;em&gt;_qsympify_sequence(seq)&lt;/em&gt; method is implemented, it treats any Qubit() passed as state to Density as a sequence object. Therefore, the Qubit object is lost and a tuple is replaced instead of the Qubit object. This needs to a fixed or a work around decided so that Qubits can be provided as states to Density objects.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;span style=&quot;text-decoration: underline;&quot;&gt;My next steps ( plan for next week’s pull request):&lt;/span&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Discuss with the mentor team and see how to approach the problem with Qubits being converted to sequence. ( in next 2 days )&lt;/li&gt;
-&lt;li&gt;Add remaining functionality into density.py ( entropy, reduced trace operations ) ( should be completed by middle of next week )&lt;/li&gt;
-&lt;li&gt;Blog about the implementation details of changes to tensorproduct.py with respect to what we would need for density operators.  I hope to also have this part implemented by end of next week.&lt;/li&gt;
-&lt;li&gt;Address issues with the current pull request. I plan to have this as the top priority task and work on this every time it comes back to me.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;span style=&quot;text-decoration: underline;&quot;&gt;Misc:&lt;/span&gt;&lt;/p&gt;
-&lt;p&gt;I gave a lightening talk at Google Chicago office this week regarding my GSoC 2012 project and there was lot of interest in Sympy. Particularly, folks were very excited to know about  &lt;a href=&quot;http://live.sympy.org&quot; target=&quot;_blank&quot;&gt;Sympy Live&lt;/a&gt; website which I spoke about in the presentation.&lt;/p&gt;
-&lt;p&gt;Also, met one of our Sympy contributors &lt;a href=&quot;https://github.com/mrocklin&quot;&gt;Matthew Rocklin&lt;/a&gt;  at the meeting. Nice to meet someone you know only as an email-id, in person!&lt;/p&gt;
-&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/rhoforsympy.wordpress.com/76/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/rhoforsympy.wordpress.com/76/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;amp;blog=34650270&amp;amp;post=76&amp;amp;subd=rhoforsympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
-	<pubDate>Fri, 25 May 2012 19:06:15 +0000</pubDate>
 </item>
 
 </channel>
