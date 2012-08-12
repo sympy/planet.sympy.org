@@ -8,6 +8,97 @@
 	<description>Planet SymPy - http://planet.sympy.org/</description>
 
 <item>
+	<title>Sergiu Ivanov: The Revolution (The Preview)</title>
+	<guid isPermaLink="false">http://scolobb.wordpress.com/?p=384</guid>
+	<link>http://scolobb.wordpress.com/2012/08/12/the-revolution-the-preview/</link>
+	<description>&lt;p&gt;This week I continued the work on diagram embeddings and, unfortunately, I have discovered that &lt;tt&gt;Diagram&lt;/tt&gt; did not actually work properly.  I have written a status report E-mail to Tom, in which I briefly outine the progess.  This E-mail (with some omissions) will serve as this week’s blog post, because writing a proper blog post would take me at least three hours, and I would rather code right now, given the limited timeframe.&lt;/p&gt;
+&lt;blockquote&gt;&lt;p&gt;
+Unfortunately, I’ve got some, well, ambiguous news.&lt;/p&gt;
+&lt;p&gt;Remember I told you about hash-randomisation failures in computing&lt;br /&gt;
+diagram embeddings?  Well, it turned out that diagram embeddings was&lt;br /&gt;
+quite OK, and the problem went as far back as the Diagram class.&lt;br /&gt;
+Essentially, I have done a really bad job implementing it at the&lt;br /&gt;
+beginning of the summer: I wanted it to directly store all possible&lt;br /&gt;
+morphism compositions.  However, in that implementation, I didn’t&lt;br /&gt;
+really store all compositions, but just a part of them; which part I&lt;br /&gt;
+stored depended on the order in which the morphisms were supplied&lt;br /&gt;
+(severe facepalm &lt;img src=&quot;http://s0.wp.com/wp-includes/images/smilies/icon_sad.gif&quot; alt=&quot;:-(&quot; class=&quot;wp-smiley&quot; /&gt;  )&lt;/p&gt;
+&lt;p&gt;I tried thinking of some good fixes, but, as you can easily imagine,&lt;br /&gt;
+the whole idea of storing all composites has suffered an epic&lt;br /&gt;
+disintegration in the face of diagrams with cycles.  I am really&lt;br /&gt;
+_really_ astonished at how this has managed to slip by me for such a&lt;br /&gt;
+long time! &lt;img src=&quot;http://s0.wp.com/wp-includes/images/smilies/icon_sad.gif&quot; alt=&quot;:-(&quot; class=&quot;wp-smiley&quot; /&gt; &lt;/p&gt;
+&lt;p&gt;I have spent the first one third of Friday on trying to save the&lt;br /&gt;
+existing design somehow, by carefully processing all possible edge&lt;br /&gt;
+cases, but this has very quickly started to be abominable, and, of&lt;br /&gt;
+course, it didn’t work.  So, I have spent the greater part of Friday&lt;br /&gt;
+on thinking out a new Diagram.  I have spent all of yesterday, (all of&lt;br /&gt;
+Saturday, that is), on implementing this new concept.  Basically, the&lt;br /&gt;
+new Diagram only stores the relevant generator morphisms, but it is&lt;br /&gt;
+still able to correctly determine and enumerate the morphisms that&lt;br /&gt;
+belong to it.  It is also capable of determining whether it is finite&lt;br /&gt;
+or not (i.e., whether there are cycles in the underlying directed&lt;br /&gt;
+multigraph).  When asked for all morphisms, the new Diagram yields a&lt;br /&gt;
+generator which acts correctly both in the finite and infinite cases.&lt;br /&gt;
+In the finite case it produces all the morphisms of the Diagram.  This&lt;br /&gt;
+is clearly impossible in the infinite case, but Diagram is&lt;br /&gt;
+sufficiently clever in this case to produce the morphisms in a&lt;br /&gt;
+BFS-like manner.  Intuitively, it will first yield all length one&lt;br /&gt;
+morphisms, then all morphisms of length two, etc.&lt;/p&gt;
+&lt;p&gt;I have made some changes to the interface of the Diagram to better&lt;br /&gt;
+reflect the new internals.  Nevertheless, the behaviour in the finite&lt;br /&gt;
+case is the same as that of the old Diagram (modulo some property&lt;br /&gt;
+names and minor changes, of course).&lt;/p&gt;
+&lt;p&gt;One bit of good news that deserves standing out in a separate&lt;br /&gt;
+paragraph is that I only had to change _one_ line of code in&lt;br /&gt;
+diagram_drawing.py to get it to work with the new Diagram.  (Well, I&lt;br /&gt;
+did drop three other lines, because they were redundant), so this&lt;br /&gt;
+radical swerve with the Diagram has left the larger part of my GSoC&lt;br /&gt;
+work unaffected.&lt;/p&gt;
+&lt;p&gt;Now, I have started cherry-picking the diagram embeddings code, and I&lt;br /&gt;
+have arrived at a conclusion that Diagram has to be further extended.&lt;br /&gt;
+(“Extending” means adding something new, not rewriting it again.)&lt;br /&gt;
+Namely, it is insufficient to know whether the whole Diagram is finite&lt;br /&gt;
+or not; I really need to know whether a certain hom-set is finite or&lt;br /&gt;
+not.  It’s not that hard to implement, and I’ve got a cool book on&lt;br /&gt;
+graphs; however, it’s going to require some extra time.&lt;/p&gt;
+&lt;p&gt;Here comes the most important part of my message: I’m working at the&lt;br /&gt;
+fullest possible cruising speed (not sprinting yet; that I’m saving&lt;br /&gt;
+for the last 100m).  I won’t obviously have everything done tomorrow,&lt;br /&gt;
+on Monday; however, I strongly believe that I only need another couple&lt;br /&gt;
+days to finish the bulk of inferencing.  Provided that on Monday we&lt;br /&gt;
+have what is referred to as _soft_ pencils-down date, I hope that I’m&lt;br /&gt;
+still OK with the GSoC timeframe.  Further, I think I have already&lt;br /&gt;
+mentioned a couple times that I’m going to have another couple free&lt;br /&gt;
+weeks after GSoC, during which I will be easily able to finalise&lt;br /&gt;
+whatever will be unfinished.  Do note, however, that I definitely&lt;br /&gt;
+expect to have inferencing done _within_ the GSoC timeframe.&lt;/p&gt;
+&lt;p&gt;Conclusion: despite the rather radical direction things have taken in&lt;br /&gt;
+the last two days, I’m _still_ more or less fine with the timing.&lt;/p&gt;
+&lt;p&gt;At the moment, you will not be able to see the code I’m working on on&lt;br /&gt;
+GitHub.  The reason is that I’m juggling branches rather ninja-ily&lt;br /&gt;
+right now, so I don’t really have the most relevant one to push&lt;br /&gt;
+online, and they are all relatively short-lived.  I do expect to get&lt;br /&gt;
+back to working sequentially today, and once I’ve got there, I’ll push&lt;br /&gt;
+to ct3-commutativity to reflect the updates.&lt;/p&gt;
+&lt;p&gt;I’m documenting everything I do in as minute detail as possible.  I&lt;br /&gt;
+think the Diagram class and the embeddings functionality has more&lt;br /&gt;
+comments than actual code.  I expect this to make reviewing and later&lt;br /&gt;
+maintenance considerably more agreeable.  Further, my commits are&lt;br /&gt;
+almost all rather short, with acceptably long commit messages.  There&lt;br /&gt;
+is one commit that breaks the rule, however: the commit which adds the&lt;br /&gt;
+new Diagram.  It is one relatively large chunk of code, which replaces&lt;br /&gt;
+the old Diagram with the new one and shows that the old tests still&lt;br /&gt;
+pass modulo minor changes.  I have nevertheless reformatted the&lt;br /&gt;
+history a bit to make this commit easier to review and, of course, the&lt;br /&gt;
+code itself is just literally stuffed with comments.  All other&lt;br /&gt;
+commits are much more like my usual ones.
+&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;Whenever I’m done with the core parts of inferencing, I will write a proper blogpost.&lt;/p&gt;
+&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/384/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/384/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;amp;blog=35433045&amp;amp;post=384&amp;amp;subd=scolobb&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
+	<pubDate>Sun, 12 Aug 2012 19:16:45 +0000</pubDate>
+</item>
+<item>
 	<title>Angadh Nanjangud: GSoC blog post</title>
 	<guid isPermaLink="false">http://angadhsympy.wordpress.com/?p=420</guid>
 	<link>http://angadhsympy.wordpress.com/2012/08/12/penultimate-wee/</link>
@@ -1790,85 +1881,6 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
 &lt;p&gt;&lt;strong&gt;UPDATED&lt;/strong&gt; To included a more correct way to represent morphism composition as string (see first reply to first comment).&lt;/p&gt;
 &lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/106/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/106/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;amp;blog=35433045&amp;amp;post=106&amp;amp;subd=scolobb&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
 	<pubDate>Fri, 01 Jun 2012 21:41:39 +0000</pubDate>
-</item>
-<item>
-	<title>Stefan Krastanov: Scalar and Vector Fields in SymPy – First Steps</title>
-	<guid isPermaLink="false">http://krastanov.wordpress.com/?p=307</guid>
-	<link>http://krastanov.wordpress.com/2012/05/27/scalar-and-vector-fields-in-sympy-first-steps/</link>
-	<description>&lt;p&gt;The Differential Geometry module for SymPy already supports some interesting basic operations. However, it would be appropriate to describe its structure before giving any examples.&lt;/p&gt;
-&lt;p&gt;First of all, there are the &lt;code&gt;Manifold&lt;/code&gt; and &lt;code&gt;Patch&lt;/code&gt; classes which are just placeholders. They contain all the coordinate charts that are defined on the patch and do not provide, for instance, any topological information. This leads us to the &lt;code&gt;CoordSystem&lt;/code&gt; class which contains all the coordinate transformation logic. For example, if I want to define the &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cmathbb%7BR%7D%5E2+&amp;amp;bg=f3f3f3&amp;amp;fg=888888&amp;amp;s=0&quot; alt=&quot;\mathbb{R}^2 &quot; class=&quot;latex&quot; title=&quot;\mathbb{R}^2 &quot; /&gt; euclidean manifold together with the polar and Cartesian coordinate systems I would do:&lt;/p&gt;
-&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;R2 = Manifold('R^2', 2)
-# Patch and coordinate systems.
-R2_origin = Patch('R^2_o', R2)
-R2_r = CoordSystem('R^2_r', R2_origin)
-R2_p = CoordSystem('R^2_p', R2_origin)
-
-# Connecting the coordinate charts.
-x, y, r, theta = [Dummy(s) for s in ['x', 'y', 'r', 'theta']]
-R2_r.connect_to(R2_p, [x, y],
-                      [sqrt(x**2 + y**2), atan2(y, x)],
-                inverse=False, fill_in_gaps=False)
-R2_p.connect_to(R2_r, [r, theta],
-                      [r*cos(theta), r*sin(theta)],
-                inverse=False, fill_in_gaps=False)
-&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
-&lt;p&gt;All following examples will be about the &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cmathbb%7BR%7D%5E2+&amp;amp;bg=f3f3f3&amp;amp;fg=888888&amp;amp;s=0&quot; alt=&quot;\mathbb{R}^2 &quot; class=&quot;latex&quot; title=&quot;\mathbb{R}^2 &quot; /&gt; manifold which is already implemented in the code for the module. Also, notice the use of the &lt;code&gt;inverse&lt;/code&gt; and &lt;code&gt;fill_in_gaps&lt;/code&gt; flags. When they are set to &lt;code&gt;True&lt;/code&gt; the &lt;code&gt;CoordSystem&lt;/code&gt; classes try to automatically deduce the inverse transformations using SymPy’s &lt;code&gt;solve&lt;/code&gt; function.&lt;/p&gt;
-&lt;p&gt;Now that we have a manifold we would like to create some fields on it and define some points that belong to the manifold. The points are implemented in the &lt;code&gt;Point&lt;/code&gt; class. You need to specify some coordinates when you define the point, however after that the object is completely coordinate-system-idependent.&lt;/p&gt;
-&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;# You need to specify coordinates in some coordinate system
-p = Point(R2_p, [r0, theta0])
-&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
-&lt;p&gt;Then one can define fields. &lt;code&gt;ScalarField&lt;/code&gt; takes points to real numbers and &lt;code&gt;VectorField&lt;/code&gt; is an operator on &lt;code&gt;ScalarField&lt;/code&gt; taking a scalar field to another scalar field by applying a directional derivative. For example, here &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt; are the scalar fields taking a point and returning it’s coordinate and &lt;code&gt;d_dx&lt;/code&gt; and &lt;code&gt;d_dy&lt;/code&gt; are the vector fields &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cfrac%7B%5Cpartial%7D%7B%5Cpartial+x%7D&amp;amp;bg=f3f3f3&amp;amp;fg=888888&amp;amp;s=0&quot; alt=&quot;\frac{\partial}{\partial x}&quot; class=&quot;latex&quot; title=&quot;\frac{\partial}{\partial x}&quot; /&gt; and &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cfrac%7B%5Cpartial%7D%7B%5Cpartial+y%7D&amp;amp;bg=f3f3f3&amp;amp;fg=888888&amp;amp;s=0&quot; alt=&quot;\frac{\partial}{\partial y}&quot; class=&quot;latex&quot; title=&quot;\frac{\partial}{\partial y}&quot; /&gt;. &lt;code&gt;R2_r&lt;/code&gt; is the Cartesian coordinate system and &lt;code&gt;R2_p&lt;/code&gt; is the polar one.&lt;/p&gt;
-&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;R2_r.x(p) == r0*cos(theta0)
-# R2_r.d_dx(R2_r.x) is a also scalar field
-R2_r.d_dx(R2_r.x)(p) == 1
-&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
-&lt;p&gt;Looking at how can these fields be defined:&lt;/p&gt;
-&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;# For a ScalarField you provide the transformation in some coordinate system
-R2_r.x = ScalarField(R2_r, [x0, y0], x0)
-#                     /      |        ^-------- the result
-#     the coord system     the coordinates
-
-# For a VectorField you provide the components in some coordinate system
-R2_r.d_dx = VectorField(R2_r, [x0, y0], [1, 0])
-#                        /      |         ^-------- the components
-#         the coord system     the coordinates
-&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
-&lt;p&gt;Obviously one can define much more interesting fields. For instance the potential due to a point charge at the origin is:&lt;/p&gt;
-&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;potential = ScalarField(R2_p, [r0, thata0], -1/r0)
-# And to reiterate, the definition does not limit you
-# to use it only in this coordinate system. For instance:
-potential(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2)
-&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
-&lt;p&gt;However there is another more intuitive way to do it:&lt;/p&gt;
-&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;# R2_p.r is the scalar field that takes a point and returns the r coordinate
-potential2 = 1/R2_p.r
-potential2(R2_r.point([x0, y0])) == 1/sqrt(x0**2 + y0**2))
-&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
-&lt;p&gt;And this new object &lt;code&gt;potential2&lt;/code&gt; is not an instance of &lt;code&gt;ScalarField&lt;/code&gt;. It is actually a normal SymPy expression tree that contains a &lt;code&gt;ScalarField&lt;/code&gt; somewhere in its leafs (namely in this case it is &lt;code&gt;Pow(R2_p.r, -1)&lt;/code&gt;). However, due to the change to one of the base classes of SymPy that I did in this &lt;a href=&quot;https://github.com/sympy/sympy/pull/1299&quot; target=&quot;_blank&quot; title=&quot;Make Expr recursively callable&quot;&gt;pull request&lt;/a&gt; it is now possible for such tree to be a python callable, by recursively applying the argument to each callable leaf in the tree. This change is still debated and it may be reverted.&lt;/p&gt;
-&lt;p&gt;Vector fields can also be build in this manner. However, they pose a problem. What happens when you multiply a vector field and a scalar field? This operation should give another vector field. And here is a possible problem with the approach of recursively callable expressions trees:&lt;/p&gt;
-&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;# Naively this operation will call a scalar field on
-# another scalar field which is nonsense:
-(R2_r.x * R2_r.d_dx)(R2_r.x) == R2_r.x(R2_r.x) * R2_r.d_dx(R2_r.x)
-#                         nonsense----^
-&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
-&lt;p&gt;The current solution is for &lt;code&gt;scalar_field(not_point)&lt;/code&gt; to return the callable itself. Thus we have:&lt;/p&gt;
-&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;(R2_r.x * R2_r.d_dx)(R2_r.x) == R2_r.x * R2_r.d_dx(R2_r.x)
-#\________________/ \______/    \_______________________/
-#   vector field        ^---scalar fields---^
-&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
-&lt;p&gt;This way there is no need for complicated logic in &lt;code&gt;__mul__ nor is there need for addition subclasses of &lt;/code&gt;&lt;code&gt;Expr&lt;/code&gt; in order to accommodate this behavior.&lt;/p&gt;
-&lt;p&gt;There is not much more to be said about the structure of the module. There are some other nice things already implemented like integral curves, however I will discuss these in a later post.&lt;/p&gt;
-&lt;p&gt;Among the things that should be done at some point:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Should vector fields be callable on points? If yes, what the result should be? An abstract vector, a tuple of coordinates in a certain coordinate system, something else?&lt;/li&gt;
-&lt;li&gt;There are many expressions generated by this code that are not simple enough. I should work on the simplification routines and on the differential geometry module itself in order to get more canonical expressions.&lt;/li&gt;
-&lt;li&gt;The last point is also valid about the solvers: some coordinate transformations are too complicated for the solvers to find the inverse transformation.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;Manifold&lt;/code&gt; and &lt;code&gt;Patch&lt;/code&gt; have &lt;code&gt;name&lt;/code&gt; attributes. Are these necessary? What is the role of &lt;code&gt;name&lt;/code&gt; attributes in SymPy besides printing?&lt;/li&gt;
-&lt;li&gt;Start using &lt;code&gt;Lambda&lt;/code&gt; where applicable.&lt;/li&gt;
-&lt;li&gt;Follow better the class structure of SymPy.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;br /&gt;  &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=krastanov.wordpress.com&amp;amp;blog=15251174&amp;amp;post=307&amp;amp;subd=krastanov&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
-	<pubDate>Sun, 27 May 2012 13:04:42 +0000</pubDate>
 </item>
 
 </channel>
