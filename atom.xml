@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2012-08-13T06:00:52Z</updated>
+  <updated>2012-08-13T15:00:46Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,73 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry xml:lang="en">
+    <id>http://amakelov.wordpress.com/?p=484</id>
+    <link href="http://amakelov.wordpress.com/2012/08/13/google-summer-of-code-2012-week-12/" rel="alternate" type="text/html"/>
+    <title>Google Summer of Code 2012: Week 12</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Hi all, here’s a brief summary of the 12th week of my GSoC: Centralizers got some more attention since there were several bugs in the implementation from last week; this also exposed a bug in .subgroup_search() as it is on sympy/master right now. Fortunately, I located it and fixed it earlier today, so the fix <a class="excerpt-more-link" href="http://amakelov.wordpress.com/2012/08/13/google-summer-of-code-2012-week-12/">[…]</a><img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;blog=35896871&amp;post=484&amp;subd=amakelov&amp;ref=&amp;feed=1" width="1"/></div>
+    </summary>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Hi all, here’s a brief summary of the 12th week of my GSoC:</p>
+<ul>
+<li>Centralizers got some more attention since there were several bugs in the implementation from last week; this also exposed a bug in .subgroup_search() as it is on sympy/master right now. Fortunately, I located it and fixed it earlier today, so the fix for .subgroup_search() will be contained in my next pull request. In fact, it is just three more lines that should be added. Namely,<pre class="brush: python; wrap-lines: false;"># line 29: set the next element from the current branch and update
+# accorndingly
+c[l] += 1
+element = ~(computed_words[l - 1])
+</pre>
+<p>should be replaced with</p>
+<p/><pre class="brush: python; wrap-lines: false;"># line 29: set the next element from the current branch and update
+# accorndingly
+c[l] += 1
+if l == 0:
+    element = identity
+else:
+    element = ~(computed_words[l - 1])
+</pre><p/>
+<p>since we might be at the bottom level with <img alt="l=0" class="latex" src="http://s0.wp.com/latex.php?latex=l%3D0&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="l=0"/>. In this case, python doesn’t yell at you for looking up computed_words[-1] since negative indices wrap around the list in python. Yet another silly mistake that’s incredibly hard to track down! I hope that it will work properly from now on, and I’ll have to include some more tests to it.</p></li>
+<li>The description of the algorithm for finding the center in polynomial time given in [1] didn’t really make sense to me, so instead a straightforward one,<br/>
+<pre class="brush: python;">def center(self):
+    return self.centralizer(self)
+</pre><p/>
+<p>was used. This can be updated later when I (or someone else) figures out the polynomial-time algorithm.</p></li>
+<li>A new, faster algorithm for finding normal closures: this one uses the incremental version of Schreier-Sims, and some randomization. It’s described in [1].</li>
+<li>Some applications of normal closure: the derived series, lower cenral series, the commutator of two subgroups of a group, nilpotency testing. Now we have things like this:<br/>
+<pre class="brush: python; wrap-lines: false;">In [68]: from sympy.combinatorics.named_groups import *
+In [69]: S = SymmetricGroup(4)
+In [70]: ds = S.derived_series()
+In [71]: len(ds)
+Out[71]: 4
+In [72]: ds[1] == AlternatingGroup(4)
+Out[72]: True
+In [73]: ds[2] == DihedralGroup(2)
+Out[73]: True
+In [74]: ds[3] == PermutationGroup([Permutation([0, 1, 2, 3])])
+Out[74]: True
+</pre><p/>
+<p>demonstrating the well-known normal series of groups <img alt="e &lt; K_4 &lt; A_4 &lt; S_4" class="latex" src="http://s0.wp.com/latex.php?latex=e+%3C+K_4+%3C+A_4+%3C+S_4&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="e &lt; K_4 &lt; A_4 &lt; S_4"/> that solves the symmetric group on 4 letters. Note that the normal closure algorithm was already there thanks to the work of <a href="https://github.com/pernici" target="_blank">Mario</a>, I just improved it a bit and added some applications.</p></li>
+<li>Moved DirectProduct() to a new file, group_constructs.py, that is planned to hold functions that treat several groups equally (for one other example, the commutator of two groups in the full symmetric group) rather than treating them in some sort of subgroup-supergroup relationship (such as .centralizer()).</li>
+</ul>
+<p>I wrote docstrings for the new stuff, and my current work can be found on <a href="https://github.com/amakelov/sympy/tree/week10" target="_blank">my week10 branch</a>. There will be some comprehensive test following the new additions (and I’ll need GAP to verify the results of some of them, probably). It seems that Todd-Coxeter won’t happen during GSoC since there’s just one more week; instead, I plan to focus on improving disjoint cycle notation and group databases.</p>
+<p>[1] Derek F. Holt, Bettina Eick, Bettina, Eamonn A. O’Brien, “Handbook of computational group theory”, Discrete Mathematics and its Applications (Boca Raton). Chapman &amp; Hall/CRC, Boca Raton, FL, 2005. ISBN 1-58488-372-3</p>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/amakelov.wordpress.com/484/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/amakelov.wordpress.com/484/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;blog=35896871&amp;post=484&amp;subd=amakelov&amp;ref=&amp;feed=1" width="1"/></div>
+    </content>
+    <updated>2012-08-13T15:00:09Z</updated>
+    <category term="Google Summer of Code 2012"/>
+    <author>
+      <name>amakelov</name>
+    </author>
+    <source>
+      <id>http://amakelov.wordpress.com</id>
+      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
+      <link href="http://amakelov.wordpress.com/category/google-summer-of-code-2012/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://amakelov.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://amakelov.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <subtitle>A. Makelov</subtitle>
+      <title>Not really blogging » Google Summer of Code 2012</title>
+      <updated>2012-08-13T15:00:45Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en">
     <id>http://rhoforsympy.wordpress.com/?p=251</id>
@@ -46,7 +113,7 @@
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-08-13T06:00:51Z</updated>
+      <updated>2012-08-13T15:00:42Z</updated>
     </source>
   </entry>
 
@@ -164,7 +231,7 @@ commits are much more like my usual ones.
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-08-13T06:00:45Z</updated>
+      <updated>2012-08-13T15:00:38Z</updated>
     </source>
   </entry>
 
@@ -197,7 +264,7 @@ commits are much more like my usual ones.
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-08-13T06:00:47Z</updated>
+      <updated>2012-08-13T15:00:39Z</updated>
     </source>
   </entry>
 
@@ -260,9 +327,9 @@ commits are much more like my usual ones.
     <updated>2012-08-05T11:29:33Z</updated>
     <category term="SymPy"/>
     <category term="category theory"/>
-    <category term="subgraph isomorphism problem"/>
-    <category term="graph embedding"/>
     <category term="diagram embedding"/>
+    <category term="graph embedding"/>
+    <category term="subgraph isomorphism problem"/>
     <author>
       <name>scolobb</name>
     </author>
@@ -275,7 +342,7 @@ commits are much more like my usual ones.
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-08-13T06:00:44Z</updated>
+      <updated>2012-08-13T15:00:38Z</updated>
     </source>
   </entry>
 
@@ -301,7 +368,7 @@ commits are much more like my usual ones.
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-08-13T06:00:48Z</updated>
+      <updated>2012-08-13T15:00:41Z</updated>
     </source>
   </entry>
 
@@ -342,7 +409,7 @@ commits are much more like my usual ones.
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-08-13T06:00:46Z</updated>
+      <updated>2012-08-13T15:00:39Z</updated>
     </source>
   </entry>
 
@@ -374,7 +441,7 @@ commits are much more like my usual ones.
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-08-13T06:00:51Z</updated>
+      <updated>2012-08-13T15:00:42Z</updated>
     </source>
   </entry>
 
@@ -485,7 +552,7 @@ StopIteration:
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2012-08-12T13:00:41Z</updated>
+      <updated>2012-08-13T15:00:46Z</updated>
     </source>
   </entry>
 
@@ -518,7 +585,7 @@ StopIteration:
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-08-13T06:00:51Z</updated>
+      <updated>2012-08-13T15:00:42Z</updated>
     </source>
   </entry>
 
@@ -558,12 +625,12 @@ StopIteration:
     </content>
     <updated>2012-07-29T19:20:53Z</updated>
     <category term="SymPy"/>
-    <category term="string representation"/>
+    <category term="backward chaining"/>
     <category term="deciding commutativity"/>
     <category term="diagram layout"/>
     <category term="pretty printing"/>
     <category term="sort key"/>
-    <category term="backward chaining"/>
+    <category term="string representation"/>
     <category term="subgraph isomorphism problem"/>
     <author>
       <name>scolobb</name>
@@ -577,7 +644,7 @@ StopIteration:
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-08-13T06:00:44Z</updated>
+      <updated>2012-08-13T15:00:37Z</updated>
     </source>
   </entry>
 
@@ -607,7 +674,7 @@ StopIteration:
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-08-13T06:00:46Z</updated>
+      <updated>2012-08-13T15:00:39Z</updated>
     </source>
   </entry>
 
@@ -649,7 +716,7 @@ StopIteration:
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-08-13T06:00:49Z</updated>
+      <updated>2012-08-13T15:00:41Z</updated>
     </source>
   </entry>
 
@@ -857,7 +924,7 @@ Out[128]: False
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2012-08-12T13:00:41Z</updated>
+      <updated>2012-08-13T15:00:46Z</updated>
     </source>
   </entry>
 
@@ -1062,7 +1129,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-08-13T06:00:44Z</updated>
+      <updated>2012-08-13T15:00:37Z</updated>
     </source>
   </entry>
 
@@ -1112,7 +1179,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-08-13T06:00:51Z</updated>
+      <updated>2012-08-13T15:00:42Z</updated>
     </source>
   </entry>
 
@@ -1157,7 +1224,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-08-13T06:00:44Z</updated>
+      <updated>2012-08-13T15:00:37Z</updated>
     </source>
   </entry>
 
@@ -1192,7 +1259,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-08-13T06:00:51Z</updated>
+      <updated>2012-08-13T15:00:42Z</updated>
     </source>
   </entry>
 
@@ -1229,7 +1296,7 @@ Out[128]: False
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2012-08-12T13:00:41Z</updated>
+      <updated>2012-08-13T15:00:45Z</updated>
     </source>
   </entry>
 
@@ -1265,7 +1332,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-08-13T06:00:48Z</updated>
+      <updated>2012-08-13T15:00:41Z</updated>
     </source>
   </entry>
 
@@ -1307,7 +1374,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-08-13T06:00:17Z</updated>
+      <updated>2012-08-13T15:00:16Z</updated>
     </source>
   </entry>
 
@@ -1351,7 +1418,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-08-13T06:00:51Z</updated>
+      <updated>2012-08-13T15:00:42Z</updated>
     </source>
   </entry>
 
@@ -1398,7 +1465,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-08-13T06:00:45Z</updated>
+      <updated>2012-08-13T15:00:38Z</updated>
     </source>
   </entry>
 
@@ -1544,7 +1611,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2012-08-12T13:00:41Z</updated>
+      <updated>2012-08-13T15:00:46Z</updated>
     </source>
   </entry>
 
@@ -1575,7 +1642,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-08-13T06:00:46Z</updated>
+      <updated>2012-08-13T15:00:39Z</updated>
     </source>
   </entry>
 
@@ -1622,7 +1689,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-08-13T06:00:44Z</updated>
+      <updated>2012-08-13T15:00:38Z</updated>
     </source>
   </entry>
 
@@ -1662,7 +1729,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-08-13T06:00:49Z</updated>
+      <updated>2012-08-13T15:00:41Z</updated>
     </source>
   </entry>
 
@@ -1705,7 +1772,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-08-13T06:00:51Z</updated>
+      <updated>2012-08-13T15:00:42Z</updated>
     </source>
   </entry>
 
@@ -1744,7 +1811,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2012-08-12T13:00:41Z</updated>
+      <updated>2012-08-13T15:00:46Z</updated>
     </source>
   </entry>
 
@@ -1778,7 +1845,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-08-13T06:00:46Z</updated>
+      <updated>2012-08-13T15:00:39Z</updated>
     </source>
   </entry>
 
@@ -2055,7 +2122,7 @@ form_field(vector_field)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-08-13T06:00:51Z</updated>
+      <updated>2012-08-13T15:00:42Z</updated>
     </source>
   </entry>
 
@@ -2165,7 +2232,7 @@ In [305]: G._coset_repr
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2012-08-12T13:00:41Z</updated>
+      <updated>2012-08-13T15:00:46Z</updated>
     </source>
   </entry>
 
@@ -2187,7 +2254,7 @@ In [305]: G._coset_repr
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-08-13T06:00:48Z</updated>
+      <updated>2012-08-13T15:00:40Z</updated>
     </source>
   </entry>
 
@@ -2219,7 +2286,7 @@ In [305]: G._coset_repr
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-08-13T06:00:46Z</updated>
+      <updated>2012-08-13T15:00:39Z</updated>
     </source>
   </entry>
 
@@ -2263,7 +2330,7 @@ In [305]: G._coset_repr
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2012-08-12T13:00:40Z</updated>
+      <updated>2012-08-13T15:00:45Z</updated>
     </source>
   </entry>
 
@@ -2508,7 +2575,7 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-08-13T06:00:44Z</updated>
+      <updated>2012-08-13T15:00:37Z</updated>
     </source>
   </entry>
 
@@ -2538,7 +2605,7 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-08-13T06:00:46Z</updated>
+      <updated>2012-08-13T15:00:39Z</updated>
     </source>
   </entry>
 
@@ -2573,7 +2640,7 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-08-13T06:00:45Z</updated>
+      <updated>2012-08-13T15:00:38Z</updated>
     </source>
   </entry>
 
@@ -2616,7 +2683,7 @@ sudo python setup.py develop
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-08-13T06:00:17Z</updated>
+      <updated>2012-08-13T15:00:16Z</updated>
     </source>
   </entry>
 
@@ -2651,7 +2718,7 @@ sudo python setup.py develop
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2012-08-12T13:00:41Z</updated>
+      <updated>2012-08-13T15:00:46Z</updated>
     </source>
   </entry>
 
@@ -2700,7 +2767,7 @@ sudo python setup.py develop
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-08-13T06:00:45Z</updated>
+      <updated>2012-08-13T15:00:38Z</updated>
     </source>
   </entry>
 
@@ -2737,7 +2804,7 @@ sudo python setup.py develop
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-08-13T06:00:51Z</updated>
+      <updated>2012-08-13T15:00:42Z</updated>
     </source>
   </entry>
 
@@ -2779,7 +2846,7 @@ sudo python setup.py develop
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-08-13T06:00:48Z</updated>
+      <updated>2012-08-13T15:00:41Z</updated>
     </source>
   </entry>
 
@@ -2806,7 +2873,7 @@ sudo python setup.py develop
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-08-13T06:00:47Z</updated>
+      <updated>2012-08-13T15:00:39Z</updated>
     </source>
   </entry>
 
@@ -2978,7 +3045,7 @@ sudo python setup.py develop
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-08-13T06:00:48Z</updated>
+      <updated>2012-08-13T15:00:40Z</updated>
     </source>
   </entry>
 
@@ -3024,7 +3091,7 @@ sudo python setup.py develop
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2012-08-12T13:00:41Z</updated>
+      <updated>2012-08-13T15:00:46Z</updated>
     </source>
   </entry>
 
@@ -3071,34 +3138,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-08-13T06:00:51Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://angadhsympy.wordpress.com/2012/06/02/gsoc-2012-post-3-4/</id>
-    <link href="http://angadhsympy.wordpress.com/2012/06/02/gsoc-2012-post-3-4/" rel="alternate" type="text/html"/>
-    <title>GSoC 2012 Post 3</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">It’s the last week of school so things are a little crazy. I haven’t had time to look into much for the summer of code this week as a result. I will have my responsibilities for the quarter wrapped by noon on the 5th (Tuesday) so it appears that I will be on schedule as [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=angadhsympy.wordpress.com&amp;blog=35620584&amp;post=65&amp;subd=angadhsympy&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>It’s the last week of school so things are a little crazy. I haven’t had time to look into much for the summer of code this week as a result. I will have my responsibilities for the quarter wrapped by noon on the 5th (Tuesday) so it appears that I will be on schedule as predicted.</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/angadhsympy.wordpress.com/65/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/angadhsympy.wordpress.com/65/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=angadhsympy.wordpress.com&amp;blog=35620584&amp;post=65&amp;subd=angadhsympy&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2012-06-02T00:34:15Z</updated>
-    <category term="Uncategorized"/>
-    <author>
-      <name>angadhn</name>
-    </author>
-    <source>
-      <id>http://angadhsympy.wordpress.com</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://angadhsympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://angadhsympy.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://angadhsympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
-      <title>GSoC 2012 blog</title>
-      <updated>2012-08-13T06:00:46Z</updated>
+      <updated>2012-08-13T15:00:42Z</updated>
     </source>
   </entry>
 </feed>

@@ -33,6 +33,79 @@
 
 
 
+<h3><a href="http://amakelov.wordpress.com" title="Not really blogging » Google Summer of Code 2012">Aleksandar Makelov</a></h3>
+
+
+<div class="entrygroup" id="http://amakelov.wordpress.com/?p=484">
+<h4 lang="en"><a href="http://amakelov.wordpress.com/2012/08/13/google-summer-of-code-2012-week-12/">Google Summer of Code 2012: Week 12</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p>Hi all, here’s a brief summary of the 12th week of my GSoC:</p>
+<ul>
+<li>Centralizers got some more attention since there were several bugs in the implementation from last week; this also exposed a bug in .subgroup_search() as it is on sympy/master right now. Fortunately, I located it and fixed it earlier today, so the fix for .subgroup_search() will be contained in my next pull request. In fact, it is just three more lines that should be added. Namely,<pre class="brush: python; wrap-lines: false;"># line 29: set the next element from the current branch and update
+# accorndingly
+c[l] += 1
+element = ~(computed_words[l - 1])
+</pre>
+<p>should be replaced with</p>
+<p></p><pre class="brush: python; wrap-lines: false;"># line 29: set the next element from the current branch and update
+# accorndingly
+c[l] += 1
+if l == 0:
+    element = identity
+else:
+    element = ~(computed_words[l - 1])
+</pre><p></p>
+<p>since we might be at the bottom level with <img src="http://s0.wp.com/latex.php?latex=l%3D0&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="l=0" class="latex" title="l=0" />. In this case, python doesn’t yell at you for looking up computed_words[-1] since negative indices wrap around the list in python. Yet another silly mistake that’s incredibly hard to track down! I hope that it will work properly from now on, and I’ll have to include some more tests to it.</p></li>
+<li>The description of the algorithm for finding the center in polynomial time given in [1] didn’t really make sense to me, so instead a straightforward one,<br />
+<pre class="brush: python;">def center(self):
+    return self.centralizer(self)
+</pre><p></p>
+<p>was used. This can be updated later when I (or someone else) figures out the polynomial-time algorithm.</p></li>
+<li>A new, faster algorithm for finding normal closures: this one uses the incremental version of Schreier-Sims, and some randomization. It’s described in [1].</li>
+<li>Some applications of normal closure: the derived series, lower cenral series, the commutator of two subgroups of a group, nilpotency testing. Now we have things like this:<br />
+<pre class="brush: python; wrap-lines: false;">In [68]: from sympy.combinatorics.named_groups import *
+In [69]: S = SymmetricGroup(4)
+In [70]: ds = S.derived_series()
+In [71]: len(ds)
+Out[71]: 4
+In [72]: ds[1] == AlternatingGroup(4)
+Out[72]: True
+In [73]: ds[2] == DihedralGroup(2)
+Out[73]: True
+In [74]: ds[3] == PermutationGroup([Permutation([0, 1, 2, 3])])
+Out[74]: True
+</pre><p></p>
+<p>demonstrating the well-known normal series of groups <img src="http://s0.wp.com/latex.php?latex=e+%3C+K_4+%3C+A_4+%3C+S_4&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="e &lt; K_4 &lt; A_4 &lt; S_4" class="latex" title="e &lt; K_4 &lt; A_4 &lt; S_4" /> that solves the symmetric group on 4 letters. Note that the normal closure algorithm was already there thanks to the work of <a href="https://github.com/pernici" target="_blank">Mario</a>, I just improved it a bit and added some applications.</p></li>
+<li>Moved DirectProduct() to a new file, group_constructs.py, that is planned to hold functions that treat several groups equally (for one other example, the commutator of two groups in the full symmetric group) rather than treating them in some sort of subgroup-supergroup relationship (such as .centralizer()).</li>
+</ul>
+<p>I wrote docstrings for the new stuff, and my current work can be found on <a href="https://github.com/amakelov/sympy/tree/week10" target="_blank">my week10 branch</a>. There will be some comprehensive test following the new additions (and I’ll need GAP to verify the results of some of them, probably). It seems that Todd-Coxeter won’t happen during GSoC since there’s just one more week; instead, I plan to focus on improving disjoint cycle notation and group databases.</p>
+<p>[1] Derek F. Holt, Bettina Eick, Bettina, Eamonn A. O’Brien, “Handbook of computational group theory”, Discrete Mathematics and its Applications (Boca Raton). Chapman &amp; Hall/CRC, Boca Raton, FL, 2005. ISBN 1-58488-372-3</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/amakelov.wordpress.com/484/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/amakelov.wordpress.com/484/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;blog=35896871&amp;post=484&amp;subd=amakelov&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://amakelov.wordpress.com/2012/08/13/google-summer-of-code-2012-week-12/">by amakelov at August 13, 2012 03:00 PM</a>
+</p>
+</div>
+</div>
+
+
+
+</div>
+<div class="channelgroup">
+
+
+
+
+
+
+
 <h3><a href="http://rhoforsympy.wordpress.com" title="rhoforsympy">Guru Devanla</a></h3>
 
 
@@ -3404,39 +3477,6 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
 </div>
 
 
-
-</div>
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://angadhsympy.wordpress.com" title="GSoC 2012 blog">Angadh Nanjangud</a></h3>
-
-
-<div class="entrygroup" id="http://angadhsympy.wordpress.com/2012/06/02/gsoc-2012-post-3-4/">
-<h4 lang="en"><a href="http://angadhsympy.wordpress.com/2012/06/02/gsoc-2012-post-3-4/">GSoC 2012 Post 3</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>It’s the last week of school so things are a little crazy. I haven’t had time to look into much for the summer of code this week as a result. I will have my responsibilities for the quarter wrapped by noon on the 5th (Tuesday) so it appears that I will be on schedule as predicted.</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/angadhsympy.wordpress.com/65/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/angadhsympy.wordpress.com/65/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=angadhsympy.wordpress.com&amp;blog=35620584&amp;post=65&amp;subd=angadhsympy&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://angadhsympy.wordpress.com/2012/06/02/gsoc-2012-post-3-4/">by angadhn at June 02, 2012 12:34 AM</a>
-</p>
-</div>
-</div>
-
-
 </div>
 
 </div>
@@ -3454,7 +3494,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
 <a href="http://addisoncugini.blogspot.com/feeds/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://addisoncugini.blogspot.com/" class="message" title="no activity in 7 days">Addison Cugini</a>
 </li>
 <li>
-<a href="http://amakelov.wordpress.com/category/google-summer-of-code-2012/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://amakelov.wordpress.com" class="message" title="no activity in 7 days">Aleksandar Makelov</a>
+<a href="http://amakelov.wordpress.com/category/google-summer-of-code-2012/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://amakelov.wordpress.com" title="Not really blogging » Google Summer of Code 2012">Aleksandar Makelov</a>
 </li>
 <li>
 <a href="http://angadhsympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://angadhsympy.wordpress.com" title="GSoC 2012 blog">Angadh Nanjangud</a>
@@ -3547,7 +3587,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
 
 <p>
 <strong>Last updated:</strong><br>
-August 13, 2012 06:01 AM<br>
+August 13, 2012 03:00 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>

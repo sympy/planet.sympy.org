@@ -13,6 +13,7 @@
 
 	<items>
 		<rdf:Seq>
+			<rdf:li rdf:resource="http://amakelov.wordpress.com/?p=484" />
 			<rdf:li rdf:resource="http://rhoforsympy.wordpress.com/?p=251" />
 			<rdf:li rdf:resource="http://scolobb.wordpress.com/?p=384" />
 			<rdf:li rdf:resource="http://angadhsympy.wordpress.com/?p=420" />
@@ -72,11 +73,58 @@
 			<rdf:li rdf:resource="http://catchmrbharath.github.com/programming/2012/06/03/gsoc-week-2" />
 			<rdf:li rdf:resource="http://amakelov.wordpress.com/?p=25" />
 			<rdf:li rdf:resource="http://rhoforsympy.wordpress.com/?p=116" />
-			<rdf:li rdf:resource="http://angadhsympy.wordpress.com/2012/06/02/gsoc-2012-post-3-4/" />
 		</rdf:Seq>
 	</items>
 </channel>
 
+<item rdf:about="http://amakelov.wordpress.com/?p=484">
+	<title>Aleksandar Makelov: Google Summer of Code 2012: Week 12</title>
+	<link>http://amakelov.wordpress.com/2012/08/13/google-summer-of-code-2012-week-12/</link>
+	<content:encoded>&lt;p&gt;Hi all, here’s a brief summary of the 12th week of my GSoC:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Centralizers got some more attention since there were several bugs in the implementation from last week; this also exposed a bug in .subgroup_search() as it is on sympy/master right now. Fortunately, I located it and fixed it earlier today, so the fix for .subgroup_search() will be contained in my next pull request. In fact, it is just three more lines that should be added. Namely,&lt;pre class=&quot;brush: python; wrap-lines: false;&quot;&gt;# line 29: set the next element from the current branch and update
+# accorndingly
+c[l] += 1
+element = ~(computed_words[l - 1])
+&lt;/pre&gt;
+&lt;p&gt;should be replaced with&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python; wrap-lines: false;&quot;&gt;# line 29: set the next element from the current branch and update
+# accorndingly
+c[l] += 1
+if l == 0:
+    element = identity
+else:
+    element = ~(computed_words[l - 1])
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;p&gt;since we might be at the bottom level with &lt;img src=&quot;http://s0.wp.com/latex.php?latex=l%3D0&amp;amp;bg=fafad3&amp;amp;fg=6f5e4e&amp;amp;s=0&quot; alt=&quot;l=0&quot; class=&quot;latex&quot; title=&quot;l=0&quot; /&gt;. In this case, python doesn’t yell at you for looking up computed_words[-1] since negative indices wrap around the list in python. Yet another silly mistake that’s incredibly hard to track down! I hope that it will work properly from now on, and I’ll have to include some more tests to it.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;The description of the algorithm for finding the center in polynomial time given in [1] didn’t really make sense to me, so instead a straightforward one,&lt;br /&gt;
+&lt;pre class=&quot;brush: python;&quot;&gt;def center(self):
+    return self.centralizer(self)
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;p&gt;was used. This can be updated later when I (or someone else) figures out the polynomial-time algorithm.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;A new, faster algorithm for finding normal closures: this one uses the incremental version of Schreier-Sims, and some randomization. It’s described in [1].&lt;/li&gt;
+&lt;li&gt;Some applications of normal closure: the derived series, lower cenral series, the commutator of two subgroups of a group, nilpotency testing. Now we have things like this:&lt;br /&gt;
+&lt;pre class=&quot;brush: python; wrap-lines: false;&quot;&gt;In [68]: from sympy.combinatorics.named_groups import *
+In [69]: S = SymmetricGroup(4)
+In [70]: ds = S.derived_series()
+In [71]: len(ds)
+Out[71]: 4
+In [72]: ds[1] == AlternatingGroup(4)
+Out[72]: True
+In [73]: ds[2] == DihedralGroup(2)
+Out[73]: True
+In [74]: ds[3] == PermutationGroup([Permutation([0, 1, 2, 3])])
+Out[74]: True
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;p&gt;demonstrating the well-known normal series of groups &lt;img src=&quot;http://s0.wp.com/latex.php?latex=e+%3C+K_4+%3C+A_4+%3C+S_4&amp;amp;bg=fafad3&amp;amp;fg=6f5e4e&amp;amp;s=0&quot; alt=&quot;e &amp;lt; K_4 &amp;lt; A_4 &amp;lt; S_4&quot; class=&quot;latex&quot; title=&quot;e &amp;lt; K_4 &amp;lt; A_4 &amp;lt; S_4&quot; /&gt; that solves the symmetric group on 4 letters. Note that the normal closure algorithm was already there thanks to the work of &lt;a href=&quot;https://github.com/pernici&quot; target=&quot;_blank&quot;&gt;Mario&lt;/a&gt;, I just improved it a bit and added some applications.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;Moved DirectProduct() to a new file, group_constructs.py, that is planned to hold functions that treat several groups equally (for one other example, the commutator of two groups in the full symmetric group) rather than treating them in some sort of subgroup-supergroup relationship (such as .centralizer()).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;I wrote docstrings for the new stuff, and my current work can be found on &lt;a href=&quot;https://github.com/amakelov/sympy/tree/week10&quot; target=&quot;_blank&quot;&gt;my week10 branch&lt;/a&gt;. There will be some comprehensive test following the new additions (and I’ll need GAP to verify the results of some of them, probably). It seems that Todd-Coxeter won’t happen during GSoC since there’s just one more week; instead, I plan to focus on improving disjoint cycle notation and group databases.&lt;/p&gt;
+&lt;p&gt;[1] Derek F. Holt, Bettina Eick, Bettina, Eamonn A. O’Brien, “Handbook of computational group theory”, Discrete Mathematics and its Applications (Boca Raton). Chapman &amp;amp; Hall/CRC, Boca Raton, FL, 2005. ISBN 1-58488-372-3&lt;/p&gt;
+&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/amakelov.wordpress.com/484/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/amakelov.wordpress.com/484/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;amp;blog=35896871&amp;amp;post=484&amp;amp;subd=amakelov&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
+	<dc:date>2012-08-13T15:00:09+00:00</dc:date>
+	<dc:creator>amakelov</dc:creator>
+</item>
 <item rdf:about="http://rhoforsympy.wordpress.com/?p=251">
 	<title>Guru Devanla: Week 12 :  Starting work on Shor’s algorithm</title>
 	<link>http://rhoforsympy.wordpress.com/2012/08/13/week-12-starting-work-on-shors-algorithm/</link>
@@ -1931,14 +1979,6 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
 &lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/rhoforsympy.wordpress.com/116/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/rhoforsympy.wordpress.com/116/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;amp;blog=34650270&amp;amp;post=116&amp;amp;subd=rhoforsympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
 	<dc:date>2012-06-02T13:30:41+00:00</dc:date>
 	<dc:creator>grdvnl</dc:creator>
-</item>
-<item rdf:about="http://angadhsympy.wordpress.com/2012/06/02/gsoc-2012-post-3-4/">
-	<title>Angadh Nanjangud: GSoC 2012 Post 3</title>
-	<link>http://angadhsympy.wordpress.com/2012/06/02/gsoc-2012-post-3-4/</link>
-	<content:encoded>&lt;p&gt;It’s the last week of school so things are a little crazy. I haven’t had time to look into much for the summer of code this week as a result. I will have my responsibilities for the quarter wrapped by noon on the 5th (Tuesday) so it appears that I will be on schedule as predicted.&lt;/p&gt;
-&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/angadhsympy.wordpress.com/65/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/angadhsympy.wordpress.com/65/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=angadhsympy.wordpress.com&amp;amp;blog=35620584&amp;amp;post=65&amp;amp;subd=angadhsympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
-	<dc:date>2012-06-02T00:34:15+00:00</dc:date>
-	<dc:creator>angadhn</dc:creator>
 </item>
 
 </rdf:RDF>
