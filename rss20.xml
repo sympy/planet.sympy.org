@@ -191,6 +191,54 @@ commits are much more like my usual ones.
 	<pubDate>Wed, 08 Aug 2012 11:21:46 +0000</pubDate>
 </item>
 <item>
+	<title>Aleksandar Makelov: Google Summer of Code 2012: Week 11</title>
+	<guid isPermaLink="false">http://amakelov.wordpress.com/?p=445</guid>
+	<link>http://amakelov.wordpress.com/2012/08/06/google-summer-of-code-2012-week-11/</link>
+	<description>&lt;p&gt;Hi all, here’s a brief summary of the 11th week of my GSoC.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Yay! Subgroup searching now works with the use of .stabilizer(), as I discussed in &lt;a href=&quot;http://amakelov.wordpress.com/2012/07/30/google-summer-of-code-2012-week-10/&quot; target=&quot;_blank&quot;&gt;my previous blog post&lt;/a&gt;. Surprisingly, the running time is similar to that of the flawed version using .baseswap() (whenever the one using .baseswap() works), you can play around with the two versions on my &lt;a href=&quot;https://github.com/amakelov/sympy/tree/week6&quot; target=&quot;_blank&quot;&gt;week6&lt;/a&gt; (has a bug, using .baseswap()) and &lt;a href=&quot;https://github.com/amakelov/sympy/tree/week9&quot; target=&quot;_blank&quot;&gt;week9&lt;/a&gt; (seems to work, using .stabilizer()) branches.&lt;/li&gt;
+&lt;li&gt;Consequently, I made a &lt;a href=&quot;https://github.com/sympy/sympy/pull/1454&quot; target=&quot;_blank&quot;&gt;new pull request&lt;/a&gt; containing the incremental version of Schreier-Sims, the remove_gens utility for getting rid of redundant generators in a strong generating set, and the new (working) subgroup_search algorithm. You’re most welcome to help with the review!&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ul&gt;
+&lt;li&gt;I worked on several applications of subgroup_search() and the incremental Schreier-Sims algorithm. Namely, the pointwise stabilizer of a set of points (via the incremental Schreier-Sims algorithm):&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python; wrap-lines: false;&quot;&gt;In [4]: from sympy.combinatorics.named_groups import *
+In [5]: A = AlternatingGroup(9)
+In [6]: G = A.pointwise_stabilizer([2, 3, 5])
+In [7]: G == A.stabilizer(2).stabilizer(3).stabilizer(5)
+Out[7]: True
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;p&gt;(this is much faster than the naive implementation using .stabilizer() repeatedly), and the centralizer of a group &lt;img src=&quot;http://s0.wp.com/latex.php?latex=H&amp;amp;bg=fafad3&amp;amp;fg=6f5e4e&amp;amp;s=0&quot; alt=&quot;H&quot; class=&quot;latex&quot; title=&quot;H&quot; /&gt; inside a group &lt;img src=&quot;http://s0.wp.com/latex.php?latex=G&amp;amp;bg=fafad3&amp;amp;fg=6f5e4e&amp;amp;s=0&quot; alt=&quot;G&quot; class=&quot;latex&quot; title=&quot;G&quot; /&gt;:&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python; wrap-lines: false;&quot;&gt;In [11]: from sympy.combinatorics.named_groups import *
+In [12]: S = SymmetricGroup(6)
+In [13]: A = AlternatingGroup(6)
+In [14]: C = CyclicGroup(6)
+In [15]: S_els = list(S.generate())
+In [16]: G = S.centralizer(A)
+In [17]: G.order()
+Out[17]: 1
+In [18]: temp = [[el*gen for gen in A.generators] == [gen*el for gen in A.generators] for el in S_els]
+In [19]: temp.count(False)
+Out[19]: 719
+In [20]: temp.count(True)
+Out[20]: 1
+In [21]: G = S.centralizer(C)
+In [22]: G == C
+Out[22]: True
+In [23]: temp = [[el*gen for gen in C.generators] == [gen*el for gen in C.generators] for el in S_els]
+In [24]: temp.count(True)
+Out[24]: 6
+&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;p&gt;(it takes some effort to see that these calculations indeed prove that .centralizer() returned the needed centralizer). The centralizer algorithm uses a pruning criterion described in [1], and even though it’s exponential in complexity, it’s fast for practical purposes. Both of the above functions are available (albeit not documented yet) on &lt;a href=&quot;https://github.com/amakelov/sympy/tree/week10&quot; target=&quot;_blank&quot;&gt;my week10 branch&lt;/a&gt;.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The next steps are an algorithm for the centre in polynomial time, and an algorithm to find the intersection of two subgroups! And after that, I hope to be able to implement the Todd-Coxeter algorithm…&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;That’s it for now!&lt;/p&gt;
+&lt;p&gt;[1] Derek F. Holt, Bettina Eick, Bettina, Eamonn A. O’Brien, “Handbook of computational group theory”, Discrete Mathematics and its Applications (Boca Raton). Chapman &amp;amp; Hall/CRC, Boca Raton, FL, 2005. ISBN 1-58488-372-3&lt;/p&gt;
+&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/amakelov.wordpress.com/445/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/amakelov.wordpress.com/445/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;amp;blog=35896871&amp;amp;post=445&amp;amp;subd=amakelov&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
+	<pubDate>Mon, 06 Aug 2012 14:26:08 +0000</pubDate>
+</item>
+<item>
 	<title>Sergiu Ivanov: The Embedding</title>
 	<guid isPermaLink="false">http://scolobb.wordpress.com/?p=357</guid>
 	<link>http://scolobb.wordpress.com/2012/08/05/the-embedding/</link>
@@ -1888,34 +1936,6 @@ sudo python setup.py develop
 &lt;p&gt;[2] Permutation Group Algorithms, Ákos Seress, Cambridge University Press&lt;/p&gt;
 &lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/amakelov.wordpress.com/25/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/amakelov.wordpress.com/25/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;amp;blog=35896871&amp;amp;post=25&amp;amp;subd=amakelov&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
 	<pubDate>Sat, 02 Jun 2012 16:35:29 +0000</pubDate>
-</item>
-<item>
-	<title>Guru Devanla: Week 2: Activity Summary</title>
-	<guid isPermaLink="false">http://rhoforsympy.wordpress.com/?p=116</guid>
-	<link>http://rhoforsympy.wordpress.com/2012/06/02/week-2-activity-summary/</link>
-	<description>&lt;p&gt;This week there was fewer lines of code than last week. But, with this week I have almost(except partial trace) merged all changes from @ellisonbg’s densityop branch and ready to extend the implementation to incorporate other features.  Most of the time I spent this week is to review and structure my work for the coming weeks and address comments on previous PR . I have provided a detailed plan below.&lt;/p&gt;
-&lt;h2&gt;&lt;span style=&quot;text-decoration: underline;&quot;&gt;Tasks performed this week&lt;/span&gt;&lt;/h2&gt;
-&lt;p&gt;1.  Responded to and completed all comments on last weeks pull &lt;a href=&quot;https://github.com/sympy/sympy/pull/1312&quot; title=&quot;PR 1312&quot;&gt;PR1312.&lt;/a&gt;&lt;br /&gt;
-2.  Pushed a minor code change branch to my git account. This change handles &lt;strong&gt;entropy for general density operators&lt;/strong&gt;.  (&lt;em&gt;I am still waiting for the previous pull request to get merged, since this pull request was branched off that.)&lt;br /&gt;
-&lt;/em&gt;3.  Review and understand the partial trace operations and qubit related implementation.  Further notes will be prepared for the discussion.&lt;br /&gt;
-4. Understand current implementation of tensor products to plan work for coming weeks.&lt;/p&gt;
-&lt;h2&gt;&lt;span style=&quot;text-decoration: underline;&quot;&gt;My plan for weeks 3,4,5,6 ( based on design discussion we have had regarding partial trace )&lt;/span&gt;&lt;/h2&gt;
-&lt;p&gt;&lt;em&gt;(Note, the detailed plan here still meets the timeline outlined in the proposal. The only change is I will be working fewer hours during Week 4(June 10-16), since I am at the summer school. Hopefully, I can contain the work to not flow into later weeks). &lt;/em&gt;&lt;/p&gt;
-&lt;h3&gt;Week 3/4&lt;/h3&gt;
-&lt;p&gt;Implement/test partial trace methods [ &lt;strong&gt;_eval_partial_trace&lt;/strong&gt; ] and other required methods for following classes:&lt;/p&gt;
-&lt;p&gt;QubitDensity (&lt;span style=&quot;color: #800000;&quot;&gt;&lt;em&gt;name suggestion needed!&lt;/em&gt;)&lt;/span&gt; : for this I will use the current bit-twiddling algorithm but add detailed test cases.&lt;br /&gt;
-TensorProduct : Code to handle density operators ( both qubit based, and generic) during expand, mul operations.&lt;br /&gt;
-TensorProduct : _eval_partial_trace method will split the sub-system to trace. and then based on states inside Tr(|i&amp;gt;&amp;lt;k|).  [ &lt;em&gt;This needs more discussions during the next few days and during IRC session.&lt;/em&gt;]&lt;br /&gt;
-Sub-classes of ‘State’ : Need to decide which subclasses need and how it should be done.&lt;/p&gt;
-&lt;h3&gt;Week 5&lt;/h3&gt;
-&lt;p&gt;Symbolic Trace operations and Partial Trace operations.&lt;/p&gt;
-&lt;h3&gt;Week 6&lt;/h3&gt;
-&lt;p&gt;Changes to qapply for L and R operations and any operations that would be needed based on changes so far. (will also fix the bug identified in PR 1312)&lt;/p&gt;
-&lt;h2&gt;&lt;span style=&quot;text-decoration: underline;&quot;&gt;Other related learning activities this week.&lt;/span&gt;&lt;/h2&gt;
-&lt;p&gt;I tried &lt;a href=&quot;http://ipython.org/ipython-doc/dev/interactive/htmlnotebook.html&quot;&gt;IPython Notebook&lt;/a&gt; and I absolutely love it. Now, I am using that as my command line interface for running sympy commands and understanding current implementation.  The best thing Notebook has done to my workflow is help me save my scratch work and go back whenever I need it. Thanks&lt;a href=&quot;https://github.com/ellisonbg&quot; title=&quot;Brian's github&quot;&gt; @ellisonbg&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;I did have to jump some hoops to set up Notebook on Ubuntu 11.04, since I had to build a lot of dependencies myself. I plan to blog about it as part of another post.  A minor pain point with it is, I need to drag/drop files I want to work on. Wish it gave me an option to type in the URL to a saved notebook rather than forcing me to open a FileManager window to find file to drag and drop.&lt;/p&gt;
-&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/rhoforsympy.wordpress.com/116/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/rhoforsympy.wordpress.com/116/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;amp;blog=34650270&amp;amp;post=116&amp;amp;subd=rhoforsympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
-	<pubDate>Sat, 02 Jun 2012 13:30:41 +0000</pubDate>
 </item>
 
 </channel>

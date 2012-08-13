@@ -343,6 +343,83 @@ commits are much more like my usual ones.
 
 </div>
 <div class="daygroup">
+<h2>August 06, 2012</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://amakelov.wordpress.com" title="Not really blogging » Google Summer of Code 2012">Aleksandar Makelov</a></h3>
+
+
+<div class="entrygroup" id="http://amakelov.wordpress.com/?p=445">
+<h4 lang="en"><a href="http://amakelov.wordpress.com/2012/08/06/google-summer-of-code-2012-week-11/">Google Summer of Code 2012: Week 11</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p>Hi all, here’s a brief summary of the 11th week of my GSoC.</p>
+<ul>
+<li>Yay! Subgroup searching now works with the use of .stabilizer(), as I discussed in <a href="http://amakelov.wordpress.com/2012/07/30/google-summer-of-code-2012-week-10/" target="_blank">my previous blog post</a>. Surprisingly, the running time is similar to that of the flawed version using .baseswap() (whenever the one using .baseswap() works), you can play around with the two versions on my <a href="https://github.com/amakelov/sympy/tree/week6" target="_blank">week6</a> (has a bug, using .baseswap()) and <a href="https://github.com/amakelov/sympy/tree/week9" target="_blank">week9</a> (seems to work, using .stabilizer()) branches.</li>
+<li>Consequently, I made a <a href="https://github.com/sympy/sympy/pull/1454" target="_blank">new pull request</a> containing the incremental version of Schreier-Sims, the remove_gens utility for getting rid of redundant generators in a strong generating set, and the new (working) subgroup_search algorithm. You’re most welcome to help with the review!</li>
+</ul>
+<ul>
+<li>I worked on several applications of subgroup_search() and the incremental Schreier-Sims algorithm. Namely, the pointwise stabilizer of a set of points (via the incremental Schreier-Sims algorithm):</li>
+</ul>
+<p></p><pre class="brush: python; wrap-lines: false;">In [4]: from sympy.combinatorics.named_groups import *
+In [5]: A = AlternatingGroup(9)
+In [6]: G = A.pointwise_stabilizer([2, 3, 5])
+In [7]: G == A.stabilizer(2).stabilizer(3).stabilizer(5)
+Out[7]: True
+</pre><p></p>
+<p>(this is much faster than the naive implementation using .stabilizer() repeatedly), and the centralizer of a group <img src="http://s0.wp.com/latex.php?latex=H&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="H" class="latex" title="H" /> inside a group <img src="http://s0.wp.com/latex.php?latex=G&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="G" class="latex" title="G" />:</p>
+<p></p><pre class="brush: python; wrap-lines: false;">In [11]: from sympy.combinatorics.named_groups import *
+In [12]: S = SymmetricGroup(6)
+In [13]: A = AlternatingGroup(6)
+In [14]: C = CyclicGroup(6)
+In [15]: S_els = list(S.generate())
+In [16]: G = S.centralizer(A)
+In [17]: G.order()
+Out[17]: 1
+In [18]: temp = [[el*gen for gen in A.generators] == [gen*el for gen in A.generators] for el in S_els]
+In [19]: temp.count(False)
+Out[19]: 719
+In [20]: temp.count(True)
+Out[20]: 1
+In [21]: G = S.centralizer(C)
+In [22]: G == C
+Out[22]: True
+In [23]: temp = [[el*gen for gen in C.generators] == [gen*el for gen in C.generators] for el in S_els]
+In [24]: temp.count(True)
+Out[24]: 6
+</pre><p></p>
+<p>(it takes some effort to see that these calculations indeed prove that .centralizer() returned the needed centralizer). The centralizer algorithm uses a pruning criterion described in [1], and even though it’s exponential in complexity, it’s fast for practical purposes. Both of the above functions are available (albeit not documented yet) on <a href="https://github.com/amakelov/sympy/tree/week10" target="_blank">my week10 branch</a>.</p>
+<ul>
+<li>The next steps are an algorithm for the centre in polynomial time, and an algorithm to find the intersection of two subgroups! And after that, I hope to be able to implement the Todd-Coxeter algorithm…</li>
+</ul>
+<p>That’s it for now!</p>
+<p>[1] Derek F. Holt, Bettina Eick, Bettina, Eamonn A. O’Brien, “Handbook of computational group theory”, Discrete Mathematics and its Applications (Boca Raton). Chapman &amp; Hall/CRC, Boca Raton, FL, 2005. ISBN 1-58488-372-3</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/amakelov.wordpress.com/445/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/amakelov.wordpress.com/445/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;blog=35896871&amp;post=445&amp;subd=amakelov&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://amakelov.wordpress.com/2012/08/06/google-summer-of-code-2012-week-11/">by amakelov at August 06, 2012 02:26 PM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>August 05, 2012</h2>
 
 <div class="channelgroup">
@@ -3424,59 +3501,6 @@ sudo python setup.py develop
 </div>
 
 
-
-</div>
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://rhoforsympy.wordpress.com" title="rhoforsympy">Guru Devanla</a></h3>
-
-
-<div class="entrygroup" id="http://rhoforsympy.wordpress.com/?p=116">
-<h4 lang="en"><a href="http://rhoforsympy.wordpress.com/2012/06/02/week-2-activity-summary/">Week 2: Activity Summary</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>This week there was fewer lines of code than last week. But, with this week I have almost(except partial trace) merged all changes from @ellisonbg’s densityop branch and ready to extend the implementation to incorporate other features.  Most of the time I spent this week is to review and structure my work for the coming weeks and address comments on previous PR . I have provided a detailed plan below.</p>
-<h2><span style="text-decoration: underline;">Tasks performed this week</span></h2>
-<p>1.  Responded to and completed all comments on last weeks pull <a href="https://github.com/sympy/sympy/pull/1312" title="PR 1312">PR1312.</a><br />
-2.  Pushed a minor code change branch to my git account. This change handles <strong>entropy for general density operators</strong>.  (<em>I am still waiting for the previous pull request to get merged, since this pull request was branched off that.)<br />
-</em>3.  Review and understand the partial trace operations and qubit related implementation.  Further notes will be prepared for the discussion.<br />
-4. Understand current implementation of tensor products to plan work for coming weeks.</p>
-<h2><span style="text-decoration: underline;">My plan for weeks 3,4,5,6 ( based on design discussion we have had regarding partial trace )</span></h2>
-<p><em>(Note, the detailed plan here still meets the timeline outlined in the proposal. The only change is I will be working fewer hours during Week 4(June 10-16), since I am at the summer school. Hopefully, I can contain the work to not flow into later weeks). </em></p>
-<h3>Week 3/4</h3>
-<p>Implement/test partial trace methods [ <strong>_eval_partial_trace</strong> ] and other required methods for following classes:</p>
-<p>QubitDensity (<span style="color: #800000;"><em>name suggestion needed!</em>)</span> : for this I will use the current bit-twiddling algorithm but add detailed test cases.<br />
-TensorProduct : Code to handle density operators ( both qubit based, and generic) during expand, mul operations.<br />
-TensorProduct : _eval_partial_trace method will split the sub-system to trace. and then based on states inside Tr(|i&gt;&lt;k|).  [ <em>This needs more discussions during the next few days and during IRC session.</em>]<br />
-Sub-classes of ‘State’ : Need to decide which subclasses need and how it should be done.</p>
-<h3>Week 5</h3>
-<p>Symbolic Trace operations and Partial Trace operations.</p>
-<h3>Week 6</h3>
-<p>Changes to qapply for L and R operations and any operations that would be needed based on changes so far. (will also fix the bug identified in PR 1312)</p>
-<h2><span style="text-decoration: underline;">Other related learning activities this week.</span></h2>
-<p>I tried <a href="http://ipython.org/ipython-doc/dev/interactive/htmlnotebook.html">IPython Notebook</a> and I absolutely love it. Now, I am using that as my command line interface for running sympy commands and understanding current implementation.  The best thing Notebook has done to my workflow is help me save my scratch work and go back whenever I need it. Thanks<a href="https://github.com/ellisonbg" title="Brian's github"> @ellisonbg</a>.</p>
-<p>I did have to jump some hoops to set up Notebook on Ubuntu 11.04, since I had to build a lot of dependencies myself. I plan to blog about it as part of another post.  A minor pain point with it is, I need to drag/drop files I want to work on. Wish it gave me an option to type in the URL to a saved notebook rather than forcing me to open a FileManager window to find file to drag and drop.</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/rhoforsympy.wordpress.com/116/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/rhoforsympy.wordpress.com/116/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;blog=34650270&amp;post=116&amp;subd=rhoforsympy&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://rhoforsympy.wordpress.com/2012/06/02/week-2-activity-summary/">by grdvnl at June 02, 2012 01:30 PM</a>
-</p>
-</div>
-</div>
-
-
 </div>
 
 </div>
@@ -3587,7 +3611,7 @@ Sub-classes of ‘State’ : Need to decide which subclasses need and how it sho
 
 <p>
 <strong>Last updated:</strong><br>
-August 13, 2012 03:00 PM<br>
+August 13, 2012 03:20 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
