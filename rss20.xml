@@ -8,6 +8,37 @@
 	<description>Planet SymPy - http://planet.sympy.org/</description>
 
 <item>
+	<title>Bharath M R: GSoC last week</title>
+	<guid isPermaLink="true">http://blog.catchmrbharath.in/programming/2012/08/19/gsoc-last-week</guid>
+	<link>http://blog.catchmrbharath.in/programming/2012/08/19/gsoc-last-week</link>
+	<description>&lt;p&gt;This happens to be the last week of GSoC. The major things that I accomplished this week are&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Got pylab to work interactively.&lt;/li&gt;
+
+&lt;li&gt;Made more changes to the documentation of plotting module.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I have a pull request for the restructured plotting module at &lt;a href=&quot;https://github.com/sympy/sympy/pull/1468&quot;&gt;here&lt;/a&gt;. There has been lots of discussions on how the new plot API should look like in the pull request. The API as of now has 5 functions:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;plot_line&lt;/code&gt; which plots 2D line plots, which I think I will change to &lt;code&gt;plot&lt;/code&gt;.&lt;/li&gt;
+
+&lt;li&gt;&lt;code&gt;plot_parametric&lt;/code&gt; which plots 2D parametric plots.&lt;/li&gt;
+
+&lt;li&gt;&lt;code&gt;plot3D&lt;/code&gt; which plots 3D plots.&lt;/li&gt;
+
+&lt;li&gt;&lt;code&gt;plot3D_parametric&lt;/code&gt; which plots 3D parametric line plots. I think I will have to change it into &lt;code&gt;plot_parametric3D&lt;/code&gt;.&lt;/li&gt;
+
+&lt;li&gt;&lt;code&gt;plot3D_surface&lt;/code&gt; which plots 3D parametric surfaces.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The names are slightly confusing, but the alternative to these names are big. If you have any good names for 3D plots, please leave it in the comments.&lt;/p&gt;
+
+&lt;p&gt;I will have another post describing the things I learnt over this GSoC period.&lt;/p&gt;</description>
+	<pubDate>Sun, 19 Aug 2012 07:00:00 +0000</pubDate>
+</item>
+<item>
 	<title>Aleksandar Makelov: Google Summer of Code 2012: Week 12</title>
 	<guid isPermaLink="false">http://amakelov.wordpress.com/?p=484</guid>
 	<link>http://amakelov.wordpress.com/2012/08/13/google-summer-of-code-2012-week-12/</link>
@@ -1907,35 +1938,6 @@ sudo python setup.py develop
 &lt;p&gt;It is better illustrated in the plot below. It is possible to see the width of the line increasing and then decreasing. &lt;img width=&quot;600&quot; src=&quot;http://catchmrbharath.github.com/images/09062012/img7.png&quot; height=&quot;400&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Then next problem is that of rasterization. In order to avoid rasterization I tried using the Matplotlib’s &lt;code&gt;contourf&lt;/code&gt; function which implements the marching squares algorithm. Though it smoothens the curves, still there is fair bit of rasterization. The plot below is a zoomed version of $y=sin(x)$ &lt;img width=&quot;600&quot; src=&quot;http://catchmrbharath.github.com/images/09062012/img8.png&quot; height=&quot;400&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Presently the plotting function supports plotting of expressions containing &lt;code&gt;cos&lt;/code&gt;, &lt;code&gt;sin&lt;/code&gt;, &lt;code&gt;tan&lt;/code&gt;, &lt;code&gt;exp&lt;/code&gt;, &lt;code&gt;log&lt;/code&gt;, &lt;code&gt;sqrt&lt;/code&gt;, &lt;code&gt;atan&lt;/code&gt;. Implementing more functions is fairly easy. I should be able to finish most of the expressions that can be implemented in the next week. I will look into implementing plotting implicit equations for expressions which cannot be implemented using interval arithmetic.&lt;/p&gt;</description>
-	<pubDate>Sat, 09 Jun 2012 07:00:00 +0000</pubDate>
-</item>
-<item>
-	<title>Bharath M R: GSoC Week 3</title>
-	<guid isPermaLink="true">http://blog.catchmrbharath.in/programming/2012/06/09/gsoc-week-3</guid>
-	<link>http://blog.catchmrbharath.in/programming/2012/06/09/gsoc-week-3</link>
-	<description>&lt;p&gt;I have almost finished with the basic framework of implicit plotting based on interval arithmetic. The module implements both continuity tracking and domain tracking. Hence it does not plot points which are not there in the domain of the function. The functionalities are best illustrated by plots. There are also a couple of limitations that I encountered, which I think is difficult to avoid. I will illustrate both the functionality and the problems through plots.&lt;/p&gt;
-&lt;img width=&quot;600&quot; src=&quot;http://blog.catchmrbharath.in/images/09062012/img1.png&quot; height=&quot;400&quot; /&gt;
-&lt;p&gt;The above image illustrates a plot which does domain tracking and continuity tracking. It is not possible for interval arithmetic without tracking, to decide whether to draw the plots near zero. But with continuity tracking we get an accurate plot.&lt;/p&gt;
-&lt;img width=&quot;600&quot; src=&quot;http://blog.catchmrbharath.in/images/09062012/img2.png&quot; height=&quot;400&quot; /&gt;
-&lt;p&gt;The above plot is that of $y = \frac{1}{\tan{\left (x \right )}}$ . It is possible to see the small discontinuity near multiples of $\pi / 2$ as $\pi / 2$ is not there in the domain of the expression.&lt;/p&gt;
-&lt;img width=&quot;600&quot; src=&quot;http://blog.catchmrbharath.in/images/09062012/img3.png&quot; height=&quot;400&quot; /&gt;
-&lt;p&gt;The above plot illustrates how sqrt does not plot anything outside its domain. Even though it appears not that significant, it becomes significant when the huge expression is provided as the argument to the function.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Illustrations of more plots&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;Plot of $y^{2}=x^{3}-x$ &lt;img width=&quot;600&quot; src=&quot;http://blog.catchmrbharath.in/images/09062012/img4.png&quot; height=&quot;400&quot; /&gt;&lt;/p&gt;
-&lt;img width=&quot;600&quot; src=&quot;http://blog.catchmrbharath.in/images/09062012/img5.png&quot; height=&quot;400&quot; /&gt;
-&lt;p&gt;The above plot took 19.26 seconds to render.&lt;/p&gt;
-
-&lt;h2 id=&quot;problems&quot;&gt;Problems&lt;/h2&gt;
-
-&lt;p&gt;The problem with plots using interval arithmetic is that the errors increases with the length of the expression as the it takes the lowest and the uppermost bounds. It is possible to see the effect of errors in the following plot. It is possible to see the line thickens when the expression reaches a maximum or an minimum. This is due to the error creeping in. The interval becomes wide even at the smallest of the x interval.&lt;/p&gt;
-&lt;img width=&quot;600&quot; src=&quot;http://blog.catchmrbharath.in/images/09062012/img6.png&quot; height=&quot;400&quot; /&gt;
-&lt;p&gt;It is better illustrated in the plot below. It is possible to see the width of the line increasing and then decreasing. &lt;img width=&quot;600&quot; src=&quot;http://blog.catchmrbharath.in/images/09062012/img7.png&quot; height=&quot;400&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Then next problem is that of rasterization. In order to avoid rasterization I tried using the Matplotlib’s &lt;code&gt;contourf&lt;/code&gt; function which implements the marching squares algorithm. Though it smoothens the curves, still there is fair bit of rasterization. The plot below is a zoomed version of $y=sin(x)$ &lt;img width=&quot;600&quot; src=&quot;http://blog.catchmrbharath.in/images/09062012/img8.png&quot; height=&quot;400&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Presently the plotting function supports plotting of expressions containing &lt;code&gt;cos&lt;/code&gt;, &lt;code&gt;sin&lt;/code&gt;, &lt;code&gt;tan&lt;/code&gt;, &lt;code&gt;exp&lt;/code&gt;, &lt;code&gt;log&lt;/code&gt;, &lt;code&gt;sqrt&lt;/code&gt;, &lt;code&gt;atan&lt;/code&gt;. Implementing more functions is fairly easy. I should be able to finish most of the expressions that can be implemented in the next week. I will look into implementing plotting implicit equations for expressions which cannot be implemented using interval arithmetic.&lt;/p&gt;</description>
 	<pubDate>Sat, 09 Jun 2012 07:00:00 +0000</pubDate>
