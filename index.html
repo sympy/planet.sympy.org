@@ -493,6 +493,33 @@ Out[24]: 6
 </div>
 
 
+
+
+<div class="entrygroup" id="http://blog.catchmrbharath.in/programming/2012/08/05/gsoc-week-11">
+<h4><a href="http://blog.catchmrbharath.in/programming/2012/08/05/gsoc-week-11">GSOC week 11</a></h4>
+<div class="entry">
+<div class="content">
+<p>I got my adaptive sampling branch merged last week. Now the plots are sampled adaptively and is more accurate. I also added a lot of tests to the implicit plotting branch and the coverage now is greater than 90%.</p>
+
+<p>One of the major things decided in the previous week was to restructure the plot function. Presently <code>plot</code> is a single function, which depending on its input, renders an 2d or an 3d plot. Though it plots the right kind of plot, the <code>plot</code> function is quite complex and it was decided to split the plot function into smaller functions that plots a particular type of plot. I tried an approach where all 2D plots are plotted by a <code>plot2d</code> function, the 3D plots by <code>plot3D</code> and the existing <code>plot_implicit</code> plots to plot regions and implicit equations. Aaron mentioned that the API is still very complex as I was using tuples and lists to differentiate between a parametric plot and a 2d line plot and he was right. It is a bit complex and it was decided to have a functions for each kind of plot.</p>
+
+<p>I think i can have the new plot functions as an PR by next week and I would like to try getting a Mayavi backend ready by the end of my GSoC period.</p>
+
+<p>I forgot to mention why I deviated from my what I said I would do in my GSoC application. I tried getting a svgfig backend ready for almost one and a half week, and it was quite difficult. svgfig is not being updated and I had a hard time getting the axis ticks labelling to work most of the time. I wrote to the project maintainer many times and he helped me with a lot of things, but the library was not polished enough to use it with Sympy Live. So plotting for SymPy Live should be attempted with a javascript plotting library rather than a python backend. If we get matplotlib support on GAE, then it would be awesome.</p></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://blog.catchmrbharath.in/programming/2012/08/05/gsoc-week-11">August 05, 2012 07:00 AM</a>
+</p>
+</div>
+</div>
+
+
 </div>
 
 </div>
@@ -898,6 +925,49 @@ StopIteration:
 
 <p class="date">
 <a href="http://catchmrbharath.github.com/programming/2012/07/23/gsoc-week-9">July 23, 2012 07:00 AM</a>
+</p>
+</div>
+</div>
+
+
+
+
+<div class="entrygroup" id="http://blog.catchmrbharath.in/programming/2012/07/23/gsoc-week-9">
+<h4><a href="http://blog.catchmrbharath.in/programming/2012/07/23/gsoc-week-9">Gsoc week 9</a></h4>
+<div class="entry">
+<div class="content">
+<p>This has been a really unproductive week. I was sick with fever for almost three days and could not spend my time on anything. I spent the next days getting the basic svgfig backend for 2d line plots. There are lots of issues with svgfig, and hence I am of the opinion svgfig should be used only for displaying images on the google app engine ie sympy live. First on the list is no support for 3-D graphs. I think this is ok, because there are not many libraries even in javascript which can do 3D plotting. Also, I am having problems with implementing contour plots and surface plots in svgfig. I am experimenting with a way, which would involve using marching squares algorithm to plot contour plots.</p>
+
+<p>I think I am a little behind my gsoc schedule, and I should speed up things a little in the next few weeks.</p>
+
+<p>So these are the things that I have to address</p>
+
+<ul>
+<li>Integration of svgfig with sympy live</li>
+
+<li>Fix the multiple spawning of windows in matplotlib issue.</li>
+
+<li>Fix the plot tests. As of now, the tests do nothing, as the process_series is not called if show is set to False.</li>
+
+<li>I have been toying around with ipython to get isympy notebook and qtconsole working. The problem I am facing is, there are 2 instances of qtconsole created, instead of one, when I run it. I will have to figure out the problem.</li>
+
+<li>Address the issues regarding the adaptive sampling of 2d plots.</li>
+
+<li>Clean up my branch of implicit plotting (This is almost done).</li>
+
+<li>Split the plot function into plot, plot3d, implicit_plot functions.</li>
+</ul>
+
+<p>I don’t think I will be able to do all of these by the end of gsoc period. But my priority will be getting the implicit plotting and svgfig backend working and getting my pull requests merged.</p></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://blog.catchmrbharath.in/programming/2012/07/23/gsoc-week-9">July 23, 2012 07:00 AM</a>
 </p>
 </div>
 </div>
@@ -1551,6 +1621,43 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
 
 
 
+
+<div class="entrygroup" id="http://blog.catchmrbharath.in/programming/2012/07/09/gsoc-week-7">
+<h4><a href="http://blog.catchmrbharath.in/programming/2012/07/09/gsoc-week-7">GSoC week 7</a></h4>
+<div class="entry">
+<div class="content">
+<p>This week has been quite eventful. The implicit plotting module is almost done. I added the functionality of combining expressions using the <code>And</code> and <code>Or</code> statements. Now you can do</p>
+
+<p><code>
+plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
+</code> and get a plot as below. So now you can combine any number of equations / inequalities and plot it. I think its possible to do a lot of cool stuff combining equations / inequalities. <img width="600" src="http://blog.catchmrbharath.in/images/09072012/fig1.png" height="400" /></p>
+
+<p>Plotting through interval math is awesome but is also very limited. You cannot add support to <code>re()</code>, to functions that you cannot characterize as monotonic in certain regions. But we always encounter such functions. So there should be some fall back algorithm to plot such plots. I implemented the fall back algorithm last week. The idea is borrowed from sage implicit plots. We convert an equation / inequality into a function which returns 1 if it satisfies and -1 if it doesn’t satisfy. So if you are plotting an equality then you plot using the <code>contour</code> command of matplotlib, and instruct it to plot only the zero contour. If its an inequality then plotting the region with two colors gives the plot required.</p>
+
+<p>These are examples from the fallback algorithm.</p>
+
+<p>Plot of $y^{2}=x^{3}-x$ <img width="600" src="http://blog.catchmrbharath.in/images/09072012/fig2.png" height="400" /></p>
+
+<p>The plot with interval arithmetic is more precise. <img width="600" src="http://blog.catchmrbharath.in/images/09072012/fig3.png" height="400" /></p>
+
+<p>I haven’t finished with the tests. Once I finish the tests I can send a pull request. The pull request will be pretty big, but most of the things have been reviewed in my previous pull request. This is just an extension of the previous pull request.</p>
+
+<p>There are certain problems with the module though. The line width problem which I mentioned in my previous blog post, cannot be fixed. So you will have to change to the fall back method if the line width becomes large. Also the fall back algorithm cannot plot boolean combinations of equations / inequalities. So the two methods complement each other largely. So the next question would be whether we can choose one of the two intelligently. I guess the answer is No. That decision must be taken by the user. But most of the times the interval math approach works very nicely.</p></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://blog.catchmrbharath.in/programming/2012/07/09/gsoc-week-7">July 09, 2012 07:00 AM</a>
+</p>
+</div>
+</div>
+
+
+
 </div>
 <div class="channelgroup">
 
@@ -1975,6 +2082,47 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
 
 <p class="date">
 <a href="http://catchmrbharath.github.com/programming/2012/07/02/gsoc-week-6">July 02, 2012 07:00 AM</a>
+</p>
+</div>
+</div>
+
+
+
+
+<div class="entrygroup" id="http://blog.catchmrbharath.in/programming/2012/07/02/gsoc-week-6">
+<h4><a href="http://blog.catchmrbharath.in/programming/2012/07/02/gsoc-week-6">GSoC Week 6</a></h4>
+<div class="entry">
+<div class="content">
+<p>I have been trying to improve the implicit plotting module during this week. But I have hit a road block. I almost ran out of ideas to solve the problem.</p>
+
+<p>Description:</p>
+
+<p>The implicit plotting algorithm I implemented works something like below:</p>
+
+<p>1) Get x and y interval. If it satisfies the expression throughout the interval, then plot it.</p>
+
+<p>2) If it does not satisfy, throw away the intervals.</p>
+
+<p>3) If it partially satisfies, then recursively subdivide into four intervals, and try again.</p>
+
+<p>For cases of equality, the first point never holds true due to floating point errors. So we go on eliminating regions, and after a certain depth, plot the remaining region. These are the regions where there is at least one solution. This is the reason why the plots are rasterized. But there is an inherent bigger problem here. In the cases of expressions like $x^{3}$ even if the x interval is small, the resulting interval after computation will be large. Sometimes, due to these large intervals, there might be lots of y and x intervals which satisfy because of these errors. Even if we make x interval really small, the corresponding y interval will be large, ie the line widths become large. The explanation is more of a guess rather than the right explanation.</p>
+
+<p>Examples:</p>
+
+<p>Plot of $x^{y}=y^{x}$ <img width="600" src="http://blog.catchmrbharath.in/images/02072012/fig1.png" height="400" /> Even if I increase my depth of recursion to higher values, the thickness becomes less, but doesn’t vanish. The plot actually should have been two separate curves.</p>
+<img width="600" src="http://blog.catchmrbharath.in/images/02072012/fig3.png" height="400" />
+<p>The Mac OSX’s Grapher uses a similar algorithm(A guess because they have similar rasterization) but takes care of the line widths.</p>
+
+<p>If you feel you know where the problem is, please comment or email me. :)</p></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://blog.catchmrbharath.in/programming/2012/07/02/gsoc-week-6">July 02, 2012 07:00 AM</a>
 </p>
 </div>
 </div>
@@ -2559,6 +2707,29 @@ In [305]: G._coset_repr
 
 <p class="date">
 <a href="http://catchmrbharath.github.com/programming/2012/06/24/gsoc-week-5">June 24, 2012 07:00 AM</a>
+</p>
+</div>
+</div>
+
+
+
+
+<div class="entrygroup" id="http://blog.catchmrbharath.in/programming/2012/06/24/gsoc-week-5">
+<h4><a href="http://blog.catchmrbharath.in/programming/2012/06/24/gsoc-week-5">Gsoc week 5</a></h4>
+<div class="entry">
+<div class="content">
+<p>This week has been mostly bug fixing and working on migrating the sympy ipython profile to sympy. I also wanted to add the functionality of <code>ipython -c qtconsole</code>. So it has been mostly hanging in the ipython irc, asking them lots of questions on how ipython works. I am really thankful to minrk who patiently taught me how to do most of the stuff. There are a few problems that I am facing, but I think I will have the qtconsole ready in a day.</p>
+
+<p>I also submitted a pull request #1370 for my initial work on implicit plotting. Except for the bug of changing line thickness, it works pretty nicely. Please feel free to play with it and comment on the pull request if you encounter any bugs.</p></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://blog.catchmrbharath.in/programming/2012/06/24/gsoc-week-5">June 24, 2012 07:00 AM</a>
 </p>
 </div>
 </div>
@@ -3230,207 +3401,35 @@ sudo python setup.py develop
 </div>
 
 
-</div>
 
-</div>
-<div class="daygroup">
-<h2>June 08, 2012</h2>
 
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://angadhsympy.wordpress.com" title="GSoC 2012 blog">Angadh Nanjangud</a></h3>
-
-
-<div class="entrygroup" id="http://angadhsympy.wordpress.com/?p=94">
-<h4 lang="en"><a href="http://angadhsympy.wordpress.com/2012/06/08/gsoc-2012-post-4-15/">GSoC 2012 Post 4</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>This week I officially got started on my GSoC work. With some last minute confusions I was a day later than expected but I found that just a little over a week away from Python, and my memory was already a little rusty. It was back to the Python Tutorial for me to brush up for a short while.<br />Having a less rigorous exposure to programming and only ever having dwelled in the functional programming world, dealing with the concept of ‘Classes’ has been overwhelming. I think with respect to training myself in Python through the tutorial, it is probably the topic I have spent the most time on and every time that I go through it, I seem to come across a little nugget of information that I missed or had misunderstood. With all that going on, it took me longer than I expected but I was able to get my first helper function working- the linear momentum function. It took me a lot longer than expected to get it working but it appears that I was having some issues importing the module that contained that function. It’s not completely apparent what I was doing incorrectly because I didn’t change anything in my code. Ultimately, by earlier today morning, I had the function working for both particles and rigid bodies and I have pushed the functions to my fork. I haven’t opened a pull request yet. I will do so once I have all the documentation in place. So currently, I’m just working on the documentation, just brushing up on the ‘standards’ for editing the docstring, making my tests and examples more explicit. Apart from that, I’m looking at<a href="https://github.com/sympy/sympy/pull/1269#issuecomment-5417513"> PR 1269</a>  and the documentation on <a href="http://pydy.org/index.php?title=Main_Page">pydy.org</a>. I constantly had to explore that webpage during the winter quarter of 2012 when I was taking a multibody dynamics class which required us to learn sympy.physics.mechanics. Though the documentation is very good, it is a commonly held belief that things can be made more accessible than it is at present. So, I’m jsut exploring that to see what could be plausible ways of improving things as they currently stand. On the coding front, I will be getting on to the angular momentum helper function and also, I’m thinking of determining a way to represent a system of rigid bodies and/or particles so that composite momenta (and probably inertia too) can be computed as these are useful information to be have at one’s disposal.<br />Until next week, then.</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/angadhsympy.wordpress.com/94/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/angadhsympy.wordpress.com/94/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=angadhsympy.wordpress.com&amp;blog=35620584&amp;post=94&amp;subd=angadhsympy&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://angadhsympy.wordpress.com/2012/06/08/gsoc-2012-post-4-15/">by angadhn at June 08, 2012 10:43 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
-<div class="daygroup">
-<h2>June 07, 2012</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://amakelov.wordpress.com" title="Not really blogging">Aleksandar Makelov</a></h3>
-
-
-<div class="entrygroup" id="http://amakelov.wordpress.com/?p=67">
-<h4 lang="en"><a href="http://amakelov.wordpress.com/2012/06/07/think-small-2/">Think small</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p style="text-align: right;"><em><a href="http://en.wikipedia.org/wiki/The_Hitchhiker%27s_Guide_to_the_Galaxy" target="_blank">Time is an illusion. Lunchtime doubly so.</a></em></p>
-<p style="text-align: right;"><em><a href="http://en.wikipedia.org/wiki/Douglas_Adams" target="_blank">Douglas Adams, </a></em></p>
-<p>By the way, the <a href="http://en.wikipedia.org/wiki/The_Hitchhiker%27s_Guide_to_the_Galaxy_%28film%29" target="_blank">movie</a> isn’t as bad as I thought when I saw it the first time. I guess I was too narrow-minded back then.</p>
-<p>To paraphrase Douglas Adams, everyone has problems, and mathematicians doubly so. <strong>Problems</strong> are what makes math so cool and challenging, and coming up with a nice, beautiful solution is what makes mathematicians go “WOOHOO! HAHAHAHA! OOOOH YEAH!” That’s why I want to start my discussion of mathematics with a (in my view, very interesting) problem. There is no clear way to state it rigorously, but it’s more or less intuitively clear what’s going on. So here we go: you can pick the more formalized or less formalized version; the way I first heard it (thanks to V. Valov, MIT, ’15) was in the latter version.</p>
-<p style="text-align: left;"><strong>Not so formal:</strong> There are several lions and one goat (note that lions enjoy eating goats). If a lion eats a goat he turns into a goat, and each lion knows that. What is going to happen?</p>
-<p style="text-align: left;"><strong>More formal:</strong> There are <img src="http://s0.wp.com/latex.php?latex=n%5Cin%5Cmathbb%7BN%7D&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="n\in\mathbb{N}" class="latex" title="n\in\mathbb{N}" /> lions and <img src="http://s0.wp.com/latex.php?latex=1&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="1" class="latex" title="1" /> goat. Each lion obeys the following set of priorities:</p>
-<ol>
-<li>Stay alive.</li>
-<li>Eat a goat.</li>
-</ol>
-<p>in this order, meaning that he’s going to eat a goat if and only if he’ll stay alive after that. If a lion eats a goat, he’s going to turn into a goat, and each lion knows that. Also, somewhat surprisingly, lions can predict the outcome of any possible situation in the lion-goat configuration. If several lions want to eat one goat, assume that the only result of this is one of them eating the goat.</p>
-<p style="text-align: left;">What is going to happen?</p>
-<p style="text-align: center;">***</p>
-<p style="text-align: left;">If you want to get any real fun out of this blog post, you should now try to solve it for yourself.</p>
-<p style="text-align: center;">***</p>
-<p style="text-align: left;"><strong>Solution.</strong> I’ve already showed this problem (in the more formal version) to several people from different math backgrounds. Common first reactions were nevertheless similar: “Nothing is going to happen (implicit: each lion will avoid becoming a goat and thus being eaten)!”; or, “There is going to be one goat in the end (implicit: lions just want to eat goats. That’s it.)!” My initial reaction was similar. There is often confusion as to why the number <img src="http://s0.wp.com/latex.php?latex=n%5Cin%5Cmathbb%7BN%7D&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="n\in\mathbb{N}" class="latex" title="n\in\mathbb{N}" /> should even matter.</p>
-<p style="text-align: left;">Then you can just get stuck, as it often happens in math (it wouldn’t be that interesting otherwise, would it?).</p>
-<p style="text-align: left;">One thing I learned from the <a href="http://www.imo-official.org/" target="_blank">olympiad</a> training (good old times) was that whenever you have ” for <img src="http://s0.wp.com/latex.php?latex=n+%5Cin%5Cmathbb%7BN%7D+&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="n \in\mathbb{N} " class="latex" title="n \in\mathbb{N} " />…”, and no real ideas what to do, you should just start with looking at <img src="http://s0.wp.com/latex.php?latex=n%3D1%2C+n%3D2%2C+n%3D3%2C%5Cldots+&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="n=1, n=2, n=3,\ldots " class="latex" title="n=1, n=2, n=3,\ldots " /> and try to find a pattern. It’s that simple, and yet often overlooked by contestants.</p>
-<p style="text-align: left;"><img src="http://s0.wp.com/latex.php?latex=n%3D1&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="n=1" class="latex" title="n=1" />. Well, he’s either going to eat the goat or not. But there’s no one else to eat him if he does, so the list of priorities tells us that he’s gonna have a meal. Yay! So for <img src="http://s0.wp.com/latex.php?latex=n%3D1&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="n=1" class="latex" title="n=1" /> the outcome is that the lion eats the goat.</p>
-<p style="text-align: left;"><img src="http://s0.wp.com/latex.php?latex=n%3D2&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="n=2" class="latex" title="n=2" />. It doesn’t take a lot of effort to see that if one of the lions eats the goat, the other lion is going to eat <em>him</em>, so in this case the lions are going to stick to priority number 1 and do nothing.</p>
-<p style="text-align: left;"><img src="http://s0.wp.com/latex.php?latex=n%3D3&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="n=3" class="latex" title="n=3" />. Hmm. Well, for what we may call the first move, the goat is either going to be eaten or not.</p>
-<p style="text-align: left;">If it is, we’re left with two lions and a goat… <strong>sounds sort of familiar.</strong> Nothing happens.</p>
-<p style="text-align: left;">Since nothing happens (the lion who eats the goat stays alive, though a bit more goatish), it <em>must </em>be the case that the a lion eats the goat (recall the priorities).</p>
-<p style="text-align: left;">Now we’re going somewhere (aren’t we?). In <img src="http://s0.wp.com/latex.php?latex=n%3D4&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="n=4" class="latex" title="n=4" />, we again consider the same two cases and see that if a lion eats the goat, he is going to be eaten by another lion afterwards, because that other lion knows he’s not going to be eaten, because… blah blah… because… blah blah.. because if there’s one lion and a goat, he’s going to eat the goat. It’s sort of long to phrase. These lions probably get a really bad headache while thinking of the outcome of a given situation…</p>
-<p style="text-align: left;">Well, not really. Math is about patterns, and quite often, about being concise. Even something that doesn’t seem too important, like notation, can bring great insights when introduced in the right way. In our case, it is the <strong>hypothesis </strong>- i.e., what we think the answer is – that will help us actually <strong>prove</strong> that it is the answer. <strong>Mathematicians like to know <a href="http://en.wikipedia.org/wiki/Phrases_from_The_Hitchhiker%27s_Guide_to_the_Galaxy#Answer_to_the_Ultimate_Question_of_Life.2C_the_Universe.2C_and_Everything_.2842.29" target="_blank">the answer</a> before they actually start solving the problem</strong> (and this doesn’t only apply to problems with numbers <img src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif" alt=":)" class="wp-smiley" />  ).</p>
-<p>So, what is the hypothesis going to be? We saw that for <img src="http://s0.wp.com/latex.php?latex=n+%3D+1%2C3&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="n = 1,3" class="latex" title="n = 1,3" /> one lion eats the goat and that’s it, whereas for <img src="http://s0.wp.com/latex.php?latex=n+%3D+2%2C4&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="n = 2,4" class="latex" title="n = 2,4" />, nothing happens. Proceeding in the same way with <img src="http://s0.wp.com/latex.php?latex=n+%3D+5%2C+6%2C%5Cldots&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="n = 5, 6,\ldots" class="latex" title="n = 5, 6,\ldots" /> we find that for <img src="http://s0.wp.com/latex.php?latex=5%2C7%2C9%2C%5Cldots&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="5,7,9,\ldots" class="latex" title="5,7,9,\ldots" /> a lion eats the goat and for <img src="http://s0.wp.com/latex.php?latex=n+%3D+6%2C8%2C10%2C%5Cldots&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="n = 6,8,10,\ldots" class="latex" title="n = 6,8,10,\ldots" /> nothing happens. We are now pretty convinced that this is one of the simplest possible patterns: even and odd.</p>
-<p>Now that we’ve made that leap of faith, a straightforward <a href="http://en.wikipedia.org/wiki/Mathematical_induction" target="_blank">induction</a> can be used to prove that it is actually correct. Induction is basically what we did in order to deduce the <img src="http://s0.wp.com/latex.php?latex=n+%3D+4&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="n = 4" class="latex" title="n = 4" /> case from the <img src="http://s0.wp.com/latex.php?latex=n+%3D+3&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="n = 3" class="latex" title="n = 3" /> case, but you just keep doing it on and on. The idea is that any natural number is finite, so we’re going to reach it at some point. Thinking small helped us think big.</p>
-<p>It is worth noting how important the principle of induction is. If you want to be rigorous (and mathematicians certainly do that, for a simple reason – they don’t want to fall into the trap of intuition), it doesn’t even make sense to talk about <strong>proving </strong>the principle of induction. This has got to do with what the <img src="http://s0.wp.com/latex.php?latex=%5Cmathbb%7BN%7D&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="\mathbb{N}" class="latex" title="\mathbb{N}" /> actually <a href="http://en.wikipedia.org/wiki/Peano_axioms" target="_blank">is</a> in the formal sense – the principle of induction is actually a part of the definition of the natural numbers that is accepted today, and indeed the most powerful axiom among Peano’s axioms.</p>
-<p>And so we enter the realm of rigorous mathematical logic where <a href="http://en.wikipedia.org/wiki/Georg_Cantor" target="_blank">one</a> can go <a href="http://www.youtube.com/watch?v=NMNgbISmF4I&amp;ob=av2e" target="_blank">crazy</a> and proving <img src="http://s0.wp.com/latex.php?latex=%5Cforall+y%5Cin%5Cmathbb%7BN%7D%3A%5Cforall+z%5Cin%5Cmathbb%7BN%7D%3A+%5Cforall+x+%5Cin%5Cmathbb%7BN%7D%3A+y%5Cneq+z+%5Cimplies+yx%5Cneq+zx&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" alt="\forall y\in\mathbb{N}:\forall z\in\mathbb{N}: \forall x \in\mathbb{N}: y\neq z \implies yx\neq zx" class="latex" title="\forall y\in\mathbb{N}:\forall z\in\mathbb{N}: \forall x \in\mathbb{N}: y\neq z \implies yx\neq zx" /> takes about 6 pages. If you want to hang around, you might find <a href="http://en.wikipedia.org/wiki/G%C3%B6del,_Escher,_Bach" target="_blank">this </a>interesting.</p>
-<p>And finally, the above approach is not always guaranteed to be a good idea. There are a lot of crazy examples (and counterexamples, if you like the negative connotation better) for all kinds of things in math, and thinking small is no exception. I’m so sorry to bring this to your attention, but see <a href="http://en.wikipedia.org/wiki/Borwein_integral" target="_blank">this</a> and <a href="http://www.math.hmc.edu/funfacts/ffiles/20009.5.shtml" target="_blank">this</a>. You know, you <a href="http://spikedmath.com/499.html" target="_blank">can’t</a> have everything.</p>
-<p>Anyway, I’m not really blogging and this might be my last post. Farewell!</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/amakelov.wordpress.com/67/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/amakelov.wordpress.com/67/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godelicious/amakelov.wordpress.com/67/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/delicious/amakelov.wordpress.com/67/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/amakelov.wordpress.com/67/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/facebook/amakelov.wordpress.com/67/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/amakelov.wordpress.com/67/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/twitter/amakelov.wordpress.com/67/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gostumble/amakelov.wordpress.com/67/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/stumble/amakelov.wordpress.com/67/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godigg/amakelov.wordpress.com/67/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/digg/amakelov.wordpress.com/67/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/goreddit/amakelov.wordpress.com/67/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/reddit/amakelov.wordpress.com/67/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;blog=35896871&amp;post=67&amp;subd=amakelov&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://amakelov.wordpress.com/2012/06/07/think-small-2/">by amakelov at June 07, 2012 10:44 PM</a>
-</p>
-</div>
-</div>
-
-
-
-
-<div class="entrygroup" id="http://amakelov.wordpress.com/?p=34">
-<h4 lang="en"><a href="http://amakelov.wordpress.com/2012/06/07/gsoc-setting-up-the-environment/">GSoC: Setting up the environment</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p><em><strong>A guide from a newbie</strong></em></p>
-<p>So you’re gonna be coding? Well, coding and Linux go really well together… they say.</p>
-<p>But if you like how everything in Windows seems to work without you thinking too much about it, don’t despair!</p>
-<p>Because there are these amazing things called <a href="http://en.wikipedia.org/wiki/Virtual_machine" target="_blank">virtual machines</a> that allow you to run two operating systems simultaneously on the same computer…</p>
-<p>wait what?!… Yes, this is possible. Actually, the idea turns out to be quite <a href="http://www.extremetech.com/computing/72186-virtual-machines-vmware-part-i/2" target="_blank">old</a>, and, it seems, backed up by some fairly sophisticated <a href="http://developers.slashdot.org/story/02/06/25/1223234/virtual-machine-design-and-implementation-in-cc" target="_blank">theory</a> (so it’s not surprising that virtual machines feel like <a href="http://www.quotationspage.com/quote/776.html" target="_blank">magic</a>).</p>
-<p>I personally use the <a href="http://en.wikipedia.org/wiki/Hypervisor" target="_blank">hypervisor </a><a href="https://www.virtualbox.org/" target="_blank">Virtual Box</a> and the <a href="http://en.wikipedia.org/wiki/Ubuntu_%28operating_system%29" target="_blank">Ubuntu</a> operating system as a guest OS. The following simple <a href="http://www.psychocats.net/ubuntu/virtualbox" target="_blank">guide</a> got Ubuntu installed and running inside the VM in about half an hour. It is important to decide how you’re going to split your machine’s resources between the host OS and the guest OS, mainly the CPU and RAM, but you can always revert the changes if you find something is not quite balanced. I have the following on my machine:</p>
-<p>CPU: Intel Core i3 M 350 @ 2.27 GHz</p>
-<p>RAM: 4.00 GB</p>
-<p>ATI Mobility Radeon HD 5145 512 MB</p>
-<p style="text-align: right;">running under Windows 7.</p>
-<p>I assigned as much as I could to my VM, this being 1.75GB of RAM, 2 CPUs and 128MB of video memory. It has been running pretty smoothly for all my programming/web browsing purposes so far (unless when I try to compute something ridiculously huge, but that’s sort of expected); the host OS is also performing smoothly for web browsing, and that’s quite enough for me at the moment.</p>
-<p>Next, you <em>want </em>to get the <a href="http://www.virtualbox.org/manual/ch04.html" target="_blank">guest additions installed</a> because they make the VM seem even more magical (and, what is probably more important from a practical perspective, more user-friendly).</p>
-<p>Setting up <strong>shared folders</strong> is also really convenient – and changing the contents of the folder in one OS can immediately be seen in the other (see? <a href="http://www.youtube.com/watch?v=YWf5BLUOhNM&amp;ob=av2n" target="_blank">magic!</a>). It took me some time to figure out the cryptic command</p>
-<p><code>mount -t vboxsf [-o OPTIONS] sharename mountpoint</code></p>
-<p>found in the Shared Folders menu of VirtualBox, but, in short, what you have to do is open a terminal in your Ubuntu guest OS and use</p>
-<p><code>sudo mount -t vboxsf sharename path</code></p>
-<p>where sharename is only <strong>the name</strong> of your shared folder as you created <strong>in your host OS</strong> (for me, it is in the C:\Users\Username\.VirtualBox folder, so for example if you want to share C:\Users\Username\.VirtualBox\shared you should use shared for sharename), and path is the full path, relative to your home directory, to the folder as which you want the shared folder to appear <strong>in your guest OS</strong>. Be careful, since mounting the shared folder will <strong>erase</strong> whatever there is in the folder pointed to by path (this happened to me once, but restarting the guest OS undid the changes). Also, the folder pointed to by path must exist by the time of mounting.</p>
-<p>Next, the <strong>coding tools</strong>. For editing code, I shamelessly use gedit that comes with Ubuntu (probably a very bad idea in general, but we’ll see where this goes). Since I’m writing code for a large enough project to care about trailing whitespace and stuff, I found the following <a href="https://gitorious.org/gedit-trailing-spaces" target="_blank">two</a> <a href="https://github.com/jonleighton/gedit-trailsave" target="_blank">plugins</a> really helpful for automatically getting rid of these brats – you can download them directly from the git repository and copy the relevant files in the relevant folders, as per <a href="https://live.gnome.org/Gedit/Plugins" target="_blank">this</a>).</p>
-<p>Which leads us to version control, and <a href="http://en.wikipedia.org/wiki/Git_%28software%29" target="_blank"><strong>git</strong></a>. I don’t really know git, but I’m getting used to it, and the following <a href="http://gitref.org/" target="_blank">reference</a> has been helpful so far (though it doesn’t provide information about some of the more advanced commands). Beyond that, you should basically scream for help, google stuff if you’re not sure, and, most importantly, get your hands on it (this approach seems to work for a surprising number of things in life).</p>
-<p>And finally, <a href="http://www.youtube.com/watch?v=anwy2MPT5RE" target="_blank"><strong>python</strong></a>. I recently started using the <a href="https://github.com/ipython/ipython" target="_blank">ipython</a> interpreter (you can download the development version from github, or a stable release from their <a href="http://ipython.org/" target="_blank">website</a>). It has some really nice features, for example</p>
-<p><code>%load_ext autoreload</code></p>
-<p><code>%autoreload</code></p>
-<p>reloads the modules currently imported so that any changes made after the interpreter was started are taken into account. Or<br />
-<code><br />
-%timeit(my_function())</code></p>
-<p>which runs some function my_function() several times to record the time of computation more precisely.</p>
-<p>Well, that’s it for now. If I find any other useful additions to my environment, or anything nontrivial that I had to do in order to make my life as a programmer easier, I’ll try to put it up here, for my own reference and for anyone who may be struggling with the same problems.</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/amakelov.wordpress.com/34/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/amakelov.wordpress.com/34/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godelicious/amakelov.wordpress.com/34/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/delicious/amakelov.wordpress.com/34/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gofacebook/amakelov.wordpress.com/34/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/facebook/amakelov.wordpress.com/34/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gotwitter/amakelov.wordpress.com/34/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/twitter/amakelov.wordpress.com/34/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/gostumble/amakelov.wordpress.com/34/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/stumble/amakelov.wordpress.com/34/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/godigg/amakelov.wordpress.com/34/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/digg/amakelov.wordpress.com/34/" alt="" border="0" /></a> <a href="http://feeds.wordpress.com/1.0/goreddit/amakelov.wordpress.com/34/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/reddit/amakelov.wordpress.com/34/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;blog=35896871&amp;post=34&amp;subd=amakelov&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://amakelov.wordpress.com/2012/06/07/gsoc-setting-up-the-environment/">by amakelov at June 07, 2012 06:54 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
-<div class="daygroup">
-<h2>June 03, 2012</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://krastanov.wordpress.com" title="Stefan's Blog » SymPy">Stefan Krastanov</a></h3>
-
-
-<div class="entrygroup" id="http://krastanov.wordpress.com/?p=333">
-<h4 lang="en"><a href="http://krastanov.wordpress.com/2012/06/04/consistent-output-from-the-sympy-solvers-and-some-ideas-about-the-ode-solver/">Consistent output from the SymPy solvers (and some ideas about the ODE solver)</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>The work on the differential geometry module has not progressed much this week. I have fixed some minor issues, docstrings and naming conventions, however I have not done much with respect to the implementation of form fields as there are still some questions about the design to be ironed out.</p>
-<p>Instead I focused on studying two of the features that SymPy presents and that I will use heavily. The first is the simplification routine that I will discuss another time. The second one is the different solvers implement in SymPy.</p>
-<p>First of all, I have a very hard time getting used to the various output that the solvers provide. The algebraic equations solver, for example, can return either an empty list or a None instance if there is no solution. If there are solutions it can return a list of tuples of solutions, or a list of dictionaries of solutions, or a list of solutions if there is only one variable to solve for, or the solution itself if the solution is unique… Thankfully, a remedy for this was implemented by Christopher Smith. In <a href="https://github.com/sympy/sympy/pull/1324" target="_blank">pull request 1324</a> he provided some flags that force the solver to return the solutions in a canonical form. I am very grateful for his work and I hope that in the not too distant future what he has done will become the default behavior. I also hope that the solver will get refactored, because internally it is still a mess of different possible outputs that are canonicalized only at the very end. It is possible that I will work on this later.</p>
-<p>Then there is the ODE module. I already need this solver in order to work with the integral curves that my code produces[1]. It is a very advanced solver written a few years ago by Aaron Meurer as part of his GSoC project. However, it still does not support systems of ODEs or solving for initial conditions. With Aaron’s help I have started those. The main difficulty is that I am covering only the simplest cases, however the new API must be futureproof. Moreover, here I again have a problem with the various outputs that can be produced by the ODE solver. Solutions are always returned as Equation instances (which is necessary, as some solutions can be in implicit form), however if there are multiple solutions they are returned in a list, while single solutions are returned themselves (not in a list). Anyway, the structure of the ODE module is straightforward so this should not be too hard to work around.</p>
-<p>This week I will probably finish my work with the ODE solver and proceed to the form fields.</p>
-<p>[1] The code on the differential geometry side is ready, however before showing it I will first extend the ODE solver in order to have more interesting examples.</p>
-<br />  <img src="http://stats.wordpress.com/b.gif?host=krastanov.wordpress.com&amp;blog=15251174&amp;post=333&amp;subd=krastanov&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://krastanov.wordpress.com/2012/06/04/consistent-output-from-the-sympy-solvers-and-some-ideas-about-the-ode-solver/">by Stefan Krastanov at June 03, 2012 10:14 PM</a>
-</p>
-</div>
-</div>
-
-
-
-
-<div class="entrygroup" id="http://catchmrbharath.github.com/programming/2012/06/03/gsoc-week-2">
-<h4><a href="http://catchmrbharath.github.com/programming/2012/06/03/gsoc-week-2">GSoC Week 2</a></h4>
+<div class="entrygroup" id="http://blog.catchmrbharath.in/programming/2012/06/09/gsoc-week-3">
+<h4><a href="http://blog.catchmrbharath.in/programming/2012/06/09/gsoc-week-3">GSoC Week 3</a></h4>
 <div class="entry">
 <div class="content">
-<p>I worked on interval aithmetic using numpy this week. I have almost got the module ready. I have to integrate it with Stefan’s branch and a basic version of implicit plotting will be ready to go. I will update this blog post with plots and performance results once I integrate it with Stefan’s branch.</p></div>
+<p>I have almost finished with the basic framework of implicit plotting based on interval arithmetic. The module implements both continuity tracking and domain tracking. Hence it does not plot points which are not there in the domain of the function. The functionalities are best illustrated by plots. There are also a couple of limitations that I encountered, which I think is difficult to avoid. I will illustrate both the functionality and the problems through plots.</p>
+<img width="600" src="http://blog.catchmrbharath.in/images/09062012/img1.png" height="400" />
+<p>The above image illustrates a plot which does domain tracking and continuity tracking. It is not possible for interval arithmetic without tracking, to decide whether to draw the plots near zero. But with continuity tracking we get an accurate plot.</p>
+<img width="600" src="http://blog.catchmrbharath.in/images/09062012/img2.png" height="400" />
+<p>The above plot is that of $y = \frac{1}{\tan{\left (x \right )}}$ . It is possible to see the small discontinuity near multiples of $\pi / 2$ as $\pi / 2$ is not there in the domain of the expression.</p>
+<img width="600" src="http://blog.catchmrbharath.in/images/09062012/img3.png" height="400" />
+<p>The above plot illustrates how sqrt does not plot anything outside its domain. Even though it appears not that significant, it becomes significant when the huge expression is provided as the argument to the function.</p>
+
+<p><strong>Illustrations of more plots</strong></p>
+
+<p>Plot of $y^{2}=x^{3}-x$ <img width="600" src="http://blog.catchmrbharath.in/images/09062012/img4.png" height="400" /></p>
+<img width="600" src="http://blog.catchmrbharath.in/images/09062012/img5.png" height="400" />
+<p>The above plot took 19.26 seconds to render.</p>
+
+<h2 id="problems">Problems</h2>
+
+<p>The problem with plots using interval arithmetic is that the errors increases with the length of the expression as the it takes the lowest and the uppermost bounds. It is possible to see the effect of errors in the following plot. It is possible to see the line thickens when the expression reaches a maximum or an minimum. This is due to the error creeping in. The interval becomes wide even at the smallest of the x interval.</p>
+<img width="600" src="http://blog.catchmrbharath.in/images/09062012/img6.png" height="400" />
+<p>It is better illustrated in the plot below. It is possible to see the width of the line increasing and then decreasing. <img width="600" src="http://blog.catchmrbharath.in/images/09062012/img7.png" height="400" /></p>
+
+<p>Then next problem is that of rasterization. In order to avoid rasterization I tried using the Matplotlib’s <code>contourf</code> function which implements the marching squares algorithm. Though it smoothens the curves, still there is fair bit of rasterization. The plot below is a zoomed version of $y=sin(x)$ <img width="600" src="http://blog.catchmrbharath.in/images/09062012/img8.png" height="400" /></p>
+
+<p>Presently the plotting function supports plotting of expressions containing <code>cos</code>, <code>sin</code>, <code>tan</code>, <code>exp</code>, <code>log</code>, <code>sqrt</code>, <code>atan</code>. Implementing more functions is fairly easy. I should be able to finish most of the expressions that can be implemented in the next week. I will look into implementing plotting implicit equations for expressions which cannot be implemented using interval arithmetic.</p></div>
 
 
 
@@ -3439,63 +3438,7 @@ sudo python setup.py develop
 
 
 <p class="date">
-<a href="http://catchmrbharath.github.com/programming/2012/06/03/gsoc-week-2">June 03, 2012 07:00 AM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
-<div class="daygroup">
-<h2>June 02, 2012</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://amakelov.wordpress.com" title="Not really blogging » Google Summer of Code 2012">Aleksandar Makelov</a></h3>
-
-
-<div class="entrygroup" id="http://amakelov.wordpress.com/?p=25">
-<h4 lang="en"><a href="http://amakelov.wordpress.com/2012/06/02/google-summer-of-code-2012-week-2/">Google Summer of Code 2012: Week 2</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>Hi everyone,</p>
-<p>Here is a brief summary of what I’ve been doing for the second week of my GSoC.</p>
-<p>The first main direction was randomization: an implementation of the <strong><a href="http://en.wikipedia.org/wiki/Nielsen_transformation#Product_replacement_algorithm" target="_blank">product replacement algorithm</a> using an optimization suggested by Leedham-Green, as described in [1]</strong>. After an initialization that takes ~ 50 group operations (a number suggested by [1] to be large enough for practical purposes), group elements the properties of which are satisfyingly random for most CGT algorithms can be produced at the cost of one group operation (in the context of permutation groups, by a ‘group operation’ we mean the multiplication of two permutations of size the degree of the permutation group). Thus the time complexity here is O(n).</p>
-<p>The product replacement algorithm allowed the implementation of a simple (yet backed up by some nontrivial results in number theory and group theory) and fast <a href="http://en.wikipedia.org/wiki/Monte_Carlo_algorithm" target="_blank">Monte Carlo algorithm</a> for <strong>testing whether a given permutation group is the symmetric or the alternating group</strong> (once we know this, it is straightforward to decide which one it is by checking the parity of all the generators). This is suggested in [1] as a first step in analyzing a large permutation group. It should be noted that the algorithm is actually one-sided Monte Carlo (as defined in [2]): a wrong answer is guaranteed to be wrong, whereas a right answer may be wrong with some predefined probability. The complexity here is O(n log(n)).</p>
-<p>The second direction was <strong>computing minimal blocks by Atkinson’s algorithm</strong>. A function taking several points S from {0, 1, …, n-1} for a transitive permutation group G of degree n, and returning the maximal block system of G (meaning the one with the smallest block size) such that the points in S are contained in the same block, was implemented. The time complexity is just above O(|S|n) ([1]). Atkinson’s algorithm itself makes use of the <a href="http://www.algorithmist.com/index.php/Union_Find" target="_blank">union-find</a> algorithm (of course, with path compression and union by rank) to manage an equivalence relation on the set {0, 1, …, n-1}.</p>
-<p>As a consequence of this, <strong>primitivity testing</strong> in O(n^2) time is possible (we just check for blocks containing {0, 1}, {0, 2},…, {0, n-1}). There are three optimizations to this suggested in [1] that were implemented:</p>
-<ul>
-<li>Compute the stabilizer Stab of 0 and look at {0, rep} for orbit representatives of the action of Stab on {0, …,  n-1}</li>
-<li>Stop the merging process once an equivalence class becomes larger than n/p where p is the smallest prime dividing n (as block sizes must divide n)</li>
-<li>Instead of computing the stabilizer deterministically, take a subgroup generated by several random elements from Stab, by a slight modification of product replacement for G.</li>
-</ul>
-<p>Still, the algorithm runs for O(n^2) time and will perform badly if Stab is small. There are primitivity testing algorithms that run in almost linear time (one is suggested in [2]), but it is claimed in [1] that the use of Atkinson’s algorithm performs well for permutation groups with degrees in the millions (which is good for our purposes) — so the question of performance here needs some further investigation.</p>
-<p>There were some other minor changes made:</p>
-<ul>
-<li>The group constructors for Sym and Alt now don’t calculate the order of the group right away, but only when the order is called for ( factorial(1000000) used to take almost all the time for initializing SymmetricGroup(1000000)).</li>
-<li>The function orbit() can now compute the union of the orbits for several points, or the orbit of an ordered tuple of elements of {0, 1,…, n-1}. It would be desirable to be able to do this for unordered tuples as well – but the effectiveness of this might become very low since sets are not hashable in python. Perhaps there is some way to get around this.</li>
-</ul>
-<p>Several changes in design were proposed in the <a href="https://github.com/sympy/sympy/pull/1319#issuecomment-6005413" target="_blank">pull request for week1</a> that deserve consideration (and discussion).</p>
-<p>[1] Derek F. Holt, Bettina Eick, Bettina, Eamonn A. O’Brien, “Handbook of computational group theory”, Discrete Mathematics and its Applications (Boca Raton). Chapman &amp; Hall/CRC, Boca Raton, FL, 2005. ISBN 1-58488-372-3</p>
-<p>[2] Permutation Group Algorithms, Ákos Seress, Cambridge University Press</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/amakelov.wordpress.com/25/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/amakelov.wordpress.com/25/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;blog=35896871&amp;post=25&amp;subd=amakelov&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://amakelov.wordpress.com/2012/06/02/google-summer-of-code-2012-week-2/">by amakelov at June 02, 2012 04:35 PM</a>
+<a href="http://blog.catchmrbharath.in/programming/2012/06/09/gsoc-week-3">June 09, 2012 07:00 AM</a>
 </p>
 </div>
 </div>
@@ -3521,13 +3464,13 @@ sudo python setup.py develop
 <a href="http://amakelov.wordpress.com/category/google-summer-of-code-2012/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://amakelov.wordpress.com" title="Not really blogging » Google Summer of Code 2012">Aleksandar Makelov</a>
 </li>
 <li>
-<a href="http://angadhsympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://angadhsympy.wordpress.com" title="GSoC 2012 blog">Angadh Nanjangud</a>
+<a href="http://angadhsympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://angadhsympy.wordpress.com" class="message" title="no activity in 7 days">Angadh Nanjangud</a>
 </li>
 <li>
-<a href="http://catchmrbharath.github.com/programming.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a class="message" title="no activity in 7 days">Bharath M R</a>
+<a href="http://blog.catchmrbharath.in/programming.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a class="message" title="no activity in 7 days">Bharath M R</a>
 </li>
 <li>
-<a href="http://www.blogger.com/feeds/267967203861801529/posts/default/-/SymPy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://straightupcoding.blogspot.com/search/label/SymPy" class="message" title="no activity in 7 days">Brian Jorgensen</a>
+<a href="http://straightupcoding.blogspot.com/feeds/posts/default/-/SymPy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://straightupcoding.blogspot.com/search/label/SymPy" class="message" title="no activity in 7 days">Brian Jorgensen</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/5997157115341007565/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://lasympy.blogspot.com/" class="message" title="no activity in 7 days">Chris Wu</a>
@@ -3551,7 +3494,7 @@ sudo python setup.py develop
 <a href="http://www.blogger.com/feeds/7648717043547744590/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://gsoc-mathtex.blogspot.com/" class="message" title="no activity in 7 days">Freddie Witherden</a>
 </li>
 <li>
-<a href="http://www.blogger.com/feeds/4754734402679928849/posts/default/-/sympy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://fredrik-j.blogspot.com/search/label/sympy" class="message" title="no activity in 7 days">Fredrik Johansson</a>
+<a href="http://fredrik-j.blogspot.com/feeds/posts/default/-/sympy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://fredrik-j.blogspot.com/search/label/sympy" class="message" title="no activity in 7 days">Fredrik Johansson</a>
 </li>
 <li>
 <a href="http://gilbertgede.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://gilbertgede.wordpress.com" class="message" title="no activity in 7 days">Gilbert Gede</a>
@@ -3575,7 +3518,7 @@ sudo python setup.py develop
 <a href="http://www.blogger.com/feeds/2520472460430880330/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sympy.blogspot.com/" class="message" title="no activity in 7 days">Official SymPy blog</a>
 </li>
 <li>
-<a href="http://www.blogger.com/feeds/6568744196982634289/posts/default/-/sympy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://ondrejcertik.blogspot.com/search/label/sympy" class="message" title="no activity in 7 days">Ondřej Čertík</a>
+<a href="http://ondrejcertik.blogspot.com/feeds/posts/default/-/sympy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://ondrejcertik.blogspot.com/search/label/sympy" class="message" title="no activity in 7 days">Ondřej Čertík</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/436496352933562096/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://robert-code.blogspot.com/" class="message" title="no activity in 7 days">Robert Schwarz</a>
@@ -3593,7 +3536,7 @@ sudo python setup.py develop
 <a href="http://sherjilozair.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sherjilozair.wordpress.com" class="message" title="no activity in 7 days">Sherjil Ozair</a>
 </li>
 <li>
-<a href="http://krastanov.wordpress.com/category/sympy-2/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://krastanov.wordpress.com" title="Stefan's Blog » SymPy">Stefan Krastanov</a>
+<a href="http://krastanov.wordpress.com/category/sympy-2/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://krastanov.wordpress.com" class="message" title="no activity in 7 days">Stefan Krastanov</a>
 </li>
 <li>
 <a href="http://nessgrh.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://nessgrh.wordpress.com" class="message" title="no activity in 7 days">Tom Bachmann</a>
@@ -3611,7 +3554,7 @@ sudo python setup.py develop
 
 <p>
 <strong>Last updated:</strong><br>
-August 13, 2012 03:20 PM<br>
+August 19, 2012 08:00 AM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
