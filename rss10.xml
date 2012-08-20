@@ -13,6 +13,7 @@
 
 	<items>
 		<rdf:Seq>
+			<rdf:li rdf:resource="http://amakelov.wordpress.com/?p=512" />
 			<rdf:li rdf:resource="http://blog.catchmrbharath.in/programming/2012/08/19/gsoc-last-week" />
 			<rdf:li rdf:resource="http://amakelov.wordpress.com/?p=484" />
 			<rdf:li rdf:resource="http://rhoforsympy.wordpress.com/?p=251" />
@@ -72,11 +73,33 @@
 			<rdf:li rdf:resource="http://amakelov.wordpress.com/?p=115" />
 			<rdf:li rdf:resource="http://scolobb.wordpress.com/?p=119" />
 			<rdf:li rdf:resource="http://rhoforsympy.wordpress.com/?p=151" />
-			<rdf:li rdf:resource="http://catchmrbharath.github.com/programming/2012/06/09/gsoc-week-3" />
 		</rdf:Seq>
 	</items>
 </channel>
 
+<item rdf:about="http://amakelov.wordpress.com/?p=512">
+	<title>Aleksandar Makelov: Google Summer of Code 2012: Week 13</title>
+	<link>http://amakelov.wordpress.com/2012/08/20/google-summer-of-code-2012-week-13/</link>
+	<content:encoded>&lt;p&gt;Hi all, here’s a brief summary of my 13th (and last) week of GSoC.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;I continued my work on centralizers, improving normal closure, derived in lower central series, etc. My most recent pull request containing these additions just got merged and can be found &lt;a href=&quot;https://github.com/sympy/sympy/pull/1495&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. This week I spent a lot of time on writing better tests and developing some new test practices. The group-theoretical algorithms in the combinatorics module are getting more and more complicated, so better, cleverer and more thorough tests are needed. I came up with the following model for verification:&lt;br /&gt;
+- since the results of the tests are very hard to compute by hand, some helper functions are needed that find the wanted object in a brute-force manner using only definitions. For example, we often look for a subgroup with certain properties. The most naive and robust approach to this is to:&lt;br /&gt;
+- list all group elements, go over the list and check each element for the given property.&lt;br /&gt;
+- Then, make a list of all the “good” elements and compare it (as a set) with the list of all elements of the group the function being tested returns.&lt;br /&gt;
+Hence, a new file was created, sympy/combinatorics/testutil.py, that will host such functions. (Needless to say, they are exponential in complexity, and for example going over all the elements of SymmetricGroup(n) becomes infeasible for n larger than 10.)&lt;br /&gt;
+- The presence of functions being used to test other functions gets us in a bit of a &lt;a href=&quot;http://en.wikipedia.org/wiki/Quis_custodiet_ipsos_custodes%3F&quot; target=&quot;_blank&quot;&gt;&lt;strong&gt;&lt;em&gt;Quis custodiet ipsos custodes?&lt;/em&gt;&lt;/strong&gt;&lt;/a&gt; situation, but this is not fatal: the functions in testutil.py are extremely straightforward compared to the functions in perm_groups.py that they test, and it’s really obvious what they’re doing, so it’ll take less tests to verify &lt;em&gt;them. &lt;/em&gt;&lt;br /&gt;
+- In the tests for the new functions from perm_groups.py, I introduced some comments to indicate what (and why) I’m testing. Another practice that seems to be good is to verify the algorithms for small groups (degrees 1, 2, 3) since there are a lot of corner cases there that seem to break them.&lt;/li&gt;
+&lt;li&gt;I started work on improving the disjoint cycle notation, namely excluding singleton cycles from the cyclic form; however, there are other changes to handling permutations that are waiting to be merged in the combinatorics module &lt;a href=&quot;https://github.com/sympy/sympy/pull/1498&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;, so I guess I’ll first discuss my changes with &lt;a href=&quot;https://github.com/smichr&quot; target=&quot;_blank&quot;&gt;Christopher&lt;/a&gt;. Currently, I see the following two possibilities for handling the singleton cycles:&lt;br /&gt;
+- add a &lt;code&gt;_size&lt;/code&gt; attribute to the Permutation class, and then, when faced with something like &lt;code&gt;Permutation([[2, 3], [4, 5, 6], [8]])&lt;/code&gt;, find the maximum index appearing in the permutation (here it’s 8) and assign the size of the permutation to that + 1. Then it remains to adjust some of the other methods in the class (after I adjusted &lt;strong&gt;mul&lt;/strong&gt; so that it treats permutations of different sizes as if they leave all points outside their domain fixed, all the tests passed) so that they make sense with that new approach to cyclic forms.&lt;br /&gt;
+- more ambitious: make a new class, &lt;code&gt;ExtendedArrayForm&lt;/code&gt; or something, with a field &lt;code&gt;_array_form&lt;/code&gt; that holds the usual array form of a permutation. Then we overload the &lt;code&gt;__getitem__&lt;/code&gt; method so that if the index is outside the bounds of &lt;code&gt;self._array_form&lt;/code&gt; we return the index unchanged. Of course, we’ll have to overload other things, like the &lt;code&gt;__len__&lt;/code&gt; and &lt;code&gt;__str__&lt;/code&gt; to make it behave like a list. Then instead of using a list to initialize the array form of a permutation, we use the corresponding &lt;code&gt;ExtendedArrayForm&lt;/code&gt;. This will make all permutations behave as if they are acting on a practically infinite domain, and if we do it that way, we won’t have to make any changes to the methods in &lt;code&gt;Permutation&lt;/code&gt; – everything is going to work as expected, no casework like &lt;code&gt;if len(a) &amp;gt; len(b),...&lt;/code&gt; will be needed. So this sounds like a rather elegant approach. On the other hand, I’m not entirely sure if it is possible to make it completely like a list, and also it doesn’t seem like a very performance-efficient decision since &lt;code&gt;ExtendedArrayForm&lt;/code&gt; instances will be created all the time. (&lt;strong&gt;see the discussion &lt;a href=&quot;https://github.com/sympy/sympy/pull/1498&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;).&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Still nothing on a database of groups. I looked around the web for a while but didn’t find any resources… the search continues. Perhaps I should ask someone more knowledgeable.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;That’s it for now, and that’s the end of my series of blog posts for the GSoC, but I don’t really feel that something has ended since it seems that my contributions to the combinatorics module will continue (albeit not that regularly : ) ). After all, it’s a lot of fun, and there are a lot more things to be implemented/fixed there! So, a big “Thank you” to everyone who helped me get through (and to) GSoC, it’s been a pleasure and I learned a lot. Goodbye!&lt;/p&gt;
+&lt;p&gt; &lt;/p&gt;
+&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/amakelov.wordpress.com/512/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/amakelov.wordpress.com/512/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;amp;blog=35896871&amp;amp;post=512&amp;amp;subd=amakelov&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
+	<dc:date>2012-08-20T14:38:23+00:00</dc:date>
+	<dc:creator>amakelov</dc:creator>
+</item>
 <item rdf:about="http://blog.catchmrbharath.in/programming/2012/08/19/gsoc-last-week">
 	<title>Bharath M R: GSoC last week</title>
 	<link>http://blog.catchmrbharath.in/programming/2012/08/19/gsoc-last-week</link>
@@ -1971,34 +1994,6 @@ sudo python setup.py develop
 &lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/rhoforsympy.wordpress.com/151/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/rhoforsympy.wordpress.com/151/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;amp;blog=34650270&amp;amp;post=151&amp;amp;subd=rhoforsympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
 	<dc:date>2012-06-10T04:30:31+00:00</dc:date>
 	<dc:creator>grdvnl</dc:creator>
-</item>
-<item rdf:about="http://catchmrbharath.github.com/programming/2012/06/09/gsoc-week-3">
-	<title>Bharath M R: GSoC Week 3</title>
-	<link>http://catchmrbharath.github.com/programming/2012/06/09/gsoc-week-3</link>
-	<content:encoded>&lt;p&gt;I have almost finished with the basic framework of implicit plotting based on interval arithmetic. The module implements both continuity tracking and domain tracking. Hence it does not plot points which are not there in the domain of the function. The functionalities are best illustrated by plots. There are also a couple of limitations that I encountered, which I think is difficult to avoid. I will illustrate both the functionality and the problems through plots.&lt;/p&gt;
-&lt;img width=&quot;600&quot; src=&quot;http://catchmrbharath.github.com/images/09062012/img1.png&quot; height=&quot;400&quot; /&gt;
-&lt;p&gt;The above image illustrates a plot which does domain tracking and continuity tracking. It is not possible for interval arithmetic without tracking, to decide whether to draw the plots near zero. But with continuity tracking we get an accurate plot.&lt;/p&gt;
-&lt;img width=&quot;600&quot; src=&quot;http://catchmrbharath.github.com/images/09062012/img2.png&quot; height=&quot;400&quot; /&gt;
-&lt;p&gt;The above plot is that of $y = \frac{1}{\tan{\left (x \right )}}$ . It is possible to see the small discontinuity near multiples of $\pi / 2$ as $\pi / 2$ is not there in the domain of the expression.&lt;/p&gt;
-&lt;img width=&quot;600&quot; src=&quot;http://catchmrbharath.github.com/images/09062012/img3.png&quot; height=&quot;400&quot; /&gt;
-&lt;p&gt;The above plot illustrates how sqrt does not plot anything outside its domain. Even though it appears not that significant, it becomes significant when the huge expression is provided as the argument to the function.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Illustrations of more plots&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;Plot of $y^{2}=x^{3}-x$ &lt;img width=&quot;600&quot; src=&quot;http://catchmrbharath.github.com/images/09062012/img4.png&quot; height=&quot;400&quot; /&gt;&lt;/p&gt;
-&lt;img width=&quot;600&quot; src=&quot;http://catchmrbharath.github.com/images/09062012/img5.png&quot; height=&quot;400&quot; /&gt;
-&lt;p&gt;The above plot took 19.26 seconds to render.&lt;/p&gt;
-
-&lt;h2 id=&quot;problems&quot;&gt;Problems&lt;/h2&gt;
-
-&lt;p&gt;The problem with plots using interval arithmetic is that the errors increases with the length of the expression as the it takes the lowest and the uppermost bounds. It is possible to see the effect of errors in the following plot. It is possible to see the line thickens when the expression reaches a maximum or an minimum. This is due to the error creeping in. The interval becomes wide even at the smallest of the x interval.&lt;/p&gt;
-&lt;img width=&quot;600&quot; src=&quot;http://catchmrbharath.github.com/images/09062012/img6.png&quot; height=&quot;400&quot; /&gt;
-&lt;p&gt;It is better illustrated in the plot below. It is possible to see the width of the line increasing and then decreasing. &lt;img width=&quot;600&quot; src=&quot;http://catchmrbharath.github.com/images/09062012/img7.png&quot; height=&quot;400&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Then next problem is that of rasterization. In order to avoid rasterization I tried using the Matplotlib’s &lt;code&gt;contourf&lt;/code&gt; function which implements the marching squares algorithm. Though it smoothens the curves, still there is fair bit of rasterization. The plot below is a zoomed version of $y=sin(x)$ &lt;img width=&quot;600&quot; src=&quot;http://catchmrbharath.github.com/images/09062012/img8.png&quot; height=&quot;400&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Presently the plotting function supports plotting of expressions containing &lt;code&gt;cos&lt;/code&gt;, &lt;code&gt;sin&lt;/code&gt;, &lt;code&gt;tan&lt;/code&gt;, &lt;code&gt;exp&lt;/code&gt;, &lt;code&gt;log&lt;/code&gt;, &lt;code&gt;sqrt&lt;/code&gt;, &lt;code&gt;atan&lt;/code&gt;. Implementing more functions is fairly easy. I should be able to finish most of the expressions that can be implemented in the next week. I will look into implementing plotting implicit equations for expressions which cannot be implemented using interval arithmetic.&lt;/p&gt;</content:encoded>
-	<dc:date>2012-06-09T07:00:00+00:00</dc:date>
 </item>
 
 </rdf:RDF>
