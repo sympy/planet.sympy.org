@@ -23,6 +23,97 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>August 31, 2012</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
+
+
+<div class="entrygroup" id="http://asmeurersympy.wordpress.com/?p=1154">
+<h4 lang="en"><a href="http://asmeurersympy.wordpress.com/2012/08/31/isympy-i-a-saner-interactive-environment/">isympy -I:  A saner interactive environment</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p>As <a href="http://asmeurersympy.wordpress.com/2012/08/21/sympy-live-sphinx-extension/">promised</a>, here is another post describing a new feature in the upcoming <a href="https://github.com/sympy/sympy/wiki/Release-Notes-for-0.7.2">SymPy 0.7.2</a>.</p>
+<h2>Automatic Symbol Definition</h2>
+<p>While not as ground breaking as the feature I described in my <a href="http://asmeurersympy.wordpress.com/2012/08/21/sympy-live-sphinx-extension/">last post</a>, this feature is still quite useful. As you may know, SymPy is inherently a Python library, meaning that it lives by the rules of Python. If you want to use any name, whether it be a Symbol or a function (like cos), you need to define it (in the case of Symbols), or import it (in the case of functions that come with SymPy). We provide the script <code>isympy</code> with SymPy to assist with this. This script automatically runs IPython (if it’s installed), imports all names from sympy (<code>from sympy import *</code>), and defines common symbol names (like <code>x</code>, <code>y</code>, and <code>z</code>).</p>
+<p>But if you want to use a Symbol that is not one of the ones predefined by <code>isympy</code>, you will get something like</p>
+<p></p><pre class="brush: python;">In [1]: r*x
+---------------------------------------------------------------------------
+NameError                                 Traceback (most recent call last)
+ in ()
+----&gt; 1 r*x
+
+NameError: name 'r' is not defined
+</pre><p></p>
+<p>The best solution for this has been either to type <code>var('r')</code>, which will create the Symbol <code>r</code> and inject it into the namespace, or to wrap your text in a string and pass it to <code>sympify()</code>, like <code>sympify("r*x")</code>. Neither of these are very friendly in interactive mode.</p>
+<p>In SymPy 0.7.2, <code>isympy</code> has a new command line option, <code>isympy -a</code>, which will enable a mechanism that will automatically define all undefined names as Symbols for you:</p>
+<p></p><pre class="brush: python;">In [1]: r*x
+Out[1]: r⋅x
+</pre><p></p>
+<p>There are some caveats to be aware of when using this feature:</p>
+<ul>
+<li>Names must be undefined for <code>isympy -a</code> to work. If you type something like <code>S*x</code>, you’ll get:<pre class="brush: python;">In [3]: S*x
+---------------------------------------------------------------------------
+TypeError                                 Traceback (most recent call last)
+&lt;ipython-input-3-6656a97ea7b0&gt; in &lt;module&gt;()
+----&gt; 1 S*x
+
+TypeError: unsupported operand type(s) for *: 'SingletonRegistry' and 'Symbol'
+</pre>
+<p>That’s because <code>S</code> is already defined (it’s the <code>SingletonRegistry</code>, and also a shortcut to <code>sympify()</code>). To use a name that’s already defined, either create it manually with <code>var()</code> or delete it using <code>del</code>.</p></li>
+<li>This only works on the top level namespace. If you define a function with an undefined name, it will not automatically define that symbol when run.</li>
+<li>This works by catching NameError, defining the name, and then re-running the expression. If you have a multiline statement, any lines before the undefined name will be run before the NameError will be caught. This usually won’t happen, but it’s a potential side-effect to be aware of. We plan to rewrite it using either ast or tokenize to avoid this issue.</li>
+<li>Obviously, this is intended for interactive use only. If you copy code and put it in a script, or in some other place where someone might be expected to run it, but not necessarily from <code>isympy -a</code>, you should include symbol definitions.</li>
+</ul>
+<h2>Automatic int to Integer Conversion</h2>
+<p>A second thing that is annoying with Python and SymPy is that something like <code>1/2</code> will be interpreted completely by Python, without any SymPy. This means that something like <code>1/2 + x</code> will give either <code>0 + x</code> or <code>0.5 + x</code>, depending on whether or not <code>__future__.division</code> has been imported. <code>isympy</code> has always ran <code>from __future__ import division</code>, so that you’ll get the latter, but we usually would prefer to get <code>Rational(1, 2)</code>. Previously, the best way to do this was again to either run it through <code>sympify()</code> as a string, or to sympify at least one of the numbers (here the <code>S()</code> shortcut to <code>sympify()</code> is useful, because you can type just <code>S(1)/2</code>).</p>
+<p>With SymPy 0.7.2, you can run <code>isympy -i</code>, and it will automatically wrap all integers literals with <code>Integer()</code>. The result is that <code>1/2</code> produces <code>Rational(1, 2)</code>:</p>
+<p></p><pre class="brush: python;">In [1]: 1/2 + x
+Out[1]: x + 1/2
+</pre><p></p>
+<p>Again, there are a couple of caveats:</p>
+<ul>
+<li>If you want to get Python style division, you just need to wrap both arguments in <code>int()</code>:<pre class="brush: python;">In [2]: int(1)/int(2)
+Out[2]: 0.5
+</pre>
+<p>Of course, if you just want a floating point number, you can just use <code>N()</code> or <code>.evalf()</code></p></li>
+<li>This works by parsing the text and wrapping all integer literals with <code>Integer()</code>. This means that if you have a variable set to a Python int, it will still act like a Python int:<pre class="brush: python;">In [6]: a = int(1)
+
+In [7]: b = int(2)
+
+In [8]: a/b
+Out[8]: 0.5
+</pre>
+<p>Note that to even do that example, I had to manually make <code>a</code> and <code>b</code> Python ints by wrapping them in <code>int()</code>. If I had just done <code>a = 1</code>, it would have been parsed as <code>a = Integer(1)</code>, and I would have gotten a SymPy Integer. But this can be an issue if you use the result of some function that returns an int (again, note that most functions in SymPy that return integers return Integer, not int).</p></li>
+<li>The same as before: this will only work interactively. If you want to reuse your code outside of <code>isympy -i</code>, you should take care of any int/int by rewriting it as S(int)/int.</li>
+</ul>
+<p>Since these are both useful features, we’ve added a way that you can get them both at once: by doing <code>isympy -I</code> (the “I” stands for “Interactive”). If we add similar features in the future, we will also add them to the <code>-I</code> shortcut (for example, we may add an option to allow <code>^</code> to automatically be replaced with <code>**</code>).</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/asmeurersympy.wordpress.com/1154/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/asmeurersympy.wordpress.com/1154/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1154&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://asmeurersympy.wordpress.com/2012/08/31/isympy-i-a-saner-interactive-environment/">by Aaron Meurer at August 31, 2012 03:30 AM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>August 21, 2012</h2>
 
 <div class="channelgroup">
@@ -3409,55 +3500,6 @@ sudo python setup.py develop
 </div>
 
 
-
-</div>
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://scolobb.wordpress.com" title="Coaquarium">Sergiu Ivanov</a></h3>
-
-
-<div class="entrygroup" id="http://scolobb.wordpress.com/?p=119">
-<h4 lang="en"><a href="http://scolobb.wordpress.com/2012/06/11/the-setting/">The Setting</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>This week has been my first week fully-dedicated to GSoC and my (absolutely beloved) category-theory-related <a href="https://github.com/sympy/sympy/wiki/GSoC-2012-Application-Sergiu-Ivanov:-Category-Theory-Module">project</a>.</p>
-<p>First off, I have finished working on the first phase of the project, entitled “Base Classes”.  In the course of this phase I have implemented the base classes (oh yeah <img src="http://s1.wp.com/wp-includes/images/smilies/icon_wink.gif" alt=";-)" class="wp-smiley" />  ) of the category theory module, which includes <tt>Object</tt>, <tt>Morphism</tt>, <tt>Category</tt>, and <tt>Diagram</tt>.</p>
-<p>The names of the classes were meant to be self-documenting, but there are a couple gotchas which are determined by the pre-incipient state of the module. In the following paragraphs I will try to briefly overview the classes and point out the things which may be unexpected.</p>
-<p>The first two classes in the enumeration are pretty straightforward. The class <tt>Object</tt> represents an object in an abstract category. Since we’re talking about abstract categories, an object is little more than its name. The class <tt>Morphism</tt> represents a morphism in an abstract category, which is little more than just an arrow from an object to another object. Correspondingly, a <tt>Morphism</tt>, has a string name, an <tt>Object</tt> which is the <em>domain</em> (the object where the arrow begins) and <em>codomain</em> (the object where the arrow ends). Now, morphisms can be <em>composed</em>. Thus if you have a morphism <img src="http://s0.wp.com/latex.php?latex=f&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="f" class="latex" title="f" /> from <img src="http://s0.wp.com/latex.php?latex=A&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="A" class="latex" title="A" /> to <img src="http://s0.wp.com/latex.php?latex=B&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="B" class="latex" title="B" /> (which are objects in some (asbtract) category), and a morphism <img src="http://s0.wp.com/latex.php?latex=g&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="g" class="latex" title="g" /> from <img src="http://s0.wp.com/latex.php?latex=B&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="B" class="latex" title="B" /> to <img src="http://s0.wp.com/latex.php?latex=C&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="C" class="latex" title="C" />, then you can take their composition, which is a morphism from <img src="http://s0.wp.com/latex.php?latex=A&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="A" class="latex" title="A" /> to <img src="http://s0.wp.com/latex.php?latex=C&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="C" class="latex" title="C" />. This composite is often denoted <img src="http://s0.wp.com/latex.php?latex=g%5Ccirc+f&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="g\circ f" class="latex" title="g\circ f" /> (mind the order). The morphisms themselves are often written as <img src="http://s0.wp.com/latex.php?latex=f%3AA%5Crightarrow+B&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="f:A\rightarrow B" class="latex" title="f:A\rightarrow B" /> and <img src="http://s0.wp.com/latex.php?latex=g%3AB%5Crightarrow+C&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="g:B\rightarrow C" class="latex" title="g:B\rightarrow C" />. These two morphisms are called <em>composable</em> in this order.</p>
-<p>While in some concrete settings like set mappings, group homomorphisms, etc. the composite function/homomorphism acts in a well-defined way, there’s no way to define the action of an abstract category theoretic morphism. In correspondence with this, compositions of <tt>Moprhism</tt>‘s yield other morphisms, which store the components they were obtained from inside themselves. Composing morphisms which were already composed is all right, since a <tt>Morphism</tt> always stores the flattened-down version of the list of components. Thus a <tt>Morphism</tt> representing <img src="http://s0.wp.com/latex.php?latex=h%5Ccirc+%28g%5Ccirc+f%29&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="h\circ (g\circ f)" class="latex" title="h\circ (g\circ f)" />, the composite of <img src="http://s0.wp.com/latex.php?latex=h%3AC%5Crightarrow+D&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="h:C\rightarrow D" class="latex" title="h:C\rightarrow D" /> and <img src="http://s0.wp.com/latex.php?latex=g%5Ccirc+f%3AA%5Crightarrow+C&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="g\circ f:A\rightarrow C" class="latex" title="g\circ f:A\rightarrow C" />, will store the list of three morphisms representing <img src="http://s0.wp.com/latex.php?latex=f&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="f" class="latex" title="f" />, <img src="http://s0.wp.com/latex.php?latex=g&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="g" class="latex" title="g" />, <img src="http://s0.wp.com/latex.php?latex=h&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="h" class="latex" title="h" /> (again, mind the order).</p>
-<p>A morphism of the form <img src="http://s0.wp.com/latex.php?latex=id_A%3AA%5Crightarrow+A&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="id_A:A\rightarrow A" class="latex" title="id_A:A\rightarrow A" /> is called an <em>identity</em> if for any two other morphisms <img src="http://s0.wp.com/latex.php?latex=f%3AX%5Crightarrow+A&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="f:X\rightarrow A" class="latex" title="f:X\rightarrow A" /> and <img src="http://s0.wp.com/latex.php?latex=g%3AA%5Crightarrow+Y&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="g:A\rightarrow Y" class="latex" title="g:A\rightarrow Y" /> one has <img src="http://s0.wp.com/latex.php?latex=id_A%5Ccirc+f+%3D+f&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="id_A\circ f = f" class="latex" title="id_A\circ f = f" /> and <img src="http://s0.wp.com/latex.php?latex=g%5Ccirc+id_A+%3D+g&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="g\circ id_A = g" class="latex" title="g\circ id_A = g" />, that is, identity morphisms are identities with respect to morphism composition. Instances of <tt>Morphism</tt> which have the flag <tt>identity</tt> set, behave exactly as one would expect them, i.e., if you try to compose with them, nothing happens (of course, I’m talking of the situation when you take a <em>composable</em> morphism).</p>
-<p>So far so good. Here come the gotchas of <tt>Morphism</tt>, however. Morphisms are compared by domain, codomain, and name. Thus for the representations <tt>f1</tt> and <tt>f2</tt> of <img src="http://s0.wp.com/latex.php?latex=f_1%3AA%5Crightarrow+B&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="f_1:A\rightarrow B" class="latex" title="f_1:A\rightarrow B" /> and <img src="http://s0.wp.com/latex.php?latex=f_2%3AA%5Crightarrow+B&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="f_2:A\rightarrow B" class="latex" title="f_2:A\rightarrow B" />, <tt>f1 == f1</tt> is <tt>True</tt> and <tt>f1 == f2</tt> is <tt>False</tt>, even if <tt>f1</tt> and <tt>f2</tt> are actually the same morphisms with different names. Now, that’s quite understandable, since a <tt>Morphism</tt> cannot really know what you <em>actually</em> want <img src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif" alt=":-)" class="wp-smiley" />  However, with the implemented apparatus, you <em>can</em> state that <tt>f1</tt> and <tt>f2</tt> are actually the same thing. Read to the end to find out how <img src="http://s1.wp.com/wp-includes/images/smilies/icon_wink.gif" alt=";-)" class="wp-smiley" /> </p>
-<p>On a side note, <tt>Morphism</tt> is sufficiently clever to know that all identity morphisms of the same object are equal, no matter the name.</p>
-<p>Next comes <tt>Category</tt>. Unfortunately, at the moment this class isn’t capable of doing much useful stuff. One of the reasons is that the notion of a category is based on the notion of a set-theoretical <a href="http://en.wikipedia.org/wiki/Class_(set_theory)">class</a>, which is not implemented in SymPy yet. More importantly, though, for the purposes of this GSoC project, an essentially primitive <tt>Category</tt> is perfectly enough. A <tt>Category</tt> has a string name and a set of <tt>Diagram</tt>‘s which are asserted to be commutative in this category.</p>
-<div style="width: 210px;" class="wp-caption alignright" id="attachment_157"><a href="http://scolobb.files.wordpress.com/2012/06/200px-commutative_square-svg.png"><img src="http://scolobb.files.wordpress.com/2012/06/200px-commutative_square-svg.png?w=549" alt="A simple square diagram with four objects and four morphisms." class="size-full wp-image-157" title="A simple diagram." /></a><p class="wp-caption-text">A simple diagram.</p></div>
-<p>The last and the most interesting class in the context of this project is <tt>Diagram</tt>. A diagram is a very cool way to write a lot of stuff in category theory and in algebra in general. A diagram is basically a bunch of objects from a category and some of the morphisms between these objects.  Diagrams are usually drawn, objects being represented as letters and morphisms as arrows between the letters.  A diagram is said to be <em>commutative</em>, if all paths between any two objects <img src="http://s0.wp.com/latex.php?latex=A&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="A" class="latex" title="A" /> and <img src="http://s0.wp.com/latex.php?latex=B&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="B" class="latex" title="B" /> in the diagram yield the same morphism.  For example, if the diagram in the figure is commutative, then <img src="http://s0.wp.com/latex.php?latex=k%5Ccirc+g+%3D+h%5Ccirc+f&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="k\circ g = h\circ f" class="latex" title="k\circ g = h\circ f" />.</p>
-<p>The class <tt>Diagram</tt> is meant to represent such diagrammatic structures.  It cannot be plotted as yet; what it can do is storing a bunch of morphisms.  A <tt>Diagram</tt> does not know whether it is commutative or not; however, one can assert that certain <tt>Diagram</tt>‘s are commutative in a ceratain <tt>Category</tt>.</p>
-<p><tt>Diagram</tt> is actually meant to store something slightly more general than what is shown in the picture.  Suppose that the author of the picture has wanted to say that, if <img src="http://s0.wp.com/latex.php?latex=h&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="h" class="latex" title="h" /> is an isomorpism, then there exists a unique moprhism <img src="http://s0.wp.com/latex.php?latex=k&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="k" class="latex" title="k" /> such that the diagram commutes.  Authors often want to say such things, therefore <tt>Diagram</tt> contains <em>two</em> sets of morphisms: the <tt>premises</tt> and <tt>conclusions</tt>.  Well, actually, those are not sets, but rather dictionaries, mapping morphisms to their properties (which are really just strings).  Thus an instance of <tt>Diagram</tt> is read as follows: “If there exist such morphisms as in <tt>premises</tt> with corresponding properties, than there exist such morphisms as in <tt>conclusions</tt> with corresponding properties and the diagram is commutative”.  You can also state simpler statements which don’t look like logical implications by not using the conclusions part of the diagram.</p>
-<p>Now, <tt>Diagram</tt> is awesome enough to also include all composite morphisms in premises (and in conclusions, when necessary).  If you specify that <img src="http://s0.wp.com/latex.php?latex=f%3AA%5Crightarrow+B&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="f:A\rightarrow B" class="latex" title="f:A\rightarrow B" /> and <img src="http://s0.wp.com/latex.php?latex=g%3AB%5Crightarrow+C&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="g:B\rightarrow C" class="latex" title="g:B\rightarrow C" /> are in the <tt>Diagram</tt>, then you don’t have to say that <img src="http://s0.wp.com/latex.php?latex=g%5Ccirc+f%3AA%5Crightarrow+C&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="g\circ f:A\rightarrow C" class="latex" title="g\circ f:A\rightarrow C" /> is in the <tt>Diagram</tt> as well.  There’s a small thing to keep in mind here: you sometimes add morphisms <em>with properties</em> to a <tt>Diagram</tt>.  When <tt>Diagram</tt> adds the composite <img src="http://s0.wp.com/latex.php?latex=g%5Ccirc+f&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="g\circ f" class="latex" title="g\circ f" /> to itself, the properties of the composite will be the <em>intersection</em> of the properties of <img src="http://s0.wp.com/latex.php?latex=f&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="f" class="latex" title="f" /> and <img src="http://s0.wp.com/latex.php?latex=g&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="g" class="latex" title="g" />.  You can always override this by explicitly adding the composite with a different set of properties.</p>
-<p>And finally, as I promised, I’ll tell how to state that <img src="http://s0.wp.com/latex.php?latex=f_1%3AA%5Crightarrow+B&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="f_1:A\rightarrow B" class="latex" title="f_1:A\rightarrow B" /> and <img src="http://s0.wp.com/latex.php?latex=f_2%3AA%5Crightarrow+B&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="f_2:A\rightarrow B" class="latex" title="f_2:A\rightarrow B" /> are equal, despite different names.  Well, just create a diagram with these two morphisms and assert it as commutative <img src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif" alt=":-)" class="wp-smiley" /> </p>
-<p>And yet even more finally, I’d like to tell about a bit of programming experience I have found exhilarating this week.   I’ve learnt a very cool lesson: write your tests before the implementation whenever possible!  There’s no better formal way to write a specification than to write tests.  I was totally amazed at how this practice streamlined my workflow!</p>
-<p>Image source: <a href="http://en.wikipedia.org/wiki/File:Commutative_square.svg">http://en.wikipedia.org/wiki/File:Commutative_square.svg</a></p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/119/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/119/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=119&amp;subd=scolobb&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://scolobb.wordpress.com/2012/06/11/the-setting/">by scolobb at June 10, 2012 09:09 PM</a>
-</p>
-</div>
-</div>
-
-
 </div>
 
 </div>
@@ -3469,7 +3511,7 @@ sudo python setup.py develop
 <h2>Subscriptions</h2>
 <ul>
 <li>
-<a href="http://asmeurersympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://asmeurersympy.wordpress.com" class="message" title="no activity in 7 days">Aaron Meurer</a>
+<a href="http://asmeurersympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/936818886435977143/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://addisoncugini.blogspot.com/" class="message" title="no activity in 7 days">Addison Cugini</a>
@@ -3568,7 +3610,7 @@ sudo python setup.py develop
 
 <p>
 <strong>Last updated:</strong><br>
-August 31, 2012 03:20 AM<br>
+August 31, 2012 03:40 AM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
