@@ -23,6 +23,100 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>September 19, 2012</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
+
+
+<div class="entrygroup" id="http://asmeurersympy.wordpress.com/?p=1160">
+<h4 lang="en"><a href="http://asmeurersympy.wordpress.com/2012/09/19/infinitely-nested-lists-in-python/">Infinitely nested lists in Python</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p>Readers of this blog know that I sometimes like to write about some <a href="http://asmeurersympy.wordpress.com/2009/07/20/modifying-a-list-while-looping-through-it-in-python/">strange</a>, <a href="http://asmeurersympy.wordpress.com/2010/06/16/strange-python-behavior-can-someone-please-explain-to-me-what-is-going-on-here/">unexpected</a>, and <a href="http://asmeurersympy.wordpress.com/2011/03/15/true-is-true-is-false-is-true-is-false/">unusual</a> things in Python that I stumble across.  This post is another one of those.</p>
+<p>First, look at this</p>
+<p></p><pre class="brush: python;">&gt;&gt;&gt; a = []
+&gt;&gt;&gt; a.append(a)
+&gt;&gt;&gt; a
+[[...]]
+</pre><p></p>
+<p>What am I doing here?  I’m creating a list, <code>a</code>, and I’m adding it to itself.  What you end up with is an infinitely nested list.  The first interesting thing about this is that Python is smart enough to not explode when printing this list.  The following should convince you that <code>a</code> does indeed contain itself.</p>
+<p></p><pre class="brush: python;">&gt;&gt;&gt; a[0] is a
+True
+&gt;&gt;&gt; a[0] == a
+True
+</pre><p></p>
+<p>Now, if you have programmed in C, or a similar language that uses pointers, this should not come as a surprise to you.  Lists in Python, like most things, do not actually contain the items inside them.  Rather, they contain references (in C terminology, “pointers”) to the items inside them.  From this perspective, there is no issue at all with <code>a</code> containing a pointer to itself.</p>
+<p>The first thing I wondered when I saw this was just how clever the printer was at noticing that the list was infinitely nested.  What if we make the cycle a little more complex?</p>
+<p></p><pre class="brush: python;">&gt;&gt;&gt; a = []
+&gt;&gt;&gt; b = []
+&gt;&gt;&gt; a.append(b)
+&gt;&gt;&gt; b.append(a)
+&gt;&gt;&gt; a
+[[[...]]]
+&gt;&gt;&gt; b
+[[[...]]]
+&gt;&gt;&gt; a[0] is b
+True
+&gt;&gt;&gt; b[0] is a
+True
+</pre><p></p>
+<p>So it still works.  I had thought that maybe repr just catches <code>RuntimeError</code> and falls back to printing <code>...</code> when the list is nested too deeply, but it turns out that is not true:</p>
+<p></p><pre class="brush: python;">&gt;&gt;&gt; a = []
+&gt;&gt;&gt; for i in range(10000):
+...     a = [a]
+... 
+&gt;&gt;&gt; a
+Traceback (most recent call last):
+  File "&lt;stdin&gt;", line 1, in &lt;module&gt;
+RuntimeError: maximum recursion depth exceeded while getting the repr of a list
+</pre><p></p>
+<p>And by the way, in case you were wondering, it is possible to catch a <code>RuntimeError</code> (using the same <code>a</code> as the previous code block)</p>
+<p></p><pre class="brush: python;">&gt;&gt;&gt; try:
+...     print(a)
+... except RuntimeError:
+...     print("no way")
+... 
+no way
+</pre><p></p>
+<p>(and you also may notice that this is Python 3. Things behave the same way in Python 2)</p>
+<p>Back to infinitely nested lists, we saw that printing works, but there are some things that don’t work.</p>
+<p></p><pre class="brush: python;">&gt;&gt;&gt; a[0] == b
+True
+&gt;&gt;&gt; a[0] == a
+Traceback (most recent call last):
+  File "&lt;stdin&gt;", line 1, in &lt;module&gt;
+RuntimeError: maximum recursion depth exceeded in comparison
+</pre><p></p>
+<p><code>a[0] is b</code> holds (i.e., they are exactly the same object in memory), so <code>==</code> is able to short-circuit on them.  But to test <code>a[0] == a</code> it has to recursively compare the elements of <code>a</code> and <code>a[0]</code>.  Since it is infinitely nested, this leads to a recursion error.  Now an interesting question: why does this happen?  Is it because <code>==</code> on lists uses a depth first search?  If it were somehow possible to compare these two objects, would they be equal?</p>
+<p>One is reminded of <a href="http://en.wikipedia.org/wiki/Russel%27s_paradox">Russel’s paradox</a>, and the reason why in <a href="http://en.wikipedia.org/wiki/Zermelo%E2%80%93Fraenkel_set_theory">axiomatic set theory</a>, sets are not allowed to contain themselves. </p>
+<p>Thinking of this brought me to my final question.  Is it possible to make a Python <code>set</code> that contains itself?  The answer is obviously no, because <code>set</code> objects can only contain hashable objects, and <code>set</code> is not hashable.  But <code>frozenset</code>, <code>set</code>‘s counterpart, is hashable.  So can you create a <code>frozenset</code> that contains itself?  The same for <code>tuple</code>.  The method I used for <code>a</code> above won’t work, because <code>a</code> must be mutable to append it to itself.</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/asmeurersympy.wordpress.com/1160/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/asmeurersympy.wordpress.com/1160/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1160&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://asmeurersympy.wordpress.com/2012/09/19/infinitely-nested-lists-in-python/">by Aaron Meurer at September 19, 2012 04:21 AM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>September 09, 2012</h2>
 
 <div class="channelgroup">
@@ -84,11 +178,11 @@ b. Add this line to your bash_profile.</p>
 
 
 
-<h3><a href="https://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
+<h3><a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
 
 
 <div class="entrygroup" id="http://asmeurersympy.wordpress.com/?p=1154">
-<h4 lang="en"><a href="https://asmeurersympy.wordpress.com/2012/08/31/isympy-i-a-saner-interactive-environment/">isympy -I:  A saner interactive environment</a></h4>
+<h4 lang="en"><a href="http://asmeurersympy.wordpress.com/2012/08/31/isympy-i-a-saner-interactive-environment/">isympy -I:  A saner interactive environment</a></h4>
 <div class="entry">
 <div class="content" lang="en">
 <p>As <a href="http://asmeurersympy.wordpress.com/2012/08/21/sympy-live-sphinx-extension/">promised</a>, here is another post describing a new feature in the upcoming <a href="https://github.com/sympy/sympy/wiki/Release-Notes-for-0.7.2">SymPy 0.7.2</a>.</p>
@@ -155,7 +249,7 @@ Out[8]: 0.5
 
 
 <p class="date">
-<a href="https://asmeurersympy.wordpress.com/2012/08/31/isympy-i-a-saner-interactive-environment/">by Aaron Meurer at August 31, 2012 03:30 AM</a>
+<a href="http://asmeurersympy.wordpress.com/2012/08/31/isympy-i-a-saner-interactive-environment/">by Aaron Meurer at August 31, 2012 03:30 AM</a>
 </p>
 </div>
 </div>
@@ -175,11 +269,11 @@ Out[8]: 0.5
 
 
 
-<h3><a href="https://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
+<h3><a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
 
 
 <div class="entrygroup" id="http://asmeurersympy.wordpress.com/?p=1122">
-<h4 lang="en"><a href="https://asmeurersympy.wordpress.com/2012/08/21/sympy-live-sphinx-extension/">SymPy Live Sphinx Extension</a></h4>
+<h4 lang="en"><a href="http://asmeurersympy.wordpress.com/2012/08/21/sympy-live-sphinx-extension/">SymPy Live Sphinx Extension</a></h4>
 <div class="entry">
 <div class="content" lang="en">
 <p>I didn’t blog about SymPy all summer, so I thought I would write a post about my favorite feature of the upcoming SymPy 0.7.2 release.  In fact, this feature has got me more excited than any other feature from any version of SymPy.  Yeah, it’s that good.</p>
@@ -201,7 +295,7 @@ Out[8]: 0.5
 
 
 <p class="date">
-<a href="https://asmeurersympy.wordpress.com/2012/08/21/sympy-live-sphinx-extension/">by Aaron Meurer at August 21, 2012 05:09 AM</a>
+<a href="http://asmeurersympy.wordpress.com/2012/08/21/sympy-live-sphinx-extension/">by Aaron Meurer at August 21, 2012 05:09 AM</a>
 </p>
 </div>
 </div>
@@ -1958,11 +2052,11 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
 
 
 
-<h3><a href="https://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
+<h3><a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
 
 
 <div class="entrygroup" id="http://asmeurersympy.wordpress.com/?p=1112">
-<h4 lang="en"><a href="https://asmeurersympy.wordpress.com/2012/07/09/emacs-7-months-later/">Emacs: 7 months later</a></h4>
+<h4 lang="en"><a href="http://asmeurersympy.wordpress.com/2012/07/09/emacs-7-months-later/">Emacs: 7 months later</a></h4>
 <div class="entry">
 <div class="content" lang="en">
 <p>In my <a href="http://asmeurersympy.wordpress.com/2012/01/13/vim-vs-emacs-part-3/">final post</a> about my switching to Emacs, a <a href="http://asmeurersympy.wordpress.com/2012/01/13/vim-vs-emacs-part-3/#comment-544">commenter</a>, Scott, asked me, “It has been a while since you started using Emacs. I’m just curious. How is your experience so far now that you have more experience and a more complete configuration?”  My reply was getting quite long, so I figured it would be best suited as a new post.</p>
@@ -1990,7 +2084,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
 
 
 <p class="date">
-<a href="https://asmeurersympy.wordpress.com/2012/07/09/emacs-7-months-later/">by Aaron Meurer at July 09, 2012 05:24 AM</a>
+<a href="http://asmeurersympy.wordpress.com/2012/07/09/emacs-7-months-later/">by Aaron Meurer at July 09, 2012 05:24 AM</a>
 </p>
 </div>
 </div>
@@ -3456,59 +3550,6 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
 </div>
 
 </div>
-<div class="daygroup">
-<h2>June 14, 2012</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="https://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
-
-
-<div class="entrygroup" id="https://asmeurersympy.wordpress.com/?p=1109">
-<h4 lang="en"><a href="https://asmeurersympy.wordpress.com/2012/06/14/how-to-install-the-development-version-of-ipython-qtconsole-and-notebook-in-ubuntu/">How to install the development version of IPython Qtconsole and Notebook in Ubuntu</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>Both the awesome <a href="http://ipython.org/ipython-doc/dev/interactive/htmlnotebook.html">IPython notebook</a> and <a href="http://ipython.org/ipython-doc/stable/interactive/qtconsole.html">Qtconsole</a> are in the Ubuntu repositories, so if you just want to use the stable released versions, you can just do</p>
-<p></p><pre class="brush: bash;">sudo apt-get install ipython-notebook ipython-qtconsole
-</pre><p></p>
-<p>and be on your way.  But the git development version has a lot of cool new features, and you may not want to wait for 0.13 to be released and make its way to the Ubuntu repos.  But you may be thinking that to use those you will have to figure out all the dependencies yourself.  Actually, it’s pretty easy:</p>
-<p></p><pre class="brush: bash;"># First install git, if you don't already have it
-sudo apt-get install git
-# Then, clone the IPython repo, if you haven't already.
-git clone git://github.com/ipython/ipython.git
-cd ipython
-# Now just install IPython with apt, then uninstall it.  The dependencies will remain
-sudo apt-get install ipython-notebook ipython-qtconsole
-sudo apt-get remove ipython-notebook ipython -qtconsole ipython
-# Now install the IPython git version in such a way that will keep up to date when you pull
-sudo python setup.py develop
-</pre><p></p>
-<p>To update, just cd into that ipython directory and type <code>git pull</code>.  That’s it.  Now type <code>ipython notebook</code> or <code>ipython qtconsole</code> to get the magic.</p>
-<p>EDIT: After you do this, <code>apt-get</code> will start bugging you every time that you use it that a bunch of packages are no longer needed.  These are the ones that you do need for the qtconsole and the notebook, so you should not autoremove them as it says.  Rather, set them as manually installed by copying the list of packages that it tells you about and <code>sudo apt-get install</code>ing them.</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/asmeurersympy.wordpress.com/1109/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/asmeurersympy.wordpress.com/1109/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1109&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="https://asmeurersympy.wordpress.com/2012/06/14/how-to-install-the-development-version-of-ipython-qtconsole-and-notebook-in-ubuntu/">by Aaron Meurer at June 14, 2012 05:49 AM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -3517,7 +3558,7 @@ sudo python setup.py develop
 <h2>Subscriptions</h2>
 <ul>
 <li>
-<a href="https://asmeurersympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="https://asmeurersympy.wordpress.com" class="message" title="no activity in 7 days">Aaron Meurer</a>
+<a href="http://asmeurersympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/936818886435977143/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://addisoncugini.blogspot.com/" class="message" title="no activity in 7 days">Addison Cugini</a>
@@ -3616,7 +3657,7 @@ sudo python setup.py develop
 
 <p>
 <strong>Last updated:</strong><br>
-September 19, 2012 04:20 AM<br>
+September 19, 2012 04:40 AM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>

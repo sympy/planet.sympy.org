@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2012-09-19T04:20:29Z</updated>
+  <updated>2012-09-19T04:40:33Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,90 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry xml:lang="en">
+    <id>http://asmeurersympy.wordpress.com/?p=1160</id>
+    <link href="http://asmeurersympy.wordpress.com/2012/09/19/infinitely-nested-lists-in-python/" rel="alternate" type="text/html"/>
+    <title>Infinitely nested lists in Python</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Readers of this blog know that I sometimes like to write about some strange, unexpected, and unusual things in Python that I stumble across. This post is another one of those. First, look at this What am I doing here? I’m creating a list, a, and I’m adding it to itself. What you end up [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1160&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" width="1"/></div>
+    </summary>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Readers of this blog know that I sometimes like to write about some <a href="http://asmeurersympy.wordpress.com/2009/07/20/modifying-a-list-while-looping-through-it-in-python/">strange</a>, <a href="http://asmeurersympy.wordpress.com/2010/06/16/strange-python-behavior-can-someone-please-explain-to-me-what-is-going-on-here/">unexpected</a>, and <a href="http://asmeurersympy.wordpress.com/2011/03/15/true-is-true-is-false-is-true-is-false/">unusual</a> things in Python that I stumble across.  This post is another one of those.</p>
+<p>First, look at this</p>
+<p/><pre class="brush: python;">&gt;&gt;&gt; a = []
+&gt;&gt;&gt; a.append(a)
+&gt;&gt;&gt; a
+[[...]]
+</pre><p/>
+<p>What am I doing here?  I’m creating a list, <code>a</code>, and I’m adding it to itself.  What you end up with is an infinitely nested list.  The first interesting thing about this is that Python is smart enough to not explode when printing this list.  The following should convince you that <code>a</code> does indeed contain itself.</p>
+<p/><pre class="brush: python;">&gt;&gt;&gt; a[0] is a
+True
+&gt;&gt;&gt; a[0] == a
+True
+</pre><p/>
+<p>Now, if you have programmed in C, or a similar language that uses pointers, this should not come as a surprise to you.  Lists in Python, like most things, do not actually contain the items inside them.  Rather, they contain references (in C terminology, “pointers”) to the items inside them.  From this perspective, there is no issue at all with <code>a</code> containing a pointer to itself.</p>
+<p>The first thing I wondered when I saw this was just how clever the printer was at noticing that the list was infinitely nested.  What if we make the cycle a little more complex?</p>
+<p/><pre class="brush: python;">&gt;&gt;&gt; a = []
+&gt;&gt;&gt; b = []
+&gt;&gt;&gt; a.append(b)
+&gt;&gt;&gt; b.append(a)
+&gt;&gt;&gt; a
+[[[...]]]
+&gt;&gt;&gt; b
+[[[...]]]
+&gt;&gt;&gt; a[0] is b
+True
+&gt;&gt;&gt; b[0] is a
+True
+</pre><p/>
+<p>So it still works.  I had thought that maybe repr just catches <code>RuntimeError</code> and falls back to printing <code>...</code> when the list is nested too deeply, but it turns out that is not true:</p>
+<p/><pre class="brush: python;">&gt;&gt;&gt; a = []
+&gt;&gt;&gt; for i in range(10000):
+...     a = [a]
+... 
+&gt;&gt;&gt; a
+Traceback (most recent call last):
+  File "&lt;stdin&gt;", line 1, in &lt;module&gt;
+RuntimeError: maximum recursion depth exceeded while getting the repr of a list
+</pre><p/>
+<p>And by the way, in case you were wondering, it is possible to catch a <code>RuntimeError</code> (using the same <code>a</code> as the previous code block)</p>
+<p/><pre class="brush: python;">&gt;&gt;&gt; try:
+...     print(a)
+... except RuntimeError:
+...     print("no way")
+... 
+no way
+</pre><p/>
+<p>(and you also may notice that this is Python 3. Things behave the same way in Python 2)</p>
+<p>Back to infinitely nested lists, we saw that printing works, but there are some things that don’t work.</p>
+<p/><pre class="brush: python;">&gt;&gt;&gt; a[0] == b
+True
+&gt;&gt;&gt; a[0] == a
+Traceback (most recent call last):
+  File "&lt;stdin&gt;", line 1, in &lt;module&gt;
+RuntimeError: maximum recursion depth exceeded in comparison
+</pre><p/>
+<p><code>a[0] is b</code> holds (i.e., they are exactly the same object in memory), so <code>==</code> is able to short-circuit on them.  But to test <code>a[0] == a</code> it has to recursively compare the elements of <code>a</code> and <code>a[0]</code>.  Since it is infinitely nested, this leads to a recursion error.  Now an interesting question: why does this happen?  Is it because <code>==</code> on lists uses a depth first search?  If it were somehow possible to compare these two objects, would they be equal?</p>
+<p>One is reminded of <a href="http://en.wikipedia.org/wiki/Russel%27s_paradox">Russel’s paradox</a>, and the reason why in <a href="http://en.wikipedia.org/wiki/Zermelo%E2%80%93Fraenkel_set_theory">axiomatic set theory</a>, sets are not allowed to contain themselves. </p>
+<p>Thinking of this brought me to my final question.  Is it possible to make a Python <code>set</code> that contains itself?  The answer is obviously no, because <code>set</code> objects can only contain hashable objects, and <code>set</code> is not hashable.  But <code>frozenset</code>, <code>set</code>‘s counterpart, is hashable.  So can you create a <code>frozenset</code> that contains itself?  The same for <code>tuple</code>.  The method I used for <code>a</code> above won’t work, because <code>a</code> must be mutable to append it to itself.</p>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/asmeurersympy.wordpress.com/1160/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/asmeurersympy.wordpress.com/1160/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1160&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" width="1"/></div>
+    </content>
+    <updated>2012-09-19T04:21:08Z</updated>
+    <category term="Uncategorized"/>
+    <author>
+      <name>Aaron Meurer</name>
+    </author>
+    <source>
+      <id>http://asmeurersympy.wordpress.com</id>
+      <logo>http://1.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=http%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
+      <link href="http://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
+      <title>Aaron Meurer's SymPy Blog</title>
+      <updated>2012-09-19T04:40:14Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en">
     <id>http://rhoforsympy.wordpress.com/?p=266</id>
@@ -50,13 +134,13 @@ b. Add this line to your bash_profile.</p>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-09-19T04:20:28Z</updated>
+      <updated>2012-09-19T04:40:31Z</updated>
     </source>
   </entry>
 
   <entry xml:lang="en">
     <id>http://asmeurersympy.wordpress.com/?p=1154</id>
-    <link href="https://asmeurersympy.wordpress.com/2012/08/31/isympy-i-a-saner-interactive-environment/" rel="alternate" type="text/html"/>
+    <link href="http://asmeurersympy.wordpress.com/2012/08/31/isympy-i-a-saner-interactive-environment/" rel="alternate" type="text/html"/>
     <title>isympy -I:  A saner interactive environment</title>
     <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">As promised, here is another post describing a new feature in the upcoming SymPy 0.7.2. Automatic Symbol Definition While not as ground breaking as the feature I described in my last post, this feature is still quite useful. As you may know, SymPy is inherently a Python library, meaning that it lives by the rules [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1154&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" width="1"/></div>
     </summary>
@@ -123,21 +207,21 @@ Out[8]: 0.5
       <name>Aaron Meurer</name>
     </author>
     <source>
-      <id>https://asmeurersympy.wordpress.com</id>
-      <logo>https://secure.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=https%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
-      <link href="https://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="https://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="https://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="https://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <id>http://asmeurersympy.wordpress.com</id>
+      <logo>http://1.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=http%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
+      <link href="http://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-09-19T04:20:12Z</updated>
+      <updated>2012-09-19T04:40:13Z</updated>
     </source>
   </entry>
 
   <entry xml:lang="en">
     <id>http://asmeurersympy.wordpress.com/?p=1122</id>
-    <link href="https://asmeurersympy.wordpress.com/2012/08/21/sympy-live-sphinx-extension/" rel="alternate" type="text/html"/>
+    <link href="http://asmeurersympy.wordpress.com/2012/08/21/sympy-live-sphinx-extension/" rel="alternate" type="text/html"/>
     <title>SymPy Live Sphinx Extension</title>
     <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">I didn’t blog about SymPy all summer, so I thought I would write a post about my favorite feature of the upcoming SymPy 0.7.2 release.  In fact, this feature has got me more excited than any other feature from any version of SymPy.  Yeah, it’s that good. The feature is the SymPy Live Sphinx extension. [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1122&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" width="1"/></div>
     </summary>
@@ -159,15 +243,15 @@ Out[8]: 0.5
       <name>Aaron Meurer</name>
     </author>
     <source>
-      <id>https://asmeurersympy.wordpress.com</id>
-      <logo>https://secure.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=https%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
-      <link href="https://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="https://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="https://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="https://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <id>http://asmeurersympy.wordpress.com</id>
+      <logo>http://1.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=http%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
+      <link href="http://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-09-19T04:20:12Z</updated>
+      <updated>2012-09-19T04:40:14Z</updated>
     </source>
   </entry>
 
@@ -253,7 +337,7 @@ Hence, a new file was created, sympy/combinatorics/testutil.py, that will host s
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-09-19T04:20:27Z</updated>
+      <updated>2012-09-19T04:40:30Z</updated>
     </source>
   </entry>
 
@@ -359,7 +443,7 @@ Out[74]: True
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-09-19T04:20:28Z</updated>
+      <updated>2012-09-19T04:40:31Z</updated>
     </source>
   </entry>
 
@@ -477,7 +561,7 @@ commits are much more like my usual ones.
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-09-19T04:20:25Z</updated>
+      <updated>2012-09-19T04:40:28Z</updated>
     </source>
   </entry>
 
@@ -510,7 +594,7 @@ commits are much more like my usual ones.
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-09-19T04:20:26Z</updated>
+      <updated>2012-09-19T04:40:29Z</updated>
     </source>
   </entry>
 
@@ -640,9 +724,9 @@ Out[24]: 6
     <updated>2012-08-05T11:29:33Z</updated>
     <category term="SymPy"/>
     <category term="category theory"/>
-    <category term="diagram embedding"/>
-    <category term="graph embedding"/>
     <category term="subgraph isomorphism problem"/>
+    <category term="graph embedding"/>
+    <category term="diagram embedding"/>
     <author>
       <name>scolobb</name>
     </author>
@@ -655,7 +739,7 @@ Out[24]: 6
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-09-19T04:20:25Z</updated>
+      <updated>2012-09-19T04:40:28Z</updated>
     </source>
   </entry>
 
@@ -707,7 +791,7 @@ Out[24]: 6
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-09-19T04:20:27Z</updated>
+      <updated>2012-09-19T04:40:30Z</updated>
     </source>
   </entry>
 
@@ -748,7 +832,7 @@ Out[24]: 6
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-09-19T04:20:25Z</updated>
+      <updated>2012-09-19T04:40:29Z</updated>
     </source>
   </entry>
 
@@ -780,7 +864,7 @@ Out[24]: 6
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-09-19T04:20:28Z</updated>
+      <updated>2012-09-19T04:40:31Z</updated>
     </source>
   </entry>
 
@@ -924,7 +1008,7 @@ StopIteration:
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-09-19T04:20:28Z</updated>
+      <updated>2012-09-19T04:40:31Z</updated>
     </source>
   </entry>
 
@@ -964,12 +1048,12 @@ StopIteration:
     </content>
     <updated>2012-07-29T19:20:53Z</updated>
     <category term="SymPy"/>
-    <category term="backward chaining"/>
+    <category term="string representation"/>
     <category term="deciding commutativity"/>
     <category term="diagram layout"/>
     <category term="pretty printing"/>
     <category term="sort key"/>
-    <category term="string representation"/>
+    <category term="backward chaining"/>
     <category term="subgraph isomorphism problem"/>
     <author>
       <name>scolobb</name>
@@ -983,7 +1067,7 @@ StopIteration:
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-09-19T04:20:24Z</updated>
+      <updated>2012-09-19T04:40:27Z</updated>
     </source>
   </entry>
 
@@ -1013,7 +1097,7 @@ StopIteration:
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-09-19T04:20:25Z</updated>
+      <updated>2012-09-19T04:40:29Z</updated>
     </source>
   </entry>
 
@@ -1097,7 +1181,7 @@ StopIteration:
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-09-19T04:20:27Z</updated>
+      <updated>2012-09-19T04:40:30Z</updated>
     </source>
   </entry>
 
@@ -1510,7 +1594,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-09-19T04:20:24Z</updated>
+      <updated>2012-09-19T04:40:27Z</updated>
     </source>
   </entry>
 
@@ -1560,7 +1644,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-09-19T04:20:28Z</updated>
+      <updated>2012-09-19T04:40:31Z</updated>
     </source>
   </entry>
 
@@ -1605,7 +1689,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-09-19T04:20:24Z</updated>
+      <updated>2012-09-19T04:40:27Z</updated>
     </source>
   </entry>
 
@@ -1640,7 +1724,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-09-19T04:20:28Z</updated>
+      <updated>2012-09-19T04:40:31Z</updated>
     </source>
   </entry>
 
@@ -1749,13 +1833,13 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-09-19T04:20:27Z</updated>
+      <updated>2012-09-19T04:40:30Z</updated>
     </source>
   </entry>
 
   <entry xml:lang="en">
     <id>http://asmeurersympy.wordpress.com/?p=1112</id>
-    <link href="https://asmeurersympy.wordpress.com/2012/07/09/emacs-7-months-later/" rel="alternate" type="text/html"/>
+    <link href="http://asmeurersympy.wordpress.com/2012/07/09/emacs-7-months-later/" rel="alternate" type="text/html"/>
     <title>Emacs: 7 months later</title>
     <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">In my final post about my switching to Emacs, a commenter, Scott, asked me, “It has been a while since you started using Emacs. I’m just curious. How is your experience so far now that you have more experience and a more complete configuration?” My reply was getting quite long, so I figured it would [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1112&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" width="1"/></div>
     </summary>
@@ -1783,15 +1867,15 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <name>Aaron Meurer</name>
     </author>
     <source>
-      <id>https://asmeurersympy.wordpress.com</id>
-      <logo>https://secure.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=https%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
-      <link href="https://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="https://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="https://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="https://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <id>http://asmeurersympy.wordpress.com</id>
+      <logo>http://1.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=http%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
+      <link href="http://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-09-19T04:20:12Z</updated>
+      <updated>2012-09-19T04:40:14Z</updated>
     </source>
   </entry>
 
@@ -1835,7 +1919,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-09-19T04:20:28Z</updated>
+      <updated>2012-09-19T04:40:32Z</updated>
     </source>
   </entry>
 
@@ -1882,7 +1966,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-09-19T04:20:25Z</updated>
+      <updated>2012-09-19T04:40:28Z</updated>
     </source>
   </entry>
 
@@ -2059,7 +2143,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-09-19T04:20:26Z</updated>
+      <updated>2012-09-19T04:40:29Z</updated>
     </source>
   </entry>
 
@@ -2106,7 +2190,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-09-19T04:20:25Z</updated>
+      <updated>2012-09-19T04:40:28Z</updated>
     </source>
   </entry>
 
@@ -2186,7 +2270,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-09-19T04:20:27Z</updated>
+      <updated>2012-09-19T04:40:30Z</updated>
     </source>
   </entry>
 
@@ -2229,7 +2313,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-09-19T04:20:28Z</updated>
+      <updated>2012-09-19T04:40:32Z</updated>
     </source>
   </entry>
 
@@ -2302,7 +2386,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-09-19T04:20:25Z</updated>
+      <updated>2012-09-19T04:40:29Z</updated>
     </source>
   </entry>
 
@@ -2579,7 +2663,7 @@ form_field(vector_field)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-09-19T04:20:28Z</updated>
+      <updated>2012-09-19T04:40:32Z</updated>
     </source>
   </entry>
 
@@ -2733,7 +2817,7 @@ In [305]: G._coset_repr
       <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
-      <updated>2012-09-19T04:20:27Z</updated>
+      <updated>2012-09-19T04:40:30Z</updated>
     </source>
   </entry>
 
@@ -2765,7 +2849,7 @@ In [305]: G._coset_repr
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-09-19T04:20:25Z</updated>
+      <updated>2012-09-19T04:40:29Z</updated>
     </source>
   </entry>
 
@@ -3054,7 +3138,7 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-09-19T04:20:24Z</updated>
+      <updated>2012-09-19T04:40:27Z</updated>
     </source>
   </entry>
 
@@ -3084,7 +3168,7 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-09-19T04:20:26Z</updated>
+      <updated>2012-09-19T04:40:29Z</updated>
     </source>
   </entry>
 
@@ -3119,50 +3203,7 @@ intcurve_series(v_field, t, start_point, n=4, coeffs=True)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-09-19T04:20:25Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>https://asmeurersympy.wordpress.com/?p=1109</id>
-    <link href="https://asmeurersympy.wordpress.com/2012/06/14/how-to-install-the-development-version-of-ipython-qtconsole-and-notebook-in-ubuntu/" rel="alternate" type="text/html"/>
-    <title>How to install the development version of IPython Qtconsole and Notebook in Ubuntu</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Both the awesome IPython notebook and Qtconsole are in the Ubuntu repositories, so if you just want to use the stable released versions, you can just do and be on your way. But the git development version has a lot of cool new features, and you may not want to wait for 0.13 to be [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1109&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Both the awesome <a href="http://ipython.org/ipython-doc/dev/interactive/htmlnotebook.html">IPython notebook</a> and <a href="http://ipython.org/ipython-doc/stable/interactive/qtconsole.html">Qtconsole</a> are in the Ubuntu repositories, so if you just want to use the stable released versions, you can just do</p>
-<p/><pre class="brush: bash;">sudo apt-get install ipython-notebook ipython-qtconsole
-</pre><p/>
-<p>and be on your way.  But the git development version has a lot of cool new features, and you may not want to wait for 0.13 to be released and make its way to the Ubuntu repos.  But you may be thinking that to use those you will have to figure out all the dependencies yourself.  Actually, it’s pretty easy:</p>
-<p/><pre class="brush: bash;"># First install git, if you don't already have it
-sudo apt-get install git
-# Then, clone the IPython repo, if you haven't already.
-git clone git://github.com/ipython/ipython.git
-cd ipython
-# Now just install IPython with apt, then uninstall it.  The dependencies will remain
-sudo apt-get install ipython-notebook ipython-qtconsole
-sudo apt-get remove ipython-notebook ipython -qtconsole ipython
-# Now install the IPython git version in such a way that will keep up to date when you pull
-sudo python setup.py develop
-</pre><p/>
-<p>To update, just cd into that ipython directory and type <code>git pull</code>.  That’s it.  Now type <code>ipython notebook</code> or <code>ipython qtconsole</code> to get the magic.</p>
-<p>EDIT: After you do this, <code>apt-get</code> will start bugging you every time that you use it that a bunch of packages are no longer needed.  These are the ones that you do need for the qtconsole and the notebook, so you should not autoremove them as it says.  Rather, set them as manually installed by copying the list of packages that it tells you about and <code>sudo apt-get install</code>ing them.</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/asmeurersympy.wordpress.com/1109/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/asmeurersympy.wordpress.com/1109/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1109&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2012-06-14T05:49:08Z</updated>
-    <category term="Uncategorized"/>
-    <author>
-      <name>Aaron Meurer</name>
-    </author>
-    <source>
-      <id>https://asmeurersympy.wordpress.com</id>
-      <logo>https://secure.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=https%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
-      <link href="https://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="https://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="https://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="https://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
-      <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-09-19T04:20:12Z</updated>
+      <updated>2012-09-19T04:40:28Z</updated>
     </source>
   </entry>
 </feed>
