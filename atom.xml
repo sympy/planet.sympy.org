@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2012-10-22T15:40:22Z</updated>
+  <updated>2012-10-23T16:40:29Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,170 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry>
+    <id>tag:fseoane.net/blog,2012-10-23:2012/learning-to-rank-with-scikit-learn-the-pairwise-transform/</id>
+    <link href="http://fseoane.net/blog/2012/learning-to-rank-with-scikit-learn-the-pairwise-transform/" rel="alternate" type="text/html"/>
+    <title>Learning to rank with scikit-learn: the pairwise transform</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>This tutorial introduces the concept of pairwise preference used in most <a href="http://en.wikipedia.org/wiki/Learning_to_rank">ranking problems</a>. I'll use scikit-learn and for learning and matplotlib for visualization.</p>
+<p>In the ranking setting, training data consists of lists of items with some order specified between items in each list. This order is typically induced by giving a numerical or ordinal score or a binary judgment (e.g. "relevant" or "not relevant") for each item, so that for any two samples <code>a</code> and <code>b</code>, either <code>a &lt; b</code>, <code>b &gt; a</code> or <code>b</code> and <code>a</code> are not comparable.</p>
+<p>For example, in the case of a search engine, our dataset consists of results that belong to different queries and it makes sense to compare the relevance of results for the same query but it is meaningless to compare the relevance across queries, e.g. a result might be very relevant for a particular query but will probably be irrelevant for most other queries.</p>
+<p>The order relationship is usually domain-specific. For instance, in information retrieval the set of comparable samples is refered to as a "query id". The goal behind this is to compare only documents that belong to the same query (<a href="http://dx.doi.org/10.1145/775047.775067">Joachims 2002</a>). In medical imaging on the other hand, the order of the labels usually depend on the subject so the comparable samples is given by the different subjects in the study (<a href="http://hal.inria.fr/hal-00717990/en">Pedregosa et al 2012</a>).</p>
+<div class="highlight"><pre><span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
+<span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">pl</span>
+<span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">svm</span><span class="p">,</span> <span class="n">linear_model</span><span class="p">,</span> <span class="n">cross_validation</span>
+</pre></div>
+
+<p>To start with, we'll create a dataset in which the target values consists of three graded measurements Y = {0, 1, 2} and the input data is a collection of 30 samples, each one with two features.</p>
+<p>The set of comparable elements (queries in information retrieval) will consist of two equally sized blocks, $X = X_1 \cup X_2$, where each block is generated using a normal distribution with different mean and covariance. In the pictures, we represent $X_1$ with round markers and $X_2$ with triangular markers.</p>
+<div class="highlight"><pre><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+<span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)])</span>
+<span class="n">K</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">K</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">X</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">w</span><span class="p">))</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">y</span><span class="p">,</span> <span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">K</span><span class="p">))</span>
+
+<span class="c"># slightly displace data corresponding to our second partition</span>
+<span class="n">X</span><span class="p">[::</span><span class="mi">2</span><span class="p">]</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">])</span> 
+<span class="n">blocks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+
+<span class="c"># split into train and test set</span>
+<span class="n">cv</span> <span class="o">=</span> <span class="n">cross_validation</span><span class="o">.</span><span class="n">StratifiedShuffleSplit</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=.</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">train</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">cv</span><span class="p">)</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">b_train</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">train</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">train</span><span class="p">],</span> <span class="n">blocks</span><span class="p">[</span><span class="n">train</span><span class="p">]</span>
+<span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span> <span class="n">b_test</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">test</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">test</span><span class="p">],</span> <span class="n">blocks</span><span class="p">[</span><span class="n">test</span><span class="p">]</span>
+
+<span class="c"># plot the result</span>
+<span class="n">idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">b_train</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X_train</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X_train</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">y_train</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> 
+    <span class="n">marker</span><span class="o">=</span><span class="s">'^'</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">pl</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">Blues</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X_train</span><span class="p">[</span><span class="o">~</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X_train</span><span class="p">[</span><span class="o">~</span><span class="n">idx</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">y_train</span><span class="p">[</span><span class="o">~</span><span class="n">idx</span><span class="p">],</span>
+    <span class="n">marker</span><span class="o">=</span><span class="s">'o'</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">pl</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">Blues</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">arrow</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">8</span> <span class="o">*</span> <span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">8</span> <span class="o">*</span> <span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">fc</span><span class="o">=</span><span class="s">'gray'</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="s">'gray'</span><span class="p">,</span> 
+    <span class="n">head_width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">head_length</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s">'$w$'</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">arrow</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span> <span class="o">*</span> <span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">8</span> <span class="o">*</span> <span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">fc</span><span class="o">=</span><span class="s">'gray'</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="s">'gray'</span><span class="p">,</span> 
+    <span class="n">head_width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">head_length</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="o">-</span><span class="mf">2.6</span><span class="p">,</span> <span class="o">-</span><span class="mi">7</span><span class="p">,</span> <span class="s">'$w$'</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s">'equal'</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+<p><img alt="" src="http://fseoane.net/blog/feed/uploads/pairwise_transform_files/pairwise_transform_fig_00.png"/></p>
+<p>In the plot we clearly see that for both blocks there's a common vector w such that the projection onto w gives a list with the correct ordering.</p>
+<p>However, because linear considers that output labels live in a metric space it will consider that all pairs are comparable. Thus if we fit this model to the problem above it will fit both blocks at the same time, yielding a result that is clearly not optimal. In the following plot we estimate $\hat{w}$ using an l2-regularized linear model.</p>
+<div class="highlight"><pre><span class="n">ridge</span> <span class="o">=</span> <span class="n">linear_model</span><span class="o">.</span><span class="n">Ridge</span><span class="p">(</span><span class="mf">1.</span><span class="p">)</span>
+<span class="n">ridge</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">coef</span> <span class="o">=</span> <span class="n">ridge</span><span class="o">.</span><span class="n">coef_</span> <span class="o">/</span> <span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">ridge</span><span class="o">.</span><span class="n">coef_</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X_train</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X_train</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">y_train</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> 
+    <span class="n">marker</span><span class="o">=</span><span class="s">'^'</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">pl</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">Blues</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X_train</span><span class="p">[</span><span class="o">~</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X_train</span><span class="p">[</span><span class="o">~</span><span class="n">idx</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">y_train</span><span class="p">[</span><span class="o">~</span><span class="n">idx</span><span class="p">],</span>
+    <span class="n">marker</span><span class="o">=</span><span class="s">'o'</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">pl</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">Blues</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">arrow</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">7</span> <span class="o">*</span> <span class="n">coef</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">7</span> <span class="o">*</span> <span class="n">coef</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">fc</span><span class="o">=</span><span class="s">'gray'</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="s">'gray'</span><span class="p">,</span> 
+    <span class="n">head_width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">head_length</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">'$\hat{w}$'</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s">'equal'</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">'Estimation by Ridge regression'</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+<p><img alt="" src="http://fseoane.net/blog/feed/uploads/pairwise_transform_files/pairwise_transform_fig_01.png"/></p>
+<p>To assess the quality of our model we need to define a ranking score. Since we are interesting in a model that <em>orders</em> the data, it is natural to look for a metric that compares the ordering of our model to the given ordering. For this, we use <a href="http://en.wikipedia.org/wiki/Kendall_tau_rank_correlation_coefficient">Kendall's tau correlation coefficient</a>, which is defined as (P - Q)/(P + Q), being P the number of concordant pairs and Q is the number of discordant pairs. This measure is used extensively in the ranking litterature (e.g <a href="http://www.cs.cornell.edu/people/tj/publications/joachims_02c.pdf">Optimizing Search Engines using Clickthrough Data</a>).</p>
+<p>We thus evaluate this metric on the test set for each block separately.</p>
+<div class="highlight"><pre><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+    <span class="n">tau</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">kendalltau</span><span class="p">(</span>
+        <span class="n">ridge</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">[</span><span class="n">b_test</span> <span class="o">==</span> <span class="n">i</span><span class="p">]),</span> <span class="n">y_test</span><span class="p">[</span><span class="n">b_test</span> <span class="o">==</span> <span class="n">i</span><span class="p">])</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">'Kendall correlation coefficient for block </span><span class="si">%s</span><span class="s">: </span><span class="si">%.5f</span><span class="s">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">tau</span><span class="p">))</span>
+</pre></div>
+
+<div class="codehilite"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> 0<span class="p">:</span> 0<span class="p">.</span>71122
+<span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> 1<span class="p">:</span> 0<span class="p">.</span>84387
+</pre></div>
+
+
+<h2>The pairwise transform</h2>
+<p>As proved in (<a href="http://www.mendeley.com/research/support-vector-learning-ordinal-regression/">Herbrich 1999</a>), if we consider linear ranking functions, the ranking problem can be transformed into a two-class classification problem. For this, we form the difference of all comparable elements such that our data is transformed into $(x'_k, y'_k) = (x_i - x_j, sign(y_i - y_j))$ for all comparable pairs.</p>
+<p>This way we transformed our ranking problem into a two-class classification problem. The following plot shows this transformed dataset, and color reflects the difference in labels, and our task is to separate positive samples from negative ones. The hyperplane {x^T w = 0} separates these two classes.</p>
+<div class="highlight"><pre><span class="c"># form all pairwise combinations</span>
+<span class="n">comb</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">k</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">Xp</span><span class="p">,</span> <span class="n">yp</span><span class="p">,</span> <span class="n">diff</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="ow">in</span> <span class="n">comb</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">y_train</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">y_train</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> \
+        <span class="ow">or</span> <span class="n">blocks</span><span class="p">[</span><span class="n">train</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">blocks</span><span class="p">[</span><span class="n">train</span><span class="p">][</span><span class="n">j</span><span class="p">]:</span>
+        <span class="c"># skip if same target or different group</span>
+        <span class="k">continue</span>
+    <span class="n">Xp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X_train</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">X_train</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+    <span class="n">diff</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y_train</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">y_train</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+    <span class="n">yp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">diff</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="c"># output balanced classes</span>
+    <span class="k">if</span> <span class="n">yp</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="n">k</span><span class="p">:</span>
+        <span class="n">yp</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">Xp</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">diff</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="n">Xp</span><span class="p">,</span> <span class="n">yp</span><span class="p">,</span> <span class="n">diff</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">,</span> <span class="p">(</span><span class="n">Xp</span><span class="p">,</span> <span class="n">yp</span><span class="p">,</span> <span class="n">diff</span><span class="p">))</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">Xp</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">Xp</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">diff</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s">'o'</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">pl</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">Blues</span><span class="p">)</span>
+<span class="n">x_space</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_space</span> <span class="o">*</span> <span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span> <span class="n">x_space</span> <span class="o">*</span> <span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s">'gray'</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="s">'$\{x^T w = 0\}$'</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">17</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s">'equal'</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+<p><img alt="" src="http://fseoane.net/blog/feed/uploads/pairwise_transform_files/pairwise_transform_fig_02.png"/></p>
+<p>As we see in the previous plot, this classification is separable. This will not always be the clase, however, in our training set  there are no order inversions, thus the respective classification problem is separable.</p>
+<p>We will now finally train an Support Vector Machine model on the transformed data. This model is known as RankSVM. We will then plot the training data together with the estimated coefficient $\hat{w}$ by RankSVM.</p>
+<div class="highlight"><pre><span class="n">clf</span> <span class="o">=</span> <span class="n">svm</span><span class="o">.</span><span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s">'linear'</span><span class="p">,</span> <span class="n">C</span><span class="o">=.</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xp</span><span class="p">,</span> <span class="n">yp</span><span class="p">)</span>
+<span class="n">coef</span> <span class="o">=</span> <span class="n">clf</span><span class="o">.</span><span class="n">coef_</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span> <span class="o">/</span> <span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">clf</span><span class="o">.</span><span class="n">coef_</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X_train</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X_train</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">y_train</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span>
+    <span class="n">marker</span><span class="o">=</span><span class="s">'^'</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">pl</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">Blues</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X_train</span><span class="p">[</span><span class="o">~</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X_train</span><span class="p">[</span><span class="o">~</span><span class="n">idx</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">y_train</span><span class="p">[</span><span class="o">~</span><span class="n">idx</span><span class="p">],</span>
+    <span class="n">marker</span><span class="o">=</span><span class="s">'o'</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">pl</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">Blues</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">arrow</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">7</span> <span class="o">*</span> <span class="n">coef</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">7</span> <span class="o">*</span> <span class="n">coef</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">fc</span><span class="o">=</span><span class="s">'gray'</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="s">'gray'</span><span class="p">,</span>
+    <span class="n">head_width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">head_length</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">arrow</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">8</span><span class="p">,</span> <span class="mi">7</span> <span class="o">*</span> <span class="n">coef</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">7</span> <span class="o">*</span> <span class="n">coef</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">fc</span><span class="o">=</span><span class="s">'gray'</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="s">'gray'</span><span class="p">,</span>
+    <span class="n">head_width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">head_length</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">.</span><span class="mi">7</span><span class="p">,</span> <span class="s">'$\hat{w}$'</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="o">-</span><span class="mf">2.6</span><span class="p">,</span> <span class="o">-</span><span class="mi">7</span><span class="p">,</span> <span class="s">'$\hat{w}$'</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s">'equal'</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+<p><img alt="" src="http://fseoane.net/blog/feed/uploads/pairwise_transform_files/pairwise_transform_fig_03.png"/></p>
+<p>Finally we will check that as expected, the ranking score (Kendall tau) increases with the RankSVM model respect to linear regression.</p>
+<div class="highlight"><pre><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+    <span class="n">tau</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">kendalltau</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X_test</span><span class="p">[</span><span class="n">b_test</span> <span class="o">==</span> <span class="n">i</span><span class="p">],</span> <span class="n">coef</span><span class="p">),</span> <span class="n">y_test</span><span class="p">[</span><span class="n">b_test</span> <span class="o">==</span> <span class="n">i</span><span class="p">])</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">'Kendall correlation coefficient for block </span><span class="si">%s</span><span class="s">: </span><span class="si">%.5f</span><span class="s">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">tau</span><span class="p">))</span>
+</pre></div>
+
+<div class="codehilite"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> 0<span class="p">:</span> 0<span class="p">.</span>83627
+<span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> 1<span class="p">:</span> 0<span class="p">.</span>84387
+</pre></div>
+
+
+<p>This is indeed higher than the values (0.71122, 0.84387) obtained in the case of linear regression.</p>
+<p><strong>Original notebook for this blog post can be found <a href="https://github.com/fabianp/minirank/blob/master/notebooks/pairwise_transform.ipynb">here</a></strong></p></div>
+    </summary>
+    <updated>2012-10-23T16:21:50Z</updated>
+    <author>
+      <name>Fabian Pedregosa</name>
+    </author>
+    <source>
+      <id>http://fseoane.net/blog/</id>
+      <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
+      <link href="http://fseoane.net/blog/feed/rss.xml" rel="self" type="application/atom+xml"/>
+      <title>I say things</title>
+      <updated>2012-10-23T16:40:12Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en">
     <id>http://sympystats.wordpress.com/?p=273</id>
@@ -82,13 +246,12 @@
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-10-22T15:40:16Z</updated>
+      <updated>2012-10-23T16:40:24Z</updated>
     </source>
   </entry>
 
   <entry>
     <id>tag:blogger.com,1999:blog-2520472460430880330.post-1520965087387896738</id>
-    <link href="http://sympy.blogspot.com/2012/10/sympy-072-is-released.html" rel="related" type="text/html"/>
     <link href="http://sympy.blogspot.com/feeds/1520965087387896738/comments/default" rel="replies" type="application/atom+xml"/>
     <link href="http://www.blogger.com/comment.g?blogID=2520472460430880330&amp;postID=1520965087387896738" rel="replies" type="text/html"/>
     <link href="http://www.blogger.com/feeds/2520472460430880330/posts/default/1520965087387896738" rel="edit" type="application/atom+xml"/>
@@ -228,7 +391,7 @@ RuntimeError: maximum recursion depth exceeded in comparison
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-10-22T15:40:07Z</updated>
+      <updated>2012-10-23T16:40:15Z</updated>
     </source>
   </entry>
 
@@ -271,7 +434,7 @@ b. Add this line to your bash_profile.</p>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-22T15:40:21Z</updated>
+      <updated>2012-10-23T16:40:29Z</updated>
     </source>
   </entry>
 
@@ -352,7 +515,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-10-22T15:40:07Z</updated>
+      <updated>2012-10-23T16:40:15Z</updated>
     </source>
   </entry>
 
@@ -388,7 +551,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-10-22T15:40:07Z</updated>
+      <updated>2012-10-23T16:40:15Z</updated>
     </source>
   </entry>
 
@@ -624,7 +787,7 @@ Out[74]: True
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-22T15:40:21Z</updated>
+      <updated>2012-10-23T16:40:29Z</updated>
     </source>
   </entry>
 
@@ -742,7 +905,7 @@ commits are much more like my usual ones.
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-10-22T15:40:19Z</updated>
+      <updated>2012-10-23T16:40:26Z</updated>
     </source>
   </entry>
 
@@ -775,7 +938,7 @@ commits are much more like my usual ones.
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-10-22T15:40:20Z</updated>
+      <updated>2012-10-23T16:40:27Z</updated>
     </source>
   </entry>
 
@@ -809,7 +972,7 @@ commits are much more like my usual ones.
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-10-13T11:00:21Z</updated>
+      <updated>2012-10-23T06:40:20Z</updated>
     </source>
   </entry>
 
@@ -905,9 +1068,9 @@ Out[24]: 6
     <updated>2012-08-05T11:29:33Z</updated>
     <category term="SymPy"/>
     <category term="category theory"/>
-    <category term="subgraph isomorphism problem"/>
-    <category term="graph embedding"/>
     <category term="diagram embedding"/>
+    <category term="graph embedding"/>
+    <category term="subgraph isomorphism problem"/>
     <author>
       <name>scolobb</name>
     </author>
@@ -920,7 +1083,7 @@ Out[24]: 6
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-10-22T15:40:19Z</updated>
+      <updated>2012-10-23T16:40:26Z</updated>
     </source>
   </entry>
 
@@ -1039,7 +1202,7 @@ Out[24]: 6
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-10-22T15:40:19Z</updated>
+      <updated>2012-10-23T16:40:27Z</updated>
     </source>
   </entry>
 
@@ -1071,7 +1234,7 @@ Out[24]: 6
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-22T15:40:21Z</updated>
+      <updated>2012-10-23T16:40:29Z</updated>
     </source>
   </entry>
 
@@ -1112,7 +1275,7 @@ Out[24]: 6
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-10-13T11:00:21Z</updated>
+      <updated>2012-10-23T06:40:20Z</updated>
     </source>
   </entry>
 
@@ -1215,7 +1378,7 @@ StopIteration:
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-22T15:40:21Z</updated>
+      <updated>2012-10-23T16:40:29Z</updated>
     </source>
   </entry>
 
@@ -1255,12 +1418,12 @@ StopIteration:
     </content>
     <updated>2012-07-29T19:20:53Z</updated>
     <category term="SymPy"/>
-    <category term="string representation"/>
+    <category term="backward chaining"/>
     <category term="deciding commutativity"/>
     <category term="diagram layout"/>
     <category term="pretty printing"/>
     <category term="sort key"/>
-    <category term="backward chaining"/>
+    <category term="string representation"/>
     <category term="subgraph isomorphism problem"/>
     <author>
       <name>scolobb</name>
@@ -1274,7 +1437,7 @@ StopIteration:
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-10-22T15:40:19Z</updated>
+      <updated>2012-10-23T16:40:26Z</updated>
     </source>
   </entry>
 
@@ -1304,7 +1467,7 @@ StopIteration:
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-10-22T15:40:19Z</updated>
+      <updated>2012-10-23T16:40:27Z</updated>
     </source>
   </entry>
 
@@ -1673,7 +1836,7 @@ Out[128]: False
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-10-13T11:00:21Z</updated>
+      <updated>2012-10-23T06:40:20Z</updated>
     </source>
   </entry>
 
@@ -1761,7 +1924,7 @@ Out[128]: False
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-10-13T11:00:21Z</updated>
+      <updated>2012-10-23T06:40:20Z</updated>
     </source>
   </entry>
 
@@ -1796,7 +1959,7 @@ Out[128]: False
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-10-13T11:00:21Z</updated>
+      <updated>2012-10-23T06:40:20Z</updated>
     </source>
   </entry>
 
@@ -1843,7 +2006,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-10-22T15:40:19Z</updated>
+      <updated>2012-10-23T16:40:26Z</updated>
     </source>
   </entry>
 
@@ -1893,7 +2056,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-22T15:40:21Z</updated>
+      <updated>2012-10-23T16:40:29Z</updated>
     </source>
   </entry>
 
@@ -1938,7 +2101,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-10-22T15:40:19Z</updated>
+      <updated>2012-10-23T16:40:26Z</updated>
     </source>
   </entry>
 
@@ -1973,7 +2136,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-22T15:40:21Z</updated>
+      <updated>2012-10-23T16:40:29Z</updated>
     </source>
   </entry>
 
@@ -2160,7 +2323,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-10-22T15:40:08Z</updated>
+      <updated>2012-10-23T16:40:15Z</updated>
     </source>
   </entry>
 
@@ -2204,7 +2367,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-22T15:40:21Z</updated>
+      <updated>2012-10-23T16:40:29Z</updated>
     </source>
   </entry>
 
@@ -2251,7 +2414,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-10-22T15:40:19Z</updated>
+      <updated>2012-10-23T16:40:26Z</updated>
     </source>
   </entry>
 
@@ -2299,7 +2462,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-10-13T11:00:22Z</updated>
+      <updated>2012-10-23T06:40:20Z</updated>
     </source>
   </entry>
 
@@ -2428,7 +2591,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-10-22T15:40:20Z</updated>
+      <updated>2012-10-23T16:40:27Z</updated>
     </source>
   </entry>
 
@@ -2475,7 +2638,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-10-22T15:40:19Z</updated>
+      <updated>2012-10-23T16:40:26Z</updated>
     </source>
   </entry>
 
@@ -2638,7 +2801,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-22T15:40:21Z</updated>
+      <updated>2012-10-23T16:40:29Z</updated>
     </source>
   </entry>
 
@@ -2711,7 +2874,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-10-22T15:40:19Z</updated>
+      <updated>2012-10-23T16:40:27Z</updated>
     </source>
   </entry>
 
@@ -2892,7 +3055,7 @@ form_field(vector_field)
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-10-13T11:00:21Z</updated>
+      <updated>2012-10-23T06:40:20Z</updated>
     </source>
   </entry>
 
@@ -2988,7 +3151,7 @@ form_field(vector_field)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-22T15:40:22Z</updated>
+      <updated>2012-10-23T16:40:29Z</updated>
     </source>
   </entry>
 
@@ -3028,77 +3191,7 @@ form_field(vector_field)
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-10-13T11:00:21Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://amakelov.wordpress.com/?p=147</id>
-    <link href="http://amakelov.wordpress.com/2012/06/24/google-summer-of-code-2012-week-5/" rel="alternate" type="text/html"/>
-    <title>Google Summer of Code 2012: Week 5</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Hi everyone, here’s a brief summary of what I’ve been doing for the fifth week of my GSoC. Firstly, I finally had my first pull request merged; it’s all my fault I didn’t complain about it on the mailing list earlier : ) I had to fix a bunch of things on it (stuff like <a class="excerpt-more-link" href="http://amakelov.wordpress.com/2012/06/24/google-summer-of-code-2012-week-5/">[…]</a><img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;blog=35896871&amp;post=147&amp;subd=amakelov&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Hi everyone,</p>
-<p>here’s a brief summary of what I’ve been doing for the fifth week of my GSoC.</p>
-<ul>
-<li>Firstly, I finally had <a href="https://github.com/sympy/sympy/pull/1319" target="_blank">my first pull request</a> merged; it’s all my fault I didn’t complain about it on the mailing list earlier : ) I had to fix a bunch of things on it (stuff like documentation using sphinx and some improvements in code quality, mainly docstrings), and now I’m really happy to have my first major contribution to sympy merged with the master branch. Thanks to everyone who helped in reviewing it – <a href="https://github.com/Krastanov" target="_blank">Stefan</a>, <a href="https://github.com/pernici" target="_blank">Mario</a>, <a href="https://github.com/ness01" target="_blank">Tom</a>, <a href="https://github.com/mrocklin" target="_blank">Matthew</a>, and of course my mentor <a href="https://github.com/wdjoyner" target="_blank">David</a>.</li>
-<li>Secondly, my next pull request, mainly containing work from weeks 2 and 5. After some moderate rebasing over the fixes from my first pull request, it is available <a href="https://github.com/sympy/sympy/pull/1377" target="_blank">here</a>. Apart from implementations of <a href="http://amakelov.wordpress.com/2012/06/02/google-summer-of-code-2012-week-2/" target="_blank">what I did in week 2</a>, it addresses the issue of testing randomized algorithms ( which is still being discussed <a href="https://groups.google.com/forum/?fromgroups#!topic/sympy/2el1T0ZY-Z4" target="_blank">here</a> ), and splits the generators for the named groups (symmetric, dihedral,…) in a separate file (which is probably going to contain more and more constructors for some well-known groups as time goes by). The PR looks longer than it is ( : ) read: any help in the review process will be appreciated), mainly because some 250 lines were copied to a new file in order to accommodate the named groups module. I hope that this time I did a better job at splitting the different parts of the PR into several commits.</li>
-<li>Finally, I started work on algorithms for backtrack searches in groups. These include stuff like printing all group elements (sort of boring, but you have to start somewhere), searching for subgroups of elements satisfying a given property, finding normalizers and centralizers,  intersection of subgroups,… In general, backtrack searches tend to be slow since all the elements in the group have to be visited, but there are ways of skipping large numbers of them. Also, for some problems in computational group theory, backtrack searches are the best we have today. They are described in [1], 4.6., and I’m currently following the exposition offered there. After two days of debugging, I finally got the function PRINTELEMENTS described in 4.6.1 of [1] to work; it turned out that the current implementation of the Schreier-Sims algorithm sets the field _coset_repr of an object of class PermutationGroup in sympy.combinatorics.perm_groups.py in a way that was unexpected to me. This little digression might help anyone else trying to understand the perm_groups file better. So for example consider the following:</li>
-</ul>
-<p/><pre class="brush: python;">In [297]: S = SymmetricGroup(4)
-
-In [298]: S.schreier_sims()
-
-In [299]: S._coset_repr
-Out[299]:
-[[[0, 1, 2, 3], [1, 2, 3, 0], [2, 3, 0, 1], [3, 0, 1, 2]],
-[[0, 1, 2, 3], [0, 2, 1, 3], [0, 3, 1, 2]],
-[[0, 1, 2, 3], [0, 1, 3, 2]]]
- 
- In [300]: S._base
-Out[300]: [0, 1, 2]
-
-</pre><p/>
-<p>From this and similar examples I concluded that the i-th component of _coset_repr is a transversal of the i-th basic orbit of the group S and tried to use this in PRINTELEMENTS. However, consired the following example:</p>
-<p/><pre class="brush: python;">In [302]: G = PermutationGroup([Permutation([[0, 1, 2, 3], [4], [5]]), Permutation([[1, 3], [0], [2], [4], [5]]), Permutation([[0], [1], [2], [3], [4, 5]])])
-
-In [303]: G.schreier_sims()
-
-In [304]: G._base
- Out[304]: [0, 1, 4]
-
-In [305]: G._coset_repr
- Out[305]:
- [[[0, 1, 2, 3, 4, 5],
- [1, 2, 3, 0, 4, 5],
- [2, 3, 0, 1, 4, 5],
- [3, 0, 1, 2, 4, 5]],
- [[0, 1, 2, 3, 4, 5], [0, 3, 2, 1, 4, 5]],
- [[0, 1, 2, 3, 4, 5]],
- [[0, 1, 2, 3, 4, 5]],
- [[0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 5, 4]]]
-
-</pre><p/>
-<p>Here, the first two components of _coset_repr are as I expected, but the 3rd and 4th are something I didn’t expect to be there (I expected to get the 5th component instead of the 3rd, and no more components). Hence at present the behaviour of _coset_repr is not too clear to me. The current solution is to use the randomized version of the Schreier-Sims algorithm to get a base and a strong generating set. Another option would be to use the generators from the attribute _stabilizers_gens, but I haven’t tried that yet. Anyway, PRINTELEMENTS works now (edit: there are many other algorithms present for printing all the elements of a group, but this one is significant for the implementation of backtrack searches), and the order in which the elements of the group are visited (lexicographically with respect to the image of the base, in an ordering of <img alt="\Omega = \{0, 1,\ldots, n-1\}" class="latex" src="http://s0.wp.com/latex.php?latex=%5COmega+%3D+%5C%7B0%2C+1%2C%5Cldots%2C+n-1%5C%7D&amp;bg=fafad3&amp;fg=6f5e4e&amp;s=0" title="\Omega = \{0, 1,\ldots, n-1\}"/> in which base points come first) is used in most of the following backtrack searches, so a large part of this algorithm will be reused in subsequent algorithms ( I hope : ) ). My description of the situation assumed some knowledge of the theory behind the Schreier-Sims algorithm, so if something is not quite clear feel free to ask in the comments!</p>
-<p>That’s it for now. Next week, I’ll continue with backtrack searches, and hopefully will implement the subgroup intersection routine (it seems formidable right now)… and put some more effort into getting the second pull request merged – I’ve got a lot to catch up with in terms of getting my code in sympy : ) .</p>
-<p>[1] Derek F. Holt, Bettina Eick, Bettina, Eamonn A. O’Brien, “Handbook of computational group theory”, Discrete Mathematics and its Applications (Boca Raton). Chapman &amp; Hall/CRC, Boca Raton, FL, 2005. ISBN 1-58488-372-3</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/amakelov.wordpress.com/147/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/amakelov.wordpress.com/147/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;blog=35896871&amp;post=147&amp;subd=amakelov&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2012-06-24T21:19:23Z</updated>
-    <category term="Google Summer of Code 2012"/>
-    <author>
-      <name>amakelov</name>
-    </author>
-    <source>
-      <id>http://amakelov.wordpress.com</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://amakelov.wordpress.com/category/google-summer-of-code-2012/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://amakelov.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://amakelov.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>A. Makelov</subtitle>
-      <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2012-08-20T14:40:54Z</updated>
+      <updated>2012-10-23T06:40:20Z</updated>
     </source>
   </entry>
 </feed>
