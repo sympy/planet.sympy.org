@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2012-10-23T16:40:29Z</updated>
+  <updated>2012-10-23T17:40:36Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -17,8 +17,8 @@
     <title>Learning to rank with scikit-learn: the pairwise transform</title>
     <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>This tutorial introduces the concept of pairwise preference used in most <a href="http://en.wikipedia.org/wiki/Learning_to_rank">ranking problems</a>. I'll use scikit-learn and for learning and matplotlib for visualization.</p>
 <p>In the ranking setting, training data consists of lists of items with some order specified between items in each list. This order is typically induced by giving a numerical or ordinal score or a binary judgment (e.g. "relevant" or "not relevant") for each item, so that for any two samples <code>a</code> and <code>b</code>, either <code>a &lt; b</code>, <code>b &gt; a</code> or <code>b</code> and <code>a</code> are not comparable.</p>
-<p>For example, in the case of a search engine, our dataset consists of results that belong to different queries and it makes sense to compare the relevance of results for the same query but it is meaningless to compare the relevance across queries, e.g. a result might be very relevant for a particular query but will probably be irrelevant for most other queries.</p>
-<p>The order relationship is usually domain-specific. For instance, in information retrieval the set of comparable samples is refered to as a "query id". The goal behind this is to compare only documents that belong to the same query (<a href="http://dx.doi.org/10.1145/775047.775067">Joachims 2002</a>). In medical imaging on the other hand, the order of the labels usually depend on the subject so the comparable samples is given by the different subjects in the study (<a href="http://hal.inria.fr/hal-00717990/en">Pedregosa et al 2012</a>).</p>
+<p>For example, in the case of a search engine, our dataset consists of results that belong to different queries and we would like to only compare the relevance for results coming from the same query.</p>
+<p>This order relation is usually domain-specific. For instance, in information retrieval the set of comparable samples is referred to as a "query id". The goal behind this is to compare only documents that belong to the same query (<a href="http://dx.doi.org/10.1145/775047.775067">Joachims 2002</a>). In medical imaging on the other hand, the order of the labels usually depend on the subject so the comparable samples is given by the different subjects in the study (<a href="http://hal.inria.fr/hal-00717990/en">Pedregosa et al 2012</a>).</p>
 <div class="highlight"><pre><span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
@@ -83,7 +83,7 @@
 </pre></div>
 
 <p><img alt="" src="http://fseoane.net/blog/feed/uploads/pairwise_transform_files/pairwise_transform_fig_01.png"/></p>
-<p>To assess the quality of our model we need to define a ranking score. Since we are interesting in a model that <em>orders</em> the data, it is natural to look for a metric that compares the ordering of our model to the given ordering. For this, we use <a href="http://en.wikipedia.org/wiki/Kendall_tau_rank_correlation_coefficient">Kendall's tau correlation coefficient</a>, which is defined as (P - Q)/(P + Q), being P the number of concordant pairs and Q is the number of discordant pairs. This measure is used extensively in the ranking litterature (e.g <a href="http://www.cs.cornell.edu/people/tj/publications/joachims_02c.pdf">Optimizing Search Engines using Clickthrough Data</a>).</p>
+<p>To assess the quality of our model we need to define a ranking score. Since we are interesting in a model that <em>orders</em> the data, it is natural to look for a metric that compares the ordering of our model to the given ordering. For this, we use <a href="http://en.wikipedia.org/wiki/Kendall_tau_rank_correlation_coefficient">Kendall's tau correlation coefficient</a>, which is defined as (P - Q)/(P + Q), being P the number of concordant pairs and Q is the number of discordant pairs. This measure is used extensively in the ranking literature (e.g <a href="http://www.cs.cornell.edu/people/tj/publications/joachims_02c.pdf">Optimizing Search Engines using Clickthrough Data</a>).</p>
 <p>We thus evaluate this metric on the test set for each block separately.</p>
 <div class="highlight"><pre><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
     <span class="n">tau</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">kendalltau</span><span class="p">(</span>
@@ -127,7 +127,7 @@
 </pre></div>
 
 <p><img alt="" src="http://fseoane.net/blog/feed/uploads/pairwise_transform_files/pairwise_transform_fig_02.png"/></p>
-<p>As we see in the previous plot, this classification is separable. This will not always be the clase, however, in our training set  there are no order inversions, thus the respective classification problem is separable.</p>
+<p>As we see in the previous plot, this classification is separable. This will not always be the case, however, in our training set  there are no order inversions, thus the respective classification problem is separable.</p>
 <p>We will now finally train an Support Vector Machine model on the transformed data. This model is known as RankSVM. We will then plot the training data together with the estimated coefficient $\hat{w}$ by RankSVM.</p>
 <div class="highlight"><pre><span class="n">clf</span> <span class="o">=</span> <span class="n">svm</span><span class="o">.</span><span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s">'linear'</span><span class="p">,</span> <span class="n">C</span><span class="o">=.</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xp</span><span class="p">,</span> <span class="n">yp</span><span class="p">)</span>
@@ -160,9 +160,9 @@
 
 
 <p>This is indeed higher than the values (0.71122, 0.84387) obtained in the case of linear regression.</p>
-<p><strong>Original notebook for this blog post can be found <a href="https://github.com/fabianp/minirank/blob/master/notebooks/pairwise_transform.ipynb">here</a></strong></p></div>
+<p><strong>Original ipython notebook for this blog post can be found <a href="https://github.com/fabianp/minirank/blob/master/notebooks/pairwise_transform.ipynb">here</a></strong></p></div>
     </summary>
-    <updated>2012-10-23T16:21:50Z</updated>
+    <updated>2012-10-22T22:00:00Z</updated>
     <author>
       <name>Fabian Pedregosa</name>
     </author>
@@ -171,7 +171,7 @@
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog/feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2012-10-23T16:40:12Z</updated>
+      <updated>2012-10-23T17:40:13Z</updated>
     </source>
   </entry>
 
@@ -246,7 +246,7 @@
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-10-23T16:40:24Z</updated>
+      <updated>2012-10-23T17:40:30Z</updated>
     </source>
   </entry>
 
@@ -391,7 +391,7 @@ RuntimeError: maximum recursion depth exceeded in comparison
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-10-23T16:40:15Z</updated>
+      <updated>2012-10-23T17:40:16Z</updated>
     </source>
   </entry>
 
@@ -434,7 +434,7 @@ b. Add this line to your bash_profile.</p>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-23T16:40:29Z</updated>
+      <updated>2012-10-23T17:40:35Z</updated>
     </source>
   </entry>
 
@@ -515,7 +515,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-10-23T16:40:15Z</updated>
+      <updated>2012-10-23T17:40:16Z</updated>
     </source>
   </entry>
 
@@ -551,7 +551,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-10-23T16:40:15Z</updated>
+      <updated>2012-10-23T17:40:16Z</updated>
     </source>
   </entry>
 
@@ -787,7 +787,7 @@ Out[74]: True
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-23T16:40:29Z</updated>
+      <updated>2012-10-23T17:40:35Z</updated>
     </source>
   </entry>
 
@@ -905,7 +905,7 @@ commits are much more like my usual ones.
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-10-23T16:40:26Z</updated>
+      <updated>2012-10-23T17:40:33Z</updated>
     </source>
   </entry>
 
@@ -938,7 +938,7 @@ commits are much more like my usual ones.
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-10-23T16:40:27Z</updated>
+      <updated>2012-10-23T17:40:33Z</updated>
     </source>
   </entry>
 
@@ -1083,7 +1083,7 @@ Out[24]: 6
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-10-23T16:40:26Z</updated>
+      <updated>2012-10-23T17:40:32Z</updated>
     </source>
   </entry>
 
@@ -1202,7 +1202,7 @@ Out[24]: 6
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-10-23T16:40:27Z</updated>
+      <updated>2012-10-23T17:40:33Z</updated>
     </source>
   </entry>
 
@@ -1234,7 +1234,7 @@ Out[24]: 6
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-23T16:40:29Z</updated>
+      <updated>2012-10-23T17:40:35Z</updated>
     </source>
   </entry>
 
@@ -1378,7 +1378,7 @@ StopIteration:
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-23T16:40:29Z</updated>
+      <updated>2012-10-23T17:40:35Z</updated>
     </source>
   </entry>
 
@@ -1437,7 +1437,7 @@ StopIteration:
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-10-23T16:40:26Z</updated>
+      <updated>2012-10-23T17:40:32Z</updated>
     </source>
   </entry>
 
@@ -1467,7 +1467,7 @@ StopIteration:
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-10-23T16:40:27Z</updated>
+      <updated>2012-10-23T17:40:33Z</updated>
     </source>
   </entry>
 
@@ -2006,7 +2006,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-10-23T16:40:26Z</updated>
+      <updated>2012-10-23T17:40:32Z</updated>
     </source>
   </entry>
 
@@ -2056,7 +2056,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-23T16:40:29Z</updated>
+      <updated>2012-10-23T17:40:35Z</updated>
     </source>
   </entry>
 
@@ -2101,7 +2101,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-10-23T16:40:26Z</updated>
+      <updated>2012-10-23T17:40:32Z</updated>
     </source>
   </entry>
 
@@ -2136,7 +2136,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-23T16:40:29Z</updated>
+      <updated>2012-10-23T17:40:35Z</updated>
     </source>
   </entry>
 
@@ -2323,7 +2323,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-10-23T16:40:15Z</updated>
+      <updated>2012-10-23T17:40:16Z</updated>
     </source>
   </entry>
 
@@ -2367,7 +2367,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-23T16:40:29Z</updated>
+      <updated>2012-10-23T17:40:35Z</updated>
     </source>
   </entry>
 
@@ -2414,7 +2414,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-10-23T16:40:26Z</updated>
+      <updated>2012-10-23T17:40:33Z</updated>
     </source>
   </entry>
 
@@ -2591,7 +2591,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-10-23T16:40:27Z</updated>
+      <updated>2012-10-23T17:40:33Z</updated>
     </source>
   </entry>
 
@@ -2638,7 +2638,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-10-23T16:40:26Z</updated>
+      <updated>2012-10-23T17:40:33Z</updated>
     </source>
   </entry>
 
@@ -2801,7 +2801,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-23T16:40:29Z</updated>
+      <updated>2012-10-23T17:40:35Z</updated>
     </source>
   </entry>
 
@@ -2874,7 +2874,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-10-23T16:40:27Z</updated>
+      <updated>2012-10-23T17:40:33Z</updated>
     </source>
   </entry>
 
@@ -3151,7 +3151,7 @@ form_field(vector_field)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-23T16:40:29Z</updated>
+      <updated>2012-10-23T17:40:35Z</updated>
     </source>
   </entry>
 
