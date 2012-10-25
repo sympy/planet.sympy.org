@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2012-10-24T22:20:30Z</updated>
+  <updated>2012-10-25T00:00:29Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,904 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry xml:lang="en">
+    <id>http://blog.krastanov.org/?p=561</id>
+    <link href="http://blog.krastanov.org/2012/10/25/sage-vs-sympy-integration/" rel="alternate" type="text/html"/>
+    <title>Sage vs SymPy – integration</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">During the recent GSoC summit I had the chance to participate in many fascinating discussions. One such occasion was while meeting the Sage representative. A detail he mentioned, was that during his tests SymPy frequently failed to solve integrals that Sage (using Maxima) was able to solve. An explanation, in which I like to believe, [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=blog.krastanov.org&amp;blog=15251174&amp;post=561&amp;subd=krastanov&amp;ref=&amp;feed=1" width="1"/></div>
+    </summary>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>During the recent GSoC summit I had the chance to participate in many fascinating discussions. One such occasion was while meeting the Sage representative.</p>
+<p>A detail he mentioned, was that during his tests SymPy frequently failed to solve integrals that Sage (using Maxima) was able to solve. An explanation, in which I like to believe, would be that he was testing an old version of SymPy lacking the new integration routines implemented during the last few GSoC projects. Hence my decision the compare the most recent versions of both projects.</p>
+<p>The tested versions are SymPy 0.7.2 and Sage 5.3.</p>
+<p>Depending on screen size and wordpress theme the table might be badly formatted so here is a link to the <a href="https://raw.github.com/wiki/sympy/sympy/sympy_sage_integration.html" target="_blank">wiki html page</a> and a <a href="http://krastanov.files.wordpress.com/2012/10/sympy_sage.pdf">pdf</a> version.</p>
+<p>It should be noted that Sage is more rigorous about the assumptions on its symbols and so it fails to integrate something like <img alt="x^n" class="latex" src="http://s0.wp.com/latex.php?latex=x%5En&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="x^n"/> if <img alt="n" class="latex" src="http://s0.wp.com/latex.php?latex=n&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="n"/> is not explicitly different than -1. I personally think that this is a feature and not a bug. Due to this difference however the script used to test Sage differs from the one used for SymPy.</p>
+<p>Another minor methodological difference in the tests is the fact that the timeout pattern that I used failed to work for the Sage interpreter. Hence, SymPy integration timeouts at about 120 seconds while Sage integration is manually interrupted when it takes too much time.</p>
+<p>Final methodological difference is that I purge the SymPy cache between each integral as otherwise the RAM usage becomes too great.</p>
+<p>The results show that SymPy is slightly better in using special functions to solve integrals, but there are also a few integrals that Sage solves while SymPy fails to do so. On few occasions Sage fails disgracefully, meaning  that it returns an error instead of unevaluated integral. When both packages fail to evaluate the integral SymPy is much slower to say so (timeout for SymPy compared to 1 or 2 seconds for Sage to return an unevaluated integral). Finally, on some occasions the results by Sage seem better simplified.</p>
+<p>Integrals solved better by SymPy (if you consider special functions “better”):</p>
+<ul>
+<li><img alt="\frac{1}{a x^n + 1}" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cfrac%7B1%7D%7Ba+x%5En+%2B+1%7D&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="\frac{1}{a x^n + 1}"/> with the use of a special function while Sage returns unevaluated integrals</li>
+<li><img alt="\frac{a x^n}{b x^m + 1}" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cfrac%7Ba+x%5En%7D%7Bb+x%5Em+%2B+1%7D&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="\frac{a x^n}{b x^m + 1}"/> with the use of a special function while Sage returns unevaluated integrals</li>
+<li><img alt="\frac{a x^n + 1}{b x^m + 1}" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cfrac%7Ba+x%5En+%2B+1%7D%7Bb+x%5Em+%2B+1%7D&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="\frac{a x^n + 1}{b x^m + 1}"/> with the use of a special function while Sage returns unevaluated integrals</li>
+<li><img alt="\frac{a x^5 + x^3 + 1}{b x^5 + x^3 + 1}" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cfrac%7Ba+x%5E5+%2B+x%5E3+%2B+1%7D%7Bb+x%5E5+%2B+x%5E3+%2B+1%7D&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="\frac{a x^5 + x^3 + 1}{b x^5 + x^3 + 1}"/> with the use of a special function while Sage returns unevaluated integrals</li>
+</ul>
+<p>Integrals solved better by Sage:</p>
+<ul>
+<li><img alt="\frac{a x^2}{b x^2 + 1}" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cfrac%7Ba+x%5E2%7D%7Bb+x%5E2+%2B+1%7D&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="\frac{a x^2}{b x^2 + 1}"/> solved by both but Sage’s result is simpler (it uses arctan instead of log)</li>
+<li><img alt="\frac{1}{\sqrt{x^2 + 1}}" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cfrac%7B1%7D%7B%5Csqrt%7Bx%5E2+%2B+1%7D%7D&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="\frac{1}{\sqrt{x^2 + 1}}"/> SymPy fails this simple integral</li>
+<li><img alt="\log\left(\frac{a x^3}{b x^3 + 1}\right)" class="latex" src="http://s0.wp.com/latex.php?latex=%5Clog%5Cleft%28%5Cfrac%7Ba+x%5E3%7D%7Bb+x%5E3+%2B+1%7D%5Cright%29&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="\log\left(\frac{a x^3}{b x^3 + 1}\right)"/> solved by both but Sage’s result is much simpler</li>
+<li><img alt="\log\left(\frac{a x^2 + 1}{b x^2 + 1}\right)" class="latex" src="http://s0.wp.com/latex.php?latex=%5Clog%5Cleft%28%5Cfrac%7Ba+x%5E2+%2B+1%7D%7Bb+x%5E2+%2B+1%7D%5Cright%29&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="\log\left(\frac{a x^2 + 1}{b x^2 + 1}\right)"/> SymPy fails</li>
+<li><img alt="\log\left(\frac{a x^3 + 1}{b x^3 + 1}\right)" class="latex" src="http://s0.wp.com/latex.php?latex=%5Clog%5Cleft%28%5Cfrac%7Ba+x%5E3+%2B+1%7D%7Bb+x%5E3+%2B+1%7D%5Cright%29&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="\log\left(\frac{a x^3 + 1}{b x^3 + 1}\right)"/> SymPy fails</li>
+<li><img alt="\frac{1}{\sin x + 1}" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cfrac%7B1%7D%7B%5Csin+x+%2B+1%7D&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="\frac{1}{\sin x + 1}"/> SymPy fails</li>
+<li><img alt="\frac{a \sin^2 x + 1}{b \sin^2 x + 1}" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cfrac%7Ba+%5Csin%5E2+x+%2B+1%7D%7Bb+%5Csin%5E2+x+%2B+1%7D&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="\frac{a \sin^2 x + 1}{b \sin^2 x + 1}"/> SymPy fails</li>
+</ul>
+<p>The code for the SymPy tests:</p>
+<p/><pre class="brush: python;">import signal
+from time import clock
+from sympy import *
+from sympy.core.cache import clear_cache
+
+class TimeoutException(Exception):
+pass
+
+def timeout_handler(signum, frame):
+raise TimeoutException()
+
+a, b, x = symbols('a b x')
+n, m = symbols('n m', integer=True)
+
+integrants = [
+x,
+a*x**n,
+a*x**n + 1,
+a*x**b + 1,
+
+1/x,
+1/(x + 1),
+1/(x**2 + 1),
+1/(x**3 + 1),
+1/(a*x**n),
+1/(a*x**n + 1),
+1/(a*x**b + 1),
+
+a*x**2/(b*x**2 + 1),
+a*x**3/(b*x**3 + 1),
+a*x**n/(b*x**m + 1),
+(a*x**2 + 1)/(b*x**2 + 1),
+(a*x**3 + 1)/(b*x**3 + 1),
+(a*x**n + 1)/(b*x**m + 1),
+(a*x**5 + x**3 + 1)/(b*x**5 + x**3 + 1),
+
+sqrt(1/x),
+sqrt(1/(x + 1)),
+sqrt(1/(x**2 + 1)),
+sqrt(1/(x**3 + 1)),
+sqrt(1/(a*x**n)),
+sqrt(1/(a*x**n + 1)),
+sqrt(1/(a*x**b + 1)),
+sqrt(a*x**2/(b*x**2 + 1)),
+sqrt(a*x**3/(b*x**3 + 1)),
+sqrt(a*x**n/(b*x**m + 1)),
+sqrt((a*x**2 + 1)/(b*x**2 + 1)),
+sqrt((a*x**3 + 1)/(b*x**3 + 1)),
+sqrt((a*x**n + 1)/(b*x**m + 1)),
+sqrt((a*x**5 + x**3 + 1)/(b*x**5 + x**3 + 1)),
+
+log(x),
+log(1/x),
+log(1/(x + 1)),
+log(1/(x**2 + 1)),
+log(1/(x**3 + 1)),
+log(1/(a*x**n)),
+log(1/(a*x**n + 1)),
+log(1/(a*x**b + 1)),
+log(a*x**2/(b*x**2 + 1)),
+log(a*x**3/(b*x**3 + 1)),
+log(a*x**n/(b*x**m + 1)),
+log((a*x**2 + 1)/(b*x**2 + 1)),
+log((a*x**3 + 1)/(b*x**3 + 1)),
+log((a*x**n + 1)/(b*x**m + 1)),
+log((a*x**5 + x**3 + 1)/(b*x**5 + x**3 + 1)),
+
+sin(x),
+sin(x)**n*cos(x)**m,
+sin(a*x)**n*cos(b*x)**m,
+1/sin(x),
+1/(sin(x) + 1),
+1/(sin(x)**2 + 1),
+1/(sin(x)**3 + 1),
+1/(a*sin(x)**n),
+1/(a*sin(x)**n + 1),
+1/(a*sin(x)**b + 1),
+a*sin(x)**2/(b*sin(x)**2 + 1),
+a*sin(x)**3/(b*sin(x)**3 + 1),
+a*sin(x)**n/(b*sin(x)**m + 1),
+(a*sin(x)**2 + 1)/(b*sin(x)**2 + 1),
+(a*sin(x)**3 + 1)/(b*sin(x)**3 + 1),
+(a*sin(x)**n + 1)/(b*sin(x)**m + 1),
+(a*sin(x)**5 + sin(x)**3 + 1)/(b*sin(x)**5 + sin(x)**3 + 1),
+]
+
+integrated = []
+durations = []
+
+f_integrants = open('dump_integrants', 'w')
+f_integrated = open('dump_integrated', 'w')
+f_durations = open('dump_duration', 'w')
+
+for index, integrant in enumerate(integrants):
+clear_cache()
+print '====================================='
+print index, ' of ', len(integrants)
+print '###', integrant
+start = clock()
+try:
+old_handler = signal.signal(signal.SIGALRM, timeout_handler)
+signal.alarm(120)
+integrated.append(integrate(integrant, x))
+signal.alarm(0)
+except TimeoutException:
+integrated.append(TimeoutException)
+finally:
+signal.signal(signal.SIGALRM, old_handler)
+durations.append(clock() - start)
+print '###', integrated[-1]
+print 'in %f seconds'%durations[-1]
+
+f_integrants.write(str(integrant))
+f_integrated.write(str(integrated[-1]))
+f_durations.write(str(durations[-1]))
+f_integrants.write('\n')
+f_integrated.write('\n')
+f_durations.write('\n')
+</pre><p/>
+<p>And for Sage:</p>
+<p/><pre class="brush: python;">import signal
+from time import clock
+from sage.all import *
+from sage.symbolic.integration.integral import indefinite_integral
+
+class TimeoutException(Exception):
+pass
+
+def timeout_handler(signum, frame):
+raise TimeoutException()
+
+a, b, x = var('a b x')
+n, m = var('n m')
+assume(n, 'integer')
+assume(m, 'integer')
+
+assume(n != 1)
+assume(n != -1)
+assume(n != 2)
+assume(n&gt;0)
+assume(b != 1)
+assume(b != -1)
+assume(b&gt;0)
+assume(a&gt;0)
+
+integrants = [
+x,
+a*x**n,
+a*x**n + 1,
+a*x**b + 1,
+
+1/x,
+1/(x + 1),
+1/(x**2 + 1),
+1/(x**3 + 1),
+1/(a*x**n),
+1/(a*x**n + 1),
+1/(a*x**b + 1),
+
+a*x**2/(b*x**2 + 1),
+a*x**3/(b*x**3 + 1),
+a*x**n/(b*x**m + 1),
+(a*x**2 + 1)/(b*x**2 + 1),
+(a*x**3 + 1)/(b*x**3 + 1),
+(a*x**n + 1)/(b*x**m + 1),
+(a*x**5 + x**3 + 1)/(b*x**5 + x**3 + 1),
+
+sqrt(1/x),
+sqrt(1/(x + 1)),
+sqrt(1/(x**2 + 1)),
+sqrt(1/(x**3 + 1)),
+sqrt(1/(a*x**n)),
+sqrt(1/(a*x**n + 1)),
+sqrt(1/(a*x**b + 1)),
+sqrt(a*x**2/(b*x**2 + 1)),
+sqrt(a*x**3/(b*x**3 + 1)),
+sqrt(a*x**n/(b*x**m + 1)),
+sqrt((a*x**2 + 1)/(b*x**2 + 1)),
+sqrt((a*x**3 + 1)/(b*x**3 + 1)),
+sqrt((a*x**n + 1)/(b*x**m + 1)),
+sqrt((a*x**5 + x**3 + 1)/(b*x**5 + x**3 + 1)),
+
+log(x),
+log(1/x),
+log(1/(x + 1)),
+log(1/(x**2 + 1)),
+log(1/(x**3 + 1)),
+log(1/(a*x**n)),
+log(1/(a*x**n + 1)),
+log(1/(a*x**b + 1)),
+log(a*x**2/(b*x**2 + 1)),
+log(a*x**3/(b*x**3 + 1)),
+log(a*x**n/(b*x**m + 1)),
+log((a*x**2 + 1)/(b*x**2 + 1)),
+log((a*x**3 + 1)/(b*x**3 + 1)),
+log((a*x**n + 1)/(b*x**m + 1)),
+log((a*x**5 + x**3 + 1)/(b*x**5 + x**3 + 1)),
+
+sin(x),
+sin(x)**n*cos(x)**m,
+sin(a*x)**n*cos(b*x)**m,
+1/sin(x),
+1/(sin(x) + 1),
+1/(sin(x)**2 + 1),
+1/(sin(x)**3 + 1),
+1/(a*sin(x)**n),
+1/(a*sin(x)**n + 1),
+1/(a*sin(x)**b + 1),
+a*sin(x)**2/(b*sin(x)**2 + 1),
+a*sin(x)**3/(b*sin(x)**3 + 1),
+a*sin(x)**n/(b*sin(x)**m + 1),
+(a*sin(x)**2 + 1)/(b*sin(x)**2 + 1),
+(a*sin(x)**3 + 1)/(b*sin(x)**3 + 1),
+(a*sin(x)**n + 1)/(b*sin(x)**m + 1),
+(a*sin(x)**5 + sin(x)**3 + 1)/(b*sin(x)**5 + sin(x)**3 + 1),
+]
+
+integrated = []
+durations = []
+
+f_integrants = open('dump_integrants', 'w')
+f_integrated = open('dump_integrated', 'w')
+f_durations = open('dump_duration', 'w')
+
+for index, integrant in enumerate(integrants):
+print '====================================='
+print index, ' of ', len(integrants)
+print '###', integrant
+start = clock()
+try:
+old_handler = signal.signal(signal.SIGALRM, timeout_handler)
+signal.alarm(120)
+integrated.append(indefinite_integral(integrant, x))
+signal.alarm(0)
+except Exception, e:
+integrated.append(e)
+finally:
+signal.signal(signal.SIGALRM, old_handler)
+durations.append(clock() - start)
+print '###', integrated[-1]
+print 'in %f seconds'%durations[-1]
+
+f_integrants.write(str(integrant))
+f_integrated.write(str(integrated[-1]))
+f_durations.write(str(durations[-1]))
+f_integrants.write('\n')
+f_integrated.write('\n')
+f_durations.write('\n')
+</pre><p/>
+<p>Below is the complete table (available as a <a href="https://raw.github.com/wiki/sympy/sympy/sympy_sage_integration.html" target="_blank">wiki html page</a> and a <a href="http://krastanov.files.wordpress.com/2012/10/sympy_sage.pdf">pdf</a>).</p>
+<table>
+<caption>Sympy vs Sage integration routines</caption>
+<tbody>
+<tr>
+<td style="font-size: 10pt;">Legend:</td>
+<td/>
+<td/>
+<td/>
+<td/>
+<td/>
+</tr>
+<tr>
+<td style="font-size: 10pt;">Disgraceful failure</td>
+<td/>
+<td/>
+<td/>
+<td/>
+<td/>
+</tr>
+<tr>
+<td style="font-size: 10pt;">Timeout or manual interupt</td>
+<td/>
+<td/>
+<td/>
+<td/>
+<td/>
+</tr>
+<tr>
+<td style="font-size: 10pt;">Return an unevalued integral</td>
+<td/>
+<td/>
+<td/>
+<td/>
+<td/>
+</tr>
+<tr>
+<td style="font-size: 10pt;">Asking for assumptions</td>
+<td/>
+<td/>
+<td/>
+<td/>
+<td/>
+</tr>
+<tr>
+<td style="font-size: 10pt;">Solution with fancy special functions</td>
+<td/>
+<td/>
+<td/>
+<td/>
+<td/>
+</tr>
+<tr>
+<td/>
+<td/>
+<td/>
+<td/>
+<td/>
+<td/>
+</tr>
+<tr>
+<td/>
+<td/>
+<td/>
+<td/>
+<td/>
+<td/>
+</tr>
+<tr>
+<td colspan="1" rowspan="2" style="font-size: 10pt;">Integrant</td>
+<td colspan="2" rowspan="1" style="font-size: 10pt;">Sympy `integrate`</td>
+<td colspan="2" rowspan="1" style="font-size: 10pt;">Sage `indefinite_integral`</td>
+<td colspan="1" rowspan="2" style="font-size: 10pt;">Comments</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">Result</td>
+<td style="font-size: 10pt;">cpu time</td>
+<td style="font-size: 10pt;">Result</td>
+<td style="font-size: 10pt;">cpu time</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">x</td>
+<td style="font-size: 10pt;">x**2/2</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">1/2*x^2</td>
+<td style="font-size: 10pt;">0</td>
+<td style=""/>
+</tr>
+<tr>
+<td style="font-size: 10pt;">a*x**n</td>
+<td style="font-size: 10pt;">a*x**(n + 1)/(n + 1)</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">a*x^(n + 1)/(n + 1)</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">Sage asks whether the denominator is zero before solving.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">a*x**n + 1</td>
+<td style="font-size: 10pt;">a*x**(n + 1)/(n + 1) + x</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">a*x^(n + 1)/(n + 1) + x</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">Sage asks whether the denominator is zero before solving.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">a*x**b + 1</td>
+<td style="font-size: 10pt;">a*x**(b + 1)/(b + 1) + x</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">a*x^(b + 1)/(b + 1) + x</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">Sage asks whether the denominator is zero before solving.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">1/x</td>
+<td style="font-size: 10pt;">log(x)</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">log(x)</td>
+<td style="font-size: 10pt;">0</td>
+<td style=""/>
+</tr>
+<tr>
+<td style="font-size: 10pt;">1/(x + 1)</td>
+<td style="font-size: 10pt;">log(x + 1)</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">log(x + 1)</td>
+<td style="font-size: 10pt;">0</td>
+<td style=""/>
+</tr>
+<tr>
+<td style="font-size: 10pt;">1/(x**2 + 1)</td>
+<td style="font-size: 10pt;">atan(x)</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">arctan(x)</td>
+<td style="font-size: 10pt;">0</td>
+<td style=""/>
+</tr>
+<tr>
+<td style="font-size: 10pt;">1/(x**3 + 1)</td>
+<td style="font-size: 10pt;">log(x + 1)/3 – log(x**2 – x + 1)/6 + sqrt(3)*atan(2*sqrt(3)*x/3 – sqrt(3)/3)/3</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">1/3*sqrt(3)*arctan(1/3*(2*x – 1)*sqrt(3)) + 1/3*log(x + 1) – 1/6*log(x^2 – x + 1)</td>
+<td style="font-size: 10pt;">0</td>
+<td style=""/>
+</tr>
+<tr>
+<td style="font-size: 10pt;">x**(-n)/a</td>
+<td style="font-size: 10pt;">x**(-n + 1)/(a*(-n + 1))</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">-x^(-n + 1)/((n – 1)*a)</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">Sage asks whether the denominator is zero before solving.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">1/(a*x**n + 1)</td>
+<td style="font-size: 10pt;">x*gamma(1/n)*lerchphi(a*x**n*exp_polar(I*pi), 1, 1/n)/(n**2*gamma(1 + 1/n))</td>
+<td style="font-size: 10pt;">2</td>
+<td style="font-size: 10pt;">integrate(1/(x^n*a + 1), x)</td>
+<td style="font-size: 10pt;">1</td>
+<td style="font-size: 10pt;">Sympy solves with special functions an integral that Sage cannot solve.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">1/(a*x**b + 1)</td>
+<td style="font-size: 10pt;">x*gamma(1/b)*lerchphi(a*x**b*exp_polar(I*pi), 1, 1/b)/(b**2*gamma(1 + 1/b))</td>
+<td style="font-size: 10pt;">1</td>
+<td style="font-size: 10pt;">integrate(1/(x^b*a + 1), x)</td>
+<td style="font-size: 10pt;">1</td>
+<td style="font-size: 10pt;">Sympy solves with special functions an integral that Sage cannot solve.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">a*x**2/(b*x**2 + 1)</td>
+<td style="font-size: 10pt;">a*(sqrt(-1/b**3)*log(-b*sqrt(-1/b**3) + x)/2 – sqrt(-1/b**3)*log(b*sqrt(-1/b**3) + x)/2 + x/b)</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">(x/b – arctan(sqrt(b)*x)/b^(3/2))*a</td>
+<td style="font-size: 10pt;">0</td>
+<td style=""/>
+</tr>
+<tr>
+<td style="font-size: 10pt;">a*x**3/(b*x**3 + 1)</td>
+<td style="font-size: 10pt;">a*(RootSum(_t**3 + 1/(27*b**4), Lambda(_t, _t*log(-3*_t*b + x))) + x/b)</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">-1/6*(2*sqrt(3)*arctan(1/3*(2*b^(2/3)*x – b^(1/3))*sqrt(3)/b^(1/3))/b^(4/3) – 6*x/b – log(b^(2/3)*x^2 – b^(1/3)*x + 1)/b^(4/3) + 2*log((b^(1/3)*x + 1)/b^(1/3))/b^(4/3))*a</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">Interesting examples deserving more study as Sympy uses the sum of the roots of a high order polynomial while Sage uses elementary special functions.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">a*x**n/(b*x**m + 1)</td>
+<td style="font-size: 10pt;">a*(n*x*x**n*gamma(n/m + 1/m)*lerchphi(b*x**m*exp_polar(I*pi), 1, n/m + 1/m)/(m**2*gamma(1 + n/m + 1/m)) + x*x**n*gamma(n/m + 1/m)*lerchphi(b*x**m*exp_polar(I*pi), 1, n/m + 1/m)/(m**2*gamma(1 + n/m + 1/m)))</td>
+<td style="font-size: 10pt;">3</td>
+<td style="font-size: 10pt;">(m*integrate(x^n/((m – n – 1)*b^2*x^(2*m) + 2*(m – n – 1)*x^m*b + m – n – 1), x) – x^(n + 1)/((m – n – 1)*x^m*b + m – n – 1))*a</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">Sympy solves with special functions an integral that Sage cannot solve.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">(a*x**2 + 1)/(b*x**2 + 1)</td>
+<td style="font-size: 10pt;">a*x/b + sqrt((-a**2 + 2*a*b – b**2)/b**3)*log(-b*sqrt((-a**2 + 2*a*b – b**2)/b**3)/(a – b) + x)/2 – sqrt((-a**2 + 2*a*b – b**2)/b**3)*log(b*sqrt((-a**2 + 2*a*b – b**2)/b**3)/(a – b) + x)/2</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">a*x/b – (a – b)*arctan(sqrt(b)*x)/b^(3/2)</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">Sage symplifies better (log-to-trig formulas).</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">(a*x**3 + 1)/(b*x**3 + 1)</td>
+<td style="font-size: 10pt;">a*x/b + RootSum(_t**3 + (a**3 – 3*a**2*b + 3*a*b**2 – b**3)/(27*b**4), Lambda(_t, _t*log(-3*_t*b/(a – b) + x)))</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">a*x/b – 1/3*(a*b – b^2)*sqrt(3)*arctan(1/3*(2*b^(2/3)*x – b^(1/3))*sqrt(3)/b^(1/3))/b^(7/3) + 1/6*(a*b^(2/3) – b^(5/3))*log(b^(2/3)*x^2 – b^(1/3)*x + 1)/b^2 – 1/3*(a*b^(2/3) – b^(5/3))*log((b^(1/3)*x + 1)/b^(1/3))/b^2</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">Interesting examples deserving more study as Sympy uses the sum of the roots of a high order polynomial while Sage uses elementary special functions.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">(a*x**n + 1)/(b*x**m + 1)</td>
+<td style="font-size: 10pt;">a*(n*x*x**n*gamma(n/m + 1/m)*lerchphi(b*x**m*exp_polar(I*pi), 1, n/m + 1/m)/(m**2*gamma(1 + n/m + 1/m)) + x*x**n*gamma(n/m + 1/m)*lerchphi(b*x**m*exp_polar(I*pi), 1, n/m + 1/m)/(m**2*gamma(1 + n/m + 1/m))) + x*gamma(1/m)*lerchphi(b*x**m*exp_polar(I*pi), 1, 1/m)/(m**2*gamma(1 + 1/m))</td>
+<td style="font-size: 10pt;">5</td>
+<td style="font-size: 10pt;">a*m*integrate(x^n/((m – n – 1)*b^2*x^(2*m) + 2*(m – n – 1)*x^m*b + m – n – 1), x) – a*x^(n + 1)/((m – n – 1)*x^m*b + m – n – 1) + integrate(1/(x^m*b + 1), x)</td>
+<td style="font-size: 10pt;">1</td>
+<td style="font-size: 10pt;">Sympy solves with special functions an integral that Sage cannot solve.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">(a*x**5 + x**3 + 1)/(b*x**5 + x**3 + 1)</td>
+<td style="font-size: 10pt;">a*x/b + RootSum(_t**5 + _t**3*(500*a**2*b**3 + 27*a**2 – 1000*a*b**4 – 54*a*b + 500*b**5 + 27*b**2)/(3125*b**6 + 108*b**3) + _t**2*(27*a**3 – 81*a**2*b + 81*a*b**2 – 27*b**3)/(3125*b**6 + 108*b**3) + _t*(9*a**4 – 36*a**3*b + 54*a**2*b**2 – 36*a*b**3 + 9*b**4)/(3125*b**6 + 108*b**3) + (a**5 – 5*a**4*b + 10*a**3*b**2 – 10*a**2*b**3 + 5*a*b**4 – b**5)/(3125*b**6 + 108*b**3), Lambda(_t, _t*log(x + (3662109375*_t**4*b**12 + 3986718750*_t**4*b**9 + 242757000*_t**4*b**6 + 3779136*_t**4*b**3 – 1054687500*_t**3*a*b**9 – 72900000*_t**3*a*b**6 – 1259712*_t**3*a*b**3 + 1054687500*_t**3*b**10 + 72900000*_t**3*b**7 + 1259712*_t**3*b**4 + 410156250*_t**2*a**2*b**9 + 655340625*_t**2*a**2*b**6 + 51267654*_t**2*a**2*b**3 + 944784*_t**2*a**2 – 820312500*_t**2*a*b**10 – 1310681250*_t**2*a*b**7 – 102535308*_t**2*a*b**4 – 1889568*_t**2*a*b + 410156250*_t**2*b**11 + 655340625*_t**2*b**8 + 51267654*_t**2*b**5 + 944784*_t**2*b**2 – 48828125*_t*a**3*b**9 – 186046875*_t*a**3*b**6 + 16774290*_t*a**3*b**3 + 629856*_t*a**3 + 146484375*_t*a**2*b**10 + 558140625*_t*a**2*b**7 – 50322870*_t*a**2*b**4 – 1889568*_t*a**2*b – 146484375*_t*a*b**11 – 558140625*_t*a*b**8 + 50322870*_t*a*b**5 + 1889568*_t*a*b**2 + 48828125*_t*b**12 + 186046875*_t*b**9 – 16774290*_t*b**6 – 629856*_t*b**3 – 2812500*a**4*b**6 + 3596400*a**4*b**3 + 104976*a**4 + 11250000*a**3*b**7 – 14385600*a**3*b**4 – 419904*a**3*b – 16875000*a**2*b**8 + 21578400*a**2*b**5 + 629856*a**2*b**2 + 11250000*a*b**9 – 14385600*a*b**6 – 419904*a*b**3 – 2812500*b**10 + 3596400*b**7 + 104976*b**4)/(9765625*a**4*b**8 + 26493750*a**4*b**5 + 746496*a**4*b**2 – 39062500*a**3*b**9 – 105975000*a**3*b**6 – 2985984*a**3*b**3 + 58593750*a**2*b**10 + 158962500*a**2*b**7 + 4478976*a**2*b**4 – 39062500*a*b**11 – 105975000*a*b**8 – 2985984*a*b**5 + 9765625*b**12 + 26493750*b**9 + 746496*b**6))))</td>
+<td style="font-size: 10pt;">106</td>
+<td style="font-size: 10pt;">-(a – b)*integrate((x^3 + 1)/(b*x^5 + x^3 + 1), x)/b + a*x/b</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">Sympy solves with special functions an integral that Sage cannot solve.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">sqrt(1/x)</td>
+<td style="font-size: 10pt;">2*x*sqrt(1/x)</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">2*x*sqrt(1/x)</td>
+<td style="font-size: 10pt;">0</td>
+<td style=""/>
+</tr>
+<tr>
+<td style="font-size: 10pt;">sqrt(1/(x + 1))</td>
+<td style="font-size: 10pt;">2*x*sqrt(1/(x + 1)) + 2*sqrt(1/(x + 1))</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">2/sqrt(1/(x + 1))</td>
+<td style="font-size: 10pt;">0</td>
+<td style=""/>
+</tr>
+<tr>
+<td style="font-size: 10pt;">sqrt(1/(x**2 + 1))</td>
+<td style="font-size: 10pt;">Integral(sqrt(1/(x**2 + 1)), x)</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">arcsinh(x)</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">Sympy cannot solve this simple integral while Sage can.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">sqrt(1/(x**3 + 1))</td>
+<td style="font-size: 10pt;">Integral(sqrt(1/(x**3 + 1)), x)</td>
+<td style="font-size: 10pt;">3</td>
+<td style="font-size: 10pt;">integrate(sqrt(1/(x^3 + 1)), x)</td>
+<td style="font-size: 10pt;">0</td>
+<td style=""/>
+</tr>
+<tr>
+<td style="font-size: 10pt;">sqrt(x**(-n)/a)</td>
+<td style="font-size: 10pt;">-2*x*sqrt(1/a)*sqrt(x**(-n))/(n – 2)</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">-2*x*sqrt(x^(-n)/a)/(n-2)</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">Sage asks whether the denominator is zero before solving.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">sqrt(1/(a*x**n + 1))</td>
+<td style="font-size: 10pt;">Integral(sqrt(1/(a*x**n + 1)), x)</td>
+<td style="font-size: 10pt;">29</td>
+<td style="font-size: 10pt;">integrate(sqrt(1/(x^n*a + 1)), x)</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">When both Sage and Sympy fail, Sage is quicker.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">sqrt(1/(a*x**b + 1))</td>
+<td style="font-size: 10pt;">Integral(sqrt(1/(a*x**b + 1)), x)</td>
+<td style="font-size: 10pt;">35</td>
+<td style="font-size: 10pt;">integrate(sqrt(1/(x^b*a + 1)), x)</td>
+<td style="font-size: 10pt;">1</td>
+<td style="font-size: 10pt;">When both Sage and Sympy fail, Sage is quicker.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">sqrt(a*x**2/(b*x**2 + 1))</td>
+<td style="font-size: 10pt;">sqrt(a)*x*sqrt(x**2)*sqrt(1/(b*x**2 + 1)) + sqrt(a)*sqrt(x**2)*sqrt(1/(b*x**2 + 1))/(b*x)</td>
+<td style="font-size: 10pt;">2</td>
+<td style="font-size: 10pt;">(sqrt(a)*b*x^2 + sqrt(a))/(sqrt(b*x^2 + 1)*b)</td>
+<td style="font-size: 10pt;">0</td>
+<td style=""/>
+</tr>
+<tr>
+<td style="font-size: 10pt;">sqrt(a*x**3/(b*x**3 + 1))</td>
+<td style="font-size: 10pt;">Integral(sqrt(a*x**3/(b*x**3 + 1)), x)</td>
+<td style="font-size: 10pt;">7</td>
+<td style="font-size: 10pt;">integrate(sqrt(a*x^3/(b*x^3 + 1)), x)</td>
+<td style="font-size: 10pt;">0</td>
+<td style=""/>
+</tr>
+<tr>
+<td style="font-size: 10pt;">sqrt(a*x**n/(b*x**m + 1))</td>
+<td style="font-size: 10pt;">Timeout</td>
+<td style="font-size: 10pt;">115</td>
+<td style="font-size: 10pt;">integrate(sqrt(x^n*a/(x^m*b + 1)), x)</td>
+<td style="font-size: 10pt;">1</td>
+<td style="font-size: 10pt;">When both Sage and Sympy fail, Sage is quicker.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">sqrt((a*x**2 + 1)/(b*x**2 + 1))</td>
+<td style="font-size: 10pt;">Timeout</td>
+<td style="font-size: 10pt;">110</td>
+<td style="font-size: 10pt;">integrate(sqrt((a*x^2 + 1)/(b*x^2 + 1)), x)</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">When both Sage and Sympy fail, Sage is quicker.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">sqrt((a*x**3 + 1)/(b*x**3 + 1))</td>
+<td style="font-size: 10pt;">Timeout</td>
+<td style="font-size: 10pt;">109</td>
+<td style="font-size: 10pt;">integrate(sqrt((a*x^3 + 1)/(b*x^3 + 1)), x)</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">When both Sage and Sympy fail, Sage is quicker.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">sqrt((a*x**n + 1)/(b*x**m + 1))</td>
+<td style="font-size: 10pt;">Timeout</td>
+<td style="font-size: 10pt;">114</td>
+<td style="font-size: 10pt;">integrate(sqrt((x^n*a + 1)/(x^m*b + 1)), x)</td>
+<td style="font-size: 10pt;">1</td>
+<td style="font-size: 10pt;">When both Sage and Sympy fail, Sage is quicker.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">sqrt((a*x**5 + x**3 + 1)/(b*x**5 + x**3 + 1))</td>
+<td style="font-size: 10pt;">Timeout</td>
+<td style="font-size: 10pt;">104</td>
+<td style="font-size: 10pt;">integrate(sqrt((a*x^5 + x^3 + 1)/(b*x^5 + x^3 + 1)), x)</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">When both Sage and Sympy fail, Sage is quicker.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">log(x)</td>
+<td style="font-size: 10pt;">x*log(x) – x</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">x*log(x) – x</td>
+<td style="font-size: 10pt;">0</td>
+<td style=""/>
+</tr>
+<tr>
+<td style="font-size: 10pt;">log(1/x)</td>
+<td style="font-size: 10pt;">-x*log(x) + x</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">-x*log(x) + x</td>
+<td style="font-size: 10pt;">0</td>
+<td style=""/>
+</tr>
+<tr>
+<td style="font-size: 10pt;">log(1/(x + 1))</td>
+<td style="font-size: 10pt;">-x*log(x + 1) + x – log(x + 1)</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">-(x + 1)*log(x + 1) + x + 1</td>
+<td style="font-size: 10pt;">0</td>
+<td style=""/>
+</tr>
+<tr>
+<td style="font-size: 10pt;">log(1/(x**2 + 1))</td>
+<td style="font-size: 10pt;">-x*log(x**2 + 1) + 2*x – 2*I*log(x + I) + I*log(x**2 + 1)</td>
+<td style="font-size: 10pt;">2</td>
+<td style="font-size: 10pt;">-x*log(x^2 + 1) + 2*x – 2*arctan(x)</td>
+<td style="font-size: 10pt;">0</td>
+<td style=""/>
+</tr>
+<tr>
+<td style="font-size: 10pt;">log(1/(x**3 + 1))</td>
+<td style="font-size: 10pt;">-x*log(x**3 + 1) + 3*x – 3*log(x + 1)/2 + sqrt(3)*I*log(x + 1)/2 + log(x**3 + 1)/2 – sqrt(3)*I*log(x**3 + 1)/2 + sqrt(3)*I*log(x – 1/2 – sqrt(3)*I/2)</td>
+<td style="font-size: 10pt;">6</td>
+<td style="font-size: 10pt;">-x*log(x^3 + 1) – sqrt(3)*arctan(1/3*(2*x – 1)*sqrt(3)) + 3*x – log(x + 1) + 1/2*log(x^2 – x + 1)</td>
+<td style="font-size: 10pt;">0</td>
+<td style=""/>
+</tr>
+<tr>
+<td style="font-size: 10pt;">log(x**(-n)/a)</td>
+<td style="font-size: 10pt;">-n*x*log(x) + n*x – x*log(a)</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">n*x + x*log(x^(-n)/a)</td>
+<td style="font-size: 10pt;">0</td>
+<td style=""/>
+</tr>
+<tr>
+<td style="font-size: 10pt;">log(1/(a*x**n + 1))</td>
+<td style="font-size: 10pt;">Integral(log(1/(a*x**n + 1)), x)</td>
+<td style="font-size: 10pt;">68</td>
+<td style="font-size: 10pt;">n*x – n*integrate(1/(a*e^(n*log(x)) + 1), x) – x*log(x^n*a + 1)</td>
+<td style="font-size: 10pt;">1</td>
+<td style="font-size: 10pt;">When both Sage and Sympy fail, Sage is quicker.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">log(1/(a*x**b + 1))</td>
+<td style="font-size: 10pt;">Timeout</td>
+<td style="font-size: 10pt;">91</td>
+<td style="font-size: 10pt;">b*x – b*integrate(1/(a*e^(b*log(x)) + 1), x) – x*log(a*e^(b*log(x)) + 1)</td>
+<td style="font-size: 10pt;">2</td>
+<td style="font-size: 10pt;">When both Sage and Sympy fail, Sage is quicker.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">log(a*x**2/(b*x**2 + 1))</td>
+<td style="font-size: 10pt;">x*log(a) + 2*x*log(x) – x*log(b*x**2 + 1) + 2*I*log(x – I*sqrt(1/b))/(b*sqrt(1/b)) – I*log(b*x**2 + 1)/(b*sqrt(1/b))</td>
+<td style="font-size: 10pt;">10</td>
+<td style="font-size: 10pt;">x*log(a*x^2/(b*x^2 + 1)) – 2*arctan(sqrt(b)*x)/sqrt(b)</td>
+<td style="font-size: 10pt;">0</td>
+<td style=""/>
+</tr>
+<tr>
+<td style="font-size: 10pt;">log(a*x**3/(b*x**3 + 1))</td>
+<td style="font-size: 10pt;">-216*b**4*x**6*(1/b)**(7/3)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 216*(-1)**(2/3)*b**4*x**6*(1/b)**(7/3)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 72*(-1)**(1/6)*sqrt(3)*b**4*x**6*(1/b)**(7/3)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 72*sqrt(3)*I*b**4*x**6*(1/b)**(7/3)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 588*b**2*x**5*(1/b)**(2/3)*log(a)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 1764*b**2*x**5*(1/b)**(2/3)*log(x)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 588*b**2*x**5*(1/b)**(2/3)*log(b*x**3 + 1)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 630*b**2*x**5*(1/b)**(2/3)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 420*(-1)**(5/6)*sqrt(3)*b**2*x**5*(1/b)**(2/3)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 210*sqrt(3)*I*b**2*x**5*(1/b)**(2/3)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 981*b**2*x**3*(1/b)**(4/3)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 981*(-1)**(2/3)*b**2*x**3*(1/b)**(4/3)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 327*(-1)**(1/6)*sqrt(3)*b**2*x**3*(1/b)**(4/3)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 327*sqrt(3)*I*b**2*x**3*(1/b)**(4/3)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 135*b**2*(1/b)**(7/3)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 135*(-1)**(2/3)*b**2*(1/b)**(7/3)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 45*(-1)**(1/6)*sqrt(3)*b**2*(1/b)**(7/3)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 45*sqrt(3)*I*b**2*(1/b)**(7/3)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 147*(-1)**(2/3)*b*x**4*log(a)**2/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 49*(-1)**(1/6)*sqrt(3)*b*x**4*log(a)**2/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 49*(-1)**(5/6)*sqrt(3)*b*x**4*log(a)**2/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 147*(-1)**(1/3)*b*x**4*log(a)**2/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 882*(-1)**(2/3)*b*x**4*log(a)*log(x)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 294*(-1)**(1/6)*sqrt(3)*b*x**4*log(a)*log(x)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 294*(-1)**(5/6)*sqrt(3)*b*x**4*log(a)*log(x)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 882*(-1)**(1/3)*b*x**4*log(a)*log(x)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 294*(-1)**(1/3)*b*x**4*log(a)*log(b*x**3 + 1)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 98*(-1)**(5/6)*sqrt(3)*b*x**4*log(a)*log(b*x**3 + 1)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 98*(-1)**(1/6)*sqrt(3)*b*x**4*log(a)*log(b*x**3 + 1)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 294*(-1)**(2/3)*b*x**4*log(a)*log(b*x**3 + 1)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 588*(-1)**(2/3)*b*x**4*log(a)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 1323*(-1)**(2/3)*b*x**4*log(x)**2/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 441*(-1)**(1/6)*sqrt(3)*b*x**4*log(x)**2/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 441*(-1)**(5/6)*sqrt(3)*b*x**4*log(x)**2/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 1323*(-1)**(1/3)*b*x**4*log(x)**2/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 882*(-1)**(1/3)*b*x**4*log(x)*log(b*x**3 + 1)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 294*(-1)**(5/6)*sqrt(3)*b*x**4*log(x)*log(b*x**3 + 1)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 294*(-1)**(1/6)*sqrt(3)*b*x**4*log(x)*log(b*x**3 + 1)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 882*(-1)**(2/3)*b*x**4*log(x)*log(b*x**3 + 1)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 882*(-1)**(1/3)*b*x**4*log(x)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 294*(-1)**(5/6)*sqrt(3)*b*x**4*log(x)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 294*(-1)**(1/6)*sqrt(3)*b*x**4*log(x)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 882*(-1)**(2/3)*b*x**4*log(x)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 294*(-1)**(5/6)*sqrt(3)*b*x**4*log(x – (-1)**(1/3)*(1/b)**(1/3))/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 882*(-1)**(1/3)*b*x**4*log(x – (-1)**(1/3)*(1/b)**(1/3))/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 147*(-1)**(2/3)*b*x**4*log(b*x**3 + 1)**2/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 49*(-1)**(1/6)*sqrt(3)*b*x**4*log(b*x**3 + 1)**2/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 49*(-1)**(5/6)*sqrt(3)*b*x**4*log(b*x**3 + 1)**2/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 147*(-1)**(1/3)*b*x**4*log(b*x**3 + 1)**2/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 588*(-1)**(2/3)*b*x**4*log(b*x**3 + 1)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 294*(-1)**(1/6)*sqrt(3)*b*x**4*log(x – (-1)**(1/3)*sqrt(3)*I*(1/b)**(1/3)/2 + (-1)**(1/3)*(1/b)**(1/3)/2)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 882*(-1)**(2/3)*b*x**4*log(x – (-1)**(1/3)*sqrt(3)*I*(1/b)**(1/3)/2 + (-1)**(1/3)*(1/b)**(1/3)/2)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 294*(-1)**(2/3)*b*x**4/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 98*(-1)**(1/6)*sqrt(3)*b*x**4/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 98*(-1)**(5/6)*sqrt(3)*b*x**4/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 294*(-1)**(1/3)*b*x**4/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 588*b*x**2*(1/b)**(2/3)*log(a)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 1764*b*x**2*(1/b)**(2/3)*log(x)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 588*b*x**2*(1/b)**(2/3)*log(b*x**3 + 1)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 945*b*x**2*(1/b)**(2/3)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 630*(-1)**(5/6)*sqrt(3)*b*x**2*(1/b)**(2/3)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 315*sqrt(3)*I*b*x**2*(1/b)**(2/3)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 98*(-1)**(1/6)*sqrt(3)*x*log(a)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 98*(-1)**(5/6)*sqrt(3)*x*log(a)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 294*(-1)**(2/3)*x*log(a)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 294*(-1)**(1/3)*x*log(a)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 294*(-1)**(5/6)*sqrt(3)*x*log(x – (-1)**(1/3)*(1/b)**(1/3))/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 882*(-1)**(1/3)*x*log(x – (-1)**(1/3)*(1/b)**(1/3))/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 294*(-1)**(1/3)*x*log(b*x**3 + 1)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 294*(-1)**(2/3)*x*log(b*x**3 + 1)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 98*(-1)**(5/6)*sqrt(3)*x*log(b*x**3 + 1)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 98*(-1)**(1/6)*sqrt(3)*x*log(b*x**3 + 1)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) – 294*(-1)**(1/6)*sqrt(3)*x*log(x – (-1)**(1/3)*sqrt(3)*I*(1/b)**(1/3)/2 + (-1)**(1/3)*(1/b)**(1/3)/2)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3)) + 882*(-1)**(2/3)*x*log(x – (-1)**(1/3)*sqrt(3)*I*(1/b)**(1/3)/2 + (-1)**(1/3)*(1/b)**(1/3)/2)/(588*b**2*x**4*(1/b)**(2/3) + 588*b*x*(1/b)**(2/3))</td>
+<td style="font-size: 10pt;">26</td>
+<td style="font-size: 10pt;">x*log(a*x^3/(b*x^3 + 1)) – 1/2*(2*sqrt(3)*a*arctan(1/3*(2*b^(2/3)*x – b^(1/3))*sqrt(3)/b^(1/3))/b^(1/3) – a*log(b^(2/3)*x^2 – b^(1/3)*x + 1)/b^(1/3) + 2*a*log((b^(1/3)*x + 1)/b^(1/3))/b^(1/3))/a</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">Sage simplifies better.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">log(a*x**n/(b*x**m + 1))</td>
+<td style="font-size: 10pt;">Timeout</td>
+<td style="font-size: 10pt;">96</td>
+<td style="font-size: 10pt;">(m – n + log(a))*x – m*integrate(1/(b*e^(m*log(x)) + 1), x) – x*log(x^m*b + 1) + x*log(x^n)</td>
+<td style="font-size: 10pt;">2</td>
+<td style="font-size: 10pt;">When both Sage and Sympy fail, Sage is quicker.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">log((a*x**2 + 1)/(b*x**2 + 1))</td>
+<td style="font-size: 10pt;">Integral(log((a*x**2 + 1)/(b*x**2 + 1)), x)</td>
+<td style="font-size: 10pt;">72</td>
+<td style="font-size: 10pt;">x*log((a*x^2 + 1)/(b*x^2 + 1)) + 2*arctan(sqrt(a)*x)/sqrt(a) – 2*arctan(sqrt(b)*x)/sqrt(b)</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">Sage asks whether `a` and `b` are positive and then returns an answer. Sympy fails irrespective of the assumptions.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">log((a*x**3 + 1)/(b*x**3 + 1))</td>
+<td style="font-size: 10pt;">Timeout</td>
+<td style="font-size: 10pt;">89</td>
+<td style="font-size: 10pt;">x*log((a*x^3 + 1)/(b*x^3 + 1)) + sqrt(3)*arctan(1/3*(2*a^(2/3)*x – a^(1/3))*sqrt(3)/a^(1/3))/a^(1/3) – sqrt(3)*arctan(1/3*(2*b^(2/3)*x – b^(1/3))*sqrt(3)/b^(1/3))/b^(1/3) – 1/2*log(a^(2/3)*x^2 – a^(1/3)*x + 1)/a^(1/3) + log((a^(1/3)*x + 1)/a^(1/3))/a^(1/3) + 1/2*log(b^(2/3)*x^2 – b^(1/3)*x + 1)/b^(1/3) – log((b^(1/3)*x + 1)/b^(1/3))/b^(1/3)</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">Sage asks whether `a` and `b` are positive and then returns an answer. Sympy fails irrespective of the assumptions.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">log((a*x**n + 1)/(b*x**m + 1))</td>
+<td style="font-size: 10pt;">Timeout</td>
+<td style="font-size: 10pt;">89</td>
+<td style="font-size: 10pt;">(m – n)*x – m*integrate(1/(b*e^(m*log(x)) + 1), x) + n*integrate(1/(x^n*a + 1), x) – x*log(x^m*b + 1) + x*log(x^n*a + 1)</td>
+<td style="font-size: 10pt;">4</td>
+<td style="font-size: 10pt;">When both Sage and Sympy fail, Sage is quicker.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">log((a*x**5 + x**3 + 1)/(b*x**5 + x**3 + 1))</td>
+<td style="font-size: 10pt;">Integral(log((a*x**5 + x**3 + 1)/(b*x**5 + x**3 + 1)), x)</td>
+<td style="font-size: 10pt;">42</td>
+<td style="font-size: 10pt;">-x*log(b*x^5 + x^3 + 1) + x*log(a*x^5 + x^3 + 1) – integrate((2*x^3 + 5)/(b*x^5 + x^3 + 1), x) + integrate((2*x^3 + 5)/(a*x^5 + x^3 + 1), x)</td>
+<td style="font-size: 10pt;">1</td>
+<td style="font-size: 10pt;">When both Sage and Sympy fail, Sage is quicker.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">sin(x)</td>
+<td style="font-size: 10pt;">-cos(x)</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">-cos(x)</td>
+<td style="font-size: 10pt;">0</td>
+<td style=""/>
+</tr>
+<tr>
+<td style="font-size: 10pt;">sin(x)**n*cos(x)**m</td>
+<td style="font-size: 10pt;">Timeout</td>
+<td style="font-size: 10pt;">102</td>
+<td style="font-size: 10pt;">No result</td>
+<td style="font-size: 10pt;">110</td>
+<td style="font-size: 10pt;">Disgraceful failure by Sage.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">sin(a*x)**n*cos(b*x)**m</td>
+<td style="font-size: 10pt;">Timeout</td>
+<td style="font-size: 10pt;">81</td>
+<td style="font-size: 10pt;">No result</td>
+<td style="font-size: 10pt;">112</td>
+<td style="font-size: 10pt;">Disgraceful failure by Sage.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">1/sin(x)</td>
+<td style="font-size: 10pt;">log(cos(x) – 1)/2 – log(cos(x) + 1)/2</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">1/2*log(cos(x) – 1) – 1/2*log(cos(x) + 1)</td>
+<td style="font-size: 10pt;">0</td>
+<td style=""/>
+</tr>
+<tr>
+<td style="font-size: 10pt;">1/(sin(x) + 1)</td>
+<td style="font-size: 10pt;">-2/(tan(x/2) + 1)</td>
+<td style="font-size: 10pt;">1</td>
+<td style="font-size: 10pt;">-2/(sin(x)/(cos(x) + 1) + 1)</td>
+<td style="font-size: 10pt;">0</td>
+<td style=""/>
+</tr>
+<tr>
+<td style="font-size: 10pt;">1/(sin(x)**2 + 1)</td>
+<td style="font-size: 10pt;">Timeout</td>
+<td style="font-size: 10pt;">96</td>
+<td style="font-size: 10pt;">1/2*sqrt(2)*arctan(sqrt(2)*tan(x))</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">Sage simply beats Sympy.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">1/(sin(x)**3 + 1)</td>
+<td style="font-size: 10pt;">Timeout</td>
+<td style="font-size: 10pt;">87</td>
+<td style="font-size: 10pt;">Maxima: `quotient’ by `zero’</td>
+<td style="font-size: 10pt;">78</td>
+<td style="font-size: 10pt;">Disgraceful failure by Sage.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">sin(x)**(-n)/a</td>
+<td style="font-size: 10pt;">Integral(sin(x)**(-n)/a, x)</td>
+<td style="font-size: 10pt;">36</td>
+<td style="font-size: 10pt;">No result</td>
+<td style="font-size: 10pt;">227</td>
+<td style="font-size: 10pt;">Disgraceful failure by Sage.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">1/(a*sin(x)**n + 1)</td>
+<td style="font-size: 10pt;">Timeout</td>
+<td style="font-size: 10pt;">98</td>
+<td style="font-size: 10pt;">Maxima: expt: undefined: 0 to a negative exponent.</td>
+<td style="font-size: 10pt;">1</td>
+<td style="font-size: 10pt;">Disgraceful failure by Sage.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">1/(a*sin(x)**b + 1)</td>
+<td style="font-size: 10pt;">Timeout</td>
+<td style="font-size: 10pt;">83</td>
+<td style="font-size: 10pt;">No result</td>
+<td style="font-size: 10pt;">140</td>
+<td style="font-size: 10pt;">Disgraceful failure by Sage.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">a*sin(x)**2/(b*sin(x)**2 + 1)</td>
+<td style="font-size: 10pt;">Timeout</td>
+<td style="font-size: 10pt;">93</td>
+<td style="font-size: 10pt;">(x/b – arctan(sqrt(b + 1)*tan(x))/(sqrt(b + 1)*b))*a</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">Sage simply beats Sympy.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">a*sin(x)**3/(b*sin(x)**3 + 1)</td>
+<td style="font-size: 10pt;">Timeout</td>
+<td style="font-size: 10pt;">82</td>
+<td style="font-size: 10pt;">No result</td>
+<td style="font-size: 10pt;">568</td>
+<td style="font-size: 10pt;">Disgraceful failure by Sage.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">a*sin(x)**n/(b*sin(x)**m + 1)</td>
+<td style="font-size: 10pt;">Integral(a*sin(x)**n/(b*sin(x)**m + 1), x)</td>
+<td style="font-size: 10pt;">24</td>
+<td style="font-size: 10pt;">Manual Interupt</td>
+<td style="font-size: 10pt;">1527</td>
+<td style="font-size: 10pt;">Both Sage and Sympy fail, however Sympy is quicker.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">(a*sin(x)**2 + 1)/(b*sin(x)**2 + 1)</td>
+<td style="font-size: 10pt;">Timeout</td>
+<td style="font-size: 10pt;">98</td>
+<td style="font-size: 10pt;">a*x/b – (a – b)*arctan(sqrt(b + 1)*tan(x))/(sqrt(b + 1)*b)</td>
+<td style="font-size: 10pt;">0</td>
+<td style="font-size: 10pt;">Sage simply beats Sympy.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">(a*sin(x)**3 + 1)/(b*sin(x)**3 + 1)</td>
+<td style="font-size: 10pt;">Timeout</td>
+<td style="font-size: 10pt;">96</td>
+<td style="font-size: 10pt;">Manual Interupt</td>
+<td style="font-size: 10pt;">203</td>
+<td style=""/>
+</tr>
+<tr>
+<td style="font-size: 10pt;">(a*sin(x)**n + 1)/(b*sin(x)**m + 1)</td>
+<td style="font-size: 10pt;">Timeout</td>
+<td style="font-size: 10pt;">83</td>
+<td style="font-size: 10pt;">Maxima: expt: undefined: 0 to a negative exponent.</td>
+<td style="font-size: 10pt;">1</td>
+<td style="font-size: 10pt;">Disgraceful failure by Sage.</td>
+</tr>
+<tr>
+<td style="font-size: 10pt;">(a*sin(x)**5 + sin(x)**3 + 1)/(b*sin(x)**5 + sin(x)**3 + 1)</td>
+<td style="font-size: 10pt;">Timeout</td>
+<td style="font-size: 10pt;">89</td>
+<td style="font-size: 10pt;">Manual Interupt</td>
+<td style="font-size: 10pt;">142</td>
+<td style=""/>
+</tr>
+</tbody>
+</table>
+<br/>  <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=blog.krastanov.org&amp;blog=15251174&amp;post=561&amp;subd=krastanov&amp;ref=&amp;feed=1" width="1"/></div>
+    </content>
+    <updated>2012-10-24T23:51:52Z</updated>
+    <category term="SymPy"/>
+    <category term="integrals"/>
+    <category term="sage"/>
+    <category term="sympy"/>
+    <author>
+      <name>Stefan Krastanov</name>
+    </author>
+    <source>
+      <id>http://blog.krastanov.org</id>
+      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
+      <link href="http://blog.krastanov.org/category/sympy-2/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://blog.krastanov.org" rel="alternate" type="text/html"/>
+      <link href="http://blog.krastanov.org/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
+      <subtitle>Just another WordPress.com site</subtitle>
+      <title>Stefan's Blog » SymPy</title>
+      <updated>2012-10-25T00:00:29Z</updated>
+    </source>
+  </entry>
 
   <entry>
     <id>tag:fseoane.net/blog,2012-10-23:2012/learning-to-rank-with-scikit-learn-the-pairwise-transform/</id>
@@ -249,7 +1147,7 @@
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-10-24T22:20:25Z</updated>
+      <updated>2012-10-25T00:00:20Z</updated>
     </source>
   </entry>
 
@@ -394,7 +1292,7 @@ RuntimeError: maximum recursion depth exceeded in comparison
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-10-24T22:20:16Z</updated>
+      <updated>2012-10-25T00:00:09Z</updated>
     </source>
   </entry>
 
@@ -437,7 +1335,7 @@ b. Add this line to your bash_profile.</p>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-24T22:20:30Z</updated>
+      <updated>2012-10-25T00:00:25Z</updated>
     </source>
   </entry>
 
@@ -518,7 +1416,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-10-24T22:20:16Z</updated>
+      <updated>2012-10-25T00:00:09Z</updated>
     </source>
   </entry>
 
@@ -554,7 +1452,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-10-24T22:20:16Z</updated>
+      <updated>2012-10-25T00:00:09Z</updated>
     </source>
   </entry>
 
@@ -790,7 +1688,7 @@ Out[74]: True
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-24T22:20:29Z</updated>
+      <updated>2012-10-25T00:00:25Z</updated>
     </source>
   </entry>
 
@@ -908,7 +1806,7 @@ commits are much more like my usual ones.
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-10-24T22:20:27Z</updated>
+      <updated>2012-10-25T00:00:22Z</updated>
     </source>
   </entry>
 
@@ -941,7 +1839,7 @@ commits are much more like my usual ones.
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-10-24T22:20:28Z</updated>
+      <updated>2012-10-25T00:00:23Z</updated>
     </source>
   </entry>
 
@@ -975,7 +1873,7 @@ commits are much more like my usual ones.
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-10-23T06:40:20Z</updated>
+      <updated>2012-10-25T00:00:28Z</updated>
     </source>
   </entry>
 
@@ -1071,9 +1969,9 @@ Out[24]: 6
     <updated>2012-08-05T11:29:33Z</updated>
     <category term="SymPy"/>
     <category term="category theory"/>
-    <category term="diagram embedding"/>
-    <category term="graph embedding"/>
     <category term="subgraph isomorphism problem"/>
+    <category term="graph embedding"/>
+    <category term="diagram embedding"/>
     <author>
       <name>scolobb</name>
     </author>
@@ -1086,7 +1984,7 @@ Out[24]: 6
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-10-24T22:20:27Z</updated>
+      <updated>2012-10-25T00:00:22Z</updated>
     </source>
   </entry>
 
@@ -1205,7 +2103,7 @@ Out[24]: 6
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-10-24T22:20:28Z</updated>
+      <updated>2012-10-25T00:00:23Z</updated>
     </source>
   </entry>
 
@@ -1237,7 +2135,7 @@ Out[24]: 6
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-24T22:20:29Z</updated>
+      <updated>2012-10-25T00:00:25Z</updated>
     </source>
   </entry>
 
@@ -1278,7 +2176,7 @@ Out[24]: 6
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-10-23T06:40:20Z</updated>
+      <updated>2012-10-25T00:00:28Z</updated>
     </source>
   </entry>
 
@@ -1381,7 +2279,7 @@ StopIteration:
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-24T22:20:29Z</updated>
+      <updated>2012-10-25T00:00:25Z</updated>
     </source>
   </entry>
 
@@ -1421,12 +2319,12 @@ StopIteration:
     </content>
     <updated>2012-07-29T19:20:53Z</updated>
     <category term="SymPy"/>
-    <category term="backward chaining"/>
+    <category term="string representation"/>
     <category term="deciding commutativity"/>
     <category term="diagram layout"/>
     <category term="pretty printing"/>
     <category term="sort key"/>
-    <category term="string representation"/>
+    <category term="backward chaining"/>
     <category term="subgraph isomorphism problem"/>
     <author>
       <name>scolobb</name>
@@ -1440,7 +2338,7 @@ StopIteration:
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-10-24T22:20:27Z</updated>
+      <updated>2012-10-25T00:00:22Z</updated>
     </source>
   </entry>
 
@@ -1470,7 +2368,7 @@ StopIteration:
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-10-24T22:20:28Z</updated>
+      <updated>2012-10-25T00:00:23Z</updated>
     </source>
   </entry>
 
@@ -1839,7 +2737,7 @@ Out[128]: False
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-10-23T06:40:20Z</updated>
+      <updated>2012-10-25T00:00:28Z</updated>
     </source>
   </entry>
 
@@ -1927,7 +2825,7 @@ Out[128]: False
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-10-23T06:40:20Z</updated>
+      <updated>2012-10-25T00:00:28Z</updated>
     </source>
   </entry>
 
@@ -1962,7 +2860,7 @@ Out[128]: False
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-10-23T06:40:20Z</updated>
+      <updated>2012-10-25T00:00:28Z</updated>
     </source>
   </entry>
 
@@ -2009,7 +2907,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-10-24T22:20:27Z</updated>
+      <updated>2012-10-25T00:00:22Z</updated>
     </source>
   </entry>
 
@@ -2059,7 +2957,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-24T22:20:29Z</updated>
+      <updated>2012-10-25T00:00:25Z</updated>
     </source>
   </entry>
 
@@ -2104,7 +3002,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-10-24T22:20:27Z</updated>
+      <updated>2012-10-25T00:00:22Z</updated>
     </source>
   </entry>
 
@@ -2139,7 +3037,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-24T22:20:29Z</updated>
+      <updated>2012-10-25T00:00:25Z</updated>
     </source>
   </entry>
 
@@ -2326,7 +3224,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-10-24T22:20:17Z</updated>
+      <updated>2012-10-25T00:00:10Z</updated>
     </source>
   </entry>
 
@@ -2370,7 +3268,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-24T22:20:30Z</updated>
+      <updated>2012-10-25T00:00:25Z</updated>
     </source>
   </entry>
 
@@ -2417,7 +3315,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-10-24T22:20:27Z</updated>
+      <updated>2012-10-25T00:00:22Z</updated>
     </source>
   </entry>
 
@@ -2465,7 +3363,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-10-23T06:40:20Z</updated>
+      <updated>2012-10-25T00:00:29Z</updated>
     </source>
   </entry>
 
@@ -2594,7 +3492,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-10-24T22:20:28Z</updated>
+      <updated>2012-10-25T00:00:23Z</updated>
     </source>
   </entry>
 
@@ -2641,7 +3539,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-10-24T22:20:27Z</updated>
+      <updated>2012-10-25T00:00:22Z</updated>
     </source>
   </entry>
 
@@ -2804,7 +3702,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-24T22:20:30Z</updated>
+      <updated>2012-10-25T00:00:25Z</updated>
     </source>
   </entry>
 
@@ -2877,7 +3775,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-10-24T22:20:28Z</updated>
+      <updated>2012-10-25T00:00:23Z</updated>
     </source>
   </entry>
 
@@ -3058,7 +3956,7 @@ form_field(vector_field)
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-10-23T06:40:20Z</updated>
+      <updated>2012-10-25T00:00:28Z</updated>
     </source>
   </entry>
 
@@ -3154,47 +4052,7 @@ form_field(vector_field)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-24T22:20:30Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://krastanov.wordpress.com/?p=382</id>
-    <link href="http://blog.krastanov.org/2012/06/25/printing-in-sympy-for-the-differential-geometry-module/" rel="alternate" type="text/html"/>
-    <title>Printing in SymPy (for the Differential Geometry Module)</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">This week I was doing some interesting refactoring, that brings quite a bit of new possibilities, however I will write about this in the coming days. For now… printing. Most importantly, any suggestions for improvements are very welcomed. Printing in SymPy is done really easily. You just add a _print_Whatever() method to the printer and [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=blog.krastanov.org&amp;blog=15251174&amp;post=382&amp;subd=krastanov&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>This week I was doing some interesting refactoring, that brings quite a bit of new possibilities, however I will write about this in the coming days. For now… printing. Most importantly, any suggestions for improvements are very welcomed.</p>
-<p>Printing in SymPy is done really easily. You just add a _print_Whatever() method to the printer and your new class is printed in whatever manner you wish.</p>
-<p>For the moment I am printing scalar fields just as the name of the coordinate in bold non-italic, vector fields as <img alt="\partial" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cpartial&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="\partial"/> with the name as a subscript and differentials as a fancy <img alt="d" class="latex" src="http://s0.wp.com/latex.php?latex=d&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="d"/> followed by the name.</p>
-<p>First of all the unicode printer:</p>
-<p><a href="http://krastanov.files.wordpress.com/2012/06/pprint.png"><img alt="" class="aligncenter size-full wp-image-383" src="http://krastanov.files.wordpress.com/2012/06/pprint.png?w=600" title="pprint"/></a></p>
-<p>There are some obvious problems, like the fact that in unicode there is no subscript for <img alt="\theta" class="latex" src="http://s0.wp.com/latex.php?latex=%5Ctheta&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="\theta"/> or <img alt="y" class="latex" src="http://s0.wp.com/latex.php?latex=y&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="y"/>.</p>
-<p>And then the <img alt="\LaTeX" class="latex" src="http://s0.wp.com/latex.php?latex=%5CLaTeX&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="\LaTeX"/> printer:</p>
-<p><a href="http://krastanov.files.wordpress.com/2012/06/latex.png"><img alt="" class="aligncenter size-full wp-image-384" src="http://krastanov.files.wordpress.com/2012/06/latex.png?w=600" title="latex"/></a></p>
-<p>Now I must find a nice way to print a Point() instance.</p>
-<br/>  <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=blog.krastanov.org&amp;blog=15251174&amp;post=382&amp;subd=krastanov&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2012-06-24T22:24:19Z</updated>
-    <category term="GSoC - diffgeom"/>
-    <category term="differential geometry"/>
-    <category term="gsoc"/>
-    <category term="printing"/>
-    <category term="symbolic algebra"/>
-    <category term="sympy"/>
-    <author>
-      <name>Stefan Krastanov</name>
-    </author>
-    <source>
-      <id>http://blog.krastanov.org</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://blog.krastanov.org/category/sympy-2/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://blog.krastanov.org" rel="alternate" type="text/html"/>
-      <link href="http://blog.krastanov.org/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>Just another WordPress.com site</subtitle>
-      <title>Stefan's Blog » SymPy</title>
-      <updated>2012-10-23T06:40:20Z</updated>
+      <updated>2012-10-25T00:00:25Z</updated>
     </source>
   </entry>
 </feed>
