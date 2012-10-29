@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2012-10-25T19:00:33Z</updated>
+  <updated>2012-10-29T19:00:26Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,183 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry>
+    <id>http://matthewrocklin.com/blog//work/2012/10/29/Matrix-Computations</id>
+    <link href="http://matthewrocklin.com/blog//work/2012/10/29/Matrix-Computations" rel="alternate" type="text/html"/>
+    <title>Matrix Computations in SymPy</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>I want to translate matrix expressions like this</p>
+<div class="highlight"><pre><code class="python">    <span class="p">(</span><span class="n">alpha</span><span class="o">*</span><span class="n">A</span><span class="o">*</span><span class="n">B</span><span class="p">)</span><span class="o">.</span><span class="n">I</span> <span class="o">*</span> <span class="n">x</span>
+</code></pre>
+</div>
+<p>Into Fortran code that call BLAS and LAPACK code like this</p>
+<div class="highlight"><pre><code class="fortran">    <span class="k">subroutine </span><span class="nv">f</span><span class="p">(</span><span class="nv">alpha</span><span class="p">,</span> <span class="nv">A</span><span class="p">,</span> <span class="nv">B</span><span class="p">,</span> <span class="nv">x</span><span class="p">,</span> <span class="nv">n</span><span class="p">)</span>
+
+    <span class="kt">real</span><span class="o">*</span><span class="mi">8</span><span class="p">,</span>  <span class="k">intent</span><span class="p">(</span><span class="nv">in</span><span class="p">)</span>     <span class="kd">::</span> <span class="nv">A</span><span class="p">(</span><span class="nv">n</span><span class="p">,</span> <span class="nv">n</span><span class="p">)</span>
+    <span class="kt">real</span><span class="o">*</span><span class="mi">8</span><span class="p">,</span>  <span class="k">intent</span><span class="p">(</span><span class="nv">inout</span><span class="p">)</span>  <span class="kd">::</span> <span class="nv">B</span><span class="p">(</span><span class="nv">n</span><span class="p">,</span> <span class="nv">n</span><span class="p">)</span>
+    <span class="kt">real</span><span class="o">*</span><span class="mi">8</span><span class="p">,</span>  <span class="k">intent</span><span class="p">(</span><span class="nv">in</span><span class="p">)</span>     <span class="kd">::</span> <span class="nv">alpha</span>
+    <span class="kt">integer</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="nv">in</span><span class="p">)</span>     <span class="kd">::</span> <span class="nv">n</span>
+    <span class="kt">real</span><span class="o">*</span><span class="mi">8</span><span class="p">,</span>  <span class="k">intent</span><span class="p">(</span><span class="nv">inout</span><span class="p">)</span>  <span class="kd">::</span> <span class="nv">x</span><span class="p">(</span><span class="nv">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">call </span><span class="nv">dgemm</span><span class="p">(</span><span class="s1">'N'</span><span class="p">,</span> <span class="s1">'N'</span><span class="p">,</span> <span class="nv">n</span><span class="p">,</span> <span class="nv">n</span><span class="p">,</span> <span class="nv">n</span><span class="p">,</span> <span class="nv">alpha</span><span class="p">,</span> <span class="nv">A</span><span class="p">,</span> <span class="nv">n</span><span class="p">,</span> <span class="nv">B</span><span class="p">,</span> <span class="nv">n</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nv">B</span><span class="p">,</span> <span class="nv">n</span><span class="p">)</span>
+    <span class="k">call </span><span class="nv">dtrsv</span><span class="p">(</span><span class="s1">'L'</span><span class="p">,</span> <span class="s1">'N'</span><span class="p">,</span> <span class="s1">'N'</span><span class="p">,</span> <span class="nv">n</span><span class="p">,</span> <span class="nv">B</span><span class="p">,</span> <span class="nv">n</span><span class="p">,</span> <span class="nv">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">RETURN</span>
+<span class="k">    END</span>
+</code></pre>
+</div>
+<p>And then call it in Python like this</p>
+<div class="highlight"><pre><code class="python">    <span class="n">nA</span><span class="p">,</span> <span class="n">nB</span><span class="p">,</span> <span class="n">nx</span> <span class="o">=</span> <span class="o">....</span> <span class="c"># Get numpy arrays</span>
+    <span class="n">f</span><span class="p">(</span><span class="n">nalpha</span><span class="p">,</span> <span class="n">nA</span><span class="p">,</span> <span class="n">nB</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">nx</span><span class="o">.</span><span class="n">T</span><span class="p">))</span> 
+</code></pre>
+</div>
+<h2 id="what_is_blas">What is BLAS?</h2>
+
+<p><a href="http://en.wikipedia.org/wiki/BLAS">BLAS</a> stands for Basic Linear Algebra Subroutines. It is a library of Fortran functions for dense linear algebra first published in 1979.</p>
+
+<p>The most famous BLAS routine is <a href="http://www.netlib.org/blas/dgemm.f">DGEMM</a> a routine for <strong>D</strong>ouble precision <strong>GE</strong>nerally structured <strong>M</strong>atrix <strong>M</strong>ultiplication. <code>DGEMM</code> is very well implemented. <code>DGEMM</code> traditionally handles blocking for fewer cache misses, autotuning for each individual architecture, and even assembly level code optimization. You should never code up your own matrix multiply, you should always use <code>DGEMM</code>. Unfortunately, you may not know Fortran, and, even if you did, you might find the function header to be daunting.</p>
+
+<pre><code>SUBROUTINE DGEMM(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC)</code></pre>
+
+<p>Even if you’re capable of working at this low-level most scientific users are not. <code>DGEMM</code> is fast but inaccessible. To solve this problem we usually build layers on top of <code>BLAS</code>. For example <code>numpy.dot</code> calls <code>DGEMM</code> if the BLAS library is available on your system.</p>
+
+<h2 id="why_not_just_use_numpy">Why not just use NumPy?</h2>
+
+<p>If you’re reading this then you’re probably comfortable with NumPy and you’re very happy that it gives you access to highly optimized low-level code like <code>DGEMM</code>. What else could we desire? NumPy has two flaws</p>
+
+<ol>
+<li>
+<p>Each operation occurs at the Python level. This causes sub-optimal operation ordering and lots of unnecessary copies. For example the following code is executed as follows</p>
+<div class="highlight"><pre><code class="python"><span class="n">D</span> <span class="o">=</span> <span class="n">A</span><span class="o">*</span><span class="n">B</span><span class="o">*</span><span class="n">C</span> <span class="c"># store A*B  -&gt; _1</span>
+<span class="n">D</span> <span class="o">=</span> <span class="n">_1</span><span class="o">*</span><span class="n">C</span>  <span class="c"># store _1*C -&gt; _2</span>
+<span class="n">D</span> <span class="o">=</span> <span class="n">_2</span>    <span class="c"># store _2   -&gt;  D</span>
+
+</code></pre>
+</div>
+<p>It might have been cleaner to multiply <code>A*B*C</code> as <code>(A*B)*C</code> or <code>A*(B*C)</code> depending on the shapes of the matrices. Additionally the temporary matrices <code>_1</code>, and <code>_2</code> did not need to be created. If we’re allowed to <em>reason about the computation</em> before execution then we can make some substantial optimizaitons.</p>
+</li>
+
+<li>
+<p>BLAS contains many special functions for special cases. For example you can use <code>DSYMM</code> when one of your matrices is <strong>SY</strong>metric or <code>DTRMM</code> when one of your matrices is <strong>TR</strong>iangular. These allow for faster execution time if we are able to reason about our matrices.</p>
+</li>
+</ol>
+
+<h2 id="previous_work">Previous Work</h2>
+
+<p>In the cases above we argue that we can make substantial gains if we are allowed to reason about the computation before it is executed. This is the job of a compiler. Computation usually happens as follows:</p>
+
+<ol>
+<li>Write down code</li>
+
+<li>Reason about and transform code</li>
+
+<li>Execute code</li>
+</ol>
+
+<p>Step (2) is often removed in scripting languages for programmer simplicity. There has been a lot of activity recently in putting it back in for array computations. The following projects compile array expressions prior to execution</p>
+
+<ol>
+<li>NumExpr</li>
+
+<li>Theano</li>
+
+<li>Numba</li>
+
+<li>… I’m undoubtedly forgetting many excellent projects. Here is <a href="https://github.com/Theano/Theano/wiki/Lazy-Matrix-Algebra-Ecosystem">a more complete list</a></li>
+</ol>
+
+<h2 id="where_does_sympy_fit_in">Where does SymPy fit in?</h2>
+
+<p>The projects above are all numerical in nature. They are generally good at solving problems of the first kind (operation ordering, inplace operations, …) but none of them think very clearly about the <em>mathematical</em> properties of the matrices. This is where SymPy can be useful. Using the assumptions logical programming framework SymPy is able to reason about the properties of matrix expressions. Consider the following situation</p>
+
+<p>We know that <code>A</code> is symmetric and positive definite. We know that <code>B</code> is orthogonal.</p>
+
+<p>Question: is <code>BAB'</code> symmetric and positive definite?</p>
+
+<p>Lets see how we can pose this question in SymPy.</p>
+<div class="highlight"><pre><code class="python">    <span class="o">&gt;&gt;&gt;</span> <span class="n">A</span> <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'A'</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    <span class="o">&gt;&gt;&gt;</span> <span class="n">B</span> <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'B'</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    <span class="o">&gt;&gt;&gt;</span> <span class="n">context</span> <span class="o">=</span> <span class="n">Q</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">positive_definite</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">orthogonal</span><span class="p">(</span><span class="n">B</span><span class="p">)</span>
+    <span class="o">&gt;&gt;&gt;</span> <span class="n">ask</span><span class="p">(</span><span class="n">Q</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">B</span><span class="o">*</span><span class="n">A</span><span class="o">*</span><span class="n">B</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">positive_definite</span><span class="p">(</span><span class="n">B</span><span class="o">*</span><span class="n">A</span><span class="o">*</span><span class="n">B</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">context</span><span class="p">)</span>
+    <span class="bp">True</span>
+</code></pre>
+</div>
+<p>Positive-Definiteness is a very important property of matrix expressions. It strongly influences our choice of numerical algorithm. For example the fast <a href="http://en.wikipedia.org/wiki/Cholesky">Cholesky algorithm</a> for LU decomposition may only be used if a matrix is symmetric and positive definite. Expert numerical analysts know this but most scientific programmers do not. NumPy does not know this but SymPy does.</p>
+
+<h2 id="describing_blas">Describing BLAS</h2>
+
+<p>We describe a new matrix operation in SymPy with code like the following:</p>
+<div class="highlight"><pre><code class="python">    <span class="n">S</span> <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'S'</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    <span class="k">class</span> <span class="nc">LU</span><span class="p">(</span><span class="n">BLAS</span><span class="p">):</span>
+        <span class="sd">""" LU Decomposition """</span>
+        <span class="n">_inputs</span>   <span class="o">=</span> <span class="p">(</span><span class="n">S</span><span class="p">,)</span>
+        <span class="n">_outputs</span>  <span class="o">=</span> <span class="p">(</span><span class="n">Lof</span><span class="p">(</span><span class="n">S</span><span class="p">),</span> <span class="n">Uof</span><span class="p">(</span><span class="n">S</span><span class="p">))</span>
+        <span class="n">view_map</span>  <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span> <span class="c"># Both outputs are stored in first input</span>
+        <span class="n">condition</span> <span class="o">=</span> <span class="bp">True</span>         <span class="c"># Always valid</span>
+
+    <span class="k">class</span> <span class="nc">Cholesky</span><span class="p">(</span><span class="n">LU</span><span class="p">):</span>
+        <span class="sd">""" Cholesky LU Decomposition """</span>
+        <span class="n">condition</span> <span class="o">=</span> <span class="n">Q</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">S</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">positive_definite</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
+</code></pre>
+</div>
+<p>This description allows us to consisely describe the expert knowledge used by numerical analysts. It allows us to describe the mathematical properties of linear algebraic operations.</p>
+
+<h2 id="matrix_computation_graphs">Matrix Computation Graphs</h2>
+
+<p>We usually write code in a linear top-down text file. This representation does not allow the full generality of a program. Instead we need to use a graph.</p>
+
+<p>A computation can be described as a directed acyclic graph (DAG) where each node in the graph is an atomic computation (a function call like <code>DGEMM</code> or <code>Cholesky</code>) and each directed edge represents a data dependency between function calls (an edge from <code>DGEMM</code> to <code>Cholesky</code> implies that the <code>Cholesky</code> requires an output of the <code>DGEMM</code> call in order to run). This graph may not contain cycles - they would imply that some set of jobs all depend on each other; they could never start.</p>
+
+<p>Graphs must be eventually linearized and turned into code. Before that happens we can think about optimal ordering and, if we feel adventurous, parallel scheduling onto different machines.</p>
+
+<p>SymPy contains a very simple Computation graph object. Here we localize all of the logic about inplace operations, ordering, and (eventually) parallel scheduling.</p>
+
+<h2 id="translating_matrix_expressions_into_matrix_computations">Translating Matrix Expressions into Matrix Computations</h2>
+
+<p>So how can we transform a matrix expression like</p>
+<div class="highlight"><pre><code class="python">    <span class="p">(</span><span class="n">alpha</span><span class="o">*</span><span class="n">A</span><span class="o">*</span><span class="n">B</span><span class="p">)</span><span class="o">.</span><span class="n">I</span> <span class="o">*</span> <span class="n">x</span>
+</code></pre>
+</div>
+<p>And a set of predicates like</p>
+<div class="highlight"><pre><code class="python">    <span class="n">Q</span><span class="o">.</span><span class="n">lower_triangular</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">lower_triangular</span><span class="p">(</span><span class="n">B</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">invertible</span><span class="p">(</span><span class="n">A</span><span class="o">*</span><span class="n">B</span><span class="p">)</span>
+</code></pre>
+</div>
+<p>Into a graph of <code>BLAS</code> calls like one of the following?</p>
+<div class="highlight"><pre><code class="python">    <span class="n">DGEMM</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DTRSV</span><span class="p">(</span><span class="n">alpha</span><span class="o">*</span><span class="n">A</span><span class="o">*</span><span class="n">B</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="n">DTRMM</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>       <span class="o">-&gt;</span> <span class="n">DTRSV</span><span class="p">(</span><span class="n">alpha</span><span class="o">*</span><span class="n">A</span><span class="o">*</span><span class="n">B</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+</code></pre>
+</div>
+<p>And, once we have this set of valid computations how do we choose the right one? This is the question that this project faces right now. These are both challenging problems.</p>
+
+<h2 id="references">References</h2>
+
+<ul>
+<li><a href="http://www.netlib.org/blas/">BLAS</a> and <a href="http://www.netlib.org/lapack/">LAPACK</a></li>
+
+<li>J. Bergstra, O. Breuleux, F. Bastien, P. Lamblin, R. Pascanu, G. Desjardins, J. Turian, D. Warde-Farley and Y. Bengio. <a href="http://www.iro.umontreal.ca/~lisa/pointeurs/theano_scipy2010.pdf"><em>Theano: A CPU and GPU Math Expression Compiler</em></a>. Proceedings of the Python for Scientific Computing Conference (SciPy) 2010. June 30 - July 3, Austin, TX]</li>
+
+<li><a href="http://www.continuum.io/">Numba at Continuum</a></li>
+
+<li><a href="http://code.google.com/p/numexpr/">NumExpr</a></li>
+
+<li><a href="https://github.com/Theano/Theano/wiki/Lazy-Matrix-Algebra-Ecosystem">A list of matrix projects in Python</a></li>
+
+<li><a href="http://matthewrocklin.com/pub/ordering/partial-orders.pdf">M. Rocklin, <em>Partial Ordering in Theano</em></a></li>
+</ul></div>
+    </summary>
+    <updated>2012-10-29T07:00:00Z</updated>
+    <source>
+      <id>http://matthewrocklin.com/blog/</id>
+      <author>
+        <name>Matthew Rocklin</name>
+      </author>
+      <link href="http://matthewrocklin.com/blog/" rel="alternate" type="text/html"/>
+      <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
+      <subtitle>Posts tagged as 'SymPy'</subtitle>
+      <title>Working notes by Matthew Rocklin - SymPy</title>
+      <updated>2012-10-29T19:00:20Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en">
     <id>http://blog.krastanov.org/?p=561</id>
@@ -905,7 +1082,7 @@ f_durations.write('\n')
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-10-25T01:00:24Z</updated>
+      <updated>2012-10-29T01:20:24Z</updated>
     </source>
   </entry>
 
@@ -1148,7 +1325,7 @@ f_durations.write('\n')
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-10-25T19:00:25Z</updated>
+      <updated>2012-10-29T19:00:19Z</updated>
     </source>
   </entry>
 
@@ -1293,7 +1470,7 @@ RuntimeError: maximum recursion depth exceeded in comparison
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-10-25T19:00:16Z</updated>
+      <updated>2012-10-29T19:00:10Z</updated>
     </source>
   </entry>
 
@@ -1336,7 +1513,7 @@ b. Add this line to your bash_profile.</p>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-25T19:00:33Z</updated>
+      <updated>2012-10-29T19:00:25Z</updated>
     </source>
   </entry>
 
@@ -1417,7 +1594,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-10-25T19:00:16Z</updated>
+      <updated>2012-10-29T19:00:10Z</updated>
     </source>
   </entry>
 
@@ -1453,7 +1630,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-10-25T19:00:16Z</updated>
+      <updated>2012-10-29T19:00:10Z</updated>
     </source>
   </entry>
 
@@ -1689,7 +1866,7 @@ Out[74]: True
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-25T19:00:33Z</updated>
+      <updated>2012-10-29T19:00:25Z</updated>
     </source>
   </entry>
 
@@ -1807,7 +1984,7 @@ commits are much more like my usual ones.
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-10-25T19:00:27Z</updated>
+      <updated>2012-10-29T19:00:23Z</updated>
     </source>
   </entry>
 
@@ -1840,7 +2017,7 @@ commits are much more like my usual ones.
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-10-25T19:00:28Z</updated>
+      <updated>2012-10-29T19:00:24Z</updated>
     </source>
   </entry>
 
@@ -1874,7 +2051,7 @@ commits are much more like my usual ones.
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-10-25T01:00:24Z</updated>
+      <updated>2012-10-29T01:20:23Z</updated>
     </source>
   </entry>
 
@@ -1970,9 +2147,9 @@ Out[24]: 6
     <updated>2012-08-05T11:29:33Z</updated>
     <category term="SymPy"/>
     <category term="category theory"/>
-    <category term="subgraph isomorphism problem"/>
-    <category term="graph embedding"/>
     <category term="diagram embedding"/>
+    <category term="graph embedding"/>
+    <category term="subgraph isomorphism problem"/>
     <author>
       <name>scolobb</name>
     </author>
@@ -1985,7 +2162,7 @@ Out[24]: 6
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-10-25T19:00:27Z</updated>
+      <updated>2012-10-29T19:00:23Z</updated>
     </source>
   </entry>
 
@@ -2104,7 +2281,7 @@ Out[24]: 6
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-10-25T19:00:28Z</updated>
+      <updated>2012-10-29T19:00:23Z</updated>
     </source>
   </entry>
 
@@ -2136,7 +2313,7 @@ Out[24]: 6
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-25T19:00:33Z</updated>
+      <updated>2012-10-29T19:00:25Z</updated>
     </source>
   </entry>
 
@@ -2177,7 +2354,7 @@ Out[24]: 6
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-10-25T01:00:24Z</updated>
+      <updated>2012-10-29T01:20:23Z</updated>
     </source>
   </entry>
 
@@ -2280,7 +2457,7 @@ StopIteration:
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-25T19:00:33Z</updated>
+      <updated>2012-10-29T19:00:25Z</updated>
     </source>
   </entry>
 
@@ -2320,12 +2497,12 @@ StopIteration:
     </content>
     <updated>2012-07-29T19:20:53Z</updated>
     <category term="SymPy"/>
-    <category term="string representation"/>
+    <category term="backward chaining"/>
     <category term="deciding commutativity"/>
     <category term="diagram layout"/>
     <category term="pretty printing"/>
     <category term="sort key"/>
-    <category term="backward chaining"/>
+    <category term="string representation"/>
     <category term="subgraph isomorphism problem"/>
     <author>
       <name>scolobb</name>
@@ -2339,7 +2516,7 @@ StopIteration:
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-10-25T19:00:27Z</updated>
+      <updated>2012-10-29T19:00:23Z</updated>
     </source>
   </entry>
 
@@ -2369,7 +2546,7 @@ StopIteration:
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-10-25T19:00:28Z</updated>
+      <updated>2012-10-29T19:00:23Z</updated>
     </source>
   </entry>
 
@@ -2738,7 +2915,7 @@ Out[128]: False
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-10-25T01:00:24Z</updated>
+      <updated>2012-10-29T01:20:23Z</updated>
     </source>
   </entry>
 
@@ -2826,7 +3003,7 @@ Out[128]: False
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-10-25T01:00:24Z</updated>
+      <updated>2012-10-29T01:20:23Z</updated>
     </source>
   </entry>
 
@@ -2861,7 +3038,7 @@ Out[128]: False
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-10-25T01:00:24Z</updated>
+      <updated>2012-10-29T01:20:23Z</updated>
     </source>
   </entry>
 
@@ -2908,7 +3085,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-10-25T19:00:27Z</updated>
+      <updated>2012-10-29T19:00:23Z</updated>
     </source>
   </entry>
 
@@ -2958,7 +3135,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-25T19:00:33Z</updated>
+      <updated>2012-10-29T19:00:25Z</updated>
     </source>
   </entry>
 
@@ -3003,7 +3180,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-10-25T19:00:27Z</updated>
+      <updated>2012-10-29T19:00:23Z</updated>
     </source>
   </entry>
 
@@ -3038,7 +3215,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-25T19:00:33Z</updated>
+      <updated>2012-10-29T19:00:25Z</updated>
     </source>
   </entry>
 
@@ -3225,7 +3402,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-10-25T19:00:16Z</updated>
+      <updated>2012-10-29T19:00:10Z</updated>
     </source>
   </entry>
 
@@ -3269,7 +3446,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-25T19:00:33Z</updated>
+      <updated>2012-10-29T19:00:25Z</updated>
     </source>
   </entry>
 
@@ -3316,7 +3493,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-10-25T19:00:27Z</updated>
+      <updated>2012-10-29T19:00:23Z</updated>
     </source>
   </entry>
 
@@ -3364,7 +3541,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-10-25T01:00:24Z</updated>
+      <updated>2012-10-29T01:20:24Z</updated>
     </source>
   </entry>
 
@@ -3493,7 +3670,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-10-25T19:00:28Z</updated>
+      <updated>2012-10-29T19:00:24Z</updated>
     </source>
   </entry>
 
@@ -3540,7 +3717,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-10-25T19:00:27Z</updated>
+      <updated>2012-10-29T19:00:23Z</updated>
     </source>
   </entry>
 
@@ -3703,7 +3880,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-10-25T19:00:33Z</updated>
+      <updated>2012-10-29T19:00:25Z</updated>
     </source>
   </entry>
 
@@ -3776,7 +3953,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-10-25T19:00:28Z</updated>
+      <updated>2012-10-29T19:00:23Z</updated>
     </source>
   </entry>
 
@@ -3957,7 +4134,7 @@ form_field(vector_field)
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-10-25T01:00:24Z</updated>
+      <updated>2012-10-29T01:20:23Z</updated>
     </source>
   </entry>
 
@@ -4016,44 +4193,6 @@ form_field(vector_field)
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging</title>
       <updated>2012-06-27T14:40:24Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://rhoforsympy.wordpress.com/?p=162</id>
-    <link href="http://rhoforsympy.wordpress.com/2012/06/25/week-5-tr-class-implementation/" rel="alternate" type="text/html"/>
-    <title>Week 5 : Tr class implementation</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">I had not blogged during last week since I was away at the summer school where I had an opportunity to listen to and talk to both physicists and cs theorists working on the next quantum computer! There were  great presentations and the videos should be available shortly. So, now back to Sympy! Tasks accomplished this [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;blog=34650270&amp;post=162&amp;subd=rhoforsympy&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>I had not blogged during last week since I was away at the <a href="http://cssqi2012.iqc.uwaterloo.ca/?page_id=21">summer school</a> where I had an opportunity to listen to and talk to both physicists and cs theorists working on the next quantum computer! There were  great presentations and the <a href="http://www.youtube.com/user/quantumiqc">videos</a> should be available shortly. So, now back to Sympy!</p>
-<p><strong><span style="text-decoration: underline;">Tasks accomplished this week</span></strong></p>
-<p>My main tasks for this week was to address all comments on pending PR 1333. In addition I had planned to complete printing operations on Tr operator and get started with qubit related Tr operations.  I accomplished the task on addressing comments on PR 1333 and also completed basic printing operations along with having the notebook examples done.  The changes outside of PR 1333 are available in my githhub branch(<a href="https://github.com/gdevanla/sympy/tree/trace_permute_equals">trace_permute_equal</a>) and I plan to submit a PR for these changes as soon as PR 1333 is merged.</p>
-<p>In addition I worked on providing a permute() function and also had to play around with implementation of overriding _hashable_contents() method.  I had spend some time in figuring out the details of such an implementation and there was some discussion on this on the <a href="https://groups.google.com/d/msg/sympy/FVqM801IFzA/_9eOt7_ckEcJ">mailing list.</a>  For now, I have these 2 functions implemented ( but commented out) in branch <a href="https://github.com/gdevanla/sympy/tree/trace_permute_equals">trace_permute_equal</a>.</p>
-<p>Therefore, one task that remained but which I could not get to this week was qubit implementation related to Tr.  Also, currently I am in the process of writing up how Tr operations should work on TensorProducts. I should have a write up very soon.</p>
-<p>The tasks for next week, therefore would be  (roughly in this order)</p>
-<p>1. Share a write up on TensorProduct wrt to Tr operations.</p>
-<p>2. Push qubit related changes to my git repo</p>
-<p>3. Get started on TensorProduct/Tr and have the first cut ready for review.</p>
-<p>4 Get <a href="https://github.com/sympy/sympy/pull/1333">PR 1333</a> merged.</p>
-<p>5. Get branch <a href="https://github.com/gdevanla/sympy/tree/trace_permute_equals">trace_permute_equal</a> merged. This branch has minor changes and I hope to get this merged as well this week.</p>
-<p>Happy coding!</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/rhoforsympy.wordpress.com/162/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/rhoforsympy.wordpress.com/162/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;blog=34650270&amp;post=162&amp;subd=rhoforsympy&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2012-06-25T00:16:41Z</updated>
-    <category term="Uncategorized"/>
-    <author>
-      <name>grdvnl</name>
-    </author>
-    <source>
-      <id>http://rhoforsympy.wordpress.com</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://rhoforsympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://rhoforsympy.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://rhoforsympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>..where we discuss density operators wrt SymPy</subtitle>
-      <title>rhoforsympy</title>
-      <updated>2012-10-25T19:00:33Z</updated>
     </source>
   </entry>
 </feed>
