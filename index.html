@@ -23,6 +23,187 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>November 01, 2012</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://matthewrocklin.com/blog/" title="Working notes by Matthew Rocklin - SymPy">Matthew Rocklin</a></h3>
+
+
+<div class="entrygroup" id="http://matthewrocklin.com/blog//work/2012/11/01/Unification">
+<h4><a href="http://matthewrocklin.com/blog//work/2012/11/01/Unification">Unification in SymPy</a></h4>
+<div class="entry">
+<div class="content">
+<p>Unification is a way to ask questions by matching expressions against patterns. It is a powerful form of pattern matching found in logical programming languages like Prolog, Maude, and Datalog. It is the computational backbone behind the logical programming paradigm and is now a part of SymPy (in a pull request).</p>
+
+<p>Consider the following example. Imagine that you want to find the name of the MatrixSymbol within the Transpose in the following expression (i.e. we’re looking for the string <code>'X'</code>)</p>
+<div class="highlight"><pre><code class="python">    <span class="o">&gt;&gt;&gt;</span> <span class="n">X</span> <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'X'</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="o">&gt;&gt;&gt;</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'Y'</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="o">&gt;&gt;&gt;</span> <span class="n">expr</span> <span class="o">=</span> <span class="n">Transpose</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">+</span> <span class="n">Y</span>
+</code></pre>
+</div>
+<p>Traditionally we could solve this toy problem with a simple function</p>
+<div class="highlight"><pre><code class="python">    <span class="k">def</span> <span class="nf">name_of_symbol_in_transpose_in_add</span><span class="p">(</span><span class="n">matadd</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">matadd</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">Transpose</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">arg</span><span class="p">,</span> <span class="n">MatrixSymbol</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">arg</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">name</span>
+</code></pre>
+</div>
+<p>We solve this task with unification by setting up a pattern and then unifying that pattern against a target expression</p>
+<div class="highlight"><pre><code class="python">    <span class="o">&gt;&gt;&gt;</span> <span class="n">A</span> <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'name'</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+    <span class="o">&gt;&gt;&gt;</span> <span class="n">B</span> <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'B'</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    <span class="c"># Look for an expression tree like A.T + B</span>
+    <span class="c"># Treat the leaves 'name', n, m, B as Wilds</span>
+    <span class="o">&gt;&gt;&gt;</span> <span class="n">pattern</span> <span class="o">=</span> <span class="n">patternify</span><span class="p">(</span><span class="n">Transpose</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">+</span> <span class="n">B</span><span class="p">,</span> <span class="s">'name'</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>
+
+    <span class="o">&gt;&gt;&gt;</span> <span class="n">unify</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">expr</span><span class="p">)</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+    <span class="p">{</span><span class="s">'name'</span><span class="p">:</span> <span class="s">'X'</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="n">B</span><span class="p">:</span> <span class="n">Y</span><span class="p">}</span>
+</code></pre>
+</div>
+<p>We get back a matching for each of the wildcards (name, n, m, B) and see that <code>'name'</code> was matched to the string <code>'X'</code>. Is this better or worse than the straight Python solution? Given the relative number of users between Python and Prolog it’s a safe bet that the style of Python programs have some significant advantages over the logical programming paradigm. Why would we program in this strange way?</p>
+
+<p>Unification allows a clean separation between <em>what we’re looking for</em> and <em>how we find it</em>. In the Python solution the mathematical definition of what we want is spread among a few lines and is buried inside of control flow.</p>
+<div class="highlight"><pre><code class="python">    <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">matadd</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">Transpose</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">arg</span><span class="p">,</span> <span class="n">MatrixSymbol</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">arg</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">name</span>
+</code></pre>
+</div>
+<p>In the unification solution the line</p>
+<div class="highlight"><pre><code class="python">    <span class="n">pattern</span> <span class="o">=</span> <span class="n">patternify</span><span class="p">(</span><span class="n">Transpose</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">+</span> <span class="n">B</span><span class="p">,</span> <span class="s">'name'</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>
+</code></pre>
+</div>
+<p>expresses exactly <em>what</em> we’re looking for and gives no information on <em>how</em> it should be found. The how is wrapped up in the call to <code>unify</code></p>
+<div class="highlight"><pre><code class="python">    <span class="n">unify</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">expr</span><span class="p">)</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+</code></pre>
+</div>
+<p>This separation of the <em>what</em> and <em>how</em> is what excites me about declarative programming. I think that this separation is useful when mathematical and algorithmic programmers need to work together to solve a large problem. This is often the case in scientific computing. Mathematical programmers think about <em>what</em> should be done while algorithmic programmers think about <em>how</em> it can be efficiently computed. Declarative techniques like unification enables these two groups to work independently.</p>
+
+<h2 id="multiple_matches">Multiple Matches</h2>
+
+<p>Lets see how unify works on a slightly more interesting expression</p>
+<div class="highlight"><pre><code class="python">    <span class="o">&gt;&gt;&gt;</span> <span class="n">expr</span> <span class="o">=</span> <span class="n">Transpose</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">+</span> <span class="n">Transpose</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
+    <span class="o">&gt;&gt;&gt;</span> <span class="n">unify</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">expr</span><span class="p">)</span>
+    <span class="o">&lt;</span><span class="n">generator</span> <span class="nb">object</span> <span class="n">unify</span> <span class="n">at</span> <span class="mh">0x548cb90</span><span class="o">&gt;</span>
+</code></pre>
+</div>
+<p>In this situation because both matrices <code>X</code> and <code>Y</code> are inside transposes our pattern to match “the name of a symbol in a transpose” could equally well return the strings <code>'X'</code> or <code>'Y'</code>. The unification algorithm will give us both of these options</p>
+<div class="highlight"><pre><code class="python">    <span class="o">&gt;&gt;&gt;</span> <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">unify</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">expr</span><span class="p">):</span> 
+    <span class="o">...</span>    <span class="k">print</span> <span class="n">match</span>
+    <span class="p">{</span><span class="s">'name'</span><span class="p">:</span> <span class="s">'Y'</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="n">B</span><span class="p">:</span> <span class="n">X</span><span class="s">'}</span>
+    <span class="p">{</span><span class="s">'name'</span><span class="p">:</span> <span class="s">'X'</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="n">B</span><span class="p">:</span> <span class="n">Y</span><span class="s">'}</span>
+</code></pre>
+</div>
+<p>Because expr is commutative we can match <code>{A: Transpose(X), B: Transpose(Y)}</code> or <code>{A: Transpose(Y), B: Transpose(X)}</code> with equal validity. Instead of choosing one <code>unify</code>, returns an iterable of all possible matches.</p>
+
+<h2 id="combinatorial_blowup">Combinatorial Blowup</h2>
+
+<p>In how many ways can we match the following pattern</p>
+
+<pre><code>w + x + y + z</code></pre>
+
+<p>to the following expression?</p>
+
+<pre><code>a + b + c + d + e + f</code></pre>
+
+<p>This is a variant on the standard “N balls in K bins” problem often given in a discrete math courses. The answer is “quite a few.” How can we avoid this combinatorial blowup?</p>
+
+<p><code>unify</code> produces matches lazily. It returns a Python generator which yields results only as you ask for them. You can ask for just one match (a common case) very quickly.</p>
+
+<p>The bigger answer is that if you aren’t satisfied with this and want a better/stronger/faster way to find your desired match you could always <em>rewrite unify</em>. The <code>unify</code> function is all about the <em>how</em> and is disconnected from the <em>what</em>. Algorithmic programmers can tweak unify without disrupting the mathematical code.</p>
+
+<h2 id="rewrites">Rewrites</h2>
+
+<p>Unification is commonly used in term rewriting systems. Here is an example</p>
+<div class="highlight"><pre><code class="python">    <span class="o">&gt;&gt;&gt;</span> <span class="n">pattern_source</span> <span class="o">=</span> <span class="n">patternify</span><span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="o">&gt;&gt;&gt;</span> <span class="n">pattern_target</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="o">&gt;&gt;&gt;</span> <span class="n">sincos_to_one</span> <span class="o">=</span> <span class="n">rewriterule</span><span class="p">(</span><span class="n">pattern_source</span><span class="p">,</span> <span class="n">pattern_target</span><span class="p">)</span>
+
+    <span class="o">&gt;&gt;&gt;</span> <span class="n">sincos_to_one</span><span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+    <span class="mi">1</span>
+</code></pre>
+</div>
+<p>We were able to turn a mathematical identity <code>sin(x)**2 + cos(x)**2 =&gt; 1</code> into a function very simply using unification. However unification only does exact pattern matching so we can only find the <code>sin(x)**2 + cos(x)**2</code> pattern if that pattern is at the top node in the tree. As a result we’re not able to apply this simplification within a larger expression tree</p>
+<div class="highlight"><pre><code class="python">    <span class="o">&gt;&gt;&gt;</span> <span class="nb">list</span><span class="p">(</span><span class="n">sincos_to_one</span><span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="n">c</span><span class="o">**</span><span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span> <span class="c"># no matches</span>
+    <span class="p">[]</span>
+</code></pre>
+</div>
+<p>I will leave the solution of this problem to a future post. Instead, I want to describe why I’m working on all of this.</p>
+
+<h2 id="matrix_computations">Matrix Computations</h2>
+
+<p><a href="http://matthewrocklin.com/blog/work/2012/10/29/Matrix-Computations/">My last post</a> was about translating Matrix Expressions into high-performance Fortran Code. I ended this post with the following problem:</p>
+<hr />
+<p><em>So how can we transform a matrix expression like</em></p>
+<div class="highlight"><pre><code class="python">    <span class="p">(</span><span class="n">alpha</span><span class="o">*</span><span class="n">A</span><span class="o">*</span><span class="n">B</span><span class="p">)</span><span class="o">.</span><span class="n">I</span> <span class="o">*</span> <span class="n">x</span>
+</code></pre>
+</div>
+<p>…</p>
+
+<p><em>Into a graph of <code>BLAS</code> calls like one of the following?</em></p>
+<div class="highlight"><pre><code class="python">    <span class="n">DGEMM</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DTRSV</span><span class="p">(</span><span class="n">alpha</span><span class="o">*</span><span class="n">A</span><span class="o">*</span><span class="n">B</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="n">DTRMM</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>       <span class="o">-&gt;</span> <span class="n">DTRSV</span><span class="p">(</span><span class="n">alpha</span><span class="o">*</span><span class="n">A</span><span class="o">*</span><span class="n">B</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+</code></pre>
+</div><hr />
+<p>This problem can be partially solved by unification and rewrite rules. Each <code>BLAS</code> operation is described by a class</p>
+<div class="highlight"><pre><code class="python"><span class="k">class</span> <span class="nc">MM</span><span class="p">(</span><span class="n">BLAS</span><span class="p">):</span>
+    <span class="sd">""" Matrix Multiply """</span>
+    <span class="n">_inputs</span>   <span class="o">=</span> <span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
+    <span class="n">_outputs</span>  <span class="o">=</span> <span class="p">(</span><span class="n">alpha</span><span class="o">*</span><span class="n">A</span><span class="o">*</span><span class="n">B</span> <span class="o">+</span> <span class="n">beta</span><span class="o">*</span><span class="n">C</span><span class="p">,)</span>
+</code></pre>
+</div>
+<p>The <code>_outputs</code> and <code>_inputs</code> fields mathematically define when <code>MM</code> is appropriate. This is all we need to make a transformation</p>
+<div class="highlight"><pre><code class="python">    <span class="n">pattern_source</span> <span class="o">=</span> <span class="n">patternify</span><span class="p">(</span><span class="n">MM</span><span class="o">.</span><span class="n">_outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">*</span><span class="n">MM</span><span class="o">.</span><span class="n">_inputs</span><span class="p">)</span>
+    <span class="n">pattern_target</span> <span class="o">=</span> <span class="n">MM</span><span class="p">(</span><span class="o">*</span><span class="n">MM</span><span class="o">.</span><span class="n">_inputs</span><span class="p">)</span>
+    <span class="n">rewriterule</span><span class="p">(</span><span class="n">pattern_source</span><span class="p">,</span> <span class="n">pattern_target</span><span class="p">)</span>
+</code></pre>
+</div>
+<p>Unification allows us to describe <code>BLAS</code> mathematically without thinking about how each individual operation will be detected in an expression. The control flow and the math are completely separated allowing us to think hard about each problem in isolation.</p>
+
+<h2 id="references">References</h2>
+
+<p>I learned a great deal from the following sources</p>
+
+<ul>
+<li><a href="http://aima.cs.berkeley.edu/">Artificial Intelligence: A Modern Approach</a> by Stuart Russel and Peter Norvig (Particularly section 9.2 in the second edition)</li>
+
+<li><a href="http://stackoverflow.com/questions/13092092/algorithms-for-unification-of-list-based-trees">StackOverflow - Algorithms for Unification of list-based trees</a></li>
+
+<li><a href="http://stackoverflow.com/questions/13131491/partition-n-items-into-k-bins-in-python-lazily">StackOverflow - Partition N items into K bins in Python lazily</a> (Special thanks to Chris Smith who provided the best answer)</li>
+
+<li><a href="http://en.wikipedia.org/wiki/Logic_programming">Logic Programming</a></li>
+
+<li><a href="http://en.wikipedia.org/wiki/Term_rewriting">Term Rewriting</a></li>
+
+<li><a href="http://www.learnprolognow.org/">My favorite Prolog tutorial</a></li>
+
+<li><a href="http://goo.gl/ZqVHJ">SymPy E-mail thread on this topic</a></li>
+
+<li><a href="https://github.com/sympy/sympy/pull/1633">Pull Request</a></li>
+</ul></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://matthewrocklin.com/blog//work/2012/11/01/Unification">November 01, 2012 07:00 AM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>October 29, 2012</h2>
 
 <div class="channelgroup">
@@ -4329,193 +4510,6 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
 </div>
 
 </div>
-<div class="daygroup">
-<h2>June 29, 2012</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://blog.krastanov.org" title="Stefan's Blog » SymPy">Stefan Krastanov</a></h3>
-
-
-<div class="entrygroup" id="http://krastanov.wordpress.com/?p=409">
-<h4 lang="en"><a href="http://blog.krastanov.org/2012/06/30/part-1-what-is-a-tensor-and-how-is-it-implemented-in-the-diffgeom-sympy-module/">Part 1: What is a Tensor and How is it Implemented in the diffgeom SymPy module?</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<h2>The Math</h2>
-<p>The notion of “a tensor” is commonly defined in two different ways. The first definition goes roughly like this (“roughly” means “do not tell this to your math teacher”):</p>
-<blockquote><p>A tensor is a geometrical object that can be represented in some coordinate system as an n-dimensional array (it is not the array itself). The quantities in that array depend on the coordinate system in which the representation is done, however there is a precise rule on how these quantities change if we switch to another coordinate system. It is this rule that defines what a tensor (and in particular a vector or a 1-form) is.</p></blockquote>
-<p>The other definition, less used by physicists and more used by mathematicians is (again roughly) the following:</p>
-<blockquote><p>A tensor is the sum of tensor products of forms and vectors. Forms and vectors are themselves given nice geometrical definitions.</p></blockquote>
-<p>It is this second definition that is used in the diffgeom SymPy module. Naturally, we need to define “tensor product”, “vector” and “form” in order to use this definition. Indeed, the structure of the module follows closely these mathematical definitions.</p>
-<p>Disclaimer: I have used and will use the words tensor and tensor field interchangeably. In order for this post to make any sense to you, ensure that you understand the difference and are able to find out the exact meaning from the context. The same goes also for vector / vector field and form / form field.</p>
-<h2>The Implementation</h2>
-<p>To create the mathematical structure of differential geometry or its implementation in a CAS like SymPy we need to build up the ladder of object definitions. Each new and more interesting notion will depend on the definition of the previous. Hence we start with the boilerplate object “Manifold” and on it we define a “Patch” (the diffgeom module implements all this boilerplate for commonly used manifold, however in order to explain how it works, we will redo everything from scratch):</p>
-<p></p><pre class="brush: python;">m = Manifold('my_manifold', 2) # A 2D manifold called 'my_manifold'
-p = Patch('my_patch', m) # A patch called 'my_patch'
- </pre><p></p>
-<p>The first object that does something marginally interesting is the “Coordinate System”. Its role is to permit the parametrization of points on the patch by a tuple of numbers:</p>
-<p></p><pre class="brush: python;">cs_r = CoordSystem('R', p) # A coordinate system called 'R' (for rectangular)
-point = cs_r.point([1,1]) # A point with coordinates (1, 1)
-</pre><p></p>
-<p>If you have two or more coordinate systems you can tell the computer how to transform a tuple of numbers from one system to another:</p>
-<p></p><pre class="brush: python;">cs_p = CoordSystem('P', p)
-cs_r.connect_to(cs_p, [x, y], [sqrt(x**2+y**2), atan2(y,x)])
-cs_p.connect_to(cs_r, [r, t], [r*cos(t), r*sin(t)], inverse=False)
-# Now the point instances know how to transform their coordinate tuples:
-point.coords(cs_p)
-# output:
-#⎡  ___⎤
-#⎢╲╱ 2 ⎥
-#⎢     ⎥
-#⎢  π  ⎥
-#⎢  ─  ⎥
-#⎣  4  ⎦
-</pre><p></p>
-<p>However, differential geometry is not about calculating coordinates of points in different systems. It is about working with fields. Thus, we will focus on a single coordinate system from now on, and to be explicit about its complete independence of whether we want rectangular or other coordinates, we will just call it ‘c’ and leave it unconnected to other coordinate systems.</p>
-<p></p><pre class="brush: python;">c = CoordSystem('c', p)
-</pre><p></p>
-<h3>Scalar Field</h3>
-<p>We continue to build up our ladder of definitions in order to obtain a more interesting and useful theory/implementation. The next step is the “scalar field”. A scalar field is a mapping from the manifold (the set of points) to the real numbers (yes, just reals (maybe complex), the rest brings unnecessary complexity). Each coordinate system brings with itself the basic scalar fields (i.e. coordinate functions), that correspond to the mappings from a point to an element of its coordinate tuple. These basic scalar fields are implemented internally as BaseScalarField instances (this is however invisible to the user).</p>
-<p></p><pre class="brush: python;"> c.coord_functions()
-# output: [c₀, c₁]
-point = c.point([a, b])
-c.coord_function(0)(point)
-# output: a
-</pre><p></p>
-<p>You can build more complicated fields by using the base scalar fields. This does not produce an instance of some new ScalarField class. The BaseScalarField instances just become a part of the expression tree of an ordinary Expr instance (the base for building expressions in SymPy).</p>
-<p></p><pre class="brush: python;">c0, c1 = c.coord_functions()
-field = f(c0, 3*c1)/sin(c0)*c1**2
-f
-# output:
-#               -1       2
-#f(c₀, 3⋅c₁)⋅sin  (c₀)⋅c₁
-field(point)
-# output:
-# 2
-#b ⋅f(a, 3⋅b)
-#────────────
-#   sin(a)
-</pre><p></p>
-<h3>Vector Field</h3>
-<p>Then comes the vector field which is defined as an element of the set of differential operators over the scalar fields. All elements of this set can be build up as linear combinations of base vector fields. The base vector fields correspond to the partial derivatives with respect to the base scalar fields. They are implemented in the BaseVectorField class, which also is invisible to the user.</p>
-<p></p><pre class="brush: python;">c.base_vectors()
-# output: [∂_c_0, ∂_c_1]
-e_c0, e_c1 = c.base_vectors()
-e_c0(c0)
-# output: 1
-e_c0(c1)
-# output: 0
-</pre><p></p>
-<p>One can also use more complicated fields (again, no need for new VectorField class, just being part of the expression tree of Expr):</p>
-<p></p><pre class="brush: python;">v_field = c1*e_c0 + f(c0)*e_c1
-v_field
-# output: f(c₀)⋅∂_c_1 + c₁⋅∂_c_0
-s_field = g(c0, c1)
-v_field(s_field)
-# output:
-#      ⎛ d            ⎞│           ⎛ d            ⎞│
-#f(c₀)⋅⎜───(g(c₀, ξ₂))⎟│      + c₁⋅⎜───(g(ξ₁, c₁))⎟│
-#      ⎝dξ₂           ⎠│ξ₂=c₁      ⎝dξ₁           ⎠│ξ₁=c₀
-v_field(s_field)(point)
-# output:
-#  ⎛ d           ⎞│            ⎛ d           ⎞│
-#b⋅⎜───(g(ξ₁, b))⎟│     + f(a)⋅⎜───(g(a, ξ₂))⎟│
-#  ⎝dξ₁          ⎠│ξ₁=a        ⎝dξ₂          ⎠│ξ₂=b
-</pre><p></p>
-<h3>1-Form Field and Differential</h3>
-<p>The final ingredient needed for the basis of differential geometry is the 1-form field. A 1-form field is a linear mapping from the set of vector fields to the set of reals. The interesting thing is that all 1-forms can be build-up from linear combinations of the differentials of the base scalar fields.</p>
-<p>There is the need to define what a differential is. The differential <img src="http://s0.wp.com/latex.php?latex=df&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" alt="df" class="latex" title="df" /> of the scalar field <img src="http://s0.wp.com/latex.php?latex=f&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" alt="f" class="latex" title="f" /> is the 1-form field which has the following property: for every vector field <img src="http://s0.wp.com/latex.php?latex=v&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" alt="v" class="latex" title="v" /> one has <img src="http://s0.wp.com/latex.php?latex=df%28v%29+%3D+v%28f%29&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" alt="df(v) = v(f)" class="latex" title="df(v) = v(f)" />.</p>
-<p>In the diffgeom module the differential is implemented as the Differential class. The differentials of the base scalar fields are accessible with the base_oneforms() method, however one can construct the differential of whatever scalar field they wish. There is, as always, no dedicated OneFormField class. Everything is build up with Expr instances.</p>
-<p></p><pre class="brush: python;">c.base_oneforms()
-# output: [ⅆ c₀, ⅆ c₁]
-dc0, dc1 = c.base_oneforms()
-dc0(e_c0), dc1(e_c0)
-# output: (1, 0)
-</pre><p></p>
-<p>And building up more complicated expressions:</p>
-<p></p><pre class="brush: python;">f_field = g(c0)*dc1 + 2*dc0
-f_field(v_field)
-# output: g(c₀)⋅f(c₀) + 2⋅c₁
-</pre><p></p>
-<h3>The Rest</h3>
-<p>Now that we have the basic building blocks in order to construct higher order tensors we use tensor and wedge products. More about them in part 2.</p>
-<h2>What if I Need to Work with a Number of Different Coordinate Systems</h2>
-<p>The only difference is that the chain rule of differentiation will be necessary. One can express the same statement in a more implementation independent way as “The rule for transformation of coordinates will need to be applied”. Anyhow, it works:</p>
-<p>Examples from the already implemented <img src="http://s0.wp.com/latex.php?latex=R%5E2&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" alt="R^2" class="latex" title="R^2" /> module.</p>
-<h3>Points Defined in one Coordinate System and Evaluated in Another</h3>
-<p></p><pre class="brush: python;">point_r = R2_r.point([x0, y0])
-point_p = R2_p.point([r0, theta0])
-R2.x(point_r)
-# output: x₀
-R2.x(point_p)
-# output: r₀⋅cos(θ₀)
-trigsimp((R2.x**2 + R2.y**2 + g(R2.theta))(point_p))
-# output:
-#  2
-#r₀  + g(θ₀)
-</pre><p></p>
-<h3>Vector Fields Operating on Scalar Fields</h3>
-<p></p><pre class="brush: python;">R2.e_x(R2.theta)
-# output:
-#            -1
-#   ⎛ 2    2⎞
-#-y⋅⎝x  + y ⎠
-R2.e_theta(R2.y)
-# output: cos(θ)⋅r
-</pre><p></p>
-<h3>1-Form Fields Operating on Vector Fields</h3>
-<p></p><pre class="brush: python;">R2.dr(R2.e_x)
-# output:
-#         -1/2
-#⎛ 2    2⎞
-#⎝x  + y ⎠    ⋅x
-</pre><p></p>
-<h2>What if I Need an Unspecified Arbitrary Coordinate System</h2>
-<p>If it is just one coordinate system, nothing; all the examples in the first part were for a completely arbitrary system. If you want two systems with an arbitrary transformation rules between them, just use an arbitrary function when you connect them:</p>
-<p></p><pre class="brush: python;">m = Manifold('my_manifold', 2)
-p = Patch('my_patch', m)
-cs_a = CoordSystem('a', p)
-cs_b = CoordSystem('b', p)
-cs_a.connect_to(cs_b, [x, y], [f(x,y), g(x,y)], inverse=False)
-cs_a.base_vector(1)(cs_b.coord_function(0))
-# output:
-#⎛ d            ⎞│
-#⎜───(f(a₀, ξ₁))⎟│
-#⎝dξ₁           ⎠│ξ₁=a₁
-</pre><p></p>
-<h2>How Does This Relate to the Scheme Code by <a href="http://groups.csail.mit.edu/mac/users/gjs/" target="_blank">Gerald Jay Sussman</a> and <a href="http://groups.csail.mit.edu/mac/users/wisdom/" target="_blank">Jack Wisdom</a></h2>
-<p>The diffgeom module is based in its entirety on the work of <a href="http://groups.csail.mit.edu/mac/users/gjs/" target="_blank">Gerald Jay Sussman</a> and <a href="http://groups.csail.mit.edu/mac/users/wisdom/" target="_blank">Jack Wisdom</a> on <a href="http://dspace.mit.edu/handle/1721.1/30520" target="_blank">“Functional Differential Geometry”</a>. The only substantial difference (in what is already implemented) is how the diffgeom module treats operations on fields. Both the diffgeom module and the original Scheme code behave like this:</p>
-<p></p><pre class="brush: plain;">scalar_field(point) ---&gt; an expression representing a real number
-</pre><p></p>
-<p>However, the original scheme implementation and the SymPy module behave differently in these cases:</p>
-<p></p><pre class="brush: plain;"> vector_field(scalar_field)
-form_field(vector_field)
- </pre><p></p>
-<p>As far as I know, the original Scheme code produces an opaque object. It indeed represents a scalar field, however <img src="http://s0.wp.com/latex.php?latex=%5Cpartial_x%28x%29&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" alt="\partial_x(x)" class="latex" title="\partial_x(x)" /> will not produce directly <img src="http://s0.wp.com/latex.php?latex=1&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" alt="1" class="latex" title="1" />. Instead it produces an object that returns 1 when evaluated at a point. The diffgeom module does this evaluation at the time at which one calls <img src="http://s0.wp.com/latex.php?latex=%5Cpartial_x%28x%29&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" alt="\partial_x(x)" class="latex" title="\partial_x(x)" /> without the need to evaluate at a point, thus the result is explicit and not encapsulated in an opaque object.</p>
-<br />  <img src="http://stats.wordpress.com/b.gif?host=blog.krastanov.org&amp;blog=15251174&amp;post=409&amp;subd=krastanov&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://blog.krastanov.org/2012/06/30/part-1-what-is-a-tensor-and-how-is-it-implemented-in-the-diffgeom-sympy-module/">by Stefan Krastanov at June 29, 2012 10:36 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -4611,7 +4605,7 @@ form_field(vector_field)
 <a href="http://sherjilozair.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sherjilozair.wordpress.com" class="message" title="no activity in 7 days">Sherjil Ozair</a>
 </li>
 <li>
-<a href="http://blog.krastanov.org/category/sympy-2/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://blog.krastanov.org" title="Stefan's Blog » SymPy">Stefan Krastanov</a>
+<a href="http://blog.krastanov.org/category/sympy-2/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://blog.krastanov.org" class="message" title="no activity in 7 days">Stefan Krastanov</a>
 </li>
 <li>
 <a href="http://nessgrh.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://nessgrh.wordpress.com" class="message" title="no activity in 7 days">Tom Bachmann</a>
@@ -4629,7 +4623,7 @@ form_field(vector_field)
 
 <p>
 <strong>Last updated:</strong><br>
-October 29, 2012 11:00 PM<br>
+November 01, 2012 05:20 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
