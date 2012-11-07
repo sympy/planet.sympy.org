@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2012-11-06T10:40:32Z</updated>
+  <updated>2012-11-07T05:20:24Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,72 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry xml:lang="en">
+    <id>http://rhoforsympy.wordpress.com/?p=277</id>
+    <link href="http://rhoforsympy.wordpress.com/2012/11/07/emacs-script-to-add-function-headers-in-python-mode/" rel="alternate" type="text/html"/>
+    <title>Emacs script to add function headers in python mode</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">I have an usual python-mode setup with python-mode.el and all packages that help set up a good IDE environment for Python in Emacs. But, I did not find any scripts/functions that would help me generate a doc string for methods. The script I have shared below should do the trick. This is the initial script [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;blog=34650270&amp;post=277&amp;subd=rhoforsympy&amp;ref=&amp;feed=1" width="1"/></div>
+    </summary>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>I have an usual python-mode setup with python-mode.el and all packages that help set up a good IDE environment for Python in Emacs. But, I did not find any scripts/functions that would help me generate a doc string for methods. The script I have shared below should do the trick. This is the initial script and I hope to add to this script as I use it.</p>
+<p>Please feel free comment on the git repo if you find any issues or have any improvements</p>
+<p><code><br/>
+;; add the following lines to .emacs file.<br/>
+;; When a function header needs to be generated, place the cursor<br/>
+;; on the same line as function definition and call the function<br/>
+;; generate-header. Alternatively, a key-binding can be added<br/>
+;; using (global-set-key) or adding this function to the python-mode-hook</code></p><code>
+<p>(defun get-function-definition(sentence)<br/>
+  (message sentence)<br/>
+  (if (string-match "def.*(.*):" sentence)<br/>
+      (match-string 0 sentence))<br/>
+  )</p>
+<p>(defun get-parameters(sentence)<br/>
+        (setq y (get-function-definition sentence))<br/>
+        (message y)<br/>
+        (if y<br/>
+            (if (string-match "(.*)"  y)<br/>
+             (match-string 0 y)))<br/>
+        )</p>
+</code><p><code>(require 'thingatpt)<br/>
+(defun generate-header()<br/>
+    (interactive)<br/>
+    (setq p (get-parameters (thing-at-point 'sentence)))<br/>
+    (forward-line 1)<br/>
+    (insert "\t\"\"\"\n\n\n")<br/>
+    (setq params (split-string p "[?\,?\(?\)?\ ]"))<br/>
+    (while params<br/>
+        (if (/= (length (chomp (car params))) 0)<br/>
+        (progn<br/>
+            (insert "\t:param ")<br/>
+            (insert (chomp (car params)))<br/>
+            (insert ": \n")))<br/>
+        (setq params (cdr params)))<br/>
+        (insert "\n\t\"\"\"\n\n")<br/>
+    )<br/>
+</code></p>
+<p><a href="https://github.com/gdevanla/emacs_scripts/blob/master/emacs/generate-header.el" target="_blank" title="Git"/></p>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/rhoforsympy.wordpress.com/277/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/rhoforsympy.wordpress.com/277/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;blog=34650270&amp;post=277&amp;subd=rhoforsympy&amp;ref=&amp;feed=1" width="1"/></div>
+    </content>
+    <updated>2012-11-07T05:14:50Z</updated>
+    <category term="Elisp"/>
+    <category term="Emacs"/>
+    <category term="Programming"/>
+    <author>
+      <name>grdvnl</name>
+    </author>
+    <source>
+      <id>http://rhoforsympy.wordpress.com</id>
+      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
+      <link href="http://rhoforsympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://rhoforsympy.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://rhoforsympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <subtitle>..where we discuss density operators wrt SymPy</subtitle>
+      <title>rhoforsympy</title>
+      <updated>2012-11-07T05:20:23Z</updated>
+    </source>
+  </entry>
 
   <entry>
     <id>http://matthewrocklin.com/blog//work/2012/11/01/Unification</id>
@@ -172,7 +238,7 @@
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-11-06T10:40:26Z</updated>
+      <updated>2012-11-07T05:20:18Z</updated>
     </source>
   </entry>
 
@@ -210,7 +276,7 @@
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site, I guess...</subtitle>
       <title>Gilbert Gede's Blog</title>
-      <updated>2012-11-06T10:40:21Z</updated>
+      <updated>2012-11-07T05:20:13Z</updated>
     </source>
   </entry>
 
@@ -387,7 +453,7 @@
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-11-06T10:40:26Z</updated>
+      <updated>2012-11-07T05:20:18Z</updated>
     </source>
   </entry>
 
@@ -1285,7 +1351,7 @@ f_durations.write('\n')
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-11-02T21:00:41Z</updated>
+      <updated>2012-11-07T00:20:26Z</updated>
     </source>
   </entry>
 
@@ -1452,7 +1518,7 @@ f_durations.write('\n')
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog//feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2012-11-06T10:40:13Z</updated>
+      <updated>2012-11-06T19:40:13Z</updated>
     </source>
   </entry>
 
@@ -1527,7 +1593,7 @@ f_durations.write('\n')
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-11-06T10:40:24Z</updated>
+      <updated>2012-11-07T05:20:16Z</updated>
     </source>
   </entry>
 
@@ -1672,7 +1738,7 @@ RuntimeError: maximum recursion depth exceeded in comparison
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-11-06T10:40:16Z</updated>
+      <updated>2012-11-07T05:20:08Z</updated>
     </source>
   </entry>
 
@@ -1715,7 +1781,7 @@ b. Add this line to your bash_profile.</p>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-06T10:40:31Z</updated>
+      <updated>2012-11-07T05:20:23Z</updated>
     </source>
   </entry>
 
@@ -1796,7 +1862,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-11-06T10:40:16Z</updated>
+      <updated>2012-11-07T05:20:08Z</updated>
     </source>
   </entry>
 
@@ -1832,7 +1898,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-11-06T10:40:16Z</updated>
+      <updated>2012-11-07T05:20:09Z</updated>
     </source>
   </entry>
 
@@ -2068,7 +2134,7 @@ Out[74]: True
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-06T10:40:31Z</updated>
+      <updated>2012-11-07T05:20:23Z</updated>
     </source>
   </entry>
 
@@ -2186,7 +2252,7 @@ commits are much more like my usual ones.
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-11-06T10:40:29Z</updated>
+      <updated>2012-11-07T05:20:20Z</updated>
     </source>
   </entry>
 
@@ -2219,7 +2285,7 @@ commits are much more like my usual ones.
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-11-06T10:40:29Z</updated>
+      <updated>2012-11-07T05:20:21Z</updated>
     </source>
   </entry>
 
@@ -2253,7 +2319,7 @@ commits are much more like my usual ones.
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-11-02T21:00:41Z</updated>
+      <updated>2012-11-07T00:20:26Z</updated>
     </source>
   </entry>
 
@@ -2364,7 +2430,7 @@ Out[24]: 6
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-11-06T10:40:28Z</updated>
+      <updated>2012-11-07T05:20:20Z</updated>
     </source>
   </entry>
 
@@ -2483,7 +2549,7 @@ Out[24]: 6
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-11-06T10:40:29Z</updated>
+      <updated>2012-11-07T05:20:21Z</updated>
     </source>
   </entry>
 
@@ -2515,7 +2581,7 @@ Out[24]: 6
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-06T10:40:31Z</updated>
+      <updated>2012-11-07T05:20:23Z</updated>
     </source>
   </entry>
 
@@ -2556,7 +2622,7 @@ Out[24]: 6
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-11-02T21:00:41Z</updated>
+      <updated>2012-11-07T00:20:26Z</updated>
     </source>
   </entry>
 
@@ -2659,7 +2725,7 @@ StopIteration:
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-06T10:40:31Z</updated>
+      <updated>2012-11-07T05:20:23Z</updated>
     </source>
   </entry>
 
@@ -2718,7 +2784,7 @@ StopIteration:
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-11-06T10:40:28Z</updated>
+      <updated>2012-11-07T05:20:20Z</updated>
     </source>
   </entry>
 
@@ -2748,7 +2814,7 @@ StopIteration:
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-11-06T10:40:29Z</updated>
+      <updated>2012-11-07T05:20:21Z</updated>
     </source>
   </entry>
 
@@ -3117,7 +3183,7 @@ Out[128]: False
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-11-02T21:00:41Z</updated>
+      <updated>2012-11-07T00:20:26Z</updated>
     </source>
   </entry>
 
@@ -3205,7 +3271,7 @@ Out[128]: False
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-11-02T21:00:41Z</updated>
+      <updated>2012-11-07T00:20:26Z</updated>
     </source>
   </entry>
 
@@ -3240,7 +3306,7 @@ Out[128]: False
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-11-02T21:00:41Z</updated>
+      <updated>2012-11-07T00:20:25Z</updated>
     </source>
   </entry>
 
@@ -3287,7 +3353,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-11-06T10:40:28Z</updated>
+      <updated>2012-11-07T05:20:20Z</updated>
     </source>
   </entry>
 
@@ -3337,7 +3403,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-06T10:40:31Z</updated>
+      <updated>2012-11-07T05:20:23Z</updated>
     </source>
   </entry>
 
@@ -3382,7 +3448,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-11-06T10:40:28Z</updated>
+      <updated>2012-11-07T05:20:20Z</updated>
     </source>
   </entry>
 
@@ -3417,7 +3483,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-06T10:40:31Z</updated>
+      <updated>2012-11-07T05:20:23Z</updated>
     </source>
   </entry>
 
@@ -3604,7 +3670,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-11-06T10:40:16Z</updated>
+      <updated>2012-11-07T05:20:09Z</updated>
     </source>
   </entry>
 
@@ -3648,7 +3714,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-06T10:40:31Z</updated>
+      <updated>2012-11-07T05:20:23Z</updated>
     </source>
   </entry>
 
@@ -3695,7 +3761,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-11-06T10:40:29Z</updated>
+      <updated>2012-11-07T05:20:20Z</updated>
     </source>
   </entry>
 
@@ -3743,7 +3809,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-11-02T21:00:42Z</updated>
+      <updated>2012-11-07T00:20:26Z</updated>
     </source>
   </entry>
 
@@ -3872,7 +3938,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-11-06T10:40:29Z</updated>
+      <updated>2012-11-07T05:20:21Z</updated>
     </source>
   </entry>
 
@@ -3919,7 +3985,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-11-06T10:40:28Z</updated>
+      <updated>2012-11-07T05:20:20Z</updated>
     </source>
   </entry>
 
@@ -4082,7 +4148,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-06T10:40:31Z</updated>
+      <updated>2012-11-07T05:20:23Z</updated>
     </source>
   </entry>
 
@@ -4122,40 +4188,6 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
       <updated>2012-11-03T21:20:25Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://angadhsympy.wordpress.com/2012/06/30/gsoc-2012-post-7-22/</id>
-    <link href="http://angadhsympy.wordpress.com/2012/06/30/gsoc-2012-post-7-22/" rel="alternate" type="text/html"/>
-    <title>GSoC 2012 Post 7</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Another week and more things learned. A new functionality was added this week to mechanics- the partial velocities function. This function basically spits out a list of lists of partial velocities. A little background on the use of partial velocities in determining equations of motion- Partial velocities are used in Kane’s method to determine, what [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=angadhsympy.wordpress.com&amp;blog=35620584&amp;post=263&amp;subd=angadhsympy&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Another week and more things learned. A new functionality was added this week to mechanics- the partial velocities function. This function basically spits out a list of lists of partial velocities.</p>
-<p>A little background on the use of partial velocities in determining equations of motion- Partial velocities are used in Kane’s method to determine, what Kane calls, generalized active force and generalized inertia force. A partial velocity is defined as the partial derivative of a velocity (or angular velocity) vector with respect to an independent generalized speed, which is a scalar. The outcome of these partial velocities is thus a vector. As many of these can be computed as may be relevant to the system. Then these partial velocities of the points are dotted with the appropriate active and inertial forces at those points.</p>
-<p>As easy and straightforward as that may sound in terms of implementation, I found it a bit of a tedious task to decide what was the best way for implementing it. It’s one thing to write code that is for stand alone purposes and where you have creative reign but it is another when it comes to writing code that must replace chunks of existing code.</p>
-<p>At first, when I wrote out this function, it was just spitting out a list of partial velocities. That wasn’t too hard. But then Jason in the comment on last week’s post suggested that changes be made into the Kane class so that the partial velocities function be incorporated into it. So as it stood, my function was useless for anything else but looking at partial velocities. So back to the drawing board!</p>
-<p>In the mechanics package, the scalar equations that are computed are stored in a matrix. So, I thought what would be ideal is to get a matrix of partial velocities that would mimic the partial velocities table that we get when we try to derive equations of motion by hand. So I went about doing that. Finally when I tested my code, I was getting an error message I couldn’t figure out. Now it was time to debug the code but with an error message that I couldn’t really grasp. I guess I went about trying to decipher the error in an unconventional way, where I went and rewrote each line of my code into the test file. But this was good because I finally figured out the issue with the function- The Matrix package in sympy doesn’t accept objects which are of the Vector class type that we typically use to represent vectors in mechanics.</p>
-<p>Speaking about this with Gilbert finally led to the conclusion that nested lists would be best in this case. So after having written the same function several times, I was finally able to rewrite the function successfully and a pertinent <a href="https://github.com/sympy/sympy/pull/1391">PR</a> opened. (I should add that in all this hoopla of writing and rewriting this function, I completely forgot about python list indexing beginning at 0. In hindsight it was hilarious to see myslef struggle with debugging my function one last time when I forgot one of Python’s quirks. I was up until the wee hours of the morning trying to figure that one out and then it hit me! Hah!). Currently I have been looking at the Kane.py module to see how to incorporate this function into it. In theory it shouldn’t be hard because the math that needs to be done fits right in, but it could be a bit more tedious than I recognize. But I’m confident that the function itself will not have to be tweaked to be used which is a good sign.</p>
-<p>So this upcoming week, I will find a way to use this functionality in the Kane class. I will also be meeting with Gilbert and we will determine a plan in terms of how to implement a Lagrange class which is one of the major goals for this summer.</p>
-<div/>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/angadhsympy.wordpress.com/263/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/angadhsympy.wordpress.com/263/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=angadhsympy.wordpress.com&amp;blog=35620584&amp;post=263&amp;subd=angadhsympy&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2012-06-30T09:17:23Z</updated>
-    <category term="Uncategorized"/>
-    <author>
-      <name>angadhn</name>
-    </author>
-    <source>
-      <id>http://angadhsympy.wordpress.com</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://angadhsympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://angadhsympy.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://angadhsympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
-      <title>GSoC 2012 blog</title>
-      <updated>2012-11-06T10:40:29Z</updated>
     </source>
   </entry>
 </feed>
