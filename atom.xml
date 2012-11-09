@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2012-11-07T19:20:33Z</updated>
+  <updated>2012-11-09T15:20:26Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -12,10 +12,109 @@
   <link href="http://planet.sympy.org/" rel="alternate"/>
 
   <entry>
+    <id>http://matthewrocklin.com/blog//work/2012/11/09/BranchingStrategies</id>
+    <link href="http://matthewrocklin.com/blog//work/2012/11/09/BranchingStrategies" rel="alternate" type="text/html"/>
+    <title>Branching Strategies</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>In my last post on <a href="http://matthewrocklin.com/blog/work/2012/11/07/Strategies/">strategies</a> I introduced a set of higher order functions to represent common control patterns (like <code>top_down</code>). We combined these with transformation rules (like <code>flatten</code>) to create complex functions for tree manipulation (like <code>flatten_tree</code>)</p>
+
+<pre><code>rule     :: expr -&gt; expr
+strategy :: parameters, rule -&gt; rule</code></pre>
+
+<p>In my post on <a href="http://matthewrocklin.com/blog/work/2012/11/01/Unification/">unification</a> we showed how to easily create rules from patterns. At the end of this post I described that because patterns might match in multiple ways one rule might produce many different results. To avoid combinatorial blowup in the number of possible matches we solved this by yielding matches lazily.</p>
+
+<p>Transformation rules produced by unify don’t return values, they yield possible solutions lazily. How do we reconcile this with our previous notion of rules and strategies? We make a new set of strategies for branching rules.</p>
+
+<pre><code>branching-rule      :: expr -&gt; {expr} 
+branching-strategy  :: parameters, branching-rule -&gt; branching-rule</code></pre>
+
+<p>In <code>sympy.rules.branch</code> we have implemented lazy analogs for the strategies found in <code>sympy.rules</code>. This allows us to apply strategies to transformations like the <code>sincos_to_one</code> rule created in the unification post.</p>
+
+<h2 id="toy_problem">Toy Problem</h2>
+
+<p>Lets see branching strategies with a toy problem. Consider the following “function”</p>
+
+<p>$$ f(x) = \cases{ x+1 &amp; \text{if } 5 &lt; x &lt; 10 \\ x-1 &amp; \text{if } 0 &lt; x &lt; 5 \\ x+1 \text{ or } x-1 &amp; \text{if } x = 5 \\ x &amp; \text{otherwise} \\ } $$</p>
+
+<p>And it’s equivalent in Python</p>
+<div class="highlight"><pre><code class="python">    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">:</span>   <span class="k">yield</span> <span class="n">x</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="mi">5</span> <span class="o">&lt;</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>  <span class="k">yield</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>      <span class="k">yield</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span> <span class="k">yield</span> <span class="n">x</span> <span class="o">-</span> <span class="mi">1</span>
+</code></pre>
+</div>
+<p>Notice that in the case where <code>x = 5</code> there are two possible outcomes. Each of these is preserved by the application of branching strategies. We use the branching version of the <code>exhaust</code> strategy to make a new exhaustive version of this function</p>
+<div class="highlight"><pre><code class="python">    <span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">sympy.rules.branch</span> <span class="kn">import</span> <span class="n">exhaust</span>
+    <span class="o">&gt;&gt;&gt;</span> <span class="n">newf</span> <span class="o">=</span> <span class="n">exhaust</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="o">&gt;&gt;&gt;</span> <span class="nb">set</span><span class="p">(</span><span class="n">newf</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
+    <span class="p">{</span><span class="mi">10</span><span class="p">}</span>
+    <span class="o">&gt;&gt;&gt;</span> <span class="nb">set</span><span class="p">(</span><span class="n">newf</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+    <span class="p">{</span><span class="mi">0</span><span class="p">}</span>
+    <span class="o">&gt;&gt;&gt;</span> <span class="nb">set</span><span class="p">(</span><span class="n">newf</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+    <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">}</span>
+</code></pre>
+</div><hr/>
+<h2 id="practical_problem">Practical Problem</h2>
+
+<p>We have all the machinery necessary. Lets make a <code>sin(x)**2 + cos(x)**2 -&gt; 1</code> tree-wise simplification function.</p>
+<div class="highlight"><pre><code class="python">    <span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">sympy.rules.branch.traverse</span> <span class="kn">import</span> <span class="n">top_down</span>
+    <span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">sympy.unify.usympy</span> <span class="kn">import</span> <span class="n">patternify</span>
+    <span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">sympy.unify.rewrite</span> <span class="kn">import</span> <span class="n">rewriterule</span>
+
+    <span class="o">&gt;&gt;&gt;</span> <span class="n">pattern_source</span> <span class="o">=</span> <span class="n">patternify</span><span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="o">&gt;&gt;&gt;</span> <span class="n">sincos_to_one</span> <span class="o">=</span> <span class="n">rewriterule</span><span class="p">(</span><span class="n">pattern_source</span><span class="p">,</span> <span class="n">S</span><span class="o">.</span><span class="n">One</span><span class="p">)</span>
+    <span class="o">&gt;&gt;&gt;</span> <span class="n">sincos_tree</span> <span class="o">=</span> <span class="n">top_down</span><span class="p">(</span><span class="n">sincos_to_one</span><span class="p">)</span>
+    
+    <span class="o">&gt;&gt;&gt;</span> <span class="nb">list</span><span class="p">(</span><span class="n">sincos_tree</span><span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="n">c</span><span class="o">**</span><span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span>  <span class="c"># see footnote</span>
+    <span class="p">[</span><span class="n">c</span><span class="o">**</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span> 
+</code></pre>
+</div>
+<p>Lets make a rule to simplify expressions like <code>c**1</code></p>
+<div class="highlight"><pre><code class="python">    <span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">sympy.rules.branch.strat_pure</span> <span class="kn">import</span> <span class="n">multiplex</span><span class="p">,</span> <span class="n">exhaust</span> 
+
+    <span class="o">&gt;&gt;&gt;</span> <span class="n">pattern</span> <span class="o">=</span> <span class="n">patternify</span><span class="p">(</span><span class="n">Pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">evaluate</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span> <span class="n">x</span><span class="p">)</span>
+    <span class="o">&gt;&gt;&gt;</span> <span class="n">pow_simp</span> <span class="o">=</span> <span class="n">rewriterule</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>                  <span class="c"># footnote 2</span>
+
+    <span class="o">&gt;&gt;&gt;</span> <span class="n">simplify</span> <span class="o">=</span> <span class="n">exhaust</span><span class="p">(</span><span class="n">top_down</span><span class="p">(</span><span class="n">multiplex</span><span class="p">(</span><span class="n">sincos_to_one</span><span class="p">,</span> <span class="n">pow_simp</span><span class="p">)))</span>
+    <span class="o">&gt;&gt;&gt;</span> <span class="nb">list</span><span class="p">(</span><span class="n">simplify</span><span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="n">c</span><span class="o">**</span><span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span>
+    <span class="p">[</span><span class="n">c</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
+</code></pre>
+</div>
+<p>We see how we can easiy build up powerful simplification functions through the separate description of logic</p>
+
+<pre><code>sin(x)**2 + cos(x)**2 -&gt; 1
+x ** 1 -&gt; x</code></pre>
+
+<p>and control</p>
+
+<pre><code>simplify = exhaust(top_down(multiplex( ... )))</code></pre>
+<hr/>
+<p><em>Footnote 1</em>: At the time of this writing this line should actually be</p>
+
+<pre><code>map(rebuild, sincos_tree( ... )</code></pre>
+
+<p>The <code>rebuild</code> function is necessary because rules don’t play well with <code>Expr</code>s. Expr’s need to be constructed normally in order to function properly. In particular all expressions built by rules lack the <code>is_commutative</code> flag which is attached onto the object at construction time. I neglected to mention this above to simplify the discussion.</p>
+
+<p><em>Footnote 2</em>: This also requires a slight modification due to the Expr/rules mismatch. In particular the pattern <code>Pow(x, 1, evaluate=False)</code> unfortunately matches to just <code>x</code> because <code>x == x**1</code> in SymPy.</p></div>
+    </summary>
+    <updated>2012-11-09T08:00:00Z</updated>
+    <source>
+      <id>http://matthewrocklin.com/blog/</id>
+      <author>
+        <name>MRocklin</name>
+      </author>
+      <link href="http://matthewrocklin.com/blog/" rel="alternate" type="text/html"/>
+      <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
+      <subtitle>Posts tagged as 'SymPy'</subtitle>
+      <title>Working notes by Matthew Rocklin - SymPy</title>
+      <updated>2012-11-09T15:20:19Z</updated>
+    </source>
+  </entry>
+
+  <entry>
     <id>http://matthewrocklin.com/blog//work/2012/11/07/Strategies</id>
     <link href="http://matthewrocklin.com/blog//work/2012/11/07/Strategies" rel="alternate" type="text/html"/>
     <title>Strategies</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>In <a href="http://matthewrocklin.com/blog/matthewrocklin.com/blog/work/2012/11/01/Unification/">my last post</a> I showed how unification and rewrite rules allow us to express <em>what</em> we want without specifying <em>how</em> to compute it. As an example we were able to turn the mathematical identity <code>sin(x)**2 + cos(x)**2 -&gt; 1</code> into a function with relatively simple code</p>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>In <a href="http://matthewrocklin.com/blog/work/2012/11/01/Unification/">my last post</a> I showed how unification and rewrite rules allow us to express <em>what</em> we want without specifying <em>how</em> to compute it. As an example we were able to turn the mathematical identity <code>sin(x)**2 + cos(x)**2 -&gt; 1</code> into a function with relatively simple code</p>
 <div class="highlight"><pre><code class="python">    <span class="c"># Transformation : sin(x)**2 + cos(x)**2 -&gt; 1</span>
     <span class="o">&gt;&gt;&gt;</span> <span class="n">pattern</span> <span class="o">=</span> <span class="n">patternify</span><span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
     <span class="o">&gt;&gt;&gt;</span> <span class="n">sincos_to_one</span> <span class="o">=</span> <span class="n">rewriterule</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
@@ -214,7 +313,7 @@
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-11-07T19:20:28Z</updated>
+      <updated>2012-11-09T15:20:20Z</updated>
     </source>
   </entry>
 
@@ -278,7 +377,7 @@
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-07T19:20:32Z</updated>
+      <updated>2012-11-09T15:20:25Z</updated>
     </source>
   </entry>
 
@@ -443,7 +542,7 @@
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-11-07T19:20:27Z</updated>
+      <updated>2012-11-09T15:20:20Z</updated>
     </source>
   </entry>
 
@@ -481,7 +580,7 @@
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site, I guess...</subtitle>
       <title>Gilbert Gede's Blog</title>
-      <updated>2012-11-07T19:20:22Z</updated>
+      <updated>2012-11-09T15:20:14Z</updated>
     </source>
   </entry>
 
@@ -658,7 +757,7 @@
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-11-07T19:20:28Z</updated>
+      <updated>2012-11-09T15:20:19Z</updated>
     </source>
   </entry>
 
@@ -1798,7 +1897,7 @@ f_durations.write('\n')
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-11-07T19:20:25Z</updated>
+      <updated>2012-11-09T15:20:16Z</updated>
     </source>
   </entry>
 
@@ -1943,7 +2042,7 @@ RuntimeError: maximum recursion depth exceeded in comparison
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-11-07T19:20:11Z</updated>
+      <updated>2012-11-09T15:20:08Z</updated>
     </source>
   </entry>
 
@@ -1986,7 +2085,7 @@ b. Add this line to your bash_profile.</p>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-07T19:20:33Z</updated>
+      <updated>2012-11-09T15:20:25Z</updated>
     </source>
   </entry>
 
@@ -2067,7 +2166,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-11-07T19:20:11Z</updated>
+      <updated>2012-11-09T15:20:08Z</updated>
     </source>
   </entry>
 
@@ -2103,7 +2202,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-11-07T19:20:11Z</updated>
+      <updated>2012-11-09T15:20:08Z</updated>
     </source>
   </entry>
 
@@ -2339,7 +2438,7 @@ Out[74]: True
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-07T19:20:32Z</updated>
+      <updated>2012-11-09T15:20:25Z</updated>
     </source>
   </entry>
 
@@ -2457,7 +2556,7 @@ commits are much more like my usual ones.
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-11-07T19:20:30Z</updated>
+      <updated>2012-11-09T15:20:23Z</updated>
     </source>
   </entry>
 
@@ -2490,7 +2589,7 @@ commits are much more like my usual ones.
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-11-07T19:20:31Z</updated>
+      <updated>2012-11-09T15:20:23Z</updated>
     </source>
   </entry>
 
@@ -2620,9 +2719,9 @@ Out[24]: 6
     <updated>2012-08-05T11:29:33Z</updated>
     <category term="SymPy"/>
     <category term="category theory"/>
-    <category term="diagram embedding"/>
-    <category term="graph embedding"/>
     <category term="subgraph isomorphism problem"/>
+    <category term="graph embedding"/>
+    <category term="diagram embedding"/>
     <author>
       <name>scolobb</name>
     </author>
@@ -2635,7 +2734,7 @@ Out[24]: 6
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-11-07T19:20:30Z</updated>
+      <updated>2012-11-09T15:20:22Z</updated>
     </source>
   </entry>
 
@@ -2754,7 +2853,7 @@ Out[24]: 6
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-11-07T19:20:31Z</updated>
+      <updated>2012-11-09T15:20:23Z</updated>
     </source>
   </entry>
 
@@ -2786,7 +2885,7 @@ Out[24]: 6
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-07T19:20:32Z</updated>
+      <updated>2012-11-09T15:20:25Z</updated>
     </source>
   </entry>
 
@@ -2930,7 +3029,7 @@ StopIteration:
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-07T19:20:32Z</updated>
+      <updated>2012-11-09T15:20:25Z</updated>
     </source>
   </entry>
 
@@ -2970,12 +3069,12 @@ StopIteration:
     </content>
     <updated>2012-07-29T19:20:53Z</updated>
     <category term="SymPy"/>
-    <category term="backward chaining"/>
+    <category term="string representation"/>
     <category term="deciding commutativity"/>
     <category term="diagram layout"/>
     <category term="pretty printing"/>
     <category term="sort key"/>
-    <category term="string representation"/>
+    <category term="backward chaining"/>
     <category term="subgraph isomorphism problem"/>
     <author>
       <name>scolobb</name>
@@ -2989,7 +3088,7 @@ StopIteration:
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-11-07T19:20:30Z</updated>
+      <updated>2012-11-09T15:20:22Z</updated>
     </source>
   </entry>
 
@@ -3019,7 +3118,7 @@ StopIteration:
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-11-07T19:20:31Z</updated>
+      <updated>2012-11-09T15:20:23Z</updated>
     </source>
   </entry>
 
@@ -3558,7 +3657,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-11-07T19:20:30Z</updated>
+      <updated>2012-11-09T15:20:22Z</updated>
     </source>
   </entry>
 
@@ -3608,7 +3707,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-07T19:20:32Z</updated>
+      <updated>2012-11-09T15:20:25Z</updated>
     </source>
   </entry>
 
@@ -3653,7 +3752,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-11-07T19:20:30Z</updated>
+      <updated>2012-11-09T15:20:22Z</updated>
     </source>
   </entry>
 
@@ -3688,7 +3787,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-07T19:20:32Z</updated>
+      <updated>2012-11-09T15:20:25Z</updated>
     </source>
   </entry>
 
@@ -3875,7 +3974,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-11-07T19:20:11Z</updated>
+      <updated>2012-11-09T15:20:08Z</updated>
     </source>
   </entry>
 
@@ -3919,7 +4018,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-07T19:20:33Z</updated>
+      <updated>2012-11-09T15:20:25Z</updated>
     </source>
   </entry>
 
@@ -3966,7 +4065,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-11-07T19:20:30Z</updated>
+      <updated>2012-11-09T15:20:23Z</updated>
     </source>
   </entry>
 
@@ -4143,7 +4242,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-11-07T19:20:31Z</updated>
+      <updated>2012-11-09T15:20:23Z</updated>
     </source>
   </entry>
 
@@ -4190,7 +4289,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-11-07T19:20:30Z</updated>
+      <updated>2012-11-09T15:20:23Z</updated>
     </source>
   </entry>
 
@@ -4311,49 +4410,6 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
       <updated>2012-10-06T05:40:18Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://rhoforsympy.wordpress.com/?p=169</id>
-    <link href="http://rhoforsympy.wordpress.com/2012/07/01/week-6-tr-implementation-contd/" rel="alternate" type="text/html"/>
-    <title>Week 6 : Tr implementation contd…</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">This week I continued to work on the Tr operator and the related code needed for partial trace operations.  Following up with the list of tasks I had listed out for this week, I got the following items accomplished this week. 1. PR 1333 merged 2. Submitted PR 1396  for review : This PR has the [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;blog=34650270&amp;post=169&amp;subd=rhoforsympy&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>This week I continued to work on the Tr operator and the related code needed for partial trace operations.  Following up with the list of tasks I had listed out for this week, I got the following items accomplished this week.</p>
-<p>1. PR 1333 merged</p>
-<p>2. Submitted <a href="https://github.com/sympy/sympy/pull/1396">PR 1396</a>  for review :</p>
-<p>This PR has the following changes:</p>
-<p>1. Printing ( default, latex and pretty).  The current output does not display the indices.  I would like some input on this from the reviewers on how to incorporate the information on indices into the output.</p>
-<p>2. Handles indices in the constructor of Density class and related methods.</p>
-<p>3. Handle partial trace operations especially wrt to Density operators.</p>
-<p>4. Notebook example, some of which are listed below:</p>
-<p><a href="http://rhoforsympy.files.wordpress.com/2012/07/tr_examp1.jpg"><img alt="" class="alignleft size-full wp-image-174" height="396" src="http://rhoforsympy.files.wordpress.com/2012/07/tr_examp1.jpg?w=500&amp;h=396" title="tr_examp" width="500"/></a></p>
-<p>The activities I have in mind for next week are as follows.</p>
-<p>1.  Address review comments on latest PR.</p>
-<p>2.  Complete the test cases for existing partial trace implementation for Qubits. My plan is to get this changes merged with the current PR. This should happen by Tuesday.</p>
-<p>With these 2 activities, I believe most of what is needed for Tr and density matrices could be considered complete. Again, I expect  <a href="https://github.com/ellisonbg">@ellisonbg</a> and <a href="https://github.com/flacjacket">@flacjacket</a> to provide some input on this.   Assuming, this is true, then I plan to start looking at</p>
-<p>3. qapply() method to incorporate density op L and R operations.</p>
-<p><span style="text-decoration: underline;">Aside:</span></p>
-<p>BTW, for Emacs lovers and who love IPython Notebook, there is <a href="http://tkf.github.com/emacs-ipython-notebook/">IPython notebook for Emacs</a> now. I have not tried this yet,  but I plan to try this out this week and post my experience.</p>
-<p>Happy coding!</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/rhoforsympy.wordpress.com/169/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/rhoforsympy.wordpress.com/169/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;blog=34650270&amp;post=169&amp;subd=rhoforsympy&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2012-07-01T23:39:33Z</updated>
-    <category term="Uncategorized"/>
-    <author>
-      <name>grdvnl</name>
-    </author>
-    <source>
-      <id>http://rhoforsympy.wordpress.com</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://rhoforsympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://rhoforsympy.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://rhoforsympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>..where we discuss density operators wrt SymPy</subtitle>
-      <title>rhoforsympy</title>
-      <updated>2012-11-07T19:20:33Z</updated>
     </source>
   </entry>
 </feed>

@@ -8,10 +8,96 @@
 	<description>Planet SymPy - http://planet.sympy.org/</description>
 
 <item>
+	<title>MRocklin: Branching Strategies</title>
+	<guid isPermaLink="true">http://matthewrocklin.com/blog//work/2012/11/09/BranchingStrategies</guid>
+	<link>http://matthewrocklin.com/blog//work/2012/11/09/BranchingStrategies</link>
+	<description>&lt;p&gt;In my last post on &lt;a href=&quot;http://matthewrocklin.com/blog/work/2012/11/07/Strategies/&quot;&gt;strategies&lt;/a&gt; I introduced a set of higher order functions to represent common control patterns (like &lt;code&gt;top_down&lt;/code&gt;). We combined these with transformation rules (like &lt;code&gt;flatten&lt;/code&gt;) to create complex functions for tree manipulation (like &lt;code&gt;flatten_tree&lt;/code&gt;)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;rule     :: expr -&amp;gt; expr
+strategy :: parameters, rule -&amp;gt; rule&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In my post on &lt;a href=&quot;http://matthewrocklin.com/blog/work/2012/11/01/Unification/&quot;&gt;unification&lt;/a&gt; we showed how to easily create rules from patterns. At the end of this post I described that because patterns might match in multiple ways one rule might produce many different results. To avoid combinatorial blowup in the number of possible matches we solved this by yielding matches lazily.&lt;/p&gt;
+
+&lt;p&gt;Transformation rules produced by unify don’t return values, they yield possible solutions lazily. How do we reconcile this with our previous notion of rules and strategies? We make a new set of strategies for branching rules.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;branching-rule      :: expr -&amp;gt; {expr} 
+branching-strategy  :: parameters, branching-rule -&amp;gt; branching-rule&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In &lt;code&gt;sympy.rules.branch&lt;/code&gt; we have implemented lazy analogs for the strategies found in &lt;code&gt;sympy.rules&lt;/code&gt;. This allows us to apply strategies to transformations like the &lt;code&gt;sincos_to_one&lt;/code&gt; rule created in the unification post.&lt;/p&gt;
+
+&lt;h2 id=&quot;toy_problem&quot;&gt;Toy Problem&lt;/h2&gt;
+
+&lt;p&gt;Lets see branching strategies with a toy problem. Consider the following “function”&lt;/p&gt;
+
+&lt;p&gt;$$ f(x) = \cases{ x+1 &amp;amp; \text{if } 5 &amp;lt; x &amp;lt; 10 \\ x-1 &amp;amp; \text{if } 0 &amp;lt; x &amp;lt; 5 \\ x+1 \text{ or } x-1 &amp;amp; \text{if } x = 5 \\ x &amp;amp; \text{otherwise} \\ } $$&lt;/p&gt;
+
+&lt;p&gt;And it’s equivalent in Python&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;   &lt;span class=&quot;k&quot;&gt;yield&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;  &lt;span class=&quot;k&quot;&gt;yield&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;      &lt;span class=&quot;k&quot;&gt;yield&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;yield&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;Notice that in the case where &lt;code&gt;x = 5&lt;/code&gt; there are two possible outcomes. Each of these is preserved by the application of branching strategies. We use the branching version of the &lt;code&gt;exhaust&lt;/code&gt; strategy to make a new exhaustive version of this function&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;    &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;sympy.rules.branch&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;exhaust&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;newf&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;exhaust&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;set&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;newf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;6&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;set&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;newf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;set&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;newf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;&lt;hr /&gt;
+&lt;h2 id=&quot;practical_problem&quot;&gt;Practical Problem&lt;/h2&gt;
+
+&lt;p&gt;We have all the machinery necessary. Lets make a &lt;code&gt;sin(x)**2 + cos(x)**2 -&amp;gt; 1&lt;/code&gt; tree-wise simplification function.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;    &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;sympy.rules.branch.traverse&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;top_down&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;sympy.unify.usympy&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;patternify&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;sympy.unify.rewrite&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rewriterule&lt;/span&gt;
+
+    &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pattern_source&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;patternify&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sincos_to_one&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rewriterule&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pattern_source&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;S&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;One&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sincos_tree&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;top_down&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sincos_to_one&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    
+    &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sincos_tree&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;  &lt;span class=&quot;c&quot;&gt;# see footnote&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; 
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;Lets make a rule to simplify expressions like &lt;code&gt;c**1&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;    &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;sympy.rules.branch.strat_pure&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;multiplex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;exhaust&lt;/span&gt; 
+
+    &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pattern&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;patternify&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Pow&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;evaluate&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pow_simp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rewriterule&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pattern&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;                  &lt;span class=&quot;c&quot;&gt;# footnote 2&lt;/span&gt;
+
+    &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;simplify&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;exhaust&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;top_down&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;multiplex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sincos_to_one&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pow_simp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;simplify&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;We see how we can easiy build up powerful simplification functions through the separate description of logic&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;sin(x)**2 + cos(x)**2 -&amp;gt; 1
+x ** 1 -&amp;gt; x&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;and control&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;simplify = exhaust(top_down(multiplex( ... )))&lt;/code&gt;&lt;/pre&gt;
+&lt;hr /&gt;
+&lt;p&gt;&lt;em&gt;Footnote 1&lt;/em&gt;: At the time of this writing this line should actually be&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;map(rebuild, sincos_tree( ... )&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;rebuild&lt;/code&gt; function is necessary because rules don’t play well with &lt;code&gt;Expr&lt;/code&gt;s. Expr’s need to be constructed normally in order to function properly. In particular all expressions built by rules lack the &lt;code&gt;is_commutative&lt;/code&gt; flag which is attached onto the object at construction time. I neglected to mention this above to simplify the discussion.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Footnote 2&lt;/em&gt;: This also requires a slight modification due to the Expr/rules mismatch. In particular the pattern &lt;code&gt;Pow(x, 1, evaluate=False)&lt;/code&gt; unfortunately matches to just &lt;code&gt;x&lt;/code&gt; because &lt;code&gt;x == x**1&lt;/code&gt; in SymPy.&lt;/p&gt;</description>
+	<pubDate>Fri, 09 Nov 2012 08:00:00 +0000</pubDate>
+</item>
+<item>
 	<title>MRocklin: Strategies</title>
 	<guid isPermaLink="true">http://matthewrocklin.com/blog//work/2012/11/07/Strategies</guid>
 	<link>http://matthewrocklin.com/blog//work/2012/11/07/Strategies</link>
-	<description>&lt;p&gt;In &lt;a href=&quot;http://matthewrocklin.com/blog/matthewrocklin.com/blog/work/2012/11/01/Unification/&quot;&gt;my last post&lt;/a&gt; I showed how unification and rewrite rules allow us to express &lt;em&gt;what&lt;/em&gt; we want without specifying &lt;em&gt;how&lt;/em&gt; to compute it. As an example we were able to turn the mathematical identity &lt;code&gt;sin(x)**2 + cos(x)**2 -&amp;gt; 1&lt;/code&gt; into a function with relatively simple code&lt;/p&gt;
+	<description>&lt;p&gt;In &lt;a href=&quot;http://matthewrocklin.com/blog/work/2012/11/01/Unification/&quot;&gt;my last post&lt;/a&gt; I showed how unification and rewrite rules allow us to express &lt;em&gt;what&lt;/em&gt; we want without specifying &lt;em&gt;how&lt;/em&gt; to compute it. As an example we were able to turn the mathematical identity &lt;code&gt;sin(x)**2 + cos(x)**2 -&amp;gt; 1&lt;/code&gt; into a function with relatively simple code&lt;/p&gt;
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;    &lt;span class=&quot;c&quot;&gt;# Transformation : sin(x)**2 + cos(x)**2 -&amp;gt; 1&lt;/span&gt;
     &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pattern&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;patternify&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
     &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sincos_to_one&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rewriterule&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pattern&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
@@ -3202,30 +3288,6 @@ plot_implicit(And(Eq(y, exp(x)), y - x &amp;gt; 2)
 
 &lt;p&gt;If you feel you know where the problem is, please comment or email me. :)&lt;/p&gt;</description>
 	<pubDate>Mon, 02 Jul 2012 07:00:00 +0000</pubDate>
-</item>
-<item>
-	<title>Guru Devanla: Week 6 : Tr implementation contd…</title>
-	<guid isPermaLink="false">http://rhoforsympy.wordpress.com/?p=169</guid>
-	<link>http://rhoforsympy.wordpress.com/2012/07/01/week-6-tr-implementation-contd/</link>
-	<description>&lt;p&gt;This week I continued to work on the Tr operator and the related code needed for partial trace operations.  Following up with the list of tasks I had listed out for this week, I got the following items accomplished this week.&lt;/p&gt;
-&lt;p&gt;1. PR 1333 merged&lt;/p&gt;
-&lt;p&gt;2. Submitted &lt;a href=&quot;https://github.com/sympy/sympy/pull/1396&quot;&gt;PR 1396&lt;/a&gt;  for review :&lt;/p&gt;
-&lt;p&gt;This PR has the following changes:&lt;/p&gt;
-&lt;p&gt;1. Printing ( default, latex and pretty).  The current output does not display the indices.  I would like some input on this from the reviewers on how to incorporate the information on indices into the output.&lt;/p&gt;
-&lt;p&gt;2. Handles indices in the constructor of Density class and related methods.&lt;/p&gt;
-&lt;p&gt;3. Handle partial trace operations especially wrt to Density operators.&lt;/p&gt;
-&lt;p&gt;4. Notebook example, some of which are listed below:&lt;/p&gt;
-&lt;p&gt;&lt;a href=&quot;http://rhoforsympy.files.wordpress.com/2012/07/tr_examp1.jpg&quot;&gt;&lt;img src=&quot;http://rhoforsympy.files.wordpress.com/2012/07/tr_examp1.jpg?w=500&amp;amp;h=396&quot; title=&quot;tr_examp&quot; height=&quot;396&quot; width=&quot;500&quot; alt=&quot;&quot; class=&quot;alignleft size-full wp-image-174&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;The activities I have in mind for next week are as follows.&lt;/p&gt;
-&lt;p&gt;1.  Address review comments on latest PR.&lt;/p&gt;
-&lt;p&gt;2.  Complete the test cases for existing partial trace implementation for Qubits. My plan is to get this changes merged with the current PR. This should happen by Tuesday.&lt;/p&gt;
-&lt;p&gt;With these 2 activities, I believe most of what is needed for Tr and density matrices could be considered complete. Again, I expect  &lt;a href=&quot;https://github.com/ellisonbg&quot;&gt;@ellisonbg&lt;/a&gt; and &lt;a href=&quot;https://github.com/flacjacket&quot;&gt;@flacjacket&lt;/a&gt; to provide some input on this.   Assuming, this is true, then I plan to start looking at&lt;/p&gt;
-&lt;p&gt;3. qapply() method to incorporate density op L and R operations.&lt;/p&gt;
-&lt;p&gt;&lt;span style=&quot;text-decoration: underline;&quot;&gt;Aside:&lt;/span&gt;&lt;/p&gt;
-&lt;p&gt;BTW, for Emacs lovers and who love IPython Notebook, there is &lt;a href=&quot;http://tkf.github.com/emacs-ipython-notebook/&quot;&gt;IPython notebook for Emacs&lt;/a&gt; now. I have not tried this yet,  but I plan to try this out this week and post my experience.&lt;/p&gt;
-&lt;p&gt;Happy coding!&lt;/p&gt;
-&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/rhoforsympy.wordpress.com/169/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/rhoforsympy.wordpress.com/169/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;amp;blog=34650270&amp;amp;post=169&amp;amp;subd=rhoforsympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
-	<pubDate>Sun, 01 Jul 2012 23:39:33 +0000</pubDate>
 </item>
 
 </channel>
