@@ -10,6 +10,7 @@
 
 
 
+
 <head>
 <title>Planet SymPy</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -21,6 +22,170 @@
 <body>
 <h1>Planet SymPy</h1>
 
+<div class="daygroup">
+<h2>November 10, 2012</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://matthewrocklin.com/blog/" title="Working notes by Matthew Rocklin - SymPy">MRocklin</a></h3>
+
+
+<div class="entrygroup" id="http://matthewrocklin.com/blog//work/2012/11/10/GeneratingBLAS-PreliminaryResults">
+<h4><a href="http://matthewrocklin.com/blog//work/2012/11/10/GeneratingBLAS-PreliminaryResults">Preliminary BLAS Results</a></h4>
+<div class="entry">
+<div class="content">
+<p>In the last few posts I’ve built up some independent technology.</p>
+
+<ol>
+<li><a href="http://mrocklin.github.com/blog/work/2012/10/29/Matrix-Computations/">BLAS and code generation</a> - a logical description</li>
+
+<li><a href="http://mrocklin.github.com/blog/work/2012/11/01/Unification/">Unification</a> - advanced pattern matching</li>
+
+<li><a href="http://mrocklin.github.com/blog/work/2012/11/07/Strategies/">Strategies</a> - programmatic control</li>
+
+<li><a href="http://mrocklin.github.com/blog/work/2012/11/09/BranchingStrategies/">Branching Strategies</a> - control with multiple possibilities</li>
+</ol>
+
+<p>In this post I’ll pull them all together for my first substantial results generating Fortran code to call BLAS/LAPACK. Lets go through a working example</p>
+
+<p>We set up a problem that we’d like to solve. This case we try to compute \((4 X X^{T} + 2 Z)^{-1} X\) where \( X \) and \(Z\) are positive definite and \(Z\) is also symmetric.</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="c"># Set up a mathematical problem to solve</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">X</span> <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'X'</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">Z</span> <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'Z'</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">target</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">X</span><span class="o">*</span><span class="n">X</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">Z</span><span class="p">)</span><span class="o">.</span><span class="n">I</span><span class="o">*</span><span class="n">X</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">assumptions</span> <span class="o">=</span> <span class="n">Q</span><span class="o">.</span><span class="n">invertible</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">positive_definite</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span>
+</code></pre>
+</div>
+<p>We have described a set of BLAS operations to perform certain transformations when the right conditions are met. Each BLAS operation is a single rewrite rule.</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">sympy.matrices.expressions.gen</span> <span class="kn">import</span> <span class="n">rr_from_blas</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">sympy.matrices.expressions.blas</span> <span class="kn">import</span>   <span class="n">GEMM</span><span class="p">,</span> <span class="n">SYMM</span><span class="p">,</span> <span class="n">TRMM</span><span class="p">,</span> <span class="n">TRSV</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">sympy.matrices.expressions.lapack</span> <span class="kn">import</span> <span class="n">POSV</span><span class="p">,</span> <span class="n">GESV</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">routines</span> <span class="o">=</span> <span class="p">(</span><span class="n">TRSV</span><span class="p">,</span> <span class="n">POSV</span><span class="p">,</span> <span class="n">GESV</span><span class="p">,</span> <span class="n">TRMM</span><span class="p">,</span> <span class="n">SYMM</span><span class="p">,</span> <span class="n">GEMM</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">rules</span> <span class="o">=</span> <span class="p">[</span><span class="n">rr_from_blas</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">assumptions</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">routines</span><span class="p">]</span>
+</code></pre>
+</div>
+<p>Each of these rules can convert one kind of expression into a computation given certain conditions. For example</p>
+
+<pre><code>SYMM:  alpha A B + beta C -&gt; SYMM(alpha, A, B, beta, C) if A or B are symmetric</code></pre>
+
+<p>We need to combine them to turn the large target expression into a set of atomic inputs. Some of the BLAS routines overlap so there are potentially many possibilities.</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">sympy.matrices.expressions.gen</span> <span class="kn">import</span> <span class="n">top_down</span> 
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">sympy.rules.branch</span> <span class="kn">import</span> <span class="n">multiplex</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">rule</span> <span class="o">=</span> <span class="n">top_down</span><span class="p">(</span><span class="n">multiplex</span><span class="p">(</span><span class="o">*</span><span class="n">rules</span><span class="p">))</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">computations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">rule</span><span class="p">(</span><span class="n">target</span><span class="p">))</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">computations</span><span class="p">)</span>
+<span class="mi">2</span>
+</code></pre>
+</div>
+<p>We generate Fortran code from the first computation</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="k">print</span> <span class="n">computations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">print_Fortran</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">assumptions</span><span class="p">)</span>
+</code></pre>
+</div><div class="highlight"><pre><code class="fortran"><span class="k">subroutine </span><span class="nv">f</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span> <span class="nv">Z</span><span class="p">,</span> <span class="nv">INFO</span><span class="p">,</span> <span class="nv">n</span><span class="p">)</span>
+
+<span class="kt">real</span><span class="o">*</span><span class="mi">8</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="nv">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="nv">X</span><span class="p">(</span><span class="nv">n</span><span class="p">,</span> <span class="nv">n</span><span class="p">)</span>
+<span class="kt">real</span><span class="o">*</span><span class="mi">8</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="nv">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="nv">Z</span><span class="p">(</span><span class="nv">n</span><span class="p">,</span> <span class="nv">n</span><span class="p">)</span>
+<span class="kt">integer</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="nv">out</span><span class="p">)</span> <span class="kd">::</span> <span class="nv">INFO</span>
+<span class="kt">integer</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="nv">in</span><span class="p">)</span> <span class="kd">::</span> <span class="nv">n</span>
+
+<span class="k">call </span><span class="nv">dgemm</span><span class="p">(</span><span class="s1">'N'</span><span class="p">,</span> <span class="s1">'T'</span><span class="p">,</span> <span class="nv">n</span><span class="p">,</span> <span class="nv">n</span><span class="p">,</span> <span class="nv">n</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="nv">X</span><span class="p">,</span> <span class="nv">n</span><span class="p">,</span> <span class="nv">X</span><span class="p">,</span> <span class="nv">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="nv">Z</span><span class="p">,</span> <span class="nv">n</span><span class="p">)</span>
+<span class="k">call </span><span class="nv">dposv</span><span class="p">(</span><span class="nv">U</span><span class="p">,</span> <span class="nv">n</span><span class="p">,</span> <span class="nv">n</span><span class="p">,</span> <span class="nv">Z</span><span class="p">,</span> <span class="nv">n</span><span class="p">,</span> <span class="nv">X</span><span class="p">,</span> <span class="nv">n</span><span class="p">,</span> <span class="nv">INFO</span><span class="p">)</span>
+
+<span class="k">RETURN</span>
+<span class="k">END</span>
+</code></pre>
+</div>
+<p>This solution first uses <code>GEMM</code> to multiply \(4X X^{T} + 2 Z\). It then uses <code>POSV</code> to perform the solve \((4X X^{T} + 2Z)^{-1} X\). The <code>POSV</code> routine solves systems of the form \(A^{-1}B\) where \(A\) is symmetric positive definite. We used a logical programming framework to infer that \(4X X^{T} + 2Z\) is symmetric positive definite given the original mathematical assumptions.</p>
+
+<p>This computation is in-place. <code>GEMM</code> stores its result in the argument <code>Z</code>. <code>POSV</code> uses <code>Z</code> and stores the output in <code>X</code>. Note that both <code>X</code> and <code>Z</code> have been declared with <code>inout</code> intents in the Fortran code.</p>
+
+<p>This Fortran code is independent of Python or SymPy and can be used in any project. However, if we prefer the Python environment we can bring it back into the Python session with F2PY.</p>
+
+<pre><code>&gt;&gt;&gt; f = computations[0].build(str, assumptions) 
+&gt;&gt;&gt; f?
+f - Function signature:
+  info = f(x,z,[n])
+Required arguments:
+  x : in/output rank-2 array('d') with bounds (n,n)
+  z : in/output rank-2 array('d') with bounds (n,n)
+Optional arguments:
+  n := shape(x,0) input int
+Return objects:
+  info : int</code></pre>
+
+<p>This function accepts numpy arrays and so integrates well into the Python scientific computing stack.</p>
+
+<h2 id="multiple_matches">Multiple Matches</h2>
+
+<p>There were two computations. What was the other?</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">computations</span><span class="p">)</span>
+<span class="mi">2</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">print</span> <span class="n">computations</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">print_Fortran</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">assumptions</span><span class="p">)</span>
+</code></pre>
+</div><div class="highlight"><pre><code class="fortran"><span class="k">subroutine </span><span class="nv">f</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span> <span class="nv">Z</span><span class="p">,</span> <span class="nv">INFO</span><span class="p">,</span> <span class="nv">IPIV</span><span class="p">,</span> <span class="nv">n</span><span class="p">)</span>
+
+<span class="kt">real</span><span class="o">*</span><span class="mi">8</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="nv">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="nv">X</span><span class="p">(</span><span class="nv">n</span><span class="p">,</span> <span class="nv">n</span><span class="p">)</span>
+<span class="kt">real</span><span class="o">*</span><span class="mi">8</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="nv">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="nv">Z</span><span class="p">(</span><span class="nv">n</span><span class="p">,</span> <span class="nv">n</span><span class="p">)</span>
+<span class="kt">integer</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="nv">out</span><span class="p">)</span> <span class="kd">::</span> <span class="nv">INFO</span>
+<span class="kt">integer</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="nv">out</span><span class="p">)</span> <span class="kd">::</span> <span class="nv">IPIV</span><span class="p">(</span><span class="nv">n</span><span class="p">)</span>
+<span class="kt">integer</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="nv">in</span><span class="p">)</span> <span class="kd">::</span> <span class="nv">n</span>
+
+<span class="k">call </span><span class="nv">dgemm</span><span class="p">(</span><span class="s1">'N'</span><span class="p">,</span> <span class="s1">'T'</span><span class="p">,</span> <span class="nv">n</span><span class="p">,</span> <span class="nv">n</span><span class="p">,</span> <span class="nv">n</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="nv">X</span><span class="p">,</span> <span class="nv">n</span><span class="p">,</span> <span class="nv">X</span><span class="p">,</span> <span class="nv">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="nv">Z</span><span class="p">,</span> <span class="nv">n</span><span class="p">)</span>
+<span class="k">call </span><span class="nv">dgesv</span><span class="p">(</span><span class="nv">n</span><span class="p">,</span> <span class="nv">n</span><span class="p">,</span> <span class="nv">Z</span><span class="p">,</span> <span class="nv">n</span><span class="p">,</span> <span class="nv">IPIV</span><span class="p">,</span> <span class="nv">X</span><span class="p">,</span> <span class="nv">n</span><span class="p">,</span> <span class="nv">INFO</span><span class="p">)</span>
+
+<span class="k">RETURN</span>
+<span class="k">END</span>
+</code></pre>
+</div>
+<p>This solution uses the <code>GESV</code> routine for general matrices in place of the specialized <code>POSV</code> for symmetric positive definite matrices. Which is best? In this case <code>POSV</code> is likely faster because it is able to use faster algorithms due to the symmetric positive definite assumption. After looking at both possibilities we choose it.</p>
+
+<p>For large matrix expressions the number of possible computations may stop us from inspecting all possible solutions. How can we ensure that the best solution is in the first few?</p>
+
+<h2 id="code_separation">Code Separation</h2>
+
+<p>The definition of BLAS/LAPACK is separated from the pattern matching code and the branching control code. This allows me (or other people) to develop one without thinking about the other. It also allows for a declarative definition of BLAS and LAPACK routines. If anyone is interested I could use more routines than just the six used in this example.</p>
+
+<p>This project requires the technology from the previous four posts. While all of that technology (strategies, unification, code generation) is necessary to this project none of it is specific to this project. All of the pieces are general, composable, and applicable to other ends. I hope that others are able to find some use for them.</p>
+
+<h2 id="caveats">Caveats</h2>
+
+<p>This code is still experimental. It is not yet merged into the SymPy master branch. The interface may change. Results are promising but there are stil big pieces missing before its ready for public use.</p>
+
+<h2 id="references">References</h2>
+
+<ol>
+<li><a href="http://cens.ioc.ee/projects/f2py2e/">F2PY</a></li>
+
+<li>D. Fabregat-Traver, P. Bientinesi, <a href="http://www.aices.rwth-aachen.de:8080/aices/preprint/documents/AICES-2012-01-02.pdf"><em>A Domain-Specific Comiler for Linear Algebra Operations</em></a>, arXiv preprint arXiv:1205.5975 (2012).</li>
+
+<li><a href="http://mrocklin.github.com/blog/storage/blas_prelim.py">Example code</a> from this post</li>
+
+<li><a href="https://github.com/mrocklin/sympy/tree/blas">My development branch of SymPy</a></li>
+</ol></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://matthewrocklin.com/blog//work/2012/11/10/GeneratingBLAS-PreliminaryResults">November 10, 2012 08:00 AM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
 <div class="daygroup">
 <h2>November 09, 2012</h2>
 
@@ -4728,47 +4893,6 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
 </div>
 
 
-
-
-<div class="entrygroup" id="http://blog.catchmrbharath.in/programming/2012/07/02/gsoc-week-6">
-<h4><a href="http://blog.catchmrbharath.in/programming/2012/07/02/gsoc-week-6">GSoC Week 6</a></h4>
-<div class="entry">
-<div class="content">
-<p>I have been trying to improve the implicit plotting module during this week. But I have hit a road block. I almost ran out of ideas to solve the problem.</p>
-
-<p>Description:</p>
-
-<p>The implicit plotting algorithm I implemented works something like below:</p>
-
-<p>1) Get x and y interval. If it satisfies the expression throughout the interval, then plot it.</p>
-
-<p>2) If it does not satisfy, throw away the intervals.</p>
-
-<p>3) If it partially satisfies, then recursively subdivide into four intervals, and try again.</p>
-
-<p>For cases of equality, the first point never holds true due to floating point errors. So we go on eliminating regions, and after a certain depth, plot the remaining region. These are the regions where there is at least one solution. This is the reason why the plots are rasterized. But there is an inherent bigger problem here. In the cases of expressions like $x^{3}$ even if the x interval is small, the resulting interval after computation will be large. Sometimes, due to these large intervals, there might be lots of y and x intervals which satisfy because of these errors. Even if we make x interval really small, the corresponding y interval will be large, ie the line widths become large. The explanation is more of a guess rather than the right explanation.</p>
-
-<p>Examples:</p>
-
-<p>Plot of $x^{y}=y^{x}$ <img width="600" src="http://blog.catchmrbharath.in/images/02072012/fig1.png" height="400" /> Even if I increase my depth of recursion to higher values, the thickness becomes less, but doesn’t vanish. The plot actually should have been two separate curves.</p>
-<img width="600" src="http://blog.catchmrbharath.in/images/02072012/fig3.png" height="400" />
-<p>The Mac OSX’s Grapher uses a similar algorithm(A guess because they have similar rasterization) but takes care of the line widths.</p>
-
-<p>If you feel you know where the problem is, please comment or email me. :)</p></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://blog.catchmrbharath.in/programming/2012/07/02/gsoc-week-6">July 02, 2012 07:00 AM</a>
-</p>
-</div>
-</div>
-
-
 </div>
 
 </div>
@@ -4885,7 +5009,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
 
 <p>
 <strong>Last updated:</strong><br>
-November 09, 2012 03:20 PM<br>
+November 10, 2012 03:00 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
