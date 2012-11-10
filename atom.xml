@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2012-11-10T15:00:28Z</updated>
+  <updated>2012-11-10T15:20:34Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -29,7 +29,7 @@
 
 <p>In this post I’ll pull them all together for my first substantial results generating Fortran code to call BLAS/LAPACK. Lets go through a working example</p>
 
-<p>We set up a problem that we’d like to solve. This case we try to compute \((4 X X^{T} + 2 Z)^{-1} X\) where \( X \) and \(Z\) are positive definite and \(Z\) is also symmetric.</p>
+<p>We set up a problem that we’d like to solve. We want to compute \((4 X X^{T} + 2 Z)^{-1} X\) where \( X \) is invertible and and \(Z\) is symmetric positive definite.</p>
 <div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="c"># Set up a mathematical problem to solve</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">X</span> <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'X'</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">Z</span> <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'Z'</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
@@ -37,7 +37,7 @@
 <span class="o">&gt;&gt;&gt;</span> <span class="n">assumptions</span> <span class="o">=</span> <span class="n">Q</span><span class="o">.</span><span class="n">invertible</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">positive_definite</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span>
 </code></pre>
 </div>
-<p>We have described a set of BLAS operations to perform certain transformations when the right conditions are met. Each BLAS operation is a single rewrite rule.</p>
+<p>We have described a set of BLAS/LAPACK operations to perform certain transformations when the right conditions are met. Each BLAS operation is a single rewrite rule.</p>
 <div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">sympy.matrices.expressions.gen</span> <span class="kn">import</span> <span class="n">rr_from_blas</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">sympy.matrices.expressions.blas</span> <span class="kn">import</span>   <span class="n">GEMM</span><span class="p">,</span> <span class="n">SYMM</span><span class="p">,</span> <span class="n">TRMM</span><span class="p">,</span> <span class="n">TRSV</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">sympy.matrices.expressions.lapack</span> <span class="kn">import</span> <span class="n">POSV</span><span class="p">,</span> <span class="n">GESV</span>
@@ -47,7 +47,7 @@
 </div>
 <p>Each of these rules can convert one kind of expression into a computation given certain conditions. For example</p>
 
-<pre><code>SYMM:  alpha A B + beta C -&gt; SYMM(alpha, A, B, beta, C) if A or B are symmetric</code></pre>
+<pre><code>SYMM:  alpha*A*B + beta*C -&gt; SYMM(alpha, A, B, beta, C) if A or B is symmetric</code></pre>
 
 <p>We need to combine them to turn the large target expression into a set of atomic inputs. Some of the BLAS routines overlap so there are potentially many possibilities.</p>
 <div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">sympy.matrices.expressions.gen</span> <span class="kn">import</span> <span class="n">top_down</span> 
@@ -77,8 +77,13 @@
 <span class="k">END</span>
 </code></pre>
 </div>
-<p>This solution first uses <code>GEMM</code> to multiply \(4X X^{T} + 2 Z\). It then uses <code>POSV</code> to perform the solve \((4X X^{T} + 2Z)^{-1} X\). The <code>POSV</code> routine solves systems of the form \(A^{-1}B\) where \(A\) is symmetric positive definite. We used a logical programming framework to infer that \(4X X^{T} + 2Z\) is symmetric positive definite given the original mathematical assumptions.</p>
-
+<p>This solution first uses <code>GEMM</code> to multiply \(4X X^{T} + 2 Z\). It then uses <code>POSV</code> to perform the solve \((4X X^{T} + 2Z)^{-1} X\). The <code>POSV</code> routine solves systems of the form \(A^{-1}B\) where \(A\) is symmetric positive definite. Internally we used a logical programming framework to infer that \(4X X^{T} + 2Z\) is symmetric positive definite given the original mathematical assumptions.</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">assumptions</span> <span class="o">=</span> <span class="n">Q</span><span class="o">.</span><span class="n">invertible</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">positive_definite</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">expr</span> <span class="o">=</span> <span class="mi">4</span><span class="o">*</span><span class="n">X</span><span class="o">*</span><span class="n">X</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">Z</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ask</span><span class="p">(</span><span class="n">Q</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">positive_definite</span><span class="p">(</span><span class="n">expr</span><span class="p">),</span> <span class="n">assumptions</span><span class="p">)</span>
+<span class="bp">True</span>
+</code></pre>
+</div>
 <p>This computation is in-place. <code>GEMM</code> stores its result in the argument <code>Z</code>. <code>POSV</code> uses <code>Z</code> and stores the output in <code>X</code>. Note that both <code>X</code> and <code>Z</code> have been declared with <code>inout</code> intents in the Fortran code.</p>
 
 <p>This Fortran code is independent of Python or SymPy and can be used in any project. However, if we prefer the Python environment we can bring it back into the Python session with F2PY.</p>
@@ -155,7 +160,7 @@ Return objects:
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-11-10T15:00:23Z</updated>
+      <updated>2012-11-10T15:20:29Z</updated>
     </source>
   </entry>
 
@@ -254,7 +259,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-11-10T15:00:22Z</updated>
+      <updated>2012-11-10T15:20:28Z</updated>
     </source>
   </entry>
 
@@ -461,7 +466,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-11-10T15:00:22Z</updated>
+      <updated>2012-11-10T15:20:28Z</updated>
     </source>
   </entry>
 
@@ -525,7 +530,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-10T15:00:27Z</updated>
+      <updated>2012-11-10T15:20:34Z</updated>
     </source>
   </entry>
 
@@ -690,7 +695,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-11-10T15:00:23Z</updated>
+      <updated>2012-11-10T15:20:29Z</updated>
     </source>
   </entry>
 
@@ -728,7 +733,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site, I guess...</subtitle>
       <title>Gilbert Gede's Blog</title>
-      <updated>2012-11-10T15:00:16Z</updated>
+      <updated>2012-11-10T15:20:22Z</updated>
     </source>
   </entry>
 
@@ -905,7 +910,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-11-10T15:00:22Z</updated>
+      <updated>2012-11-10T15:20:28Z</updated>
     </source>
   </entry>
 
@@ -2045,7 +2050,7 @@ f_durations.write('\n')
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-11-10T15:00:18Z</updated>
+      <updated>2012-11-10T15:20:25Z</updated>
     </source>
   </entry>
 
@@ -2190,7 +2195,7 @@ RuntimeError: maximum recursion depth exceeded in comparison
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-11-10T15:00:09Z</updated>
+      <updated>2012-11-10T15:20:07Z</updated>
     </source>
   </entry>
 
@@ -2233,7 +2238,7 @@ b. Add this line to your bash_profile.</p>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-10T15:00:27Z</updated>
+      <updated>2012-11-10T15:20:34Z</updated>
     </source>
   </entry>
 
@@ -2314,7 +2319,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-11-10T15:00:09Z</updated>
+      <updated>2012-11-10T15:20:07Z</updated>
     </source>
   </entry>
 
@@ -2350,7 +2355,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-11-10T15:00:09Z</updated>
+      <updated>2012-11-10T15:20:07Z</updated>
     </source>
   </entry>
 
@@ -2586,7 +2591,7 @@ Out[74]: True
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-10T15:00:27Z</updated>
+      <updated>2012-11-10T15:20:34Z</updated>
     </source>
   </entry>
 
@@ -2704,7 +2709,7 @@ commits are much more like my usual ones.
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-11-10T15:00:25Z</updated>
+      <updated>2012-11-10T15:20:31Z</updated>
     </source>
   </entry>
 
@@ -2737,7 +2742,7 @@ commits are much more like my usual ones.
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-11-10T15:00:26Z</updated>
+      <updated>2012-11-10T15:20:32Z</updated>
     </source>
   </entry>
 
@@ -2867,9 +2872,9 @@ Out[24]: 6
     <updated>2012-08-05T11:29:33Z</updated>
     <category term="SymPy"/>
     <category term="category theory"/>
-    <category term="diagram embedding"/>
-    <category term="graph embedding"/>
     <category term="subgraph isomorphism problem"/>
+    <category term="graph embedding"/>
+    <category term="diagram embedding"/>
     <author>
       <name>scolobb</name>
     </author>
@@ -2882,7 +2887,7 @@ Out[24]: 6
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-11-10T15:00:25Z</updated>
+      <updated>2012-11-10T15:20:31Z</updated>
     </source>
   </entry>
 
@@ -3001,7 +3006,7 @@ Out[24]: 6
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-11-10T15:00:26Z</updated>
+      <updated>2012-11-10T15:20:32Z</updated>
     </source>
   </entry>
 
@@ -3033,7 +3038,7 @@ Out[24]: 6
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-10T15:00:27Z</updated>
+      <updated>2012-11-10T15:20:34Z</updated>
     </source>
   </entry>
 
@@ -3177,7 +3182,7 @@ StopIteration:
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-10T15:00:27Z</updated>
+      <updated>2012-11-10T15:20:34Z</updated>
     </source>
   </entry>
 
@@ -3217,12 +3222,12 @@ StopIteration:
     </content>
     <updated>2012-07-29T19:20:53Z</updated>
     <category term="SymPy"/>
-    <category term="backward chaining"/>
+    <category term="string representation"/>
     <category term="deciding commutativity"/>
     <category term="diagram layout"/>
     <category term="pretty printing"/>
     <category term="sort key"/>
-    <category term="string representation"/>
+    <category term="backward chaining"/>
     <category term="subgraph isomorphism problem"/>
     <author>
       <name>scolobb</name>
@@ -3236,7 +3241,7 @@ StopIteration:
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-11-10T15:00:25Z</updated>
+      <updated>2012-11-10T15:20:31Z</updated>
     </source>
   </entry>
 
@@ -3266,7 +3271,7 @@ StopIteration:
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-11-10T15:00:26Z</updated>
+      <updated>2012-11-10T15:20:32Z</updated>
     </source>
   </entry>
 
@@ -3805,7 +3810,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-11-10T15:00:25Z</updated>
+      <updated>2012-11-10T15:20:31Z</updated>
     </source>
   </entry>
 
@@ -3855,7 +3860,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-10T15:00:27Z</updated>
+      <updated>2012-11-10T15:20:34Z</updated>
     </source>
   </entry>
 
@@ -3900,7 +3905,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-11-10T15:00:25Z</updated>
+      <updated>2012-11-10T15:20:31Z</updated>
     </source>
   </entry>
 
@@ -3935,7 +3940,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-10T15:00:27Z</updated>
+      <updated>2012-11-10T15:20:34Z</updated>
     </source>
   </entry>
 
@@ -4122,7 +4127,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-11-10T15:00:09Z</updated>
+      <updated>2012-11-10T15:20:07Z</updated>
     </source>
   </entry>
 
@@ -4166,7 +4171,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-10T15:00:27Z</updated>
+      <updated>2012-11-10T15:20:34Z</updated>
     </source>
   </entry>
 
@@ -4213,7 +4218,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-11-10T15:00:25Z</updated>
+      <updated>2012-11-10T15:20:31Z</updated>
     </source>
   </entry>
 
@@ -4390,7 +4395,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-11-10T15:00:26Z</updated>
+      <updated>2012-11-10T15:20:32Z</updated>
     </source>
   </entry>
 
@@ -4437,7 +4442,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-11-10T15:00:25Z</updated>
+      <updated>2012-11-10T15:20:31Z</updated>
     </source>
   </entry>
 

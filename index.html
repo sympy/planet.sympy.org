@@ -54,7 +54,7 @@
 
 <p>In this post I’ll pull them all together for my first substantial results generating Fortran code to call BLAS/LAPACK. Lets go through a working example</p>
 
-<p>We set up a problem that we’d like to solve. This case we try to compute \((4 X X^{T} + 2 Z)^{-1} X\) where \( X \) and \(Z\) are positive definite and \(Z\) is also symmetric.</p>
+<p>We set up a problem that we’d like to solve. We want to compute \((4 X X^{T} + 2 Z)^{-1} X\) where \( X \) is invertible and and \(Z\) is symmetric positive definite.</p>
 <div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="c"># Set up a mathematical problem to solve</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">X</span> <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'X'</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">Z</span> <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'Z'</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
@@ -62,7 +62,7 @@
 <span class="o">&gt;&gt;&gt;</span> <span class="n">assumptions</span> <span class="o">=</span> <span class="n">Q</span><span class="o">.</span><span class="n">invertible</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">positive_definite</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span>
 </code></pre>
 </div>
-<p>We have described a set of BLAS operations to perform certain transformations when the right conditions are met. Each BLAS operation is a single rewrite rule.</p>
+<p>We have described a set of BLAS/LAPACK operations to perform certain transformations when the right conditions are met. Each BLAS operation is a single rewrite rule.</p>
 <div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">sympy.matrices.expressions.gen</span> <span class="kn">import</span> <span class="n">rr_from_blas</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">sympy.matrices.expressions.blas</span> <span class="kn">import</span>   <span class="n">GEMM</span><span class="p">,</span> <span class="n">SYMM</span><span class="p">,</span> <span class="n">TRMM</span><span class="p">,</span> <span class="n">TRSV</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">sympy.matrices.expressions.lapack</span> <span class="kn">import</span> <span class="n">POSV</span><span class="p">,</span> <span class="n">GESV</span>
@@ -72,7 +72,7 @@
 </div>
 <p>Each of these rules can convert one kind of expression into a computation given certain conditions. For example</p>
 
-<pre><code>SYMM:  alpha A B + beta C -&gt; SYMM(alpha, A, B, beta, C) if A or B are symmetric</code></pre>
+<pre><code>SYMM:  alpha*A*B + beta*C -&gt; SYMM(alpha, A, B, beta, C) if A or B is symmetric</code></pre>
 
 <p>We need to combine them to turn the large target expression into a set of atomic inputs. Some of the BLAS routines overlap so there are potentially many possibilities.</p>
 <div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">sympy.matrices.expressions.gen</span> <span class="kn">import</span> <span class="n">top_down</span> 
@@ -102,8 +102,13 @@
 <span class="k">END</span>
 </code></pre>
 </div>
-<p>This solution first uses <code>GEMM</code> to multiply \(4X X^{T} + 2 Z\). It then uses <code>POSV</code> to perform the solve \((4X X^{T} + 2Z)^{-1} X\). The <code>POSV</code> routine solves systems of the form \(A^{-1}B\) where \(A\) is symmetric positive definite. We used a logical programming framework to infer that \(4X X^{T} + 2Z\) is symmetric positive definite given the original mathematical assumptions.</p>
-
+<p>This solution first uses <code>GEMM</code> to multiply \(4X X^{T} + 2 Z\). It then uses <code>POSV</code> to perform the solve \((4X X^{T} + 2Z)^{-1} X\). The <code>POSV</code> routine solves systems of the form \(A^{-1}B\) where \(A\) is symmetric positive definite. Internally we used a logical programming framework to infer that \(4X X^{T} + 2Z\) is symmetric positive definite given the original mathematical assumptions.</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">assumptions</span> <span class="o">=</span> <span class="n">Q</span><span class="o">.</span><span class="n">invertible</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">positive_definite</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">expr</span> <span class="o">=</span> <span class="mi">4</span><span class="o">*</span><span class="n">X</span><span class="o">*</span><span class="n">X</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">Z</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ask</span><span class="p">(</span><span class="n">Q</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">positive_definite</span><span class="p">(</span><span class="n">expr</span><span class="p">),</span> <span class="n">assumptions</span><span class="p">)</span>
+<span class="bp">True</span>
+</code></pre>
+</div>
 <p>This computation is in-place. <code>GEMM</code> stores its result in the argument <code>Z</code>. <code>POSV</code> uses <code>Z</code> and stores the output in <code>X</code>. Note that both <code>X</code> and <code>Z</code> have been declared with <code>inout</code> intents in the Fortran code.</p>
 
 <p>This Fortran code is independent of Python or SymPy and can be used in any project. However, if we prefer the Python environment we can bring it back into the Python session with F2PY.</p>
@@ -5009,7 +5014,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
 
 <p>
 <strong>Last updated:</strong><br>
-November 10, 2012 03:00 PM<br>
+November 10, 2012 03:20 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
