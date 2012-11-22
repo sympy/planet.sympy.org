@@ -23,6 +23,100 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>November 21, 2012</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://matthewrocklin.com/blog/" title="Working notes by Matthew Rocklin - SymPy">MRocklin</a></h3>
+
+
+<div class="entrygroup" id="http://matthewrocklin.com/blog//work/2012/11/21/Computations">
+<h4><a href="http://matthewrocklin.com/blog//work/2012/11/21/Computations">Computations</a></h4>
+<div class="entry">
+<div class="content">
+<p>How can we symbolically represent computations? In SymPy we normally represent expressions as trees. Each node in the graph is an expression; it depends on some operation like <code>Add</code> or <code>Mul</code> and a sequence of arguments/children.</p>
+
+<p><img src="http://mrocklin.github.com/blog/images/add-mul-tree.png" alt="" /></p>
+
+<p>While trees are a convenient data structure they are also very restrictive. Consider the following operation</p>
+
+<p><img src="http://mrocklin.github.com/blog/images/min-max-dag.png" alt="" /></p>
+
+<p>This <code>MinMax</code> operation takes two inputs variables, <code>x</code>, and <code>y</code>, and produces two outputs <code>Min(x, y)</code>, <code>Max(x, y)</code>. Computationally you might prefer this over two separate trees because both outputs can be produced at once with a single comparison. This also supports natural grouping of common sub-expressions. If <code>x</code> and <code>y</code> were large trees we would not want two have copies of each in separate <code>Min</code> and <code>Max</code> trees.</p>
+
+<p><img src="http://mrocklin.github.com/blog/images/min-tree.png" alt="" /> <img src="http://mrocklin.github.com/blog/images/max-tree.png" alt="" /></p>
+
+<p>Because the <code>MinMax</code> operation has two outputs we can no longer represent its graph with a single tree, we need a more general data structure. This graph can be described as a bipartite directed acyclic graph (BiDAG). It is bipartite because there are two types of nodes, variables (circles) and operations [boxes]. It is directed and acyclic by the dependence of data (e.g. if <code>Min(x, y)</code> depends on <code>x</code> then <code>x</code> can not depend on <code>Min(x, y)</code>).</p>
+
+<p>A DAG is the next most restrictive graph subtype. In some sense this is the smallest generalization we can make.</p>
+
+<h2 id="computation_type">Computation Type</h2>
+
+<p>Enter the <code>Computation</code> base type. This is an interface that must provide tuples of <code>inputs</code> and <code>outputs</code> instead of the standard <code>args</code> we use for trees.</p>
+
+<p>We also add a <code>CompositeComputation</code> type which collects many computations together. Consider the collection of the following computations.</p>
+
+<p><img src="http://mrocklin.github.com/blog/images/min-max-dag.png" alt="" /> <img src="http://mrocklin.github.com/blog/images/op.png" alt="" /></p>
+
+<p>Note that <code>A</code> produces <code>x</code> which is used by <code>MinMax</code>. This computation has inputs (<code>w</code>, <code>y</code>) and outputs (<code>Min(x, y)</code>, <code>Max(x, y)</code>). The data dependencies infer an ordering; the <code>A</code> computation must occur before the <code>MinMax</code> computation.</p>
+
+<h2 id="internal_representation">Internal Representation</h2>
+
+<p>My current implementation of <code>CompositeComputation</code> is represented internally as an immutable set of computations. Inter-computation interactions are inferred as needed by their variables. We provide methods to form an alternative dict-based data structure with fast access and traversal should performance become necessary.</p>
+
+<p>All variables are assumed immutable and unique. The intention is that variables should be entirely defined by their mathematical meaning. The expectation is that the variables are SymPy expressions.</p>
+
+<p>This approach has a focus on immutability and mathematical attributes rather than performance and computational attributes. For example it is impossible to represent a <code>Copy</code> operation within this framework because mathematical meanings of the input and output variable would be identical. Similarily inplace operations are not checkable in this framework.</p>
+
+<h2 id="inplace">Inplace</h2>
+
+<p>And yet copies and inplace operations are important parts of real computation. We make an explicit separation between mathematics-based optimizations and infrastructure-based optimizations (like inplace). We perform this transition by replacing each variable with a pair that contains a purely mathematical expression (left) and a purely computational variable (right).</p>
+
+<p><img src="http://mrocklin.github.com/blog/images/min-max-dag-pure.png" alt="" /></p>
+
+<p>In the example above we see the <code>MinMax</code> computation where the <code>x</code> and <code>y</code> expressions are stored in variables <code>"x"</code> and <code>"y"</code> and the outputs are stored in dummy variables <code>"_1"</code> and <code>"_2"</code>. For performance reasons a computation may write the outputs back into the memory for the inputs as follows (note that the two outputs are stored in the same variables as the inputs.)</p>
+
+<p><img src="http://mrocklin.github.com/blog/images/min-max-dag-inplace.png" alt="" /></p>
+
+<p>Inplace computations provide higher performance at the cost of memory safety. We must avoid situations like the following where the <code>x</code> variable may be overwritten (for example by <code>B</code>) before it is read (by <code>C</code>).</p>
+
+<p><img src="http://mrocklin.github.com/blog/images/dangerous-inplace.png" alt="" /></p>
+
+<h2 id="motivation">Motivation</h2>
+
+<p>I am working to translate matrix expressions (tree) into a computation (DAG) of BLAS/LAPACK operations. I do this through setting up and matching mathematical patterns like the following</p>
+
+<pre><code>alpha*X*Y + beta*Z -&gt; GEMM(alpha, X, Y, beta, Z)</code></pre>
+
+<p>However the available operations (like <code>GEMM</code>) are inplace by default. These two goals of mathematical pattern matching and inplace computations are challenging to solve simultaneously for non-trivial expressions. My solution has been to consider the mathematical pattern matching problem first and then switch to ‘inplace mode’ and resolve the inplace issues separately.</p>
+
+<h2 id="question">Question</h2>
+
+<p>Should this be a part of SymPy?</p></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://matthewrocklin.com/blog//work/2012/11/21/Computations">November 21, 2012 08:00 AM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>November 17, 2012</h2>
 
 <div class="channelgroup">
@@ -4857,47 +4951,6 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
 </div>
 
 
-
-
-<div class="entrygroup" id="http://www.catchmrbharath.in/programming/2012/07/02/gsoc-week-6">
-<h4><a href="http://www.catchmrbharath.in/programming/2012/07/02/gsoc-week-6">GSoC Week 6</a></h4>
-<div class="entry">
-<div class="content">
-<p>I have been trying to improve the implicit plotting module during this week. But I have hit a road block. I almost ran out of ideas to solve the problem.</p>
-
-<p>Description:</p>
-
-<p>The implicit plotting algorithm I implemented works something like below:</p>
-
-<p>1) Get x and y interval. If it satisfies the expression throughout the interval, then plot it.</p>
-
-<p>2) If it does not satisfy, throw away the intervals.</p>
-
-<p>3) If it partially satisfies, then recursively subdivide into four intervals, and try again.</p>
-
-<p>For cases of equality, the first point never holds true due to floating point errors. So we go on eliminating regions, and after a certain depth, plot the remaining region. These are the regions where there is at least one solution. This is the reason why the plots are rasterized. But there is an inherent bigger problem here. In the cases of expressions like $x^{3}$ even if the x interval is small, the resulting interval after computation will be large. Sometimes, due to these large intervals, there might be lots of y and x intervals which satisfy because of these errors. Even if we make x interval really small, the corresponding y interval will be large, ie the line widths become large. The explanation is more of a guess rather than the right explanation.</p>
-
-<p>Examples:</p>
-
-<p>Plot of $x^{y}=y^{x}$ <img width="600" src="http://www.catchmrbharath.in/images/02072012/fig1.png" height="400" /> Even if I increase my depth of recursion to higher values, the thickness becomes less, but doesn’t vanish. The plot actually should have been two separate curves.</p>
-<img width="600" src="http://www.catchmrbharath.in/images/02072012/fig3.png" height="400" />
-<p>The Mac OSX’s Grapher uses a similar algorithm(A guess because they have similar rasterization) but takes care of the line widths.</p>
-
-<p>If you feel you know where the problem is, please comment or email me. :)</p></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://www.catchmrbharath.in/programming/2012/07/02/gsoc-week-6">July 02, 2012 07:00 AM</a>
-</p>
-</div>
-</div>
-
-
 </div>
 
 </div>
@@ -4966,7 +5019,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
 <a href="" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a class="message" title="404: not found">Kazuo Thow</a>
 </li>
 <li>
-<a href="http://matthewrocklin.com/blog//feed.sympy.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://matthewrocklin.com/blog/" class="message" title="no activity in 7 days">MRocklin</a>
+<a href="http://matthewrocklin.com/blog//feed.sympy.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://matthewrocklin.com/blog/" title="Working notes by Matthew Rocklin - SymPy">MRocklin</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/9135222751616024074/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://mattjcurry.blogspot.com/" class="message" title="no activity in 7 days">Matthew Curry</a>
@@ -5014,7 +5067,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
 
 <p>
 <strong>Last updated:</strong><br>
-November 17, 2012 05:00 PM<br>
+November 22, 2012 01:40 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
