@@ -9,6 +9,8 @@
 
 
 
+
+
 <head>
 <title>Planet SymPy</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -20,6 +22,140 @@
 <body>
 <h1>Planet SymPy</h1>
 
+<div class="daygroup">
+<h2>November 23, 2012</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://matthewrocklin.com/blog/" title="Working notes by Matthew Rocklin - SymPy">MRocklin</a></h3>
+
+
+<div class="entrygroup" id="http://matthewrocklin.com/blog//work/2012/11/23/BuildingComputations">
+<h4><a href="http://matthewrocklin.com/blog//work/2012/11/23/BuildingComputations">Building Computations</a></h4>
+<div class="entry">
+<div class="content">
+<p>In my <a href="http://mrocklin.github.com/blog/work/2012/11/21/Computations/">last post</a> I described a base type that represented a computation as a directed acyclic graph. In my post on <a href="http://mrocklin.github.com/blog/work/2012/11/10/GeneratingBLAS-PreliminaryResults/">preliminary results</a> I showed how we could write Fortran code for a simple matrix expression. In this post I want to show how unificaiton, rewrite rules, and manipulations on computations can compile computations from fairly complex matrix expressions.</p>
+
+<h2 id="inputs">Inputs</h2>
+
+<p>Lets begin with a complex expression and a set of assumptions</p>
+<div class="highlight"><pre><code class="python">    <span class="n">expr</span> <span class="o">=</span> <span class="p">(</span><span class="n">Y</span><span class="o">.</span><span class="n">I</span><span class="o">*</span><span class="n">Z</span><span class="o">*</span><span class="n">Y</span> <span class="o">+</span> <span class="n">b</span><span class="o">*</span><span class="n">Z</span><span class="o">*</span><span class="n">Y</span> <span class="o">+</span> <span class="n">c</span><span class="o">*</span><span class="n">W</span><span class="o">*</span><span class="n">W</span><span class="p">)</span><span class="o">.</span><span class="n">I</span><span class="o">*</span><span class="n">Z</span><span class="o">*</span><span class="n">W</span>
+    <span class="n">assumptions</span> <span class="o">=</span> <span class="n">Q</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">positive_definite</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+</code></pre>
+</div>
+<p>We also specify a list of conditional rewrite patterns. A pattern has the following form</p>
+<div class="highlight"><pre><code class="python">    <span class="n">Source</span><span class="p">:</span>     <span class="n">alpha</span><span class="o">*</span><span class="n">A</span><span class="o">*</span><span class="n">B</span>
+    <span class="n">Target</span><span class="p">:</span>     <span class="n">SYMM</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">S</span><span class="o">.</span><span class="n">Zero</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>
+    <span class="n">Wilds</span><span class="p">:</span>      <span class="n">alpha</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">B</span>
+    <span class="n">Condition</span><span class="p">:</span>  <span class="n">Q</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">|</span> <span class="n">Q</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">B</span><span class="p">)</span>
+</code></pre>
+</div>
+<p>This means that we convert the expression <code>alpha*A*B</code> into the computation <code>SYMM(alpha, A, B, S.Zero, B)</code> (a SYmmetric Matrix Multiply) for any <code>(alpha, A, B)</code> when either <code>A</code> is symmetric or <code>B</code> is symmetric.</p>
+
+<p>Thanks to <a href="http://mrocklin.github.com/blog/work/2012/11/01/Unification/">unification</a> rewrite patterns are easy to write. Someone who is familiar with BLAS/LAPACK but unfamiliar with compilers would be able to make these easily.</p>
+
+<h2 id="expressions_to_computations">Expressions to Computations</h2>
+
+<p>Each pattern is turned into a function/rule that transforms an expression into a computation. We start with an identity computation</p>
+<div class="highlight"><pre><code class="python">    <span class="n">expr</span> <span class="o">=</span> <span class="p">(</span><span class="n">Y</span><span class="o">.</span><span class="n">I</span><span class="o">*</span><span class="n">Z</span><span class="o">*</span><span class="n">Y</span> <span class="o">+</span> <span class="n">b</span><span class="o">*</span><span class="n">Z</span><span class="o">*</span><span class="n">Y</span> <span class="o">+</span> <span class="n">c</span><span class="o">*</span><span class="n">W</span><span class="o">*</span><span class="n">W</span><span class="p">)</span><span class="o">.</span><span class="n">I</span><span class="o">*</span><span class="n">Z</span><span class="o">*</span><span class="n">W</span>
+    <span class="n">assumptions</span> <span class="o">=</span> <span class="n">Q</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">positive_definite</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="n">identcomp</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+    <span class="n">identcomp</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre>
+</div>
+<p>Computations are able to print themselves in the <a href="http://en.wikipedia.org/wiki/DOT_language">DOT Language</a> enabling simple visualization. Here we see a computation that produces the expression we want but its input is the same. We’d prefer one that had more atomic inputs like <code>a, b, c, W, X, Y, Z</code></p>
+
+<p><img src="http://mrocklin.github.com/blog/images/complex-matrix-computation-identity.png" alt="" /></p>
+
+<p>Our patterns know how to break down big expressions into smaller ones by adding the right computation (e.g <code>alpha*A*B</code> -&gt; <code>alpha, A, B</code> via <code>SYMM</code>.) We convert each of our patterns into a rule. This rule looks at the inputs and, if it finds a matching expression adds on a new computation to break down that expression. We use <a href="http://mrocklin.github.com/blog/work/2012/11/09/BranchingStrategies/">branching strategies</a> to orchestrate <em>how</em> all of these rules are applied. This is accomplished in the last line of the <code>make_matrix_rule</code> function</p>
+<div class="highlight"><pre><code class="python">    <span class="k">def</span> <span class="nf">make_matrix_rule</span><span class="p">(</span><span class="n">patterns</span><span class="p">,</span> <span class="n">assumptions</span><span class="p">):</span>
+        <span class="n">rules</span> <span class="o">=</span> <span class="p">[</span><span class="n">expr_to_comp_rule</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">wilds</span><span class="p">,</span> <span class="n">cond</span><span class="p">,</span> <span class="n">assumptions</span><span class="p">)</span>
+                 <span class="k">for</span> <span class="n">src</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">wilds</span><span class="p">,</span> <span class="n">cond</span> <span class="ow">in</span> <span class="n">patterns</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">exhaust</span><span class="p">(</span><span class="n">multiplex</span><span class="p">(</span><span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="n">input_crunch</span><span class="p">,</span> <span class="n">rules</span><span class="p">)))</span>
+</code></pre>
+</div>
+<p>This function combines logic (<code>patterns/assumptions</code>) with control (<code>exhaust/multiplex/input_crunch</code>) to create a <a href="http://www.icsd.aegean.gr/lecturers/stamatatos/courses/Logic/Prolog/Ch1/Ch1_files/algorithm%3Dlogic%2Bcontrol.pdf">complete algorithm</a>. We apply this algorithm to our identity computation and pull off a compiled result</p>
+<div class="highlight"><pre><code class="python">    <span class="n">rule</span> <span class="o">=</span> <span class="n">make_matrix_rule</span><span class="p">(</span><span class="n">patterns</span><span class="p">,</span> <span class="n">assumptions</span><span class="p">)</span>
+    <span class="n">comp</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">rule</span><span class="p">(</span><span class="n">identcomp</span><span class="p">))</span>
+    <span class="n">comp</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre>
+</div>
+<p><img src="http://mrocklin.github.com/blog/images/complex-matrix-computation.png" alt="" /></p>
+
+<p>We still have same output but now the input is broken down into smaller pieces by a set of computations. These computations are arranged in a graph based on their dependencies. We had to use a <code>GESV</code>, a <code>POSV</code>, two <code>GEMM</code>s a <code>SYMM</code> and two <code>AXPY</code>s to break down this computation. Our inputs are now <code>a,b,c,W,X,Y,Z</code> as desired.</p>
+
+<p><code>rule(identcomp)</code> iterates over all possible computations to compute this expression. If you are not satisfied with the computation above you may ask for another.</p>
+
+<h2 id="inplace_computations">Inplace Computations</h2>
+
+<p>The BLAS/LAPACK routines are <em>inplace</em>; they write their results to the memory locations of some of their inputs. The above <em>matheamtical</em> graph doesn’t have the necessary information to think about this <em>computational</em> concern. We have a separate system to compile and optimize inplace computations.</p>
+<div class="highlight"><pre><code class="python">    <span class="kn">from</span> <span class="nn">sympy.computations.inplace</span> <span class="kn">import</span> <span class="n">inplace_compile</span>
+    <span class="n">icomp</span> <span class="o">=</span> <span class="n">inplace_compile</span><span class="p">(</span><span class="n">comp</span><span class="p">)</span>
+    <span class="n">icomp</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre>
+</div>
+<p><img src="http://mrocklin.github.com/blog/images/complex-matrix-computation-inplace.png" alt="" /></p>
+
+<p>Each variable is now of the form</p>
+
+<pre><code>Mathematical Expression @ memory location</code></pre>
+
+<p>We have introduced <code>Copy</code> operations into the graph where necessary to prevent dangerous overwrites. If you track the memory locations you can see which BLAS/LAPACK operations overwrite which variables. For example <code>Z</code> is never overwritten and so is never copied. On the other hand <code>W</code> is used in two overwrite operations and so it is copied to two new variables, <code>W_2</code> and <code>W_3</code>. Copies are not added if obviously unnecessary.</p>
+
+<h2 id="future_work">Future Work</h2>
+
+<p>There are a couple of small items and one large one.</p>
+
+<ol>
+<li>
+<p>An expert in BLAS/LAPACK will note that there are some issues with my graphs; they are not yet ideal. I don’t handle <code>IPIV</code> permutation operations well (I need to add some new patterns), I am overwrie the <code>INFO</code> out parameter, and there are a few cases where a copy could be avoided by operation reordering.</p>
+</li>
+
+<li>
+<p>I need to refactor my old Fortran generation code to work with the new inplace system.</p>
+</li>
+
+<li>
+<p>The largest challenge is to build strategies for intelligent application of rewrite rules. Expressions are now large enough and the list of patterns is now long enough so that checking all possiblities is definitely infeasible. I need to think hard about traversals. Fortunately this problem is purely algorithmic and has no connection to BLAS, inplace computations, etc…. I should be able to think about it in isolation.</p>
+</li>
+</ol>
+
+<h2 id="closing_note">Closing Note</h2>
+
+<p>Except for the mathematical definition of BLAS none of this code is specific to generating matrix computations. The majority of this technology isn’t even specific to building computations. The computaitonal core of most of the technologies isn’t even dependent on SymPy. My final <code>sympy.computations.matrices</code> directory is small.</p>
+
+<p>Throughout this project I’ve tried to keep all of the technology as general as possible in hopes that others will make use of it. Only a small fraction of my work has been specific to my application. I hope that others find this work interesting. I hope that this technology enables a variety of other unrelated projects.</p>
+
+<h2 id="links">Links</h2>
+
+<ol>
+<li><a href="https://github.com/mrocklin/sympy/tree/compblas">Development Branch</a></li>
+
+<li><a href="http://mrocklin.github.com/blog/scripts/2012-11-23-BuildingComputations.py">Script to generate images within this post</a></li>
+</ol></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://matthewrocklin.com/blog//work/2012/11/23/BuildingComputations">November 23, 2012 08:00 AM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
 <div class="daygroup">
 <h2>November 21, 2012</h2>
 
@@ -4900,58 +5036,6 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
 </div>
 
 </div>
-<div class="daygroup">
-<h2>July 02, 2012</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://scolobb.wordpress.com" title="Coaquarium">Sergiu Ivanov</a></h3>
-
-
-<div class="entrygroup" id="http://scolobb.wordpress.com/?p=220">
-<h4 lang="en"><a href="http://scolobb.wordpress.com/2012/07/02/the-layout/">The Layout</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>I haven’t posted in quite some time, because I have been totally absorbed by implementing the functionality to lay out diagrams.  I am painfully close to having finished it; however, I’ve been that close to it for a couple days already, and that’s something which drives me crazy <img src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif" alt=":-)" class="wp-smiley" /> </p>
-<p>OK, it’s time to take a general look over what has been done.  In the end, I will describe my short-term further plans a bit.</p>
-<p>First of all, the goal.  When you want to lay out a (commutative) diagram, you should really aim at grid layout.  This is how people normally typeset diagrams in articles, and this is the thing the semblance of which I would be happy to achieve.  The resulting grid layout is one of the traits of diagrams which make the task of automatically drawing them different from the task of automatically drawing a graph.  The other specific feature is that, when you get a diagram, you can (and you should) actually throw away those morphisms which are not really interesting.  In the following sections, I will try to describe the philosophy behind the functionality I have implemented, for each bit in part.</p>
-<p>The first stage of the algorithm is to remove the <b>uninteresting morphisms</b>.  At this stage, those composite morphisms which have no properties are discarded; identity morphisms without properties are discarded as well.  In fact, this corresponds pretty well to how people draw diagrams.  This first stage ends by merging the premises and the conclusions of the diagram into a single container.  This is because, at drawing, the distinction between premises and conclusions is not important at all, since all interesting morphisms should make their way into the final picture.</p>
-<p>At the second stage, the algorithm abstracts morphisms away, in favour of unoriented edges between objects.  The code builds the so-called <b>skeleton</b> of the diagram (that’s an ad-hoc name).  The skeleton is a graph which has all objects of the diagram as vertices.  Between two vertices of the skeleton there is an <em>undirected</em> edge, if these objects are connected by an (interesting) morphism.  Notice how we discard the direction of the connection.  After all edges corresponding to morphisms have been added, the skeleton is further completed in the following way.  An edge is added between any two objects <img src="http://s0.wp.com/latex.php?latex=A&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="A" class="latex" title="A" /> and <img src="http://s0.wp.com/latex.php?latex=C&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="C" class="latex" title="C" /> for which there exists and object <img src="http://s0.wp.com/latex.php?latex=B&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="B" class="latex" title="B" /> such that <img src="http://s0.wp.com/latex.php?latex=A&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="A" class="latex" title="A" /> and <img src="http://s0.wp.com/latex.php?latex=B&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="B" class="latex" title="B" /> are connected with an interesting morphism and <img src="http://s0.wp.com/latex.php?latex=B&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="B" class="latex" title="B" /> and <img src="http://s0.wp.com/latex.php?latex=C&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="C" class="latex" title="C" /> are connected with an interesting morphism.  This is <em>not</em> the transitive closure of the graph, it is only the first step of it.  The new edges are dummy edges, in the sense that they may not correspond to interesting morphisms.</p>
-<p>The next stage is the first key stage of the algorithm.  The skeleton is tesselated into triangles, which will eventually be used to get as many right angles in the layout as possible.  Here is when the dummy edges come into play.  Their presence assures that the diagram can be completely split into triangles.  For those who have read my <a href="https://github.com/sympy/sympy/wiki/GSoC-2012-Application-Sergiu-Ivanov:-Category-Theory-Module">proposal</a>, I will remark that all the stages of diagram analysis I described <em>after</em> laying out the triangles are actually unnecessary, namely because of these dummy edges, which guarantee that we have sufficiently many triangles.  Yet, dummy edges are indeed dummy, in the sense that most of them will not appear in the final diagram.  This makes the triangles we find in the skeleton unevenly interesting to us.  Triangles which have more than one dummy edge are totally extra, because they would distract the attention of the code from  triangles with more meaningful edges and would mess things up, generally.  Therefore, such triangles are immediately dropped.</p>
-<p>Once the “triangulating” stage is complete, the core of the algorithm comes into play.  Basically, the idea is to pick one of the triangles, pick one of its edges and put it on a grid, horizontally, remembering that it is in the fringe.  Then, iteratively, “<b>weld</b>” interesting triangles to the fringe, eventually placing all objects of the diagram on the grid.  This part is the trickiest part of the whole algorithm, so prepare to hear a talk about a lot of magic <img src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif" alt=":-)" class="wp-smiley" />  </p>
-<p>Any triangle is placed on the grid as a right-angled triangle, with the perpendicular edges being horizontal and vertical.  This assures that we keep “quite” close to the desired grid layout.  Whenever a triangle is placed on the grid, the objects which form its vertices are recorded as already placed.  Then, those triangles which only contain objects which have already been placed (uninteresting triangles) are dropped.  That is, once the places of some objects are decided, those objects are never considered again.  This may constitute a point of future improvement, of course, because objects are often drawn in several copies to make the diagram look clearer.</p>
-<p>When placing the triangle on the grid, the code attempts to assure that as many interesting (not dummy) edges as possible will be drawn horizontally or vertically.  There is some dark magic in the code which detects such situations, but I hope that after following the trail of comments and just reading the code itself, the whole thing should become rather clear.</p>
-<p>Now, since the algorithm is essentially greedy, there can be situations when all edges to which the remaining triangles could have been welded, have already been positioned inside the structure and it is now impossible to find the welding edge.  In this case, the algorithm attempts to attach a triangle to the existing structure by a vertex only.  If such a possibility is found, an edge (the <b>pseudopod</b>) of the triangle is placed as vertically (or horizontally) as possible and then the welding process can be continued, since there already is a welding edge.</p>
-<p>Let’s now focus on what happens to the fringe.  When a new triangle is welded, the two new edges are added to the fringe.  No edges are deleted however, because the welding edge might still have some free space to its other part.  Edges are deleted from the fringe only when they are detected as possible welding edges, but when the algorithm finds that there is no space around them actually.  I have considered several possibilities of correcting the fringe on different occasions; my conclusions so far have been that it’s not generally worth it, performance-wise.  This question however should be better investigated, including doing some complexity analysis.</p>
-<p>You might have noticed that I do not in any way treat the situation when a pseudopod cannot be grown.  I have not encountered such situations during the testing yet, so I decided not to attempt to handle them before I have actually seen an example.  Taking into consideration that I am going to work with diagrams rather intensively later, if such situations are possible, I will indeed run into them.  I must confess that I haven’t considered the problem theoretically yet, though <img src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif" alt=":-)" class="wp-smiley" /> </p>
-<p>The description of the essential parts of the algorithm is complete here, so I’m passing over to the overview of the remaining problems and further short-term plans.</p>
-<p>Tom Bachmann, my mentor, has suggested that I describe the steps of the algorithm in the docs which come with the source code.  I will do this shortly.  I believe it is essential to write such documentation as soon as possible, despite the abundant (hopefully) comments in the code.</p>
-<p>My immediately next task is, however, producing the actual <a href="http://www.tug.org/applications/Xy-pic/">Xy-pic</a> code.  I expect that getting this done at a basic level shouldn’t be hard.  However, drawing longer morphisms and avoiding intersections for as much as possible may prove a rather hard task to achieve.</p>
-<p>Oh, and the almost forgotten conclusion: I now essentially have the core of the automatic diagram plotting functionality, since laying out objects is the most difficult part of the affair.</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/220/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/220/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=220&amp;subd=scolobb&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://scolobb.wordpress.com/2012/07/02/the-layout/">by scolobb at July 02, 2012 08:42 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -5065,7 +5149,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
 
 <p>
 <strong>Last updated:</strong><br>
-November 22, 2012 02:40 PM<br>
+November 23, 2012 02:00 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
