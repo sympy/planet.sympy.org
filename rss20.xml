@@ -8,6 +8,119 @@
 	<description>Planet SymPy - http://planet.sympy.org/</description>
 
 <item>
+	<title>MRocklin: Computing the Kalman Filter</title>
+	<guid isPermaLink="true">http://matthewrocklin.com/blog//work/2012/11/24/Kalman-Filter</guid>
+	<link>http://matthewrocklin.com/blog//work/2012/11/24/Kalman-Filter</link>
+	<description>&lt;p&gt;The &lt;a href=&quot;http://en.wikipedia.org/wiki/Kalman_filter&quot;&gt;Kalman Filter&lt;/a&gt; is an algorithm to update probability distributions with new observations made under noisy conditions. It is used in everything from smartphone GPS navigation systems to large scale climate simulations. It is implemented in hardware ranging from embedded devices to super-computers. It is important and widely used.&lt;/p&gt;
+
+&lt;p&gt;In this post I will&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Show how to compute the Kalman Filter with BLAS/LAPACK&lt;/li&gt;
+
+&lt;li&gt;Relate this to old work on &lt;code&gt;sympy.stats&lt;/code&gt;&lt;/li&gt;
+
+&lt;li&gt;Analyze the computation graph for some flaws and features&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;images&quot;&gt;Images&lt;/h2&gt;
+
+&lt;p&gt;The Kalman filter can be defined as a pair of matrix expressions&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;c&quot;&gt;# kalman.py&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;sympy.matrices.expressions&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MatrixSymbol&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Identity&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;sympy&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Symbol&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Q&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;k&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Symbol&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'n'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Symbol&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'k'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;      &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MatrixSymbol&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'mu'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Sigma&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MatrixSymbol&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'Sigma'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;H&lt;/span&gt;       &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MatrixSymbol&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'H'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;k&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;R&lt;/span&gt;       &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MatrixSymbol&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'R'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;k&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;k&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MatrixSymbol&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'data'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;k&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;       &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Identity&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;new_mu&lt;/span&gt;      &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Sigma&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;H&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;R&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;H&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Sigma&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;H&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;I&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;H&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;new_Sigma&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;I&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Sigma&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;H&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;R&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;H&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Sigma&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;H&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;I&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;H&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Sigma&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;assumptions&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Q&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;positive_definite&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Sigma&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Q&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;symmetric&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Sigma&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;
+               &lt;span class=&quot;n&quot;&gt;Q&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;positive_definite&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;R&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Q&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;symmetric&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;R&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;We convert these matrix expressions into a computation&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;c&quot;&gt;# kalman_computation.py&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;kalman&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;new_mu&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;new_Sigma&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;assumptions&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;sympy.computations.matrices.compile&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;make_rule&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;patterns&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;sympy.computations.core&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Identity&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;ident&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Identity&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;new_mu&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;new_Sigma&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;rule&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;make_rule&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;patterns&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;assumptions&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;mathcomp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;next&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rule&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ident&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;mathcomp&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;show&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;&lt;img src=&quot;http://mrocklin.github.com/blog/images/kalman-math-1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;This is a useful result.&lt;/p&gt;
+
+&lt;h2 id=&quot;history_with_stats&quot;&gt;History with stats&lt;/h2&gt;
+
+&lt;p&gt;Two years ago I wrote two blogposts about the Kalman filter, one on &lt;a href=&quot;http://sympystats.wordpress.com/2011/07/02/a-lesson-in-data-assimilation-using-sympy/&quot;&gt;the univariate case&lt;/a&gt; and one on &lt;a href=&quot;http://sympystats.wordpress.com/2011/07/19/multivariate-normal-random-variables/&quot;&gt;the multivariate case&lt;/a&gt;. At the time I was working on &lt;code&gt;sympy.stats&lt;/code&gt;, a module that enabled uncertainty modeling through the introduction of a random variables into the SymPy language.&lt;/p&gt;
+
+&lt;p&gt;SymPy stats was designed with atomicity in mind. It tried to be as small and thin a layer as possible.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;It turned queries on continuous random expressions into integral expressions.&lt;/li&gt;
+
+&lt;li&gt;It turned queries on discrete random expressions into iterators and sums.&lt;/li&gt;
+
+&lt;li&gt;It also turned queries on multivariate normal random expressions into matrix expressions.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The goal was to turn a specialized problem (uncertainty quantification) into a general one (integrals, sums, matrix expressions) under the assumption that tools are much richer to solve general problems than specific ones.&lt;/p&gt;
+
+&lt;p&gt;The first blogpost on the univariate kalman filter produced integral expressions that were then solved by SymPy’s integration routines. The &lt;a href=&quot;http://sympystats.wordpress.com/2011/07/19/multivariate-normal-random-variables/&quot;&gt;second blogpost&lt;/a&gt; on the multivariate Kalman filter generated the following matrix expressions&lt;/p&gt;
+
+&lt;p&gt;$$\mu’ = \mu + \Sigma H^T \left( R + H \Sigma H^T \right )^{-1} \left(H\mu - \textrm{data} \right) $$ $$\Sigma’ = \left( \mathbb{I} - \Sigma H^T \left(R + H \Sigma H^T \right)^{-1} H \right) \Sigma $$&lt;/p&gt;
+
+&lt;p&gt;That blogpost finished with this result, claiming that the job of &lt;code&gt;sympy.stats&lt;/code&gt; was finished and that any of the popular numerical linear algebra packages could pick up from that point.&lt;/p&gt;
+
+&lt;p&gt;These two equations are the Kalman filter and were our starting point for today. Matrix Expressions are an intermediate representation layer between &lt;code&gt;sympy.stats&lt;/code&gt; and &lt;code&gt;sympy.computations.matrices&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;By composing these projects we compile high level statistical expressions of &lt;code&gt;sympy.stats&lt;/code&gt; to intermediate level matrix expressions to the DAGs of &lt;code&gt;sympy.computations&lt;/code&gt; and even down to low level Fortran code. If we add a traditional Fortran compiler we can build working binaries directly from &lt;code&gt;sympy.stats&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;features_and_flaws_in_the_kalman_graph&quot;&gt;Features and Flaws in the Kalman graph&lt;/h2&gt;
+
+&lt;p&gt;Lets investigate the Kalman computation. It contains a few notable features.&lt;/p&gt;
+
+&lt;p&gt;First, unlike previous examples it has two outputs, &lt;code&gt;new_mu&lt;/code&gt; and &lt;code&gt;new_Sigma&lt;/code&gt;. These two have large common subexpressions like &lt;code&gt;H*Sigma*H' + R&lt;/code&gt;. You can see that these were computed once and shared.&lt;/p&gt;
+
+&lt;p&gt;Second, lets appreciate that &lt;code&gt;H*Sigma*H + R&lt;/code&gt; is identified as symmetric positive definite allowing the more efficient &lt;code&gt;POSV&lt;/code&gt; routine. I’ve brought this up before in artificial examples. It’s nice to see that this occurs in practice.&lt;/p&gt;
+
+&lt;p&gt;Third, there is an unfortunately common motif. This instance was taken from the upper right of the image but the &lt;code&gt;GE/SYMM -&amp;gt; AXPY&lt;/code&gt; motif occurs four times in this graph.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://mrocklin.github.com/blog/images/kalman-math-gemm-axpy-motif.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;GEMM/SYMM&lt;/code&gt; are matrix multiply operations used to break down expressions like &lt;code&gt;alpha*A*B&lt;/code&gt;. &lt;code&gt;AXPY&lt;/code&gt; is a matrix addition used to break down expressions like &lt;code&gt;alpha*A + B&lt;/code&gt;. They are both used properly here.&lt;/p&gt;
+
+&lt;p&gt;This motif is unforunate because &lt;code&gt;GEMM&lt;/code&gt; is also capable of breaking down a larger expression like &lt;code&gt;alpha*A*B + beta*C&lt;/code&gt;, doing a fused matrix multiply and add all in one pass. The &lt;code&gt;AXPY&lt;/code&gt; would be unnecessary if the larger &lt;code&gt;GE/SYMM&lt;/code&gt; patterns had matched correctly.&lt;/p&gt;
+
+&lt;h2 id=&quot;canonicalization&quot;&gt;Canonicalization&lt;/h2&gt;
+
+&lt;p&gt;The &lt;code&gt;alpha*A*B + beta*C&lt;/code&gt; patterns did not match here for a silly reason, there wasn’t anything to match for the scalars &lt;code&gt;alpha&lt;/code&gt; and &lt;code&gt;beta&lt;/code&gt;. Instead the patterns were like &lt;code&gt;A*B - C&lt;/code&gt;. One solution to this problem is to make more patterns with all possibilities. Alternatively we could change how we canonicalize &lt;code&gt;MatMul&lt;/code&gt; objects so that they always have a scalar coefficient, even if it defaults to 1.&lt;/p&gt;
+
+&lt;p&gt;We don’t want to change &lt;code&gt;MatMul&lt;/code&gt; to behave like this throughout all of SymPy though; the extra 1 is usually unwanted. This is a case where there are multiple correct definitions of canonical. Fortunately &lt;code&gt;MatMul&lt;/code&gt; is written with this eventuality in mind.&lt;/p&gt;
+
+&lt;h2 id=&quot;links&quot;&gt;Links&lt;/h2&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;a href=&quot;http://sympystats.wordpress.com/2011/07/02/a-lesson-in-data-assimilation-using-sympy/&quot;&gt;A Lesson in Data Assimilation using SymPy&lt;/a&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;a href=&quot;http://sympystats.wordpress.com/2011/07/19/multivariate-normal-random-variables/&quot;&gt;Multivariate Normal Random Variables&lt;/a&gt;&lt;/li&gt;
+
+&lt;li&gt;Source for this post: &lt;a href=&quot;http://mrocklin.github.com/blog/scripts/kalman.py&quot;&gt;kalman.py&lt;/a&gt;, &lt;a href=&quot;http://mrocklin.github.com/blog/scripts/kalman_comp.py&quot;&gt;kalman_comp.py&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;</description>
+	<pubDate>Sat, 24 Nov 2012 08:00:00 +0000</pubDate>
+</item>
+<item>
 	<title>MRocklin: Building Computations</title>
 	<guid isPermaLink="true">http://matthewrocklin.com/blog//work/2012/11/23/BuildingComputations</guid>
 	<link>http://matthewrocklin.com/blog//work/2012/11/23/BuildingComputations</link>
@@ -3494,18 +3607,6 @@ plot_implicit(And(Eq(y, exp(x)), y - x &amp;gt; 2)
 &lt;p&gt;Well, that’s it for now it seems. If anything else pops up soon, I’ll add it here!&lt;/p&gt;
 &lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/amakelov.wordpress.com/266/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/amakelov.wordpress.com/266/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;amp;blog=35896871&amp;amp;post=266&amp;amp;subd=amakelov&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
 	<pubDate>Sun, 08 Jul 2012 15:29:12 +0000</pubDate>
-</item>
-<item>
-	<title>Angadh Nanjangud: Another week ha…</title>
-	<guid isPermaLink="true">http://angadhsympy.wordpress.com/2012/07/07/another-week-ha-18/</guid>
-	<link>http://angadhsympy.wordpress.com/2012/07/07/another-week-ha-18/</link>
-	<description>&lt;p&gt;Another week has gone by and another &lt;a href=&quot;https://github.com/sympy/sympy/pull/1407#issuecomment-6821926&quot;&gt;PR&lt;/a&gt; has been opened. Added the kinetic energy and potential energy methods to the Particle and RigidBody classes. Also added functions to determine the same for a system of bodies. Implementing the kinetic energy method was fairly straightforward. A slightly different approach was used when it came to potential energies. It was decided that the best thing to do would be to let the user specify the potential energy scalar. So there is a set_potential_energy method and a read-only property called potential_energy.&lt;/p&gt;
-&lt;p&gt;On a brighter note, the two PRs that I had opened for the momenta functions and partial velocity functions have been merged. Chuffed about that. &lt;/p&gt;
-&lt;p&gt;As things stand now, we are set up beautifully to being the implementation of Lagrange’s method. The next week is primarily going to revolve around reading as much literature on the topic as possible because an attempt is going to be made to deal with non-holonomic systems too, unlike what was stated in my proposal i.e. only holonomic systems. I have personally never used Lagrange’s method on non-holonomic systems; instructors in the past have said it’s a messy affair and have stressed on the superiority of Kane’s method especially for this class of systems. I don’t doubt the superiority of Kane’s method but unfortunately, it’s not something that every dynamicist is aware of. So, it is definitely going to be a useful addition; a natural progression in the learning of dynamical methods starts at Newton’s method and is typically followed by Lagrange’s method and then to Kane’s method.&lt;/p&gt;
-&lt;p&gt;With the partial velocities helper functions and energy methods and functions, we are in a very good place in terms of implementing this method. Until next week then! (It’s 7am and I haven’t gotten any sleep last night. Over caffeinated. This post may not have made for pretty reading consequently)&lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;
-&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/angadhsympy.wordpress.com/303/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/angadhsympy.wordpress.com/303/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=angadhsympy.wordpress.com&amp;amp;blog=35620584&amp;amp;post=303&amp;amp;subd=angadhsympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
-	<pubDate>Sat, 07 Jul 2012 14:00:31 +0000</pubDate>
 </item>
 
 </channel>

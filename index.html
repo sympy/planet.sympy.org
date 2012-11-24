@@ -10,6 +10,7 @@
 
 
 
+
 <head>
 <title>Planet SymPy</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -21,6 +22,148 @@
 <body>
 <h1>Planet SymPy</h1>
 
+<div class="daygroup">
+<h2>November 24, 2012</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://matthewrocklin.com/blog/" title="Working notes by Matthew Rocklin - SymPy">MRocklin</a></h3>
+
+
+<div class="entrygroup" id="http://matthewrocklin.com/blog//work/2012/11/24/Kalman-Filter">
+<h4><a href="http://matthewrocklin.com/blog//work/2012/11/24/Kalman-Filter">Computing the Kalman Filter</a></h4>
+<div class="entry">
+<div class="content">
+<p>The <a href="http://en.wikipedia.org/wiki/Kalman_filter">Kalman Filter</a> is an algorithm to update probability distributions with new observations made under noisy conditions. It is used in everything from smartphone GPS navigation systems to large scale climate simulations. It is implemented in hardware ranging from embedded devices to super-computers. It is important and widely used.</p>
+
+<p>In this post I will</p>
+
+<ol>
+<li>Show how to compute the Kalman Filter with BLAS/LAPACK</li>
+
+<li>Relate this to old work on <code>sympy.stats</code></li>
+
+<li>Analyze the computation graph for some flaws and features</li>
+</ol>
+
+<h2 id="images">Images</h2>
+
+<p>The Kalman filter can be defined as a pair of matrix expressions</p>
+<div class="highlight"><pre><code class="python"><span class="c"># kalman.py</span>
+<span class="kn">from</span> <span class="nn">sympy.matrices.expressions</span> <span class="kn">import</span> <span class="n">MatrixSymbol</span><span class="p">,</span> <span class="n">Identity</span>
+<span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">Symbol</span><span class="p">,</span> <span class="n">Q</span>
+
+<span class="n">n</span><span class="p">,</span> <span class="n">k</span>    <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'n'</span><span class="p">),</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'k'</span><span class="p">)</span>
+<span class="n">mu</span>      <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'mu'</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">Sigma</span>   <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'Sigma'</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+<span class="n">H</span>       <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'H'</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+<span class="n">R</span>       <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'R'</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+<span class="n">data</span>    <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'data'</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">I</span>       <span class="o">=</span> <span class="n">Identity</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+
+<span class="n">new_mu</span>      <span class="o">=</span> <span class="n">mu</span> <span class="o">+</span> <span class="n">Sigma</span><span class="o">*</span><span class="n">H</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="p">(</span><span class="n">R</span> <span class="o">+</span> <span class="n">H</span><span class="o">*</span><span class="n">Sigma</span><span class="o">*</span><span class="n">H</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">I</span> <span class="o">*</span> <span class="p">(</span><span class="n">H</span><span class="o">*</span><span class="n">mu</span> <span class="o">-</span> <span class="n">data</span><span class="p">)</span>
+<span class="n">new_Sigma</span>   <span class="o">=</span> <span class="p">(</span><span class="n">I</span> <span class="o">-</span> <span class="n">Sigma</span><span class="o">*</span><span class="n">H</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="p">(</span><span class="n">R</span> <span class="o">+</span> <span class="n">H</span><span class="o">*</span><span class="n">Sigma</span><span class="o">*</span><span class="n">H</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">I</span> <span class="o">*</span> <span class="n">H</span><span class="p">)</span> <span class="o">*</span> <span class="n">Sigma</span>
+
+<span class="n">assumptions</span> <span class="o">=</span> <span class="p">(</span><span class="n">Q</span><span class="o">.</span><span class="n">positive_definite</span><span class="p">(</span><span class="n">Sigma</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">Sigma</span><span class="p">)</span> <span class="o">&amp;</span>
+               <span class="n">Q</span><span class="o">.</span><span class="n">positive_definite</span><span class="p">(</span><span class="n">R</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">R</span><span class="p">))</span>
+</code></pre>
+</div>
+<p>We convert these matrix expressions into a computation</p>
+<div class="highlight"><pre><code class="python"><span class="c"># kalman_computation.py</span>
+<span class="kn">from</span> <span class="nn">kalman</span> <span class="kn">import</span> <span class="n">new_mu</span><span class="p">,</span> <span class="n">new_Sigma</span><span class="p">,</span> <span class="n">assumptions</span>
+<span class="kn">from</span> <span class="nn">sympy.computations.matrices.compile</span> <span class="kn">import</span> <span class="n">make_rule</span><span class="p">,</span> <span class="n">patterns</span>
+<span class="kn">from</span> <span class="nn">sympy.computations.core</span> <span class="kn">import</span> <span class="n">Identity</span>
+
+<span class="n">ident</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">(</span><span class="n">new_mu</span><span class="p">,</span> <span class="n">new_Sigma</span><span class="p">)</span>
+<span class="n">rule</span> <span class="o">=</span> <span class="n">make_rule</span><span class="p">(</span><span class="n">patterns</span><span class="p">,</span> <span class="n">assumptions</span><span class="p">)</span>
+<span class="n">mathcomp</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">rule</span><span class="p">(</span><span class="n">ident</span><span class="p">))</span>
+<span class="n">mathcomp</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre>
+</div>
+<p><img src="http://mrocklin.github.com/blog/images/kalman-math-1.png" alt="" /></p>
+
+<p>This is a useful result.</p>
+
+<h2 id="history_with_stats">History with stats</h2>
+
+<p>Two years ago I wrote two blogposts about the Kalman filter, one on <a href="http://sympystats.wordpress.com/2011/07/02/a-lesson-in-data-assimilation-using-sympy/">the univariate case</a> and one on <a href="http://sympystats.wordpress.com/2011/07/19/multivariate-normal-random-variables/">the multivariate case</a>. At the time I was working on <code>sympy.stats</code>, a module that enabled uncertainty modeling through the introduction of a random variables into the SymPy language.</p>
+
+<p>SymPy stats was designed with atomicity in mind. It tried to be as small and thin a layer as possible.</p>
+
+<ul>
+<li>It turned queries on continuous random expressions into integral expressions.</li>
+
+<li>It turned queries on discrete random expressions into iterators and sums.</li>
+
+<li>It also turned queries on multivariate normal random expressions into matrix expressions.</li>
+</ul>
+
+<p>The goal was to turn a specialized problem (uncertainty quantification) into a general one (integrals, sums, matrix expressions) under the assumption that tools are much richer to solve general problems than specific ones.</p>
+
+<p>The first blogpost on the univariate kalman filter produced integral expressions that were then solved by SymPy’s integration routines. The <a href="http://sympystats.wordpress.com/2011/07/19/multivariate-normal-random-variables/">second blogpost</a> on the multivariate Kalman filter generated the following matrix expressions</p>
+
+<p>$$\mu’ = \mu + \Sigma H^T \left( R + H \Sigma H^T \right )^{-1} \left(H\mu - \textrm{data} \right) $$ $$\Sigma’ = \left( \mathbb{I} - \Sigma H^T \left(R + H \Sigma H^T \right)^{-1} H \right) \Sigma $$</p>
+
+<p>That blogpost finished with this result, claiming that the job of <code>sympy.stats</code> was finished and that any of the popular numerical linear algebra packages could pick up from that point.</p>
+
+<p>These two equations are the Kalman filter and were our starting point for today. Matrix Expressions are an intermediate representation layer between <code>sympy.stats</code> and <code>sympy.computations.matrices</code>.</p>
+
+<p>By composing these projects we compile high level statistical expressions of <code>sympy.stats</code> to intermediate level matrix expressions to the DAGs of <code>sympy.computations</code> and even down to low level Fortran code. If we add a traditional Fortran compiler we can build working binaries directly from <code>sympy.stats</code>.</p>
+
+<h2 id="features_and_flaws_in_the_kalman_graph">Features and Flaws in the Kalman graph</h2>
+
+<p>Lets investigate the Kalman computation. It contains a few notable features.</p>
+
+<p>First, unlike previous examples it has two outputs, <code>new_mu</code> and <code>new_Sigma</code>. These two have large common subexpressions like <code>H*Sigma*H' + R</code>. You can see that these were computed once and shared.</p>
+
+<p>Second, lets appreciate that <code>H*Sigma*H + R</code> is identified as symmetric positive definite allowing the more efficient <code>POSV</code> routine. I’ve brought this up before in artificial examples. It’s nice to see that this occurs in practice.</p>
+
+<p>Third, there is an unfortunately common motif. This instance was taken from the upper right of the image but the <code>GE/SYMM -&gt; AXPY</code> motif occurs four times in this graph.</p>
+
+<p><img src="http://mrocklin.github.com/blog/images/kalman-math-gemm-axpy-motif.png" alt="" /></p>
+
+<p><code>GEMM/SYMM</code> are matrix multiply operations used to break down expressions like <code>alpha*A*B</code>. <code>AXPY</code> is a matrix addition used to break down expressions like <code>alpha*A + B</code>. They are both used properly here.</p>
+
+<p>This motif is unforunate because <code>GEMM</code> is also capable of breaking down a larger expression like <code>alpha*A*B + beta*C</code>, doing a fused matrix multiply and add all in one pass. The <code>AXPY</code> would be unnecessary if the larger <code>GE/SYMM</code> patterns had matched correctly.</p>
+
+<h2 id="canonicalization">Canonicalization</h2>
+
+<p>The <code>alpha*A*B + beta*C</code> patterns did not match here for a silly reason, there wasn’t anything to match for the scalars <code>alpha</code> and <code>beta</code>. Instead the patterns were like <code>A*B - C</code>. One solution to this problem is to make more patterns with all possibilities. Alternatively we could change how we canonicalize <code>MatMul</code> objects so that they always have a scalar coefficient, even if it defaults to 1.</p>
+
+<p>We don’t want to change <code>MatMul</code> to behave like this throughout all of SymPy though; the extra 1 is usually unwanted. This is a case where there are multiple correct definitions of canonical. Fortunately <code>MatMul</code> is written with this eventuality in mind.</p>
+
+<h2 id="links">Links</h2>
+
+<ol>
+<li><a href="http://sympystats.wordpress.com/2011/07/02/a-lesson-in-data-assimilation-using-sympy/">A Lesson in Data Assimilation using SymPy</a></li>
+
+<li><a href="http://sympystats.wordpress.com/2011/07/19/multivariate-normal-random-variables/">Multivariate Normal Random Variables</a></li>
+
+<li>Source for this post: <a href="http://mrocklin.github.com/blog/scripts/kalman.py">kalman.py</a>, <a href="http://mrocklin.github.com/blog/scripts/kalman_comp.py">kalman_comp.py</a></li>
+</ol></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://matthewrocklin.com/blog//work/2012/11/24/Kalman-Filter">November 24, 2012 08:00 AM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
 <div class="daygroup">
 <h2>November 23, 2012</h2>
 
@@ -4994,47 +5137,6 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
 </div>
 
 </div>
-<div class="daygroup">
-<h2>July 07, 2012</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://angadhsympy.wordpress.com" title="GSoC 2012 blog">Angadh Nanjangud</a></h3>
-
-
-<div class="entrygroup" id="http://angadhsympy.wordpress.com/2012/07/07/another-week-ha-18/">
-<h4 lang="en"><a href="http://angadhsympy.wordpress.com/2012/07/07/another-week-ha-18/">Another week ha…</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>Another week has gone by and another <a href="https://github.com/sympy/sympy/pull/1407#issuecomment-6821926">PR</a> has been opened. Added the kinetic energy and potential energy methods to the Particle and RigidBody classes. Also added functions to determine the same for a system of bodies. Implementing the kinetic energy method was fairly straightforward. A slightly different approach was used when it came to potential energies. It was decided that the best thing to do would be to let the user specify the potential energy scalar. So there is a set_potential_energy method and a read-only property called potential_energy.</p>
-<p>On a brighter note, the two PRs that I had opened for the momenta functions and partial velocity functions have been merged. Chuffed about that. </p>
-<p>As things stand now, we are set up beautifully to being the implementation of Lagrange’s method. The next week is primarily going to revolve around reading as much literature on the topic as possible because an attempt is going to be made to deal with non-holonomic systems too, unlike what was stated in my proposal i.e. only holonomic systems. I have personally never used Lagrange’s method on non-holonomic systems; instructors in the past have said it’s a messy affair and have stressed on the superiority of Kane’s method especially for this class of systems. I don’t doubt the superiority of Kane’s method but unfortunately, it’s not something that every dynamicist is aware of. So, it is definitely going to be a useful addition; a natural progression in the learning of dynamical methods starts at Newton’s method and is typically followed by Lagrange’s method and then to Kane’s method.</p>
-<p>With the partial velocities helper functions and energy methods and functions, we are in a very good place in terms of implementing this method. Until next week then! (It’s 7am and I haven’t gotten any sleep last night. Over caffeinated. This post may not have made for pretty reading consequently)</p>
-<p> </p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/angadhsympy.wordpress.com/303/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/angadhsympy.wordpress.com/303/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=angadhsympy.wordpress.com&amp;blog=35620584&amp;post=303&amp;subd=angadhsympy&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://angadhsympy.wordpress.com/2012/07/07/another-week-ha-18/">by angadhn at July 07, 2012 02:00 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -5148,7 +5250,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
 
 <p>
 <strong>Last updated:</strong><br>
-November 23, 2012 02:00 PM<br>
+November 24, 2012 02:00 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
