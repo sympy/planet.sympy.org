@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2012-11-29T05:40:28Z</updated>
+  <updated>2012-12-02T19:00:30Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,99 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry>
+    <id>http://matthewrocklin.com/blog//work/2012/12/03/Characteristic-Functions</id>
+    <link href="http://matthewrocklin.com/blog//work/2012/12/03/Characteristic-Functions" rel="alternate" type="text/html"/>
+    <title>Characteristic Functions</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>In a recent post, <a href="http://jpktd.blogspot.com/2012/12/characteristic-functions-and-scipystats.html">Characteristic Functions and scipy.stats</a>, <a href="https://github.com/josef-pkt">Josef Perktold</a> created functions for the <a href="http://en.wikipedia.org/wiki/Characteristic_function">characteristic functions</a> of the <a href="http://en.wikipedia.org/wiki/Normal_distribution">Normal</a> (easy) and <a href="http://en.wikipedia.org/wiki/Student%27s_t-distribution">t</a> (hard) distributions. The t-distribution is challenging because the solution involves special functions and has numerically challenging behavior around 0.</p>
+
+<p>Lets see if SymPy can do this work symbolically. Wikipedia says that the characteristic function \(\phi(t)\) of a random variable <code>X</code> is defined as follows</p>
+
+<p>$$ \phi_X(t) = E(e^{itX}) $$</p>
+
+<p>It equal to the expectation of <code>exp(i*t*X)</code>. Lets do this in SymPy</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">sympy.stats</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">mu</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'mu'</span><span class="p">,</span> <span class="n">bounded</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sigma</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'sigma'</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">bounded</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">X</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s">'X'</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">t</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'t'</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">simplify</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">exp</span><span class="p">(</span><span class="n">I</span><span class="o">*</span><span class="n">t</span><span class="o">*</span><span class="n">X</span><span class="p">)))</span>
+              <span class="mi">2</span>  <span class="mi">2</span>
+             <span class="err">σ</span> <span class="err">⋅</span><span class="n">t</span> 
+     <span class="err">ⅈ⋅μ⋅</span><span class="n">t</span> <span class="o">-</span> <span class="err">─────</span>
+               <span class="mi">2</span>  
+   <span class="err">ℯ</span>             
+</code></pre>
+</div>
+<p>Wikipedia verifies that this is the correct answer. I was actually pretty surprised that this worked as smoothly as it did. SymPy stats wasn’t designed to support characteristic functions natively.</p>
+
+<p>Here are some gists for the <a href="https://gist.github.com/4186685">Cauchy</a> and <a href="https://gist.github.com/4186709">Student-T</a> distributions. Cauchy simplifies down pretty well but the Student-T characteristic function has a few special functions included.</p>
+
+<h2 id="behavior_near_zero">Behavior near zero</h2>
+
+<p>Josef says that the behavior of the characteristic function of the t distribution near zero for high degrees of freedom (the nu parameter) is challenging to compute numerically. Can SymPy handle this symbolically?</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">nu</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'nu'</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">integer</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">X</span> <span class="o">=</span> <span class="n">StudentT</span><span class="p">(</span><span class="s">'X'</span><span class="p">,</span> <span class="n">nu</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">t</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'t'</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">simplify</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">exp</span><span class="p">(</span><span class="n">I</span><span class="o">*</span><span class="n">t</span><span class="o">*</span><span class="n">X</span><span class="p">)))</span>
+</code></pre>
+</div>
+<p><img alt="" src="http://goo.gl/a6xcw"/></p>
+
+<p>The bold scripted I’s are besseli functions. We restrict this expression to a specific number of degrees of freedom, setting <code>nu = 50</code></p>
+
+<pre><code>&gt;&gt;&gt; simplify(E(exp(I*t*X))).subs(nu, 50)  # replace nu with 50
+         ⎛         ___  ⎞            ⎛        ___  ⎞
+∞⋅besseli⎝-25, 5⋅╲╱ 2 ⋅t⎠ - ∞⋅besseli⎝25, 5⋅╲╱ 2 ⋅t⎠</code></pre>
+
+<p>Whoops, simple substitution at that number of degrees of freedom fails, giving us infinities. What if we build the expression with <code>50</code> from the beginning? This gives the integration routines more information when they compute the expectation.</p>
+
+<pre><code>&gt;&gt;&gt; X = StudentT('X', 50)
+&gt;&gt;&gt; simplify(E(exp(I*t*X)))
+        ⎛              │     2  -ⅈ⋅π⎞           ⎛              │     2  ⅈ⋅π⎞
+╭─╮3, 1 ⎜   1/2        │ 25⋅t ⋅ℯ    ⎟   ╭─╮3, 1 ⎜   1/2        │ 25⋅t ⋅ℯ   ⎟
+│╶┐     ⎜              │ ───────────⎟ + │╶┐     ⎜              │ ──────────⎟
+╰─╯1, 3 ⎝25, 0, 1/2    │      2     ⎠   ╰─╯1, 3 ⎝25, 0, 1/2    │     2     ⎠
+────────────────────────────────────────────────────────────────────────────
+                        1240896803466478878720000⋅π                         </code></pre>
+
+<p>The solution is in terms of <a href="http://en.wikipedia.org/wiki/Meijer-G">Meijer-G</a> functions. Can we evaluate this close to <code>t = 0</code>?</p>
+
+<pre><code>&gt;&gt;&gt; simplify(E(exp(I*t*X))).subs(t, 1e-6).evalf()
+0.999999999999479 + 1.56564942264937e-29⋅ⅈ</code></pre>
+
+<p>And finally can we plot it?</p>
+
+<pre><code>&gt;&gt;&gt; plot(re(simplify(E(exp(I*t*X)))), (t, 1e-7, 1e-3))</code></pre>
+
+<p><img alt="" src="http://mrocklin.github.com/blog/images/student-t-characteristic-near-zero.png"/></p>
+
+<h2 id="closing_notes">Closing Notes</h2>
+
+<p>The <code>sympy.stats</code> module was not designed with characteristic functions in mind. I was pleasantly surprised when I entered the following mathematical code</p>
+
+<pre><code>X = Normal('X', mu, sigma)
+E(I*t*X)</code></pre>
+
+<p>and received the answer on Wikipedia. I am always happy when projects work on problems for which they were not originally designed.</p>
+
+<p>If you do complex work on statistical functions I recommend you take a look at <code>sympy.stats</code>. It’s able to perform some interesting high level transformations. Thanks to recent work by <a href="https://github.com/raoulb">Raoul Bourquin</a> many of the common distributions found in <code>scipy.stats</code> are now available (with even more in a <a href="https://github.com/sympy/sympy/pull/1413">pull request</a>).</p></div>
+    </summary>
+    <updated>2012-12-03T08:00:00Z</updated>
+    <source>
+      <id>http://matthewrocklin.com/blog/</id>
+      <author>
+        <name>MRocklin</name>
+      </author>
+      <link href="http://matthewrocklin.com/blog/" rel="alternate" type="text/html"/>
+      <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
+      <subtitle>Posts tagged as 'SymPy'</subtitle>
+      <title>Working notes by Matthew Rocklin - SymPy</title>
+      <updated>2012-12-02T19:00:23Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en-US">
     <id>http://brianegranger.com/?p=235</id>
@@ -165,7 +258,7 @@
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-11-29T05:40:20Z</updated>
+      <updated>2012-12-02T19:00:23Z</updated>
     </source>
   </entry>
 
@@ -283,7 +376,7 @@
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-11-29T05:40:21Z</updated>
+      <updated>2012-12-02T19:00:24Z</updated>
     </source>
   </entry>
 
@@ -361,7 +454,7 @@
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-11-29T05:40:21Z</updated>
+      <updated>2012-12-02T19:00:24Z</updated>
     </source>
   </entry>
 
@@ -393,7 +486,7 @@
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-29T05:40:27Z</updated>
+      <updated>2012-12-02T19:00:29Z</updated>
     </source>
   </entry>
 
@@ -546,7 +639,7 @@ Return objects:
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-11-29T05:40:22Z</updated>
+      <updated>2012-12-02T19:00:24Z</updated>
     </source>
   </entry>
 
@@ -645,7 +738,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-11-29T05:40:20Z</updated>
+      <updated>2012-12-02T19:00:23Z</updated>
     </source>
   </entry>
 
@@ -852,7 +945,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-11-29T05:40:21Z</updated>
+      <updated>2012-12-02T19:00:24Z</updated>
     </source>
   </entry>
 
@@ -916,7 +1009,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-29T05:40:27Z</updated>
+      <updated>2012-12-02T19:00:29Z</updated>
     </source>
   </entry>
 
@@ -1081,7 +1174,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-11-29T05:40:21Z</updated>
+      <updated>2012-12-02T19:00:24Z</updated>
     </source>
   </entry>
 
@@ -1119,7 +1212,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site, I guess...</subtitle>
       <title>Gilbert Gede's Blog</title>
-      <updated>2012-11-29T05:40:13Z</updated>
+      <updated>2012-12-02T19:00:15Z</updated>
     </source>
   </entry>
 
@@ -1296,7 +1389,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-11-29T05:40:21Z</updated>
+      <updated>2012-12-02T19:00:24Z</updated>
     </source>
   </entry>
 
@@ -2194,7 +2287,7 @@ f_durations.write('\n')
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-11-27T00:00:32Z</updated>
+      <updated>2012-12-01T06:40:28Z</updated>
     </source>
   </entry>
 
@@ -2436,7 +2529,7 @@ f_durations.write('\n')
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-11-29T05:40:16Z</updated>
+      <updated>2012-12-02T19:00:18Z</updated>
     </source>
   </entry>
 
@@ -2581,7 +2674,7 @@ RuntimeError: maximum recursion depth exceeded in comparison
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-11-29T05:40:07Z</updated>
+      <updated>2012-12-02T19:00:09Z</updated>
     </source>
   </entry>
 
@@ -2624,7 +2717,7 @@ b. Add this line to your bash_profile.</p>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-29T05:40:27Z</updated>
+      <updated>2012-12-02T19:00:29Z</updated>
     </source>
   </entry>
 
@@ -2705,7 +2798,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-11-29T05:40:07Z</updated>
+      <updated>2012-12-02T19:00:08Z</updated>
     </source>
   </entry>
 
@@ -2741,7 +2834,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-11-29T05:40:08Z</updated>
+      <updated>2012-12-02T19:00:09Z</updated>
     </source>
   </entry>
 
@@ -2977,7 +3070,7 @@ Out[74]: True
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-29T05:40:27Z</updated>
+      <updated>2012-12-02T19:00:29Z</updated>
     </source>
   </entry>
 
@@ -3095,7 +3188,7 @@ commits are much more like my usual ones.
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-11-29T05:40:24Z</updated>
+      <updated>2012-12-02T19:00:27Z</updated>
     </source>
   </entry>
 
@@ -3128,7 +3221,7 @@ commits are much more like my usual ones.
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-11-29T05:40:25Z</updated>
+      <updated>2012-12-02T19:00:28Z</updated>
     </source>
   </entry>
 
@@ -3162,7 +3255,7 @@ commits are much more like my usual ones.
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-11-27T00:00:32Z</updated>
+      <updated>2012-12-01T06:40:28Z</updated>
     </source>
   </entry>
 
@@ -3258,9 +3351,9 @@ Out[24]: 6
     <updated>2012-08-05T11:29:33Z</updated>
     <category term="SymPy"/>
     <category term="category theory"/>
-    <category term="diagram embedding"/>
-    <category term="graph embedding"/>
     <category term="subgraph isomorphism problem"/>
+    <category term="graph embedding"/>
+    <category term="diagram embedding"/>
     <author>
       <name>scolobb</name>
     </author>
@@ -3273,7 +3366,7 @@ Out[24]: 6
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-11-29T05:40:24Z</updated>
+      <updated>2012-12-02T19:00:27Z</updated>
     </source>
   </entry>
 
@@ -3392,7 +3485,7 @@ Out[24]: 6
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-11-29T05:40:25Z</updated>
+      <updated>2012-12-02T19:00:28Z</updated>
     </source>
   </entry>
 
@@ -3424,7 +3517,7 @@ Out[24]: 6
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-29T05:40:27Z</updated>
+      <updated>2012-12-02T19:00:29Z</updated>
     </source>
   </entry>
 
@@ -3465,7 +3558,7 @@ Out[24]: 6
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-11-27T00:00:32Z</updated>
+      <updated>2012-12-01T06:40:28Z</updated>
     </source>
   </entry>
 
@@ -3568,7 +3661,7 @@ StopIteration:
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-29T05:40:27Z</updated>
+      <updated>2012-12-02T19:00:29Z</updated>
     </source>
   </entry>
 
@@ -3608,12 +3701,12 @@ StopIteration:
     </content>
     <updated>2012-07-29T19:20:53Z</updated>
     <category term="SymPy"/>
-    <category term="backward chaining"/>
+    <category term="string representation"/>
     <category term="deciding commutativity"/>
     <category term="diagram layout"/>
     <category term="pretty printing"/>
     <category term="sort key"/>
-    <category term="string representation"/>
+    <category term="backward chaining"/>
     <category term="subgraph isomorphism problem"/>
     <author>
       <name>scolobb</name>
@@ -3627,7 +3720,7 @@ StopIteration:
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-11-29T05:40:24Z</updated>
+      <updated>2012-12-02T19:00:27Z</updated>
     </source>
   </entry>
 
@@ -3657,7 +3750,7 @@ StopIteration:
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-11-29T05:40:25Z</updated>
+      <updated>2012-12-02T19:00:28Z</updated>
     </source>
   </entry>
 
@@ -4026,7 +4119,7 @@ Out[128]: False
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-11-27T00:00:32Z</updated>
+      <updated>2012-12-01T06:40:28Z</updated>
     </source>
   </entry>
 
@@ -4114,7 +4207,7 @@ Out[128]: False
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-11-27T00:00:32Z</updated>
+      <updated>2012-12-01T06:40:28Z</updated>
     </source>
   </entry>
 
@@ -4149,7 +4242,7 @@ Out[128]: False
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-11-27T00:00:31Z</updated>
+      <updated>2012-12-01T06:40:28Z</updated>
     </source>
   </entry>
 
@@ -4196,7 +4289,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-11-29T05:40:24Z</updated>
+      <updated>2012-12-02T19:00:27Z</updated>
     </source>
   </entry>
 
@@ -4246,7 +4339,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-29T05:40:27Z</updated>
+      <updated>2012-12-02T19:00:29Z</updated>
     </source>
   </entry>
 
@@ -4291,7 +4384,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-11-29T05:40:24Z</updated>
+      <updated>2012-12-02T19:00:27Z</updated>
     </source>
   </entry>
 
@@ -4326,7 +4419,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-29T05:40:27Z</updated>
+      <updated>2012-12-02T19:00:29Z</updated>
     </source>
   </entry>
 
@@ -4513,7 +4606,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-11-29T05:40:08Z</updated>
+      <updated>2012-12-02T19:00:09Z</updated>
     </source>
   </entry>
 
@@ -4557,7 +4650,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-11-29T05:40:27Z</updated>
+      <updated>2012-12-02T19:00:29Z</updated>
     </source>
   </entry>
 
@@ -4604,55 +4697,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-11-29T05:40:24Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://krastanov.wordpress.com/?p=447</id>
-    <link href="http://blog.krastanov.org/2012/07/09/tensor-vs-tensor-field-basis-vs-coordinate-system/" rel="alternate" type="text/html"/>
-    <title>Tensor vs Tensor Field, Basis vs Coordinate System</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">In most of my posts that discuss the SymPy diffgeom module I do not try to make a distinction between a tensor and a tensor field, as it is usually obvious from the context. However, it would be nice to spell it out at least once. I have two favorite ways to define a tensor/tensor [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=blog.krastanov.org&amp;blog=15251174&amp;post=447&amp;subd=krastanov&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>In most of my posts that discuss the SymPy diffgeom module I do not try to make a distinction between a tensor and a tensor field, as it is usually obvious from the context. However, it would be nice to spell it out at least once.</p>
-<p>I have two favorite ways to define a tensor/tensor field: either as an object with a representation (in the form of a multidimensional array) that transforms in a precise way when one switches from one basis to another, or instead as (sum of) tensor products of some vectors and 1-forms (i.e. an element of some tensor product of the vector space and its dual).</p>
-<h3>In Terms of Transformation Rules</h3>
-<p>With regard to the first definition, Wikipedia has this to say:</p>
-<blockquote><p>A tensor of type (n, m−n) is an assignment of a multidimensional array <img alt="T^{i_1\dots i_n}_{i_{n+1}\dots i_m}[\mathbf{f}] " class="latex" src="http://s0.wp.com/latex.php?latex=T%5E%7Bi_1%5Cdots+i_n%7D_%7Bi_%7Bn%2B1%7D%5Cdots+i_m%7D%5B%5Cmathbf%7Bf%7D%5D+&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="T^{i_1\dots i_n}_{i_{n+1}\dots i_m}[\mathbf{f}] "/> to each basis <img alt="f = (e_1,...,e_N) " class="latex" src="http://s0.wp.com/latex.php?latex=f+%3D+%28e_1%2C...%2Ce_N%29+&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="f = (e_1,...,e_N) "/> such that, if we apply the change of basis <img alt="\mathbf{f}\mapsto \mathbf{f}\cdot R = \left( R_1^i \mathbf{e}_i, \dots, R_N^i\mathbf{e}_i\right) " class="latex" src="http://s0.wp.com/latex.php?latex=%5Cmathbf%7Bf%7D%5Cmapsto+%5Cmathbf%7Bf%7D%5Ccdot+R+%3D+%5Cleft%28+R_1%5Ei+%5Cmathbf%7Be%7D_i%2C+%5Cdots%2C+R_N%5Ei%5Cmathbf%7Be%7D_i%5Cright%29+&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="\mathbf{f}\mapsto \mathbf{f}\cdot R = \left( R_1^i \mathbf{e}_i, \dots, R_N^i\mathbf{e}_i\right) "/> then the multidimensional array obeys the transformation law <img alt="T^{i_1\dots i_n}_{i_{n+1}\dots i_m}[\mathbf{f}\cdot R] = (R^{-1})^{i_1}_{j_1}\cdots(R^{-1})^{i_n}_{j_n} R^{j_{n+1}}_{i_{n+1}}\cdots R^{j_{m}}_{i_{m}}T^{j_1,\ldots,j_n}_{j_{n+1},\ldots,j_m}[\mathbf{f}] " class="latex" src="http://s0.wp.com/latex.php?latex=T%5E%7Bi_1%5Cdots+i_n%7D_%7Bi_%7Bn%2B1%7D%5Cdots+i_m%7D%5B%5Cmathbf%7Bf%7D%5Ccdot+R%5D+%3D+%28R%5E%7B-1%7D%29%5E%7Bi_1%7D_%7Bj_1%7D%5Ccdots%28R%5E%7B-1%7D%29%5E%7Bi_n%7D_%7Bj_n%7D+R%5E%7Bj_%7Bn%2B1%7D%7D_%7Bi_%7Bn%2B1%7D%7D%5Ccdots+R%5E%7Bj_%7Bm%7D%7D_%7Bi_%7Bm%7D%7DT%5E%7Bj_1%2C%5Cldots%2Cj_n%7D_%7Bj_%7Bn%2B1%7D%2C%5Cldots%2Cj_m%7D%5B%5Cmathbf%7Bf%7D%5D+&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="T^{i_1\dots i_n}_{i_{n+1}\dots i_m}[\mathbf{f}\cdot R] = (R^{-1})^{i_1}_{j_1}\cdots(R^{-1})^{i_n}_{j_n} R^{j_{n+1}}_{i_{n+1}}\cdots R^{j_{m}}_{i_{m}}T^{j_1,\ldots,j_n}_{j_{n+1},\ldots,j_m}[\mathbf{f}] "/>.</p></blockquote>
-<p>A tensor field then is a way to map a tensor to each point of a manifold (the tensor is wrt the tangent space at that point).</p>
-<p>When we switch from tensors to tensor fields a new object becomes important: the coordinate system. Before proceeding, one must know what a manifold and a tangent space mean. Then we can illuminate the relation between what one calls a “basis” when speaking about tensors and the “coordinate system” in the context of tensor fields. Firstly, a coordinate system gives a way to continuously map a tuple of numbers to a point on the manifold. This continuous map is what physicist love to work with (Cartesian or polar coordinates for instance). The nice thing is that each coordinate system brings with itself a canonical basis for each point of the manifold.</p>
-<p>What can be confusing, is that the basis can change from point to point. For example, one can take the <img alt="R^2" class="latex" src="http://s0.wp.com/latex.php?latex=R%5E2&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="R^2"/> manifold that has <img alt="R^2" class="latex" src="http://s0.wp.com/latex.php?latex=R%5E2&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="R^2"/> as its tangent space. Take for instance two points <img alt="(x=1, y=0)" class="latex" src="http://s0.wp.com/latex.php?latex=%28x%3D1%2C+y%3D0%29&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="(x=1, y=0)"/> and <img alt="(x=0, y=1)" class="latex" src="http://s0.wp.com/latex.php?latex=%28x%3D0%2C+y%3D1%29&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="(x=0, y=1)"/>. The basis vectors in the Cartesian coordinate system are the same for both points: <img alt="(e_x, e_y)" class="latex" src="http://s0.wp.com/latex.php?latex=%28e_x%2C+e_y%29&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="(e_x, e_y)"/>. However in the polar coordinate system the basis vectors for the first point are <img alt="(e_x, e_y)" class="latex" src="http://s0.wp.com/latex.php?latex=%28e_x%2C+e_y%29&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="(e_x, e_y)"/> and <img alt="(e_y, -e_x)" class="latex" src="http://s0.wp.com/latex.php?latex=%28e_y%2C+-e_x%29&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="(e_y, -e_x)"/> for the second point.</p>
-<p>Anyway, the only thing that changes in the definition, is that the change-of-basis matrix mentioned above now depends on the coordinate systems.</p>
-<blockquote><p><img alt="\hat{T}^{i_1\dots i_n}_{i_{n+1}\dots i_m}(\bar{x}_1,\ldots,\bar{x}_k) =  \frac{\partial \bar{x}^{i_1}}{\partial x^{j_1}}  \cdots  \frac{\partial \bar{x}^{i_n}}{\partial x^{j_n}}  \frac{\partial x^{j_{n+1}}}{\partial \bar{x}^{i_{n+1}}}  \cdots  \frac{\partial x^{j_m}}{\partial \bar{x}^{i_m}}  T^{j_1\dots j_n}_{j_{n+1}\dots j_m}(x_1,\ldots,x_k) " class="latex" src="http://s0.wp.com/latex.php?latex=%5Chat%7BT%7D%5E%7Bi_1%5Cdots+i_n%7D_%7Bi_%7Bn%2B1%7D%5Cdots+i_m%7D%28%5Cbar%7Bx%7D_1%2C%5Cldots%2C%5Cbar%7Bx%7D_k%29+%3D++%5Cfrac%7B%5Cpartial+%5Cbar%7Bx%7D%5E%7Bi_1%7D%7D%7B%5Cpartial+x%5E%7Bj_1%7D%7D++%5Ccdots++%5Cfrac%7B%5Cpartial+%5Cbar%7Bx%7D%5E%7Bi_n%7D%7D%7B%5Cpartial+x%5E%7Bj_n%7D%7D++%5Cfrac%7B%5Cpartial+x%5E%7Bj_%7Bn%2B1%7D%7D%7D%7B%5Cpartial+%5Cbar%7Bx%7D%5E%7Bi_%7Bn%2B1%7D%7D%7D++%5Ccdots++%5Cfrac%7B%5Cpartial+x%5E%7Bj_m%7D%7D%7B%5Cpartial+%5Cbar%7Bx%7D%5E%7Bi_m%7D%7D++T%5E%7Bj_1%5Cdots+j_n%7D_%7Bj_%7Bn%2B1%7D%5Cdots+j_m%7D%28x_1%2C%5Cldots%2Cx_k%29+&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="\hat{T}^{i_1\dots i_n}_{i_{n+1}\dots i_m}(\bar{x}_1,\ldots,\bar{x}_k) =  \frac{\partial \bar{x}^{i_1}}{\partial x^{j_1}}  \cdots  \frac{\partial \bar{x}^{i_n}}{\partial x^{j_n}}  \frac{\partial x^{j_{n+1}}}{\partial \bar{x}^{i_{n+1}}}  \cdots  \frac{\partial x^{j_m}}{\partial \bar{x}^{i_m}}  T^{j_1\dots j_n}_{j_{n+1}\dots j_m}(x_1,\ldots,x_k) "/></p></blockquote>
-<h3>In Terms of Tensor Products</h3>
-<p>I prefer this definition, as it relies on the geometrical meaning of vectors and forms. According to Wikipedia, one can express it as:</p>
-<blockquote><p>A type (n, m) tensor T is defined as a map <img alt="T: \underbrace{ V^* \times\dots\times V^*}_{n \text{ copies}} \times \underbrace{ V \times\dots\times V}_{m \text{ copies}} \rightarrow \mathbf{R} " class="latex" src="http://s0.wp.com/latex.php?latex=T%3A+%5Cunderbrace%7B+V%5E%2A+%5Ctimes%5Cdots%5Ctimes+V%5E%2A%7D_%7Bn+%5Ctext%7B+copies%7D%7D+%5Ctimes+%5Cunderbrace%7B+V+%5Ctimes%5Cdots%5Ctimes+V%7D_%7Bm+%5Ctext%7B+copies%7D%7D+%5Crightarrow+%5Cmathbf%7BR%7D+&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="T: \underbrace{ V^* \times\dots\times V^*}_{n \text{ copies}} \times \underbrace{ V \times\dots\times V}_{m \text{ copies}} \rightarrow \mathbf{R} "/>, where V is a vector space and V* is the corresponding dual space of covectors, which is linear in each of its arguments.</p></blockquote>
-<p>One can again try to translate this to the case of tensor fields. The straightforward way is just to say that this map is parametrized, thus it depends on which point on the manifold it is evaluated.</p>
-<p>However, a more “geometrical” approach would be to keep the part about “a tensor field is the sum of tensor products of vector fields and 1-form fields” but define vector fields and 1-form fields “geometrically”. Vector fields become differential operators over the manifold instead of maps to elements of the tangent space and 1-forms are defined in terms of differentials instead of duals of vectors.</p>
-<h3>The Magic</h3>
-<p>The magic is that this parametrization in terms of tuples of real numbers (a coordinate system) brings automatically a canonical basis and and the transformation matrix for change of basis. Hence defining a coordinate system provides a basis for free. Otherwise the generalization of the first definition would have been clumsier.</p>
-<br/>  <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=blog.krastanov.org&amp;blog=15251174&amp;post=447&amp;subd=krastanov&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2012-07-08T22:50:51Z</updated>
-    <category term="GSoC - diffgeom"/>
-    <category term="Mathematics"/>
-    <category term="differential geometry"/>
-    <category term="&#x43C;&#x430;&#x442;&#x435;&#x43C;&#x430;&#x442;&#x438;&#x43A;&#x430;"/>
-    <category term="gsoc"/>
-    <category term="sympy"/>
-    <author>
-      <name>Stefan Krastanov</name>
-    </author>
-    <source>
-      <id>http://blog.krastanov.org</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://blog.krastanov.org/category/sympy-2/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://blog.krastanov.org" rel="alternate" type="text/html"/>
-      <link href="http://blog.krastanov.org/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>Just another WordPress.com site</subtitle>
-      <title>Stefan's Blog » SymPy</title>
-      <updated>2012-11-27T00:00:32Z</updated>
+      <updated>2012-12-02T19:00:27Z</updated>
     </source>
   </entry>
 </feed>
