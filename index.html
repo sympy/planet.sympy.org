@@ -10,6 +10,7 @@
 
 
 
+
 <head>
 <title>Planet SymPy</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -60,17 +61,17 @@
 <pre><code>&gt;&gt;&gt; from sympy.stats import *
 &gt;&gt;&gt; mu = Symbol('mu', bounded=True)
 &gt;&gt;&gt; sigma = Symbol('sigma', positive=True, bounded=True)
-&gt;&gt;&gt; X = Normal('X', mu, sigma)
 &gt;&gt;&gt; t = Symbol('t', positive=True)
 
-&gt;&gt;&gt; simplify(E(exp(I*t*X)))
+&gt;&gt;&gt; X = Normal('X', mu, sigma)  # Normal random variable
+&gt;&gt;&gt; simplify(E(exp(I*t*X)))     # Expectation of exp(I*t*X)
               2  2
              σ ⋅t 
      ⅈ⋅μ⋅t - ─────
                2  
    ℯ             </code></pre>
 
-<p>Wikipedia verifies that this is the correct answer. I was actually pretty surprised that this worked as smoothly as it did. SymPy stats wasn’t designed for this.</p>
+<p>I was actually pretty surprised that this worked as smoothly as it did. SymPy stats wasn’t designed for this.</p>
 
 <p>Here are some gists for the <a href="https://gist.github.com/4186685">Cauchy</a> and <a href="https://gist.github.com/4186709">Student-T</a> distributions. Cauchy simplifies down pretty well but the Student-T characteristic function has a few special functions included.</p>
 
@@ -78,8 +79,9 @@
 
 <p>Josef says that the behavior of the characteristic function of the t distribution near zero for high degrees of freedom (the nu parameter) is challenging to compute numerically. Can SymPy handle this symbolically?</p>
 <div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">nu</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'nu'</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">integer</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">X</span> <span class="o">=</span> <span class="n">StudentT</span><span class="p">(</span><span class="s">'X'</span><span class="p">,</span> <span class="n">nu</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">t</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'t'</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">X</span> <span class="o">=</span> <span class="n">StudentT</span><span class="p">(</span><span class="s">'X'</span><span class="p">,</span> <span class="n">nu</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">simplify</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">exp</span><span class="p">(</span><span class="n">I</span><span class="o">*</span><span class="n">t</span><span class="o">*</span><span class="n">X</span><span class="p">)))</span>
 </code></pre>
 </div>
@@ -112,7 +114,7 @@
 
 <p>This is where scipy’s special functions failed in Josef’s post, yielding infinity instead of 1.</p>
 
-<p>And finally we plot the behavior around 1.</p>
+<p>And finally we plot the behavior around 0.</p>
 
 <pre><code>&gt;&gt;&gt; plot(re(simplify(E(exp(I*t*X)))), (t, 1e-7, 1e-1))</code></pre>
 
@@ -5265,7 +5267,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
 
 <p>
 <strong>Last updated:</strong><br>
-December 03, 2012 01:40 PM<br>
+December 03, 2012 05:00 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>

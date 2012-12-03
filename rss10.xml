@@ -101,17 +101,17 @@
 &lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt;&amp;gt; from sympy.stats import *
 &amp;gt;&amp;gt;&amp;gt; mu = Symbol('mu', bounded=True)
 &amp;gt;&amp;gt;&amp;gt; sigma = Symbol('sigma', positive=True, bounded=True)
-&amp;gt;&amp;gt;&amp;gt; X = Normal('X', mu, sigma)
 &amp;gt;&amp;gt;&amp;gt; t = Symbol('t', positive=True)
 
-&amp;gt;&amp;gt;&amp;gt; simplify(E(exp(I*t*X)))
+&amp;gt;&amp;gt;&amp;gt; X = Normal('X', mu, sigma)  # Normal random variable
+&amp;gt;&amp;gt;&amp;gt; simplify(E(exp(I*t*X)))     # Expectation of exp(I*t*X)
               2  2
              σ ⋅t 
      ⅈ⋅μ⋅t - ─────
                2  
    ℯ             &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Wikipedia verifies that this is the correct answer. I was actually pretty surprised that this worked as smoothly as it did. SymPy stats wasn’t designed for this.&lt;/p&gt;
+&lt;p&gt;I was actually pretty surprised that this worked as smoothly as it did. SymPy stats wasn’t designed for this.&lt;/p&gt;
 
 &lt;p&gt;Here are some gists for the &lt;a href=&quot;https://gist.github.com/4186685&quot;&gt;Cauchy&lt;/a&gt; and &lt;a href=&quot;https://gist.github.com/4186709&quot;&gt;Student-T&lt;/a&gt; distributions. Cauchy simplifies down pretty well but the Student-T characteristic function has a few special functions included.&lt;/p&gt;
 
@@ -119,8 +119,9 @@
 
 &lt;p&gt;Josef says that the behavior of the characteristic function of the t distribution near zero for high degrees of freedom (the nu parameter) is challenging to compute numerically. Can SymPy handle this symbolically?&lt;/p&gt;
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nu&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Symbol&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'nu'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;positive&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;integer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;X&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;StudentT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'X'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nu&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Symbol&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'t'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;positive&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;X&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;StudentT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'X'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nu&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;simplify&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;E&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;exp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;X&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
@@ -153,7 +154,7 @@
 
 &lt;p&gt;This is where scipy’s special functions failed in Josef’s post, yielding infinity instead of 1.&lt;/p&gt;
 
-&lt;p&gt;And finally we plot the behavior around 1.&lt;/p&gt;
+&lt;p&gt;And finally we plot the behavior around 0.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt;&amp;gt; plot(re(simplify(E(exp(I*t*X)))), (t, 1e-7, 1e-1))&lt;/code&gt;&lt;/pre&gt;
 
