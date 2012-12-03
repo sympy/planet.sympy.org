@@ -11,28 +11,38 @@
 	<title>MRocklin: Characteristic Functions</title>
 	<guid isPermaLink="true">http://matthewrocklin.com/blog//work/2012/12/03/Characteristic-Functions</guid>
 	<link>http://matthewrocklin.com/blog//work/2012/12/03/Characteristic-Functions</link>
-	<description>&lt;p&gt;In a recent post, &lt;a href=&quot;http://jpktd.blogspot.com/2012/12/characteristic-functions-and-scipystats.html&quot;&gt;Characteristic Functions and scipy.stats&lt;/a&gt;, &lt;a href=&quot;https://github.com/josef-pkt&quot;&gt;Josef Perktold&lt;/a&gt; created functions for the &lt;a href=&quot;http://en.wikipedia.org/wiki/Characteristic_function&quot;&gt;characteristic functions&lt;/a&gt; of the &lt;a href=&quot;http://en.wikipedia.org/wiki/Normal_distribution&quot;&gt;Normal&lt;/a&gt; (easy) and &lt;a href=&quot;http://en.wikipedia.org/wiki/Student%27s_t-distribution&quot;&gt;t&lt;/a&gt; (hard) distributions. The t-distribution is challenging because the solution involves special functions and has numerically challenging behavior around 0.&lt;/p&gt;
+	<description>&lt;p&gt;In a recent post, &lt;a href=&quot;http://jpktd.blogspot.com/2012/12/characteristic-functions-and-scipystats.html&quot;&gt;Characteristic Functions and scipy.stats&lt;/a&gt;, &lt;a href=&quot;https://github.com/josef-pkt&quot;&gt;Josef Perktold&lt;/a&gt; created functions for the &lt;a href=&quot;http://en.wikipedia.org/wiki/Characteristic_function&quot;&gt;characteristic functions&lt;/a&gt; of the &lt;a href=&quot;http://en.wikipedia.org/wiki/Normal_distribution&quot;&gt;Normal&lt;/a&gt; (easy) and &lt;a href=&quot;http://en.wikipedia.org/wiki/Student%27s_t-distribution&quot;&gt;t&lt;/a&gt; (hard) distributions. The t-distribution is challenging because the solution involves special functions and has numerically challenging behavior around 0 for high degrees of freedom. Some quotes&lt;/p&gt;
 
-&lt;p&gt;Lets see if SymPy can do this work symbolically. Wikipedia says that the characteristic function \(\phi(t)\) of a random variable &lt;code&gt;X&lt;/code&gt; is defined as follows&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;The characteristic function for the normal distribution is easy, but looking at the characteristic function of the t-distribution, I wish someone had translated it into code already&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Since I haven’t seen it yet, I sat down and tried it myself. I managed to code the characteristic function of the t-distribution, but it returns NaNs when it is evaluated close to zero for large df. I didn’t find a Bessel “k” function that works in this case&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;He then includes his code and discusses a particular application of the characteristic function which I won’t discuss here.&lt;/p&gt;
+
+&lt;h2 id=&quot;symbolic_solution&quot;&gt;Symbolic Solution&lt;/h2&gt;
+
+&lt;p&gt;Josef wished that this code had been written already. Characteristic functions aren’t built into SymPy but we may be able to derive them automatically.&lt;/p&gt;
+
+&lt;p&gt;Wikipedia says that the characteristic function \(\phi(t)\) of a random variable &lt;code&gt;X&lt;/code&gt; is defined as follows&lt;/p&gt;
 
 &lt;p&gt;$$ \phi_X(t) = E(e^{itX}) $$&lt;/p&gt;
 
 &lt;p&gt;It equal to the expectation of &lt;code&gt;exp(i*t*X)&lt;/code&gt;. Lets do this in SymPy&lt;/p&gt;
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;sympy.stats&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Symbol&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'mu'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bounded&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sigma&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Symbol&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'sigma'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;positive&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bounded&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;X&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Normal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'X'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sigma&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Symbol&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'t'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;positive&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 
-&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;simplify&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;E&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;exp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;X&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
-              &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;  &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;
-             &lt;span class=&quot;err&quot;&gt;σ&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;⋅&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;t&lt;/span&gt; 
-     &lt;span class=&quot;err&quot;&gt;ⅈ⋅μ⋅&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;t&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;─────&lt;/span&gt;
-               &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;  
-   &lt;span class=&quot;err&quot;&gt;ℯ&lt;/span&gt;             
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;Wikipedia verifies that this is the correct answer. I was actually pretty surprised that this worked as smoothly as it did. SymPy stats wasn’t designed to support characteristic functions natively.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt;&amp;gt; from sympy.stats import *
+&amp;gt;&amp;gt;&amp;gt; mu = Symbol('mu', bounded=True)
+&amp;gt;&amp;gt;&amp;gt; sigma = Symbol('sigma', positive=True, bounded=True)
+&amp;gt;&amp;gt;&amp;gt; X = Normal('X', mu, sigma)
+&amp;gt;&amp;gt;&amp;gt; t = Symbol('t', positive=True)
+
+&amp;gt;&amp;gt;&amp;gt; simplify(E(exp(I*t*X)))
+              2  2
+             σ ⋅t 
+     ⅈ⋅μ⋅t - ─────
+               2  
+   ℯ             &lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Wikipedia verifies that this is the correct answer. I was actually pretty surprised that this worked as smoothly as it did. SymPy stats wasn’t designed for this.&lt;/p&gt;
 
 &lt;p&gt;Here are some gists for the &lt;a href=&quot;https://gist.github.com/4186685&quot;&gt;Cauchy&lt;/a&gt; and &lt;a href=&quot;https://gist.github.com/4186709&quot;&gt;Student-T&lt;/a&gt; distributions. Cauchy simplifies down pretty well but the Student-T characteristic function has a few special functions included.&lt;/p&gt;
 
@@ -67,22 +77,27 @@
 &lt;p&gt;The solution is in terms of &lt;a href=&quot;http://en.wikipedia.org/wiki/Meijer-G&quot;&gt;Meijer-G&lt;/a&gt; functions. Can we evaluate this close to &lt;code&gt;t = 0&lt;/code&gt;?&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt;&amp;gt; simplify(E(exp(I*t*X))).subs(t, 1e-6).evalf()
-0.999999999999479 + 1.56564942264937e-29⋅ⅈ&lt;/code&gt;&lt;/pre&gt;
+0.999999999999479 + 1.56564942264937e-29⋅ⅈ
 
-&lt;p&gt;And finally can we plot it?&lt;/p&gt;
+&amp;gt;&amp;gt;&amp;gt; simplify(E(exp(I*t*X))).subs(t, 1e-30).evalf()  
+1.0 - 1.2950748484704e-53⋅ⅈ&lt;/code&gt;&lt;/pre&gt;
 
-&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt;&amp;gt; plot(re(simplify(E(exp(I*t*X)))), (t, 1e-7, 1e-3))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This is where scipy’s special functions failed in Josef’s post, yielding infinity instead of 1.&lt;/p&gt;
+
+&lt;p&gt;And finally we plot the behavior around 1.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt;&amp;gt; plot(re(simplify(E(exp(I*t*X)))), (t, 1e-7, 1e-1))&lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://mrocklin.github.com/blog/images/student-t-characteristic-near-zero.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
 &lt;h2 id=&quot;closing_notes&quot;&gt;Closing Notes&lt;/h2&gt;
 
-&lt;p&gt;The &lt;code&gt;sympy.stats&lt;/code&gt; module was not designed with characteristic functions in mind. I was pleasantly surprised when I entered the following mathematical code&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;sympy.stats&lt;/code&gt; module was not designed with characteristic functions in mind. I was pleasantly surprised when I entered code almost identical to the mathematical definition&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;X = Normal('X', mu, sigma)
-E(I*t*X)&lt;/code&gt;&lt;/pre&gt;
+E(exp(I*t*X))&lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;and received the answer on Wikipedia. I am always happy when projects work on problems for which they were not originally designed.&lt;/p&gt;
+&lt;p&gt;and received the correct answer. I am always happy when projects work on problems for which they were not originally designed. The fact that this works is largely due to SymPy’s excellent handling of integrals of special functions, due largely to &lt;a href=&quot;https://github.com/ness01&quot;&gt;Tom Bachmann&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;If you do complex work on statistical functions I recommend you take a look at &lt;code&gt;sympy.stats&lt;/code&gt;. It’s able to perform some interesting high level transformations. Thanks to recent work by &lt;a href=&quot;https://github.com/raoulb&quot;&gt;Raoul Bourquin&lt;/a&gt; many of the common distributions found in &lt;code&gt;scipy.stats&lt;/code&gt; are now available (with even more in a &lt;a href=&quot;https://github.com/sympy/sympy/pull/1413&quot;&gt;pull request&lt;/a&gt;).&lt;/p&gt;</description>
 	<pubDate>Mon, 03 Dec 2012 08:00:00 +0000</pubDate>
