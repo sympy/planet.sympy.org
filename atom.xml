@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2012-12-11T11:00:57Z</updated>
+  <updated>2012-12-12T13:40:34Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,101 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry>
+    <id>http://matthewrocklin.com/blog//work/2012/12/11/Statistical-Simplification</id>
+    <link href="http://matthewrocklin.com/blog//work/2012/12/11/Statistical-Simplification" rel="alternate" type="text/html"/>
+    <title>Statistical Simplification</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p><a href="http://matthewrocklin.com/blog/feed.sympy.xml">Lawrence Leemis</a>, a statistician at Williams and Mary, recently published <a href="http://www.math.wm.edu/~leemis/chart/UDR/UDR.html">a wonderful interactive visualization</a> on the reduction relationships of statistical distributions. (found via <a href="http://www.johndcook.com/blog/2012/12/10/extended-distribution-chart/">John Cook’s blog</a>)</p>
+
+<p><a href="http://www.math.wm.edu/~leemis/chart/UDR/UDR.html"><img alt="" src="http://www.johndcook.com/leemis.png"/></a></p>
+
+<p>This excites me because it touches on one of my favorite topics</p>
+
+<p><em>How do we reusably encode expert knowledge into computational systems?</em></p>
+
+<h2 id="the_big_challenge">The Big Challenge</h2>
+
+<p>Correct use of mathematical information can accelerate important computations by several orders of magnitude. Unfortunately the people who know the mathematics are not always the ones doing the computation. This results in substantial waste.</p>
+
+<p>How do we integrate expert mathematical knowledge everywhere? One solution is to collaborate more. While collaboration is generally good it doesn’t scale well. As problems become more complex it is more difficult to find all of the necessary experts, especially for smaller relatively unimportant projects. Also, collaboration rarely results in reusable infrastructure. Statistical chemistry projects are rarely applicable to statistical biology problems.</p>
+
+<h2 id="one_solution__multistage_compilation">One Solution - Multi-Stage Compilation</h2>
+
+<p>We could write each expert’s knowledge into a single project and then connect many such projects into a multi-stage compiler. At each each stage we simplify the expression with the knowledge relevant at that stage. We must create a transformation between each pair of connecting stages. Ideally the conceptual distance between connected stages is small and so these transformations are easy.</p>
+
+<p>This isn’t clearly the right solution. It is difficult to chain many small projects together and end up with efficient code. You need to find the right sequence of intermediate layers that are able to communicate mathematical information down to the lowest-level of computational code.</p>
+
+<h2 id="relevance_to_sympystats">Relevance to SymPy.stats</h2>
+
+<p>SymPy.stats endeavors to be a transformation in such a toolchain. It converts stochastic expressions into integral expressions.</p>
+
+<p>The surrounding infrastructure looks like this</p>
+
+<p><img alt="" src="http://mrocklin.github.com/blog/images/stats-simp.png"/></p>
+
+<p>When SymPy expressions are imbued with random variables they form stochastic expressions. Sympy.stats transforms these into integral expressions which are then again converted through a variety of methods, either numeric (like Monte Carlo) or again symbolic.</p>
+
+<p>Each stage within this pipeline presents us with the opportunity to simplify the expression with knowledge relevant to that stage. For example at the input and output SymPy Expr layers we make algebraic and trigonometric simplifications like the following</p>
+
+<pre><code>X + X -&gt; 2*X
+sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
+
+<p>At the integration stage we might separate multivariate integrals if possible or use integration by parts.</p>
+
+<p>Notice that there is no such simplification self-loop at the <code>Stochastic Expr</code> node. This is where the information in Leemis’ chart would fit.</p>
+
+<h3 id="a_failing_of_sympystats">A Failing of sympy.stats</h3>
+
+<p>Currently sympy.stats does not simplify stochastic expressions with expert knowledge; it converts directly from stochastic expressions to integral expressions without first applying known simplifications like what is encoded in Leemis’ chart. This causes some fairly embarassing failures</p>
+<div class="highlight"><pre><code class="python"><span class="n">In</span> <span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="kn">from</span> <span class="nn">sympy.stats</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="n">X</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s">'X'</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c"># A standard normal random variable</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">3</span><span class="p">]:</span> <span class="n">density</span><span class="p">(</span><span class="n">X</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>  
+<span class="n">Out</span><span class="p">[</span><span class="mi">3</span><span class="p">]:</span> 
+<span class="o">&lt;&lt;</span> <span class="n">failure</span><span class="p">:</span> <span class="n">unevaluated</span> <span class="n">integral</span> <span class="o">&gt;&gt;</span>
+</code></pre>
+</div>
+<p>Any statistician could tell you that the expression <code>X**2</code> has a Chi Squared distribution which has a simple and well understood density. This relation is commonly known and commonly occurs in practice.</p>
+
+<p>Because sympy.stats doesn’t know this it blindly takes the expression <code>density(X**2)</code> and converts it directly into an integral. The resulting integral is difficult and stumps the integration routines.* In this case knowing basic statistics would have turned an impossible problem into a trivial one.</p>
+
+<h3 id="future_work">Future work</h3>
+
+<p>We should encode relations on distributions into SymPy. The knowledge in Leemis’s chart could be written down as a knowledgebase of known transformations. Transformations like the following could solve our immediate problem.</p>
+<div class="highlight"><pre><code class="python"><span class="n">Normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StandardNormal</span><span class="p">()</span>
+<span class="n">StandardNormal</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span> <span class="o">-&gt;</span> <span class="n">ChiSquared</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">StandardNormal</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">ChiSquared</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ChiSquared</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+</code></pre>
+</div>
+<p>Each stage in the compilation pipeline presents us with an opportunity to apply expert knowledge. The <code>Stochastic Expr</code> stage is such an opportunity of which we are not currently taking advantage.</p>
+
+<p>Leemis’s chart is written declaratively, highlighting which logical transformations are possible under which conditions. The new modules on <a href="http://mrocklin.github.com/blog/work/2012/11/01/Unification/">unification</a> and <a href="http://mrocklin.github.com/blog/work/2012/11/07/Strategies/">strategies</a> should provide all of the necessary infrastructure to translate Leemis’ chart to functioning code. Writing a minimal simpliication scheme for the above problem might be as simple as</p>
+<div class="highlight"><pre><code class="python"><span class="c">#    rewriterule(from-pattern, to-pattern, wilds)</span>
+<span class="n">p1</span> <span class="o">=</span> <span class="n">rewriterule</span><span class="p">(</span><span class="n">Normal</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">StandardNormal</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="n">wilds</span><span class="o">=</span><span class="p">(</span><span class="n">name</span><span class="p">,))</span>
+<span class="n">p2</span> <span class="o">=</span> <span class="n">rewriterule</span><span class="p">(</span><span class="n">StandardNormal</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">ChiSquared</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">wilds</span><span class="o">=</span><span class="p">(</span><span class="n">name</span><span class="p">,))</span>
+<span class="n">p3</span> <span class="o">=</span> <span class="n">rewriterule</span><span class="p">(</span><span class="n">StandardNormal</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">ChiSquared</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">n</span><span class="p">),</span> 
+                 <span class="n">ChiSquared</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">wilds</span><span class="o">=</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+
+<span class="n">statsimp</span> <span class="o">=</span> <span class="n">exhaust</span><span class="p">(</span><span class="n">bottom_up</span><span class="p">(</span><span class="n">multiplex</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">)))</span>
+</code></pre>
+</div>
+<p>If anyone is interested in this I’d be happy to help out. This is the sort of project that really excites me but that I can’t currently justify time-wise.</p></div>
+    </summary>
+    <updated>2012-12-11T08:00:00Z</updated>
+    <source>
+      <id>http://matthewrocklin.com/blog/</id>
+      <author>
+        <name>MRocklin</name>
+      </author>
+      <link href="http://matthewrocklin.com/blog/" rel="alternate" type="text/html"/>
+      <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
+      <subtitle>Posts tagged as 'SymPy'</subtitle>
+      <title>Working notes by Matthew Rocklin - SymPy</title>
+      <updated>2012-12-12T13:40:27Z</updated>
+    </source>
+  </entry>
 
   <entry>
     <id>tag:fseoane.net/blog,2012-12-08:2012/singular-value-decomposition-in-scipy/</id>
@@ -158,7 +253,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-12-11T11:00:51Z</updated>
+      <updated>2012-12-12T13:40:28Z</updated>
     </source>
   </entry>
 
@@ -316,7 +411,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-12-11T11:00:51Z</updated>
+      <updated>2012-12-12T13:40:28Z</updated>
     </source>
   </entry>
 
@@ -434,7 +529,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-12-11T11:00:52Z</updated>
+      <updated>2012-12-12T13:40:28Z</updated>
     </source>
   </entry>
 
@@ -512,7 +607,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-12-11T11:00:52Z</updated>
+      <updated>2012-12-12T13:40:29Z</updated>
     </source>
   </entry>
 
@@ -544,7 +639,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-12-11T11:00:56Z</updated>
+      <updated>2012-12-12T13:40:34Z</updated>
     </source>
   </entry>
 
@@ -697,7 +792,7 @@ Return objects:
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-12-11T11:00:52Z</updated>
+      <updated>2012-12-12T13:40:29Z</updated>
     </source>
   </entry>
 
@@ -796,7 +891,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-12-11T11:00:51Z</updated>
+      <updated>2012-12-12T13:40:28Z</updated>
     </source>
   </entry>
 
@@ -1003,7 +1098,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-12-11T11:00:52Z</updated>
+      <updated>2012-12-12T13:40:29Z</updated>
     </source>
   </entry>
 
@@ -1067,7 +1162,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-12-11T11:00:56Z</updated>
+      <updated>2012-12-12T13:40:33Z</updated>
     </source>
   </entry>
 
@@ -1232,7 +1327,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-12-11T11:00:51Z</updated>
+      <updated>2012-12-12T13:40:28Z</updated>
     </source>
   </entry>
 
@@ -1270,7 +1365,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site, I guess...</subtitle>
       <title>Gilbert Gede's Blog</title>
-      <updated>2012-12-11T11:00:43Z</updated>
+      <updated>2012-12-12T13:40:19Z</updated>
     </source>
   </entry>
 
@@ -1447,7 +1542,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-12-11T11:00:51Z</updated>
+      <updated>2012-12-12T13:40:28Z</updated>
     </source>
   </entry>
 
@@ -2345,7 +2440,7 @@ f_durations.write('\n')
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-12-01T06:40:28Z</updated>
+      <updated>2012-12-12T11:20:38Z</updated>
     </source>
   </entry>
 
@@ -2587,7 +2682,7 @@ f_durations.write('\n')
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-12-11T11:00:46Z</updated>
+      <updated>2012-12-12T13:40:22Z</updated>
     </source>
   </entry>
 
@@ -2732,7 +2827,7 @@ RuntimeError: maximum recursion depth exceeded in comparison
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-12-11T11:00:17Z</updated>
+      <updated>2012-12-12T13:40:13Z</updated>
     </source>
   </entry>
 
@@ -2775,7 +2870,7 @@ b. Add this line to your bash_profile.</p>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-12-11T11:00:56Z</updated>
+      <updated>2012-12-12T13:40:34Z</updated>
     </source>
   </entry>
 
@@ -2856,7 +2951,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-12-11T11:00:17Z</updated>
+      <updated>2012-12-12T13:40:13Z</updated>
     </source>
   </entry>
 
@@ -2892,7 +2987,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-12-11T11:00:17Z</updated>
+      <updated>2012-12-12T13:40:13Z</updated>
     </source>
   </entry>
 
@@ -3128,7 +3223,7 @@ Out[74]: True
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-12-11T11:00:56Z</updated>
+      <updated>2012-12-12T13:40:33Z</updated>
     </source>
   </entry>
 
@@ -3246,7 +3341,7 @@ commits are much more like my usual ones.
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-12-11T11:00:54Z</updated>
+      <updated>2012-12-12T13:40:32Z</updated>
     </source>
   </entry>
 
@@ -3279,7 +3374,7 @@ commits are much more like my usual ones.
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-12-11T11:00:55Z</updated>
+      <updated>2012-12-12T13:40:32Z</updated>
     </source>
   </entry>
 
@@ -3313,7 +3408,7 @@ commits are much more like my usual ones.
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-12-01T06:40:28Z</updated>
+      <updated>2012-12-12T11:20:38Z</updated>
     </source>
   </entry>
 
@@ -3424,7 +3519,7 @@ Out[24]: 6
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-12-11T11:00:54Z</updated>
+      <updated>2012-12-12T13:40:31Z</updated>
     </source>
   </entry>
 
@@ -3543,7 +3638,7 @@ Out[24]: 6
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-12-11T11:00:55Z</updated>
+      <updated>2012-12-12T13:40:32Z</updated>
     </source>
   </entry>
 
@@ -3575,7 +3670,7 @@ Out[24]: 6
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-12-11T11:00:56Z</updated>
+      <updated>2012-12-12T13:40:33Z</updated>
     </source>
   </entry>
 
@@ -3616,7 +3711,7 @@ Out[24]: 6
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-12-01T06:40:28Z</updated>
+      <updated>2012-12-12T11:20:38Z</updated>
     </source>
   </entry>
 
@@ -3719,7 +3814,7 @@ StopIteration:
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-12-11T11:00:56Z</updated>
+      <updated>2012-12-12T13:40:33Z</updated>
     </source>
   </entry>
 
@@ -3778,7 +3873,7 @@ StopIteration:
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-12-11T11:00:54Z</updated>
+      <updated>2012-12-12T13:40:31Z</updated>
     </source>
   </entry>
 
@@ -3808,7 +3903,7 @@ StopIteration:
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-12-11T11:00:55Z</updated>
+      <updated>2012-12-12T13:40:32Z</updated>
     </source>
   </entry>
 
@@ -4177,7 +4272,7 @@ Out[128]: False
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-12-01T06:40:28Z</updated>
+      <updated>2012-12-12T11:20:38Z</updated>
     </source>
   </entry>
 
@@ -4265,7 +4360,7 @@ Out[128]: False
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-12-01T06:40:28Z</updated>
+      <updated>2012-12-12T11:20:38Z</updated>
     </source>
   </entry>
 
@@ -4300,7 +4395,7 @@ Out[128]: False
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2012-12-01T06:40:28Z</updated>
+      <updated>2012-12-12T11:20:38Z</updated>
     </source>
   </entry>
 
@@ -4347,7 +4442,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-12-11T11:00:54Z</updated>
+      <updated>2012-12-12T13:40:31Z</updated>
     </source>
   </entry>
 
@@ -4397,7 +4492,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-12-11T11:00:56Z</updated>
+      <updated>2012-12-12T13:40:33Z</updated>
     </source>
   </entry>
 
@@ -4442,7 +4537,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-12-11T11:00:54Z</updated>
+      <updated>2012-12-12T13:40:31Z</updated>
     </source>
   </entry>
 
@@ -4477,7 +4572,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-12-11T11:00:56Z</updated>
+      <updated>2012-12-12T13:40:33Z</updated>
     </source>
   </entry>
 
@@ -4664,51 +4759,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-12-11T11:00:17Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://rhoforsympy.wordpress.com/?p=181</id>
-    <link href="http://rhoforsympy.wordpress.com/2012/07/09/week-7-tr-operations-on-qubits/" rel="alternate" type="text/html"/>
-    <title>Week 7: Tr operations on Qubits</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">This week has been lot less coding and more of understanding some pieces of codes for next set of changes. As far as the implementation goes, the Tr operations ( including partial trace/reduce density operations) for qubits was implemented. Some examples of the Tr operations on qubits can be seen here. An example of an [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;blog=34650270&amp;post=181&amp;subd=rhoforsympy&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>This week has been lot less coding and more of understanding some pieces of codes for next set of changes. As far as the implementation goes, the Tr operations ( including partial trace/reduce density operations) for qubits was implemented.</p>
-<p>Some examples of the Tr operations on qubits can be seen here.</p>
-<p><a href="http://rhoforsympy.files.wordpress.com/2012/07/tr_qubit_1.jpg"><img alt="" class="alignleft size-full wp-image-182" src="http://rhoforsympy.files.wordpress.com/2012/07/tr_qubit_1.jpg?w=500" title="tr_qubit_1"/></a></p>
-<p>An example of an reduced density operation on a mixed-state is shown below</p>
-<p><a href="http://rhoforsympy.files.wordpress.com/2012/07/tr_qubit_2.jpg"><img alt="" class="alignleft size-full wp-image-183" height="199" src="http://rhoforsympy.files.wordpress.com/2012/07/tr_qubit_2.jpg?w=500&amp;h=199" title="tr_qubit_2" width="500"/></a></p>
-<p>The changes shown above are currently available in my git branch over <a href="https://github.com/gdevanla/sympy/tree/trace_qubit">here</a>. I plan to submit a PR of this branch as soon as the my current <a href="https://github.com/sympy/sympy/pull/1396/">PR 1396</a> is merged.</p>
-<p>Another task I have been working on this week is figuring changes needed to qapply() to perform the L and R operations of density matrix. I plan to work on this tasks during next week.</p>
-<p>In summary, plan for next week:</p>
-<p>1. Address comments on current <a href="https://github.com/sympy/sympy/pull/1396/">PR 1396</a>.</p>
-<p>2. Submit PR for trace_qubit branch and address any reviews on that.</p>
-<p>3. Work on the L and R operations.</p>
-<p>With these activities, the next major task that would remain is to set up trace operations for Time Dependent states.  I will start researching on the current implementation of this code to understand where my changes would have to go.</p>
-<p>On a side note, we are breaking record <a href="http://www.chicagotribune.com/news/chi-120707chicago-heat-weather,0,3439069.story">temperatures</a> in Chicago this week, and it was tough to keep myself cool without an air-conditioner!  Hope other Chicagoan Sympy members are doing just fine by the beach!</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/rhoforsympy.wordpress.com/181/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/rhoforsympy.wordpress.com/181/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;blog=34650270&amp;post=181&amp;subd=rhoforsympy&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2012-07-09T01:13:49Z</updated>
-    <category term="GSoc"/>
-    <category term="density"/>
-    <category term="GSoc 2012"/>
-    <category term="quantum"/>
-    <category term="sympy"/>
-    <category term="trace"/>
-    <author>
-      <name>grdvnl</name>
-    </author>
-    <source>
-      <id>http://rhoforsympy.wordpress.com</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://rhoforsympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://rhoforsympy.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://rhoforsympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>..where we discuss density operators wrt SymPy</subtitle>
-      <title>rhoforsympy</title>
-      <updated>2012-12-11T11:00:56Z</updated>
+      <updated>2012-12-12T13:40:13Z</updated>
     </source>
   </entry>
 </feed>

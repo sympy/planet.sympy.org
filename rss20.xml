@@ -8,6 +8,88 @@
 	<description>Planet SymPy - http://planet.sympy.org/</description>
 
 <item>
+	<title>MRocklin: Statistical Simplification</title>
+	<guid isPermaLink="true">http://matthewrocklin.com/blog//work/2012/12/11/Statistical-Simplification</guid>
+	<link>http://matthewrocklin.com/blog//work/2012/12/11/Statistical-Simplification</link>
+	<description>&lt;p&gt;&lt;a href=&quot;http://matthewrocklin.com/blog/feed.sympy.xml&quot;&gt;Lawrence Leemis&lt;/a&gt;, a statistician at Williams and Mary, recently published &lt;a href=&quot;http://www.math.wm.edu/~leemis/chart/UDR/UDR.html&quot;&gt;a wonderful interactive visualization&lt;/a&gt; on the reduction relationships of statistical distributions. (found via &lt;a href=&quot;http://www.johndcook.com/blog/2012/12/10/extended-distribution-chart/&quot;&gt;John Cook’s blog&lt;/a&gt;)&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://www.math.wm.edu/~leemis/chart/UDR/UDR.html&quot;&gt;&lt;img src=&quot;http://www.johndcook.com/leemis.png&quot; alt=&quot;&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;This excites me because it touches on one of my favorite topics&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;How do we reusably encode expert knowledge into computational systems?&lt;/em&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;the_big_challenge&quot;&gt;The Big Challenge&lt;/h2&gt;
+
+&lt;p&gt;Correct use of mathematical information can accelerate important computations by several orders of magnitude. Unfortunately the people who know the mathematics are not always the ones doing the computation. This results in substantial waste.&lt;/p&gt;
+
+&lt;p&gt;How do we integrate expert mathematical knowledge everywhere? One solution is to collaborate more. While collaboration is generally good it doesn’t scale well. As problems become more complex it is more difficult to find all of the necessary experts, especially for smaller relatively unimportant projects. Also, collaboration rarely results in reusable infrastructure. Statistical chemistry projects are rarely applicable to statistical biology problems.&lt;/p&gt;
+
+&lt;h2 id=&quot;one_solution__multistage_compilation&quot;&gt;One Solution - Multi-Stage Compilation&lt;/h2&gt;
+
+&lt;p&gt;We could write each expert’s knowledge into a single project and then connect many such projects into a multi-stage compiler. At each each stage we simplify the expression with the knowledge relevant at that stage. We must create a transformation between each pair of connecting stages. Ideally the conceptual distance between connected stages is small and so these transformations are easy.&lt;/p&gt;
+
+&lt;p&gt;This isn’t clearly the right solution. It is difficult to chain many small projects together and end up with efficient code. You need to find the right sequence of intermediate layers that are able to communicate mathematical information down to the lowest-level of computational code.&lt;/p&gt;
+
+&lt;h2 id=&quot;relevance_to_sympystats&quot;&gt;Relevance to SymPy.stats&lt;/h2&gt;
+
+&lt;p&gt;SymPy.stats endeavors to be a transformation in such a toolchain. It converts stochastic expressions into integral expressions.&lt;/p&gt;
+
+&lt;p&gt;The surrounding infrastructure looks like this&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://mrocklin.github.com/blog/images/stats-simp.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;When SymPy expressions are imbued with random variables they form stochastic expressions. Sympy.stats transforms these into integral expressions which are then again converted through a variety of methods, either numeric (like Monte Carlo) or again symbolic.&lt;/p&gt;
+
+&lt;p&gt;Each stage within this pipeline presents us with the opportunity to simplify the expression with knowledge relevant to that stage. For example at the input and output SymPy Expr layers we make algebraic and trigonometric simplifications like the following&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;X + X -&amp;gt; 2*X
+sin(x)**2 + cos(x)**2 -&amp;gt; 1 &lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;At the integration stage we might separate multivariate integrals if possible or use integration by parts.&lt;/p&gt;
+
+&lt;p&gt;Notice that there is no such simplification self-loop at the &lt;code&gt;Stochastic Expr&lt;/code&gt; node. This is where the information in Leemis’ chart would fit.&lt;/p&gt;
+
+&lt;h3 id=&quot;a_failing_of_sympystats&quot;&gt;A Failing of sympy.stats&lt;/h3&gt;
+
+&lt;p&gt;Currently sympy.stats does not simplify stochastic expressions with expert knowledge; it converts directly from stochastic expressions to integral expressions without first applying known simplifications like what is encoded in Leemis’ chart. This causes some fairly embarassing failures&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;n&quot;&gt;In&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;sympy.stats&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;In&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;X&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Normal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'X'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;  &lt;span class=&quot;c&quot;&gt;# A standard normal random variable&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;In&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;density&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;X&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;  
+&lt;span class=&quot;n&quot;&gt;Out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; 
+&lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;failure&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unevaluated&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;integral&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;Any statistician could tell you that the expression &lt;code&gt;X**2&lt;/code&gt; has a Chi Squared distribution which has a simple and well understood density. This relation is commonly known and commonly occurs in practice.&lt;/p&gt;
+
+&lt;p&gt;Because sympy.stats doesn’t know this it blindly takes the expression &lt;code&gt;density(X**2)&lt;/code&gt; and converts it directly into an integral. The resulting integral is difficult and stumps the integration routines.* In this case knowing basic statistics would have turned an impossible problem into a trivial one.&lt;/p&gt;
+
+&lt;h3 id=&quot;future_work&quot;&gt;Future work&lt;/h3&gt;
+
+&lt;p&gt;We should encode relations on distributions into SymPy. The knowledge in Leemis’s chart could be written down as a knowledgebase of known transformations. Transformations like the following could solve our immediate problem.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;n&quot;&gt;Normal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;StandardNormal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;StandardNormal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ChiSquared&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;StandardNormal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ChiSquared&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ChiSquared&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;Each stage in the compilation pipeline presents us with an opportunity to apply expert knowledge. The &lt;code&gt;Stochastic Expr&lt;/code&gt; stage is such an opportunity of which we are not currently taking advantage.&lt;/p&gt;
+
+&lt;p&gt;Leemis’s chart is written declaratively, highlighting which logical transformations are possible under which conditions. The new modules on &lt;a href=&quot;http://mrocklin.github.com/blog/work/2012/11/01/Unification/&quot;&gt;unification&lt;/a&gt; and &lt;a href=&quot;http://mrocklin.github.com/blog/work/2012/11/07/Strategies/&quot;&gt;strategies&lt;/a&gt; should provide all of the necessary infrastructure to translate Leemis’ chart to functioning code. Writing a minimal simpliication scheme for the above problem might be as simple as&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;c&quot;&gt;#    rewriterule(from-pattern, to-pattern, wilds)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;p1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rewriterule&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Normal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;StandardNormal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;wilds&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,))&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;p2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rewriterule&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;StandardNormal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ChiSquared&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;wilds&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,))&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;p3&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rewriterule&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;StandardNormal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ChiSquared&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; 
+                 &lt;span class=&quot;n&quot;&gt;ChiSquared&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;wilds&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;statsimp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;exhaust&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;bottom_up&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;multiplex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;If anyone is interested in this I’d be happy to help out. This is the sort of project that really excites me but that I can’t currently justify time-wise.&lt;/p&gt;</description>
+	<pubDate>Tue, 11 Dec 2012 08:00:00 +0000</pubDate>
+</item>
+<item>
 	<title>Fabian Pedregosa: Singular Value Decomposition in SciPy</title>
 	<guid isPermaLink="false">tag:fseoane.net/blog,2012-12-08:2012/singular-value-decomposition-in-scipy/</guid>
 	<link>http://fseoane.net/blog/2012/singular-value-decomposition-in-scipy/</link>
@@ -3602,26 +3684,6 @@ plot_implicit(And(Eq(y, exp(x)), y - x &amp;gt; 2)
 &lt;p&gt;&lt;/p&gt;
 &lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/asmeurersympy.wordpress.com/1112/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/asmeurersympy.wordpress.com/1112/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;amp;blog=7467151&amp;amp;post=1112&amp;amp;subd=asmeurersympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
 	<pubDate>Mon, 09 Jul 2012 05:24:05 +0000</pubDate>
-</item>
-<item>
-	<title>Guru Devanla: Week 7: Tr operations on Qubits</title>
-	<guid isPermaLink="false">http://rhoforsympy.wordpress.com/?p=181</guid>
-	<link>http://rhoforsympy.wordpress.com/2012/07/09/week-7-tr-operations-on-qubits/</link>
-	<description>&lt;p&gt;This week has been lot less coding and more of understanding some pieces of codes for next set of changes. As far as the implementation goes, the Tr operations ( including partial trace/reduce density operations) for qubits was implemented.&lt;/p&gt;
-&lt;p&gt;Some examples of the Tr operations on qubits can be seen here.&lt;/p&gt;
-&lt;p&gt;&lt;a href=&quot;http://rhoforsympy.files.wordpress.com/2012/07/tr_qubit_1.jpg&quot;&gt;&lt;img src=&quot;http://rhoforsympy.files.wordpress.com/2012/07/tr_qubit_1.jpg?w=500&quot; alt=&quot;&quot; class=&quot;alignleft size-full wp-image-182&quot; title=&quot;tr_qubit_1&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;An example of an reduced density operation on a mixed-state is shown below&lt;/p&gt;
-&lt;p&gt;&lt;a href=&quot;http://rhoforsympy.files.wordpress.com/2012/07/tr_qubit_2.jpg&quot;&gt;&lt;img src=&quot;http://rhoforsympy.files.wordpress.com/2012/07/tr_qubit_2.jpg?w=500&amp;amp;h=199&quot; title=&quot;tr_qubit_2&quot; height=&quot;199&quot; width=&quot;500&quot; alt=&quot;&quot; class=&quot;alignleft size-full wp-image-183&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;The changes shown above are currently available in my git branch over &lt;a href=&quot;https://github.com/gdevanla/sympy/tree/trace_qubit&quot;&gt;here&lt;/a&gt;. I plan to submit a PR of this branch as soon as the my current &lt;a href=&quot;https://github.com/sympy/sympy/pull/1396/&quot;&gt;PR 1396&lt;/a&gt; is merged.&lt;/p&gt;
-&lt;p&gt;Another task I have been working on this week is figuring changes needed to qapply() to perform the L and R operations of density matrix. I plan to work on this tasks during next week.&lt;/p&gt;
-&lt;p&gt;In summary, plan for next week:&lt;/p&gt;
-&lt;p&gt;1. Address comments on current &lt;a href=&quot;https://github.com/sympy/sympy/pull/1396/&quot;&gt;PR 1396&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;2. Submit PR for trace_qubit branch and address any reviews on that.&lt;/p&gt;
-&lt;p&gt;3. Work on the L and R operations.&lt;/p&gt;
-&lt;p&gt;With these activities, the next major task that would remain is to set up trace operations for Time Dependent states.  I will start researching on the current implementation of this code to understand where my changes would have to go.&lt;/p&gt;
-&lt;p&gt;On a side note, we are breaking record &lt;a href=&quot;http://www.chicagotribune.com/news/chi-120707chicago-heat-weather,0,3439069.story&quot;&gt;temperatures&lt;/a&gt; in Chicago this week, and it was tough to keep myself cool without an air-conditioner!  Hope other Chicagoan Sympy members are doing just fine by the beach!&lt;/p&gt;
-&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/rhoforsympy.wordpress.com/181/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/rhoforsympy.wordpress.com/181/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;amp;blog=34650270&amp;amp;post=181&amp;amp;subd=rhoforsympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
-	<pubDate>Mon, 09 Jul 2012 01:13:49 +0000</pubDate>
 </item>
 
 </channel>
