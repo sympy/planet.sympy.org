@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2012-12-17T10:40:33Z</updated>
+  <updated>2012-12-18T21:00:45Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -102,7 +102,7 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-12-17T10:40:24Z</updated>
+      <updated>2012-12-18T21:00:39Z</updated>
     </source>
   </entry>
 
@@ -111,15 +111,15 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
     <link href="http://fseoane.net/blog/2012/singular-value-decomposition-in-scipy/" rel="alternate" type="text/html"/>
     <title>Singular Value Decomposition in SciPy</title>
     <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>SciPy contains two methods to compute the singular value decomposition (SVD) of a matrix: <code>scipy.linalg.svd</code> and <code>scipy.sparse.linalg.svds</code>. In this post I'll compare both methods for the task of computing the full SVD of a large dense matrix.</p>
-<p>The first method, <code>scipy.linalg.svd</code>, is perhaps the best known and uses the linear algebra library <a href="http://www.netlib.org/lapack/">LAPACK</a> to handle the computations. This implements the Golub-Kahan-Reisch algorithm [<sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup>], which is an accurate and highly efficient implementation with a cost of O(n^3) floating-point operations [<sup id="fnref:2"><a href="http://fseoane.net/blog/feed/#fn:2" rel="footnote">2</a></sup>].</p>
+<p>The first method, <code>scipy.linalg.svd</code>, is perhaps the best known and uses the linear algebra library <a href="http://www.netlib.org/lapack/">LAPACK</a> to handle the computations. This implements the Golub-Kahan-Reisch algorithm <sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup>, which is accurate and highly efficient with a cost of O(n^3) floating-point operations <sup id="fnref:2"><a href="http://fseoane.net/blog/feed/#fn:2" rel="footnote">2</a></sup>.</p>
 <p>The second method is <code>scipy.sparse.linalg.svds</code> and despite it's name it works fine also for dense arrays. This implementation is based on the <a href="http://www.caam.rice.edu/software/ARPACK/">ARPACK</a> library and consists of an iterative procedure that finds the SVD decomposition by reducing the problem to an eigendecomposition on the array X -&gt; dot(X.T, X). This method is usually very effective when the input matrix X is sparse or only the largest singular values are required. There are other SVD solvers that I did not consider, such as <a href="http://pypi.python.org/pypi/sparsesvd/">sparsesvd</a> or <a href="http://pysparse.sourceforge.net/introduction.html#jdsym">pysparse.jdsym</a>, but my points for the sparse solve probably hold for those packages too since they both implement iterative algorithms based on the same principles.</p>
-<p>When the input matrix is dense and all the singular values are required, the first method is usually more efficient. To support this statement I've created a little benchmark: timings for both methods as a function of the size of the matrices. Notice that we are in a case that is clearly favorable to the <code>linalg.svd</code>: after all <code>sparse.linalg.svds</code> was not created with this setting in mind, it was created for sparse matrices or dense matrices with some special structure. We will see however that even in this setting it still has some advantages.</p>
-<p>I'll create random square matrices with different sizes and plot the timings for both methods. For the benchmarks I used SciPy v0.12 linked against Intel Math Kernel Library v11. Both methods are single-threaded (I had to set OMP_NUM_THREADS=1 so that MKL does not try to parallelize the computations). <a href="https://gist.github.com/4250756">[code]</a></p>
+<p>When the input matrix is dense and all the singular values are required, the first method is usually more efficient. To back this statement I've created a little benchmark: timings for both methods as a function of the size of the matrices. Notice that we are in a case that is clearly favorable to the <code>linalg.svd</code>: after all <code>sparse.linalg.svds</code> was not created with this setting in mind, it was created for sparse matrices or dense matrices with some special structure. We will see however that even in this setting it has interesting advantages.</p>
+<p>I'll create random square matrices with different sizes and plot the timings for both methods. For the benchmarks I used SciPy v0.12 linked against Intel Math Kernel Library v11. Both methods are single-threaded (I had to set OMP_NUM_THREADS=1 so that MKL does not try to parallelize the computations). <a href="http://fseoane.net/blog/static/uploads/2012/svd_timing.py">[code]</a></p>
 <p><img alt="svd timings" src="http://fseoane.net/blog/static/uploads/2012/svd_timing.png"/></p>
-<p>Lower timings are better, so this gives <code>scipy.linalg.svd</code> as clear winner. However, this is just part of the story. What this graph doesn't show is that this method is winning at the price of allocating a huge amount of memory for temporary computations. If we now plot the memory consumption for both methods under the same settings, the story is completely different. <a href="https://gist.github.com/4250756">[code]</a></p>
+<p>Lower timings are better, so this gives <code>scipy.linalg.svd</code> as clear winner. However, this is just part of the story. What this graph doesn't show is that this method is winning at the price of allocating a huge amount of memory for temporary computations. If we now plot the memory consumption for both methods under the same settings, the story is completely different.</p>
 <p><img alt="svd memory" src="http://fseoane.net/blog/static/uploads/2012/svd_memory.png"/></p>
-<p>The memory requirements of <code>scipy.linalg.svd</code> scales worse than linearly with the number of dimensions, while for the sparse version the amount of allocated memory seems to be only increased by the size of the input matrix, which is bigger on each itertion (we are measuring the amount of total memory used, not just the workspace memory).</p>
-<p>For example, in my applications, I need to compute the SVD of a matrix for and the needed workspace demanded by <code>linalg.svd</code> does not fit in memory, so it blows up with a MemoryError. In cases like this, the sparse algorithm (<code>sparse.linalg.svds</code>) can come in handy: the timing is just a factor worse (but I can easily parallelize jobs) and the memory requirements for this method is peanuts compared to the dense version.</p>
+<p>The memory requirements of <code>scipy.linalg.svd</code> scale with the number of dimensions, while for the sparse version the amount of allocated memory is constant. Notice that we are measuring the amount of total memory used, it is thus natural to see a slight increase in memory consumption since the input matrix is bigger on each iteration.</p>
+<p>For example, in my applications, I need to compute the SVD of a matrix for whom the needed workspace does not fit in memory. In cases like this, the sparse algorithm (<code>sparse.linalg.svds</code>) can come in handy: the timing is just a factor worse (but I can easily parallelize jobs) and the memory requirements for this method is peanuts compared to the dense version.</p>
 <div class="footnote">
 <hr/>
 <ol>
@@ -144,7 +144,7 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog//feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2012-12-11T11:00:15Z</updated>
+      <updated>2012-12-18T21:00:16Z</updated>
     </source>
   </entry>
 
@@ -253,7 +253,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-12-17T10:40:25Z</updated>
+      <updated>2012-12-18T21:00:39Z</updated>
     </source>
   </entry>
 
@@ -411,7 +411,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-12-17T10:40:25Z</updated>
+      <updated>2012-12-18T21:00:39Z</updated>
     </source>
   </entry>
 
@@ -529,7 +529,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-12-17T10:40:25Z</updated>
+      <updated>2012-12-18T21:00:39Z</updated>
     </source>
   </entry>
 
@@ -607,7 +607,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-12-17T10:40:26Z</updated>
+      <updated>2012-12-18T21:00:40Z</updated>
     </source>
   </entry>
 
@@ -639,7 +639,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-12-17T10:40:30Z</updated>
+      <updated>2012-12-18T21:00:45Z</updated>
     </source>
   </entry>
 
@@ -792,7 +792,7 @@ Return objects:
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-12-17T10:40:26Z</updated>
+      <updated>2012-12-18T21:00:40Z</updated>
     </source>
   </entry>
 
@@ -891,7 +891,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-12-17T10:40:25Z</updated>
+      <updated>2012-12-18T21:00:39Z</updated>
     </source>
   </entry>
 
@@ -1098,7 +1098,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-12-17T10:40:25Z</updated>
+      <updated>2012-12-18T21:00:40Z</updated>
     </source>
   </entry>
 
@@ -1162,7 +1162,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-12-17T10:40:30Z</updated>
+      <updated>2012-12-18T21:00:44Z</updated>
     </source>
   </entry>
 
@@ -1327,7 +1327,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-12-17T10:40:25Z</updated>
+      <updated>2012-12-18T21:00:39Z</updated>
     </source>
   </entry>
 
@@ -1365,7 +1365,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site, I guess...</subtitle>
       <title>Gilbert Gede's Blog</title>
-      <updated>2012-12-17T10:40:16Z</updated>
+      <updated>2012-12-18T21:00:31Z</updated>
     </source>
   </entry>
 
@@ -1542,7 +1542,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2012-12-17T10:40:25Z</updated>
+      <updated>2012-12-18T21:00:39Z</updated>
     </source>
   </entry>
 
@@ -2607,7 +2607,7 @@ f_durations.write('\n')
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog//feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2012-12-11T11:00:14Z</updated>
+      <updated>2012-12-18T21:00:14Z</updated>
     </source>
   </entry>
 
@@ -2682,7 +2682,7 @@ f_durations.write('\n')
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2012-12-17T10:40:19Z</updated>
+      <updated>2012-12-18T21:00:34Z</updated>
     </source>
   </entry>
 
@@ -2827,7 +2827,7 @@ RuntimeError: maximum recursion depth exceeded in comparison
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-12-17T10:40:10Z</updated>
+      <updated>2012-12-18T21:00:18Z</updated>
     </source>
   </entry>
 
@@ -2870,7 +2870,7 @@ b. Add this line to your bash_profile.</p>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-12-17T10:40:30Z</updated>
+      <updated>2012-12-18T21:00:44Z</updated>
     </source>
   </entry>
 
@@ -2951,7 +2951,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-12-17T10:40:10Z</updated>
+      <updated>2012-12-18T21:00:18Z</updated>
     </source>
   </entry>
 
@@ -2987,7 +2987,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-12-17T10:40:10Z</updated>
+      <updated>2012-12-18T21:00:18Z</updated>
     </source>
   </entry>
 
@@ -3223,7 +3223,7 @@ Out[74]: True
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-12-17T10:40:30Z</updated>
+      <updated>2012-12-18T21:00:44Z</updated>
     </source>
   </entry>
 
@@ -3341,7 +3341,7 @@ commits are much more like my usual ones.
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-12-17T10:40:28Z</updated>
+      <updated>2012-12-18T21:00:42Z</updated>
     </source>
   </entry>
 
@@ -3374,7 +3374,7 @@ commits are much more like my usual ones.
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-12-17T10:40:29Z</updated>
+      <updated>2012-12-18T21:00:43Z</updated>
     </source>
   </entry>
 
@@ -3504,9 +3504,9 @@ Out[24]: 6
     <updated>2012-08-05T11:29:33Z</updated>
     <category term="SymPy"/>
     <category term="category theory"/>
-    <category term="subgraph isomorphism problem"/>
-    <category term="graph embedding"/>
     <category term="diagram embedding"/>
+    <category term="graph embedding"/>
+    <category term="subgraph isomorphism problem"/>
     <author>
       <name>scolobb</name>
     </author>
@@ -3519,7 +3519,7 @@ Out[24]: 6
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-12-17T10:40:28Z</updated>
+      <updated>2012-12-18T21:00:42Z</updated>
     </source>
   </entry>
 
@@ -3638,7 +3638,7 @@ Out[24]: 6
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-12-17T10:40:29Z</updated>
+      <updated>2012-12-18T21:00:43Z</updated>
     </source>
   </entry>
 
@@ -3670,7 +3670,7 @@ Out[24]: 6
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-12-17T10:40:30Z</updated>
+      <updated>2012-12-18T21:00:44Z</updated>
     </source>
   </entry>
 
@@ -3814,7 +3814,7 @@ StopIteration:
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-12-17T10:40:30Z</updated>
+      <updated>2012-12-18T21:00:44Z</updated>
     </source>
   </entry>
 
@@ -3854,12 +3854,12 @@ StopIteration:
     </content>
     <updated>2012-07-29T19:20:53Z</updated>
     <category term="SymPy"/>
-    <category term="string representation"/>
+    <category term="backward chaining"/>
     <category term="deciding commutativity"/>
     <category term="diagram layout"/>
     <category term="pretty printing"/>
     <category term="sort key"/>
-    <category term="backward chaining"/>
+    <category term="string representation"/>
     <category term="subgraph isomorphism problem"/>
     <author>
       <name>scolobb</name>
@@ -3873,7 +3873,7 @@ StopIteration:
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-12-17T10:40:28Z</updated>
+      <updated>2012-12-18T21:00:42Z</updated>
     </source>
   </entry>
 
@@ -3903,7 +3903,7 @@ StopIteration:
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2012-12-17T10:40:29Z</updated>
+      <updated>2012-12-18T21:00:43Z</updated>
     </source>
   </entry>
 
@@ -4442,7 +4442,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-12-17T10:40:28Z</updated>
+      <updated>2012-12-18T21:00:42Z</updated>
     </source>
   </entry>
 
@@ -4492,7 +4492,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-12-17T10:40:30Z</updated>
+      <updated>2012-12-18T21:00:44Z</updated>
     </source>
   </entry>
 
@@ -4537,7 +4537,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2012-12-17T10:40:28Z</updated>
+      <updated>2012-12-18T21:00:42Z</updated>
     </source>
   </entry>
 
@@ -4572,7 +4572,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2012-12-17T10:40:30Z</updated>
+      <updated>2012-12-18T21:00:44Z</updated>
     </source>
   </entry>
 
@@ -4759,7 +4759,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2012-12-17T10:40:10Z</updated>
+      <updated>2012-12-18T21:00:18Z</updated>
     </source>
   </entry>
 </feed>
