@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2013-01-02T03:00:28Z</updated>
+  <updated>2013-01-02T03:40:28Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -12,8 +12,91 @@
   <link href="http://planet.sympy.org/" rel="alternate"/>
 
   <entry xml:lang="en">
+    <id>http://asmeurersympy.wordpress.com/?p=1168</id>
+    <link href="http://asmeurersympy.wordpress.com/2013/01/01/emacs-one-year-later/" rel="alternate" type="text/html"/>
+    <title>Emacs: One year later</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">As readers of this blog may remember, back in 2011, I decided to move to a command-line based editor. For roughly two weeks in December, 2011, I exclusively used Vim, and for the same amount of time in January, 2012, I used exclusively Emacs. I had used a little of each editor in the past, [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1168&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" width="1"/></div>
+    </summary>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>As readers of this blog may remember, back in 2011, I decided to move to a command-line based editor. For roughly two weeks in December, 2011, I exclusively used Vim, and for the same amount of time in January, 2012, I used exclusively Emacs. I had used a little of each editor in the past, but this was my first time using them to do true editing work. My experiences are chronicled in my blog posts (parts <a href="http://asmeurersympy.wordpress.com/2011/12/20/vim-vs-emacs-part-1/" title="1">1</a>, <a href="http://asmeurersympy.wordpress.com/2012/01/03/vim-vs-emacs-part-2/" title="2">2</a>, <a href="http://asmeurersympy.wordpress.com/2012/01/13/vim-vs-emacs-part-3/" title="3">3</a>, and <a href="http://asmeurersympy.wordpress.com/2012/07/09/emacs-7-months-later/" title="7 months later follow up">7 months later follow up</a>).  </p>
+<p>To summarize, I decided to use Emacs, as I found it to be much more intuitive, and much more user-friendly.  Today, January 1, marks the one-year point of my using Emacs as my sole text editor, with some exceptions (notably, I’m currently writing this blog post in the browser).  So I’d like to make some observations:</p>
+<li>Either one of these editors (Vim or Emacs) is going to really suck unless you are willing to make a serious investment in customizing them and installing nice addons. For the second point, Emacs has an advantage, because the philosophy of Vim is to be barebones whereas the philosophy of Emacs is to be featureful, so that in particular many things that were once addons of Emacs are now included in the standard installation.  For customization, on the one hand, Emacs is easier, because it has a nice interface (<code>M-x customize</code>), but on the other hand, Vim’s scripting language is much easier to hack on than Emacs lisp (I still can’t code in Lisp to save my life; it’s a very challenging programming language).
+<p>But my point here is that neither has really great defaults. For example, in Emacs, <code>M-space</code> is bound to <code>just-one-space</code>, which is great for programming.  What it does is remove all spaces around the cursor, except for one.  But to be really useful, it also should include newlines.  It doesn’t do this by default.  Rather, you have to call it with a negative argument.  So to be really useful, you have to add</p>
+<p/><pre class="brush: plain;">(defun just-one-space-with-newline ()
+  "Call just-one-space with a negative argument"
+  (interactive)
+  (just-one-space -1))
+
+(global-set-key (kbd "M-SPC") 'just-one-space-with-newline)
+</pre><p/>
+<p>to your <code>.emacs</code> file.</p></li>
+<li>Emacs has great features, but I always have to look them up.  Or rather, I have to look up the keyboard shortcuts for them.  I only have the keyboard shortcuts memorized for the things I do every day.  I even ended up forgetting really important ones, like <code>M-w</code> (Emacs version of copy).  And if a feature involves several keystrokes to access, forget about it (for example, rectangular selection, or any features of special modes).  If I use a new mode, e.g., for some file type that I rarely edit (like HTML), I might as well not have any of the features, other than the syntax highlighting, because I either don’t know what they are, or even if I know that they should exist (like automatic tag completion for html), I have no idea how to access them.
+<p>There’s really something to be said about GUI editors, which give these things to users in a way that they don’t have to memorize anything.  Perhaps I should try to use the menu more.  Or maybe authors of addons should aim to make features require as little cognitive user interaction as possible (such as the excellent <a href="http://cx4a.org/software/auto-complete/manual.html"><code>auto-complete-mode</code></a> I mentioned in <a href="http://asmeurersympy.wordpress.com/2012/01/13/vim-vs-emacs-part-3/">part 3</a>).</p>
+<p> I mention this because it is one of the things I complained about with Vim, that the keybindings were too hard to memorize.  Of course, the difference with Vim is that one has to memorize keybindings to do even the most basic of editing tasks, whereas with Emacs one can always fall back to more natural things like <code>Shift-Arrow Key</code> to select text or <code>Delete</code> to delete the character under the cursor (and yes, I know you can rebind this stuff in Vim; I refer you to the previous bullet point). </p></li>
+<li>I mentioned at the end of part 3 that Vim might still be useful to learn, as vi is available literally anywhere that you have POSIX.  I honestly don’t think I would be able to use vi or vim if I had to, customization or no, unless I had my keyboard cheat sheet and a decent amount of time.  If I’m stuck on a barebones system and I can’t do anything about it, I’ll use nano/pico before I use vi.  It’s not that I hate vi. I just can’t do anything with it. It is the same to me now as it was before I used it in-depth.  I have forgotten all the keyboard shortcuts, except for <code>ESC</code> and <code>i</code>.</li>
+<li>I don’t use <code>emacsclient</code> any more.  Ever since I got my new retina MacBook Pro, I don’t need it any more, because with the solid state drive starting Emacs from scratch is instantaneous.  I’m glad to get rid of it, because it had some seriously annoying glitches.</li>
+<li>Add <code>alias e=emacs</code> to your Bash config file (<code>.profile</code> or <code>.bashrc</code>). It makes life much easier. “emacs” is not an easy word to type, at least on QWERTY keyboards.</li>
+<li>I still feel like I am not nearly as efficient in Emacs as I could be. On the one hand, I know there are built-in features (like rectangular selection) that I do not take advantage of enough.  I have been a bit lazy with customization: there are a handful of things that I do often that require several keystrokes, but I still haven’t created custom keyboard shortcuts for (off the top of my head: copying and pasting to/from the Mac OS X clipboard and rigidly indenting/dedenting a block of text (<code>C-u 4 C-x TAB</code>, actually <code>C-c u 4 C-x TAB</code>, since I did the sensible thing and rebound <code>C-u</code> to clear to the previous newline, and bound <code>universal-argument</code> to <code>C-c u</code>) come to mind).
+<p>I feel as if I were to watch someone who has used Emacs for a long time that I would learn a lot of tricks.</p></li>
+<li>I really should learn Emacs lisp. There are a lot of little customizations that I would like to make, but they are really niche, and can only be done programmatically.  But who has the time to learn a completely new programming language (plus a whole library, as just knowing Lisp is useless if you don’t know the proper Emacs funtions and variables and coding styles)?</li>
+<li>I’ve still not found a good visual browser for jumping to function definitions in a file (mostly Python function definitions, but also other kinds of headers for other kinds of files).  The best I’ve found is <code>imenu</code>. If you know of anything, please let me know.  One thing I really liked about Vim was the <a href="http://www.vim.org/scripts/script.php?script_id=273">tag list</a> extension, which did this perfectly (thanks to commenter <a href="http://asmeurersympy.wordpress.com/2011/12/20/vim-vs-emacs-part-1/#comment-424">Scott</a> for pointing it out to me).  I’ve been told that Cedet has something like this, but every time I try to install it, I run into some issues that just seem like way too much work (I don’t remember what they are, it won’t compile or something, or maybe it just wants to do just way too much and I can’t figure out how to disable everything except for the parts I want).  </li>
+<li>If you ever code in C, add the following to your Makefile
+<p/><pre class="brush: plain;">check-syntax:
+	$(CC) -o nul $(FLAGS) -S $(CHK_SOURCES)
+</pre><p/>
+<p>(and if you don’t use a Makefile, start using one now).  This is assuming you have <code>CC</code> and <code>FLAGS</code> defined at the top (generally to something like <code>cc</code> and <code>-Wall</code>, respectively). Also, add the following to your <code>.emacs</code></p>
+<p/><pre class="brush: plain;">;; ===== Turn on flymake-mode ====
+
+(add-hook 'c-mode-common-hook 'turn-on-flymake)
+(defun turn-on-flymake ()
+  "Force flymake-mode on. For use in hooks."
+  (interactive)
+  (flymake-mode 1))
+
+(add-hook 'c-mode-common-hook 'flymake-keyboard-shortcuts)
+(defun flymake-keyboard-shortcuts ()
+  "Add keyboard shortcuts for flymake goto next/prev error."
+  (interactive)
+  (local-set-key "\M-n" 'flymake-goto-next-error)
+  (local-set-key "\M-p" 'flymake-goto-prev-error))
+</pre><p/>
+<p>The last part adds the useful keyboard shortcuts <code>M-n</code> and <code>M-p</code> to move between errors.  Now, errors in your C code will show up automatically as you type.  If you use the command line version of emacs like I do, and not the GUI version, you’ll also need to install the <a href="http://www.emacswiki.org/emacs/flymake-cursor.el">flymake-cursor</a> module, which makes the errors show up in the mode line, since otherwise it tries to use mouse popups.  You can change the colors using <code>M-x customize-face</code> (search for “flymake”). </p></li>
+<li>I never got flymake to work with LaTeX.  Does anyone know how to do it? It seems it is hardcoded to use MikTeX, the Windows version of LaTeX. I found some stuff, but none of it worked.
+<p>Actually, what I really would like is not syntax checking (I rarely make syntax mistakes in LaTeX any more), but rather something that automatically builds the PDF constantly as I type.  That way, I can just look over at the PDF as I am writing (I use an external monitor for this. I highly recommend it if you use LaTeX, especially one of those monitors that swivels to portrait mode).  </p></li>
+<li>If you use Mac OS X, you can use the very excellent <a href="http://pqrs.org/macosx/keyremap4macbook/">KeyRemap4MacBook</a> program to make regular Mac OS X programs act more like Emacs.  Mac OS X already has many Emacs shortcuts built in (like <code>C-a</code>, <code>C-e</code>, etc.), but that only works in Cocoa apps, and it doesn’t include any meta key shortcuts.  This lets you use additional shortcuts literally everywhere (don’t worry, it automatically doesn’t use them in the Terminal), including an emulator for <code>C-space</code> and some <code>C-x</code> commands (like <code>C-x C-s</code> to <code>Command-s</code>).  It doesn’t work on context sensitive shortcuts, unfortunately, unless the operating system already supports it with another keyboard shortcut (e.g., it can map <code>M-f</code> to <code>Option-right arrow</code>).  For example, it can’t enable moving between paragraphs with <code>C-S-{</code> and <code>C-S-}</code>.  If anyone knows how to do that, let me know. </li>
+<li>For about a month this summer, I had to use a Linux laptop, because my Mac broke and my new Mac took a month to arrive (the downside to ordering a new computer immediately after it is announced by Apple).  At this point, my saving of all my customizations to <a href="http://pqrs.org/macosx/keyremap4macbook/">GitHub</a> really helped a lot.  I created a new branch for the Linux computer (because several things in my customizations were Mac specific), and just symlinked the files I wanted.  A hint I can give to people using Linux is to use Konsole.  The Gnome terminal sucks.  One thing I never figured out is how to make Konsole (or any other Terminal for that matter) to send Control-Shift shortcuts to Emacs (see <a href="http://superuser.com/q/439961/39697" rel="nofollow">http://superuser.com/q/439961/39697</a>).   I don’t use Linux any more at the moment, but if anyone knows what was going on there, add an answer to that question. </li>
+<li>In <a href="http://asmeurersympy.wordpress.com/2012/01/13/vim-vs-emacs-part-3/">part 3</a> mentioned that <a href="http://www.dr-qubit.org/predictive/predictive-user-manual/html/index.php">predictive mode</a> was cool, but not very useful.  What it does is basically add tab completion for every word in the English language.  Actually, I’ve found using auto-complete-mode even when editing text (or LaTeX) to be very useful.  Unlike predictive mode, it only guesses words that you’ve already typed  (it turns out that you tend to type the same words over and over, and doubly so if those words are LaTeX math commands).  Also, predictive mode has a set order of words, which supposedly helps to use it with muscle memory, whereas auto-complete-mode tries to learn what words you are more likely to use based on some basic statistical machine-learning.  Also, auto-complete-mode has a much better visual UI and smarter defaults than predictive mode. The result is that it’s actually quite useful and makes typing plain text, as well as LaTeX (actually, pretty much anything, as long as you tend to use the same words repeatedly) much faster.  I recommend enabling auto-complete-mode almost everywhere using hooks, like
+<p/><pre class="brush: plain;">(add-hook 'latex-mode-hook 'auto-complete-mode)
+(add-hook 'LaTeX-mode-hook 'auto-complete-mode)
+(add-hook 'prog-mode-hook 'auto-complete-mode)
+;; etc.
+</pre><p/>
+</li>
+<li>At the end of the day, I’m pretty happy with Emacs.  I’ve managed to fix most of the things that make it annoying, and it is orders of magnitude more powerful than any GUI editor or IDE I’ve ever seen, especially at just basic text editing, which is the most important thing (I can always use another program for other things, like debugging or whatever).  The editor uses the basic shortcuts that I am used to, and is quite efficient to write in.  Extensions like auto-complete-mode make using it much faster, though I could use some more extensions to make it even better (namely, a better isearch and a better imenu). Regarding Vim vs. Emacs, I’d like to quote something I said back in my <a href="http://asmeurersympy.wordpress.com/2011/12/20/vim-vs-emacs-part-1">first blog post</a> about Vim over a year ago:<br/>
+<blockquote><p>Vim is great for text <em>editing</em>, but not so hot for text <em>writing</em> (unless you always write text perfectly, so that you never need to leave insert mode until you are done typing). Just the simple act of deleting a mistyped word (yes, word, that happens a lot when you are decently fast touch typist) takes several keystrokes, when it should in my opinion only take one (two if you count the meta-key).</p></blockquote>
+<p>Needless to say, I find Emacs to be great for both text editing and text writing. </p></li>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/asmeurersympy.wordpress.com/1168/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/asmeurersympy.wordpress.com/1168/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1168&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" width="1"/></div>
+    </content>
+    <updated>2013-01-01T09:51:21Z</updated>
+    <category term="Uncategorized"/>
+    <author>
+      <name>Aaron Meurer</name>
+    </author>
+    <source>
+      <id>http://asmeurersympy.wordpress.com</id>
+      <logo>http://1.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=http%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
+      <link href="http://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
+      <title>Aaron Meurer's SymPy Blog</title>
+      <updated>2013-01-02T03:40:08Z</updated>
+    </source>
+  </entry>
+
+  <entry xml:lang="en">
     <id>http://asmeurersympy.wordpress.com/?p=1165</id>
-    <link href="https://asmeurersympy.wordpress.com/2012/12/30/2012-in-review/" rel="alternate" type="text/html"/>
+    <link href="http://asmeurersympy.wordpress.com/2012/12/30/2012-in-review/" rel="alternate" type="text/html"/>
     <title>2012 in review</title>
     <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">The WordPress.com stats helper monkeys prepared a 2012 annual report for this blog. Here’s an excerpt: 4,329 films were submitted to the 2012 Cannes Film Festival. This blog had 20,000 views in 2012. If each view were a film, this blog would power 5 Film Festivals Click here to see the complete report.<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1165&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" width="1"/></div>
     </summary>
@@ -30,15 +113,15 @@
       <name>Aaron Meurer</name>
     </author>
     <source>
-      <id>https://asmeurersympy.wordpress.com</id>
-      <logo>https://secure.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=https%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
-      <link href="https://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="https://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="https://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="https://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <id>http://asmeurersympy.wordpress.com</id>
+      <logo>http://1.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=http%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
+      <link href="http://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-01-02T03:00:08Z</updated>
+      <updated>2013-01-02T03:40:08Z</updated>
     </source>
   </entry>
 
@@ -133,7 +216,7 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-01-02T03:00:22Z</updated>
+      <updated>2013-01-02T03:40:22Z</updated>
     </source>
   </entry>
 
@@ -284,7 +367,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-01-02T03:00:22Z</updated>
+      <updated>2013-01-02T03:40:22Z</updated>
     </source>
   </entry>
 
@@ -442,7 +525,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-01-02T03:00:22Z</updated>
+      <updated>2013-01-02T03:40:22Z</updated>
     </source>
   </entry>
 
@@ -560,7 +643,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-01-02T03:00:23Z</updated>
+      <updated>2013-01-02T03:40:23Z</updated>
     </source>
   </entry>
 
@@ -638,7 +721,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-01-02T03:00:23Z</updated>
+      <updated>2013-01-02T03:40:23Z</updated>
     </source>
   </entry>
 
@@ -670,7 +753,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-01-02T03:00:27Z</updated>
+      <updated>2013-01-02T03:40:28Z</updated>
     </source>
   </entry>
 
@@ -823,7 +906,7 @@ Return objects:
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-01-02T03:00:23Z</updated>
+      <updated>2013-01-02T03:40:23Z</updated>
     </source>
   </entry>
 
@@ -922,7 +1005,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-01-02T03:00:22Z</updated>
+      <updated>2013-01-02T03:40:22Z</updated>
     </source>
   </entry>
 
@@ -1129,7 +1212,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-01-02T03:00:23Z</updated>
+      <updated>2013-01-02T03:40:23Z</updated>
     </source>
   </entry>
 
@@ -1193,7 +1276,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-01-02T03:00:27Z</updated>
+      <updated>2013-01-02T03:40:28Z</updated>
     </source>
   </entry>
 
@@ -1358,7 +1441,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-01-02T03:00:22Z</updated>
+      <updated>2013-01-02T03:40:23Z</updated>
     </source>
   </entry>
 
@@ -1396,7 +1479,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site, I guess...</subtitle>
       <title>Gilbert Gede's Blog</title>
-      <updated>2013-01-02T03:00:14Z</updated>
+      <updated>2013-01-02T03:40:14Z</updated>
     </source>
   </entry>
 
@@ -1573,7 +1656,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-01-02T03:00:22Z</updated>
+      <updated>2013-01-02T03:40:23Z</updated>
     </source>
   </entry>
 
@@ -2713,7 +2796,7 @@ f_durations.write('\n')
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2013-01-02T03:00:17Z</updated>
+      <updated>2013-01-02T03:40:17Z</updated>
     </source>
   </entry>
 
@@ -2780,7 +2863,7 @@ f_durations.write('\n')
 
   <entry xml:lang="en">
     <id>http://asmeurersympy.wordpress.com/?p=1160</id>
-    <link href="https://asmeurersympy.wordpress.com/2012/09/19/infinitely-nested-lists-in-python/" rel="alternate" type="text/html"/>
+    <link href="http://asmeurersympy.wordpress.com/2012/09/19/infinitely-nested-lists-in-python/" rel="alternate" type="text/html"/>
     <title>Infinitely nested lists in Python</title>
     <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Readers of this blog know that I sometimes like to write about some strange, unexpected, and unusual things in Python that I stumble across. This post is another one of those. First, look at this What am I doing here? I’m creating a list, a, and I’m adding it to itself. What you end up [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1160&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" width="1"/></div>
     </summary>
@@ -2850,15 +2933,15 @@ RuntimeError: maximum recursion depth exceeded in comparison
       <name>Aaron Meurer</name>
     </author>
     <source>
-      <id>https://asmeurersympy.wordpress.com</id>
-      <logo>https://secure.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=https%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
-      <link href="https://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="https://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="https://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="https://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <id>http://asmeurersympy.wordpress.com</id>
+      <logo>http://1.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=http%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
+      <link href="http://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-01-02T03:00:08Z</updated>
+      <updated>2013-01-02T03:40:08Z</updated>
     </source>
   </entry>
 
@@ -2901,13 +2984,13 @@ b. Add this line to your bash_profile.</p>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-01-02T03:00:27Z</updated>
+      <updated>2013-01-02T03:40:28Z</updated>
     </source>
   </entry>
 
   <entry xml:lang="en">
     <id>http://asmeurersympy.wordpress.com/?p=1154</id>
-    <link href="https://asmeurersympy.wordpress.com/2012/08/31/isympy-i-a-saner-interactive-environment/" rel="alternate" type="text/html"/>
+    <link href="http://asmeurersympy.wordpress.com/2012/08/31/isympy-i-a-saner-interactive-environment/" rel="alternate" type="text/html"/>
     <title>isympy -I:  A saner interactive environment</title>
     <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">As promised, here is another post describing a new feature in the upcoming SymPy 0.7.2. Automatic Symbol Definition While not as ground breaking as the feature I described in my last post, this feature is still quite useful. As you may know, SymPy is inherently a Python library, meaning that it lives by the rules [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1154&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" width="1"/></div>
     </summary>
@@ -2974,21 +3057,21 @@ Out[8]: 0.5
       <name>Aaron Meurer</name>
     </author>
     <source>
-      <id>https://asmeurersympy.wordpress.com</id>
-      <logo>https://secure.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=https%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
-      <link href="https://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="https://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="https://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="https://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <id>http://asmeurersympy.wordpress.com</id>
+      <logo>http://1.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=http%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
+      <link href="http://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-01-02T03:00:08Z</updated>
+      <updated>2013-01-02T03:40:08Z</updated>
     </source>
   </entry>
 
   <entry xml:lang="en">
     <id>http://asmeurersympy.wordpress.com/?p=1122</id>
-    <link href="https://asmeurersympy.wordpress.com/2012/08/21/sympy-live-sphinx-extension/" rel="alternate" type="text/html"/>
+    <link href="http://asmeurersympy.wordpress.com/2012/08/21/sympy-live-sphinx-extension/" rel="alternate" type="text/html"/>
     <title>SymPy Live Sphinx Extension</title>
     <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">I didn’t blog about SymPy all summer, so I thought I would write a post about my favorite feature of the upcoming SymPy 0.7.2 release.  In fact, this feature has got me more excited than any other feature from any version of SymPy.  Yeah, it’s that good. The feature is the SymPy Live Sphinx extension. [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1122&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" width="1"/></div>
     </summary>
@@ -3010,15 +3093,15 @@ Out[8]: 0.5
       <name>Aaron Meurer</name>
     </author>
     <source>
-      <id>https://asmeurersympy.wordpress.com</id>
-      <logo>https://secure.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=https%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
-      <link href="https://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="https://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="https://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="https://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <id>http://asmeurersympy.wordpress.com</id>
+      <logo>http://1.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=http%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
+      <link href="http://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-01-02T03:00:08Z</updated>
+      <updated>2013-01-02T03:40:08Z</updated>
     </source>
   </entry>
 
@@ -3254,7 +3337,7 @@ Out[74]: True
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-01-02T03:00:27Z</updated>
+      <updated>2013-01-02T03:40:28Z</updated>
     </source>
   </entry>
 
@@ -3372,7 +3455,7 @@ commits are much more like my usual ones.
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-01-02T03:00:26Z</updated>
+      <updated>2013-01-02T03:40:26Z</updated>
     </source>
   </entry>
 
@@ -3405,7 +3488,7 @@ commits are much more like my usual ones.
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2013-01-02T03:00:26Z</updated>
+      <updated>2013-01-02T03:40:27Z</updated>
     </source>
   </entry>
 
@@ -3535,9 +3618,9 @@ Out[24]: 6
     <updated>2012-08-05T11:29:33Z</updated>
     <category term="SymPy"/>
     <category term="category theory"/>
-    <category term="subgraph isomorphism problem"/>
-    <category term="graph embedding"/>
     <category term="diagram embedding"/>
+    <category term="graph embedding"/>
+    <category term="subgraph isomorphism problem"/>
     <author>
       <name>scolobb</name>
     </author>
@@ -3550,7 +3633,7 @@ Out[24]: 6
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-01-02T03:00:26Z</updated>
+      <updated>2013-01-02T03:40:26Z</updated>
     </source>
   </entry>
 
@@ -3669,7 +3752,7 @@ Out[24]: 6
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2013-01-02T03:00:26Z</updated>
+      <updated>2013-01-02T03:40:27Z</updated>
     </source>
   </entry>
 
@@ -3701,7 +3784,7 @@ Out[24]: 6
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-01-02T03:00:27Z</updated>
+      <updated>2013-01-02T03:40:28Z</updated>
     </source>
   </entry>
 
@@ -3845,7 +3928,7 @@ StopIteration:
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-01-02T03:00:27Z</updated>
+      <updated>2013-01-02T03:40:28Z</updated>
     </source>
   </entry>
 
@@ -3885,12 +3968,12 @@ StopIteration:
     </content>
     <updated>2012-07-29T19:20:53Z</updated>
     <category term="SymPy"/>
-    <category term="string representation"/>
+    <category term="backward chaining"/>
     <category term="deciding commutativity"/>
     <category term="diagram layout"/>
     <category term="pretty printing"/>
     <category term="sort key"/>
-    <category term="backward chaining"/>
+    <category term="string representation"/>
     <category term="subgraph isomorphism problem"/>
     <author>
       <name>scolobb</name>
@@ -3904,7 +3987,7 @@ StopIteration:
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-01-02T03:00:25Z</updated>
+      <updated>2013-01-02T03:40:26Z</updated>
     </source>
   </entry>
 
@@ -3934,7 +4017,7 @@ StopIteration:
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2013-01-02T03:00:26Z</updated>
+      <updated>2013-01-02T03:40:27Z</updated>
     </source>
   </entry>
 
@@ -4473,7 +4556,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-01-02T03:00:25Z</updated>
+      <updated>2013-01-02T03:40:26Z</updated>
     </source>
   </entry>
 
@@ -4523,7 +4606,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-01-02T03:00:27Z</updated>
+      <updated>2013-01-02T03:40:28Z</updated>
     </source>
   </entry>
 
@@ -4568,7 +4651,7 @@ Out[128]: False
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-01-02T03:00:25Z</updated>
+      <updated>2013-01-02T03:40:26Z</updated>
     </source>
   </entry>
 
@@ -4603,7 +4686,7 @@ Out[128]: False
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-01-02T03:00:27Z</updated>
+      <updated>2013-01-02T03:40:28Z</updated>
     </source>
   </entry>
 
@@ -4713,42 +4796,6 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
       <updated>2012-08-19T07:40:29Z</updated>
-    </source>
-  </entry>
-
-  <entry>
-    <id>http://blog.catchmrbharath.in/programming/2012/07/09/gsoc-week-7</id>
-    <link href="http://blog.catchmrbharath.in/programming/2012/07/09/gsoc-week-7" rel="alternate" type="text/html"/>
-    <title>GSoC week 7</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>This week has been quite eventful. The implicit plotting module is almost done. I added the functionality of combining expressions using the <code>And</code> and <code>Or</code> statements. Now you can do</p>
-
-<p><code>
-plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
-</code> and get a plot as below. So now you can combine any number of equations / inequalities and plot it. I think its possible to do a lot of cool stuff combining equations / inequalities. <img height="400" src="http://blog.catchmrbharath.in/images/09072012/fig1.png" width="600"/></p>
-
-<p>Plotting through interval math is awesome but is also very limited. You cannot add support to <code>re()</code>, to functions that you cannot characterize as monotonic in certain regions. But we always encounter such functions. So there should be some fall back algorithm to plot such plots. I implemented the fall back algorithm last week. The idea is borrowed from sage implicit plots. We convert an equation / inequality into a function which returns 1 if it satisfies and -1 if it doesn’t satisfy. So if you are plotting an equality then you plot using the <code>contour</code> command of matplotlib, and instruct it to plot only the zero contour. If its an inequality then plotting the region with two colors gives the plot required.</p>
-
-<p>These are examples from the fallback algorithm.</p>
-
-<p>Plot of $y^{2}=x^{3}-x$ <img height="400" src="http://blog.catchmrbharath.in/images/09072012/fig2.png" width="600"/></p>
-
-<p>The plot with interval arithmetic is more precise. <img height="400" src="http://blog.catchmrbharath.in/images/09072012/fig3.png" width="600"/></p>
-
-<p>I haven’t finished with the tests. Once I finish the tests I can send a pull request. The pull request will be pretty big, but most of the things have been reviewed in my previous pull request. This is just an extension of the previous pull request.</p>
-
-<p>There are certain problems with the module though. The line width problem which I mentioned in my previous blog post, cannot be fixed. So you will have to change to the fall back method if the line width becomes large. Also the fall back algorithm cannot plot boolean combinations of equations / inequalities. So the two methods complement each other largely. So the next question would be whether we can choose one of the two intelligently. I guess the answer is No. That decision must be taken by the user. But most of the times the interval math approach works very nicely.</p></div>
-    </summary>
-    <updated>2012-07-09T07:00:00Z</updated>
-    <published>2012-07-09T07:00:00Z</published>
-    <source>
-      <author>
-        <name>Bharath M R</name>
-      </author>
-      <link href="" rel="alternate" type="text/html"/>
-      <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
-      <subtitle>Posts categorized as 'programming'</subtitle>
-      <title>- Programming</title>
-      <updated>2012-10-06T05:40:18Z</updated>
     </source>
   </entry>
 </feed>
