@@ -36,6 +36,33 @@
 <h3><a href="http://brianegranger.com" title="Brian E. Granger">Brian Granger</a></h3>
 
 
+<div class="entrygroup" id="http://brianegranger.com/?p=261">
+<h4 lang="en-US"><a href="http://brianegranger.com/?p=261">Personal Reflections on Features and Scope</a></h4>
+<div class="entry">
+<div class="content" lang="en-US">
+<p>In a previous <a href="http://brianegranger.com/?p=249" target="_blank" title="previous blog post">blog post</a>, I talked about the problem of ever expanding feature sets in open source software projects.  I discussed the hidden  costs and liabilities of adding new features and proposed practical ways of tackling these problems.  However, I think that story is incomplete.  Of course open source projects will want to add features, even some with massive costs and liabilities, but how should that happen?  How should projects decide which features to add?  What criteria should be used?  To answer these questions, I want to describe a few of my own experiences in dealing with features and scope in IPython and PyZMQ.</p>
+<p>First, <a href="http://ipython.org/" target="_blank" title="IPython">IPython</a>.  Anyone who is familiar with IPython will probably read my previous blog post and say, “wait, hasn’t IPython experienced a massive amount of feature creep over the last few years.  It started out as a simple terminal based interactive shell, but has grown to include parallel computing, a web application and a GUI application.  The IPython developers, including yourself, have shown little, if any restraint in adding features.”</p>
+<p>Back in 2004, IPython was the 3 year old child of Fernando Perez.  At that point, it was already a popular, enhanced interactive Python shell.  I had started to work on parallel computing libraries for Python, when Fernando visited me at Santa Clara University (we had been classmates in graduate school starting in 1996).  We stayed up until 3 am talking about Python’s rapidly evolving ecosystem of scientific computing libraries, interactive computing environments and the future of IPython and my parallel computing libraries.  IPython was a fantastic tool, but both of us wanted more.  We wanted a web based IPython Notebook.  We wanted integrated parallel computing tools.  We began to see that all of these things required the same architecture: a stateful computational engine, the IPython Kernel, that could run user code and send back results over a network.  Once that existed, everything else could be layered on top, even the terminal based IPython.  The vision that emerged that night was specific and, while ambitious, was ultimately finite.  As Fernando describes, in this <a href="http://blog.fperez.org/2012/01/ipython-notebook-historical.html" target="_blank" title="History of the IPython Notebook">blog post</a>, it took us ~6 years and multiple attempts to build this architecture.  Now, we have a terminal, QtConsole, web-based notebook and parallel computing library all built on top of a common IPython Kernel and message specification.  While these things may look like feature creep from the outside, they have been part of a deliberate and calculated plan.</p>
+<p>What I have learned from this experience is that it is absolutely critical for the core developers of an open source project to consciously and deliberately set the scope and vision for the project.  This vision can even be ambitious.  Once that scope is set, choosing which features to add becomes easy: to first order, you add features within that scope.  That doesn’t mean you don’t count the cost of those features or that you add all possible features within the scope.  The scope provides an upper bound on the feature set.  So why does IPython have parallel computing tools?  Because we set the scope early on to include that.</p>
+<p>Second, <a href="https://github.com/zeromq/pyzmq" target="_blank" title="PyZMQ">PyZMQ</a>.  As we developed IPython’s architecture, we realized that we needed better networking/messaging libraries.  This led to the creation of PyZMQ in 2010, which is a set of Python bindings for <a href="http://www.zeromq.org/" target="_blank" title="ZeroMQ">ZeroMQ</a>.  Notice the scope of PyZMQ: Python bindings for ZeroMQ.  Fast forward to Spring of 2012.  In the course of working on the IPython Notebook, I had written some additional code for building PyZMQ based web applications: a module for simple, PyZMQ-based RPC and a module for running Tornado event handlers in a scalable and distributed manner using PyZMQ.  I submitted two <a href="https://github.com/zeromq/pyzmq/pull/177" target="_blank" title="pull request 1">pull</a> <a href="https://github.com/zeromq/pyzmq/pull/174" target="_blank" title="pull request 2">requests</a> to include these modules in PyZMQ.  One of them was quickly merged and the other languished in code review for almost a year.  Min began to sense that these modules, while useful, were not a good match for inclusion in PyZMQ.  Their API was very unstable and they hadn’t been well tested.  They would require a much faster release cycle compared to the rest of PyZMQ, which was very stable and well tested.  This Christmas break, I finally woke up to the real problem.  These modules were outside the scope of PyZMQ.  They involved an implicit and undiscussed increase in scope from “Python bindings for ZeroMQ” to “A general place for ZeroMQ based tools in Python.”  Once I realized this, Min and I pulled them out of PyZMQ and created separate projects for them.  Again, the important thing is to set the scope of a project.</p>
+<p> </p>
+<p> </p></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://brianegranger.com/?p=261">by Brian Granger at January 09, 2013 06:44 PM</a>
+</p>
+</div>
+</div>
+
+
+
+
 <div class="entrygroup" id="http://brianegranger.com/?p=249">
 <h4 lang="en-US"><a href="http://brianegranger.com/?p=249">Features and Scope in Open Source Software</a></h4>
 <div class="entry">
@@ -231,11 +258,11 @@ dimensions.</p>
 
 
 
-<h3><a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
+<h3><a href="https://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
 
 
 <div class="entrygroup" id="http://asmeurersympy.wordpress.com/?p=1168">
-<h4 lang="en"><a href="http://asmeurersympy.wordpress.com/2013/01/01/emacs-one-year-later/">Emacs: One year later</a></h4>
+<h4 lang="en"><a href="https://asmeurersympy.wordpress.com/2013/01/01/emacs-one-year-later/">Emacs: One year later</a></h4>
 <div class="entry">
 <div class="content" lang="en">
 <p>As readers of this blog may remember, back in 2011, I decided to move to a command-line based editor. For roughly two weeks in December, 2011, I exclusively used Vim, and for the same amount of time in January, 2012, I used exclusively Emacs. I had used a little of each editor in the past, but this was my first time using them to do true editing work. My experiences are chronicled in my blog posts (parts <a href="http://asmeurersympy.wordpress.com/2011/12/20/vim-vs-emacs-part-1/" title="1">1</a>, <a href="http://asmeurersympy.wordpress.com/2012/01/03/vim-vs-emacs-part-2/" title="2">2</a>, <a href="http://asmeurersympy.wordpress.com/2012/01/13/vim-vs-emacs-part-3/" title="3">3</a>, and <a href="http://asmeurersympy.wordpress.com/2012/07/09/emacs-7-months-later/" title="7 months later follow up">7 months later follow up</a>).  </p>
@@ -304,7 +331,7 @@ dimensions.</p>
 
 
 <p class="date">
-<a href="http://asmeurersympy.wordpress.com/2013/01/01/emacs-one-year-later/">by Aaron Meurer at January 01, 2013 09:51 AM</a>
+<a href="https://asmeurersympy.wordpress.com/2013/01/01/emacs-one-year-later/">by Aaron Meurer at January 01, 2013 09:51 AM</a>
 </p>
 </div>
 </div>
@@ -324,11 +351,11 @@ dimensions.</p>
 
 
 
-<h3><a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
+<h3><a href="https://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
 
 
 <div class="entrygroup" id="http://asmeurersympy.wordpress.com/?p=1165">
-<h4 lang="en"><a href="http://asmeurersympy.wordpress.com/2012/12/30/2012-in-review/">2012 in review</a></h4>
+<h4 lang="en"><a href="https://asmeurersympy.wordpress.com/2012/12/30/2012-in-review/">2012 in review</a></h4>
 <div class="entry">
 <div class="content" lang="en">
 <p>The WordPress.com stats helper monkeys prepared a 2012 annual report for this blog.</p>
@@ -345,7 +372,7 @@ dimensions.</p>
 
 
 <p class="date">
-<a href="http://asmeurersympy.wordpress.com/2012/12/30/2012-in-review/">by Aaron Meurer at December 30, 2012 11:07 PM</a>
+<a href="https://asmeurersympy.wordpress.com/2012/12/30/2012-in-review/">by Aaron Meurer at December 30, 2012 11:07 PM</a>
 </p>
 </div>
 </div>
@@ -3346,11 +3373,11 @@ f_durations.write('\n')
 
 
 
-<h3><a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
+<h3><a href="https://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
 
 
 <div class="entrygroup" id="http://asmeurersympy.wordpress.com/?p=1160">
-<h4 lang="en"><a href="http://asmeurersympy.wordpress.com/2012/09/19/infinitely-nested-lists-in-python/">Infinitely nested lists in Python</a></h4>
+<h4 lang="en"><a href="https://asmeurersympy.wordpress.com/2012/09/19/infinitely-nested-lists-in-python/">Infinitely nested lists in Python</a></h4>
 <div class="entry">
 <div class="content" lang="en">
 <p>Readers of this blog know that I sometimes like to write about some <a href="http://asmeurersympy.wordpress.com/2009/07/20/modifying-a-list-while-looping-through-it-in-python/">strange</a>, <a href="http://asmeurersympy.wordpress.com/2010/06/16/strange-python-behavior-can-someone-please-explain-to-me-what-is-going-on-here/">unexpected</a>, and <a href="http://asmeurersympy.wordpress.com/2011/03/15/true-is-true-is-false-is-true-is-false/">unusual</a> things in Python that I stumble across.  This post is another one of those.</p>
@@ -3420,7 +3447,7 @@ RuntimeError: maximum recursion depth exceeded in comparison
 
 
 <p class="date">
-<a href="http://asmeurersympy.wordpress.com/2012/09/19/infinitely-nested-lists-in-python/">by Aaron Meurer at September 19, 2012 04:21 AM</a>
+<a href="https://asmeurersympy.wordpress.com/2012/09/19/infinitely-nested-lists-in-python/">by Aaron Meurer at September 19, 2012 04:21 AM</a>
 </p>
 </div>
 </div>
@@ -3491,11 +3518,11 @@ b. Add this line to your bash_profile.</p>
 
 
 
-<h3><a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
+<h3><a href="https://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
 
 
 <div class="entrygroup" id="http://asmeurersympy.wordpress.com/?p=1154">
-<h4 lang="en"><a href="http://asmeurersympy.wordpress.com/2012/08/31/isympy-i-a-saner-interactive-environment/">isympy -I:  A saner interactive environment</a></h4>
+<h4 lang="en"><a href="https://asmeurersympy.wordpress.com/2012/08/31/isympy-i-a-saner-interactive-environment/">isympy -I:  A saner interactive environment</a></h4>
 <div class="entry">
 <div class="content" lang="en">
 <p>As <a href="http://asmeurersympy.wordpress.com/2012/08/21/sympy-live-sphinx-extension/">promised</a>, here is another post describing a new feature in the upcoming <a href="https://github.com/sympy/sympy/wiki/Release-Notes-for-0.7.2">SymPy 0.7.2</a>.</p>
@@ -3562,7 +3589,7 @@ Out[8]: 0.5
 
 
 <p class="date">
-<a href="http://asmeurersympy.wordpress.com/2012/08/31/isympy-i-a-saner-interactive-environment/">by Aaron Meurer at August 31, 2012 03:30 AM</a>
+<a href="https://asmeurersympy.wordpress.com/2012/08/31/isympy-i-a-saner-interactive-environment/">by Aaron Meurer at August 31, 2012 03:30 AM</a>
 </p>
 </div>
 </div>
@@ -3582,11 +3609,11 @@ Out[8]: 0.5
 
 
 
-<h3><a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
+<h3><a href="https://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
 
 
 <div class="entrygroup" id="http://asmeurersympy.wordpress.com/?p=1122">
-<h4 lang="en"><a href="http://asmeurersympy.wordpress.com/2012/08/21/sympy-live-sphinx-extension/">SymPy Live Sphinx Extension</a></h4>
+<h4 lang="en"><a href="https://asmeurersympy.wordpress.com/2012/08/21/sympy-live-sphinx-extension/">SymPy Live Sphinx Extension</a></h4>
 <div class="entry">
 <div class="content" lang="en">
 <p>I didn’t blog about SymPy all summer, so I thought I would write a post about my favorite feature of the upcoming SymPy 0.7.2 release.  In fact, this feature has got me more excited than any other feature from any version of SymPy.  Yeah, it’s that good.</p>
@@ -3608,7 +3635,7 @@ Out[8]: 0.5
 
 
 <p class="date">
-<a href="http://asmeurersympy.wordpress.com/2012/08/21/sympy-live-sphinx-extension/">by Aaron Meurer at August 21, 2012 05:09 AM</a>
+<a href="https://asmeurersympy.wordpress.com/2012/08/21/sympy-live-sphinx-extension/">by Aaron Meurer at August 21, 2012 05:09 AM</a>
 </p>
 </div>
 </div>
@@ -5346,53 +5373,6 @@ Out[128]: False
 </div>
 
 </div>
-<div class="daygroup">
-<h2>July 15, 2012</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://amakelov.wordpress.com" title="Not really blogging » Google Summer of Code 2012">Aleksandar Makelov</a></h3>
-
-
-<div class="entrygroup" id="http://amakelov.wordpress.com/?p=302">
-<h4 lang="en"><a href="http://amakelov.wordpress.com/2012/07/15/google-summer-of-code-2012-week-8/">Google Summer of Code 2012: Week 8</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>Hi everyone, here’s a brief summary of what I’ve been doing for the 8th week of my GSoC:</p>
-<ul>
-<li>The issue with the BASESWAP function on page 103 of [1] that I discussed <a href="http://amakelov.wordpress.com/2012/07/01/google-summer-of-code-2012-week-6/" target="_blank">here</a> is now resolved: one of the authors, Professor Derek Holt at Warwick, replied to me that this is indeed a typo and added it to the errata page <a href="http://homepages.warwick.ac.uk/~mareg/CGTHandbookErrors" target="_blank">here</a>.</li>
-</ul>
-<ul>
-<li>I studied the SUBGROUPSEARCH algorithm described in [1] in more depth. It takes as input a group <img src="http://s0.wp.com/latex.php?latex=G&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="G" class="latex" title="G" /> with a BSGS, a subgroup <img src="http://s0.wp.com/latex.php?latex=K+%3C+G&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="K &lt; G" class="latex" title="K &lt; G" /> with a BSGS having the same base as that of <img src="http://s0.wp.com/latex.php?latex=G&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="G" class="latex" title="G" />, a property <img src="http://s0.wp.com/latex.php?latex=P&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="P" class="latex" title="P" /> such that <img src="http://s0.wp.com/latex.php?latex=P%28g%29&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="P(g)" class="latex" title="P(g)" /> for <img src="http://s0.wp.com/latex.php?latex=g+%5Cin+G&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="g \in G" class="latex" title="g \in G" /> is either true or false, <img src="http://s0.wp.com/latex.php?latex=P%28g%29&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="P(g)" class="latex" title="P(g)" /> is always true for $g \in K$, and the elements of <img src="http://s0.wp.com/latex.php?latex=G&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="G" class="latex" title="G" /> satisfying <img src="http://s0.wp.com/latex.php?latex=P&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="P" class="latex" title="P" /> form a subgroup <img src="http://s0.wp.com/latex.php?latex=H&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="H" class="latex" title="H" />, and tests <img src="http://s0.wp.com/latex.php?latex=%5Ctext%7BTEST%7D%28g%2C+l%29&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="\text{TEST}(g, l)" class="latex" title="\text{TEST}(g, l)" /> used to rule out group elements (i.e., make sure they don’t satisfy <img src="http://s0.wp.com/latex.php?latex=P&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="P" class="latex" title="P" />) based on the image of the first <img src="http://s0.wp.com/latex.php?latex=l&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="l" class="latex" title="l" /> base points of <img src="http://s0.wp.com/latex.php?latex=G&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="G" class="latex" title="G" />, the so-called partial base image. It modifies <img src="http://s0.wp.com/latex.php?latex=K&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="K" class="latex" title="K" /> by adding generators until <img src="http://s0.wp.com/latex.php?latex=K+%3D+H&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="K = H" class="latex" title="K = H" />, and returns a strong generating set for <img src="http://s0.wp.com/latex.php?latex=H&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="H" class="latex" title="H" />. It performs a depth-first search over all possible base images (which by the definition of a base determine uniquely every element of <img src="http://s0.wp.com/latex.php?latex=G&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="G" class="latex" title="G" />), but uses several conditions to prune the search tree and is said to be fast in practice. This algorithm is the basis for finding normalizers and centralizers and intersections of subgroups, so it’s pretty fundamental. One of its features is the frequent change of base for <img src="http://s0.wp.com/latex.php?latex=K&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="K" class="latex" title="K" />: at level <img src="http://s0.wp.com/latex.php?latex=l&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="l" class="latex" title="l" /> in the search tree we want to make sure that the base for <img src="http://s0.wp.com/latex.php?latex=K&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="K" class="latex" title="K" /> starts with the current partial base image (i.e., the image of the first <img src="http://s0.wp.com/latex.php?latex=l&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="l" class="latex" title="l" /> points in the base). In [1] it is said that this requires only one application of BASESWAP (which swaps two neighbouring base points). <strong>This was confusing me for a while.</strong> However, since we want to only change the <img src="http://s0.wp.com/latex.php?latex=l&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="l" class="latex" title="l" />-th base point at any base change, and the base after the <img src="http://s0.wp.com/latex.php?latex=l&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="l" class="latex" title="l" />-th point doesn’t matter at level <img src="http://s0.wp.com/latex.php?latex=l&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="l" class="latex" title="l" />, it seems that we can do the following. Treat the partial base image, denote it by <img src="http://s0.wp.com/latex.php?latex=c_1+c_2+%5Cldots+c_l&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="c_1 c_2 \ldots c_l" class="latex" title="c_1 c_2 \ldots c_l" />, as a base, and then run BASESWAP on <img src="http://s0.wp.com/latex.php?latex=c_1+c_2+%5Cldots+c_l+c&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="c_1 c_2 \ldots c_l c" class="latex" title="c_1 c_2 \ldots c_l c" />, interchanging the last two elements, where <img src="http://s0.wp.com/latex.php?latex=c&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="c" class="latex" title="c" /> is the new <img src="http://s0.wp.com/latex.php?latex=l&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="l" class="latex" title="l" />-th point in the base. Now I’m more confident that I can implement SUBGROUP search (the other parts of the procedure are easily approachable). But there is one other problem with it:</li>
-<li>We want <img src="http://s0.wp.com/latex.php?latex=K&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="K" class="latex" title="K" />, the group we initialize <img src="http://s0.wp.com/latex.php?latex=H&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="H" class="latex" title="H" /> with, to have the same base as <img src="http://s0.wp.com/latex.php?latex=G&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="G" class="latex" title="G" />. The current deterministic implementation of the Schreier-Sims algorithm (using Jerrum’s filther) always produces a BSGS from scratch, and therefore we can’t tell it to make a BSGS for <img src="http://s0.wp.com/latex.php?latex=K&amp;bg=ffffff&amp;fg=4b5d67&amp;s=0" alt="K" class="latex" title="K" /> with respect to some particular base. Hence we need an implementation of the so-called “incremental” Schreier-Sims algorithm, which takes a sequence of points and a generating set and extends them to a BSGS. This is also described in [1], together with some optimizations, and it won’t be very hard to go through the pseudocode and implement it – so that’ going to be the next step. It would also be a useful addition to the entire group-theoretical module since often in algorithms we want a BSGS with respect to some convenient base.</li>
-</ul>
-<p>More or less, that’s it for now. In the next few days I’ll try to write some actual code implementing the above two bullets and get some more reviewing for my <a href="https://github.com/sympy/sympy/pull/1406" target="_blank">most recent pull request</a>.</p>
-<p>[1] Derek F. Holt, Bettina Eick, Bettina, Eamonn A. O’Brien, “Handbook of computational group theory”, Discrete Mathematics and its Applications (Boca Raton). Chapman &amp; Hall/CRC, Boca Raton, FL, 2005. ISBN 1-58488-372-3</p>
-<p> </p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/amakelov.wordpress.com/302/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/amakelov.wordpress.com/302/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;blog=35896871&amp;post=302&amp;subd=amakelov&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://amakelov.wordpress.com/2012/07/15/google-summer-of-code-2012-week-8/">by Александър Макелов at July 15, 2012 11:28 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -5401,7 +5381,7 @@ Out[128]: False
 <h2>Subscriptions</h2>
 <ul>
 <li>
-<a href="http://asmeurersympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://asmeurersympy.wordpress.com" class="message" title="no activity in 7 days">Aaron Meurer</a>
+<a href="https://asmeurersympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="https://asmeurersympy.wordpress.com" class="message" title="no activity in 7 days">Aaron Meurer</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/936818886435977143/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://addisoncugini.blogspot.com/" class="message" title="no activity in 7 days">Addison Cugini</a>
@@ -5506,7 +5486,7 @@ Out[128]: False
 
 <p>
 <strong>Last updated:</strong><br>
-January 09, 2013 06:40 PM<br>
+January 09, 2013 07:00 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
