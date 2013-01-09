@@ -14,6 +14,7 @@
 	<items>
 		<rdf:Seq>
 			<rdf:li rdf:resource="http://brianegranger.com/?p=249" />
+			<rdf:li rdf:resource="tag:fseoane.net/blog,2013-01-04:2013/memory-plots-with-memory_profiler/" />
 			<rdf:li rdf:resource="http://asmeurersympy.wordpress.com/?p=1168" />
 			<rdf:li rdf:resource="http://asmeurersympy.wordpress.com/?p=1165" />
 			<rdf:li rdf:resource="http://matthewrocklin.com/blog//work/2012/12/11/Statistical-Simplification" />
@@ -72,7 +73,6 @@
 			<rdf:li rdf:resource="http://scolobb.wordpress.com/?p=259" />
 			<rdf:li rdf:resource="http://rhoforsympy.wordpress.com/?p=197" />
 			<rdf:li rdf:resource="http://amakelov.wordpress.com/?p=302" />
-			<rdf:li rdf:resource="http://www.catchmrbharath.in/programming/2012/07/09/gsoc-week-7" />
 		</rdf:Seq>
 	</items>
 </channel>
@@ -120,9 +120,106 @@
 	<dc:date>2013-01-09T03:49:20+00:00</dc:date>
 	<dc:creator>Brian Granger</dc:creator>
 </item>
+<item rdf:about="tag:fseoane.net/blog,2013-01-04:2013/memory-plots-with-memory_profiler/">
+	<title>Fabian Pedregosa: Memory plots with memory_profiler</title>
+	<link>http://fseoane.net/blog/2013/memory-plots-with-memory_profiler/</link>
+	<content:encoded>&lt;p&gt;Besides performing a line-by-line analysis of memory consumption,
+&lt;a href=&quot;http://pypi.python.org/pypi/memory_profiler&quot;&gt;&lt;code&gt;memory_profiler&lt;/code&gt;&lt;/a&gt;
+exposes some functions that allow to retrieve the memory consumption
+of a function in real-time, allowing e.g. to visualize the memory
+consumption of a given function over time.&lt;/p&gt;
+&lt;p&gt;The function to be used is &lt;code&gt;memory_usage&lt;/code&gt;. The first argument
+specifies what code is to be monitored. This can represent either an
+external process or a Python function. In the case of an external
+process the first argument is an integer representing its process
+identifier (PID). In the case of a Python function, we need pass the
+function and its arguments to memory_usage. We do this by passing the
+tuple &lt;code&gt;(f, args, kw)&lt;/code&gt; that specifies the function, its position
+arguments as a tuple and its keyword arguments as a dictionary,
+respectively. This will be then executed by &lt;code&gt;memory_usage&lt;/code&gt; as
+&lt;code&gt;f(*args, **kw)&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Let's see this with an example. Take as function NumPy's
+&lt;a href=&quot;http://docs.scipy.org/doc/numpy/reference/generated/numpy.linalg.pinv.html&quot;&gt;pseudo-inverse function&lt;/a&gt;. Thus
+&lt;code&gt;f = numpy.linalg.pinv&lt;/code&gt; and &lt;code&gt;f&lt;/code&gt; takes one positional argument (the
+matrix to be inverted) so &lt;code&gt;args = (a,)&lt;/code&gt; where &lt;code&gt;a&lt;/code&gt; is the matrix to be
+inverted. Note that args must be a tuple consisting of the different
+arguments, thus the parenthesis around &lt;code&gt;a&lt;/code&gt;. The third item is a
+dictionary &lt;code&gt;kw&lt;/code&gt; specifying the keyword arguments. Here kw is optional
+and is omitted.&lt;/p&gt;
+&lt;div class=&quot;codehilite&quot;&gt;&lt;pre&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;memory_profiler&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memory_usage&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;numpy&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;np&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# create a random matrix&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;randn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;500&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;500&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mem_usage&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memory_usage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;linalg&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pinv&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,)),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;interval&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=.&lt;/span&gt;&lt;span class=&quot;mo&quot;&gt;01&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mem_usage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;57.02734375&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;55.0234375&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;57.078125&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This has given me a list specifying at different time intervals &lt;code&gt;(t0,
+t0 + .01, t0 + .02, ...)&lt;/code&gt; at which the measurements where taken. Now I can
+use that to for example plot the memory consumption as a function of
+time:&lt;/p&gt;
+&lt;div class=&quot;codehilite&quot;&gt;&lt;pre&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;pylab&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;pl&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;plot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;arange&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mem_usage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mo&quot;&gt;01&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mem_usage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;label&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'linalg.pinv'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xlabel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'Time (in seconds)'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ylabel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'Memory consumption (in MB)'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;show&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;img src=&quot;http://fseoane.net/blog/static/images/2013/plot_memory_pinv.png&quot; alt=&quot;Memory plot&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;This will give the memory usage of a single function across time, which 
+might be interesting for example to detect temporaries that would be
+created during the execution. &lt;/p&gt;
+&lt;p&gt;Another use case for &lt;code&gt;memory_usage&lt;/code&gt; would be to see how memory behaves
+as input data gets bigger. In this case we are interested in memory as
+a function of the input data. One obvious way we can do this is by
+calling the same function each time with a different input and take as
+memory consumption the maximum consumption over time. This way we will
+have a memory usage for each input.&lt;/p&gt;
+&lt;div class=&quot;codehilite&quot;&gt;&lt;pre&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;A&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;randn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;mem_usage&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memory_usage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;linalg&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pinv&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;A&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,)))&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;    &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;max&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mem_usage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;mf&quot;&gt;29.22&lt;/span&gt;
+&lt;span class=&quot;mf&quot;&gt;30.10&lt;/span&gt;
+&lt;span class=&quot;mf&quot;&gt;40.66&lt;/span&gt;
+&lt;span class=&quot;mf&quot;&gt;53.96&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;It is now possible to plot these results as a function of the
+dimensions.&lt;/p&gt;
+&lt;div class=&quot;codehilite&quot;&gt;&lt;pre&gt;&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;numpy&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;np&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;pylab&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;pl&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;memory_profiler&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memory_usage&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;dims&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;linspace&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;pinv_mem&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;zeros&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dims&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i_dim&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;k&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;enumerate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dims&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;randn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;k&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;k&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;tmp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memory_usage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;linalg&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pinv&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,)),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;interval&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=.&lt;/span&gt;&lt;span class=&quot;mo&quot;&gt;01&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;pinv_mem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i_dim&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;max&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tmp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;pl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;plot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dims&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pinv_mem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;label&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'np.linalg.pinv'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;pl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ylabel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'Memory (in MB)'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;pl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xlabel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'Dimension of the square matrix'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;pl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;legend&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;loc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'upper left'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;pl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;axis&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'tight'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;pl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;show&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;img src=&quot;http://fseoane.net/blog/static/images/2013/plot_memory_pinv_2.png&quot; alt=&quot;Memory plot&quot; /&gt;&lt;/p&gt;</content:encoded>
+	<dc:date>2013-01-03T23:00:00+00:00</dc:date>
+	<dc:creator>Fabian Pedregosa</dc:creator>
+</item>
 <item rdf:about="http://asmeurersympy.wordpress.com/?p=1168">
 	<title>Aaron Meurer: Emacs: One year later</title>
-	<link>https://asmeurersympy.wordpress.com/2013/01/01/emacs-one-year-later/</link>
+	<link>http://asmeurersympy.wordpress.com/2013/01/01/emacs-one-year-later/</link>
 	<content:encoded>&lt;p&gt;As readers of this blog may remember, back in 2011, I decided to move to a command-line based editor. For roughly two weeks in December, 2011, I exclusively used Vim, and for the same amount of time in January, 2012, I used exclusively Emacs. I had used a little of each editor in the past, but this was my first time using them to do true editing work. My experiences are chronicled in my blog posts (parts &lt;a href=&quot;http://asmeurersympy.wordpress.com/2011/12/20/vim-vs-emacs-part-1/&quot; title=&quot;1&quot;&gt;1&lt;/a&gt;, &lt;a href=&quot;http://asmeurersympy.wordpress.com/2012/01/03/vim-vs-emacs-part-2/&quot; title=&quot;2&quot;&gt;2&lt;/a&gt;, &lt;a href=&quot;http://asmeurersympy.wordpress.com/2012/01/13/vim-vs-emacs-part-3/&quot; title=&quot;3&quot;&gt;3&lt;/a&gt;, and &lt;a href=&quot;http://asmeurersympy.wordpress.com/2012/07/09/emacs-7-months-later/&quot; title=&quot;7 months later follow up&quot;&gt;7 months later follow up&lt;/a&gt;).  &lt;/p&gt;
 &lt;p&gt;To summarize, I decided to use Emacs, as I found it to be much more intuitive, and much more user-friendly.  Today, January 1, marks the one-year point of my using Emacs as my sole text editor, with some exceptions (notably, I’m currently writing this blog post in the browser).  So I’d like to make some observations:&lt;/p&gt;
 &lt;li&gt;Either one of these editors (Vim or Emacs) is going to really suck unless you are willing to make a serious investment in customizing them and installing nice addons. For the second point, Emacs has an advantage, because the philosophy of Vim is to be barebones whereas the philosophy of Emacs is to be featureful, so that in particular many things that were once addons of Emacs are now included in the standard installation.  For customization, on the one hand, Emacs is easier, because it has a nice interface (&lt;code&gt;M-x customize&lt;/code&gt;), but on the other hand, Vim’s scripting language is much easier to hack on than Emacs lisp (I still can’t code in Lisp to save my life; it’s a very challenging programming language).
@@ -186,7 +283,7 @@
 </item>
 <item rdf:about="http://asmeurersympy.wordpress.com/?p=1165">
 	<title>Aaron Meurer: 2012 in review</title>
-	<link>https://asmeurersympy.wordpress.com/2012/12/30/2012-in-review/</link>
+	<link>http://asmeurersympy.wordpress.com/2012/12/30/2012-in-review/</link>
 	<content:encoded>&lt;p&gt;The WordPress.com stats helper monkeys prepared a 2012 annual report for this blog.&lt;/p&gt;
 &lt;p&gt;	&lt;a href=&quot;http://asmeurersympy.wordpress.com/2012/annual-report/&quot;&gt;&lt;img src=&quot;http://www.wordpress.com/wp-content/mu-plugins/annual-reports/img/2012-emailteaser.png&quot; alt=&quot;&quot; width=&quot;100%&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;Here’s an excerpt:&lt;/p&gt;
@@ -2453,8 +2550,8 @@ f_durations.write('\n')
     &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'Kendall correlation coefficient for block &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%s&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;: &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%.5f&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tau&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;div class=&quot;codehilite&quot;&gt;&lt;pre&gt;&lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; 0&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; 0&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;71122
-&lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; 1&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; 0&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;84387
+&lt;div class=&quot;codehilite&quot;&gt;&lt;pre&gt;&lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.71122&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.84387&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
@@ -2516,8 +2613,8 @@ f_durations.write('\n')
     &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'Kendall correlation coefficient for block &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%s&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;: &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%.5f&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tau&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;div class=&quot;codehilite&quot;&gt;&lt;pre&gt;&lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; 0&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; 0&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;83627
-&lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; 1&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; 0&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;84387
+&lt;div class=&quot;codehilite&quot;&gt;&lt;pre&gt;&lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.83627&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.84387&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
@@ -2601,7 +2698,7 @@ f_durations.write('\n')
 </item>
 <item rdf:about="http://asmeurersympy.wordpress.com/?p=1160">
 	<title>Aaron Meurer: Infinitely nested lists in Python</title>
-	<link>https://asmeurersympy.wordpress.com/2012/09/19/infinitely-nested-lists-in-python/</link>
+	<link>http://asmeurersympy.wordpress.com/2012/09/19/infinitely-nested-lists-in-python/</link>
 	<content:encoded>&lt;p&gt;Readers of this blog know that I sometimes like to write about some &lt;a href=&quot;http://asmeurersympy.wordpress.com/2009/07/20/modifying-a-list-while-looping-through-it-in-python/&quot;&gt;strange&lt;/a&gt;, &lt;a href=&quot;http://asmeurersympy.wordpress.com/2010/06/16/strange-python-behavior-can-someone-please-explain-to-me-what-is-going-on-here/&quot;&gt;unexpected&lt;/a&gt;, and &lt;a href=&quot;http://asmeurersympy.wordpress.com/2011/03/15/true-is-true-is-false-is-true-is-false/&quot;&gt;unusual&lt;/a&gt; things in Python that I stumble across.  This post is another one of those.&lt;/p&gt;
 &lt;p&gt;First, look at this&lt;/p&gt;
 &lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; a = []
@@ -2688,7 +2785,7 @@ b. Add this line to your bash_profile.&lt;/p&gt;
 </item>
 <item rdf:about="http://asmeurersympy.wordpress.com/?p=1154">
 	<title>Aaron Meurer: isympy -I:  A saner interactive environment</title>
-	<link>https://asmeurersympy.wordpress.com/2012/08/31/isympy-i-a-saner-interactive-environment/</link>
+	<link>http://asmeurersympy.wordpress.com/2012/08/31/isympy-i-a-saner-interactive-environment/</link>
 	<content:encoded>&lt;p&gt;As &lt;a href=&quot;http://asmeurersympy.wordpress.com/2012/08/21/sympy-live-sphinx-extension/&quot;&gt;promised&lt;/a&gt;, here is another post describing a new feature in the upcoming &lt;a href=&quot;https://github.com/sympy/sympy/wiki/Release-Notes-for-0.7.2&quot;&gt;SymPy 0.7.2&lt;/a&gt;.&lt;/p&gt;
 &lt;h2&gt;Automatic Symbol Definition&lt;/h2&gt;
 &lt;p&gt;While not as ground breaking as the feature I described in my &lt;a href=&quot;http://asmeurersympy.wordpress.com/2012/08/21/sympy-live-sphinx-extension/&quot;&gt;last post&lt;/a&gt;, this feature is still quite useful. As you may know, SymPy is inherently a Python library, meaning that it lives by the rules of Python. If you want to use any name, whether it be a Symbol or a function (like cos), you need to define it (in the case of Symbols), or import it (in the case of functions that come with SymPy). We provide the script &lt;code&gt;isympy&lt;/code&gt; with SymPy to assist with this. This script automatically runs IPython (if it’s installed), imports all names from sympy (&lt;code&gt;from sympy import *&lt;/code&gt;), and defines common symbol names (like &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt;, and &lt;code&gt;z&lt;/code&gt;).&lt;/p&gt;
@@ -2750,7 +2847,7 @@ Out[8]: 0.5
 </item>
 <item rdf:about="http://asmeurersympy.wordpress.com/?p=1122">
 	<title>Aaron Meurer: SymPy Live Sphinx Extension</title>
-	<link>https://asmeurersympy.wordpress.com/2012/08/21/sympy-live-sphinx-extension/</link>
+	<link>http://asmeurersympy.wordpress.com/2012/08/21/sympy-live-sphinx-extension/</link>
 	<content:encoded>&lt;p&gt;I didn’t blog about SymPy all summer, so I thought I would write a post about my favorite feature of the upcoming SymPy 0.7.2 release.  In fact, this feature has got me more excited than any other feature from any version of SymPy.  Yeah, it’s that good.&lt;/p&gt;
 &lt;p&gt;The feature is the SymPy Live Sphinx extension.  To start, if you don’t know about it, check out &lt;a href=&quot;http://live.sympy.org/&quot; target=&quot;_blank&quot;&gt;SymPy Live&lt;/a&gt;.  This is a console that runs on the &lt;a href=&quot;https://developers.google.com/appengine/&quot;&gt;App Engine&lt;/a&gt;.  We’ve actually had this for quite some time, but this winter, it got a huge upgrade thanks to the contribution of some &lt;a href=&quot;http://www.google-melange.com/gci/homepage/google/gci2011&quot;&gt;GCI&lt;/a&gt; students.  Basically, SymPy Live lets you try out SymPy in your browser completely for free, because it runs all the code on the App Engine.  Actually, the console is a full Python console, so you can actually run any valid Python command on it.  This past winter, GCI students upgraded the look of the site, added a mobile version (visit live.sympy.org on your phone), and added other neat features like search history and autocompletion.&lt;/p&gt;
 &lt;p&gt;Now, &lt;a href=&quot;http://sphinx.pocoo.org/&quot;&gt;Sphinx&lt;/a&gt; is the documentation system that we use to generate &lt;a href=&quot;http://docs.sympy.org/&quot;&gt;SymPy’s html documentation&lt;/a&gt;. Last year, when I was at the &lt;a href=&quot;http://asmeurersympy.wordpress.com/2011/07/17/the-scipy-2011-conference/&quot;&gt;SciPy Conference&lt;/a&gt;, Mateusz had an idea at the sprints to create an extension linking SymPy Live and Sphinx, so that the examples in Sphinx could be easily run in SymPy Live.  He didn’t finish the extension, but I’m happy to report that thanks to David Li, who was also one of the aforementioned GCI students, the extension is now complete, and is running live on our &lt;a href=&quot;http://docs.sympy.org/dev/&quot;&gt;development docs&lt;/a&gt;.  When SymPy 0.7.2 is released (soon I promise), it will be part of the oficial documentation.&lt;/p&gt;
@@ -3762,28 +3859,6 @@ Out[128]: False
 &lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/amakelov.wordpress.com/302/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/amakelov.wordpress.com/302/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;amp;blog=35896871&amp;amp;post=302&amp;amp;subd=amakelov&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
 	<dc:date>2012-07-15T23:28:05+00:00</dc:date>
 	<dc:creator>Александър Макелов</dc:creator>
-</item>
-<item rdf:about="http://www.catchmrbharath.in/programming/2012/07/09/gsoc-week-7">
-	<title>Bharath M R: GSoC week 7</title>
-	<link>http://www.catchmrbharath.in/programming/2012/07/09/gsoc-week-7</link>
-	<content:encoded>&lt;p&gt;This week has been quite eventful. The implicit plotting module is almost done. I added the functionality of combining expressions using the &lt;code&gt;And&lt;/code&gt; and &lt;code&gt;Or&lt;/code&gt; statements. Now you can do&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;
-plot_implicit(And(Eq(y, exp(x)), y - x &amp;gt; 2)
-&lt;/code&gt; and get a plot as below. So now you can combine any number of equations / inequalities and plot it. I think its possible to do a lot of cool stuff combining equations / inequalities. &lt;img width=&quot;600&quot; src=&quot;http://www.catchmrbharath.in/images/09072012/fig1.png&quot; height=&quot;400&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Plotting through interval math is awesome but is also very limited. You cannot add support to &lt;code&gt;re()&lt;/code&gt;, to functions that you cannot characterize as monotonic in certain regions. But we always encounter such functions. So there should be some fall back algorithm to plot such plots. I implemented the fall back algorithm last week. The idea is borrowed from sage implicit plots. We convert an equation / inequality into a function which returns 1 if it satisfies and -1 if it doesn’t satisfy. So if you are plotting an equality then you plot using the &lt;code&gt;contour&lt;/code&gt; command of matplotlib, and instruct it to plot only the zero contour. If its an inequality then plotting the region with two colors gives the plot required.&lt;/p&gt;
-
-&lt;p&gt;These are examples from the fallback algorithm.&lt;/p&gt;
-
-&lt;p&gt;Plot of $y^{2}=x^{3}-x$ &lt;img width=&quot;600&quot; src=&quot;http://www.catchmrbharath.in/images/09072012/fig2.png&quot; height=&quot;400&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;The plot with interval arithmetic is more precise. &lt;img width=&quot;600&quot; src=&quot;http://www.catchmrbharath.in/images/09072012/fig3.png&quot; height=&quot;400&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;I haven’t finished with the tests. Once I finish the tests I can send a pull request. The pull request will be pretty big, but most of the things have been reviewed in my previous pull request. This is just an extension of the previous pull request.&lt;/p&gt;
-
-&lt;p&gt;There are certain problems with the module though. The line width problem which I mentioned in my previous blog post, cannot be fixed. So you will have to change to the fall back method if the line width becomes large. Also the fall back algorithm cannot plot boolean combinations of equations / inequalities. So the two methods complement each other largely. So the next question would be whether we can choose one of the two intelligently. I guess the answer is No. That decision must be taken by the user. But most of the times the interval math approach works very nicely.&lt;/p&gt;</content:encoded>
-	<dc:date>2012-07-09T07:00:00+00:00</dc:date>
 </item>
 
 </rdf:RDF>

@@ -95,6 +95,132 @@
 
 </div>
 <div class="daygroup">
+<h2>January 03, 2013</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://fseoane.net/blog/" title="I say things">Fabian Pedregosa</a></h3>
+
+
+<div class="entrygroup" id="tag:fseoane.net/blog,2013-01-04:2013/memory-plots-with-memory_profiler/">
+<h4><a href="http://fseoane.net/blog/2013/memory-plots-with-memory_profiler/">Memory plots with memory_profiler</a></h4>
+<div class="entry">
+<div class="content">
+<p>Besides performing a line-by-line analysis of memory consumption,
+<a href="http://pypi.python.org/pypi/memory_profiler"><code>memory_profiler</code></a>
+exposes some functions that allow to retrieve the memory consumption
+of a function in real-time, allowing e.g. to visualize the memory
+consumption of a given function over time.</p>
+<p>The function to be used is <code>memory_usage</code>. The first argument
+specifies what code is to be monitored. This can represent either an
+external process or a Python function. In the case of an external
+process the first argument is an integer representing its process
+identifier (PID). In the case of a Python function, we need pass the
+function and its arguments to memory_usage. We do this by passing the
+tuple <code>(f, args, kw)</code> that specifies the function, its position
+arguments as a tuple and its keyword arguments as a dictionary,
+respectively. This will be then executed by <code>memory_usage</code> as
+<code>f(*args, **kw)</code>.</p>
+<p>Let's see this with an example. Take as function NumPy's
+<a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.linalg.pinv.html">pseudo-inverse function</a>. Thus
+<code>f = numpy.linalg.pinv</code> and <code>f</code> takes one positional argument (the
+matrix to be inverted) so <code>args = (a,)</code> where <code>a</code> is the matrix to be
+inverted. Note that args must be a tuple consisting of the different
+arguments, thus the parenthesis around <code>a</code>. The third item is a
+dictionary <code>kw</code> specifying the keyword arguments. Here kw is optional
+and is omitted.</p>
+<div class="codehilite"><pre><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">memory_profiler</span> <span class="kn">import</span> <span class="n">memory_usage</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="c"># create a random matrix</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">mem_usage</span> <span class="o">=</span> <span class="n">memory_usage</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">,)),</span> <span class="n">interval</span><span class="o">=.</span><span class="mo">01</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">print</span><span class="p">(</span><span class="n">mem_usage</span><span class="p">)</span>
+<span class="p">[</span><span class="mf">57.02734375</span><span class="p">,</span> <span class="mf">55.0234375</span><span class="p">,</span> <span class="mf">57.078125</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+</pre></div>
+
+
+<p>This has given me a list specifying at different time intervals <code>(t0,
+t0 + .01, t0 + .02, ...)</code> at which the measurements where taken. Now I can
+use that to for example plot the memory consumption as a function of
+time:</p>
+<div class="codehilite"><pre><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">pl</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mem_usage</span><span class="p">))</span> <span class="o">*</span> <span class="o">.</span><span class="mo">01</span><span class="p">,</span> <span class="n">mem_usage</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'linalg.pinv'</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'Time (in seconds)'</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'Memory consumption (in MB)'</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+
+<p><img src="http://fseoane.net/blog/static/images/2013/plot_memory_pinv.png" alt="Memory plot" /></p>
+<p>This will give the memory usage of a single function across time, which 
+might be interesting for example to detect temporaries that would be
+created during the execution. </p>
+<p>Another use case for <code>memory_usage</code> would be to see how memory behaves
+as input data gets bigger. In this case we are interested in memory as
+a function of the input data. One obvious way we can do this is by
+calling the same function each time with a different input and take as
+memory consumption the maximum consumption over time. This way we will
+have a memory usage for each input.</p>
+<div class="codehilite"><pre><span class="o">&gt;&gt;&gt;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span>
+<span class="o">...</span>    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">i</span><span class="p">,</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">i</span><span class="p">)</span>
+<span class="o">...</span>    <span class="n">mem_usage</span> <span class="o">=</span> <span class="n">memory_usage</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">,</span> <span class="p">(</span><span class="n">A</span><span class="p">,)))</span>
+<span class="o">...</span>    <span class="k">print</span> <span class="nb">max</span><span class="p">(</span><span class="n">mem_usage</span><span class="p">)</span>
+
+<span class="mf">29.22</span>
+<span class="mf">30.10</span>
+<span class="mf">40.66</span>
+<span class="mf">53.96</span>
+</pre></div>
+
+
+<p>It is now possible to plot these results as a function of the
+dimensions.</p>
+<div class="codehilite"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">pl</span>
+<span class="kn">from</span> <span class="nn">memory_profiler</span> <span class="kn">import</span> <span class="n">memory_usage</span>
+
+<span class="n">dims</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">pinv_mem</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">dims</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i_dim</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dims</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+    <span class="n">tmp</span> <span class="o">=</span> <span class="n">memory_usage</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,)),</span> <span class="n">interval</span><span class="o">=.</span><span class="mo">01</span><span class="p">)</span>
+    <span class="n">pinv_mem</span><span class="p">[</span><span class="n">i_dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+
+<span class="n">pl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dims</span><span class="p">,</span> <span class="n">pinv_mem</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'np.linalg.pinv'</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'Memory (in MB)'</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'Dimension of the square matrix'</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s">'upper left'</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s">'tight'</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+
+<p><img src="http://fseoane.net/blog/static/images/2013/plot_memory_pinv_2.png" alt="Memory plot" /></p></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://fseoane.net/blog/2013/memory-plots-with-memory_profiler/">by Fabian Pedregosa at January 03, 2013 11:00 PM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>January 01, 2013</h2>
 
 <div class="channelgroup">
@@ -105,11 +231,11 @@
 
 
 
-<h3><a href="https://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
+<h3><a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
 
 
 <div class="entrygroup" id="http://asmeurersympy.wordpress.com/?p=1168">
-<h4 lang="en"><a href="https://asmeurersympy.wordpress.com/2013/01/01/emacs-one-year-later/">Emacs: One year later</a></h4>
+<h4 lang="en"><a href="http://asmeurersympy.wordpress.com/2013/01/01/emacs-one-year-later/">Emacs: One year later</a></h4>
 <div class="entry">
 <div class="content" lang="en">
 <p>As readers of this blog may remember, back in 2011, I decided to move to a command-line based editor. For roughly two weeks in December, 2011, I exclusively used Vim, and for the same amount of time in January, 2012, I used exclusively Emacs. I had used a little of each editor in the past, but this was my first time using them to do true editing work. My experiences are chronicled in my blog posts (parts <a href="http://asmeurersympy.wordpress.com/2011/12/20/vim-vs-emacs-part-1/" title="1">1</a>, <a href="http://asmeurersympy.wordpress.com/2012/01/03/vim-vs-emacs-part-2/" title="2">2</a>, <a href="http://asmeurersympy.wordpress.com/2012/01/13/vim-vs-emacs-part-3/" title="3">3</a>, and <a href="http://asmeurersympy.wordpress.com/2012/07/09/emacs-7-months-later/" title="7 months later follow up">7 months later follow up</a>).  </p>
@@ -178,7 +304,7 @@
 
 
 <p class="date">
-<a href="https://asmeurersympy.wordpress.com/2013/01/01/emacs-one-year-later/">by Aaron Meurer at January 01, 2013 09:51 AM</a>
+<a href="http://asmeurersympy.wordpress.com/2013/01/01/emacs-one-year-later/">by Aaron Meurer at January 01, 2013 09:51 AM</a>
 </p>
 </div>
 </div>
@@ -198,11 +324,11 @@
 
 
 
-<h3><a href="https://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
+<h3><a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
 
 
 <div class="entrygroup" id="http://asmeurersympy.wordpress.com/?p=1165">
-<h4 lang="en"><a href="https://asmeurersympy.wordpress.com/2012/12/30/2012-in-review/">2012 in review</a></h4>
+<h4 lang="en"><a href="http://asmeurersympy.wordpress.com/2012/12/30/2012-in-review/">2012 in review</a></h4>
 <div class="entry">
 <div class="content" lang="en">
 <p>The WordPress.com stats helper monkeys prepared a 2012 annual report for this blog.</p>
@@ -219,7 +345,7 @@
 
 
 <p class="date">
-<a href="https://asmeurersympy.wordpress.com/2012/12/30/2012-in-review/">by Aaron Meurer at December 30, 2012 11:07 PM</a>
+<a href="http://asmeurersympy.wordpress.com/2012/12/30/2012-in-review/">by Aaron Meurer at December 30, 2012 11:07 PM</a>
 </p>
 </div>
 </div>
@@ -2966,8 +3092,8 @@ f_durations.write('\n')
     <span class="k">print</span><span class="p">(</span><span class="s">'Kendall correlation coefficient for block </span><span class="si">%s</span><span class="s">: </span><span class="si">%.5f</span><span class="s">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">tau</span><span class="p">))</span>
 </pre></div>
 
-<div class="codehilite"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> 0<span class="p">:</span> 0<span class="p">.</span>71122
-<span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> 1<span class="p">:</span> 0<span class="p">.</span>84387
+<div class="codehilite"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">0</span><span class="p">:</span> <span class="mf">0.71122</span>
+<span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">1</span><span class="p">:</span> <span class="mf">0.84387</span>
 </pre></div>
 
 
@@ -3029,8 +3155,8 @@ f_durations.write('\n')
     <span class="k">print</span><span class="p">(</span><span class="s">'Kendall correlation coefficient for block </span><span class="si">%s</span><span class="s">: </span><span class="si">%.5f</span><span class="s">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">tau</span><span class="p">))</span>
 </pre></div>
 
-<div class="codehilite"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> 0<span class="p">:</span> 0<span class="p">.</span>83627
-<span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> 1<span class="p">:</span> 0<span class="p">.</span>84387
+<div class="codehilite"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">0</span><span class="p">:</span> <span class="mf">0.83627</span>
+<span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">1</span><span class="p">:</span> <span class="mf">0.84387</span>
 </pre></div>
 
 
@@ -3220,11 +3346,11 @@ f_durations.write('\n')
 
 
 
-<h3><a href="https://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
+<h3><a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
 
 
 <div class="entrygroup" id="http://asmeurersympy.wordpress.com/?p=1160">
-<h4 lang="en"><a href="https://asmeurersympy.wordpress.com/2012/09/19/infinitely-nested-lists-in-python/">Infinitely nested lists in Python</a></h4>
+<h4 lang="en"><a href="http://asmeurersympy.wordpress.com/2012/09/19/infinitely-nested-lists-in-python/">Infinitely nested lists in Python</a></h4>
 <div class="entry">
 <div class="content" lang="en">
 <p>Readers of this blog know that I sometimes like to write about some <a href="http://asmeurersympy.wordpress.com/2009/07/20/modifying-a-list-while-looping-through-it-in-python/">strange</a>, <a href="http://asmeurersympy.wordpress.com/2010/06/16/strange-python-behavior-can-someone-please-explain-to-me-what-is-going-on-here/">unexpected</a>, and <a href="http://asmeurersympy.wordpress.com/2011/03/15/true-is-true-is-false-is-true-is-false/">unusual</a> things in Python that I stumble across.  This post is another one of those.</p>
@@ -3294,7 +3420,7 @@ RuntimeError: maximum recursion depth exceeded in comparison
 
 
 <p class="date">
-<a href="https://asmeurersympy.wordpress.com/2012/09/19/infinitely-nested-lists-in-python/">by Aaron Meurer at September 19, 2012 04:21 AM</a>
+<a href="http://asmeurersympy.wordpress.com/2012/09/19/infinitely-nested-lists-in-python/">by Aaron Meurer at September 19, 2012 04:21 AM</a>
 </p>
 </div>
 </div>
@@ -3365,11 +3491,11 @@ b. Add this line to your bash_profile.</p>
 
 
 
-<h3><a href="https://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
+<h3><a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
 
 
 <div class="entrygroup" id="http://asmeurersympy.wordpress.com/?p=1154">
-<h4 lang="en"><a href="https://asmeurersympy.wordpress.com/2012/08/31/isympy-i-a-saner-interactive-environment/">isympy -I:  A saner interactive environment</a></h4>
+<h4 lang="en"><a href="http://asmeurersympy.wordpress.com/2012/08/31/isympy-i-a-saner-interactive-environment/">isympy -I:  A saner interactive environment</a></h4>
 <div class="entry">
 <div class="content" lang="en">
 <p>As <a href="http://asmeurersympy.wordpress.com/2012/08/21/sympy-live-sphinx-extension/">promised</a>, here is another post describing a new feature in the upcoming <a href="https://github.com/sympy/sympy/wiki/Release-Notes-for-0.7.2">SymPy 0.7.2</a>.</p>
@@ -3436,7 +3562,7 @@ Out[8]: 0.5
 
 
 <p class="date">
-<a href="https://asmeurersympy.wordpress.com/2012/08/31/isympy-i-a-saner-interactive-environment/">by Aaron Meurer at August 31, 2012 03:30 AM</a>
+<a href="http://asmeurersympy.wordpress.com/2012/08/31/isympy-i-a-saner-interactive-environment/">by Aaron Meurer at August 31, 2012 03:30 AM</a>
 </p>
 </div>
 </div>
@@ -3456,11 +3582,11 @@ Out[8]: 0.5
 
 
 
-<h3><a href="https://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
+<h3><a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
 
 
 <div class="entrygroup" id="http://asmeurersympy.wordpress.com/?p=1122">
-<h4 lang="en"><a href="https://asmeurersympy.wordpress.com/2012/08/21/sympy-live-sphinx-extension/">SymPy Live Sphinx Extension</a></h4>
+<h4 lang="en"><a href="http://asmeurersympy.wordpress.com/2012/08/21/sympy-live-sphinx-extension/">SymPy Live Sphinx Extension</a></h4>
 <div class="entry">
 <div class="content" lang="en">
 <p>I didn’t blog about SymPy all summer, so I thought I would write a post about my favorite feature of the upcoming SymPy 0.7.2 release.  In fact, this feature has got me more excited than any other feature from any version of SymPy.  Yeah, it’s that good.</p>
@@ -3482,7 +3608,7 @@ Out[8]: 0.5
 
 
 <p class="date">
-<a href="https://asmeurersympy.wordpress.com/2012/08/21/sympy-live-sphinx-extension/">by Aaron Meurer at August 21, 2012 05:09 AM</a>
+<a href="http://asmeurersympy.wordpress.com/2012/08/21/sympy-live-sphinx-extension/">by Aaron Meurer at August 21, 2012 05:09 AM</a>
 </p>
 </div>
 </div>
@@ -5267,49 +5393,6 @@ Out[128]: False
 </div>
 
 </div>
-<div class="daygroup">
-<h2>July 09, 2012</h2>
-
-
-
-<div class="entrygroup" id="http://www.catchmrbharath.in/programming/2012/07/09/gsoc-week-7">
-<h4><a href="http://www.catchmrbharath.in/programming/2012/07/09/gsoc-week-7">GSoC week 7</a></h4>
-<div class="entry">
-<div class="content">
-<p>This week has been quite eventful. The implicit plotting module is almost done. I added the functionality of combining expressions using the <code>And</code> and <code>Or</code> statements. Now you can do</p>
-
-<p><code>
-plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
-</code> and get a plot as below. So now you can combine any number of equations / inequalities and plot it. I think its possible to do a lot of cool stuff combining equations / inequalities. <img width="600" src="http://www.catchmrbharath.in/images/09072012/fig1.png" height="400" /></p>
-
-<p>Plotting through interval math is awesome but is also very limited. You cannot add support to <code>re()</code>, to functions that you cannot characterize as monotonic in certain regions. But we always encounter such functions. So there should be some fall back algorithm to plot such plots. I implemented the fall back algorithm last week. The idea is borrowed from sage implicit plots. We convert an equation / inequality into a function which returns 1 if it satisfies and -1 if it doesn’t satisfy. So if you are plotting an equality then you plot using the <code>contour</code> command of matplotlib, and instruct it to plot only the zero contour. If its an inequality then plotting the region with two colors gives the plot required.</p>
-
-<p>These are examples from the fallback algorithm.</p>
-
-<p>Plot of $y^{2}=x^{3}-x$ <img width="600" src="http://www.catchmrbharath.in/images/09072012/fig2.png" height="400" /></p>
-
-<p>The plot with interval arithmetic is more precise. <img width="600" src="http://www.catchmrbharath.in/images/09072012/fig3.png" height="400" /></p>
-
-<p>I haven’t finished with the tests. Once I finish the tests I can send a pull request. The pull request will be pretty big, but most of the things have been reviewed in my previous pull request. This is just an extension of the previous pull request.</p>
-
-<p>There are certain problems with the module though. The line width problem which I mentioned in my previous blog post, cannot be fixed. So you will have to change to the fall back method if the line width becomes large. Also the fall back algorithm cannot plot boolean combinations of equations / inequalities. So the two methods complement each other largely. So the next question would be whether we can choose one of the two intelligently. I guess the answer is No. That decision must be taken by the user. But most of the times the interval math approach works very nicely.</p></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://www.catchmrbharath.in/programming/2012/07/09/gsoc-week-7">July 09, 2012 07:00 AM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -5318,7 +5401,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
 <h2>Subscriptions</h2>
 <ul>
 <li>
-<a href="https://asmeurersympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="https://asmeurersympy.wordpress.com" class="message" title="no activity in 7 days">Aaron Meurer</a>
+<a href="http://asmeurersympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://asmeurersympy.wordpress.com" class="message" title="no activity in 7 days">Aaron Meurer</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/936818886435977143/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://addisoncugini.blogspot.com/" class="message" title="no activity in 7 days">Addison Cugini</a>
@@ -5354,7 +5437,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
 <a href="" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a class="message" title="404: not found">Django-SymPy</a>
 </li>
 <li>
-<a href="http://fseoane.net/blog/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://fseoane.net/blog/" class="message" title="no activity in 7 days">Fabian Pedregosa</a>
+<a href="http://fseoane.net/blog//feed/rss.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://fseoane.net/blog/" title="I say things">Fabian Pedregosa</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/7648717043547744590/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://gsoc-mathtex.blogspot.com/" class="message" title="no activity in 7 days">Freddie Witherden</a>
@@ -5423,7 +5506,7 @@ plot_implicit(And(Eq(y, exp(x)), y - x &gt; 2)
 
 <p>
 <strong>Last updated:</strong><br>
-January 09, 2013 03:00 PM<br>
+January 09, 2013 03:21 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
