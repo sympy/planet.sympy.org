@@ -10,6 +10,7 @@
 
 
 
+
 <head>
 <title>Planet SymPy</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -21,6 +22,139 @@
 <body>
 <h1>Planet SymPy</h1>
 
+<div class="daygroup">
+<h2>January 14, 2013</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://matthewrocklin.com/blog/" title="Working notes by Matthew Rocklin - SymPy">MRocklin</a></h3>
+
+
+<div class="entrygroup" id="http://matthewrocklin.com/blog//work/2013/01/14/LogPy-Introduction">
+<h4><a href="http://matthewrocklin.com/blog//work/2013/01/14/LogPy-Introduction">Introducing LogPy</a></h4>
+<div class="entry">
+<div class="content">
+<p><a href="http://github.com/logpy/logpy">LogPy</a> is a library for logic and relational programming in Python. This post contains some introductory examples.</p>
+
+<h2 id="informative_examples">Informative Examples</h2>
+
+<p>LogPy enables the expression of relations and the search for values which satisfy them. The following code asks for <code>1</code> number, <code>x</code>, such that <code>x == 5</code></p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">logpy</span> <span class="kn">import</span> <span class="n">run</span><span class="p">,</span> <span class="n">eq</span><span class="p">,</span> <span class="n">membero</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">conde</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">var</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">run</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">eq</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
+<span class="p">(</span><span class="mi">5</span><span class="p">,)</span>
+</code></pre></div>
+<p>Multiple variables and multiple goals can be used simultaneously. The following code asks for a number x such that <code>x == z</code> and <code>z == 5</code></p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">z</span> <span class="o">=</span> <span class="n">var</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">run</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">eq</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">),</span>
+              <span class="n">eq</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="p">(</span><span class="mi">5</span><span class="p">,)</span>
+</code></pre></div>
+<p>LogPy uses <a href="http://en.wikipedia.org/wiki/Unification_%28computer_science%29">unification</a>, an advanced form of pattern matching, to match within expression trees. The following code asks for a number, x, such that <code>(1, 2) == (1, x)</code> holds.</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">run</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">eq</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">)))</span>
+<span class="p">(</span><span class="mi">2</span><span class="p">,)</span>
+</code></pre></div>
+<p>The above examples use <code>eq</code>, a <em>goal</em> to state that two expressions are equal. Other goals exist. <code>membero(item, coll)</code>, a goal, states that <code>item</code> is a member of <code>coll</code>, a collection.</p>
+
+<p>The following example uses <code>membero</code> twice to ask for 2 values of x, such that x is a member of <code>(1, 2, 3)</code> <em>and</em> that x is a member of <code>(2, 3, 4)</code>.</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">run</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">membero</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>  <span class="c"># x is a member of (1, 2, 3)</span>
+              <span class="n">membero</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)))</span>  <span class="c"># x is a member of (2, 3, 4)</span>
+<span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</code></pre></div>
+<p>We can write other fancier goals too. Here is a list of all prime numbers within <code>1..10</code>. <code>primo</code> depends on the traditional <code>prime</code> and <code>isprime</code> functions found in <code>sympy</code>.</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">logpy.math</span> <span class="kn">import</span> <span class="n">primo</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">run</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="n">membero</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">)),</span>
+              <span class="p">(</span><span class="n">primo</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
+<span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+</code></pre></div>
+<p>Want just a few primes? Here are five numbers that satisfy the <code>primo</code> goal</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">run</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">primo</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+<span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">11</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="relations">Relations</h2>
+
+<p>We often want to state and then query data. Logic programming represents data a set of facts and represents queries with logical goals. In the following examples we assert some facts about the Simpsons family, construct queries through logical goals and then run the queries to obtain results.</p>
+
+<p>The following code defines a <code>parent</code> relation and uses it to state who fathered whom.</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">logpy</span> <span class="kn">import</span> <span class="n">Relation</span><span class="p">,</span> <span class="n">facts</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">parent</span> <span class="o">=</span> <span class="n">Relation</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">facts</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="p">(</span><span class="s">'Homer'</span><span class="p">,</span> <span class="s">'Bart'</span><span class="p">),</span>
+<span class="o">...</span>               <span class="p">(</span><span class="s">'Homer'</span><span class="p">,</span> <span class="s">'Lisa'</span><span class="p">),</span>
+<span class="o">...</span>               <span class="p">(</span><span class="s">'Abe'</span><span class="p">,</span>  <span class="s">'Homer'</span><span class="p">))</span>
+</code></pre></div>
+<p>We ask some questions using the <code>parent</code> relation as a goal constructor. Who is Bart’s father?</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">run</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">parent</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s">'Bart'</span><span class="p">))</span>  <span class="c"># one x such that x is a parent of Bart</span>
+<span class="p">(</span><span class="s">'Homer'</span><span class="p">,)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">run</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">parent</span><span class="p">(</span><span class="s">'Homer'</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span> <span class="c"># two xs such that Homer is a parent of x</span>
+<span class="p">(</span><span class="s">'Lisa'</span><span class="p">,</span> <span class="s">'Bart'</span><span class="p">)</span>
+</code></pre></div>
+<p>We can use intermediate variables for more complex queries. Who is Bart’s grandfather?</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">y</span> <span class="o">=</span> <span class="n">var</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">run</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">parent</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> 
+              <span class="n">parent</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="s">'Bart'</span><span class="p">))</span>  
+<span class="p">(</span><span class="s">'Abe'</span><span class="p">,)</span>
+</code></pre></div>
+<p>We can express the grandfather relationship separately. In this example we use <code>conde</code>, a goal constructor for logical <em>and</em> and <em>or</em>.</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="k">def</span> <span class="nf">grandparent</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+<span class="o">...</span>     <span class="n">y</span> <span class="o">=</span> <span class="n">var</span><span class="p">()</span>
+<span class="o">...</span>     <span class="k">return</span> <span class="n">conde</span><span class="p">((</span><span class="n">parent</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">parent</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)))</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">run</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">grandparent</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s">'Bart'</span><span class="p">))</span>
+<span class="p">(</span><span class="s">'Abe,'</span><span class="p">)</span>
+</code></pre></div>
+<p><code>grandparent</code> demonstrates that we can construct complex relations programmatically. How would you define sibling? How about uncle or aunt? How about descendant?</p>
+
+<p>If you’d like to play with LogPy you can install it with pip or easy_install using</p>
+
+<pre><code>pip install logic</code></pre>
+
+<p>or clone it directly from github</p>
+
+<pre><code>git clone git@github.com:logpy/logpy.git</code></pre>
+
+<p>Source is available at <a href="http://github.com/logpy/logpy/">http://github.com/logpy/logpy/</a>, design input and contributions are much appreciated.</p>
+
+<h2 id="logic_programming_in_general">Logic Programming in General</h2>
+
+<p>Logic and relational programming are making a comeback. They were popular in the 80s, died during the AI dark ages, and have recently begun a resurgence in the functional programming community. Logic programs write music, search databases, write numeric algorithms, and build testing frameworks. It is expressive for a wide class of problems.</p>
+
+<p>The design of LogPy is based off of <code>miniKanren</code>, a simple and powerful implementation in Scheme popularized through the <code>core.logic</code> Clojure library.</p>
+
+<h2 id="references">References</h2>
+
+<ol>
+<li><a href="http://kanren.sourceforge.net/">miniKanren</a></li>
+
+<li><a href="https://github.com/clojure/core.logic">core.logic</a></li>
+
+<li><a href="http://en.wikipedia.org/wiki/Logic_programming">Wikipedia article on Logic Programming</a></li>
+
+<li><a href="https://github.com/clojure/core.logic/wiki/A-Core.logic-Primer">core.logic primer</a></li>
+</ol></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://matthewrocklin.com/blog//work/2013/01/14/LogPy-Introduction">January 14, 2013 08:00 AM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
 <div class="daygroup">
 <h2>January 09, 2013</h2>
 
@@ -411,7 +545,7 @@ dimensions.</p>
 
 <p>Correct use of mathematical information can accelerate important computations by several orders of magnitude. Unfortunately the people who know the mathematics are not always the ones doing the computation. This results in substantial waste.</p>
 
-<p>How do we integrate expert mathematical knowledge everywhere? One solution is to collaborate more. While collaboration is generally good it doesn’t scale well. As problems become more complex it is more difficult to find all of the necessary experts, especially for smaller relatively unimportant projects. Also, collaboration rarely results in reusable infrastructure. Statistical chemistry projects are rarely applicable to statistical biology problems.</p>
+<p>How do we integrate expert mathematical knowledge everywhere? One solution is to collaborate more. While collaboration is generally good it doesn’t scale well. As problems become more complex it is more difficult to find all of the necessary experts, especially for smaller relatively unimportant projects. Also, collaboration rarely results in reusable infrastructure. Statistical chemistry projects are rarely applicable to statistical biology problems despite their shared interest in statistics.</p>
 
 <h2 id="one_solution__multistage_compilation">One Solution - Multi-Stage Compilation</h2>
 
@@ -448,8 +582,7 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
 <span class="n">In</span> <span class="p">[</span><span class="mi">3</span><span class="p">]:</span> <span class="n">density</span><span class="p">(</span><span class="n">X</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>  
 <span class="n">Out</span><span class="p">[</span><span class="mi">3</span><span class="p">]:</span> 
 <span class="o">&lt;&lt;</span> <span class="n">failure</span><span class="p">:</span> <span class="n">unevaluated</span> <span class="n">integral</span> <span class="o">&gt;&gt;</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>Any statistician could tell you that the expression <code>X**2</code> has a Chi Squared distribution which has a simple and well understood density. This relation is commonly known and commonly occurs in practice.</p>
 
 <p>Because sympy.stats doesn’t know this it blindly takes the expression <code>density(X**2)</code> and converts it directly into an integral. The resulting integral is difficult and stumps the integration routines.* In this case knowing basic statistics would have turned an impossible problem into a trivial one.</p>
@@ -460,8 +593,7 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
 <div class="highlight"><pre><code class="python"><span class="n">Normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StandardNormal</span><span class="p">()</span>
 <span class="n">StandardNormal</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span> <span class="o">-&gt;</span> <span class="n">ChiSquared</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">StandardNormal</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">ChiSquared</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ChiSquared</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>Each stage in the compilation pipeline presents us with an opportunity to apply expert knowledge. The <code>Stochastic Expr</code> stage is such an opportunity of which we are not currently taking advantage.</p>
 
 <p>Leemis’s chart is written declaratively, highlighting which logical transformations are possible under which conditions. The new modules on <a href="http://mrocklin.github.com/blog/work/2012/11/01/Unification/">unification</a> and <a href="http://mrocklin.github.com/blog/work/2012/11/07/Strategies/">strategies</a> should provide all of the necessary infrastructure to translate Leemis’ chart to functioning code. Writing a minimal simpliication scheme for the above problem might be as simple as</p>
@@ -472,8 +604,7 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
                  <span class="n">ChiSquared</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">wilds</span><span class="o">=</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
 
 <span class="n">statsimp</span> <span class="o">=</span> <span class="n">exhaust</span><span class="p">(</span><span class="n">bottom_up</span><span class="p">(</span><span class="n">multiplex</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">)))</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>If anyone is interested in this I’d be happy to help out. This is the sort of project that really excites me but that I can’t currently justify time-wise.</p></div>
 
 
@@ -609,8 +740,7 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
 
 <span class="o">&gt;&gt;&gt;</span> <span class="n">X</span> <span class="o">=</span> <span class="n">StudentT</span><span class="p">(</span><span class="s">'X'</span><span class="p">,</span> <span class="n">nu</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">simplify</span><span class="p">(</span><span class="n">E</span><span class="p">(</span><span class="n">exp</span><span class="p">(</span><span class="n">I</span><span class="o">*</span><span class="n">t</span><span class="o">*</span><span class="n">X</span><span class="p">)))</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p><img src="http://goo.gl/a6xcw" alt="" /></p>
 
 <p>The bold scripted I’s are besseli functions. We restrict this expression to a specific number of degrees of freedom, setting <code>nu = 50</code></p>
@@ -768,8 +898,7 @@ E(exp(I*t*X))</code></pre>
 
 <span class="n">assumptions</span> <span class="o">=</span> <span class="p">(</span><span class="n">Q</span><span class="o">.</span><span class="n">positive_definite</span><span class="p">(</span><span class="n">Sigma</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">Sigma</span><span class="p">)</span> <span class="o">&amp;</span>
                <span class="n">Q</span><span class="o">.</span><span class="n">positive_definite</span><span class="p">(</span><span class="n">R</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">R</span><span class="p">))</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>We convert these matrix expressions into a computation</p>
 <div class="highlight"><pre><code class="python"><span class="c"># kalman_computation.py</span>
 <span class="kn">from</span> <span class="nn">kalman</span> <span class="kn">import</span> <span class="n">new_mu</span><span class="p">,</span> <span class="n">new_Sigma</span><span class="p">,</span> <span class="n">assumptions</span>
@@ -780,8 +909,7 @@ E(exp(I*t*X))</code></pre>
 <span class="n">rule</span> <span class="o">=</span> <span class="n">make_rule</span><span class="p">(</span><span class="n">patterns</span><span class="p">,</span> <span class="n">assumptions</span><span class="p">)</span>
 <span class="n">mathcomp</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">rule</span><span class="p">(</span><span class="n">ident</span><span class="p">))</span>
 <span class="n">mathcomp</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p><a href="http://mrocklin.github.com/blog/images/kalman-math-1.pdf"><img src="http://mrocklin.github.com/blog/images/kalman-math-1.png" alt="" /></a></p>
 
 <p>This is a useful result.</p>
@@ -885,15 +1013,13 @@ E(exp(I*t*X))</code></pre>
 <p>Lets begin with a complex expression and a set of assumptions</p>
 <div class="highlight"><pre><code class="python">    <span class="n">expr</span> <span class="o">=</span> <span class="p">(</span><span class="n">Y</span><span class="o">.</span><span class="n">I</span><span class="o">*</span><span class="n">Z</span><span class="o">*</span><span class="n">Y</span> <span class="o">+</span> <span class="n">b</span><span class="o">*</span><span class="n">Z</span><span class="o">*</span><span class="n">Y</span> <span class="o">+</span> <span class="n">c</span><span class="o">*</span><span class="n">W</span><span class="o">*</span><span class="n">W</span><span class="p">)</span><span class="o">.</span><span class="n">I</span><span class="o">*</span><span class="n">Z</span><span class="o">*</span><span class="n">W</span>
     <span class="n">assumptions</span> <span class="o">=</span> <span class="n">Q</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">positive_definite</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>We also specify a list of conditional rewrite patterns. A pattern has the following form</p>
 <div class="highlight"><pre><code class="python">    <span class="n">Source</span><span class="p">:</span>     <span class="n">alpha</span><span class="o">*</span><span class="n">A</span><span class="o">*</span><span class="n">B</span>
     <span class="n">Target</span><span class="p">:</span>     <span class="n">SYMM</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">S</span><span class="o">.</span><span class="n">Zero</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>
     <span class="n">Wilds</span><span class="p">:</span>      <span class="n">alpha</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">B</span>
     <span class="n">Condition</span><span class="p">:</span>  <span class="n">Q</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">|</span> <span class="n">Q</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">B</span><span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>This means that we convert the expression <code>alpha*A*B</code> into the computation <code>SYMM(alpha, A, B, S.Zero, B)</code> (a SYmmetric Matrix Multiply) for any <code>(alpha, A, B)</code> when either <code>A</code> is symmetric or <code>B</code> is symmetric.</p>
 
 <p>Thanks to <a href="http://mrocklin.github.com/blog/work/2012/11/01/Unification/">unification</a> rewrite patterns are easy to write. Someone who is familiar with BLAS/LAPACK but unfamiliar with compilers would be able to make these easily.</p>
@@ -905,8 +1031,7 @@ E(exp(I*t*X))</code></pre>
     <span class="n">assumptions</span> <span class="o">=</span> <span class="n">Q</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">positive_definite</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
     <span class="n">identcomp</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
     <span class="n">identcomp</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>Computations are able to print themselves in the <a href="http://en.wikipedia.org/wiki/DOT_language">DOT Language</a> enabling simple visualization. Here we see a computation that produces the expression we want but its input is the same. We’d prefer one that had more atomic inputs like <code>a, b, c, W, X, Y, Z</code></p>
 
 <p><img src="http://mrocklin.github.com/blog/images/complex-matrix-computation-identity.png" alt="" /></p>
@@ -916,14 +1041,12 @@ E(exp(I*t*X))</code></pre>
         <span class="n">rules</span> <span class="o">=</span> <span class="p">[</span><span class="n">expr_to_comp_rule</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">wilds</span><span class="p">,</span> <span class="n">cond</span><span class="p">,</span> <span class="n">assumptions</span><span class="p">)</span>
                  <span class="k">for</span> <span class="n">src</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">wilds</span><span class="p">,</span> <span class="n">cond</span> <span class="ow">in</span> <span class="n">patterns</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">exhaust</span><span class="p">(</span><span class="n">multiplex</span><span class="p">(</span><span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="n">input_crunch</span><span class="p">,</span> <span class="n">rules</span><span class="p">)))</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>This function combines logic (<code>patterns/assumptions</code>) with control (<code>exhaust/multiplex/input_crunch</code>) to create a <a href="http://www.icsd.aegean.gr/lecturers/stamatatos/courses/Logic/Prolog/Ch1/Ch1_files/algorithm%3Dlogic%2Bcontrol.pdf">complete algorithm</a>. We apply this algorithm to our identity computation and pull off a compiled result</p>
 <div class="highlight"><pre><code class="python">    <span class="n">rule</span> <span class="o">=</span> <span class="n">make_matrix_rule</span><span class="p">(</span><span class="n">patterns</span><span class="p">,</span> <span class="n">assumptions</span><span class="p">)</span>
     <span class="n">comp</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">rule</span><span class="p">(</span><span class="n">identcomp</span><span class="p">))</span>
     <span class="n">comp</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p><img src="http://mrocklin.github.com/blog/images/complex-matrix-computation.png" alt="" /></p>
 
 <p>We still have same output but now the input is broken down into smaller pieces by a set of computations. These computations are arranged in a graph based on their dependencies. We had to use a <code>GESV</code>, a <code>POSV</code>, two <code>GEMM</code>s a <code>SYMM</code> and two <code>AXPY</code>s to break down this computation. Our inputs are now <code>a,b,c,W,X,Y,Z</code> as desired.</p>
@@ -936,8 +1059,7 @@ E(exp(I*t*X))</code></pre>
 <div class="highlight"><pre><code class="python">    <span class="kn">from</span> <span class="nn">sympy.computations.inplace</span> <span class="kn">import</span> <span class="n">inplace_compile</span>
     <span class="n">icomp</span> <span class="o">=</span> <span class="n">inplace_compile</span><span class="p">(</span><span class="n">comp</span><span class="p">)</span>
     <span class="n">icomp</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p><img src="http://mrocklin.github.com/blog/images/complex-matrix-computation-inplace.png" alt="" /></p>
 
 <p>Each variable is now of the form</p>
@@ -1167,16 +1289,14 @@ E(exp(I*t*X))</code></pre>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">Z</span> <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'Z'</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">target</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">X</span><span class="o">*</span><span class="n">X</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">Z</span><span class="p">)</span><span class="o">.</span><span class="n">I</span><span class="o">*</span><span class="n">X</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">assumptions</span> <span class="o">=</span> <span class="n">Q</span><span class="o">.</span><span class="n">invertible</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">positive_definite</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>We have described a set of BLAS/LAPACK operations to perform certain transformations when the right conditions are met. Each BLAS operation is a single rewrite rule.</p>
 <div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">sympy.matrices.expressions.gen</span> <span class="kn">import</span> <span class="n">rr_from_blas</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">sympy.matrices.expressions.blas</span> <span class="kn">import</span>   <span class="n">GEMM</span><span class="p">,</span> <span class="n">SYMM</span><span class="p">,</span> <span class="n">TRMM</span><span class="p">,</span> <span class="n">TRSV</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">sympy.matrices.expressions.lapack</span> <span class="kn">import</span> <span class="n">POSV</span><span class="p">,</span> <span class="n">GESV</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">routines</span> <span class="o">=</span> <span class="p">(</span><span class="n">TRSV</span><span class="p">,</span> <span class="n">POSV</span><span class="p">,</span> <span class="n">GESV</span><span class="p">,</span> <span class="n">TRMM</span><span class="p">,</span> <span class="n">SYMM</span><span class="p">,</span> <span class="n">GEMM</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">rules</span> <span class="o">=</span> <span class="p">[</span><span class="n">rr_from_blas</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">assumptions</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">routines</span><span class="p">]</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>Each of these rules can convert one kind of expression into a computation given certain conditions. For example</p>
 
 <pre><code>SYMM:  alpha*A*B + beta*C -&gt; SYMM(alpha, A, B, beta, C) if A or B is symmetric</code></pre>
@@ -1190,12 +1310,10 @@ E(exp(I*t*X))</code></pre>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">computations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">rule</span><span class="p">(</span><span class="n">target</span><span class="p">))</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">computations</span><span class="p">)</span>
 <span class="mi">2</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>We generate Fortran code from the first computation</p>
 <div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="k">print</span> <span class="n">computations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">print_Fortran</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">assumptions</span><span class="p">)</span>
-</code></pre>
-</div><div class="highlight"><pre><code class="fortran"><span class="k">subroutine </span><span class="nv">f</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span> <span class="nv">Z</span><span class="p">,</span> <span class="nv">INFO</span><span class="p">,</span> <span class="nv">n</span><span class="p">)</span>
+</code></pre></div><div class="highlight"><pre><code class="fortran"><span class="k">subroutine </span><span class="nv">f</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span> <span class="nv">Z</span><span class="p">,</span> <span class="nv">INFO</span><span class="p">,</span> <span class="nv">n</span><span class="p">)</span>
 
 <span class="kt">real</span><span class="o">*</span><span class="mi">8</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="nv">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="nv">X</span><span class="p">(</span><span class="nv">n</span><span class="p">,</span> <span class="nv">n</span><span class="p">)</span>
 <span class="kt">real</span><span class="o">*</span><span class="mi">8</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="nv">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="nv">Z</span><span class="p">(</span><span class="nv">n</span><span class="p">,</span> <span class="nv">n</span><span class="p">)</span>
@@ -1207,15 +1325,13 @@ E(exp(I*t*X))</code></pre>
 
 <span class="k">RETURN</span>
 <span class="k">END</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>This solution first uses <code>GEMM</code> to multiply \(4X X^{T} + 2 Z\). It then uses <code>POSV</code> to perform the solve \((4X X^{T} + 2Z)^{-1} X\). The <code>POSV</code> routine solves systems of the form \(A^{-1}B\) where \(A\) is symmetric positive definite. Internally we used a logical programming framework to infer that \(4X X^{T} + 2Z\) is symmetric positive definite given the original mathematical assumptions.</p>
 <div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">assumptions</span> <span class="o">=</span> <span class="n">Q</span><span class="o">.</span><span class="n">invertible</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">positive_definite</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">expr</span> <span class="o">=</span> <span class="mi">4</span><span class="o">*</span><span class="n">X</span><span class="o">*</span><span class="n">X</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">Z</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">ask</span><span class="p">(</span><span class="n">Q</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">positive_definite</span><span class="p">(</span><span class="n">expr</span><span class="p">),</span> <span class="n">assumptions</span><span class="p">)</span>
 <span class="bp">True</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>This computation is in-place. <code>GEMM</code> stores its result in the argument <code>Z</code>. <code>POSV</code> uses <code>Z</code> and stores the output in <code>X</code>. Note that both <code>X</code> and <code>Z</code> have been declared with <code>inout</code> intents in the Fortran code.</p>
 
 <p>This Fortran code is independent of Python or SymPy and can be used in any project. However, if we prefer the Python environment we can bring it back into the Python session with F2PY.</p>
@@ -1240,8 +1356,7 @@ Return objects:
 <div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">computations</span><span class="p">)</span>
 <span class="mi">2</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="k">print</span> <span class="n">computations</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">print_Fortran</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">assumptions</span><span class="p">)</span>
-</code></pre>
-</div><div class="highlight"><pre><code class="fortran"><span class="k">subroutine </span><span class="nv">f</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span> <span class="nv">Z</span><span class="p">,</span> <span class="nv">INFO</span><span class="p">,</span> <span class="nv">IPIV</span><span class="p">,</span> <span class="nv">n</span><span class="p">)</span>
+</code></pre></div><div class="highlight"><pre><code class="fortran"><span class="k">subroutine </span><span class="nv">f</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span> <span class="nv">Z</span><span class="p">,</span> <span class="nv">INFO</span><span class="p">,</span> <span class="nv">IPIV</span><span class="p">,</span> <span class="nv">n</span><span class="p">)</span>
 
 <span class="kt">real</span><span class="o">*</span><span class="mi">8</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="nv">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="nv">X</span><span class="p">(</span><span class="nv">n</span><span class="p">,</span> <span class="nv">n</span><span class="p">)</span>
 <span class="kt">real</span><span class="o">*</span><span class="mi">8</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="nv">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="nv">Z</span><span class="p">(</span><span class="nv">n</span><span class="p">,</span> <span class="nv">n</span><span class="p">)</span>
@@ -1254,8 +1369,7 @@ Return objects:
 
 <span class="k">RETURN</span>
 <span class="k">END</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>This solution uses the <code>GESV</code> routine for general matrices in place of the specialized <code>POSV</code> for symmetric positive definite matrices. Which is best? In this case <code>POSV</code> is likely faster because it is able to use faster algorithms due to the symmetric positive definite assumption. After looking at both possibilities we choose it.</p>
 
 <p>For large matrix expressions the number of possible computations may stop us from inspecting all possible solutions. How can we ensure that the best solution is in the first few?</p>
@@ -1341,8 +1455,7 @@ branching-strategy  :: parameters, branching-rule -&gt; branching-rule</code></p
         <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">:</span>   <span class="k">yield</span> <span class="n">x</span> <span class="o">-</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="mi">5</span> <span class="o">&lt;</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>  <span class="k">yield</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>      <span class="k">yield</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span> <span class="k">yield</span> <span class="n">x</span> <span class="o">-</span> <span class="mi">1</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>Notice that in the case where <code>x = 5</code> there are two possible outcomes. Each of these is preserved by the application of branching strategies. We use the branching version of the <code>exhaust</code> strategy to make a new exhaustive version of this function</p>
 <div class="highlight"><pre><code class="python">    <span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">sympy.rules.branch</span> <span class="kn">import</span> <span class="n">exhaust</span>
     <span class="o">&gt;&gt;&gt;</span> <span class="n">newf</span> <span class="o">=</span> <span class="n">exhaust</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
@@ -1352,8 +1465,7 @@ branching-strategy  :: parameters, branching-rule -&gt; branching-rule</code></p
     <span class="p">{</span><span class="mi">0</span><span class="p">}</span>
     <span class="o">&gt;&gt;&gt;</span> <span class="nb">set</span><span class="p">(</span><span class="n">newf</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
     <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">}</span>
-</code></pre>
-</div><hr />
+</code></pre></div><hr />
 <h2 id="practical_problem">Practical Problem</h2>
 
 <p>We have all the machinery necessary. Lets make a <code>sin(x)**2 + cos(x)**2 -&gt; 1</code> tree-wise simplification function.</p>
@@ -1367,8 +1479,7 @@ branching-strategy  :: parameters, branching-rule -&gt; branching-rule</code></p
     
     <span class="o">&gt;&gt;&gt;</span> <span class="nb">list</span><span class="p">(</span><span class="n">sincos_tree</span><span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="n">c</span><span class="o">**</span><span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span>  <span class="c"># see footnote</span>
     <span class="p">[</span><span class="n">c</span><span class="o">**</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span> 
-</code></pre>
-</div>
+</code></pre></div>
 <p>Lets make a rule to simplify expressions like <code>c**1</code></p>
 <div class="highlight"><pre><code class="python">    <span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">sympy.rules.branch.strat_pure</span> <span class="kn">import</span> <span class="n">multiplex</span><span class="p">,</span> <span class="n">exhaust</span> 
 
@@ -1378,8 +1489,7 @@ branching-strategy  :: parameters, branching-rule -&gt; branching-rule</code></p
     <span class="o">&gt;&gt;&gt;</span> <span class="n">simplify</span> <span class="o">=</span> <span class="n">exhaust</span><span class="p">(</span><span class="n">top_down</span><span class="p">(</span><span class="n">multiplex</span><span class="p">(</span><span class="n">sincos_to_one</span><span class="p">,</span> <span class="n">pow_simp</span><span class="p">)))</span>
     <span class="o">&gt;&gt;&gt;</span> <span class="nb">list</span><span class="p">(</span><span class="n">simplify</span><span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="n">c</span><span class="o">**</span><span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span>
     <span class="p">[</span><span class="n">c</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>We see how we can easiy build up powerful simplification functions through the separate description of logic</p>
 
 <pre><code>sin(x)**2 + cos(x)**2 -&gt; 1
@@ -1438,13 +1548,11 @@ x ** 1 -&gt; x</code></pre>
 
     <span class="o">&gt;&gt;&gt;</span> <span class="n">sincos_to_one</span><span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
     <span class="mi">1</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>However we found that this function did not work deep within an expression tree</p>
 <div class="highlight"><pre><code class="python">    <span class="o">&gt;&gt;&gt;</span> <span class="nb">list</span><span class="p">(</span><span class="n">sincos_to_one</span><span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="n">c</span><span class="o">**</span><span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span> <span class="c"># no matches</span>
     <span class="p">[]</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p><code>sincos_to_one</code> does not know <em>how</em> to traverse a tree. It is pure logic and has no knowledge of control. We define traverals separately using strategies.</p>
 
 <p><em>Short version</em>: we give you a higher order function, <code>top_down</code> which turns a expression-wise function into a tree-wise function. We provide a set of similar functions which can be composed to various effects.</p>
@@ -1465,20 +1573,17 @@ x ** 1 -&gt; x</code></pre>
             <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
                 <span class="n">x</span> <span class="o">-=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">x</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>While the logic in this function is somewhat trivial</p>
 <div class="highlight"><pre><code class="python">    <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
         <span class="n">x</span> <span class="o">-=</span> <span class="mi">1</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>the control pattern is quite common in serious code</p>
 <div class="highlight"><pre><code class="python">    <span class="k">while</span><span class="p">(</span><span class="n">old</span> <span class="o">!=</span> <span class="n">expr</span><span class="p">):</span>
         <span class="n">old</span> <span class="o">=</span> <span class="n">expr</span> 
         <span class="n">expr</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">expr</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>It is the “Exhaustively apply this function until there is no effect” control pattern. It occurs often in general programming and very often in the SymPy sourcecode. We separate this control pattern into a higher order function named <code>exhaust</code></p>
 <div class="highlight"><pre><code class="python">    <span class="k">def</span> <span class="nf">exhaust</span><span class="p">(</span><span class="n">rule</span><span class="p">):</span>
         <span class="sd">""" Apply a rule repeatedly until it has no effect """</span>
@@ -1488,16 +1593,14 @@ x ** 1 -&gt; x</code></pre>
                 <span class="n">expr</span><span class="p">,</span> <span class="n">old</span> <span class="o">=</span> <span class="n">rule</span><span class="p">(</span><span class="n">expr</span><span class="p">),</span> <span class="n">expr</span> 
             <span class="k">return</span> <span class="n">expr</span> 
         <span class="k">return</span> <span class="n">exhaustive_rl</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>We show how to use this function to achieve the previous result.</p>
 <div class="highlight"><pre><code class="python">    <span class="k">def</span> <span class="nf">dec_10</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>                          <span class="c"># Close to pure logic</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>   <span class="k">return</span> <span class="n">x</span> <span class="o">-</span> <span class="mi">1</span>
         <span class="k">else</span><span class="p">:</span>               <span class="k">return</span> <span class="n">x</span>
 
     <span class="n">reduce_to_ten</span> <span class="o">=</span> <span class="n">exhaust</span><span class="p">(</span><span class="n">dec_10</span><span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>By factoring out the control strategy we achieve several benefits</p>
 
 <ol>
@@ -1515,8 +1618,7 @@ x ** 1 -&gt; x</code></pre>
     <span class="k">if</span> <span class="n">new</span> <span class="o">!=</span> <span class="n">old</span><span class="p">:</span>
         <span class="k">print</span> <span class="s">"Before: "</span><span class="p">,</span> <span class="n">old</span> 
         <span class="k">print</span> <span class="s">"After:  "</span><span class="p">,</span> <span class="n">new</span> 
-</code></pre>
-</div>
+</code></pre></div>
 <p>This common structure is encapsulated in the debug strategy</p>
 <div class="highlight"><pre><code class="python">    <span class="k">def</span> <span class="nf">debug</span><span class="p">(</span><span class="n">rule</span><span class="p">):</span>
         <span class="sd">""" Print out before and after expressions each time rule is used """</span>
@@ -1528,8 +1630,7 @@ x ** 1 -&gt; x</code></pre>
                 <span class="k">print</span> <span class="s">"Out:  "</span><span class="p">,</span> <span class="n">result</span>
             <span class="k">return</span> <span class="n">result</span>
         <span class="k">return</span> <span class="n">debug_rl</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>Because control is separated we can inject this easily into our function</p>
 <div class="highlight"><pre><code class="python">    <span class="o">&gt;&gt;&gt;</span> <span class="n">reduce_to_ten</span> <span class="o">=</span> <span class="n">exhaust</span><span class="p">(</span><span class="n">debug</span><span class="p">(</span><span class="n">dec_10</span><span class="p">))</span>
     
@@ -1544,8 +1645,7 @@ x ** 1 -&gt; x</code></pre>
     <span class="n">In</span><span class="p">:</span>    <span class="mi">21</span>
     <span class="n">Out</span><span class="p">:</span>   <span class="mi">20</span>
     <span class="mi">20</span>
-</code></pre>
-</div>
+</code></pre></div>
 <h2 id="traversals">Traversals</h2>
 
 <p>Finally we show off the use of a tree traversal strategy which applies a function at each node in an expression tree. Here we use the <code>Basic</code> type to denote a tree of generic nodes.</p>
@@ -1563,8 +1663,7 @@ x ** 1 -&gt; x</code></pre>
     <span class="o">&gt;&gt;&gt;</span> <span class="n">expr</span> <span class="o">=</span> <span class="n">Basic</span><span class="p">(</span><span class="mi">23</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="n">Basic</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">13</span><span class="p">),</span> <span class="n">Basic</span><span class="p">(</span><span class="n">Basic</span><span class="p">(</span><span class="mi">5</span><span class="p">)))</span>
     <span class="o">&gt;&gt;&gt;</span> <span class="n">reduce_to_ten_tree</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
     <span class="n">Basic</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="n">Basic</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">Basic</span><span class="p">(</span><span class="n">Basic</span><span class="p">(</span><span class="mi">0</span><span class="p">)))</span>
-</code></pre>
-</div>
+</code></pre></div>
 <h2 id="use_in_practice">Use in Practice</h2>
 
 <p>We have rewritten the canonicalization code in the Matrix Expression module to use these strategies. There are a number of small functions to represent atomic logical transformations of expressions. We call these rules. Rules are functions from expressions to expressions</p>
@@ -1588,8 +1687,7 @@ x ** 1 -&gt; x</code></pre>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">new</span><span class="p">(</span><span class="n">expr</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>We compose these general rules (e.g. ‘flatten’, ‘unpack’, ‘sort’, ‘glom’) with strategies to create large canonicalization functions</p>
 <div class="highlight"><pre><code class="python">    <span class="n">rules</span> <span class="o">=</span> <span class="p">(</span><span class="n">rm_identity</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ZeroMatrix</span><span class="p">)),</span>
              <span class="n">unpack</span><span class="p">,</span>
@@ -1598,16 +1696,14 @@ x ** 1 -&gt; x</code></pre>
              <span class="n">sort</span><span class="p">(</span><span class="nb">str</span><span class="p">))</span>
 
     <span class="n">canonicalize</span> <span class="o">=</span> <span class="n">exhaust</span><span class="p">(</span><span class="n">top_down</span><span class="p">(</span><span class="n">typed</span><span class="p">({</span><span class="n">MatAdd</span><span class="p">:</span> <span class="n">do_one</span><span class="p">(</span><span class="o">*</span><span class="n">rules</span><span class="p">)})))</span>
-</code></pre>
-</div>
+</code></pre></div>
 <h2 id="going_farther">Going Farther</h2>
 
 <p>We use strategies to build large rules out of small rules. Can we build large strategies out of small strategies? The <code>canonicalize</code> function above follows a common pattern “Apply a set of rules down a tree, repeat until they have no effect.” This is built into the <code>canon</code> strategy.</p>
 <div class="highlight"><pre><code class="python">    <span class="k">def</span> <span class="nf">canon</span><span class="p">(</span><span class="o">*</span><span class="n">rules</span><span class="p">):</span>
         <span class="sd">""" Strategy for canonicalization """</span>
         <span class="k">return</span> <span class="n">exhaust</span><span class="p">(</span><span class="n">top_down</span><span class="p">(</span><span class="n">do_one</span><span class="p">(</span><span class="o">*</span><span class="n">rules</span><span class="p">)))</span>
-</code></pre>
-</div>
+</code></pre></div>
 <h2 id="previous_work">Previous Work</h2>
 
 <p>This implementation of strategies was inspired by the work in the language StrategoXT. Stratego is a language for control that takes these ideas much farther and implements them more cleanly. It is a language where control structure are the primitives that can be built up, composed, and compiled down. It is a language in which ideas like “breadth first search” and “dynamic programming” are natural expressions.</p>
@@ -1728,15 +1824,13 @@ x ** 1 -&gt; x</code></pre>
 <div class="highlight"><pre><code class="python">    <span class="o">&gt;&gt;&gt;</span> <span class="n">X</span> <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'X'</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
     <span class="o">&gt;&gt;&gt;</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'Y'</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
     <span class="o">&gt;&gt;&gt;</span> <span class="n">expr</span> <span class="o">=</span> <span class="n">Transpose</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">+</span> <span class="n">Y</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>Traditionally we could solve this toy problem with a simple function</p>
 <div class="highlight"><pre><code class="python">    <span class="k">def</span> <span class="nf">name_of_symbol_in_transpose_in_add</span><span class="p">(</span><span class="n">matadd</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">matadd</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">Transpose</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">arg</span><span class="p">,</span> <span class="n">MatrixSymbol</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">arg</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">name</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>We solve this task with unification by setting up a pattern and then unifying that pattern against a target expression</p>
 <div class="highlight"><pre><code class="python">    <span class="o">&gt;&gt;&gt;</span> <span class="n">A</span> <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'name'</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
     <span class="o">&gt;&gt;&gt;</span> <span class="n">B</span> <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'B'</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
@@ -1746,24 +1840,20 @@ x ** 1 -&gt; x</code></pre>
 
     <span class="o">&gt;&gt;&gt;</span> <span class="n">unify</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">expr</span><span class="p">)</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
     <span class="p">{</span><span class="s">'name'</span><span class="p">:</span> <span class="s">'X'</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="n">B</span><span class="p">:</span> <span class="n">Y</span><span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>We get back a matching for each of the wildcards (name, n, m, B) and see that <code>'name'</code> was matched to the string <code>'X'</code>. Is this better or worse than the straight Python solution? Given the relative number of users between Python and Prolog it’s a safe bet that the style of Python programs have some significant advantages over the logical programming paradigm. Why would we program in this strange way?</p>
 
 <p>Unification allows a clean separation between <em>what we’re looking for</em> and <em>how we find it</em>. In the Python solution the mathematical definition of what we want is spread among a few lines and is buried inside of control flow.</p>
 <div class="highlight"><pre><code class="python">    <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">matadd</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">Transpose</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">arg</span><span class="p">,</span> <span class="n">MatrixSymbol</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">arg</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">name</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>In the unification solution the line</p>
 <div class="highlight"><pre><code class="python">    <span class="n">pattern</span> <span class="o">=</span> <span class="n">patternify</span><span class="p">(</span><span class="n">Transpose</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">+</span> <span class="n">B</span><span class="p">,</span> <span class="s">'name'</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>expresses exactly <em>what</em> we’re looking for and gives no information on <em>how</em> it should be found. The how is wrapped up in the call to <code>unify</code></p>
 <div class="highlight"><pre><code class="python">    <span class="n">unify</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">expr</span><span class="p">)</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>This separation of the <em>what</em> and <em>how</em> is what excites me about declarative programming. I think that this separation is useful when mathematical and algorithmic programmers need to work together to solve a large problem. This is often the case in scientific computing. Mathematical programmers think about <em>what</em> should be done while algorithmic programmers think about <em>how</em> it can be efficiently computed. Declarative techniques like unification enables these two groups to work independently.</p>
 
 <h2 id="multiple_matches">Multiple Matches</h2>
@@ -1772,15 +1862,13 @@ x ** 1 -&gt; x</code></pre>
 <div class="highlight"><pre><code class="python">    <span class="o">&gt;&gt;&gt;</span> <span class="n">expr</span> <span class="o">=</span> <span class="n">Transpose</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">+</span> <span class="n">Transpose</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
     <span class="o">&gt;&gt;&gt;</span> <span class="n">unify</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">expr</span><span class="p">)</span>
     <span class="o">&lt;</span><span class="n">generator</span> <span class="nb">object</span> <span class="n">unify</span> <span class="n">at</span> <span class="mh">0x548cb90</span><span class="o">&gt;</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>In this situation because both matrices <code>X</code> and <code>Y</code> are inside transposes our pattern to match “the name of a symbol in a transpose” could equally well return the strings <code>'X'</code> or <code>'Y'</code>. The unification algorithm will give us both of these options</p>
 <div class="highlight"><pre><code class="python">    <span class="o">&gt;&gt;&gt;</span> <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">unify</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">expr</span><span class="p">):</span> 
     <span class="o">...</span>    <span class="k">print</span> <span class="n">match</span>
     <span class="p">{</span><span class="s">'name'</span><span class="p">:</span> <span class="s">'Y'</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="n">B</span><span class="p">:</span> <span class="n">X</span><span class="s">'}</span>
     <span class="p">{</span><span class="s">'name'</span><span class="p">:</span> <span class="s">'X'</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="n">B</span><span class="p">:</span> <span class="n">Y</span><span class="s">'}</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>Because expr is commutative we can match <code>{A: Transpose(X), B: Transpose(Y)}</code> or <code>{A: Transpose(Y), B: Transpose(X)}</code> with equal validity. Instead of choosing one <code>unify</code>, returns an iterable of all possible matches.</p>
 
 <h2 id="combinatorial_blowup">Combinatorial Blowup</h2>
@@ -1808,13 +1896,11 @@ x ** 1 -&gt; x</code></pre>
 
     <span class="o">&gt;&gt;&gt;</span> <span class="n">sincos_to_one</span><span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
     <span class="mi">1</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>We were able to turn a mathematical identity <code>sin(x)**2 + cos(x)**2 =&gt; 1</code> into a function very simply using unification. However unification only does exact pattern matching so we can only find the <code>sin(x)**2 + cos(x)**2</code> pattern if that pattern is at the top node in the tree. As a result we’re not able to apply this simplification within a larger expression tree</p>
 <div class="highlight"><pre><code class="python">    <span class="o">&gt;&gt;&gt;</span> <span class="nb">list</span><span class="p">(</span><span class="n">sincos_to_one</span><span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="n">c</span><span class="o">**</span><span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span> <span class="c"># no matches</span>
     <span class="p">[]</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>I will leave the solution of this problem to a future post. Instead, I want to describe why I’m working on all of this.</p>
 
 <h2 id="matrix_computations">Matrix Computations</h2>
@@ -1823,28 +1909,24 @@ x ** 1 -&gt; x</code></pre>
 <hr />
 <p><em>So how can we transform a matrix expression like</em></p>
 <div class="highlight"><pre><code class="python">    <span class="p">(</span><span class="n">alpha</span><span class="o">*</span><span class="n">A</span><span class="o">*</span><span class="n">B</span><span class="p">)</span><span class="o">.</span><span class="n">I</span> <span class="o">*</span> <span class="n">x</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>…</p>
 
 <p><em>Into a graph of <code>BLAS</code> calls like one of the following?</em></p>
 <div class="highlight"><pre><code class="python">    <span class="n">DGEMM</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DTRSV</span><span class="p">(</span><span class="n">alpha</span><span class="o">*</span><span class="n">A</span><span class="o">*</span><span class="n">B</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
     <span class="n">DTRMM</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>       <span class="o">-&gt;</span> <span class="n">DTRSV</span><span class="p">(</span><span class="n">alpha</span><span class="o">*</span><span class="n">A</span><span class="o">*</span><span class="n">B</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
-</code></pre>
-</div><hr />
+</code></pre></div><hr />
 <p>This problem can be partially solved by unification and rewrite rules. Each <code>BLAS</code> operation is described by a class</p>
 <div class="highlight"><pre><code class="python"><span class="k">class</span> <span class="nc">MM</span><span class="p">(</span><span class="n">BLAS</span><span class="p">):</span>
     <span class="sd">""" Matrix Multiply """</span>
     <span class="n">_inputs</span>   <span class="o">=</span> <span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
     <span class="n">_outputs</span>  <span class="o">=</span> <span class="p">(</span><span class="n">alpha</span><span class="o">*</span><span class="n">A</span><span class="o">*</span><span class="n">B</span> <span class="o">+</span> <span class="n">beta</span><span class="o">*</span><span class="n">C</span><span class="p">,)</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>The <code>_outputs</code> and <code>_inputs</code> fields mathematically define when <code>MM</code> is appropriate. This is all we need to make a transformation</p>
 <div class="highlight"><pre><code class="python">    <span class="n">pattern_source</span> <span class="o">=</span> <span class="n">patternify</span><span class="p">(</span><span class="n">MM</span><span class="o">.</span><span class="n">_outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">*</span><span class="n">MM</span><span class="o">.</span><span class="n">_inputs</span><span class="p">)</span>
     <span class="n">pattern_target</span> <span class="o">=</span> <span class="n">MM</span><span class="p">(</span><span class="o">*</span><span class="n">MM</span><span class="o">.</span><span class="n">_inputs</span><span class="p">)</span>
     <span class="n">rewriterule</span><span class="p">(</span><span class="n">pattern_source</span><span class="p">,</span> <span class="n">pattern_target</span><span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>Unification allows us to describe <code>BLAS</code> mathematically without thinking about how each individual operation will be detected in an expression. The control flow and the math are completely separated allowing us to think hard about each problem in isolation.</p>
 
 <h2 id="references">References</h2>
@@ -5329,47 +5411,6 @@ Out[128]: False
 </div>
 
 
-
-</div>
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://rhoforsympy.wordpress.com" title="rhoforsympy">Guru Devanla</a></h3>
-
-
-<div class="entrygroup" id="http://rhoforsympy.wordpress.com/?p=197">
-<h4 lang="en"><a href="http://rhoforsympy.wordpress.com/2012/07/16/week-8-trace-implementation-contd-and-more-density-ops/">Week 8: Trace implementation contd. and more Density ops</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>This week was primarily spent on 2 tasks.  Getting some of the issues addressed in the currently pending <a href="https://github.com/sympy/sympy/pull/1396/">PR 1396</a>. Apart from work on this I have spent some testing some changes I had to make to implement the operations needed when Unitary operations are applied to Density operators.</p>
-<p>Some use cases I am currently working on for this are as follows:</p>
-<p>1. Using basic kets/bras and generic UnitaryOperator</p>
-<p><a href="http://rhoforsympy.files.wordpress.com/2012/07/basiclandr.jpg"><img src="http://rhoforsympy.files.wordpress.com/2012/07/basiclandr.jpg?w=500&amp;h=162" title="basiclandr" height="162" width="500" alt="" class="alignleft size-full wp-image-200" /></a></p>
-<p>2. Apply Gates of Density operators with states as Qubits.</p>
-<p><a href="http://rhoforsympy.files.wordpress.com/2012/07/qapplylandr2.jpg"><img src="http://rhoforsympy.files.wordpress.com/2012/07/qapplylandr2.jpg?w=500&amp;h=216" title="qapplylandr2" height="216" width="500" alt="" class="alignleft size-full wp-image-199" /></a></p>
-<p>Currently, qapply() works on  UnitaryOpearator*Ket correctly. But, as seen in the second print statement Bra*Dagger(UnitaryOperator) does not expand out fully. I am currently working on fixing this so that the second part of the expression expands out smoothly.</p>
-<p>Therefore, my goal this week is to complete the implementation of UnitaryOperators applied to Density operators, plus address tasks for current PR and another PR ( related to partial trace on qubits)  I plan to submit this week.</p>
-<p>Happy Coding!</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/rhoforsympy.wordpress.com/197/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/rhoforsympy.wordpress.com/197/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;blog=34650270&amp;post=197&amp;subd=rhoforsympy&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://rhoforsympy.wordpress.com/2012/07/16/week-8-trace-implementation-contd-and-more-density-ops/">by grdvnl at July 16, 2012 04:14 AM</a>
-</p>
-</div>
-</div>
-
-
 </div>
 
 </div>
@@ -5438,7 +5479,7 @@ Out[128]: False
 <a href="" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a class="message" title="404: not found">Kazuo Thow</a>
 </li>
 <li>
-<a href="http://matthewrocklin.com/blog//feed.sympy.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://matthewrocklin.com/blog/" class="message" title="no activity in 7 days">MRocklin</a>
+<a href="http://matthewrocklin.com/blog//feed.sympy.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://matthewrocklin.com/blog/" title="Working notes by Matthew Rocklin - SymPy">MRocklin</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/9135222751616024074/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://mattjcurry.blogspot.com/" class="message" title="no activity in 7 days">Matthew Curry</a>
@@ -5486,7 +5527,7 @@ Out[128]: False
 
 <p>
 <strong>Last updated:</strong><br>
-January 15, 2013 05:00 PM<br>
+January 15, 2013 05:40 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
