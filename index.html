@@ -23,6 +23,120 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>January 17, 2013</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://matthewrocklin.com/blog/" title="Working notes by Matthew Rocklin - SymPy">MRocklin</a></h3>
+
+
+<div class="entrygroup" id="http://matthewrocklin.com/blog//work/2013/01/17/LogPy-Facts-Relations">
+<h4><a href="http://matthewrocklin.com/blog//work/2013/01/17/LogPy-Facts-Relations">LogPy - Facts and Relations</a></h4>
+<div class="entry">
+<div class="content">
+<p>In <a href="http://mrocklin.github.com/blog/work/2013/01/14/LogPy-Introduction/">my last post</a> I introduced <a href="http://github.com/logpy/logpy">LogPy</a>, a library for logic and relational programming in Python. In this post I show how LogPy can be used as a quick and dirty in-memory database.</p>
+
+<h2 id="data">Data</h2>
+
+<p>As an example we’ll look at the 50 states in the US. We know two things about each state.</p>
+
+<ol>
+<li>Is it coastal? For example California (CA) is coastal because it is next to the Pacific Ocean, Arizona (AZ) is not.</li>
+
+<li>To which other states is it adjacent? For example California (CA) is adjacent to Oregon (OR), Arizona (AZ) and Nevada (NV).</li>
+</ol>
+
+<p>We express data in LogPy using relations and facts</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">logpy</span> <span class="kn">import</span> <span class="n">Relation</span><span class="p">,</span> <span class="n">fact</span><span class="p">,</span> <span class="n">facts</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">coastal</span> <span class="o">=</span> <span class="n">Relation</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">fact</span><span class="p">(</span><span class="n">coastal</span><span class="p">,</span> <span class="s">'CA'</span><span class="p">)</span>
+</code></pre></div>
+<p>here we have asserted the fact that <code>'CA'</code> is coastal. Lets quickly do this for all of the coastal states</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">coastal_states</span> <span class="o">=</span> <span class="s">'WA,OR,CA,TX,LA,MI,AL,GA,FL,SC,NC,VI,MD,DW,NJ,NY,CT,RI,MA,MN,NH,AK,HI'</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="n">coastal_states</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">','</span><span class="p">):</span>
+<span class="o">...</span>     <span class="n">fact</span><span class="p">(</span><span class="n">coastal</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
+</code></pre></div>
+<p>Adjacency is only slightly more complex to express. The following code asserts that California (CA) is adjacent to Arizona (AZ) and that California (CA) is adjacent to Oregon (OR).</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">adjacent</span> <span class="o">=</span> <span class="n">Relation</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">fact</span><span class="p">(</span><span class="n">adjacent</span><span class="p">,</span> <span class="s">'CA'</span><span class="p">,</span> <span class="s">'AZ'</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">fact</span><span class="p">(</span><span class="n">adjacent</span><span class="p">,</span> <span class="s">'CA'</span><span class="p">,</span> <span class="s">'OR'</span><span class="p">)</span>
+</code></pre></div>
+<p>Now we need a list of all adjacent pairs of states. Fortunately <a href="http://writeonly.wordpress.com/2009/03/20/adjacency-list-of-states-of-the-united-states-us/">someone else</a> has already compiled such a list. His data looks like this</p>
+
+<pre><code>AK
+AL,MS,TN,GA,FL
+AR,MO,TN,MS,LA,TX,OK
+AZ,CA,NV,UT,CO,NM
+CA,OR,NV,AZ
+CO,WY,NE,KS,OK,NM,AZ,UT
+...</code></pre>
+
+<p>Each line says that the first element is adjacent to the following ones. So for example Alaska (AK) is adjacent to no states and California (CA) is adjacent to Oregon (OR), Nevada (NV) and Arizona (AZ). We can parse this file and assert the relevant facts with fairly standard Python code</p>
+<div class="highlight"><pre><code class="python"><span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">'examples/data/adjacent-states.txt'</span><span class="p">)</span>  <span class="c"># lines like 'CA,OR,NV,AZ'</span>
+<span class="n">adjlist</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">','</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">]</span>
+<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">L</span> <span class="ow">in</span> <span class="n">adjlist</span><span class="p">:</span>                   <span class="c"># ['CA', 'OR', 'NV', 'AZ']</span>
+    <span class="n">head</span><span class="p">,</span> <span class="n">tail</span> <span class="o">=</span> <span class="n">L</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">L</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>        <span class="c"># 'CA', ['OR', 'NV', 'AZ']</span>
+    <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="n">tail</span><span class="p">:</span>
+        <span class="n">fact</span><span class="p">(</span><span class="n">adjacent</span><span class="p">,</span> <span class="n">head</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span> <span class="c"># e.g. 'CA' is adjacent to 'OR',</span>
+                                    <span class="c">#      'CA' is adjacent to 'NV', etc...</span>
+</code></pre></div>
+<h2 id="querys">Querys</h2>
+
+<p>Once have asserted the relevant facts we can run queries with the logical expressions of LogPy. Recall from the <a href="http://mrocklin.github.com/blog/work/2013/01/14/LogPy-Introduction/">last post</a> that we can use relations to express logical goals and use <code>run</code> to search for cases that satisfy those goals. Here are two simple queries</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">logpy</span> <span class="kn">import</span> <span class="n">var</span><span class="p">,</span> <span class="n">run</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">var</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">print</span> <span class="n">run</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">adjacent</span><span class="p">(</span><span class="s">'CA'</span><span class="p">,</span> <span class="s">'NY'</span><span class="p">))</span> <span class="c"># is California adjacent to New York?</span>
+<span class="p">()</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="k">print</span> <span class="n">run</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">adjacent</span><span class="p">(</span><span class="s">'CA'</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>    <span class="c"># all states next to California</span>
+<span class="p">(</span><span class="s">'OR'</span><span class="p">,</span> <span class="s">'NV'</span><span class="p">,</span> <span class="s">'AZ'</span><span class="p">)</span>
+</code></pre></div>
+<p>We can construct more complex queries with multiple goals. In SQL the following queries would require a <code>JOIN</code></p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">y</span> <span class="o">=</span> <span class="n">var</span><span class="p">()</span>  <span class="c"># create second variable for complex queries</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="k">print</span> <span class="n">run</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">adjacent</span><span class="p">(</span><span class="s">'TX'</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span>    <span class="c"># all coastal states next to Texas</span>
+<span class="o">...</span>                 <span class="n">coastal</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+<span class="p">(</span><span class="s">'LA'</span><span class="p">,)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="k">print</span> <span class="n">run</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">coastal</span><span class="p">(</span><span class="n">y</span><span class="p">),</span>           <span class="c"># five states that border a coastal state</span>
+<span class="o">...</span>                 <span class="n">adjacent</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+<span class="p">(</span><span class="s">'VT'</span><span class="p">,</span> <span class="s">'AL'</span><span class="p">,</span> <span class="s">'WV'</span><span class="p">,</span> <span class="s">'DE'</span><span class="p">,</span> <span class="s">'WA'</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="k">print</span> <span class="n">run</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">adjacent</span><span class="p">(</span><span class="s">'TN'</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span>    <span class="c"># all states adjacent to Tennessee</span>
+<span class="o">...</span>                 <span class="n">adjacent</span><span class="p">(</span><span class="s">'FL'</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>    <span class="c">#        and adjacent to Florida</span>
+<span class="p">(</span><span class="s">'GA'</span><span class="p">,</span> <span class="s">'AL'</span><span class="p">)</span>
+</code></pre></div>
+<p>Facts and relations are currently indexed by default, yielding relatively fast query times.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>LogPy provides a declarative interface to query complex data. Data is stored as facts/tuples and queries are expressed as logical goals. This system is expressive and can match SQL in many respects. The use of Logic programming languages for database queries has roots in <a href="http://en.wikipedia.org/wiki/Datalog">Datalog</a> a subset of Prolog designed for databases.</p></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://matthewrocklin.com/blog//work/2013/01/17/LogPy-Facts-Relations">January 17, 2013 08:00 AM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>January 14, 2013</h2>
 
 <div class="channelgroup">
@@ -5365,55 +5479,6 @@ Out[128]: False
 </div>
 
 </div>
-<div class="daygroup">
-<h2>July 16, 2012</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://scolobb.wordpress.com" title="Coaquarium">Sergiu Ivanov</a></h3>
-
-
-<div class="entrygroup" id="http://scolobb.wordpress.com/?p=259">
-<h4 lang="en"><a href="http://scolobb.wordpress.com/2012/07/17/the-almost-there-chapter-1/">The Almost There (Chapter 1)</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>This week I have come ridiculously close to finalising the second major part of my GSoC work: diagram plotting.  Before submitting the two pull requests, I only have to add proper docstrings to a couple classes and to integrate the plotting with <tt>sympy.printing.preview</tt> for easier use.  (Well, there also is a <tt>FiniteSet</tt>-related issue, but I hope to be able to fix it more or less swiftly.)  The main functionality is ready, however, and that gives me hopes <img src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif" alt=":-)" class="wp-smiley" /> </p>
-<p>In terms of material progress, this week has been rather unimpressive: I haven’t written that many lines of code and that which I have written has introduced seemingly inessential changes to the aspect of the diagrams.  Nevertheless, I think this week can be marked as one of the most thought-intensive.</p>
-<p>In the beginning of this week I have extended the drawing of curved morphisms to take into account the situations when there are multiple morphisms between the same two pair of objects.  This allows to automatically typeset diagrams such as Diagram 1.<br />
-</p><div style="width: 210px;" class="wp-caption alignright" id="attachment_260"><a href="http://scolobb.files.wordpress.com/2012/07/multiple-curved.png"><img src="http://scolobb.files.wordpress.com/2012/07/multiple-curved.png?w=300&amp;h=292" title="Diagram 1" height="292" width="300" alt="A diagram with multiple curved morphisms." class="size-medium wp-image-260" /></a><p class="wp-caption-text">Diagram 1. Multiple curved morphisms.</p></div><p></p>
-<p>The next two days I have been smashing my head against the simplest approach to the problem of positioning morphisms labels such that they don’t get intersected by morphisms.  The upsetting part is that, despite the amount of thinking I have done and the amount of code and comments I have written, the actual output hasn’t really got much better.  (It may be considered to be a success, though, that it hasn’t got much worse either <img src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif" alt=":-)" class="wp-smiley" />  ).  Consider Diagram 2.  No special care about the position of the labels is taken.<br />
-</p><div style="width: 168px;" class="wp-caption alignright" id="attachment_264"><a href="http://scolobb.files.wordpress.com/2012/07/triangle-simple.png"><img src="http://scolobb.files.wordpress.com/2012/07/triangle-simple.png?w=549" alt="Diagram 2.  Arbitrary placement of morphism labels." class="size-full wp-image-264" title="Diagram 2" /></a><p class="wp-caption-text">Diagram 2.  Arbitrary placement of morphism labels.</p></div><p></p>
-<p>Now consider Diagram 3; notice that the labels are now on the outer sides of the diagram.  The trick basically (very basically) consists in detecting those morphisms which form the outer edges of the diagram and then placing their labels on the proper side.  While for vertical and horizontal morphisms the procedure is pretty straightforward, for diagonal morphisms I resolved to apply some basic ideas from analytic geometry and yes, I even do floating-point computations (although I of course try to do them as little as possible).  Nevertheless, the approach I have implemented feels very far from perfect.  I hope though that I have managed to achieve some balance between code that works sufficiently fast and well and code that is intelligible.  Note that the positioning of the labels of the morphsisms which are in the bowels of the visual structure of the diagram remains pretty arbitrary, which may sometimes get ugly.<br />
-</p><div style="width: 154px;" class="wp-caption alignright" id="attachment_267"><a href="http://scolobb.files.wordpress.com/2012/07/triangle-positioned.png"><img src="http://scolobb.files.wordpress.com/2012/07/triangle-positioned.png?w=549" alt="Diagram 3.  Explicit positioning of labels of outer morphisms." class="size-full wp-image-267" title="Diagram 3" /></a><p class="wp-caption-text">Diagram 3.  Explicit positioning of labels of outer morphisms.</p></div><p></p>
-<p>The next feature I have added is the possibility to draw “loop” morphisms, i.e., morphisms which have the same domains and codomains.  While proper layout of such morphisms is not guaranteed for very crowded diagrams, this functionality is of some use, as can be seen in Diagram 4.<br />
-</p><div style="width: 230px;" class="wp-caption alignright" id="attachment_272"><a href="http://scolobb.files.wordpress.com/2012/07/many-loops.png"><img src="http://scolobb.files.wordpress.com/2012/07/many-loops.png?w=300&amp;h=255" title="Diagram 4" height="255" width="300" alt="Diagram 4. Typesetting of loop morphisms." class="size-medium wp-image-272" /></a><p class="wp-caption-text">Diagram 4. Typesetting of loop morphisms.</p></div><p></p>
-<p>Finally, I have implemented the support for custom arrow formatters.  Arrow formatters are associated to morphisms properties.  Whenever a morphism with some properties is typeset, after the necessary thinking has been carried out, the resulting data is passed to the formatter.  The formatter is free to modify anything it wants in order to influence the appearance of the arrow.  A common usage is shown in Diagram 5.  This effect was achieved with a two-line formatter.<br />
-</p><div style="width: 210px;" class="wp-caption alignright" id="attachment_275"><a href="http://scolobb.files.wordpress.com/2012/07/formatter.png"><img src="http://scolobb.files.wordpress.com/2012/07/formatter.png?w=549" alt="Diagram 5. Use of formatters" class="size-full wp-image-275" title="Diagram 5" /></a><p class="wp-caption-text">Diagram 5. Use of formatters</p></div><p></p>
-<p>I must confess that dealing with hash randomisation-related issues takes up much more time that I always expect.  I have been constantly getting back to certain bits of my code and adding new and new invocations of <tt>sorted</tt> to assure stable output.  Working on this, as well as on some obscure tuning of small details of the diagram is actually what has consumed the bulk of my time this week.  The visual input of such modifications is usually minimal; yet, I do believe they bear a rather important role.</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/259/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/259/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=259&amp;subd=scolobb&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://scolobb.wordpress.com/2012/07/17/the-almost-there-chapter-1/">by scolobb at July 16, 2012 09:32 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -5527,7 +5592,7 @@ Out[128]: False
 
 <p>
 <strong>Last updated:</strong><br>
-January 17, 2013 05:00 AM<br>
+January 17, 2013 05:20 AM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
