@@ -23,6 +23,146 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>January 25, 2013</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://matthewrocklin.com/blog/" title="Working notes by Matthew Rocklin - SymPy">MRocklin</a></h3>
+
+
+<div class="entrygroup" id="http://matthewrocklin.com/blog//work/2013/01/25/Commutative-Unification">
+<h4><a href="http://matthewrocklin.com/blog//work/2013/01/25/Commutative-Unification">Commutative Unification</a></h4>
+<div class="entry">
+<div class="content">
+<p>LogPy now supports commutative and associative pattern matching on expression trees. This is a standard requirement for computer algebra systems like SymPy but not a traditional feature of logic programming systems.</p>
+
+<p>Pattern-matching in LogPy is expressed by the <code>eq</code> goal. This goal relies on unification to match trees of tuples. Unification is a computational cornerstone of LogPy. Traditionally <code>eq</code> performs exact structural pattern matching. For example</p>
+
+<pre><code>(1, x, (5, y, 7))  matches  (1, (2, 3, 4), (5, 6, 7))</code></pre>
+
+<p>with the following substitution</p>
+
+<pre><code>{x: (2, 3, 4), y: 6}</code></pre>
+
+<h2 id="expression_trees">Expression Trees</h2>
+
+<p>We traditionally represent both mathematical expressions and computer programs with expression trees. For example \(y * (1 + x)\) can be visualized as follows</p>
+
+<p><img src="http://matthewrocklin.com/images/arith-expr.png" alt="" /></p>
+
+<p>We represent this expression in LogPy with tuples. The head/first element of each tuple is an operation like <code>add</code> or <code>mul</code>. All subsequent elements (the tail) are the arguments/children of that expression.</p>
+
+<pre><code>y * (x + 1) -&gt; (mul, y, (add, x, 1))</code></pre>
+
+<h2 id="matching_expression_trees">Matching Expression Trees</h2>
+
+<p>This form is exactly what we use for unification. We could match this pattern against the following expression, treating <code>x</code> and <code>y</code> as wildcard logic variables</p>
+
+<pre><code>(mul, y, (add, x, 1))  matches  (mul, (pow, 2, 10), (add, 3, 1))</code></pre>
+
+<p>with the following substitution</p>
+
+<pre><code>{x: 3, y: (pow, 2, 10)}</code></pre>
+
+<p>But what about the following?</p>
+
+<pre><code>(add, x, 1)  matches?  (add, 1, 3)</code></pre>
+
+<p>This doesn’t unify. While the first (<code>add</code>, <code>add</code>) and second (<code>x</code>, <code>1</code>) elements can match (if <code>{x: 1}</code>) the third elements (<code>1</code>, <code>3</code>) will not.</p>
+
+<p>As mathematicians however we know that because <code>add</code> is commutative these expressions should match if we are allowed to rearrange the terms in the tail and match <code>1</code> to <code>1</code> and <code>x</code> to <code>3</code>. LogPy doesn’t know this by default. LogPy is not a math library.</p>
+
+<h2 id="building_commutative_equality">Building Commutative Equality</h2>
+
+<p>Given the goal <code>seteq</code> for set unification and a goal <code>conso</code> for head-tail pattern matching we build <code>eq_commutative</code> for commutative matching.</p>
+
+<p>Example of <code>seteq</code></p>
+
+<pre><code>run(0, x, seteq((1, 2, x), (3, 1, 2)))  # seteq matches within sets
+(3,)</code></pre>
+
+<p>Example of <code>conso</code></p>
+
+<pre><code>run(0, head,  conso(head, tail, (1, 2, 3, 4)))
+(1,)
+run(0, tail,  conso(head, tail, (1, 2, 3, 4)))
+((2, 3, 4),)</code></pre>
+
+<p>Given these two it is easy to build <code>eq_commutative</code></p>
+<div class="highlight"><pre><code class="python"><span class="k">def</span> <span class="nf">eq_commutative</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+    <span class="n">operation</span><span class="p">,</span> <span class="n">utail</span><span class="p">,</span> <span class="n">vtail</span> <span class="o">=</span> <span class="n">var</span><span class="p">(),</span> <span class="n">var</span><span class="p">(),</span> <span class="n">var</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">lall</span><span class="p">(</span><span class="n">conso</span><span class="p">(</span><span class="n">operation</span><span class="p">,</span> <span class="n">utail</span><span class="p">,</span> <span class="n">u</span><span class="p">),</span>
+                <span class="n">conso</span><span class="p">(</span><span class="n">operation</span><span class="p">,</span> <span class="n">vtail</span><span class="p">,</span> <span class="n">v</span><span class="p">),</span>
+                <span class="n">commutative</span><span class="p">(</span><span class="n">operation</span><span class="p">),</span>
+                <span class="n">seteq</span><span class="p">(</span><span class="n">utail</span><span class="p">,</span> <span class="n">vtail</span><span class="p">))</span>
+</code></pre></div>
+<p>That is we require all of the following (<code>lall</code> is logical all).</p>
+
+<ul>
+<li><code>u</code> must be of the form <code>(operation, utail....)</code></li>
+
+<li><code>v</code> must be of the form <code>(operation, vtail....)</code>. Note that the same variable <code>operation</code> must be the same in both expressions.</li>
+
+<li>The operation must be commutative (operations register themselves beforehand, see example below)</li>
+
+<li><code>utail</code> and <code>vtail</code> must unify under set equality.</li>
+</ul>
+
+<p>I am glossing over some details here, like “what about associative matching” and “how does <code>seteq</code> work?” but this should give a high-level view of how logic programs are made. Lets see an example of associative/commutative matching</p>
+
+<h2 id="example">Example</h2>
+
+<p>This is the <a href="https://github.com/logpy/logpy/blob/master/examples/commutative.py">standard example</a> for commutative matching found in the <a href="https://github.com/logpy/logpy">repository</a></p>
+<div class="highlight"><pre><code class="python"><span class="kn">from</span> <span class="nn">logpy</span> <span class="kn">import</span> <span class="n">run</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">fact</span>
+<span class="kn">from</span> <span class="nn">logpy.assoccomm</span> <span class="kn">import</span> <span class="n">eq_assoccomm</span> <span class="k">as</span> <span class="n">eq</span>
+<span class="kn">from</span> <span class="nn">logpy.assoccomm</span> <span class="kn">import</span> <span class="n">commutative</span><span class="p">,</span> <span class="n">associative</span>
+
+<span class="c"># Define some dummy Operationss</span>
+<span class="n">add</span> <span class="o">=</span> <span class="s">'add'</span>
+<span class="n">mul</span> <span class="o">=</span> <span class="s">'mul'</span>
+
+<span class="c"># Register that these ops are commutative using the facts system</span>
+<span class="n">fact</span><span class="p">(</span><span class="n">commutative</span><span class="p">,</span> <span class="n">mul</span><span class="p">)</span>
+<span class="n">fact</span><span class="p">(</span><span class="n">commutative</span><span class="p">,</span> <span class="n">add</span><span class="p">)</span>
+<span class="n">fact</span><span class="p">(</span><span class="n">associative</span><span class="p">,</span> <span class="n">mul</span><span class="p">)</span>
+<span class="n">fact</span><span class="p">(</span><span class="n">associative</span><span class="p">,</span> <span class="n">add</span><span class="p">)</span>
+
+<span class="c"># Define some wild variables</span>
+<span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">var</span><span class="p">(</span><span class="s">'x'</span><span class="p">),</span> <span class="n">var</span><span class="p">(</span><span class="s">'y'</span><span class="p">)</span>
+
+<span class="c"># Two expressions to match</span>
+<span class="n">pattern</span> <span class="o">=</span> <span class="p">(</span><span class="n">mul</span><span class="p">,</span> <span class="p">(</span><span class="n">add</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span> <span class="n">y</span><span class="p">)</span>                <span class="c"># (1 + x) * y</span>
+<span class="n">expr</span>    <span class="o">=</span> <span class="p">(</span><span class="n">mul</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">add</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>                <span class="c"># 2 * (3 + 1)</span>
+<span class="k">print</span> <span class="n">run</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">),</span> <span class="n">eq</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">expr</span><span class="p">))</span>         
+<span class="c"># ((3, 2),) #  meaning one result with x matches to 3 and y matches to 2</span>
+</code></pre></div>
+<h2 id="conclusion">Conclusion</h2>
+
+<p>With this LogPy contains all of the functionality of SymPy’s old <code>unify</code> module but in a cleaner and much more extensible form.</p></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://matthewrocklin.com/blog//work/2013/01/25/Commutative-Unification">January 25, 2013 08:00 AM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>January 17, 2013</h2>
 
 <div class="channelgroup">
@@ -5416,66 +5556,6 @@ Out[128]: False
 </div>
 
 </div>
-<div class="daygroup">
-<h2>July 18, 2012</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://rhoforsympy.wordpress.com" title="rhoforsympy">Guru Devanla</a></h3>
-
-
-<div class="entrygroup" id="http://rhoforsympy.wordpress.com/?p=208">
-<h4 lang="en"><a href="http://rhoforsympy.wordpress.com/2012/07/18/some-examples-for-latest-pull-request/">Some examples for latest pull request</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>In the latest <a href="https://github.com/sympy/sympy/pull/1428" target="_blank" title="PR 1428">PR</a>  2 features have been implemented and relevant examples were added to notebook.   Some examples for the first feature, can be found at this <a href="http://rhoforsympy.wordpress.com/2012/07/09/week-7-tr-operations-on-qubits/">post</a>.  Some updates and test cases were added after I had discussed it there.</p>
-<p>The second is a minor change to qapply() as seen in  the following 2 examples:</p>
-<p> </p>
-<p><a href="http://rhoforsympy.files.wordpress.com/2012/07/qapply1.jpg"><img src="http://rhoforsympy.files.wordpress.com/2012/07/qapply1.jpg?w=500&amp;h=285" title="qapply1" height="285" width="500" alt="" class="alignleft size-full wp-image-209" /></a></p>
-<p> </p>
-<p><a href="http://rhoforsympy.files.wordpress.com/2012/07/qapply2.jpg"><img src="http://rhoforsympy.files.wordpress.com/2012/07/qapply2.jpg?w=500&amp;h=222" title="qapply2" height="222" width="500" alt="" class="alignleft size-full wp-image-210" /></a></p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p>Happy Coding!</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/rhoforsympy.wordpress.com/208/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/rhoforsympy.wordpress.com/208/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;blog=34650270&amp;post=208&amp;subd=rhoforsympy&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://rhoforsympy.wordpress.com/2012/07/18/some-examples-for-latest-pull-request/">by grdvnl at July 18, 2012 04:25 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -5520,7 +5600,7 @@ Out[128]: False
 <a href="" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a class="message" title="404: not found">Django-SymPy</a>
 </li>
 <li>
-<a href="http://fseoane.net/blog/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://fseoane.net/blog/" class="message" title="no activity in 7 days">Fabian Pedregosa</a>
+<a href="http://fseoane.net/blog//feed/rss.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://fseoane.net/blog/" class="message" title="no activity in 7 days">Fabian Pedregosa</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/7648717043547744590/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://gsoc-mathtex.blogspot.com/" class="message" title="no activity in 7 days">Freddie Witherden</a>
@@ -5589,7 +5669,7 @@ Out[128]: False
 
 <p>
 <strong>Last updated:</strong><br>
-January 22, 2013 08:00 PM<br>
+January 25, 2013 06:01 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>

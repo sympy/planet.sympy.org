@@ -8,6 +8,117 @@
 	<description>Planet SymPy - http://planet.sympy.org/</description>
 
 <item>
+	<title>MRocklin: Commutative Unification</title>
+	<guid isPermaLink="true">http://matthewrocklin.com/blog//work/2013/01/25/Commutative-Unification</guid>
+	<link>http://matthewrocklin.com/blog//work/2013/01/25/Commutative-Unification</link>
+	<description>&lt;p&gt;LogPy now supports commutative and associative pattern matching on expression trees. This is a standard requirement for computer algebra systems like SymPy but not a traditional feature of logic programming systems.&lt;/p&gt;
+
+&lt;p&gt;Pattern-matching in LogPy is expressed by the &lt;code&gt;eq&lt;/code&gt; goal. This goal relies on unification to match trees of tuples. Unification is a computational cornerstone of LogPy. Traditionally &lt;code&gt;eq&lt;/code&gt; performs exact structural pattern matching. For example&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;(1, x, (5, y, 7))  matches  (1, (2, 3, 4), (5, 6, 7))&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;with the following substitution&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{x: (2, 3, 4), y: 6}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;expression_trees&quot;&gt;Expression Trees&lt;/h2&gt;
+
+&lt;p&gt;We traditionally represent both mathematical expressions and computer programs with expression trees. For example \(y * (1 + x)\) can be visualized as follows&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://matthewrocklin.com/images/arith-expr.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;We represent this expression in LogPy with tuples. The head/first element of each tuple is an operation like &lt;code&gt;add&lt;/code&gt; or &lt;code&gt;mul&lt;/code&gt;. All subsequent elements (the tail) are the arguments/children of that expression.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;y * (x + 1) -&amp;gt; (mul, y, (add, x, 1))&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;matching_expression_trees&quot;&gt;Matching Expression Trees&lt;/h2&gt;
+
+&lt;p&gt;This form is exactly what we use for unification. We could match this pattern against the following expression, treating &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt; as wildcard logic variables&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;(mul, y, (add, x, 1))  matches  (mul, (pow, 2, 10), (add, 3, 1))&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;with the following substitution&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{x: 3, y: (pow, 2, 10)}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;But what about the following?&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;(add, x, 1)  matches?  (add, 1, 3)&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This doesn’t unify. While the first (&lt;code&gt;add&lt;/code&gt;, &lt;code&gt;add&lt;/code&gt;) and second (&lt;code&gt;x&lt;/code&gt;, &lt;code&gt;1&lt;/code&gt;) elements can match (if &lt;code&gt;{x: 1}&lt;/code&gt;) the third elements (&lt;code&gt;1&lt;/code&gt;, &lt;code&gt;3&lt;/code&gt;) will not.&lt;/p&gt;
+
+&lt;p&gt;As mathematicians however we know that because &lt;code&gt;add&lt;/code&gt; is commutative these expressions should match if we are allowed to rearrange the terms in the tail and match &lt;code&gt;1&lt;/code&gt; to &lt;code&gt;1&lt;/code&gt; and &lt;code&gt;x&lt;/code&gt; to &lt;code&gt;3&lt;/code&gt;. LogPy doesn’t know this by default. LogPy is not a math library.&lt;/p&gt;
+
+&lt;h2 id=&quot;building_commutative_equality&quot;&gt;Building Commutative Equality&lt;/h2&gt;
+
+&lt;p&gt;Given the goal &lt;code&gt;seteq&lt;/code&gt; for set unification and a goal &lt;code&gt;conso&lt;/code&gt; for head-tail pattern matching we build &lt;code&gt;eq_commutative&lt;/code&gt; for commutative matching.&lt;/p&gt;
+
+&lt;p&gt;Example of &lt;code&gt;seteq&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;run(0, x, seteq((1, 2, x), (3, 1, 2)))  # seteq matches within sets
+(3,)&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Example of &lt;code&gt;conso&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;run(0, head,  conso(head, tail, (1, 2, 3, 4)))
+(1,)
+run(0, tail,  conso(head, tail, (1, 2, 3, 4)))
+((2, 3, 4),)&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Given these two it is easy to build &lt;code&gt;eq_commutative&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;eq_commutative&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;u&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;operation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;utail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;vtail&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;var&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;var&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;var&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lall&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;conso&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;operation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;utail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;u&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;conso&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;operation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;vtail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;commutative&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;operation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;seteq&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;utail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;vtail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;That is we require all of the following (&lt;code&gt;lall&lt;/code&gt; is logical all).&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;u&lt;/code&gt; must be of the form &lt;code&gt;(operation, utail....)&lt;/code&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;code&gt;v&lt;/code&gt; must be of the form &lt;code&gt;(operation, vtail....)&lt;/code&gt;. Note that the same variable &lt;code&gt;operation&lt;/code&gt; must be the same in both expressions.&lt;/li&gt;
+
+&lt;li&gt;The operation must be commutative (operations register themselves beforehand, see example below)&lt;/li&gt;
+
+&lt;li&gt;&lt;code&gt;utail&lt;/code&gt; and &lt;code&gt;vtail&lt;/code&gt; must unify under set equality.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I am glossing over some details here, like “what about associative matching” and “how does &lt;code&gt;seteq&lt;/code&gt; work?” but this should give a high-level view of how logic programs are made. Lets see an example of associative/commutative matching&lt;/p&gt;
+
+&lt;h2 id=&quot;example&quot;&gt;Example&lt;/h2&gt;
+
+&lt;p&gt;This is the &lt;a href=&quot;https://github.com/logpy/logpy/blob/master/examples/commutative.py&quot;&gt;standard example&lt;/a&gt; for commutative matching found in the &lt;a href=&quot;https://github.com/logpy/logpy&quot;&gt;repository&lt;/a&gt;&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;logpy&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;run&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;var&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fact&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;logpy.assoccomm&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;eq_assoccomm&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;eq&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;logpy.assoccomm&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;commutative&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;associative&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# Define some dummy Operationss&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'add'&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;mul&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'mul'&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# Register that these ops are commutative using the facts system&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;fact&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;commutative&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mul&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;fact&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;commutative&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;fact&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;associative&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mul&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;fact&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;associative&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# Define some wild variables&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;var&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'x'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;var&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# Two expressions to match&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;pattern&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mul&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;                &lt;span class=&quot;c&quot;&gt;# (1 + x) * y&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;expr&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mul&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;                &lt;span class=&quot;c&quot;&gt;# 2 * (3 + 1)&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;run&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;eq&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pattern&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;expr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;         
+&lt;span class=&quot;c&quot;&gt;# ((3, 2),) #  meaning one result with x matches to 3 and y matches to 2&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;With this LogPy contains all of the functionality of SymPy’s old &lt;code&gt;unify&lt;/code&gt; module but in a cleaner and much more extensible form.&lt;/p&gt;</description>
+	<pubDate>Fri, 25 Jan 2013 08:00:00 +0000</pubDate>
+</item>
+<item>
 	<title>MRocklin: LogPy - Facts and Relations</title>
 	<guid isPermaLink="true">http://matthewrocklin.com/blog//work/2013/01/17/LogPy-Facts-Relations</guid>
 	<link>http://matthewrocklin.com/blog//work/2013/01/17/LogPy-Facts-Relations</link>
@@ -3871,37 +3982,6 @@ Out[128]: False
 &lt;p&gt;One last remark to make is that after the official end of the GSoC timeframe, I will still have at least one week of rather spare time (I actually expect to have about 2.5 to 3 weeks of time), which means that I will bring the code to a sufficiently polished state despite any possible lags.&lt;/p&gt;
 &lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/285/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/285/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;amp;blog=35433045&amp;amp;post=285&amp;amp;subd=scolobb&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
 	<pubDate>Sat, 21 Jul 2012 23:21:49 +0000</pubDate>
-</item>
-<item>
-	<title>Guru Devanla: Some examples for latest pull request</title>
-	<guid isPermaLink="false">http://rhoforsympy.wordpress.com/?p=208</guid>
-	<link>http://rhoforsympy.wordpress.com/2012/07/18/some-examples-for-latest-pull-request/</link>
-	<description>&lt;p&gt;In the latest &lt;a href=&quot;https://github.com/sympy/sympy/pull/1428&quot; target=&quot;_blank&quot; title=&quot;PR 1428&quot;&gt;PR&lt;/a&gt;  2 features have been implemented and relevant examples were added to notebook.   Some examples for the first feature, can be found at this &lt;a href=&quot;http://rhoforsympy.wordpress.com/2012/07/09/week-7-tr-operations-on-qubits/&quot;&gt;post&lt;/a&gt;.  Some updates and test cases were added after I had discussed it there.&lt;/p&gt;
-&lt;p&gt;The second is a minor change to qapply() as seen in  the following 2 examples:&lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;
-&lt;p&gt;&lt;a href=&quot;http://rhoforsympy.files.wordpress.com/2012/07/qapply1.jpg&quot;&gt;&lt;img src=&quot;http://rhoforsympy.files.wordpress.com/2012/07/qapply1.jpg?w=500&amp;amp;h=285&quot; title=&quot;qapply1&quot; height=&quot;285&quot; width=&quot;500&quot; alt=&quot;&quot; class=&quot;alignleft size-full wp-image-209&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;
-&lt;p&gt;&lt;a href=&quot;http://rhoforsympy.files.wordpress.com/2012/07/qapply2.jpg&quot;&gt;&lt;img src=&quot;http://rhoforsympy.files.wordpress.com/2012/07/qapply2.jpg?w=500&amp;amp;h=222&quot; title=&quot;qapply2&quot; height=&quot;222&quot; width=&quot;500&quot; alt=&quot;&quot; class=&quot;alignleft size-full wp-image-210&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;
-&lt;p&gt;Happy Coding!&lt;/p&gt;
-&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/rhoforsympy.wordpress.com/208/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/rhoforsympy.wordpress.com/208/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;amp;blog=34650270&amp;amp;post=208&amp;amp;subd=rhoforsympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
-	<pubDate>Wed, 18 Jul 2012 16:25:51 +0000</pubDate>
 </item>
 
 </channel>
