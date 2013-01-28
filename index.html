@@ -10,6 +10,7 @@
 
 
 
+
 <head>
 <title>Planet SymPy</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -21,6 +22,55 @@
 <body>
 <h1>Planet SymPy</h1>
 
+<div class="daygroup">
+<h2>January 28, 2013</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
+
+
+<div class="entrygroup" id="http://asmeurersympy.wordpress.com/?p=1204">
+<h4 lang="en"><a href="http://asmeurersympy.wordpress.com/2013/01/28/tip-for-debugging-sympy-with-pudb/">Tip for debugging SymPy with PuDB</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p>Usually, when I debug SymPy code with <a href="http://asmeurersympy.wordpress.com/2010/06/04/pudb-a-better-python-debugger/">PuDB</a>, I create a script that calls the code, then I put a </p>
+<p></p><pre class="brush: python;">import pudb; pudb.set_trace()
+</pre><p></p>
+<p>in the SymPy library code where I want to start debugging. But this is annoying, first because I have to create the script, and second, because I have to modify the library code, and there’s always the risk of accidentally commiting that.  Also, if I want to start debugging somewhere else, I have to edit the files and change it.</p>
+<p>Well, I just figured out a better way.  First, if you haven’t already, add an alias like this in your bash config file (<code>~/.profile</code> or <code>~/.bashrc</code>):</p>
+<p></p><pre class="brush: bash;">alias pudb='python -m pudb.run'
+</pre><p></p>
+<p>This will let you run <code>pudb script.py</code> to debug <code>script.py</code>.  Next, start PuDB. It doesn’t matter with what. You can just run <code>touch test.py</code>, and then <code>pudb test.py</code>.  </p>
+<p>Now, press <code>m</code>, and navigate to where in the library code you want to start debugging.  It also helps to use <code>/</code> to search the current file and <code>L</code> to jump to a specific line.  When you get to the line where you want to start debugging, press <code>b</code> to set a breakpoint. You can do this in multiple places if you want.</p>
+<p>Now, you just have to start <code>isympy</code> from within PuDB.  Just run <code>pudb bin/isympy</code>, and immediately press <code>c</code> to jump to the interactive prompt.  Now, run whatever code you want to debug.  When it gets to the breakpoint, PuDB will open, and you can start debugging.  If you type <code>c</code> to continue, it will go back to isympy. But the next time you run something that hits the breakpoint, it will open PuDB again. </p>
+<p>This trick works because breakpoints are saved to file (at <code>~/.config/pudb/saved-breakpoints</code>). In fact, if you want, you can just modify that file in the first step.  You can edit your saved breakpoints in the bottom right pane of PuDB. </p>
+<p>When you are done and you type <code>Ctrl-D</code> PuDB will pop-up again, asking if you want to quit.  That’s because it was running the whole time, underneath isympy.  Just press <code>q</code>.  Note that you should avoid pressing <code>q</code> while debugging, or else PuDB will quit, and you will be left with just normal isympy (it won’t break at your breakpoints any more).  Actually, if you do this, but doing <code>Ctrl-D</code> still opens the PuDB prompt, you can just press “Restart”, and it should start working again.  Note that “Restart” will not actually reset isympy:  all your saved variables will still be the same, and any changes to the library code will not be reloaded.  To do that, you have to completely exit and start over again.</p>
+<p>Of course, there is nothing SymPy specific about this trick. As long as you have a script that acts as an entry point to an interactive console for your application, you can use it.  If you just use IPython, you can use something like <code>pudb /bin/ipython</code> (replace <code>/bin/ipython</code> with the output of <code>which ipython</code>).  </p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/asmeurersympy.wordpress.com/1204/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/asmeurersympy.wordpress.com/1204/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1204&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://asmeurersympy.wordpress.com/2013/01/28/tip-for-debugging-sympy-with-pudb/">by Aaron Meurer at January 28, 2013 12:43 AM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
 <div class="daygroup">
 <h2>January 25, 2013</h2>
 
@@ -5506,55 +5556,6 @@ Out[128]: False
 </div>
 
 </div>
-<div class="daygroup">
-<h2>July 21, 2012</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://scolobb.wordpress.com" title="Coaquarium">Sergiu Ivanov</a></h3>
-
-
-<div class="entrygroup" id="http://scolobb.wordpress.com/?p=285">
-<h4 lang="en"><a href="http://scolobb.wordpress.com/2012/07/22/the-polish-and-further-planning/">The Polish and Further Planning</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>I am currently working on getting my two pull requests into <tt>master</tt>.  Right now, the efforts have been concentrated on the first pull request, concerned with diagram layout.  Among the minor fixes, there came a number of more important changes, which I am going to shortly describe in this post, before I get to my further plans.</p>
-<p>Among the changes worth mentioning are some updates to the choice of internal data structures of <tt>DiagramGrid</tt>.  Previously, <tt>FiniteSet</tt> was used to store any sets.  Following my mentor’s suggestion, though, I have refactored the code to only use <tt>FiniteSet</tt> when something needs to be stored in <tt>Basic.args</tt>.  On all other occasions, the built-ins <tt>set</tt> and <tt>frozenset</tt> are used, depending on whether a mutable set or an immutable hashable container is needed.</p>
-<p>The other change bearing no fundamental importance but still worth mentioning is the transition to storing undirected edges as two-element <tt>frozenset</tt>‘s.  Previously, edges were stored as two-element tuples which caused a bit of hassle in what concerned recognizing the equality of <tt>(A, B)</tt> and <tt>(B, A)</tt>.  The choice of <tt>frozenset</tt> has brought in more elegant code.  In terms of performance, I do not think that this transition has had a really important impact, since I didn’t really keep performance in mind when writing other parts of the code anyway.  (I am mainly referring to the construction of the skeleton of the diagram and splitting it into triangles.)will l</p>
-<p>Among more significant improvements, I will list the support for disconnected diagrams, one-object diagrams, and, the pinnacle, graceful handling of the situations when growing a pseudopod fails.  Before you start thinking abut who the hell would need disconnected or one-object diagrams, I will remind/introduce the process and the necessity of pseudopods in diagram layout (Hey, that did sound like rubbish, did it <img src="http://s0.wp.com/wp-includes/images/smilies/icon_biggrin.gif" alt=":-D" class="wp-smiley" />  )</p>
-<p>The layout algorithm essentially considers the slightly augmented underlying undirected graph of the diagram and splits it into as many triangles as it can.  Then it tries to sort those triangles according to some rather heuristic (i.e., arbitrary) priority metric, picks them one by one, in this order, and tries to place them on the plane, edge to edge.  The strategy being pure greedy, at some point in time it may happen that there are still triangles, but there are no free edges on the plane to which they could be attached.  In this situation, the algorithm attempts to attach one of the remaining triangles by a vertex, that is, it tries to find such a vertex already in the plane, which also belongs to one of the remaining triangles.  Finally, the algorithm adds an edge of the found triangle to the plane and restarts the process of picking triangles and attaching them by edges.  This new added edge is referred to as <em>pseudopod</em>.</p>
-<p>Now, what happens when a pseudopod cannot be grown?  Initially, I was under the impression that it is rather hard to construct such a diagram.  However, it turned out to be rather easy.  Consider the set of objects <img src="http://s0.wp.com/latex.php?latex=%5C%7BA%5C%7D%5Ccup%5C%7BA_i%5Cmid+1%5Cleq+i%5Cleq+10%5C%7D&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="\{A\}\cup\{A_i\mid 1\leq i\leq 10\}" class="latex" title="\{A\}\cup\{A_i\mid 1\leq i\leq 10\}" /> and the set of morphisms <img src="http://s0.wp.com/latex.php?latex=%5C%7Bf_i%3AA%5Crightarrow+A_i%5Cmid+1%5Cleq+i%5Cleq+10%5C%7D&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="\{f_i:A\rightarrow A_i\mid 1\leq i\leq 10\}" class="latex" title="\{f_i:A\rightarrow A_i\mid 1\leq i\leq 10\}" />.  <tt>DiagramGrid</tt> will lay out the first 8 of the <img src="http://s0.wp.com/latex.php?latex=A_i&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="A_i" class="latex" title="A_i" /> quite all right: as one would expect, <img src="http://s0.wp.com/latex.php?latex=A&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="A" class="latex" title="A" /> gets to be the center of a 3×3 square, whose borders consist of the 8 <img src="http://s0.wp.com/latex.php?latex=A_i&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="A_i" class="latex" title="A_i" />‘s.  However, the last two <img src="http://s0.wp.com/latex.php?latex=A_i&amp;bg=000000&amp;fg=b8babb&amp;s=0" alt="A_i" class="latex" title="A_i" />‘s condition the situation when there are triangles left, but no pseudopods can be grown.</p>
-<p>In an attempt to address this problem, I have considered various possible strategies, and have chosen the following one.  When no pseudopod can be grown, take the set of all objects that have not yet been placed and construct from them a subdiagram of the diagram to plot.  Lay that diagram out recursively and then attach the resulting grid to the initial diagram.</p>
-<p>One important remark is due here.  This strategy is a “oh, gosh, things have gone very bad” strategy, in that is is applied only when all other approaches have failed and in that it does not really guarantee the nice look of the final diagram.  However, it does provide a graceful handling of the specific situations and I do believe that the output is still going to look acceptable.</p>
-<p>While the idea itself is rather simple, it is necessary to pay attention to what subtleties it actually brings around.  First of all, the subdiagram constructed from the remaining objects is <em>not</em> necessarily connected.  That’s easy to see even in the example I have shown in the previous paragraphs.  Furthermore, the constructed diagrams do not necessarily have non-loop morphisms!  (By abuse of graph theoretic terminology, I call a morphism with the same domain and codomain a <em>loop</em> morphism).  That is, addressing pseudopod extension failures brings about the necessity to handle disconnected diagrams and one-object diagrams.</p>
-<p>There is not much to say about the support of disconnected diagrams and one-object diagrams, but that I have implemented support for these two cases as well.  The latter case is handled trivially, while the former case employs standard depth-first search of the underlying undirected graph and separate layout of the connected components.  The components are currently dumbly positioned side by side, in a line, and a comment in the source code evokes the possibility of using groups to get a different layout.  I’m open to suggestions of further improvements in this area, though.</p>
-<p>It’s time to speak about my plans.  I have spent more than initially expected on handling pseudopod growth failures.  This means that there are still some suggestions by my mentor waiting to get fixed (I haven’t read them yet; hopefully, nothing fundamental there <img src="http://s0.wp.com/wp-includes/images/smilies/icon_biggrin.gif" alt=":-D" class="wp-smiley" />  ). Further, I absolutely must fix the problem with the sort key of <tt>FiniteSet</tt>.  I have been talking about fixing it for about two weeks already, and it doesn’t seem to require that much effort.  It is essential that this fix be done, though, since, without it, tests in the <tt>categories</tt> module fail half of the time.  Finally, I will fix how morphisms are currently pretty printed by removing the use of wide Unicode symbols.  These activities will not hopefully take me more than 2 days, at the very most.</p>
-<p>Next comes the other exciting part of my project, deciding the commutativity of diagrams.  I have provided the general idea of the algorithm in my <a href="https://github.com/sympy/sympy/wiki/GSoC-2012-Application-Sergiu-Ivanov:-Category-Theory-Module">proposal</a>.  Given that I am currently about two weeks behind the schedule in my proposal, and that I will still need to spend time on getting the code in the pull requests up to snuff, I’m really feeling very wary about planning my own time.  However, since deciding the algorithm for deciding the commutativity of diagrams I describe in the proposals <em>seems</em> to be rather straightforward, I think I will have at least a basic working version of it two weeks from now, that is, by August 5.  Allowing another week as buffer time and yet another week for merging the corresponding pull request, I do expect to be in time for the firm pencils-down date.</p>
-<p>One last remark to make is that after the official end of the GSoC timeframe, I will still have at least one week of rather spare time (I actually expect to have about 2.5 to 3 weeks of time), which means that I will bring the code to a sufficiently polished state despite any possible lags.</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/285/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/285/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=285&amp;subd=scolobb&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://scolobb.wordpress.com/2012/07/22/the-polish-and-further-planning/">by scolobb at July 21, 2012 11:21 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -5563,7 +5564,7 @@ Out[128]: False
 <h2>Subscriptions</h2>
 <ul>
 <li>
-<a href="http://asmeurersympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://asmeurersympy.wordpress.com" class="message" title="no activity in 7 days">Aaron Meurer</a>
+<a href="http://asmeurersympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/936818886435977143/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://addisoncugini.blogspot.com/" class="message" title="no activity in 7 days">Addison Cugini</a>
@@ -5668,7 +5669,7 @@ Out[128]: False
 
 <p>
 <strong>Last updated:</strong><br>
-January 25, 2013 06:20 PM<br>
+January 28, 2013 01:01 AM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
