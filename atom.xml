@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2013-01-31T14:00:43Z</updated>
+  <updated>2013-02-05T03:20:40Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,91 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry>
+    <id>http://matthewrocklin.com/blog//work/2013/02/05/Assuming</id>
+    <link href="http://matthewrocklin.com/blog//work/2013/02/05/Assuming" rel="alternate" type="text/html"/>
+    <title>Assuming assumptions</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>SymPy has two assumptions systems called (unimaginatively) “old assumptions” and “new assumptions.” They differ in how they manage mathematical attributes.</p>
+
+<h3 id="old_assumptions">Old Assumptions</h3>
+
+<p>In old assumptions attributes are bound to variables</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'x'</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">y</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'y'</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div>
+<p>These are then composed into expressions.</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">expr</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span>
+</code></pre></div>
+<p>And we query these expressions directly</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">expr</span><span class="o">.</span><span class="n">is_positive</span>
+<span class="bp">True</span>
+</code></pre></div>
+<p>The expression and the attributes are woven into the same object.</p>
+
+<h3 id="new_assumptions">New Assumptions</h3>
+
+<p>In new assumptions variables and attributes are maintained separately.</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'x'</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">y</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'y'</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">facts</span> <span class="o">=</span> <span class="n">Q</span><span class="o">.</span><span class="n">positive</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">positive</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+</code></pre></div>
+<p>The construction of mathematical expressions remains unchanged</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">expr</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span>
+</code></pre></div>
+<p>But querying now requires two inputs, both the expression and the facts.</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">ask</span><span class="p">(</span><span class="n">Q</span><span class="o">.</span><span class="n">positive</span><span class="p">(</span><span class="n">expr</span><span class="p">),</span> <span class="n">facts</span><span class="p">)</span>
+<span class="bp">True</span>
+</code></pre></div>
+<p>The separation of facts from expressions enables rich logical inference but it requires the management of two separate variables, <code>expr</code> and <code>facts</code>, rather than just one, <code>expr</code>. It is difficult to consistently pass the extra variable through all relevant function calls.</p>
+
+<h3 id="global_assumptions">Global assumptions</h3>
+
+<p>One solution to the management problem is to keep all facts in a globally accessible collection. This removes the need to pass an extra argument between function calls.</p>
+
+<p>This little known feature is already accessible in SymPy</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="c"># Setup</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">global_assumptions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Q</span><span class="o">.</span><span class="n">positive</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">global_assumptions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Q</span><span class="o">.</span><span class="n">positive</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="c"># Compute in this context</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ask</span><span class="p">(</span><span class="n">Q</span><span class="o">.</span><span class="n">positive</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">))</span>
+<span class="bp">True</span>
+</code></pre></div>
+<p>Unfortunately global variables often cause confusion. We will invariably add an experimental fact to the global collection and then forget to clean up, polluting future computations. In this case we need to always remember to clean up after we’re done.</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="c"># Cleanup</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">global_assumptions</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">Q</span><span class="o">.</span><span class="n">positive</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">global_assumptions</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">Q</span><span class="o">.</span><span class="n">positive</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+</code></pre></div>
+<p>This cleanup step is both crucial and forgettable. We can not trust ourselves to remember it.</p>
+
+<h2 id="introducing_">Introducing <code>assuming</code></h2>
+
+<p>Context managers provide the convenience of global variables with side-effect free security. This is accomplished through consistent cleanup.</p>
+
+<p>SymPy now includes, <code>assuming</code>, a context manager for mathematical assumptions. Here is an example</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">facts</span> <span class="o">=</span> <span class="n">Q</span><span class="o">.</span><span class="n">positive</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">Q</span><span class="o">.</span><span class="n">positive</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">assuming</span><span class="p">(</span><span class="o">*</span><span class="n">facts</span><span class="p">):</span>
+<span class="o">...</span>     <span class="n">ask</span><span class="p">(</span><span class="n">Q</span><span class="o">.</span><span class="n">positive</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">))</span>
+<span class="bp">True</span>
+</code></pre></div>
+<p>Everything called from within the <code>with assuming</code> block has global-like access to the facts <code>Q.positive(x)</code> and <code>Q.positive(y)</code>. These facts do not leak outside the <code>with assuming</code> block.</p></div>
+    </summary>
+    <updated>2013-02-05T08:00:00Z</updated>
+    <source>
+      <id>http://matthewrocklin.com/blog/</id>
+      <author>
+        <name>MRocklin</name>
+      </author>
+      <link href="http://matthewrocklin.com/blog/" rel="alternate" type="text/html"/>
+      <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
+      <subtitle>Posts tagged as 'SymPy'</subtitle>
+      <title>Working notes by Matthew Rocklin - SymPy</title>
+      <updated>2013-02-05T03:20:35Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en">
     <id>http://asmeurersympy.wordpress.com/?p=1204</id>
@@ -44,7 +129,7 @@
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-01-31T14:00:22Z</updated>
+      <updated>2013-02-05T03:20:20Z</updated>
     </source>
   </entry>
 
@@ -168,7 +253,7 @@ run(0, tail,  conso(head, tail, (1, 2, 3, 4)))
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-01-31T14:00:38Z</updated>
+      <updated>2013-02-05T03:20:35Z</updated>
     </source>
   </entry>
 
@@ -266,7 +351,7 @@ CO,WY,NE,KS,OK,NM,AZ,UT
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-01-31T14:00:38Z</updated>
+      <updated>2013-02-05T03:20:35Z</updated>
     </source>
   </entry>
 
@@ -383,7 +468,7 @@ CO,WY,NE,KS,OK,NM,AZ,UT
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-01-31T14:00:38Z</updated>
+      <updated>2013-02-05T03:20:35Z</updated>
     </source>
   </entry>
 
@@ -584,7 +669,7 @@ dimensions.</p>
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog//feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-01-31T14:00:17Z</updated>
+      <updated>2013-02-05T03:20:15Z</updated>
     </source>
   </entry>
 
@@ -667,7 +752,7 @@ dimensions.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-01-31T14:00:22Z</updated>
+      <updated>2013-02-05T03:20:20Z</updated>
     </source>
   </entry>
 
@@ -698,7 +783,7 @@ dimensions.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-01-31T14:00:22Z</updated>
+      <updated>2013-02-05T03:20:20Z</updated>
     </source>
   </entry>
 
@@ -790,7 +875,7 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-01-31T14:00:37Z</updated>
+      <updated>2013-02-05T03:20:34Z</updated>
     </source>
   </entry>
 
@@ -832,7 +917,7 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog//feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-01-31T14:00:17Z</updated>
+      <updated>2013-02-05T03:20:15Z</updated>
     </source>
   </entry>
 
@@ -940,7 +1025,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-01-31T14:00:38Z</updated>
+      <updated>2013-02-05T03:20:35Z</updated>
     </source>
   </entry>
 
@@ -1096,7 +1181,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-01-31T14:00:38Z</updated>
+      <updated>2013-02-05T03:20:35Z</updated>
     </source>
   </entry>
 
@@ -1208,7 +1293,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-01-31T14:00:38Z</updated>
+      <updated>2013-02-05T03:20:35Z</updated>
     </source>
   </entry>
 
@@ -1286,7 +1371,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-01-31T14:00:38Z</updated>
+      <updated>2013-02-05T03:20:35Z</updated>
     </source>
   </entry>
 
@@ -1318,7 +1403,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-01-31T14:00:43Z</updated>
+      <updated>2013-02-05T03:20:39Z</updated>
     </source>
   </entry>
 
@@ -1463,7 +1548,7 @@ Return objects:
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-01-31T14:00:38Z</updated>
+      <updated>2013-02-05T03:20:35Z</updated>
     </source>
   </entry>
 
@@ -1556,7 +1641,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-01-31T14:00:38Z</updated>
+      <updated>2013-02-04T00:20:35Z</updated>
     </source>
   </entry>
 
@@ -1812,7 +1897,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-01-31T14:00:43Z</updated>
+      <updated>2013-02-05T03:20:39Z</updated>
     </source>
   </entry>
 
@@ -2001,7 +2086,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site, I guess...</subtitle>
       <title>Gilbert Gede's Blog</title>
-      <updated>2013-01-31T14:00:31Z</updated>
+      <updated>2013-02-05T03:20:29Z</updated>
     </source>
   </entry>
 
@@ -3243,7 +3328,7 @@ f_durations.write('\n')
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog//feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-01-31T14:00:16Z</updated>
+      <updated>2013-02-05T03:20:14Z</updated>
     </source>
   </entry>
 
@@ -3318,7 +3403,7 @@ f_durations.write('\n')
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2013-01-31T14:00:33Z</updated>
+      <updated>2013-02-05T03:20:31Z</updated>
     </source>
   </entry>
 
@@ -3463,7 +3548,7 @@ RuntimeError: maximum recursion depth exceeded in comparison
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-01-31T14:00:22Z</updated>
+      <updated>2013-02-05T03:20:20Z</updated>
     </source>
   </entry>
 
@@ -3506,7 +3591,7 @@ b. Add this line to your bash_profile.</p>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-01-31T14:00:43Z</updated>
+      <updated>2013-02-05T03:20:39Z</updated>
     </source>
   </entry>
 
@@ -3587,7 +3672,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-01-31T14:00:22Z</updated>
+      <updated>2013-02-05T03:20:20Z</updated>
     </source>
   </entry>
 
@@ -3623,7 +3708,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-01-31T14:00:22Z</updated>
+      <updated>2013-02-05T03:20:20Z</updated>
     </source>
   </entry>
 
@@ -3859,7 +3944,7 @@ Out[74]: True
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-01-31T14:00:43Z</updated>
+      <updated>2013-02-05T03:20:39Z</updated>
     </source>
   </entry>
 
@@ -3977,7 +4062,7 @@ commits are much more like my usual ones.
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-01-31T14:00:41Z</updated>
+      <updated>2013-02-05T03:20:38Z</updated>
     </source>
   </entry>
 
@@ -4010,7 +4095,7 @@ commits are much more like my usual ones.
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2013-01-31T14:00:42Z</updated>
+      <updated>2013-02-05T03:20:38Z</updated>
     </source>
   </entry>
 
@@ -4155,7 +4240,7 @@ Out[24]: 6
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-01-31T14:00:41Z</updated>
+      <updated>2013-02-05T03:20:38Z</updated>
     </source>
   </entry>
 
@@ -4274,7 +4359,7 @@ Out[24]: 6
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2013-01-31T14:00:42Z</updated>
+      <updated>2013-02-05T03:20:38Z</updated>
     </source>
   </entry>
 
@@ -4306,7 +4391,7 @@ Out[24]: 6
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-01-31T14:00:43Z</updated>
+      <updated>2013-02-05T03:20:39Z</updated>
     </source>
   </entry>
 
@@ -4450,7 +4535,7 @@ StopIteration:
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-01-31T14:00:43Z</updated>
+      <updated>2013-02-05T03:20:39Z</updated>
     </source>
   </entry>
 
@@ -4509,7 +4594,7 @@ StopIteration:
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-01-31T14:00:41Z</updated>
+      <updated>2013-02-05T03:20:37Z</updated>
     </source>
   </entry>
 
@@ -4539,7 +4624,7 @@ StopIteration:
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2013-01-31T14:00:42Z</updated>
+      <updated>2013-02-05T03:20:38Z</updated>
     </source>
   </entry>
 
@@ -4982,41 +5067,6 @@ Out[128]: False
     <category term="GSoC - diffgeom"/>
     <category term="differential geometry"/>
     <category term="gsoc"/>
-    <category term="symbolic algebra"/>
-    <category term="sympy"/>
-    <author>
-      <name>Stefan Krastanov</name>
-    </author>
-    <source>
-      <id>http://blog.krastanov.org</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://blog.krastanov.org/category/sympy-2/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://blog.krastanov.org" rel="alternate" type="text/html"/>
-      <link href="http://blog.krastanov.org/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>Just another WordPress.com site</subtitle>
-      <title>Stefan's Blog » SymPy</title>
-      <updated>2013-01-20T11:00:35Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://krastanov.wordpress.com/?p=524</id>
-    <link href="http://blog.krastanov.org/2012/07/22/the-schwarzschild-solution/" rel="alternate" type="text/html"/>
-    <title>The Schwarzschild Solution</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">An “easy” solution to the Einstein equation (in free space) is the spherically symmetric Schwarzschild solution. The pdf bellow shows how one can use the diffgeom module in order to get the equations describing this solution. One starts with the most general spherically symmetrical metric and by using Einstein equation deduces the equations that must [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=blog.krastanov.org&amp;blog=15251174&amp;post=524&amp;subd=krastanov&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>An “easy” solution to the Einstein equation (in free space) is the spherically symmetric Schwarzschild solution. The pdf bellow shows how one can use the diffgeom module in order to get the equations describing this solution.</p>
-<p>One starts with the most general spherically symmetrical metric and by using Einstein equation <img alt="R_{\mu \nu}=0" class="latex" src="http://s0.wp.com/latex.php?latex=R_%7B%5Cmu+%5Cnu%7D%3D0&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="R_{\mu \nu}=0"/> deduces the equations that must be fulfilled by the components of the metric (in the chosen basis).</p>
-<p><a href="http://krastanov.files.wordpress.com/2012/07/schwarzschild.pdf">schwarzschild.pdf</a></p>
-<br/>  <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=blog.krastanov.org&amp;blog=15251174&amp;post=524&amp;subd=krastanov&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2012-07-22T13:36:44Z</updated>
-    <category term="GSoC - diffgeom"/>
-    <category term="differential geometry"/>
-    <category term="general relativity"/>
-    <category term="gsoc"/>
-    <category term="Schwarzschild"/>
     <category term="symbolic algebra"/>
     <category term="sympy"/>
     <author>

@@ -23,6 +23,107 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>February 05, 2013</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://matthewrocklin.com/blog/" title="Working notes by Matthew Rocklin - SymPy">MRocklin</a></h3>
+
+
+<div class="entrygroup" id="http://matthewrocklin.com/blog//work/2013/02/05/Assuming">
+<h4><a href="http://matthewrocklin.com/blog//work/2013/02/05/Assuming">Assuming assumptions</a></h4>
+<div class="entry">
+<div class="content">
+<p>SymPy has two assumptions systems called (unimaginatively) “old assumptions” and “new assumptions.” They differ in how they manage mathematical attributes.</p>
+
+<h3 id="old_assumptions">Old Assumptions</h3>
+
+<p>In old assumptions attributes are bound to variables</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'x'</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">y</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'y'</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div>
+<p>These are then composed into expressions.</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">expr</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span>
+</code></pre></div>
+<p>And we query these expressions directly</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">expr</span><span class="o">.</span><span class="n">is_positive</span>
+<span class="bp">True</span>
+</code></pre></div>
+<p>The expression and the attributes are woven into the same object.</p>
+
+<h3 id="new_assumptions">New Assumptions</h3>
+
+<p>In new assumptions variables and attributes are maintained separately.</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'x'</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">y</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'y'</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">facts</span> <span class="o">=</span> <span class="n">Q</span><span class="o">.</span><span class="n">positive</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="o">.</span><span class="n">positive</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+</code></pre></div>
+<p>The construction of mathematical expressions remains unchanged</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">expr</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span>
+</code></pre></div>
+<p>But querying now requires two inputs, both the expression and the facts.</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">ask</span><span class="p">(</span><span class="n">Q</span><span class="o">.</span><span class="n">positive</span><span class="p">(</span><span class="n">expr</span><span class="p">),</span> <span class="n">facts</span><span class="p">)</span>
+<span class="bp">True</span>
+</code></pre></div>
+<p>The separation of facts from expressions enables rich logical inference but it requires the management of two separate variables, <code>expr</code> and <code>facts</code>, rather than just one, <code>expr</code>. It is difficult to consistently pass the extra variable through all relevant function calls.</p>
+
+<h3 id="global_assumptions">Global assumptions</h3>
+
+<p>One solution to the management problem is to keep all facts in a globally accessible collection. This removes the need to pass an extra argument between function calls.</p>
+
+<p>This little known feature is already accessible in SymPy</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="c"># Setup</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">global_assumptions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Q</span><span class="o">.</span><span class="n">positive</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">global_assumptions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Q</span><span class="o">.</span><span class="n">positive</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="c"># Compute in this context</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ask</span><span class="p">(</span><span class="n">Q</span><span class="o">.</span><span class="n">positive</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">))</span>
+<span class="bp">True</span>
+</code></pre></div>
+<p>Unfortunately global variables often cause confusion. We will invariably add an experimental fact to the global collection and then forget to clean up, polluting future computations. In this case we need to always remember to clean up after we’re done.</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="c"># Cleanup</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">global_assumptions</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">Q</span><span class="o">.</span><span class="n">positive</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">global_assumptions</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">Q</span><span class="o">.</span><span class="n">positive</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+</code></pre></div>
+<p>This cleanup step is both crucial and forgettable. We can not trust ourselves to remember it.</p>
+
+<h2 id="introducing_">Introducing <code>assuming</code></h2>
+
+<p>Context managers provide the convenience of global variables with side-effect free security. This is accomplished through consistent cleanup.</p>
+
+<p>SymPy now includes, <code>assuming</code>, a context manager for mathematical assumptions. Here is an example</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">facts</span> <span class="o">=</span> <span class="n">Q</span><span class="o">.</span><span class="n">positive</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">Q</span><span class="o">.</span><span class="n">positive</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">assuming</span><span class="p">(</span><span class="o">*</span><span class="n">facts</span><span class="p">):</span>
+<span class="o">...</span>     <span class="n">ask</span><span class="p">(</span><span class="n">Q</span><span class="o">.</span><span class="n">positive</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">))</span>
+<span class="bp">True</span>
+</code></pre></div>
+<p>Everything called from within the <code>with assuming</code> block has global-like access to the facts <code>Q.positive(x)</code> and <code>Q.positive(y)</code>. These facts do not leak outside the <code>with assuming</code> block.</p></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://matthewrocklin.com/blog//work/2013/02/05/Assuming">February 05, 2013 08:00 AM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>January 28, 2013</h2>
 
 <div class="channelgroup">
@@ -5527,30 +5628,6 @@ Out[128]: False
 </div>
 
 
-
-
-<div class="entrygroup" id="http://krastanov.wordpress.com/?p=524">
-<h4 lang="en"><a href="http://blog.krastanov.org/2012/07/22/the-schwarzschild-solution/">The Schwarzschild Solution</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>An “easy” solution to the Einstein equation (in free space) is the spherically symmetric Schwarzschild solution. The pdf bellow shows how one can use the diffgeom module in order to get the equations describing this solution.</p>
-<p>One starts with the most general spherically symmetrical metric and by using Einstein equation <img src="http://s0.wp.com/latex.php?latex=R_%7B%5Cmu+%5Cnu%7D%3D0&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" alt="R_{\mu \nu}=0" class="latex" title="R_{\mu \nu}=0" /> deduces the equations that must be fulfilled by the components of the metric (in the chosen basis).</p>
-<p><a href="http://krastanov.files.wordpress.com/2012/07/schwarzschild.pdf">schwarzschild.pdf</a></p>
-<br />  <img src="http://stats.wordpress.com/b.gif?host=blog.krastanov.org&amp;blog=15251174&amp;post=524&amp;subd=krastanov&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://blog.krastanov.org/2012/07/22/the-schwarzschild-solution/">by Stefan Krastanov at July 22, 2012 01:36 PM</a>
-</p>
-</div>
-</div>
-
-
 </div>
 
 </div>
@@ -5562,7 +5639,7 @@ Out[128]: False
 <h2>Subscriptions</h2>
 <ul>
 <li>
-<a href="http://asmeurersympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a>
+<a href="http://asmeurersympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://asmeurersympy.wordpress.com" class="message" title="no activity in 7 days">Aaron Meurer</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/936818886435977143/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://addisoncugini.blogspot.com/" class="message" title="no activity in 7 days">Addison Cugini</a>
@@ -5580,7 +5657,7 @@ Out[128]: False
 <a href="http://brianegranger.com/?feed=rss2" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://brianegranger.com" class="message" title="no activity in 7 days">Brian Granger</a>
 </li>
 <li>
-<a href="http://straightupcoding.blogspot.com/feeds/posts/default/-/SymPy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://straightupcoding.blogspot.com/search/label/SymPy" class="message" title="no activity in 7 days">Brian Jorgensen</a>
+<a href="http://www.blogger.com/feeds/267967203861801529/posts/default/-/SymPy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://straightupcoding.blogspot.com/search/label/SymPy" class="message" title="no activity in 7 days">Brian Jorgensen</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/5997157115341007565/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://lasympy.blogspot.com/" class="message" title="no activity in 7 days">Chris Wu</a>
@@ -5640,7 +5717,7 @@ Out[128]: False
 <a href="http://saptman.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://saptman.wordpress.com" class="message" title="no activity in 7 days">Saptarshi Mandal</a>
 </li>
 <li>
-<a href="http://seanvig.blogspot.com/feeds/posts/default/-/sympy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://seanvig.blogspot.com/search/label/sympy" class="message" title="no activity in 7 days">Sean Vig</a>
+<a href="http://www.blogger.com/feeds/8510171342300140296/posts/default/-/sympy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://seanvig.blogspot.com/search/label/sympy" class="message" title="no activity in 7 days">Sean Vig</a>
 </li>
 <li>
 <a href="http://scolobb.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://scolobb.wordpress.com" class="message" title="no activity in 7 days">Sergiu Ivanov</a>
@@ -5667,7 +5744,7 @@ Out[128]: False
 
 <p>
 <strong>Last updated:</strong><br>
-January 31, 2013 02:00 PM<br>
+February 05, 2013 03:20 AM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
