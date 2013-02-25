@@ -8,6 +8,69 @@
 	<description>Planet SymPy - http://planet.sympy.org/</description>
 
 <item>
+	<title>MRocklin: Maximum a Posteriori Estimation</title>
+	<guid isPermaLink="true">http://matthewrocklin.com/blog//work/2013/02/25/MaximumAposteriori</guid>
+	<link>http://matthewrocklin.com/blog//work/2013/02/25/MaximumAposteriori</link>
+	<description>&lt;p&gt;&lt;em&gt;Disclaimer: I know relatively little about this application. Corrections welcome.&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;In this post we see how SymPy can simplify common numeric calculations, particularly in Bayesian inference problems.&lt;/p&gt;
+
+&lt;p&gt;Imagine you are a scientist studying some &lt;a href=&quot;http://en.wikipedia.org/wiki/Poisson_process&quot;&gt;counting process&lt;/a&gt; (like radioactive decay or the number of page requests on a web server). You describe this process with a &lt;a href=&quot;http://en.wikipedia.org/wiki/Poisson_distribution&quot;&gt;Poisson random variable&lt;/a&gt; and try to learn the rate parameter of this distribution by observing some random samples.&lt;/p&gt;
+
+&lt;p&gt;If you have no preconceptions about the rate then this problem is easy. You just divide total counts by total time and you’re done.&lt;/p&gt;
+
+&lt;p&gt;A more complex problem arises when external theory provides prior information about your rate parameter (for example physics might impose rules on the rate of radioactive decay). Lets model this problem in SymPy. For the sake of concreteness lets arbitrarily assume that \( \lambda \), the rate parameter, follows a Beta distribution with parameters &lt;code&gt;a&lt;/code&gt; and &lt;code&gt;b&lt;/code&gt;.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;symbols&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'a,b'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;positive&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;lam&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Symbol&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'lambda'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;positive&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;rate&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Beta&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lam&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;count&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Poisson&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'X'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;In the lab we observe many samples \( x_i \) taken from &lt;code&gt;count&lt;/code&gt;. From these we wish to find the most likely value of &lt;code&gt;rate&lt;/code&gt;. The probability of any single value of &lt;code&gt;rate&lt;/code&gt; given our data can be rewritten with Bayes’ rule.&lt;/p&gt;
+
+&lt;p&gt;$$ p(\lambda \vert x_i) \propto \prod_i p(x_i \vert \lambda) \cdot p(\lambda) $$&lt;/p&gt;
+
+&lt;p&gt;In this case the distributions are given by&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;n&quot;&gt;pdf&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;density&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;count&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;  &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;latex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pdf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;  &lt;span class=&quot;c&quot;&gt;# density of count, given rate&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;pdf&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;density&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;         &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;latex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pdf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lam&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;$$ p(x_i \vert \lambda) = \frac{\lambda^{x}}{e^{\lambda} x!} \;\;\;\; p(\lambda) = \frac{\lambda^{a - 1} \left(- \lambda + 1\right)^{b - 1} \Gamma\left(a + b\right)}{\Gamma\left(a\right) \Gamma\left(b\right)}$$&lt;/p&gt;
+
+&lt;p&gt;To find the maximizer of \( p(\lambda \vert x_i) \) we set the derivative equal to zero. We simplify the computation by taking the &lt;code&gt;log&lt;/code&gt;. Because &lt;code&gt;log&lt;/code&gt; is monotonic this does not change the solution.&lt;/p&gt;
+
+&lt;p&gt;$$ 0 = \frac{d}{d\lambda} \log\left( \prod_i p(x_i \vert \lambda) \cdot p(\lambda)\right) = \frac{d}{d\lambda} \sum_i \log(p(x_i \vert \lambda) \cdot p(\lambda)) $$&lt;/p&gt;
+
+&lt;p&gt;We can accomplish this in SymPy with the following code&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;c&quot;&gt;# Model `n` observations with a function `data` indexed by integer `i`&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;symbols&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'i,n'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;integer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'data'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;c&quot;&gt;# Compute log likelihood&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;loglikelihood&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Product&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;density&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;count&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;density&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lam&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Eq&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;simplify&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;loglikeihood&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;diff&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lam&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;$$ \sum_{i=1}^{n} \frac{a \left(\lambda - 1\right) + b \lambda - \lambda \left(\lambda - 1\right) - 2 \lambda + \left(\lambda - 1\right) \operatorname{data}{\left[i \right]} + 1}{\lambda \left(\lambda - 1\right)} = 0 $$&lt;/p&gt;
+
+&lt;h2 id=&quot;discussion&quot;&gt;Discussion&lt;/h2&gt;
+
+&lt;p&gt;SymPy reduces this Bayesian inference problem to finding roots of the above equation. I suspect that many prevalent numeric problems could be similarly accelerated through a symbolic preprocessing step.&lt;/p&gt;
+
+&lt;p&gt;Looking at the equation above it’s clear that this problem can be simplified further. However I like the existing solution because it does not depend on the user possessing any mathematical expertise beyond the ability to describe their mathematical model (the derivatives, log, etc… are generally applicable to this problem). In what other automated ways can SymPy further process computations like this? What are other ways that aren’t in SymPy but could be developed in the future?&lt;/p&gt;
+
+&lt;p&gt;I suspect that the problem given here is analytically solvable. To the extent possible SymPy should try to solve these problems. However for the vast number of problems without analytic solutions I suspect there is still a great deal we can do, either by reducing the problem as above or through the mathematically informed selection of numeric algorithms.&lt;/p&gt;
+
+&lt;p&gt;Various root finding algorithms are appropriate in different cases. Wikipedia suggests &lt;a href=&quot;http://en.wikipedia.org/wiki/Householder%27s_method&quot;&gt;Householder’s Method&lt;/a&gt;, a generalization on Newton’s method for scalar systems with known derivatives. Perhaps in cases where SymPy is unable to solve the problem analytically it could select the correct numeric algorithm. Is this a reasonable use case for SymPy?&lt;/p&gt;
+
+&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;http://en.wikipedia.org/wiki/Maximum_a_posteriori_estimation&quot;&gt;Maximum A Posteriori Estimation&lt;/a&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;a href=&quot;http://en.wikipedia.org/wiki/Poisson_process&quot;&gt;Poisson process&lt;/a&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;a href=&quot;http://en.wikipedia.org/wiki/Householder%27s_method&quot;&gt;Householder’s Method&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description>
+	<pubDate>Mon, 25 Feb 2013 08:00:00 +0000</pubDate>
+</item>
+<item>
 	<title>MRocklin: Assuming assumptions</title>
 	<guid isPermaLink="true">http://matthewrocklin.com/blog//work/2013/02/05/Assuming</guid>
 	<link>http://matthewrocklin.com/blog//work/2013/02/05/Assuming</link>
@@ -3977,71 +4040,6 @@ Out[128]: False
 &lt;p&gt;Another, more amusing way to show that the space spanned by these fields is not a vector space is to explicitly show that a property expected from vector spaces is not fulfilled. Namely, that in &lt;img src=&quot;http://s0.wp.com/latex.php?latex=n&amp;amp;bg=f3f3f3&amp;amp;fg=888888&amp;amp;s=0&quot; alt=&quot;n&quot; class=&quot;latex&quot; title=&quot;n&quot; /&gt; dimensions an &lt;img src=&quot;http://s0.wp.com/latex.php?latex=n&amp;amp;bg=f3f3f3&amp;amp;fg=888888&amp;amp;s=0&quot; alt=&quot;n&quot; class=&quot;latex&quot; title=&quot;n&quot; /&gt;-uple of linearly independent elements forms a basis. However, in the case of fields over a manifold we can easily have a number of fields that are linearly independent over the manifold as a whole, and are at the same time linearly dependent (or simply equal to zero) on a subdomain. Hence, we have an &lt;img src=&quot;http://s0.wp.com/latex.php?latex=n&amp;amp;bg=f3f3f3&amp;amp;fg=888888&amp;amp;s=0&quot; alt=&quot;n&quot; class=&quot;latex&quot; title=&quot;n&quot; /&gt;-uple of linearly independent fields that can not be linearly combined to represent another arbitrary field.&lt;/p&gt;
 &lt;br /&gt;  &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=blog.krastanov.org&amp;amp;blog=15251174&amp;amp;post=464&amp;amp;subd=krastanov&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
 	<pubDate>Sun, 22 Jul 2012 15:11:31 +0000</pubDate>
-</item>
-<item>
-	<title>Stefan Krastanov: Objects Implemented in the diffgeom Module</title>
-	<guid isPermaLink="false">http://krastanov.wordpress.com/?p=475</guid>
-	<link>http://blog.krastanov.org/2012/07/22/objects-implemented-in-the-diffgeom-module/</link>
-	<description>&lt;p&gt;This post provides a summary of all mathematical types of expression implemented in the diffgeom module. I have chosen not to mention any python classes or other implementation details at all. This table shows how an object expected by the user to be of certain mathematical type operates on another object. If the expectations of a user familiar with differential geometry do not meet the actual implementation, this is a bug in the implementation.&lt;/p&gt;
-&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; border=&quot;0&quot; summary=&quot;&quot;&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;th colspan=&quot;2&quot; rowspan=&quot;2&quot;&gt;&lt;/th&gt;
-&lt;th colspan=&quot;5&quot;&gt;The Argument&lt;/th&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;point&lt;/td&gt;
-&lt;td&gt;scalar field&lt;/td&gt;
-&lt;td&gt;vector field&lt;/td&gt;
-&lt;td&gt;1-form field&lt;/td&gt;
-&lt;td&gt;higher form field&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;th rowspan=&quot;10&quot;&gt;The Operator&lt;/th&gt;
-&lt;td&gt;scalar field&lt;/td&gt;
-&lt;td&gt;scalar&lt;/td&gt;
-&lt;td&gt;NA&lt;/td&gt;
-&lt;td&gt;NA&lt;/td&gt;
-&lt;td&gt;NA&lt;/td&gt;
-&lt;td&gt;NA&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;vector field&lt;/td&gt;
-&lt;td&gt;NA&lt;/td&gt;
-&lt;td&gt;scalar field&lt;/td&gt;
-&lt;td&gt;NA&lt;/td&gt;
-&lt;td&gt;NA&lt;/td&gt;
-&lt;td&gt;NA&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;1-form field (linear combination of differentials of scalar fields)&lt;/td&gt;
-&lt;td&gt;NA&lt;/td&gt;
-&lt;td&gt;NA&lt;/td&gt;
-&lt;td&gt;scalar field&lt;/td&gt;
-&lt;td&gt;NA&lt;/td&gt;
-&lt;td&gt;NA&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;higher form field (linear combination of tensor products of lower form fields)&lt;/td&gt;
-&lt;td&gt;NA&lt;/td&gt;
-&lt;td&gt;NA&lt;/td&gt;
-&lt;td&gt;it takes a tuple of vector fields and returns a scalar field&lt;/td&gt;
-&lt;td&gt;NA&lt;/td&gt;
-&lt;td&gt;NA&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;commutator of vector fields&lt;/td&gt;
-&lt;td colspan=&quot;5&quot;&gt;Behaves as a regular vector field.&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;Lie derivative (the argument is “called” on construction time)&lt;/td&gt;
-&lt;td&gt;NA&lt;/td&gt;
-&lt;td colspan=&quot;4&quot;&gt;You specify the object to be derived on creation. The Lie derivative of any object is an object of the same type.&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-&lt;br /&gt;  &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=blog.krastanov.org&amp;amp;blog=15251174&amp;amp;post=475&amp;amp;subd=krastanov&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
-	<pubDate>Sun, 22 Jul 2012 15:05:08 +0000</pubDate>
 </item>
 
 </channel>

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2013-02-05T05:00:42Z</updated>
+  <updated>2013-02-25T18:20:33Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,82 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry>
+    <id>http://matthewrocklin.com/blog//work/2013/02/25/MaximumAposteriori</id>
+    <link href="http://matthewrocklin.com/blog//work/2013/02/25/MaximumAposteriori" rel="alternate" type="text/html"/>
+    <title>Maximum a Posteriori Estimation</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p><em>Disclaimer: I know relatively little about this application. Corrections welcome.</em></p>
+
+<p>In this post we see how SymPy can simplify common numeric calculations, particularly in Bayesian inference problems.</p>
+
+<p>Imagine you are a scientist studying some <a href="http://en.wikipedia.org/wiki/Poisson_process">counting process</a> (like radioactive decay or the number of page requests on a web server). You describe this process with a <a href="http://en.wikipedia.org/wiki/Poisson_distribution">Poisson random variable</a> and try to learn the rate parameter of this distribution by observing some random samples.</p>
+
+<p>If you have no preconceptions about the rate then this problem is easy. You just divide total counts by total time and you’re done.</p>
+
+<p>A more complex problem arises when external theory provides prior information about your rate parameter (for example physics might impose rules on the rate of radioactive decay). Lets model this problem in SymPy. For the sake of concreteness lets arbitrarily assume that \( \lambda \), the rate parameter, follows a Beta distribution with parameters <code>a</code> and <code>b</code>.</p>
+<div class="highlight"><pre><code class="python"><span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="s">'a,b'</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">lam</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'lambda'</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">rate</span> <span class="o">=</span> <span class="n">Beta</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="n">count</span> <span class="o">=</span> <span class="n">Poisson</span><span class="p">(</span><span class="s">'X'</span><span class="p">,</span> <span class="n">rate</span><span class="p">)</span>
+</code></pre></div>
+<p>In the lab we observe many samples \( x_i \) taken from <code>count</code>. From these we wish to find the most likely value of <code>rate</code>. The probability of any single value of <code>rate</code> given our data can be rewritten with Bayes’ rule.</p>
+
+<p>$$ p(\lambda \vert x_i) \propto \prod_i p(x_i \vert \lambda) \cdot p(\lambda) $$</p>
+
+<p>In this case the distributions are given by</p>
+<div class="highlight"><pre><code class="python"><span class="n">pdf</span> <span class="o">=</span> <span class="n">density</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">rate</span><span class="p">);</span>  <span class="k">print</span> <span class="n">latex</span><span class="p">(</span><span class="n">pdf</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>  <span class="c"># density of count, given rate</span>
+<span class="n">pdf</span> <span class="o">=</span> <span class="n">density</span><span class="p">(</span><span class="n">rate</span><span class="p">);</span>         <span class="k">print</span> <span class="n">latex</span><span class="p">(</span><span class="n">pdf</span><span class="p">(</span><span class="n">lam</span><span class="p">))</span>
+</code></pre></div>
+<p>$$ p(x_i \vert \lambda) = \frac{\lambda^{x}}{e^{\lambda} x!} \;\;\;\; p(\lambda) = \frac{\lambda^{a - 1} \left(- \lambda + 1\right)^{b - 1} \Gamma\left(a + b\right)}{\Gamma\left(a\right) \Gamma\left(b\right)}$$</p>
+
+<p>To find the maximizer of \( p(\lambda \vert x_i) \) we set the derivative equal to zero. We simplify the computation by taking the <code>log</code>. Because <code>log</code> is monotonic this does not change the solution.</p>
+
+<p>$$ 0 = \frac{d}{d\lambda} \log\left( \prod_i p(x_i \vert \lambda) \cdot p(\lambda)\right) = \frac{d}{d\lambda} \sum_i \log(p(x_i \vert \lambda) \cdot p(\lambda)) $$</p>
+
+<p>We can accomplish this in SymPy with the following code</p>
+<div class="highlight"><pre><code class="python"><span class="c"># Model `n` observations with a function `data` indexed by integer `i`</span>
+<span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="s">'i,n'</span><span class="p">,</span> <span class="n">integer</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="s">'data'</span><span class="p">)</span>
+</code></pre></div><div class="highlight"><pre><code class="python"><span class="c"># Compute log likelihood</span>
+<span class="n">loglikelihood</span> <span class="o">=</span> <span class="n">log</span><span class="p">(</span><span class="n">Product</span><span class="p">(</span><span class="n">density</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">rate</span><span class="p">)(</span><span class="n">data</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="o">*</span> <span class="n">density</span><span class="p">(</span><span class="n">rate</span><span class="p">)(</span><span class="n">lam</span><span class="p">),</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">)))</span>
+<span class="n">Eq</span><span class="p">(</span><span class="n">simplify</span><span class="p">(</span><span class="n">loglikeihood</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">lam</span><span class="p">)),</span> <span class="mi">0</span><span class="p">)</span>
+</code></pre></div>
+<p>$$ \sum_{i=1}^{n} \frac{a \left(\lambda - 1\right) + b \lambda - \lambda \left(\lambda - 1\right) - 2 \lambda + \left(\lambda - 1\right) \operatorname{data}{\left[i \right]} + 1}{\lambda \left(\lambda - 1\right)} = 0 $$</p>
+
+<h2 id="discussion">Discussion</h2>
+
+<p>SymPy reduces this Bayesian inference problem to finding roots of the above equation. I suspect that many prevalent numeric problems could be similarly accelerated through a symbolic preprocessing step.</p>
+
+<p>Looking at the equation above it’s clear that this problem can be simplified further. However I like the existing solution because it does not depend on the user possessing any mathematical expertise beyond the ability to describe their mathematical model (the derivatives, log, etc… are generally applicable to this problem). In what other automated ways can SymPy further process computations like this? What are other ways that aren’t in SymPy but could be developed in the future?</p>
+
+<p>I suspect that the problem given here is analytically solvable. To the extent possible SymPy should try to solve these problems. However for the vast number of problems without analytic solutions I suspect there is still a great deal we can do, either by reducing the problem as above or through the mathematically informed selection of numeric algorithms.</p>
+
+<p>Various root finding algorithms are appropriate in different cases. Wikipedia suggests <a href="http://en.wikipedia.org/wiki/Householder%27s_method">Householder’s Method</a>, a generalization on Newton’s method for scalar systems with known derivatives. Perhaps in cases where SymPy is unable to solve the problem analytically it could select the correct numeric algorithm. Is this a reasonable use case for SymPy?</p>
+
+<h2 id="references">References</h2>
+
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Maximum_a_posteriori_estimation">Maximum A Posteriori Estimation</a></li>
+
+<li><a href="http://en.wikipedia.org/wiki/Poisson_process">Poisson process</a></li>
+
+<li><a href="http://en.wikipedia.org/wiki/Householder%27s_method">Householder’s Method</a></li>
+</ul></div>
+    </summary>
+    <updated>2013-02-25T08:00:00Z</updated>
+    <source>
+      <id>http://matthewrocklin.com/blog/</id>
+      <author>
+        <name>MRocklin</name>
+      </author>
+      <link href="http://matthewrocklin.com/blog/" rel="alternate" type="text/html"/>
+      <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
+      <subtitle>Posts tagged as 'SymPy'</subtitle>
+      <title>Working notes by Matthew Rocklin - SymPy</title>
+      <updated>2013-02-25T18:20:28Z</updated>
+    </source>
+  </entry>
 
   <entry>
     <id>http://matthewrocklin.com/blog//work/2013/02/05/Assuming</id>
@@ -92,7 +168,7 @@
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-02-05T05:00:37Z</updated>
+      <updated>2013-02-25T18:20:28Z</updated>
     </source>
   </entry>
 
@@ -129,7 +205,7 @@
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-02-05T05:00:21Z</updated>
+      <updated>2013-02-25T18:20:16Z</updated>
     </source>
   </entry>
 
@@ -253,7 +329,7 @@ run(0, tail,  conso(head, tail, (1, 2, 3, 4)))
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-02-05T05:00:36Z</updated>
+      <updated>2013-02-25T18:20:28Z</updated>
     </source>
   </entry>
 
@@ -351,7 +427,7 @@ CO,WY,NE,KS,OK,NM,AZ,UT
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-02-05T05:00:37Z</updated>
+      <updated>2013-02-25T18:20:28Z</updated>
     </source>
   </entry>
 
@@ -468,7 +544,7 @@ CO,WY,NE,KS,OK,NM,AZ,UT
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-02-05T05:00:36Z</updated>
+      <updated>2013-02-25T18:20:28Z</updated>
     </source>
   </entry>
 
@@ -669,7 +745,7 @@ dimensions.</p>
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog//feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-02-05T05:00:16Z</updated>
+      <updated>2013-02-25T18:20:14Z</updated>
     </source>
   </entry>
 
@@ -752,7 +828,7 @@ dimensions.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-02-05T05:00:21Z</updated>
+      <updated>2013-02-25T18:20:17Z</updated>
     </source>
   </entry>
 
@@ -783,7 +859,7 @@ dimensions.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-02-05T05:00:21Z</updated>
+      <updated>2013-02-25T18:20:17Z</updated>
     </source>
   </entry>
 
@@ -875,7 +951,7 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-02-05T05:00:36Z</updated>
+      <updated>2013-02-25T18:20:27Z</updated>
     </source>
   </entry>
 
@@ -917,7 +993,7 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog//feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-02-05T05:00:16Z</updated>
+      <updated>2013-02-25T18:20:14Z</updated>
     </source>
   </entry>
 
@@ -1025,7 +1101,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-02-05T05:00:36Z</updated>
+      <updated>2013-02-25T18:20:28Z</updated>
     </source>
   </entry>
 
@@ -1181,7 +1257,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-02-05T05:00:37Z</updated>
+      <updated>2013-02-25T18:20:28Z</updated>
     </source>
   </entry>
 
@@ -1293,7 +1369,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-02-05T05:00:37Z</updated>
+      <updated>2013-02-25T18:20:27Z</updated>
     </source>
   </entry>
 
@@ -1371,7 +1447,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-02-05T05:00:37Z</updated>
+      <updated>2013-02-25T18:20:28Z</updated>
     </source>
   </entry>
 
@@ -1403,7 +1479,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-02-05T05:00:41Z</updated>
+      <updated>2013-02-25T18:20:32Z</updated>
     </source>
   </entry>
 
@@ -1548,7 +1624,7 @@ Return objects:
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-02-05T05:00:36Z</updated>
+      <updated>2013-02-25T18:00:32Z</updated>
     </source>
   </entry>
 
@@ -1897,7 +1973,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-02-05T05:00:41Z</updated>
+      <updated>2013-02-25T18:20:32Z</updated>
     </source>
   </entry>
 
@@ -2086,7 +2162,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site, I guess...</subtitle>
       <title>Gilbert Gede's Blog</title>
-      <updated>2013-02-05T05:00:30Z</updated>
+      <updated>2013-02-25T18:20:22Z</updated>
     </source>
   </entry>
 
@@ -3161,7 +3237,7 @@ f_durations.write('\n')
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2013-01-20T11:00:36Z</updated>
+      <updated>2013-02-15T21:40:40Z</updated>
     </source>
   </entry>
 
@@ -3328,7 +3404,7 @@ f_durations.write('\n')
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog//feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-02-05T05:00:14Z</updated>
+      <updated>2013-02-25T18:20:13Z</updated>
     </source>
   </entry>
 
@@ -3403,7 +3479,7 @@ f_durations.write('\n')
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2013-02-05T05:00:32Z</updated>
+      <updated>2013-02-25T18:20:24Z</updated>
     </source>
   </entry>
 
@@ -3548,7 +3624,7 @@ RuntimeError: maximum recursion depth exceeded in comparison
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-02-05T05:00:21Z</updated>
+      <updated>2013-02-25T18:20:17Z</updated>
     </source>
   </entry>
 
@@ -3591,7 +3667,7 @@ b. Add this line to your bash_profile.</p>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-02-05T05:00:41Z</updated>
+      <updated>2013-02-25T18:20:32Z</updated>
     </source>
   </entry>
 
@@ -3672,7 +3748,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-02-05T05:00:21Z</updated>
+      <updated>2013-02-25T18:20:17Z</updated>
     </source>
   </entry>
 
@@ -3708,7 +3784,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-02-05T05:00:21Z</updated>
+      <updated>2013-02-25T18:20:17Z</updated>
     </source>
   </entry>
 
@@ -3750,7 +3826,7 @@ Hence, a new file was created, sympy/combinatorics/testutil.py, that will host s
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2013-01-18T08:20:35Z</updated>
+      <updated>2013-02-12T06:40:44Z</updated>
     </source>
   </entry>
 
@@ -3905,7 +3981,7 @@ Out[74]: True
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2013-01-18T08:20:34Z</updated>
+      <updated>2013-02-12T06:40:44Z</updated>
     </source>
   </entry>
 
@@ -3944,7 +4020,7 @@ Out[74]: True
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-02-05T05:00:41Z</updated>
+      <updated>2013-02-25T18:20:32Z</updated>
     </source>
   </entry>
 
@@ -4062,7 +4138,7 @@ commits are much more like my usual ones.
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-02-05T05:00:39Z</updated>
+      <updated>2013-02-25T18:20:30Z</updated>
     </source>
   </entry>
 
@@ -4095,7 +4171,7 @@ commits are much more like my usual ones.
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2013-02-05T05:00:40Z</updated>
+      <updated>2013-02-25T18:20:31Z</updated>
     </source>
   </entry>
 
@@ -4129,7 +4205,7 @@ commits are much more like my usual ones.
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2013-01-20T11:00:35Z</updated>
+      <updated>2013-02-15T21:40:40Z</updated>
     </source>
   </entry>
 
@@ -4196,7 +4272,7 @@ Out[24]: 6
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2013-01-18T08:20:35Z</updated>
+      <updated>2013-02-12T06:40:44Z</updated>
     </source>
   </entry>
 
@@ -4240,7 +4316,7 @@ Out[24]: 6
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-02-05T05:00:39Z</updated>
+      <updated>2013-02-25T18:20:30Z</updated>
     </source>
   </entry>
 
@@ -4359,7 +4435,7 @@ Out[24]: 6
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2013-02-05T05:00:40Z</updated>
+      <updated>2013-02-25T18:20:31Z</updated>
     </source>
   </entry>
 
@@ -4391,7 +4467,7 @@ Out[24]: 6
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-02-05T05:00:41Z</updated>
+      <updated>2013-02-25T18:20:32Z</updated>
     </source>
   </entry>
 
@@ -4432,7 +4508,7 @@ Out[24]: 6
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2013-01-20T11:00:35Z</updated>
+      <updated>2013-02-15T21:40:40Z</updated>
     </source>
   </entry>
 
@@ -4502,7 +4578,7 @@ StopIteration:
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2013-01-18T08:20:35Z</updated>
+      <updated>2013-02-12T06:40:44Z</updated>
     </source>
   </entry>
 
@@ -4535,7 +4611,7 @@ StopIteration:
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-02-05T05:00:41Z</updated>
+      <updated>2013-02-25T18:20:32Z</updated>
     </source>
   </entry>
 
@@ -4594,7 +4670,7 @@ StopIteration:
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-02-05T05:00:39Z</updated>
+      <updated>2013-02-25T18:20:30Z</updated>
     </source>
   </entry>
 
@@ -4624,7 +4700,7 @@ StopIteration:
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2013-02-05T05:00:40Z</updated>
+      <updated>2013-02-25T18:20:31Z</updated>
     </source>
   </entry>
 
@@ -4958,7 +5034,7 @@ Out[128]: False
       <link href="http://amakelov.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
-      <updated>2013-01-18T08:20:35Z</updated>
+      <updated>2013-02-12T06:40:44Z</updated>
     </source>
   </entry>
 
@@ -4993,95 +5069,7 @@ Out[128]: False
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2013-01-20T11:00:35Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://krastanov.wordpress.com/?p=475</id>
-    <link href="http://blog.krastanov.org/2012/07/22/objects-implemented-in-the-diffgeom-module/" rel="alternate" type="text/html"/>
-    <title>Objects Implemented in the diffgeom Module</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">This post provides a summary of all mathematical types of expression implemented in the diffgeom module. I have chosen not to mention any python classes or other implementation details at all. This table shows how an object expected by the user to be of certain mathematical type operates on another object. If the expectations of [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=blog.krastanov.org&amp;blog=15251174&amp;post=475&amp;subd=krastanov&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>This post provides a summary of all mathematical types of expression implemented in the diffgeom module. I have chosen not to mention any python classes or other implementation details at all. This table shows how an object expected by the user to be of certain mathematical type operates on another object. If the expectations of a user familiar with differential geometry do not meet the actual implementation, this is a bug in the implementation.</p>
-<table border="0" cellpadding="0" cellspacing="0" summary="">
-<tbody>
-<tr>
-<th colspan="2" rowspan="2"/>
-<th colspan="5">The Argument</th>
-</tr>
-<tr>
-<td>point</td>
-<td>scalar field</td>
-<td>vector field</td>
-<td>1-form field</td>
-<td>higher form field</td>
-</tr>
-<tr>
-<th rowspan="10">The Operator</th>
-<td>scalar field</td>
-<td>scalar</td>
-<td>NA</td>
-<td>NA</td>
-<td>NA</td>
-<td>NA</td>
-</tr>
-<tr>
-<td>vector field</td>
-<td>NA</td>
-<td>scalar field</td>
-<td>NA</td>
-<td>NA</td>
-<td>NA</td>
-</tr>
-<tr>
-<td>1-form field (linear combination of differentials of scalar fields)</td>
-<td>NA</td>
-<td>NA</td>
-<td>scalar field</td>
-<td>NA</td>
-<td>NA</td>
-</tr>
-<tr>
-<td>higher form field (linear combination of tensor products of lower form fields)</td>
-<td>NA</td>
-<td>NA</td>
-<td>it takes a tuple of vector fields and returns a scalar field</td>
-<td>NA</td>
-<td>NA</td>
-</tr>
-<tr>
-<td>commutator of vector fields</td>
-<td colspan="5">Behaves as a regular vector field.</td>
-</tr>
-<tr>
-<td>Lie derivative (the argument is “called” on construction time)</td>
-<td>NA</td>
-<td colspan="4">You specify the object to be derived on creation. The Lie derivative of any object is an object of the same type.</td>
-</tr>
-</tbody>
-</table>
-<br/>  <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=blog.krastanov.org&amp;blog=15251174&amp;post=475&amp;subd=krastanov&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2012-07-22T15:05:08Z</updated>
-    <category term="GSoC - diffgeom"/>
-    <category term="differential geometry"/>
-    <category term="gsoc"/>
-    <category term="symbolic algebra"/>
-    <category term="sympy"/>
-    <author>
-      <name>Stefan Krastanov</name>
-    </author>
-    <source>
-      <id>http://blog.krastanov.org</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://blog.krastanov.org/category/sympy-2/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://blog.krastanov.org" rel="alternate" type="text/html"/>
-      <link href="http://blog.krastanov.org/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>Just another WordPress.com site</subtitle>
-      <title>Stefan's Blog » SymPy</title>
-      <updated>2013-01-20T11:00:35Z</updated>
+      <updated>2013-02-15T21:40:40Z</updated>
     </source>
   </entry>
 </feed>

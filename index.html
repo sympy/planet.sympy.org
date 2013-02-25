@@ -10,6 +10,7 @@
 
 
 
+
 <head>
 <title>Planet SymPy</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -21,6 +22,98 @@
 <body>
 <h1>Planet SymPy</h1>
 
+<div class="daygroup">
+<h2>February 25, 2013</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://matthewrocklin.com/blog/" title="Working notes by Matthew Rocklin - SymPy">MRocklin</a></h3>
+
+
+<div class="entrygroup" id="http://matthewrocklin.com/blog//work/2013/02/25/MaximumAposteriori">
+<h4><a href="http://matthewrocklin.com/blog//work/2013/02/25/MaximumAposteriori">Maximum a Posteriori Estimation</a></h4>
+<div class="entry">
+<div class="content">
+<p><em>Disclaimer: I know relatively little about this application. Corrections welcome.</em></p>
+
+<p>In this post we see how SymPy can simplify common numeric calculations, particularly in Bayesian inference problems.</p>
+
+<p>Imagine you are a scientist studying some <a href="http://en.wikipedia.org/wiki/Poisson_process">counting process</a> (like radioactive decay or the number of page requests on a web server). You describe this process with a <a href="http://en.wikipedia.org/wiki/Poisson_distribution">Poisson random variable</a> and try to learn the rate parameter of this distribution by observing some random samples.</p>
+
+<p>If you have no preconceptions about the rate then this problem is easy. You just divide total counts by total time and you’re done.</p>
+
+<p>A more complex problem arises when external theory provides prior information about your rate parameter (for example physics might impose rules on the rate of radioactive decay). Lets model this problem in SymPy. For the sake of concreteness lets arbitrarily assume that \( \lambda \), the rate parameter, follows a Beta distribution with parameters <code>a</code> and <code>b</code>.</p>
+<div class="highlight"><pre><code class="python"><span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="s">'a,b'</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">lam</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'lambda'</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">rate</span> <span class="o">=</span> <span class="n">Beta</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="n">count</span> <span class="o">=</span> <span class="n">Poisson</span><span class="p">(</span><span class="s">'X'</span><span class="p">,</span> <span class="n">rate</span><span class="p">)</span>
+</code></pre></div>
+<p>In the lab we observe many samples \( x_i \) taken from <code>count</code>. From these we wish to find the most likely value of <code>rate</code>. The probability of any single value of <code>rate</code> given our data can be rewritten with Bayes’ rule.</p>
+
+<p>$$ p(\lambda \vert x_i) \propto \prod_i p(x_i \vert \lambda) \cdot p(\lambda) $$</p>
+
+<p>In this case the distributions are given by</p>
+<div class="highlight"><pre><code class="python"><span class="n">pdf</span> <span class="o">=</span> <span class="n">density</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">rate</span><span class="p">);</span>  <span class="k">print</span> <span class="n">latex</span><span class="p">(</span><span class="n">pdf</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>  <span class="c"># density of count, given rate</span>
+<span class="n">pdf</span> <span class="o">=</span> <span class="n">density</span><span class="p">(</span><span class="n">rate</span><span class="p">);</span>         <span class="k">print</span> <span class="n">latex</span><span class="p">(</span><span class="n">pdf</span><span class="p">(</span><span class="n">lam</span><span class="p">))</span>
+</code></pre></div>
+<p>$$ p(x_i \vert \lambda) = \frac{\lambda^{x}}{e^{\lambda} x!} \;\;\;\; p(\lambda) = \frac{\lambda^{a - 1} \left(- \lambda + 1\right)^{b - 1} \Gamma\left(a + b\right)}{\Gamma\left(a\right) \Gamma\left(b\right)}$$</p>
+
+<p>To find the maximizer of \( p(\lambda \vert x_i) \) we set the derivative equal to zero. We simplify the computation by taking the <code>log</code>. Because <code>log</code> is monotonic this does not change the solution.</p>
+
+<p>$$ 0 = \frac{d}{d\lambda} \log\left( \prod_i p(x_i \vert \lambda) \cdot p(\lambda)\right) = \frac{d}{d\lambda} \sum_i \log(p(x_i \vert \lambda) \cdot p(\lambda)) $$</p>
+
+<p>We can accomplish this in SymPy with the following code</p>
+<div class="highlight"><pre><code class="python"><span class="c"># Model `n` observations with a function `data` indexed by integer `i`</span>
+<span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="s">'i,n'</span><span class="p">,</span> <span class="n">integer</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="s">'data'</span><span class="p">)</span>
+</code></pre></div><div class="highlight"><pre><code class="python"><span class="c"># Compute log likelihood</span>
+<span class="n">loglikelihood</span> <span class="o">=</span> <span class="n">log</span><span class="p">(</span><span class="n">Product</span><span class="p">(</span><span class="n">density</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">rate</span><span class="p">)(</span><span class="n">data</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="o">*</span> <span class="n">density</span><span class="p">(</span><span class="n">rate</span><span class="p">)(</span><span class="n">lam</span><span class="p">),</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">)))</span>
+<span class="n">Eq</span><span class="p">(</span><span class="n">simplify</span><span class="p">(</span><span class="n">loglikeihood</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">lam</span><span class="p">)),</span> <span class="mi">0</span><span class="p">)</span>
+</code></pre></div>
+<p>$$ \sum_{i=1}^{n} \frac{a \left(\lambda - 1\right) + b \lambda - \lambda \left(\lambda - 1\right) - 2 \lambda + \left(\lambda - 1\right) \operatorname{data}{\left[i \right]} + 1}{\lambda \left(\lambda - 1\right)} = 0 $$</p>
+
+<h2 id="discussion">Discussion</h2>
+
+<p>SymPy reduces this Bayesian inference problem to finding roots of the above equation. I suspect that many prevalent numeric problems could be similarly accelerated through a symbolic preprocessing step.</p>
+
+<p>Looking at the equation above it’s clear that this problem can be simplified further. However I like the existing solution because it does not depend on the user possessing any mathematical expertise beyond the ability to describe their mathematical model (the derivatives, log, etc… are generally applicable to this problem). In what other automated ways can SymPy further process computations like this? What are other ways that aren’t in SymPy but could be developed in the future?</p>
+
+<p>I suspect that the problem given here is analytically solvable. To the extent possible SymPy should try to solve these problems. However for the vast number of problems without analytic solutions I suspect there is still a great deal we can do, either by reducing the problem as above or through the mathematically informed selection of numeric algorithms.</p>
+
+<p>Various root finding algorithms are appropriate in different cases. Wikipedia suggests <a href="http://en.wikipedia.org/wiki/Householder%27s_method">Householder’s Method</a>, a generalization on Newton’s method for scalar systems with known derivatives. Perhaps in cases where SymPy is unable to solve the problem analytically it could select the correct numeric algorithm. Is this a reasonable use case for SymPy?</p>
+
+<h2 id="references">References</h2>
+
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Maximum_a_posteriori_estimation">Maximum A Posteriori Estimation</a></li>
+
+<li><a href="http://en.wikipedia.org/wiki/Poisson_process">Poisson process</a></li>
+
+<li><a href="http://en.wikipedia.org/wiki/Householder%27s_method">Householder’s Method</a></li>
+</ul></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://matthewrocklin.com/blog//work/2013/02/25/MaximumAposteriori">February 25, 2013 08:00 AM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
 <div class="daygroup">
 <h2>February 05, 2013</h2>
 
@@ -5548,85 +5641,6 @@ Out[128]: False
 </div>
 
 
-
-
-<div class="entrygroup" id="http://krastanov.wordpress.com/?p=475">
-<h4 lang="en"><a href="http://blog.krastanov.org/2012/07/22/objects-implemented-in-the-diffgeom-module/">Objects Implemented in the diffgeom Module</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>This post provides a summary of all mathematical types of expression implemented in the diffgeom module. I have chosen not to mention any python classes or other implementation details at all. This table shows how an object expected by the user to be of certain mathematical type operates on another object. If the expectations of a user familiar with differential geometry do not meet the actual implementation, this is a bug in the implementation.</p>
-<table cellpadding="0" cellspacing="0" border="0" summary="">
-<tbody>
-<tr>
-<th colspan="2" rowspan="2"></th>
-<th colspan="5">The Argument</th>
-</tr>
-<tr>
-<td>point</td>
-<td>scalar field</td>
-<td>vector field</td>
-<td>1-form field</td>
-<td>higher form field</td>
-</tr>
-<tr>
-<th rowspan="10">The Operator</th>
-<td>scalar field</td>
-<td>scalar</td>
-<td>NA</td>
-<td>NA</td>
-<td>NA</td>
-<td>NA</td>
-</tr>
-<tr>
-<td>vector field</td>
-<td>NA</td>
-<td>scalar field</td>
-<td>NA</td>
-<td>NA</td>
-<td>NA</td>
-</tr>
-<tr>
-<td>1-form field (linear combination of differentials of scalar fields)</td>
-<td>NA</td>
-<td>NA</td>
-<td>scalar field</td>
-<td>NA</td>
-<td>NA</td>
-</tr>
-<tr>
-<td>higher form field (linear combination of tensor products of lower form fields)</td>
-<td>NA</td>
-<td>NA</td>
-<td>it takes a tuple of vector fields and returns a scalar field</td>
-<td>NA</td>
-<td>NA</td>
-</tr>
-<tr>
-<td>commutator of vector fields</td>
-<td colspan="5">Behaves as a regular vector field.</td>
-</tr>
-<tr>
-<td>Lie derivative (the argument is “called” on construction time)</td>
-<td>NA</td>
-<td colspan="4">You specify the object to be derived on creation. The Lie derivative of any object is an object of the same type.</td>
-</tr>
-</tbody>
-</table>
-<br />  <img src="http://stats.wordpress.com/b.gif?host=blog.krastanov.org&amp;blog=15251174&amp;post=475&amp;subd=krastanov&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://blog.krastanov.org/2012/07/22/objects-implemented-in-the-diffgeom-module/">by Stefan Krastanov at July 22, 2012 03:05 PM</a>
-</p>
-</div>
-</div>
-
-
 </div>
 
 </div>
@@ -5644,7 +5658,7 @@ Out[128]: False
 <a href="http://www.blogger.com/feeds/936818886435977143/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://addisoncugini.blogspot.com/" class="message" title="no activity in 7 days">Addison Cugini</a>
 </li>
 <li>
-<a href="http://amakelov.wordpress.com/category/google-summer-of-code-2012/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://amakelov.wordpress.com" class="message" title="no activity in 7 days">Aleksandar Makelov</a>
+<a href="http://amakelov.wordpress.com/category/google-summer-of-code-2012/feed" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://amakelov.wordpress.com" class="message" title="no activity in 7 days">Aleksandar Makelov</a>
 </li>
 <li>
 <a href="http://angadhsympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://angadhsympy.wordpress.com" class="message" title="no activity in 7 days">Angadh Nanjangud</a>
@@ -5659,7 +5673,7 @@ Out[128]: False
 <a href="http://www.blogger.com/feeds/267967203861801529/posts/default/-/SymPy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://straightupcoding.blogspot.com/search/label/SymPy" class="message" title="no activity in 7 days">Brian Jorgensen</a>
 </li>
 <li>
-<a href="http://www.blogger.com/feeds/5997157115341007565/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://lasympy.blogspot.com/" class="message" title="no activity in 7 days">Chris Wu</a>
+<a href="http://lasympy.blogspot.com/feeds/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://lasympy.blogspot.com/" class="message" title="no activity in 7 days">Chris Wu</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/22566012/posts/default/-/sympy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://haz-tech.blogspot.com/search/label/sympy" class="message" title="no activity in 7 days">Christian Muise</a>
@@ -5677,7 +5691,7 @@ Out[128]: False
 <a href="http://fseoane.net/blog//feed/rss.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://fseoane.net/blog/" class="message" title="no activity in 7 days">Fabian Pedregosa</a>
 </li>
 <li>
-<a href="http://www.blogger.com/feeds/7648717043547744590/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://gsoc-mathtex.blogspot.com/" class="message" title="no activity in 7 days">Freddie Witherden</a>
+<a href="http://gsoc-mathtex.blogspot.com/feeds/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://gsoc-mathtex.blogspot.com/" class="message" title="no activity in 7 days">Freddie Witherden</a>
 </li>
 <li>
 <a href="http://fredrik-j.blogspot.com/feeds/posts/default/-/sympy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://fredrik-j.blogspot.com/search/label/sympy" class="message" title="no activity in 7 days">Fredrik Johansson</a>
@@ -5707,7 +5721,7 @@ Out[128]: False
 <a href="http://www.blogger.com/feeds/2520472460430880330/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sympy.blogspot.com/" class="message" title="no activity in 7 days">Official SymPy blog</a>
 </li>
 <li>
-<a href="http://www.blogger.com/feeds/6568744196982634289/posts/default/-/sympy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://ondrejcertik.blogspot.com/search/label/sympy" class="message" title="no activity in 7 days">Ondřej Čertík</a>
+<a href="http://ondrejcertik.blogspot.com/feeds/posts/default/-/sympy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://ondrejcertik.blogspot.com/search/label/sympy" class="message" title="no activity in 7 days">Ondřej Čertík</a>
 </li>
 <li>
 <a href="http://robert-code.blogspot.com/feeds/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://robert-code.blogspot.com/" class="message" title="no activity in 7 days">Robert Schwarz</a>
@@ -5734,7 +5748,7 @@ Out[128]: False
 <a href="http://lazovichsympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://lazovichsympy.wordpress.com" class="message" title="no activity in 7 days">Tomo Lazovich</a>
 </li>
 <li>
-<a href="http://www.vperic.blogspot.com/feeds/posts/default/-/SymPy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://vperic.blogspot.com/search/label/SymPy" class="message" title="no activity in 7 days">Vladimir Perić</a>
+<a href="http://www.blogger.com/feeds/8814696591561172392/posts/default/-/SymPy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://vperic.blogspot.com/search/label/SymPy" class="message" title="no activity in 7 days">Vladimir Perić</a>
 </li>
 <li>
 <a href="http://ojensen.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://ojensen.wordpress.com" class="message" title="no activity in 7 days">Øyvind Jensen</a>
@@ -5743,7 +5757,7 @@ Out[128]: False
 
 <p>
 <strong>Last updated:</strong><br>
-February 05, 2013 05:00 AM<br>
+February 25, 2013 06:20 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
