@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2013-02-25T18:20:33Z</updated>
+  <updated>2013-02-27T19:40:41Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,77 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry>
+    <id>tag:fseoane.net/blog,2013-02-27:2013/loss-functions-for-ordinal-regression/</id>
+    <link href="http://fseoane.net/blog/2013/loss-functions-for-ordinal-regression/" rel="alternate" type="text/html"/>
+    <title>Loss Functions for Ordinal regression</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p><strong> Note: this post contains a fair amount of LaTeX, if you don't
+visualize the math correctly come to its <a href="http://fseoane.net/blog/2013/loss-functions-for-ordinal-regression/">original location</a> </strong></p>
+<p>In machine learning it is common to formulate the classification task
+as a minimization problem over a given loss function. Given data input
+data $(x_1, ..., x_n)$ and associated labels $(y_1, ..., y_n), y_i \in
+\lbrace-1, 1\rbrace$, the problem becomes to find a function $f(x)$
+that minimizes</p>
+<p>$$L(x, y) = \sum_i ^n \text{loss}(f(x_i), y_i)$$</p>
+<p>where loss is any loss function. These are usually functions that
+become close to zero when $f(x_i)$ agrees in sign with $y_i$ and have
+a non-negative value when $f(x_i)$ have opposite signs. Common choices
+of loss functions are:</p>
+<ul>
+<li>Zero-one loss, $I(f(x_i) = y_i)$, where $I$ is the indicator function.</li>
+<li>Hinge loss, $\text{max}(0, 1 - f(x_i) y_i)$</li>
+<li>Logistic loss, $\log(1 + \exp{f(x_i) y_i})$</li>
+</ul>
+<p><img alt="Loss functions" src="http://fseoane.net/blog/static/images/2013/loss_functions.png"/></p>
+<p>In the paper <a href="http://citeseer.ist.psu.edu/viewdoc/summary?doi=10.1.1.124.9242">Loss functions for preference levels: Regression with
+discrete ordered
+labels</a>,
+the above setting that is commonly used in the classification and
+regression setting is extended for the ordinal regression problem. In
+ordinal regression, classes can take one of several discrete, but
+ordered, labels. Think for example on movie ratings that go from zero
+to ten stars. Here there's an inherent order in the sense that
+(unlike the multiclass classification setting) not all errors are
+equally bad. For instance, it is worse to mistake a 1-star with a
+10-star than a 4-star movie with a 5-star one.</p>
+<p>To extend the binary loss to the case of ordinal regression, the
+author introduces K-1 thresholds $-\infty = \theta_0 \lt \theta_1 \lt
+... \lt \theta_{K-1}=\infty$. Each of the K segments corresponds to one of
+K labels and a predicted value between $\theta_{d}$ and $\theta_{d+1}$
+corresponds to the prediction of class $d$ (supposing that classes to
+from zero to $d$). This generalizes the binary case by considering
+zero the unique threshold. </p>
+<p>Suppose K=7 and a that the correct outcome of $y_i$ is 2, that is,
+$f(x_i)$ must lie between $\theta_1$ and $\theta_2$. In that case, it
+must be verified that $f(x_i) &gt; \theta_0$ and $f(x_i) &gt; \theta_1$ as
+well as $f(x_i) &lt; \theta_3 &lt; \theta_4 &lt; \theta_5$. Treating this as
+K-1=6 independent classification problems produces the following
+family of loss functions (for a hinge loss):</p>
+<p><img alt="Ordinal loss functions" src="http://fseoane.net/blog/static/images/2013/loss_functions_ordinal.png"/></p>
+<p>The idea behind Rennie's paper is to sum all these loss function to
+produce a single optimization problem that is then the sum of all
+threshold violations. Here, not only the function increases when
+thresholds are violated, but the slope of the loss function increases
+each time a threshold is crossed.</p>
+<p><img alt="Ordinal loss functions" src="http://fseoane.net/blog/static/images/2013/loss_functions_ordinal2.png"/></p>
+</div>
+    </summary>
+    <updated>2013-02-26T23:00:00Z</updated>
+    <category term="machine learning"/>
+    <category term="ordinal regression"/>
+    <category term="loss function"/>
+    <author>
+      <name>Fabian Pedregosa</name>
+    </author>
+    <source>
+      <id>http://fseoane.net/blog/</id>
+      <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
+      <link href="http://fseoane.net/blog//feed/rss.xml" rel="self" type="application/atom+xml"/>
+      <title>I say things</title>
+      <updated>2013-02-27T19:40:20Z</updated>
+    </source>
+  </entry>
 
   <entry>
     <id>http://matthewrocklin.com/blog//work/2013/02/25/MaximumAposteriori</id>
@@ -83,7 +154,7 @@
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-02-25T18:20:28Z</updated>
+      <updated>2013-02-27T19:40:35Z</updated>
     </source>
   </entry>
 
@@ -168,7 +239,7 @@
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-02-25T18:20:28Z</updated>
+      <updated>2013-02-27T19:40:35Z</updated>
     </source>
   </entry>
 
@@ -205,7 +276,7 @@
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-02-25T18:20:16Z</updated>
+      <updated>2013-02-27T19:40:23Z</updated>
     </source>
   </entry>
 
@@ -329,7 +400,7 @@ run(0, tail,  conso(head, tail, (1, 2, 3, 4)))
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-02-25T18:20:28Z</updated>
+      <updated>2013-02-27T19:40:35Z</updated>
     </source>
   </entry>
 
@@ -427,7 +498,7 @@ CO,WY,NE,KS,OK,NM,AZ,UT
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-02-25T18:20:28Z</updated>
+      <updated>2013-02-27T19:40:35Z</updated>
     </source>
   </entry>
 
@@ -544,7 +615,7 @@ CO,WY,NE,KS,OK,NM,AZ,UT
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-02-25T18:20:28Z</updated>
+      <updated>2013-02-27T19:40:35Z</updated>
     </source>
   </entry>
 
@@ -745,7 +816,7 @@ dimensions.</p>
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog//feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-02-25T18:20:14Z</updated>
+      <updated>2013-02-27T19:40:21Z</updated>
     </source>
   </entry>
 
@@ -828,7 +899,7 @@ dimensions.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-02-25T18:20:17Z</updated>
+      <updated>2013-02-27T19:40:24Z</updated>
     </source>
   </entry>
 
@@ -859,7 +930,7 @@ dimensions.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-02-25T18:20:17Z</updated>
+      <updated>2013-02-27T19:40:24Z</updated>
     </source>
   </entry>
 
@@ -951,7 +1022,7 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-02-25T18:20:27Z</updated>
+      <updated>2013-02-27T19:40:35Z</updated>
     </source>
   </entry>
 
@@ -960,7 +1031,7 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
     <link href="http://fseoane.net/blog/2012/singular-value-decomposition-in-scipy/" rel="alternate" type="text/html"/>
     <title>Singular Value Decomposition in SciPy</title>
     <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>SciPy contains two methods to compute the singular value decomposition (SVD) of a matrix: <code>scipy.linalg.svd</code> and <code>scipy.sparse.linalg.svds</code>. In this post I'll compare both methods for the task of computing the full SVD of a large dense matrix.</p>
-<p>The first method, <code>scipy.linalg.svd</code>, is perhaps the best known and uses the linear algebra library <a href="http://www.netlib.org/lapack/">LAPACK</a> to handle the computations. This implements the Golub-Kahan-Reisch algorithm <sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup>, which is accurate and highly efficient with a cost of O(n^3) floating-point operations <sup id="fnref:2"><a href="http://fseoane.net/blog/feed/#fn:2" rel="footnote">2</a></sup>.</p>
+<p>The first method, <code>scipy.linalg.svd</code>, is perhaps the best known and uses the linear algebra library <a href="http://www.netlib.org/lapack/">LAPACK</a> to handle the computations. This implements the Golub-Kahan-Reisch algorithm <sup id="fnref:1"><a class="footnote-ref" href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup>, which is accurate and highly efficient with a cost of O(n^3) floating-point operations <sup id="fnref:2"><a class="footnote-ref" href="http://fseoane.net/blog/feed/#fn:2" rel="footnote">2</a></sup>.</p>
 <p>The second method is <code>scipy.sparse.linalg.svds</code> and despite it's name it works fine also for dense arrays. This implementation is based on the <a href="http://www.caam.rice.edu/software/ARPACK/">ARPACK</a> library and consists of an iterative procedure that finds the SVD decomposition by reducing the problem to an eigendecomposition on the array X -&gt; dot(X.T, X). This method is usually very effective when the input matrix X is sparse or only the largest singular values are required. There are other SVD solvers that I did not consider, such as <a href="http://pypi.python.org/pypi/sparsesvd/">sparsesvd</a> or <a href="http://pysparse.sourceforge.net/introduction.html#jdsym">pysparse.jdsym</a>, but my points for the sparse solve probably hold for those packages too since they both implement iterative algorithms based on the same principles.</p>
 <p>When the input matrix is dense and all the singular values are required, the first method is usually more efficient. To support this statement I've created a little benchmark: timings for both methods as a function of the size of the matrices. Notice that we are in a case that is clearly favorable to the <code>linalg.svd</code>: after all <code>sparse.linalg.svds</code> was not created with this setting in mind, it was created for sparse matrices or dense matrices with some special structure. We will see however that even in this setting it has interesting advantages.</p>
 <p>I'll create random square matrices with different sizes and plot the timings for both methods. For the benchmarks I used SciPy v0.12 linked against Intel Math Kernel Library v11. Both methods are single-threaded (I had to set OMP_NUM_THREADS=1 so that MKL does not try to parallelize the computations). <a href="https://gist.github.com/4250756#file-svd_timing-py">[code]</a></p>
@@ -973,10 +1044,10 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
 <hr/>
 <ol>
 <li id="fn:1">
-<p>Calculating the singular values and pseudo-inverse of a matrix, <em>Golub, Gene H., Kahan, William</em>, 1965, <a href="http://www.jstor.org/stable/2949777">JSTOR</a> <a href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
+<p>Calculating the singular values and pseudo-inverse of a matrix, <em>Golub, Gene H., Kahan, William</em>, 1965, <a href="http://www.jstor.org/stable/2949777">JSTOR</a> <a class="footnote-backref" href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
 </li>
 <li id="fn:2">
-<p>A Survey of Singular Value Decomposition Methods and Performance Comparison of Some Available Serial Codes, <em>Plassman, Gerald E.</em> 2005 <a href="http://research.microsoft.com/en-us/um/people/zhoulin/2005-a%20survey%20of%20singular%20value%20decomposition_plassman.pdf">PDF</a> <a href="http://fseoane.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
+<p>A Survey of Singular Value Decomposition Methods and Performance Comparison of Some Available Serial Codes, <em>Plassman, Gerald E.</em> 2005 <a href="http://research.microsoft.com/en-us/um/people/zhoulin/2005-a%20survey%20of%20singular%20value%20decomposition_plassman.pdf">PDF</a> <a class="footnote-backref" href="http://fseoane.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
 </li>
 </ol>
 </div></div>
@@ -993,7 +1064,7 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog//feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-02-25T18:20:14Z</updated>
+      <updated>2013-02-27T19:40:21Z</updated>
     </source>
   </entry>
 
@@ -1101,7 +1172,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-02-25T18:20:28Z</updated>
+      <updated>2013-02-27T19:40:35Z</updated>
     </source>
   </entry>
 
@@ -1257,7 +1328,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-02-25T18:20:28Z</updated>
+      <updated>2013-02-27T19:40:35Z</updated>
     </source>
   </entry>
 
@@ -1369,7 +1440,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-02-25T18:20:27Z</updated>
+      <updated>2013-02-27T19:40:35Z</updated>
     </source>
   </entry>
 
@@ -1447,7 +1518,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-02-25T18:20:28Z</updated>
+      <updated>2013-02-27T19:40:35Z</updated>
     </source>
   </entry>
 
@@ -1479,7 +1550,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-02-25T18:20:32Z</updated>
+      <updated>2013-02-27T19:40:41Z</updated>
     </source>
   </entry>
 
@@ -1973,7 +2044,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-02-25T18:20:32Z</updated>
+      <updated>2013-02-27T19:40:40Z</updated>
     </source>
   </entry>
 
@@ -2162,7 +2233,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site, I guess...</subtitle>
       <title>Gilbert Gede's Blog</title>
-      <updated>2013-02-25T18:20:22Z</updated>
+      <updated>2013-02-27T19:40:29Z</updated>
     </source>
   </entry>
 
@@ -3249,7 +3320,7 @@ f_durations.write('\n')
 <p>In the ranking setting, training data consists of lists of items with some order specified between items in each list. This order is typically induced by giving a numerical or ordinal score or a binary judgment (e.g. "relevant" or "not relevant") for each item, so that for any two samples <code>a</code> and <code>b</code>, either <code>a &lt; b</code>, <code>b &gt; a</code> or <code>b</code> and <code>a</code> are not comparable.</p>
 <p>For example, in the case of a search engine, our dataset consists of results that belong to different queries and we would like to only compare the relevance for results coming from the same query.</p>
 <p>This order relation is usually domain-specific. For instance, in information retrieval the set of comparable samples is referred to as a "query id". The goal behind this is to compare only documents that belong to the same query (<a href="http://dx.doi.org/10.1145/775047.775067">Joachims 2002</a>). In medical imaging on the other hand, the order of the labels usually depend on the subject so the comparable samples is given by the different subjects in the study (<a href="http://hal.inria.fr/hal-00717990/en">Pedregosa et al 2012</a>).</p>
-<div class="highlight"><pre><span class="kn">import</span> <span class="nn">itertools</span>
+<div class="codehilite"><pre><span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
 <span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">pl</span>
@@ -3258,7 +3329,7 @@ f_durations.write('\n')
 
 <p>To start with, we'll create a dataset in which the target values consists of three graded measurements Y = {0, 1, 2} and the input data is a collection of 30 samples, each one with two features.</p>
 <p>The set of comparable elements (queries in information retrieval) will consist of two equally sized blocks, $X = X_1 \cup X_2$, where each block is generated using a normal distribution with different mean and covariance. In the pictures, we represent $X_1$ with round markers and $X_2$ with triangular markers.</p>
-<div class="highlight"><pre><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<div class="codehilite"><pre><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
 <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)])</span>
 <span class="n">K</span> <span class="o">=</span> <span class="mi">20</span>
@@ -3297,7 +3368,7 @@ f_durations.write('\n')
 <p><img alt="" src="http://fseoane.net/blog/static/uploads/2012/pairwise_transform_files/pairwise_transform_fig_00.png"/></p>
 <p>In the plot we clearly see that for both blocks there's a common vector w such that the projection onto w gives a list with the correct ordering.</p>
 <p>However, because linear considers that output labels live in a metric space it will consider that all pairs are comparable. Thus if we fit this model to the problem above it will fit both blocks at the same time, yielding a result that is clearly not optimal. In the following plot we estimate $\hat{w}$ using an l2-regularized linear model.</p>
-<div class="highlight"><pre><span class="n">ridge</span> <span class="o">=</span> <span class="n">linear_model</span><span class="o">.</span><span class="n">Ridge</span><span class="p">(</span><span class="mf">1.</span><span class="p">)</span>
+<div class="codehilite"><pre><span class="n">ridge</span> <span class="o">=</span> <span class="n">linear_model</span><span class="o">.</span><span class="n">Ridge</span><span class="p">(</span><span class="mf">1.</span><span class="p">)</span>
 <span class="n">ridge</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 <span class="n">coef</span> <span class="o">=</span> <span class="n">ridge</span><span class="o">.</span><span class="n">coef_</span> <span class="o">/</span> <span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">ridge</span><span class="o">.</span><span class="n">coef_</span><span class="p">)</span>
 <span class="n">pl</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X_train</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X_train</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">y_train</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> 
@@ -3315,21 +3386,21 @@ f_durations.write('\n')
 <p><img alt="" src="http://fseoane.net/blog/static/uploads/2012/pairwise_transform_files/pairwise_transform_fig_01.png"/></p>
 <p>To assess the quality of our model we need to define a ranking score. Since we are interesting in a model that <em>orders</em> the data, it is natural to look for a metric that compares the ordering of our model to the given ordering. For this, we use <a href="http://en.wikipedia.org/wiki/Kendall_tau_rank_correlation_coefficient">Kendall's tau correlation coefficient</a>, which is defined as (P - Q)/(P + Q), being P the number of concordant pairs and Q is the number of discordant pairs. This measure is used extensively in the ranking literature (e.g <a href="http://www.cs.cornell.edu/people/tj/publications/joachims_02c.pdf">Optimizing Search Engines using Clickthrough Data</a>).</p>
 <p>We thus evaluate this metric on the test set for each block separately.</p>
-<div class="highlight"><pre><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+<div class="codehilite"><pre><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
     <span class="n">tau</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">kendalltau</span><span class="p">(</span>
         <span class="n">ridge</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">[</span><span class="n">b_test</span> <span class="o">==</span> <span class="n">i</span><span class="p">]),</span> <span class="n">y_test</span><span class="p">[</span><span class="n">b_test</span> <span class="o">==</span> <span class="n">i</span><span class="p">])</span>
     <span class="k">print</span><span class="p">(</span><span class="s">'Kendall correlation coefficient for block </span><span class="si">%s</span><span class="s">: </span><span class="si">%.5f</span><span class="s">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">tau</span><span class="p">))</span>
 </pre></div>
 
-<div class="codehilite"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">0</span><span class="p">:</span> <span class="mf">0.71122</span>
-<span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">1</span><span class="p">:</span> <span class="mf">0.84387</span>
+<div class="codehilite"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> 0<span class="p">:</span> 0<span class="p">.</span>71122
+<span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> 1<span class="p">:</span> 0<span class="p">.</span>84387
 </pre></div>
 
 
 <h2>The pairwise transform</h2>
 <p>As proved in (<a href="http://www.mendeley.com/research/support-vector-learning-ordinal-regression/">Herbrich 1999</a>), if we consider linear ranking functions, the ranking problem can be transformed into a two-class classification problem. For this, we form the difference of all comparable elements such that our data is transformed into $(x'_k, y'_k) = (x_i - x_j, sign(y_i - y_j))$ for all comparable pairs.</p>
 <p>This way we transformed our ranking problem into a two-class classification problem. The following plot shows this transformed dataset, and color reflects the difference in labels, and our task is to separate positive samples from negative ones. The hyperplane {x^T w = 0} separates these two classes.</p>
-<div class="highlight"><pre><span class="c"># form all pairwise combinations</span>
+<div class="codehilite"><pre><span class="c"># form all pairwise combinations</span>
 <span class="n">comb</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="n">Xp</span><span class="p">,</span> <span class="n">yp</span><span class="p">,</span> <span class="n">diff</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
@@ -3359,7 +3430,7 @@ f_durations.write('\n')
 <p><img alt="" src="http://fseoane.net/blog/static/uploads/2012/pairwise_transform_files/pairwise_transform_fig_02.png"/></p>
 <p>As we see in the previous plot, this classification is separable. This will not always be the case, however, in our training set  there are no order inversions, thus the respective classification problem is separable.</p>
 <p>We will now finally train an Support Vector Machine model on the transformed data. This model is known as RankSVM. We will then plot the training data together with the estimated coefficient $\hat{w}$ by RankSVM.</p>
-<div class="highlight"><pre><span class="n">clf</span> <span class="o">=</span> <span class="n">svm</span><span class="o">.</span><span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s">'linear'</span><span class="p">,</span> <span class="n">C</span><span class="o">=.</span><span class="mi">1</span><span class="p">)</span>
+<div class="codehilite"><pre><span class="n">clf</span> <span class="o">=</span> <span class="n">svm</span><span class="o">.</span><span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s">'linear'</span><span class="p">,</span> <span class="n">C</span><span class="o">=.</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xp</span><span class="p">,</span> <span class="n">yp</span><span class="p">)</span>
 <span class="n">coef</span> <span class="o">=</span> <span class="n">clf</span><span class="o">.</span><span class="n">coef_</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span> <span class="o">/</span> <span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">clf</span><span class="o">.</span><span class="n">coef_</span><span class="p">)</span>
 <span class="n">pl</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X_train</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X_train</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">y_train</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span>
@@ -3378,14 +3449,14 @@ f_durations.write('\n')
 
 <p><img alt="" src="http://fseoane.net/blog/static/uploads/2012/pairwise_transform_files/pairwise_transform_fig_03.png"/></p>
 <p>Finally we will check that as expected, the ranking score (Kendall tau) increases with the RankSVM model respect to linear regression.</p>
-<div class="highlight"><pre><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+<div class="codehilite"><pre><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
     <span class="n">tau</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">kendalltau</span><span class="p">(</span>
         <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X_test</span><span class="p">[</span><span class="n">b_test</span> <span class="o">==</span> <span class="n">i</span><span class="p">],</span> <span class="n">coef</span><span class="p">),</span> <span class="n">y_test</span><span class="p">[</span><span class="n">b_test</span> <span class="o">==</span> <span class="n">i</span><span class="p">])</span>
     <span class="k">print</span><span class="p">(</span><span class="s">'Kendall correlation coefficient for block </span><span class="si">%s</span><span class="s">: </span><span class="si">%.5f</span><span class="s">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">tau</span><span class="p">))</span>
 </pre></div>
 
-<div class="codehilite"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">0</span><span class="p">:</span> <span class="mf">0.83627</span>
-<span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">1</span><span class="p">:</span> <span class="mf">0.84387</span>
+<div class="codehilite"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> 0<span class="p">:</span> 0<span class="p">.</span>83627
+<span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> 1<span class="p">:</span> 0<span class="p">.</span>84387
 </pre></div>
 
 
@@ -3404,7 +3475,7 @@ f_durations.write('\n')
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog//feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-02-25T18:20:13Z</updated>
+      <updated>2013-02-27T19:40:19Z</updated>
     </source>
   </entry>
 
@@ -3479,7 +3550,7 @@ f_durations.write('\n')
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2013-02-25T18:20:24Z</updated>
+      <updated>2013-02-27T19:40:32Z</updated>
     </source>
   </entry>
 
@@ -3624,7 +3695,7 @@ RuntimeError: maximum recursion depth exceeded in comparison
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-02-25T18:20:17Z</updated>
+      <updated>2013-02-27T19:40:24Z</updated>
     </source>
   </entry>
 
@@ -3667,7 +3738,7 @@ b. Add this line to your bash_profile.</p>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-02-25T18:20:32Z</updated>
+      <updated>2013-02-27T19:40:40Z</updated>
     </source>
   </entry>
 
@@ -3748,7 +3819,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-02-25T18:20:17Z</updated>
+      <updated>2013-02-27T19:40:23Z</updated>
     </source>
   </entry>
 
@@ -3784,7 +3855,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-02-25T18:20:17Z</updated>
+      <updated>2013-02-27T19:40:24Z</updated>
     </source>
   </entry>
 
@@ -4020,7 +4091,7 @@ Out[74]: True
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-02-25T18:20:32Z</updated>
+      <updated>2013-02-27T19:40:40Z</updated>
     </source>
   </entry>
 
@@ -4138,7 +4209,7 @@ commits are much more like my usual ones.
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-02-25T18:20:30Z</updated>
+      <updated>2013-02-27T19:40:38Z</updated>
     </source>
   </entry>
 
@@ -4171,7 +4242,7 @@ commits are much more like my usual ones.
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2013-02-25T18:20:31Z</updated>
+      <updated>2013-02-27T19:40:39Z</updated>
     </source>
   </entry>
 
@@ -4316,7 +4387,7 @@ Out[24]: 6
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-02-25T18:20:30Z</updated>
+      <updated>2013-02-27T19:40:38Z</updated>
     </source>
   </entry>
 
@@ -4435,7 +4506,7 @@ Out[24]: 6
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2013-02-25T18:20:31Z</updated>
+      <updated>2013-02-27T19:40:39Z</updated>
     </source>
   </entry>
 
@@ -4467,7 +4538,7 @@ Out[24]: 6
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-02-25T18:20:32Z</updated>
+      <updated>2013-02-27T19:40:40Z</updated>
     </source>
   </entry>
 
@@ -4611,7 +4682,7 @@ StopIteration:
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-02-25T18:20:32Z</updated>
+      <updated>2013-02-27T19:40:40Z</updated>
     </source>
   </entry>
 
@@ -4670,7 +4741,7 @@ StopIteration:
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-02-25T18:20:30Z</updated>
+      <updated>2013-02-27T19:40:38Z</updated>
     </source>
   </entry>
 
@@ -4700,7 +4771,7 @@ StopIteration:
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2013-02-25T18:20:31Z</updated>
+      <updated>2013-02-27T19:40:39Z</updated>
     </source>
   </entry>
 
@@ -5035,41 +5106,6 @@ Out[128]: False
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
       <updated>2013-02-12T06:40:44Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://krastanov.wordpress.com/?p=464</id>
-    <link href="http://blog.krastanov.org/2012/07/22/form-fields-and-vector-fields-do-not-form-a-vector-space/" rel="alternate" type="text/html"/>
-    <title>Form Fields and Vector Fields do not form a Vector Space</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Form fields or vector fields over a manifold (as opposed to forms and vectors) do not form a vector space. They form a module. The difference is that the scalars of a vector space form an algebraic field while the scalars of a module form a ring. For us humans (as opposed to “those higher [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=blog.krastanov.org&amp;blog=15251174&amp;post=464&amp;subd=krastanov&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p><a href="http://en.wikipedia.org/wiki/Tautological_one-form" target="_blank">Form fields</a> or <a href="http://en.wikipedia.org/wiki/Tangent_bundle#Canonical_vector_field_on_tangent_bundle" target="_blank">vector fields</a> over a <a href="http://en.wikipedia.org/wiki/Manifold" target="_blank">manifold</a> (as opposed to forms and vectors) do not form a <a href="http://en.wikipedia.org/wiki/Vector_space" target="_blank">vector space</a>. They form a <a href="http://en.wikipedia.org/wiki/Module_%28mathematics%29" target="_blank">module</a>.</p>
-<p>The difference is that the scalars of a vector space form an algebraic <a href="http://en.wikipedia.org/wiki/Field_%28mathematics%29" target="_blank">field</a> while the scalars of a module form a <a href="http://en.wikipedia.org/wiki/Ring_%28mathematics%29" target="_blank">ring</a>. For us humans (as opposed to “those higher beings that I do not understand (a.k.a. mathematicians)”) this means that the scalars in the vector field can divide each other while the scalars in the spaces spanned by fields (i.e. a module) can not.</p>
-<p>And just so we all can become even more confused: This has nothing to do with the fact that the “components” of each form field or vector field in certain basis are functions, i.e. themselves elements of a vector space with infinite number of dimensions.</p>
-<p>The first way to see this module-not-a-vector-space characteristic is by showing directly that the scalars that form the “coordinate components” of a vector field can not always be divided, even if they are <strong>not</strong> identically zero. Take, for instance the, manifold <img alt="\mathbb{R}^2" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cmathbb%7BR%7D%5E2&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="\mathbb{R}^2"/> with the polar coordinate system and look at the vector <img alt="\begin{bmatrix} r \\ r\cos(\theta) \end{bmatrix}" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cbegin%7Bbmatrix%7D+r+%5C%5C+r%5Ccos%28%5Ctheta%29+%5Cend%7Bbmatrix%7D&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="\begin{bmatrix} r \\ r\cos(\theta) \end{bmatrix}"/>. The “scalars” are <img alt="r" class="latex" src="http://s0.wp.com/latex.php?latex=r&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="r"/> and <img alt="r\cos(\theta)" class="latex" src="http://s0.wp.com/latex.php?latex=r%5Ccos%28%5Ctheta%29&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="r\cos(\theta)"/>. Obviously we can not divide the former by the latter because it will be undefined at <img alt="\theta=\frac{\pi}{2}+n\pi" class="latex" src="http://s0.wp.com/latex.php?latex=%5Ctheta%3D%5Cfrac%7B%5Cpi%7D%7B2%7D%2Bn%5Cpi&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="\theta=\frac{\pi}{2}+n\pi"/>.</p>
-<p>Another, more amusing way to show that the space spanned by these fields is not a vector space is to explicitly show that a property expected from vector spaces is not fulfilled. Namely, that in <img alt="n" class="latex" src="http://s0.wp.com/latex.php?latex=n&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="n"/> dimensions an <img alt="n" class="latex" src="http://s0.wp.com/latex.php?latex=n&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="n"/>-uple of linearly independent elements forms a basis. However, in the case of fields over a manifold we can easily have a number of fields that are linearly independent over the manifold as a whole, and are at the same time linearly dependent (or simply equal to zero) on a subdomain. Hence, we have an <img alt="n" class="latex" src="http://s0.wp.com/latex.php?latex=n&amp;bg=f3f3f3&amp;fg=888888&amp;s=0" title="n"/>-uple of linearly independent fields that can not be linearly combined to represent another arbitrary field.</p>
-<br/>  <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=blog.krastanov.org&amp;blog=15251174&amp;post=464&amp;subd=krastanov&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2012-07-22T15:11:31Z</updated>
-    <category term="GSoC - diffgeom"/>
-    <category term="differential geometry"/>
-    <category term="gsoc"/>
-    <category term="symbolic algebra"/>
-    <category term="sympy"/>
-    <author>
-      <name>Stefan Krastanov</name>
-    </author>
-    <source>
-      <id>http://blog.krastanov.org</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://blog.krastanov.org/category/sympy-2/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://blog.krastanov.org" rel="alternate" type="text/html"/>
-      <link href="http://blog.krastanov.org/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>Just another WordPress.com site</subtitle>
-      <title>Stefan's Blog » SymPy</title>
-      <updated>2013-02-15T21:40:40Z</updated>
     </source>
   </entry>
 </feed>
