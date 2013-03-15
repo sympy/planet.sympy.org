@@ -385,8 +385,8 @@ each time a threshold is crossed.</p>
 <div class="entry">
 <div class="content" lang="en">
 <p>Usually, when I debug SymPy code with <a href="http://asmeurersympy.wordpress.com/2010/06/04/pudb-a-better-python-debugger/">PuDB</a>, I create a script that calls the code, then I put a </p>
-<p></p><pre class="brush: python;">import pudb; pudb.set_trace()
-</pre><p></p>
+<pre class="brush: python; title: ; notranslate">import pudb; pudb.set_trace()
+</pre>
 <p>in the SymPy library code where I want to start debugging. But this is annoying, first because I have to create the script, and second, because I have to modify the library code, and there’s always the risk of accidentally commiting that.  Also, if I want to start debugging somewhere else, I have to edit the files and change it.</p>
 <p>Well, I just figured out a better way.  <del datetime="2013-01-30T02:32:19+00:00">First, if you haven’t already, add an alias like this in your bash config file (<code>~/.profile</code> or <code>~/.bashrc</code>):<code>alias pudb='python -m pudb.run</code>.</del> <i>As of <a href="https://github.com/inducer/pudb/pull/54">this pull request</a>, this is no longer necessary.  A <code>pudb</code> script is installed automatically with PuDB.</i></p>
 <p>This will let you run <code>pudb script.py</code> to debug <code>script.py</code>.  <del datetime="2013-02-05T04:22:39+00:00">Next, start PuDB. It doesn’t matter with what. You can just run <code>touch test.py</code>, and then <code>pudb test.py</code>.</del>  <i>It occured to me that you can just set the breakpoint when starting isympy with PuDB.</i></p>
@@ -1048,13 +1048,13 @@ dimensions.</p>
 <p>To summarize, I decided to use Emacs, as I found it to be much more intuitive, and much more user-friendly.  Today, January 1, marks the one-year point of my using Emacs as my sole text editor, with some exceptions (notably, I’m currently writing this blog post in the browser).  So I’d like to make some observations:</p>
 <li>Either one of these editors (Vim or Emacs) is going to really suck unless you are willing to make a serious investment in customizing them and installing nice addons. For the second point, Emacs has an advantage, because the philosophy of Vim is to be barebones whereas the philosophy of Emacs is to be featureful, so that in particular many things that were once addons of Emacs are now included in the standard installation.  For customization, on the one hand, Emacs is easier, because it has a nice interface (<code>M-x customize</code>), but on the other hand, Vim’s scripting language is much easier to hack on than Emacs lisp (I still can’t code in Lisp to save my life; it’s a very challenging programming language).
 <p>But my point here is that neither has really great defaults. For example, in Emacs, <code>M-space</code> is bound to <code>just-one-space</code>, which is great for programming.  What it does is remove all spaces around the cursor, except for one.  But to be really useful, it also should include newlines.  It doesn’t do this by default.  Rather, you have to call it with a negative argument.  So to be really useful, you have to add</p>
-<p></p><pre class="brush: plain;">(defun just-one-space-with-newline ()
+<pre class="brush: plain; title: ; notranslate">(defun just-one-space-with-newline ()
   "Call just-one-space with a negative argument"
   (interactive)
   (just-one-space -1))
 
 (global-set-key (kbd "M-SPC") 'just-one-space-with-newline)
-</pre><p></p>
+</pre>
 <p>to your <code>.emacs</code> file.</p></li>
 <li>Emacs has great features, but I always have to look them up.  Or rather, I have to look up the keyboard shortcuts for them.  I only have the keyboard shortcuts memorized for the things I do every day.  I even ended up forgetting really important ones, like <code>M-w</code> (Emacs version of copy).  And if a feature involves several keystrokes to access, forget about it (for example, rectangular selection, or any features of special modes).  If I use a new mode, e.g., for some file type that I rarely edit (like HTML), I might as well not have any of the features, other than the syntax highlighting, because I either don’t know what they are, or even if I know that they should exist (like automatic tag completion for html), I have no idea how to access them.
 <p>There’s really something to be said about GUI editors, which give these things to users in a way that they don’t have to memorize anything.  Perhaps I should try to use the menu more.  Or maybe authors of addons should aim to make features require as little cognitive user interaction as possible (such as the excellent <a href="http://cx4a.org/software/auto-complete/manual.html"><code>auto-complete-mode</code></a> I mentioned in <a href="http://asmeurersympy.wordpress.com/2012/01/13/vim-vs-emacs-part-3/">part 3</a>).</p>
@@ -1067,11 +1067,11 @@ dimensions.</p>
 <li>I really should learn Emacs lisp. There are a lot of little customizations that I would like to make, but they are really niche, and can only be done programmatically.  But who has the time to learn a completely new programming language (plus a whole library, as just knowing Lisp is useless if you don’t know the proper Emacs funtions and variables and coding styles)?</li>
 <li>I’ve still not found a good visual browser for jumping to function definitions in a file (mostly Python function definitions, but also other kinds of headers for other kinds of files).  The best I’ve found is <code>imenu</code>. If you know of anything, please let me know.  One thing I really liked about Vim was the <a href="http://www.vim.org/scripts/script.php?script_id=273">tag list</a> extension, which did this perfectly (thanks to commenter <a href="http://asmeurersympy.wordpress.com/2011/12/20/vim-vs-emacs-part-1/#comment-424">Scott</a> for pointing it out to me).  I’ve been told that Cedet has something like this, but every time I try to install it, I run into some issues that just seem like way too much work (I don’t remember what they are, it won’t compile or something, or maybe it just wants to do just way too much and I can’t figure out how to disable everything except for the parts I want).  </li>
 <li>If you ever code in C, add the following to your Makefile
-<p></p><pre class="brush: plain;">check-syntax:
+<pre class="brush: plain; title: ; notranslate">check-syntax:
 	$(CC) -o nul $(FLAGS) -S $(CHK_SOURCES)
-</pre><p></p>
+</pre>
 <p>(and if you don’t use a Makefile, start using one now).  This is assuming you have <code>CC</code> and <code>FLAGS</code> defined at the top (generally to something like <code>cc</code> and <code>-Wall</code>, respectively). Also, add the following to your <code>.emacs</code></p>
-<p></p><pre class="brush: plain;">;; ===== Turn on flymake-mode ====
+<pre class="brush: plain; title: ; notranslate">;; ===== Turn on flymake-mode ====
 
 (add-hook 'c-mode-common-hook 'turn-on-flymake)
 (defun turn-on-flymake ()
@@ -1085,18 +1085,18 @@ dimensions.</p>
   (interactive)
   (local-set-key "\M-n" 'flymake-goto-next-error)
   (local-set-key "\M-p" 'flymake-goto-prev-error))
-</pre><p></p>
+</pre>
 <p>The last part adds the useful keyboard shortcuts <code>M-n</code> and <code>M-p</code> to move between errors.  Now, errors in your C code will show up automatically as you type.  If you use the command line version of emacs like I do, and not the GUI version, you’ll also need to install the <a href="http://www.emacswiki.org/emacs/flymake-cursor.el">flymake-cursor</a> module, which makes the errors show up in the mode line, since otherwise it tries to use mouse popups.  You can change the colors using <code>M-x customize-face</code> (search for “flymake”). </p></li>
 <li>I never got flymake to work with LaTeX.  Does anyone know how to do it? It seems it is hardcoded to use MikTeX, the Windows version of LaTeX. I found some stuff, but none of it worked.
 <p>Actually, what I really would like is not syntax checking (I rarely make syntax mistakes in LaTeX any more), but rather something that automatically builds the PDF constantly as I type.  That way, I can just look over at the PDF as I am writing (I use an external monitor for this. I highly recommend it if you use LaTeX, especially one of those monitors that swivels to portrait mode).  </p></li>
 <li>If you use Mac OS X, you can use the very excellent <a href="http://pqrs.org/macosx/keyremap4macbook/">KeyRemap4MacBook</a> program to make regular Mac OS X programs act more like Emacs.  Mac OS X already has many Emacs shortcuts built in (like <code>C-a</code>, <code>C-e</code>, etc.), but that only works in Cocoa apps, and it doesn’t include any meta key shortcuts.  This lets you use additional shortcuts literally everywhere (don’t worry, it automatically doesn’t use them in the Terminal), including an emulator for <code>C-space</code> and some <code>C-x</code> commands (like <code>C-x C-s</code> to <code>Command-s</code>).  It doesn’t work on context sensitive shortcuts, unfortunately, unless the operating system already supports it with another keyboard shortcut (e.g., it can map <code>M-f</code> to <code>Option-right arrow</code>).  For example, it can’t enable moving between paragraphs with <code>C-S-{</code> and <code>C-S-}</code>.  If anyone knows how to do that, let me know. </li>
 <li>For about a month this summer, I had to use a Linux laptop, because my Mac broke and my new Mac took a month to arrive (the downside to ordering a new computer immediately after it is announced by Apple).  At this point, my saving of all my customizations to <a href="http://pqrs.org/macosx/keyremap4macbook/">GitHub</a> really helped a lot.  I created a new branch for the Linux computer (because several things in my customizations were Mac specific), and just symlinked the files I wanted.  A hint I can give to people using Linux is to use Konsole.  The Gnome terminal sucks.  One thing I never figured out is how to make Konsole (or any other Terminal for that matter) to send Control-Shift shortcuts to Emacs (see <a href="http://superuser.com/q/439961/39697" rel="nofollow">http://superuser.com/q/439961/39697</a>).   I don’t use Linux any more at the moment, but if anyone knows what was going on there, add an answer to that question. </li>
 <li>In <a href="http://asmeurersympy.wordpress.com/2012/01/13/vim-vs-emacs-part-3/">part 3</a> mentioned that <a href="http://www.dr-qubit.org/predictive/predictive-user-manual/html/index.php">predictive mode</a> was cool, but not very useful.  What it does is basically add tab completion for every word in the English language.  Actually, I’ve found using auto-complete-mode even when editing text (or LaTeX) to be very useful.  Unlike predictive mode, it only guesses words that you’ve already typed  (it turns out that you tend to type the same words over and over, and doubly so if those words are LaTeX math commands).  Also, predictive mode has a set order of words, which supposedly helps to use it with muscle memory, whereas auto-complete-mode tries to learn what words you are more likely to use based on some basic statistical machine-learning.  Also, auto-complete-mode has a much better visual UI and smarter defaults than predictive mode. The result is that it’s actually quite useful and makes typing plain text, as well as LaTeX (actually, pretty much anything, as long as you tend to use the same words repeatedly) much faster.  I recommend enabling auto-complete-mode almost everywhere using hooks, like
-<p></p><pre class="brush: plain;">(add-hook 'latex-mode-hook 'auto-complete-mode)
+<pre class="brush: plain; title: ; notranslate">(add-hook 'latex-mode-hook 'auto-complete-mode)
 (add-hook 'LaTeX-mode-hook 'auto-complete-mode)
 (add-hook 'prog-mode-hook 'auto-complete-mode)
 ;; etc.
-</pre><p></p>
+</pre>
 </li>
 <li>At the end of the day, I’m pretty happy with Emacs.  I’ve managed to fix most of the things that make it annoying, and it is orders of magnitude more powerful than any GUI editor or IDE I’ve ever seen, especially at just basic text editing, which is the most important thing (I can always use another program for other things, like debugging or whatever).  The editor uses the basic shortcuts that I am used to, and is quite efficient to write in.  Extensions like auto-complete-mode make using it much faster, though I could use some more extensions to make it even better (namely, a better isearch and a better imenu). Regarding Vim vs. Emacs, I’d like to quote something I said back in my <a href="http://asmeurersympy.wordpress.com/2011/12/20/vim-vs-emacs-part-1">first blog post</a> about Vim over a year ago:<br />
 <blockquote><p>Vim is great for text <em>editing</em>, but not so hot for text <em>writing</em> (unless you always write text perfectly, so that you never need to leave insert mode until you are done typing). Just the simple act of deleting a mistyped word (yes, word, that happens a lot when you are decently fast touch typist) takes several keystrokes, when it should in my opinion only take one (two if you count the meta-key).</p></blockquote>
@@ -4106,20 +4106,20 @@ f_durations.write('\n')
 <div class="content" lang="en">
 <p>Readers of this blog know that I sometimes like to write about some <a href="http://asmeurersympy.wordpress.com/2009/07/20/modifying-a-list-while-looping-through-it-in-python/">strange</a>, <a href="http://asmeurersympy.wordpress.com/2010/06/16/strange-python-behavior-can-someone-please-explain-to-me-what-is-going-on-here/">unexpected</a>, and <a href="http://asmeurersympy.wordpress.com/2011/03/15/true-is-true-is-false-is-true-is-false/">unusual</a> things in Python that I stumble across.  This post is another one of those.</p>
 <p>First, look at this</p>
-<p></p><pre class="brush: python;">&gt;&gt;&gt; a = []
+<pre class="brush: python; title: ; notranslate">&gt;&gt;&gt; a = []
 &gt;&gt;&gt; a.append(a)
 &gt;&gt;&gt; a
 [[...]]
-</pre><p></p>
+</pre>
 <p>What am I doing here?  I’m creating a list, <code>a</code>, and I’m adding it to itself.  What you end up with is an infinitely nested list.  The first interesting thing about this is that Python is smart enough to not explode when printing this list.  The following should convince you that <code>a</code> does indeed contain itself.</p>
-<p></p><pre class="brush: python;">&gt;&gt;&gt; a[0] is a
+<pre class="brush: python; title: ; notranslate">&gt;&gt;&gt; a[0] is a
 True
 &gt;&gt;&gt; a[0] == a
 True
-</pre><p></p>
+</pre>
 <p>Now, if you have programmed in C, or a similar language that uses pointers, this should not come as a surprise to you.  Lists in Python, like most things, do not actually contain the items inside them.  Rather, they contain references (in C terminology, “pointers”) to the items inside them.  From this perspective, there is no issue at all with <code>a</code> containing a pointer to itself.</p>
 <p>The first thing I wondered when I saw this was just how clever the printer was at noticing that the list was infinitely nested.  What if we make the cycle a little more complex?</p>
-<p></p><pre class="brush: python;">&gt;&gt;&gt; a = []
+<pre class="brush: python; title: ; notranslate">&gt;&gt;&gt; a = []
 &gt;&gt;&gt; b = []
 &gt;&gt;&gt; a.append(b)
 &gt;&gt;&gt; b.append(a)
@@ -4131,9 +4131,9 @@ True
 True
 &gt;&gt;&gt; b[0] is a
 True
-</pre><p></p>
+</pre>
 <p>So it still works.  I had thought that maybe repr just catches <code>RuntimeError</code> and falls back to printing <code>...</code> when the list is nested too deeply, but it turns out that is not true:</p>
-<p></p><pre class="brush: python;">&gt;&gt;&gt; a = []
+<pre class="brush: python; title: ; notranslate">&gt;&gt;&gt; a = []
 &gt;&gt;&gt; for i in range(10000):
 ...     a = [a]
 ... 
@@ -4141,24 +4141,24 @@ True
 Traceback (most recent call last):
   File "&lt;stdin&gt;", line 1, in &lt;module&gt;
 RuntimeError: maximum recursion depth exceeded while getting the repr of a list
-</pre><p></p>
+</pre>
 <p>And by the way, in case you were wondering, it is possible to catch a <code>RuntimeError</code> (using the same <code>a</code> as the previous code block)</p>
-<p></p><pre class="brush: python;">&gt;&gt;&gt; try:
+<pre class="brush: python; title: ; notranslate">&gt;&gt;&gt; try:
 ...     print(a)
 ... except RuntimeError:
 ...     print("no way")
 ... 
 no way
-</pre><p></p>
+</pre>
 <p>(and you also may notice that this is Python 3. Things behave the same way in Python 2)</p>
 <p>Back to infinitely nested lists, we saw that printing works, but there are some things that don’t work.</p>
-<p></p><pre class="brush: python;">&gt;&gt;&gt; a[0] == b
+<pre class="brush: python; title: ; notranslate">&gt;&gt;&gt; a[0] == b
 True
 &gt;&gt;&gt; a[0] == a
 Traceback (most recent call last):
   File "&lt;stdin&gt;", line 1, in &lt;module&gt;
 RuntimeError: maximum recursion depth exceeded in comparison
-</pre><p></p>
+</pre>
 <p><code>a[0] is b</code> holds (i.e., they are exactly the same object in memory), so <code>==</code> is able to short-circuit on them.  But to test <code>a[0] == a</code> it has to recursively compare the elements of <code>a</code> and <code>a[0]</code>.  Since it is infinitely nested, this leads to a recursion error.  Now an interesting question: why does this happen?  Is it because <code>==</code> on lists uses a depth first search?  If it were somehow possible to compare these two objects, would they be equal?</p>
 <p>One is reminded of <a href="http://en.wikipedia.org/wiki/Russel%27s_paradox">Russel’s paradox</a>, and the reason why in <a href="http://en.wikipedia.org/wiki/Zermelo%E2%80%93Fraenkel_set_theory">axiomatic set theory</a>, sets are not allowed to contain themselves. </p>
 <p>Thinking of this brought me to my final question.  Is it possible to make a Python <code>set</code> that contains itself?  The answer is obviously no, because <code>set</code> objects can only contain hashable objects, and <code>set</code> is not hashable.  But <code>frozenset</code>, <code>set</code>‘s counterpart, is hashable.  So can you create a <code>frozenset</code> that contains itself?  The same for <code>tuple</code>.  The method I used for <code>a</code> above won’t work, because <code>a</code> must be mutable to append it to itself.</p>
@@ -4253,22 +4253,23 @@ b. Add this line to your bash_profile.</p>
 <h2>Automatic Symbol Definition</h2>
 <p>While not as ground breaking as the feature I described in my <a href="http://asmeurersympy.wordpress.com/2012/08/21/sympy-live-sphinx-extension/">last post</a>, this feature is still quite useful. As you may know, SymPy is inherently a Python library, meaning that it lives by the rules of Python. If you want to use any name, whether it be a Symbol or a function (like cos), you need to define it (in the case of Symbols), or import it (in the case of functions that come with SymPy). We provide the script <code>isympy</code> with SymPy to assist with this. This script automatically runs IPython (if it’s installed), imports all names from sympy (<code>from sympy import *</code>), and defines common symbol names (like <code>x</code>, <code>y</code>, and <code>z</code>).</p>
 <p>But if you want to use a Symbol that is not one of the ones predefined by <code>isympy</code>, you will get something like</p>
-<p></p><pre class="brush: python;">In [1]: r*x
+<pre class="brush: python; title: ; notranslate">In [1]: r*x
 ---------------------------------------------------------------------------
 NameError                                 Traceback (most recent call last)
  in ()
 ----&gt; 1 r*x
 
 NameError: name 'r' is not defined
-</pre><p></p>
+</pre>
 <p>The best solution for this has been either to type <code>var('r')</code>, which will create the Symbol <code>r</code> and inject it into the namespace, or to wrap your text in a string and pass it to <code>sympify()</code>, like <code>sympify("r*x")</code>. Neither of these are very friendly in interactive mode.</p>
 <p>In SymPy 0.7.2, <code>isympy</code> has a new command line option, <code>isympy -a</code>, which will enable a mechanism that will automatically define all undefined names as Symbols for you:</p>
-<p></p><pre class="brush: python;">In [1]: r*x
+<pre class="brush: python; title: ; notranslate">In [1]: r*x
 Out[1]: r⋅x
-</pre><p></p>
+</pre>
 <p>There are some caveats to be aware of when using this feature:</p>
 <ul>
-<li>Names must be undefined for <code>isympy -a</code> to work. If you type something like <code>S*x</code>, you’ll get:<pre class="brush: python;">In [3]: S*x
+<li>Names must be undefined for <code>isympy -a</code> to work. If you type something like <code>S*x</code>, you’ll get:
+<pre class="brush: python; title: ; notranslate">In [3]: S*x
 ---------------------------------------------------------------------------
 TypeError                                 Traceback (most recent call last)
 &lt;ipython-input-3-6656a97ea7b0&gt; in &lt;module&gt;()
@@ -4284,16 +4285,18 @@ TypeError: unsupported operand type(s) for *: 'SingletonRegistry' and 'Symbol'
 <h2>Automatic int to Integer Conversion</h2>
 <p>A second thing that is annoying with Python and SymPy is that something like <code>1/2</code> will be interpreted completely by Python, without any SymPy. This means that something like <code>1/2 + x</code> will give either <code>0 + x</code> or <code>0.5 + x</code>, depending on whether or not <code>__future__.division</code> has been imported. <code>isympy</code> has always ran <code>from __future__ import division</code>, so that you’ll get the latter, but we usually would prefer to get <code>Rational(1, 2)</code>. Previously, the best way to do this was again to either run it through <code>sympify()</code> as a string, or to sympify at least one of the numbers (here the <code>S()</code> shortcut to <code>sympify()</code> is useful, because you can type just <code>S(1)/2</code>).</p>
 <p>With SymPy 0.7.2, you can run <code>isympy -i</code>, and it will automatically wrap all integers literals with <code>Integer()</code>. The result is that <code>1/2</code> produces <code>Rational(1, 2)</code>:</p>
-<p></p><pre class="brush: python;">In [1]: 1/2 + x
+<pre class="brush: python; title: ; notranslate">In [1]: 1/2 + x
 Out[1]: x + 1/2
-</pre><p></p>
+</pre>
 <p>Again, there are a couple of caveats:</p>
 <ul>
-<li>If you want to get Python style division, you just need to wrap both arguments in <code>int()</code>:<pre class="brush: python;">In [2]: int(1)/int(2)
+<li>If you want to get Python style division, you just need to wrap both arguments in <code>int()</code>:
+<pre class="brush: python; title: ; notranslate">In [2]: int(1)/int(2)
 Out[2]: 0.5
 </pre>
 <p>Of course, if you just want a floating point number, you can just use <code>N()</code> or <code>.evalf()</code></p></li>
-<li>This works by parsing the text and wrapping all integer literals with <code>Integer()</code>. This means that if you have a variable set to a Python int, it will still act like a Python int:<pre class="brush: python;">In [6]: a = int(1)
+<li>This works by parsing the text and wrapping all integer literals with <code>Integer()</code>. This means that if you have a variable set to a Python int, it will still act like a Python int:
+<pre class="brush: python; title: ; notranslate">In [6]: a = int(1)
 
 In [7]: b = int(2)
 
@@ -5548,7 +5551,7 @@ StopIteration:
 <h2>Subscriptions</h2>
 <ul>
 <li>
-<a href="http://asmeurersympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a>
+<a href="http://asmeurersympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://asmeurersympy.wordpress.com" class="message" title="no activity in 7 days">Aaron Meurer</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/936818886435977143/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://addisoncugini.blogspot.com/" class="message" title="no activity in 7 days">Addison Cugini</a>
@@ -5584,13 +5587,13 @@ StopIteration:
 <a href="" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a class="message" title="404: not found">Django-SymPy</a>
 </li>
 <li>
-<a href="http://fseoane.net/blog//feed/rss.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://fseoane.net/blog/" title="I say things">Fabian Pedregosa</a>
+<a href="http://fseoane.net/blog//feed/rss.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://fseoane.net/blog/" class="message" title="no activity in 7 days">Fabian Pedregosa</a>
 </li>
 <li>
 <a href="http://gsoc-mathtex.blogspot.com/feeds/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://gsoc-mathtex.blogspot.com/" class="message" title="no activity in 7 days">Freddie Witherden</a>
 </li>
 <li>
-<a href="http://fredrik-j.blogspot.com/feeds/posts/default/-/sympy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://fredrik-j.blogspot.com/search/label/sympy" class="message" title="no activity in 7 days">Fredrik Johansson</a>
+<a href="http://www.blogger.com/feeds/4754734402679928849/posts/default/-/sympy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://fredrik-j.blogspot.com/search/label/sympy" class="message" title="no activity in 7 days">Fredrik Johansson</a>
 </li>
 <li>
 <a href="http://gilbertgede.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://gilbertgede.wordpress.com" class="message" title="no activity in 7 days">Gilbert Gede</a>
@@ -5605,7 +5608,7 @@ StopIteration:
 <a href="" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a class="message" title="404: not found">Kazuo Thow</a>
 </li>
 <li>
-<a href="http://matthewrocklin.com/blog//feed.sympy.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://matthewrocklin.com/blog/" title="Working notes by Matthew Rocklin - SymPy">MRocklin</a>
+<a href="http://matthewrocklin.com/blog//feed.sympy.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://matthewrocklin.com/blog/" class="message" title="no activity in 7 days">MRocklin</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/9135222751616024074/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://mattjcurry.blogspot.com/" class="message" title="no activity in 7 days">Matthew Curry</a>
@@ -5620,13 +5623,13 @@ StopIteration:
 <a href="http://ondrejcertik.blogspot.com/feeds/posts/default/-/sympy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://ondrejcertik.blogspot.com/search/label/sympy" class="message" title="no activity in 7 days">Ondřej Čertík</a>
 </li>
 <li>
-<a href="http://robert-code.blogspot.com/feeds/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://robert-code.blogspot.com/" class="message" title="no activity in 7 days">Robert Schwarz</a>
+<a href="http://www.blogger.com/feeds/436496352933562096/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://robert-code.blogspot.com/" class="message" title="no activity in 7 days">Robert Schwarz</a>
 </li>
 <li>
 <a href="http://saptman.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://saptman.wordpress.com" class="message" title="no activity in 7 days">Saptarshi Mandal</a>
 </li>
 <li>
-<a href="http://www.blogger.com/feeds/8510171342300140296/posts/default/-/sympy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://seanvig.blogspot.com/search/label/sympy" class="message" title="no activity in 7 days">Sean Vig</a>
+<a href="http://seanvig.blogspot.com/feeds/posts/default/-/sympy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://seanvig.blogspot.com/search/label/sympy" class="message" title="no activity in 7 days">Sean Vig</a>
 </li>
 <li>
 <a href="http://scolobb.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://scolobb.wordpress.com" class="message" title="no activity in 7 days">Sergiu Ivanov</a>
@@ -5653,7 +5656,7 @@ StopIteration:
 
 <p>
 <strong>Last updated:</strong><br>
-March 03, 2013 07:00 AM<br>
+March 15, 2013 03:20 AM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>

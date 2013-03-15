@@ -307,8 +307,8 @@ each time a threshold is crossed.&lt;/p&gt;
 	<title>Aaron Meurer: Tip for debugging SymPy with PuDB</title>
 	<link>http://asmeurersympy.wordpress.com/2013/01/28/tip-for-debugging-sympy-with-pudb/</link>
 	<content:encoded>&lt;p&gt;Usually, when I debug SymPy code with &lt;a href=&quot;http://asmeurersympy.wordpress.com/2010/06/04/pudb-a-better-python-debugger/&quot;&gt;PuDB&lt;/a&gt;, I create a script that calls the code, then I put a &lt;/p&gt;
-&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;import pudb; pudb.set_trace()
-&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;pre class=&quot;brush: python; title: ; notranslate&quot;&gt;import pudb; pudb.set_trace()
+&lt;/pre&gt;
 &lt;p&gt;in the SymPy library code where I want to start debugging. But this is annoying, first because I have to create the script, and second, because I have to modify the library code, and there’s always the risk of accidentally commiting that.  Also, if I want to start debugging somewhere else, I have to edit the files and change it.&lt;/p&gt;
 &lt;p&gt;Well, I just figured out a better way.  &lt;del datetime=&quot;2013-01-30T02:32:19+00:00&quot;&gt;First, if you haven’t already, add an alias like this in your bash config file (&lt;code&gt;~/.profile&lt;/code&gt; or &lt;code&gt;~/.bashrc&lt;/code&gt;):&lt;code&gt;alias pudb='python -m pudb.run&lt;/code&gt;.&lt;/del&gt; &lt;i&gt;As of &lt;a href=&quot;https://github.com/inducer/pudb/pull/54&quot;&gt;this pull request&lt;/a&gt;, this is no longer necessary.  A &lt;code&gt;pudb&lt;/code&gt; script is installed automatically with PuDB.&lt;/i&gt;&lt;/p&gt;
 &lt;p&gt;This will let you run &lt;code&gt;pudb script.py&lt;/code&gt; to debug &lt;code&gt;script.py&lt;/code&gt;.  &lt;del datetime=&quot;2013-02-05T04:22:39+00:00&quot;&gt;Next, start PuDB. It doesn’t matter with what. You can just run &lt;code&gt;touch test.py&lt;/code&gt;, and then &lt;code&gt;pudb test.py&lt;/code&gt;.&lt;/del&gt;  &lt;i&gt;It occured to me that you can just set the breakpoint when starting isympy with PuDB.&lt;/i&gt;&lt;/p&gt;
@@ -779,13 +779,13 @@ dimensions.&lt;/p&gt;
 &lt;p&gt;To summarize, I decided to use Emacs, as I found it to be much more intuitive, and much more user-friendly.  Today, January 1, marks the one-year point of my using Emacs as my sole text editor, with some exceptions (notably, I’m currently writing this blog post in the browser).  So I’d like to make some observations:&lt;/p&gt;
 &lt;li&gt;Either one of these editors (Vim or Emacs) is going to really suck unless you are willing to make a serious investment in customizing them and installing nice addons. For the second point, Emacs has an advantage, because the philosophy of Vim is to be barebones whereas the philosophy of Emacs is to be featureful, so that in particular many things that were once addons of Emacs are now included in the standard installation.  For customization, on the one hand, Emacs is easier, because it has a nice interface (&lt;code&gt;M-x customize&lt;/code&gt;), but on the other hand, Vim’s scripting language is much easier to hack on than Emacs lisp (I still can’t code in Lisp to save my life; it’s a very challenging programming language).
 &lt;p&gt;But my point here is that neither has really great defaults. For example, in Emacs, &lt;code&gt;M-space&lt;/code&gt; is bound to &lt;code&gt;just-one-space&lt;/code&gt;, which is great for programming.  What it does is remove all spaces around the cursor, except for one.  But to be really useful, it also should include newlines.  It doesn’t do this by default.  Rather, you have to call it with a negative argument.  So to be really useful, you have to add&lt;/p&gt;
-&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: plain;&quot;&gt;(defun just-one-space-with-newline ()
+&lt;pre class=&quot;brush: plain; title: ; notranslate&quot;&gt;(defun just-one-space-with-newline ()
   &quot;Call just-one-space with a negative argument&quot;
   (interactive)
   (just-one-space -1))
 
 (global-set-key (kbd &quot;M-SPC&quot;) 'just-one-space-with-newline)
-&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;/pre&gt;
 &lt;p&gt;to your &lt;code&gt;.emacs&lt;/code&gt; file.&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;Emacs has great features, but I always have to look them up.  Or rather, I have to look up the keyboard shortcuts for them.  I only have the keyboard shortcuts memorized for the things I do every day.  I even ended up forgetting really important ones, like &lt;code&gt;M-w&lt;/code&gt; (Emacs version of copy).  And if a feature involves several keystrokes to access, forget about it (for example, rectangular selection, or any features of special modes).  If I use a new mode, e.g., for some file type that I rarely edit (like HTML), I might as well not have any of the features, other than the syntax highlighting, because I either don’t know what they are, or even if I know that they should exist (like automatic tag completion for html), I have no idea how to access them.
 &lt;p&gt;There’s really something to be said about GUI editors, which give these things to users in a way that they don’t have to memorize anything.  Perhaps I should try to use the menu more.  Or maybe authors of addons should aim to make features require as little cognitive user interaction as possible (such as the excellent &lt;a href=&quot;http://cx4a.org/software/auto-complete/manual.html&quot;&gt;&lt;code&gt;auto-complete-mode&lt;/code&gt;&lt;/a&gt; I mentioned in &lt;a href=&quot;http://asmeurersympy.wordpress.com/2012/01/13/vim-vs-emacs-part-3/&quot;&gt;part 3&lt;/a&gt;).&lt;/p&gt;
@@ -798,11 +798,11 @@ dimensions.&lt;/p&gt;
 &lt;li&gt;I really should learn Emacs lisp. There are a lot of little customizations that I would like to make, but they are really niche, and can only be done programmatically.  But who has the time to learn a completely new programming language (plus a whole library, as just knowing Lisp is useless if you don’t know the proper Emacs funtions and variables and coding styles)?&lt;/li&gt;
 &lt;li&gt;I’ve still not found a good visual browser for jumping to function definitions in a file (mostly Python function definitions, but also other kinds of headers for other kinds of files).  The best I’ve found is &lt;code&gt;imenu&lt;/code&gt;. If you know of anything, please let me know.  One thing I really liked about Vim was the &lt;a href=&quot;http://www.vim.org/scripts/script.php?script_id=273&quot;&gt;tag list&lt;/a&gt; extension, which did this perfectly (thanks to commenter &lt;a href=&quot;http://asmeurersympy.wordpress.com/2011/12/20/vim-vs-emacs-part-1/#comment-424&quot;&gt;Scott&lt;/a&gt; for pointing it out to me).  I’ve been told that Cedet has something like this, but every time I try to install it, I run into some issues that just seem like way too much work (I don’t remember what they are, it won’t compile or something, or maybe it just wants to do just way too much and I can’t figure out how to disable everything except for the parts I want).  &lt;/li&gt;
 &lt;li&gt;If you ever code in C, add the following to your Makefile
-&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: plain;&quot;&gt;check-syntax:
+&lt;pre class=&quot;brush: plain; title: ; notranslate&quot;&gt;check-syntax:
 	$(CC) -o nul $(FLAGS) -S $(CHK_SOURCES)
-&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;/pre&gt;
 &lt;p&gt;(and if you don’t use a Makefile, start using one now).  This is assuming you have &lt;code&gt;CC&lt;/code&gt; and &lt;code&gt;FLAGS&lt;/code&gt; defined at the top (generally to something like &lt;code&gt;cc&lt;/code&gt; and &lt;code&gt;-Wall&lt;/code&gt;, respectively). Also, add the following to your &lt;code&gt;.emacs&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: plain;&quot;&gt;;; ===== Turn on flymake-mode ====
+&lt;pre class=&quot;brush: plain; title: ; notranslate&quot;&gt;;; ===== Turn on flymake-mode ====
 
 (add-hook 'c-mode-common-hook 'turn-on-flymake)
 (defun turn-on-flymake ()
@@ -816,18 +816,18 @@ dimensions.&lt;/p&gt;
   (interactive)
   (local-set-key &quot;\M-n&quot; 'flymake-goto-next-error)
   (local-set-key &quot;\M-p&quot; 'flymake-goto-prev-error))
-&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;/pre&gt;
 &lt;p&gt;The last part adds the useful keyboard shortcuts &lt;code&gt;M-n&lt;/code&gt; and &lt;code&gt;M-p&lt;/code&gt; to move between errors.  Now, errors in your C code will show up automatically as you type.  If you use the command line version of emacs like I do, and not the GUI version, you’ll also need to install the &lt;a href=&quot;http://www.emacswiki.org/emacs/flymake-cursor.el&quot;&gt;flymake-cursor&lt;/a&gt; module, which makes the errors show up in the mode line, since otherwise it tries to use mouse popups.  You can change the colors using &lt;code&gt;M-x customize-face&lt;/code&gt; (search for “flymake”). &lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;I never got flymake to work with LaTeX.  Does anyone know how to do it? It seems it is hardcoded to use MikTeX, the Windows version of LaTeX. I found some stuff, but none of it worked.
 &lt;p&gt;Actually, what I really would like is not syntax checking (I rarely make syntax mistakes in LaTeX any more), but rather something that automatically builds the PDF constantly as I type.  That way, I can just look over at the PDF as I am writing (I use an external monitor for this. I highly recommend it if you use LaTeX, especially one of those monitors that swivels to portrait mode).  &lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;If you use Mac OS X, you can use the very excellent &lt;a href=&quot;http://pqrs.org/macosx/keyremap4macbook/&quot;&gt;KeyRemap4MacBook&lt;/a&gt; program to make regular Mac OS X programs act more like Emacs.  Mac OS X already has many Emacs shortcuts built in (like &lt;code&gt;C-a&lt;/code&gt;, &lt;code&gt;C-e&lt;/code&gt;, etc.), but that only works in Cocoa apps, and it doesn’t include any meta key shortcuts.  This lets you use additional shortcuts literally everywhere (don’t worry, it automatically doesn’t use them in the Terminal), including an emulator for &lt;code&gt;C-space&lt;/code&gt; and some &lt;code&gt;C-x&lt;/code&gt; commands (like &lt;code&gt;C-x C-s&lt;/code&gt; to &lt;code&gt;Command-s&lt;/code&gt;).  It doesn’t work on context sensitive shortcuts, unfortunately, unless the operating system already supports it with another keyboard shortcut (e.g., it can map &lt;code&gt;M-f&lt;/code&gt; to &lt;code&gt;Option-right arrow&lt;/code&gt;).  For example, it can’t enable moving between paragraphs with &lt;code&gt;C-S-{&lt;/code&gt; and &lt;code&gt;C-S-}&lt;/code&gt;.  If anyone knows how to do that, let me know. &lt;/li&gt;
 &lt;li&gt;For about a month this summer, I had to use a Linux laptop, because my Mac broke and my new Mac took a month to arrive (the downside to ordering a new computer immediately after it is announced by Apple).  At this point, my saving of all my customizations to &lt;a href=&quot;http://pqrs.org/macosx/keyremap4macbook/&quot;&gt;GitHub&lt;/a&gt; really helped a lot.  I created a new branch for the Linux computer (because several things in my customizations were Mac specific), and just symlinked the files I wanted.  A hint I can give to people using Linux is to use Konsole.  The Gnome terminal sucks.  One thing I never figured out is how to make Konsole (or any other Terminal for that matter) to send Control-Shift shortcuts to Emacs (see &lt;a href=&quot;http://superuser.com/q/439961/39697&quot; rel=&quot;nofollow&quot;&gt;http://superuser.com/q/439961/39697&lt;/a&gt;).   I don’t use Linux any more at the moment, but if anyone knows what was going on there, add an answer to that question. &lt;/li&gt;
 &lt;li&gt;In &lt;a href=&quot;http://asmeurersympy.wordpress.com/2012/01/13/vim-vs-emacs-part-3/&quot;&gt;part 3&lt;/a&gt; mentioned that &lt;a href=&quot;http://www.dr-qubit.org/predictive/predictive-user-manual/html/index.php&quot;&gt;predictive mode&lt;/a&gt; was cool, but not very useful.  What it does is basically add tab completion for every word in the English language.  Actually, I’ve found using auto-complete-mode even when editing text (or LaTeX) to be very useful.  Unlike predictive mode, it only guesses words that you’ve already typed  (it turns out that you tend to type the same words over and over, and doubly so if those words are LaTeX math commands).  Also, predictive mode has a set order of words, which supposedly helps to use it with muscle memory, whereas auto-complete-mode tries to learn what words you are more likely to use based on some basic statistical machine-learning.  Also, auto-complete-mode has a much better visual UI and smarter defaults than predictive mode. The result is that it’s actually quite useful and makes typing plain text, as well as LaTeX (actually, pretty much anything, as long as you tend to use the same words repeatedly) much faster.  I recommend enabling auto-complete-mode almost everywhere using hooks, like
-&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: plain;&quot;&gt;(add-hook 'latex-mode-hook 'auto-complete-mode)
+&lt;pre class=&quot;brush: plain; title: ; notranslate&quot;&gt;(add-hook 'latex-mode-hook 'auto-complete-mode)
 (add-hook 'LaTeX-mode-hook 'auto-complete-mode)
 (add-hook 'prog-mode-hook 'auto-complete-mode)
 ;; etc.
-&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;/pre&gt;
 &lt;/li&gt;
 &lt;li&gt;At the end of the day, I’m pretty happy with Emacs.  I’ve managed to fix most of the things that make it annoying, and it is orders of magnitude more powerful than any GUI editor or IDE I’ve ever seen, especially at just basic text editing, which is the most important thing (I can always use another program for other things, like debugging or whatever).  The editor uses the basic shortcuts that I am used to, and is quite efficient to write in.  Extensions like auto-complete-mode make using it much faster, though I could use some more extensions to make it even better (namely, a better isearch and a better imenu). Regarding Vim vs. Emacs, I’d like to quote something I said back in my &lt;a href=&quot;http://asmeurersympy.wordpress.com/2011/12/20/vim-vs-emacs-part-1&quot;&gt;first blog post&lt;/a&gt; about Vim over a year ago:&lt;br /&gt;
 &lt;blockquote&gt;&lt;p&gt;Vim is great for text &lt;em&gt;editing&lt;/em&gt;, but not so hot for text &lt;em&gt;writing&lt;/em&gt; (unless you always write text perfectly, so that you never need to leave insert mode until you are done typing). Just the simple act of deleting a mistyped word (yes, word, that happens a lot when you are decently fast touch typist) takes several keystrokes, when it should in my opinion only take one (two if you count the meta-key).&lt;/p&gt;&lt;/blockquote&gt;
@@ -3201,20 +3201,20 @@ f_durations.write('\n')
 	<link>http://asmeurersympy.wordpress.com/2012/09/19/infinitely-nested-lists-in-python/</link>
 	<content:encoded>&lt;p&gt;Readers of this blog know that I sometimes like to write about some &lt;a href=&quot;http://asmeurersympy.wordpress.com/2009/07/20/modifying-a-list-while-looping-through-it-in-python/&quot;&gt;strange&lt;/a&gt;, &lt;a href=&quot;http://asmeurersympy.wordpress.com/2010/06/16/strange-python-behavior-can-someone-please-explain-to-me-what-is-going-on-here/&quot;&gt;unexpected&lt;/a&gt;, and &lt;a href=&quot;http://asmeurersympy.wordpress.com/2011/03/15/true-is-true-is-false-is-true-is-false/&quot;&gt;unusual&lt;/a&gt; things in Python that I stumble across.  This post is another one of those.&lt;/p&gt;
 &lt;p&gt;First, look at this&lt;/p&gt;
-&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; a = []
+&lt;pre class=&quot;brush: python; title: ; notranslate&quot;&gt;&amp;gt;&amp;gt;&amp;gt; a = []
 &amp;gt;&amp;gt;&amp;gt; a.append(a)
 &amp;gt;&amp;gt;&amp;gt; a
 [[...]]
-&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;/pre&gt;
 &lt;p&gt;What am I doing here?  I’m creating a list, &lt;code&gt;a&lt;/code&gt;, and I’m adding it to itself.  What you end up with is an infinitely nested list.  The first interesting thing about this is that Python is smart enough to not explode when printing this list.  The following should convince you that &lt;code&gt;a&lt;/code&gt; does indeed contain itself.&lt;/p&gt;
-&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; a[0] is a
+&lt;pre class=&quot;brush: python; title: ; notranslate&quot;&gt;&amp;gt;&amp;gt;&amp;gt; a[0] is a
 True
 &amp;gt;&amp;gt;&amp;gt; a[0] == a
 True
-&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;/pre&gt;
 &lt;p&gt;Now, if you have programmed in C, or a similar language that uses pointers, this should not come as a surprise to you.  Lists in Python, like most things, do not actually contain the items inside them.  Rather, they contain references (in C terminology, “pointers”) to the items inside them.  From this perspective, there is no issue at all with &lt;code&gt;a&lt;/code&gt; containing a pointer to itself.&lt;/p&gt;
 &lt;p&gt;The first thing I wondered when I saw this was just how clever the printer was at noticing that the list was infinitely nested.  What if we make the cycle a little more complex?&lt;/p&gt;
-&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; a = []
+&lt;pre class=&quot;brush: python; title: ; notranslate&quot;&gt;&amp;gt;&amp;gt;&amp;gt; a = []
 &amp;gt;&amp;gt;&amp;gt; b = []
 &amp;gt;&amp;gt;&amp;gt; a.append(b)
 &amp;gt;&amp;gt;&amp;gt; b.append(a)
@@ -3226,9 +3226,9 @@ True
 True
 &amp;gt;&amp;gt;&amp;gt; b[0] is a
 True
-&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;/pre&gt;
 &lt;p&gt;So it still works.  I had thought that maybe repr just catches &lt;code&gt;RuntimeError&lt;/code&gt; and falls back to printing &lt;code&gt;...&lt;/code&gt; when the list is nested too deeply, but it turns out that is not true:&lt;/p&gt;
-&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; a = []
+&lt;pre class=&quot;brush: python; title: ; notranslate&quot;&gt;&amp;gt;&amp;gt;&amp;gt; a = []
 &amp;gt;&amp;gt;&amp;gt; for i in range(10000):
 ...     a = [a]
 ... 
@@ -3236,24 +3236,24 @@ True
 Traceback (most recent call last):
   File &quot;&amp;lt;stdin&amp;gt;&quot;, line 1, in &amp;lt;module&amp;gt;
 RuntimeError: maximum recursion depth exceeded while getting the repr of a list
-&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;/pre&gt;
 &lt;p&gt;And by the way, in case you were wondering, it is possible to catch a &lt;code&gt;RuntimeError&lt;/code&gt; (using the same &lt;code&gt;a&lt;/code&gt; as the previous code block)&lt;/p&gt;
-&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; try:
+&lt;pre class=&quot;brush: python; title: ; notranslate&quot;&gt;&amp;gt;&amp;gt;&amp;gt; try:
 ...     print(a)
 ... except RuntimeError:
 ...     print(&quot;no way&quot;)
 ... 
 no way
-&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;/pre&gt;
 &lt;p&gt;(and you also may notice that this is Python 3. Things behave the same way in Python 2)&lt;/p&gt;
 &lt;p&gt;Back to infinitely nested lists, we saw that printing works, but there are some things that don’t work.&lt;/p&gt;
-&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; a[0] == b
+&lt;pre class=&quot;brush: python; title: ; notranslate&quot;&gt;&amp;gt;&amp;gt;&amp;gt; a[0] == b
 True
 &amp;gt;&amp;gt;&amp;gt; a[0] == a
 Traceback (most recent call last):
   File &quot;&amp;lt;stdin&amp;gt;&quot;, line 1, in &amp;lt;module&amp;gt;
 RuntimeError: maximum recursion depth exceeded in comparison
-&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;/pre&gt;
 &lt;p&gt;&lt;code&gt;a[0] is b&lt;/code&gt; holds (i.e., they are exactly the same object in memory), so &lt;code&gt;==&lt;/code&gt; is able to short-circuit on them.  But to test &lt;code&gt;a[0] == a&lt;/code&gt; it has to recursively compare the elements of &lt;code&gt;a&lt;/code&gt; and &lt;code&gt;a[0]&lt;/code&gt;.  Since it is infinitely nested, this leads to a recursion error.  Now an interesting question: why does this happen?  Is it because &lt;code&gt;==&lt;/code&gt; on lists uses a depth first search?  If it were somehow possible to compare these two objects, would they be equal?&lt;/p&gt;
 &lt;p&gt;One is reminded of &lt;a href=&quot;http://en.wikipedia.org/wiki/Russel%27s_paradox&quot;&gt;Russel’s paradox&lt;/a&gt;, and the reason why in &lt;a href=&quot;http://en.wikipedia.org/wiki/Zermelo%E2%80%93Fraenkel_set_theory&quot;&gt;axiomatic set theory&lt;/a&gt;, sets are not allowed to contain themselves. &lt;/p&gt;
 &lt;p&gt;Thinking of this brought me to my final question.  Is it possible to make a Python &lt;code&gt;set&lt;/code&gt; that contains itself?  The answer is obviously no, because &lt;code&gt;set&lt;/code&gt; objects can only contain hashable objects, and &lt;code&gt;set&lt;/code&gt; is not hashable.  But &lt;code&gt;frozenset&lt;/code&gt;, &lt;code&gt;set&lt;/code&gt;‘s counterpart, is hashable.  So can you create a &lt;code&gt;frozenset&lt;/code&gt; that contains itself?  The same for &lt;code&gt;tuple&lt;/code&gt;.  The method I used for &lt;code&gt;a&lt;/code&gt; above won’t work, because &lt;code&gt;a&lt;/code&gt; must be mutable to append it to itself.&lt;/p&gt;
@@ -3290,22 +3290,23 @@ b. Add this line to your bash_profile.&lt;/p&gt;
 &lt;h2&gt;Automatic Symbol Definition&lt;/h2&gt;
 &lt;p&gt;While not as ground breaking as the feature I described in my &lt;a href=&quot;http://asmeurersympy.wordpress.com/2012/08/21/sympy-live-sphinx-extension/&quot;&gt;last post&lt;/a&gt;, this feature is still quite useful. As you may know, SymPy is inherently a Python library, meaning that it lives by the rules of Python. If you want to use any name, whether it be a Symbol or a function (like cos), you need to define it (in the case of Symbols), or import it (in the case of functions that come with SymPy). We provide the script &lt;code&gt;isympy&lt;/code&gt; with SymPy to assist with this. This script automatically runs IPython (if it’s installed), imports all names from sympy (&lt;code&gt;from sympy import *&lt;/code&gt;), and defines common symbol names (like &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt;, and &lt;code&gt;z&lt;/code&gt;).&lt;/p&gt;
 &lt;p&gt;But if you want to use a Symbol that is not one of the ones predefined by &lt;code&gt;isympy&lt;/code&gt;, you will get something like&lt;/p&gt;
-&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;In [1]: r*x
+&lt;pre class=&quot;brush: python; title: ; notranslate&quot;&gt;In [1]: r*x
 ---------------------------------------------------------------------------
 NameError                                 Traceback (most recent call last)
  in ()
 ----&amp;gt; 1 r*x
 
 NameError: name 'r' is not defined
-&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;/pre&gt;
 &lt;p&gt;The best solution for this has been either to type &lt;code&gt;var('r')&lt;/code&gt;, which will create the Symbol &lt;code&gt;r&lt;/code&gt; and inject it into the namespace, or to wrap your text in a string and pass it to &lt;code&gt;sympify()&lt;/code&gt;, like &lt;code&gt;sympify(&quot;r*x&quot;)&lt;/code&gt;. Neither of these are very friendly in interactive mode.&lt;/p&gt;
 &lt;p&gt;In SymPy 0.7.2, &lt;code&gt;isympy&lt;/code&gt; has a new command line option, &lt;code&gt;isympy -a&lt;/code&gt;, which will enable a mechanism that will automatically define all undefined names as Symbols for you:&lt;/p&gt;
-&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;In [1]: r*x
+&lt;pre class=&quot;brush: python; title: ; notranslate&quot;&gt;In [1]: r*x
 Out[1]: r⋅x
-&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;/pre&gt;
 &lt;p&gt;There are some caveats to be aware of when using this feature:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;Names must be undefined for &lt;code&gt;isympy -a&lt;/code&gt; to work. If you type something like &lt;code&gt;S*x&lt;/code&gt;, you’ll get:&lt;pre class=&quot;brush: python;&quot;&gt;In [3]: S*x
+&lt;li&gt;Names must be undefined for &lt;code&gt;isympy -a&lt;/code&gt; to work. If you type something like &lt;code&gt;S*x&lt;/code&gt;, you’ll get:
+&lt;pre class=&quot;brush: python; title: ; notranslate&quot;&gt;In [3]: S*x
 ---------------------------------------------------------------------------
 TypeError                                 Traceback (most recent call last)
 &amp;lt;ipython-input-3-6656a97ea7b0&amp;gt; in &amp;lt;module&amp;gt;()
@@ -3321,16 +3322,18 @@ TypeError: unsupported operand type(s) for *: 'SingletonRegistry' and 'Symbol'
 &lt;h2&gt;Automatic int to Integer Conversion&lt;/h2&gt;
 &lt;p&gt;A second thing that is annoying with Python and SymPy is that something like &lt;code&gt;1/2&lt;/code&gt; will be interpreted completely by Python, without any SymPy. This means that something like &lt;code&gt;1/2 + x&lt;/code&gt; will give either &lt;code&gt;0 + x&lt;/code&gt; or &lt;code&gt;0.5 + x&lt;/code&gt;, depending on whether or not &lt;code&gt;__future__.division&lt;/code&gt; has been imported. &lt;code&gt;isympy&lt;/code&gt; has always ran &lt;code&gt;from __future__ import division&lt;/code&gt;, so that you’ll get the latter, but we usually would prefer to get &lt;code&gt;Rational(1, 2)&lt;/code&gt;. Previously, the best way to do this was again to either run it through &lt;code&gt;sympify()&lt;/code&gt; as a string, or to sympify at least one of the numbers (here the &lt;code&gt;S()&lt;/code&gt; shortcut to &lt;code&gt;sympify()&lt;/code&gt; is useful, because you can type just &lt;code&gt;S(1)/2&lt;/code&gt;).&lt;/p&gt;
 &lt;p&gt;With SymPy 0.7.2, you can run &lt;code&gt;isympy -i&lt;/code&gt;, and it will automatically wrap all integers literals with &lt;code&gt;Integer()&lt;/code&gt;. The result is that &lt;code&gt;1/2&lt;/code&gt; produces &lt;code&gt;Rational(1, 2)&lt;/code&gt;:&lt;/p&gt;
-&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python;&quot;&gt;In [1]: 1/2 + x
+&lt;pre class=&quot;brush: python; title: ; notranslate&quot;&gt;In [1]: 1/2 + x
 Out[1]: x + 1/2
-&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
+&lt;/pre&gt;
 &lt;p&gt;Again, there are a couple of caveats:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;If you want to get Python style division, you just need to wrap both arguments in &lt;code&gt;int()&lt;/code&gt;:&lt;pre class=&quot;brush: python;&quot;&gt;In [2]: int(1)/int(2)
+&lt;li&gt;If you want to get Python style division, you just need to wrap both arguments in &lt;code&gt;int()&lt;/code&gt;:
+&lt;pre class=&quot;brush: python; title: ; notranslate&quot;&gt;In [2]: int(1)/int(2)
 Out[2]: 0.5
 &lt;/pre&gt;
 &lt;p&gt;Of course, if you just want a floating point number, you can just use &lt;code&gt;N()&lt;/code&gt; or &lt;code&gt;.evalf()&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;This works by parsing the text and wrapping all integer literals with &lt;code&gt;Integer()&lt;/code&gt;. This means that if you have a variable set to a Python int, it will still act like a Python int:&lt;pre class=&quot;brush: python;&quot;&gt;In [6]: a = int(1)
+&lt;li&gt;This works by parsing the text and wrapping all integer literals with &lt;code&gt;Integer()&lt;/code&gt;. This means that if you have a variable set to a Python int, it will still act like a Python int:
+&lt;pre class=&quot;brush: python; title: ; notranslate&quot;&gt;In [6]: a = int(1)
 
 In [7]: b = int(2)
 
