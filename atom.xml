@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2013-03-16T06:00:42Z</updated>
+  <updated>2013-03-20T01:40:42Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,144 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry>
+    <id>http://matthewrocklin.com/blog//work/2013/03/19/SymPy-Theano-part-1</id>
+    <link href="http://matthewrocklin.com/blog//work/2013/03/19/SymPy-Theano-part-1" rel="alternate" type="text/html"/>
+    <title>SymPy -&gt; Theano -- Code Generation</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>No one is good at everything, that’s why we have society.</p>
+
+<p>No project is good at everything, that’s why we have interfaces.</p>
+
+<p>This is the first of three posts that join <code>SymPy</code>, a library for symbolic mathematics, and <code>Theano</code>, a library for mathematical compilation to numeric code. Each library does a few things really well. Each library also over-reaches bit and does a few things not-as-well. Fortunately the two libraries have clear and simple data structures and so can be used together effectively.</p>
+
+<p>In this post I’ll focus on how SymPy can use Theano to generate efficient code.</p>
+
+<h2 id="physics">Physics</h2>
+
+<p>SymPy knows Physics. For example, here is the radial wavefunction corresponding to <code>n = 3</code> and <code>l = 1</code> for Carbon (<code>Z = 6</code>)</p>
+
+<pre><code>from sympy.physics.hydrogen import R_nl
+from sympy.abc import x
+expr = R_nl(3, 1, x, 6)
+print latex(expr)</code></pre>
+
+<p>$$\frac{8}{3} x \left(- 4 x + 4\right) e^{- 2 x}$$</p>
+
+<p>SymPy is great at this. It can manipulate high level mathematical expressions very naturally. When it comes to numeric computation it is less effective.</p>
+
+<h2 id="numerics">Numerics</h2>
+
+<p>Fortunately there are methods to offload the work to numerical projects like <code>numpy</code> or to generate and compile straight <code>Fortran</code> code. Here we use two existing methods to create two identical vectorized functions to compute the above expression.</p>
+
+<pre><code>from sympy.utilities.autowrap import ufuncify
+from sympy.utilities.lambdify import lambdify
+fn_numpy   = lambdify(x, expr, 'numpy')
+fn_fortran = ufuncify([x], expr)</code></pre>
+
+<p><code>fn_numpy</code> replaces each of the SymPy operations with the equivalent function from the popular NumPy package. <code>fn_fortran</code> generates and compiles low-level Fortran code and uses <code>f2py</code> to bind it to a Python function. They each use <code>numpy</code> arrays as common data structures, supporting broad interoperability with the rest of the Scientific Python ecosystem. They both work well and produce identical results.</p>
+
+<pre><code>&gt;&gt;&gt; from numpy import linspace
+&gt;&gt;&gt; xx = linspace(0, 1, 5)
+&gt;&gt;&gt; fn_numpy(xx)
+[ 0.          1.21306132  0.98101184  0.44626032  0.        ]
+&gt;&gt;&gt; fn_fortran(xx)
+[ 0.          1.21306132  0.98101184  0.44626032  0.        ]</code></pre>
+
+<p>We use these functions and <code>matplotlib</code> to plot the original equation</p>
+
+<pre><code>from pylab import plot, show, legend
+xx = linspace(0, 5, 50000)
+plot(xx, fn_numpy(xx))</code></pre>
+
+<p><img alt="" src="http://mrocklin.github.com/blog/images/R_31.png"/></p>
+
+<h2 id="performance">Performance</h2>
+
+<p>When we profile these functions we find that the <code>Fortran</code> solution runs a bit faster. This is because it is able to fuse all of the scalar operations into one loop while the <code>numpy</code> solution walks over memory several times, performing each operation individually. Jensen wrote a more thorough <a href="http://ojensen.wordpress.com/2010/08/10/fast-ufunc-ish-hydrogen-solutions/">blogpost about this</a> when he worked on code generation. He shows substantial performance increases as the complexity of the mathematical expression increases.</p>
+
+<pre><code>&gt;&gt;&gt; timeit fn_numpy(xx)
+1000 loops, best of 3: 1.4 ms per loop
+&gt;&gt;&gt; timeit fn_fortran(xx)
+1000 loops, best of 3: 884 us per loop</code></pre>
+
+<p>This weekend I built up a translation from SymPy expressions to Theano computations. This builds off of <a href="http://github.com/nouiz/theano_sympy/">old work</a> done with <a href="http://github.com/nouiz">Frederic Bastien</a> at SciPy2012.</p>
+
+<pre><code>&gt;&gt;&gt; fn_theano  = theano_function([x], [expr], dims={x: 1}, dtypes={x: 'float64'})
+&gt;&gt;&gt; timeit fn_theano(xx)
+1000 loops, best of 3: 1.04 ms per loop</code></pre>
+
+<p>Theano generates <code>C</code> code that performs the same loop fusion done in <code>Fortran</code> but it incurs a bit more startup time. It performs somewhere between the <code>numpy</code> and <code>Fortran</code> solutions.</p>
+
+<p>However, the <code>SymPy -&gt; Theano</code> system only takes up about a page of code while the <code>lambdify</code> and <code>autowrap</code> modules are substantially more complex. Additionally, Theano is actively developed and is sure to improve and track changes in hardware well into the future. <code>lambdify</code> and <code>autowrap</code> have been relatively untouched over the past year.</p>
+
+<h2 id="leveraging_theano">Leveraging Theano</h2>
+
+<p>In the above example we used Theano to copy the behavior of SymPy’s existing <code>numpy</code> and <code>Fortran</code> numeric solutions. Theano is capable of substantially more than this. To show a simple example we’ll compute both our original output and the derivative simultaneously.</p>
+
+<pre><code>outputs = expr, simplify(expr.diff(x))
+print latex(outputs)</code></pre>
+
+<p>$$ \begin{pmatrix}\frac{8}{3} x \left(- 4 x + 4\right) e^{- 2 x}, &amp; \frac{32}{3} \left(2 x^{2} - 4 x + 1\right) e^{- 2 x}\end{pmatrix} $$</p>
+
+<p>We redefine our functions to produce both outputs, instead of just <code>expr</code> alone</p>
+
+<pre><code>fn_numpy = fn_numpy = lambdify([x], outputs, 'numpy')
+fn_theano = theano_function([x], outputs, dims={x: 1}, dtypes={x: 'float64'})
+
+fns_fortran = [ufuncify([x], output) for output in outputs]
+fn_fortran = lambda xx: [fn_fortran(xx) for fn_fortran in fns_fortran]</code></pre>
+
+<p>The expression and its derivative look like this:</p>
+
+<pre><code>for y in fn_theano(xx):
+    plot(xx, y)
+legend(['$R_{31}$', "$R'_{31}$"])</code></pre>
+
+<p><img alt="" src="http://mrocklin.github.com/blog/images/R_31_prime.png"/></p>
+
+<p>Because Theano handles common subexpressions well it is able to perform the extra computation with only a very slight increase in runtime, easily eclipsing either of the other two options.</p>
+
+<pre><code>&gt;&gt;&gt; timeit fn_numpy(xx)
+100 loops, best of 3: 2.85 ms per loop
+&gt;&gt;&gt; timeit fn_fortran(xx)
+1000 loops, best of 3: 1.8 ms per loop
+&gt;&gt;&gt; timeit fn_theano(xx)
+1000 loops, best of 3: 1.16 ms per loop</code></pre>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>The Theano project is devoted to code generation at a level that exceeds the devotion of SymPy to this same topic. This is natural and prevalent. When we combine the good parts of both projects we often achieve a better result than with an in-house solution</p>
+
+<p>In-house solutions to foreign problems lack persistence. As programmers within an ecosystem we should make projects that do one thing well and provide clean interfaces and simple data structures to encourage inter-project communication.</p>
+
+<h2 id="references">References</h2>
+
+<ul>
+<li><a href="http://sympy.org/">SymPy</a></li>
+
+<li><a href="http://deeplearning.net/software/theano">Theano</a></li>
+
+<li><a href="http://ojensen.wordpress.com/2010/08/10/fast-ufunc-ish-hydrogen-solutions/">Jensen’s Blogpost</a></li>
+
+<li><a href="https://github.com/mrocklin/sympy/tree/theano-print">Development git repository</a></li>
+
+<li><a href="http://mrocklin.github.com/blog/scripts/sympy_theano_printing.ipynb">IPython notebook of this work</a></li>
+</ul></div>
+    </summary>
+    <updated>2013-03-19T07:00:00Z</updated>
+    <source>
+      <id>http://matthewrocklin.com/blog/</id>
+      <author>
+        <name>MRocklin</name>
+      </author>
+      <link href="http://matthewrocklin.com/blog/" rel="alternate" type="text/html"/>
+      <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
+      <subtitle>Posts tagged as 'SymPy'</subtitle>
+      <title>Working notes by Matthew Rocklin - SymPy</title>
+      <updated>2013-03-20T01:40:37Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en">
     <id>http://asmeurersympy.wordpress.com/?p=1218</id>
@@ -53,7 +191,7 @@
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-03-16T06:00:17Z</updated>
+      <updated>2013-03-20T01:40:25Z</updated>
     </source>
   </entry>
 
@@ -134,7 +272,7 @@ each time a threshold is crossed.</p>
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog//feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-03-16T06:00:14Z</updated>
+      <updated>2013-03-20T01:40:22Z</updated>
     </source>
   </entry>
 
@@ -210,7 +348,7 @@ each time a threshold is crossed.</p>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-16T06:00:36Z</updated>
+      <updated>2013-03-20T01:40:37Z</updated>
     </source>
   </entry>
 
@@ -295,7 +433,7 @@ each time a threshold is crossed.</p>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-16T06:00:36Z</updated>
+      <updated>2013-03-20T01:40:37Z</updated>
     </source>
   </entry>
 
@@ -332,7 +470,7 @@ each time a threshold is crossed.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-03-16T06:00:17Z</updated>
+      <updated>2013-03-20T01:40:25Z</updated>
     </source>
   </entry>
 
@@ -456,7 +594,7 @@ run(0, tail,  conso(head, tail, (1, 2, 3, 4)))
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-16T06:00:35Z</updated>
+      <updated>2013-03-20T01:40:37Z</updated>
     </source>
   </entry>
 
@@ -554,7 +692,7 @@ CO,WY,NE,KS,OK,NM,AZ,UT
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-16T06:00:35Z</updated>
+      <updated>2013-03-20T01:40:37Z</updated>
     </source>
   </entry>
 
@@ -671,7 +809,7 @@ CO,WY,NE,KS,OK,NM,AZ,UT
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-16T06:00:35Z</updated>
+      <updated>2013-03-20T01:40:37Z</updated>
     </source>
   </entry>
 
@@ -872,7 +1010,7 @@ dimensions.</p>
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog//feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-03-16T06:00:15Z</updated>
+      <updated>2013-03-20T01:40:22Z</updated>
     </source>
   </entry>
 
@@ -955,7 +1093,7 @@ dimensions.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-03-16T06:00:17Z</updated>
+      <updated>2013-03-20T01:40:25Z</updated>
     </source>
   </entry>
 
@@ -986,7 +1124,7 @@ dimensions.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-03-16T06:00:17Z</updated>
+      <updated>2013-03-20T01:40:25Z</updated>
     </source>
   </entry>
 
@@ -1078,7 +1216,7 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-16T06:00:35Z</updated>
+      <updated>2013-03-20T01:40:37Z</updated>
     </source>
   </entry>
 
@@ -1120,7 +1258,7 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog//feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-03-16T06:00:15Z</updated>
+      <updated>2013-03-20T01:40:22Z</updated>
     </source>
   </entry>
 
@@ -1228,7 +1366,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-16T06:00:35Z</updated>
+      <updated>2013-03-20T01:40:37Z</updated>
     </source>
   </entry>
 
@@ -1384,7 +1522,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-16T06:00:36Z</updated>
+      <updated>2013-03-20T01:40:37Z</updated>
     </source>
   </entry>
 
@@ -1496,7 +1634,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-16T06:00:35Z</updated>
+      <updated>2013-03-20T01:40:37Z</updated>
     </source>
   </entry>
 
@@ -1574,7 +1712,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-16T06:00:36Z</updated>
+      <updated>2013-03-20T01:20:32Z</updated>
     </source>
   </entry>
 
@@ -1606,7 +1744,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-03-16T06:00:40Z</updated>
+      <updated>2013-03-20T01:40:42Z</updated>
     </source>
   </entry>
 
@@ -2100,7 +2238,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-03-16T06:00:40Z</updated>
+      <updated>2013-03-20T01:40:42Z</updated>
     </source>
   </entry>
 
@@ -2289,7 +2427,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site, I guess...</subtitle>
       <title>Gilbert Gede's Blog</title>
-      <updated>2013-03-16T06:00:30Z</updated>
+      <updated>2013-03-20T01:40:31Z</updated>
     </source>
   </entry>
 
@@ -3364,7 +3502,7 @@ f_durations.write('\n')
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2013-03-16T06:00:42Z</updated>
+      <updated>2013-03-17T07:40:35Z</updated>
     </source>
   </entry>
 
@@ -3531,7 +3669,7 @@ f_durations.write('\n')
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog//feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-03-16T06:00:14Z</updated>
+      <updated>2013-03-20T01:40:21Z</updated>
     </source>
   </entry>
 
@@ -3606,7 +3744,7 @@ f_durations.write('\n')
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2013-03-16T06:00:32Z</updated>
+      <updated>2013-03-20T01:40:34Z</updated>
     </source>
   </entry>
 
@@ -3751,7 +3889,7 @@ RuntimeError: maximum recursion depth exceeded in comparison
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-03-16T06:00:17Z</updated>
+      <updated>2013-03-20T01:40:25Z</updated>
     </source>
   </entry>
 
@@ -3794,7 +3932,7 @@ b. Add this line to your bash_profile.</p>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-03-16T06:00:40Z</updated>
+      <updated>2013-03-20T01:40:42Z</updated>
     </source>
   </entry>
 
@@ -3878,7 +4016,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-03-16T06:00:17Z</updated>
+      <updated>2013-03-20T01:40:25Z</updated>
     </source>
   </entry>
 
@@ -3914,7 +4052,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-03-16T06:00:17Z</updated>
+      <updated>2013-03-20T01:40:25Z</updated>
     </source>
   </entry>
 
@@ -4150,7 +4288,7 @@ Out[74]: True
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-03-16T06:00:39Z</updated>
+      <updated>2013-03-20T01:40:42Z</updated>
     </source>
   </entry>
 
@@ -4268,7 +4406,7 @@ commits are much more like my usual ones.
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-03-16T06:00:38Z</updated>
+      <updated>2013-03-20T01:40:40Z</updated>
     </source>
   </entry>
 
@@ -4301,7 +4439,7 @@ commits are much more like my usual ones.
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2013-03-16T06:00:38Z</updated>
+      <updated>2013-03-20T01:40:40Z</updated>
     </source>
   </entry>
 
@@ -4335,7 +4473,7 @@ commits are much more like my usual ones.
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2013-03-16T06:00:42Z</updated>
+      <updated>2013-03-17T07:40:34Z</updated>
     </source>
   </entry>
 
@@ -4446,7 +4584,7 @@ Out[24]: 6
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-03-16T06:00:38Z</updated>
+      <updated>2013-03-20T01:40:40Z</updated>
     </source>
   </entry>
 
@@ -4565,7 +4703,7 @@ Out[24]: 6
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2013-03-16T06:00:38Z</updated>
+      <updated>2013-03-20T01:40:40Z</updated>
     </source>
   </entry>
 
@@ -4597,7 +4735,7 @@ Out[24]: 6
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-03-16T06:00:39Z</updated>
+      <updated>2013-03-20T01:40:41Z</updated>
     </source>
   </entry>
 
@@ -4638,7 +4776,7 @@ Out[24]: 6
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2013-03-16T06:00:41Z</updated>
+      <updated>2013-03-17T07:40:34Z</updated>
     </source>
   </entry>
 
@@ -4741,7 +4879,7 @@ StopIteration:
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-03-16T06:00:39Z</updated>
+      <updated>2013-03-20T01:40:42Z</updated>
     </source>
   </entry>
 
@@ -4800,7 +4938,7 @@ StopIteration:
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-03-16T06:00:38Z</updated>
+      <updated>2013-03-20T01:40:40Z</updated>
     </source>
   </entry>
 
@@ -4830,7 +4968,7 @@ StopIteration:
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2013-03-16T06:00:38Z</updated>
+      <updated>2013-03-20T01:40:40Z</updated>
     </source>
   </entry>
 
@@ -4915,48 +5053,6 @@ StopIteration:
       <subtitle>Posts categorized as 'programming'</subtitle>
       <title>- Programming</title>
       <updated>2012-08-19T07:40:29Z</updated>
-    </source>
-  </entry>
-
-  <entry>
-    <id>http://blog.catchmrbharath.in/programming/2012/07/23/gsoc-week-9</id>
-    <link href="http://blog.catchmrbharath.in/programming/2012/07/23/gsoc-week-9" rel="alternate" type="text/html"/>
-    <title>Gsoc week 9</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>This has been a really unproductive week. I was sick with fever for almost three days and could not spend my time on anything. I spent the next days getting the basic svgfig backend for 2d line plots. There are lots of issues with svgfig, and hence I am of the opinion svgfig should be used only for displaying images on the google app engine ie sympy live. First on the list is no support for 3-D graphs. I think this is ok, because there are not many libraries even in javascript which can do 3D plotting. Also, I am having problems with implementing contour plots and surface plots in svgfig. I am experimenting with a way, which would involve using marching squares algorithm to plot contour plots.</p>
-
-<p>I think I am a little behind my gsoc schedule, and I should speed up things a little in the next few weeks.</p>
-
-<p>So these are the things that I have to address</p>
-
-<ul>
-<li>Integration of svgfig with sympy live</li>
-
-<li>Fix the multiple spawning of windows in matplotlib issue.</li>
-
-<li>Fix the plot tests. As of now, the tests do nothing, as the process_series is not called if show is set to False.</li>
-
-<li>I have been toying around with ipython to get isympy notebook and qtconsole working. The problem I am facing is, there are 2 instances of qtconsole created, instead of one, when I run it. I will have to figure out the problem.</li>
-
-<li>Address the issues regarding the adaptive sampling of 2d plots.</li>
-
-<li>Clean up my branch of implicit plotting (This is almost done).</li>
-
-<li>Split the plot function into plot, plot3d, implicit_plot functions.</li>
-</ul>
-
-<p>I don’t think I will be able to do all of these by the end of gsoc period. But my priority will be getting the implicit plotting and svgfig backend working and getting my pull requests merged.</p></div>
-    </summary>
-    <updated>2012-07-23T07:00:00Z</updated>
-    <published>2012-07-23T07:00:00Z</published>
-    <source>
-      <author>
-        <name>Bharath M R</name>
-      </author>
-      <link href="" rel="alternate" type="text/html"/>
-      <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
-      <subtitle>Posts categorized as 'programming'</subtitle>
-      <title>- Programming</title>
-      <updated>2012-10-06T05:40:18Z</updated>
     </source>
   </entry>
 </feed>

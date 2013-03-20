@@ -13,6 +13,7 @@
 
 	<items>
 		<rdf:Seq>
+			<rdf:li rdf:resource="http://matthewrocklin.com/blog//work/2013/03/19/SymPy-Theano-part-1" />
 			<rdf:li rdf:resource="http://asmeurersympy.wordpress.com/?p=1218" />
 			<rdf:li rdf:resource="tag:fseoane.net/blog,2013-02-27:2013/loss-functions-for-ordinal-regression/" />
 			<rdf:li rdf:resource="http://matthewrocklin.com/blog//work/2013/02/25/MaximumAposteriori" />
@@ -72,11 +73,134 @@
 			<rdf:li rdf:resource="http://angadhsympy.wordpress.com/?p=305" />
 			<rdf:li rdf:resource="http://www.catchmrbharath.in/programming/2012/07/23/gsoc-week-9" />
 			<rdf:li rdf:resource="http://catchmrbharath.github.com/programming/2012/07/23/gsoc-week-9" />
-			<rdf:li rdf:resource="http://blog.catchmrbharath.in/programming/2012/07/23/gsoc-week-9" />
 		</rdf:Seq>
 	</items>
 </channel>
 
+<item rdf:about="http://matthewrocklin.com/blog//work/2013/03/19/SymPy-Theano-part-1">
+	<title>MRocklin: SymPy -&gt; Theano -- Code Generation</title>
+	<link>http://matthewrocklin.com/blog//work/2013/03/19/SymPy-Theano-part-1</link>
+	<content:encoded>&lt;p&gt;No one is good at everything, that’s why we have society.&lt;/p&gt;
+
+&lt;p&gt;No project is good at everything, that’s why we have interfaces.&lt;/p&gt;
+
+&lt;p&gt;This is the first of three posts that join &lt;code&gt;SymPy&lt;/code&gt;, a library for symbolic mathematics, and &lt;code&gt;Theano&lt;/code&gt;, a library for mathematical compilation to numeric code. Each library does a few things really well. Each library also over-reaches bit and does a few things not-as-well. Fortunately the two libraries have clear and simple data structures and so can be used together effectively.&lt;/p&gt;
+
+&lt;p&gt;In this post I’ll focus on how SymPy can use Theano to generate efficient code.&lt;/p&gt;
+
+&lt;h2 id=&quot;physics&quot;&gt;Physics&lt;/h2&gt;
+
+&lt;p&gt;SymPy knows Physics. For example, here is the radial wavefunction corresponding to &lt;code&gt;n = 3&lt;/code&gt; and &lt;code&gt;l = 1&lt;/code&gt; for Carbon (&lt;code&gt;Z = 6&lt;/code&gt;)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;from sympy.physics.hydrogen import R_nl
+from sympy.abc import x
+expr = R_nl(3, 1, x, 6)
+print latex(expr)&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;$$\frac{8}{3} x \left(- 4 x + 4\right) e^{- 2 x}$$&lt;/p&gt;
+
+&lt;p&gt;SymPy is great at this. It can manipulate high level mathematical expressions very naturally. When it comes to numeric computation it is less effective.&lt;/p&gt;
+
+&lt;h2 id=&quot;numerics&quot;&gt;Numerics&lt;/h2&gt;
+
+&lt;p&gt;Fortunately there are methods to offload the work to numerical projects like &lt;code&gt;numpy&lt;/code&gt; or to generate and compile straight &lt;code&gt;Fortran&lt;/code&gt; code. Here we use two existing methods to create two identical vectorized functions to compute the above expression.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;from sympy.utilities.autowrap import ufuncify
+from sympy.utilities.lambdify import lambdify
+fn_numpy   = lambdify(x, expr, 'numpy')
+fn_fortran = ufuncify([x], expr)&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;fn_numpy&lt;/code&gt; replaces each of the SymPy operations with the equivalent function from the popular NumPy package. &lt;code&gt;fn_fortran&lt;/code&gt; generates and compiles low-level Fortran code and uses &lt;code&gt;f2py&lt;/code&gt; to bind it to a Python function. They each use &lt;code&gt;numpy&lt;/code&gt; arrays as common data structures, supporting broad interoperability with the rest of the Scientific Python ecosystem. They both work well and produce identical results.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt;&amp;gt; from numpy import linspace
+&amp;gt;&amp;gt;&amp;gt; xx = linspace(0, 1, 5)
+&amp;gt;&amp;gt;&amp;gt; fn_numpy(xx)
+[ 0.          1.21306132  0.98101184  0.44626032  0.        ]
+&amp;gt;&amp;gt;&amp;gt; fn_fortran(xx)
+[ 0.          1.21306132  0.98101184  0.44626032  0.        ]&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We use these functions and &lt;code&gt;matplotlib&lt;/code&gt; to plot the original equation&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;from pylab import plot, show, legend
+xx = linspace(0, 5, 50000)
+plot(xx, fn_numpy(xx))&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://mrocklin.github.com/blog/images/R_31.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;performance&quot;&gt;Performance&lt;/h2&gt;
+
+&lt;p&gt;When we profile these functions we find that the &lt;code&gt;Fortran&lt;/code&gt; solution runs a bit faster. This is because it is able to fuse all of the scalar operations into one loop while the &lt;code&gt;numpy&lt;/code&gt; solution walks over memory several times, performing each operation individually. Jensen wrote a more thorough &lt;a href=&quot;http://ojensen.wordpress.com/2010/08/10/fast-ufunc-ish-hydrogen-solutions/&quot;&gt;blogpost about this&lt;/a&gt; when he worked on code generation. He shows substantial performance increases as the complexity of the mathematical expression increases.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt;&amp;gt; timeit fn_numpy(xx)
+1000 loops, best of 3: 1.4 ms per loop
+&amp;gt;&amp;gt;&amp;gt; timeit fn_fortran(xx)
+1000 loops, best of 3: 884 us per loop&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This weekend I built up a translation from SymPy expressions to Theano computations. This builds off of &lt;a href=&quot;http://github.com/nouiz/theano_sympy/&quot;&gt;old work&lt;/a&gt; done with &lt;a href=&quot;http://github.com/nouiz&quot;&gt;Frederic Bastien&lt;/a&gt; at SciPy2012.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt;&amp;gt; fn_theano  = theano_function([x], [expr], dims={x: 1}, dtypes={x: 'float64'})
+&amp;gt;&amp;gt;&amp;gt; timeit fn_theano(xx)
+1000 loops, best of 3: 1.04 ms per loop&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Theano generates &lt;code&gt;C&lt;/code&gt; code that performs the same loop fusion done in &lt;code&gt;Fortran&lt;/code&gt; but it incurs a bit more startup time. It performs somewhere between the &lt;code&gt;numpy&lt;/code&gt; and &lt;code&gt;Fortran&lt;/code&gt; solutions.&lt;/p&gt;
+
+&lt;p&gt;However, the &lt;code&gt;SymPy -&amp;gt; Theano&lt;/code&gt; system only takes up about a page of code while the &lt;code&gt;lambdify&lt;/code&gt; and &lt;code&gt;autowrap&lt;/code&gt; modules are substantially more complex. Additionally, Theano is actively developed and is sure to improve and track changes in hardware well into the future. &lt;code&gt;lambdify&lt;/code&gt; and &lt;code&gt;autowrap&lt;/code&gt; have been relatively untouched over the past year.&lt;/p&gt;
+
+&lt;h2 id=&quot;leveraging_theano&quot;&gt;Leveraging Theano&lt;/h2&gt;
+
+&lt;p&gt;In the above example we used Theano to copy the behavior of SymPy’s existing &lt;code&gt;numpy&lt;/code&gt; and &lt;code&gt;Fortran&lt;/code&gt; numeric solutions. Theano is capable of substantially more than this. To show a simple example we’ll compute both our original output and the derivative simultaneously.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;outputs = expr, simplify(expr.diff(x))
+print latex(outputs)&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;$$ \begin{pmatrix}\frac{8}{3} x \left(- 4 x + 4\right) e^{- 2 x}, &amp;amp; \frac{32}{3} \left(2 x^{2} - 4 x + 1\right) e^{- 2 x}\end{pmatrix} $$&lt;/p&gt;
+
+&lt;p&gt;We redefine our functions to produce both outputs, instead of just &lt;code&gt;expr&lt;/code&gt; alone&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;fn_numpy = fn_numpy = lambdify([x], outputs, 'numpy')
+fn_theano = theano_function([x], outputs, dims={x: 1}, dtypes={x: 'float64'})
+
+fns_fortran = [ufuncify([x], output) for output in outputs]
+fn_fortran = lambda xx: [fn_fortran(xx) for fn_fortran in fns_fortran]&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The expression and its derivative look like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;for y in fn_theano(xx):
+    plot(xx, y)
+legend(['$R_{31}$', &quot;$R'_{31}$&quot;])&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://mrocklin.github.com/blog/images/R_31_prime.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Because Theano handles common subexpressions well it is able to perform the extra computation with only a very slight increase in runtime, easily eclipsing either of the other two options.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt;&amp;gt; timeit fn_numpy(xx)
+100 loops, best of 3: 2.85 ms per loop
+&amp;gt;&amp;gt;&amp;gt; timeit fn_fortran(xx)
+1000 loops, best of 3: 1.8 ms per loop
+&amp;gt;&amp;gt;&amp;gt; timeit fn_theano(xx)
+1000 loops, best of 3: 1.16 ms per loop&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;The Theano project is devoted to code generation at a level that exceeds the devotion of SymPy to this same topic. This is natural and prevalent. When we combine the good parts of both projects we often achieve a better result than with an in-house solution&lt;/p&gt;
+
+&lt;p&gt;In-house solutions to foreign problems lack persistence. As programmers within an ecosystem we should make projects that do one thing well and provide clean interfaces and simple data structures to encourage inter-project communication.&lt;/p&gt;
+
+&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;http://sympy.org/&quot;&gt;SymPy&lt;/a&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;a href=&quot;http://deeplearning.net/software/theano&quot;&gt;Theano&lt;/a&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;a href=&quot;http://ojensen.wordpress.com/2010/08/10/fast-ufunc-ish-hydrogen-solutions/&quot;&gt;Jensen’s Blogpost&lt;/a&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;a href=&quot;https://github.com/mrocklin/sympy/tree/theano-print&quot;&gt;Development git repository&lt;/a&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;a href=&quot;http://mrocklin.github.com/blog/scripts/sympy_theano_printing.ipynb&quot;&gt;IPython notebook of this work&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content:encoded>
+	<dc:date>2013-03-19T07:00:00+00:00</dc:date>
+</item>
 <item rdf:about="http://asmeurersympy.wordpress.com/?p=1218">
 	<title>Aaron Meurer: When does x^log(y) = y^log(x)?</title>
 	<link>http://asmeurersympy.wordpress.com/2013/03/03/when-does-xlogy-ylogx/</link>
@@ -3929,34 +4053,6 @@ StopIteration:
 <item rdf:about="http://catchmrbharath.github.com/programming/2012/07/23/gsoc-week-9">
 	<title>Bharath M R: Gsoc week 9</title>
 	<link>http://catchmrbharath.github.com/programming/2012/07/23/gsoc-week-9</link>
-	<content:encoded>&lt;p&gt;This has been a really unproductive week. I was sick with fever for almost three days and could not spend my time on anything. I spent the next days getting the basic svgfig backend for 2d line plots. There are lots of issues with svgfig, and hence I am of the opinion svgfig should be used only for displaying images on the google app engine ie sympy live. First on the list is no support for 3-D graphs. I think this is ok, because there are not many libraries even in javascript which can do 3D plotting. Also, I am having problems with implementing contour plots and surface plots in svgfig. I am experimenting with a way, which would involve using marching squares algorithm to plot contour plots.&lt;/p&gt;
-
-&lt;p&gt;I think I am a little behind my gsoc schedule, and I should speed up things a little in the next few weeks.&lt;/p&gt;
-
-&lt;p&gt;So these are the things that I have to address&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Integration of svgfig with sympy live&lt;/li&gt;
-
-&lt;li&gt;Fix the multiple spawning of windows in matplotlib issue.&lt;/li&gt;
-
-&lt;li&gt;Fix the plot tests. As of now, the tests do nothing, as the process_series is not called if show is set to False.&lt;/li&gt;
-
-&lt;li&gt;I have been toying around with ipython to get isympy notebook and qtconsole working. The problem I am facing is, there are 2 instances of qtconsole created, instead of one, when I run it. I will have to figure out the problem.&lt;/li&gt;
-
-&lt;li&gt;Address the issues regarding the adaptive sampling of 2d plots.&lt;/li&gt;
-
-&lt;li&gt;Clean up my branch of implicit plotting (This is almost done).&lt;/li&gt;
-
-&lt;li&gt;Split the plot function into plot, plot3d, implicit_plot functions.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;I don’t think I will be able to do all of these by the end of gsoc period. But my priority will be getting the implicit plotting and svgfig backend working and getting my pull requests merged.&lt;/p&gt;</content:encoded>
-	<dc:date>2012-07-23T07:00:00+00:00</dc:date>
-</item>
-<item rdf:about="http://blog.catchmrbharath.in/programming/2012/07/23/gsoc-week-9">
-	<title>Bharath M R: Gsoc week 9</title>
-	<link>http://blog.catchmrbharath.in/programming/2012/07/23/gsoc-week-9</link>
 	<content:encoded>&lt;p&gt;This has been a really unproductive week. I was sick with fever for almost three days and could not spend my time on anything. I spent the next days getting the basic svgfig backend for 2d line plots. There are lots of issues with svgfig, and hence I am of the opinion svgfig should be used only for displaying images on the google app engine ie sympy live. First on the list is no support for 3-D graphs. I think this is ok, because there are not many libraries even in javascript which can do 3D plotting. Also, I am having problems with implementing contour plots and surface plots in svgfig. I am experimenting with a way, which would involve using marching squares algorithm to plot contour plots.&lt;/p&gt;
 
 &lt;p&gt;I think I am a little behind my gsoc schedule, and I should speed up things a little in the next few weeks.&lt;/p&gt;
