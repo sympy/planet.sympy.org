@@ -44,7 +44,7 @@
 
 <p><em>This post uses some LaTeX. You may want to read it on the original site.</em></p>
 
-<p>In my <a href="http://matthewrocklin.com/blog/feed.sympy.xml">last post</a> I showed how SymPy can benefit from Theano. In particular Theano provided a mature platform for code generation that outperformed SymPy’s attempt at the same problem. I argued that projects should stick to one specialty and depend on others for secondary concerns. Interfaces are better than add-ons.</p>
+<p>In my <a href="http://matthewrocklin.com/blog/work/2013/03/19/SymPy-Theano-part-1/">last post</a> I showed how SymPy can benefit from Theano. In particular Theano provided a mature platform for code generation that outperformed SymPy’s attempt at the same problem. I argued that projects should stick to one specialty and depend on others for secondary concerns. Interfaces are better than add-ons.</p>
 
 <p>In this post I’ll show how Theano can benefit from SymPy. In particular I’ll demonstrate the practicality of SymPy’s impressive scalar simplification routines for generating efficient programs.</p>
 
@@ -129,7 +129,8 @@ Operations:  18</code></pre>
 <p>Here is some setup code that you can safely ignore:</p>
 <div class="highlight"><pre><code class="python"><span class="k">def</span> <span class="nf">fgraph_of</span><span class="p">(</span><span class="o">*</span><span class="n">exprs</span><span class="p">):</span>
     <span class="sd">""" Transform SymPy expressions into Theano Computation """</span>
-    <span class="n">ins</span><span class="p">,</span> <span class="n">outs</span> <span class="o">=</span> <span class="p">[</span><span class="n">theano_code</span><span class="p">(</span><span class="n">x</span><span class="p">)],</span> <span class="nb">map</span><span class="p">(</span><span class="n">theano_code</span><span class="p">,</span> <span class="n">exprs</span><span class="p">)</span>
+    <span class="n">outs</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">theano_code</span><span class="p">,</span> <span class="n">exprs</span><span class="p">)</span>
+    <span class="n">ins</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">gof</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">inputs</span><span class="p">(</span><span class="n">outs</span><span class="p">)</span>
     <span class="n">ins</span><span class="p">,</span> <span class="n">outs</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">gof</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">ins</span><span class="p">,</span> <span class="n">outs</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">theano</span><span class="o">.</span><span class="n">gof</span><span class="o">.</span><span class="n">FunctionGraph</span><span class="p">(</span><span class="n">ins</span><span class="p">,</span> <span class="n">outs</span><span class="p">)</span>
 
@@ -304,7 +305,8 @@ plot(xx, fn_numpy(xx))</code></pre>
 
 <p>This weekend I built up a translation from SymPy expressions to Theano computations. This builds off of <a href="http://github.com/nouiz/theano_sympy/">old work</a> done with <a href="http://github.com/nouiz">Frederic Bastien</a> at SciPy2012.</p>
 
-<pre><code>&gt;&gt;&gt; fn_theano  = theano_function([x], [expr], dims={x: 1}, dtypes={x: 'float64'})
+<pre><code>&gt;&gt;&gt; from sympy.printing.theanocode import theano_function
+&gt;&gt;&gt; fn_theano  = theano_function([x], [expr], dims={x: 1}, dtypes={x: 'float64'})
 &gt;&gt;&gt; timeit fn_theano(xx)
 1000 loops, best of 3: 1.04 ms per loop</code></pre>
 
@@ -5865,7 +5867,7 @@ StopIteration:
 <a href="" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a class="message" title="404: not found">Django-SymPy</a>
 </li>
 <li>
-<a href="http://fseoane.net/blog//feed/rss.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://fseoane.net/blog/" class="message" title="no activity in 7 days">Fabian Pedregosa</a>
+<a href="http://fseoane.net/blog/feed/rss.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://fseoane.net/blog/" class="message" title="no activity in 7 days">Fabian Pedregosa</a>
 </li>
 <li>
 <a href="http://gsoc-mathtex.blogspot.com/feeds/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://gsoc-mathtex.blogspot.com/" class="message" title="no activity in 7 days">Freddie Witherden</a>
@@ -5934,7 +5936,7 @@ StopIteration:
 
 <p>
 <strong>Last updated:</strong><br>
-March 27, 2013 10:00 PM<br>
+March 28, 2013 02:20 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>

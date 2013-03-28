@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2013-03-27T22:00:39Z</updated>
+  <updated>2013-03-28T14:20:35Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -19,7 +19,7 @@
 
 <p><em>This post uses some LaTeX. You may want to read it on the original site.</em></p>
 
-<p>In my <a href="http://matthewrocklin.com/blog/feed.sympy.xml">last post</a> I showed how SymPy can benefit from Theano. In particular Theano provided a mature platform for code generation that outperformed SymPy’s attempt at the same problem. I argued that projects should stick to one specialty and depend on others for secondary concerns. Interfaces are better than add-ons.</p>
+<p>In my <a href="http://matthewrocklin.com/blog/work/2013/03/19/SymPy-Theano-part-1/">last post</a> I showed how SymPy can benefit from Theano. In particular Theano provided a mature platform for code generation that outperformed SymPy’s attempt at the same problem. I argued that projects should stick to one specialty and depend on others for secondary concerns. Interfaces are better than add-ons.</p>
 
 <p>In this post I’ll show how Theano can benefit from SymPy. In particular I’ll demonstrate the practicality of SymPy’s impressive scalar simplification routines for generating efficient programs.</p>
 
@@ -104,7 +104,8 @@ Operations:  18</code></pre>
 <p>Here is some setup code that you can safely ignore:</p>
 <div class="highlight"><pre><code class="python"><span class="k">def</span> <span class="nf">fgraph_of</span><span class="p">(</span><span class="o">*</span><span class="n">exprs</span><span class="p">):</span>
     <span class="sd">""" Transform SymPy expressions into Theano Computation """</span>
-    <span class="n">ins</span><span class="p">,</span> <span class="n">outs</span> <span class="o">=</span> <span class="p">[</span><span class="n">theano_code</span><span class="p">(</span><span class="n">x</span><span class="p">)],</span> <span class="nb">map</span><span class="p">(</span><span class="n">theano_code</span><span class="p">,</span> <span class="n">exprs</span><span class="p">)</span>
+    <span class="n">outs</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">theano_code</span><span class="p">,</span> <span class="n">exprs</span><span class="p">)</span>
+    <span class="n">ins</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">gof</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">inputs</span><span class="p">(</span><span class="n">outs</span><span class="p">)</span>
     <span class="n">ins</span><span class="p">,</span> <span class="n">outs</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">gof</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">ins</span><span class="p">,</span> <span class="n">outs</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">theano</span><span class="o">.</span><span class="n">gof</span><span class="o">.</span><span class="n">FunctionGraph</span><span class="p">(</span><span class="n">ins</span><span class="p">,</span> <span class="n">outs</span><span class="p">)</span>
 
@@ -197,7 +198,7 @@ Operations after Theano Simplification:  17</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-27T22:00:34Z</updated>
+      <updated>2013-03-28T14:20:29Z</updated>
     </source>
   </entry>
 
@@ -263,7 +264,8 @@ plot(xx, fn_numpy(xx))</code></pre>
 
 <p>This weekend I built up a translation from SymPy expressions to Theano computations. This builds off of <a href="http://github.com/nouiz/theano_sympy/">old work</a> done with <a href="http://github.com/nouiz">Frederic Bastien</a> at SciPy2012.</p>
 
-<pre><code>&gt;&gt;&gt; fn_theano  = theano_function([x], [expr], dims={x: 1}, dtypes={x: 'float64'})
+<pre><code>&gt;&gt;&gt; from sympy.printing.theanocode import theano_function
+&gt;&gt;&gt; fn_theano  = theano_function([x], [expr], dims={x: 1}, dtypes={x: 'float64'})
 &gt;&gt;&gt; timeit fn_theano(xx)
 1000 loops, best of 3: 1.04 ms per loop</code></pre>
 
@@ -339,7 +341,7 @@ legend(['$R_{31}$', "$R'_{31}$"])</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-27T22:00:34Z</updated>
+      <updated>2013-03-28T14:20:29Z</updated>
     </source>
   </entry>
 
@@ -385,7 +387,7 @@ legend(['$R_{31}$', "$R'_{31}$"])</code></pre>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-03-27T22:00:22Z</updated>
+      <updated>2013-03-28T14:20:18Z</updated>
     </source>
   </entry>
 
@@ -464,9 +466,9 @@ each time a threshold is crossed.</p>
     <source>
       <id>http://fseoane.net/blog/</id>
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
-      <link href="http://fseoane.net/blog//feed/rss.xml" rel="self" type="application/atom+xml"/>
+      <link href="http://fseoane.net/blog/feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-03-27T22:00:19Z</updated>
+      <updated>2013-03-28T14:20:16Z</updated>
     </source>
   </entry>
 
@@ -542,7 +544,7 @@ each time a threshold is crossed.</p>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-27T22:00:35Z</updated>
+      <updated>2013-03-28T14:20:30Z</updated>
     </source>
   </entry>
 
@@ -627,7 +629,7 @@ each time a threshold is crossed.</p>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-27T22:00:34Z</updated>
+      <updated>2013-03-28T14:20:30Z</updated>
     </source>
   </entry>
 
@@ -664,7 +666,7 @@ each time a threshold is crossed.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-03-27T22:00:22Z</updated>
+      <updated>2013-03-28T14:20:18Z</updated>
     </source>
   </entry>
 
@@ -788,7 +790,7 @@ run(0, tail,  conso(head, tail, (1, 2, 3, 4)))
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-27T22:00:34Z</updated>
+      <updated>2013-03-28T14:20:30Z</updated>
     </source>
   </entry>
 
@@ -886,7 +888,7 @@ CO,WY,NE,KS,OK,NM,AZ,UT
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-27T22:00:34Z</updated>
+      <updated>2013-03-28T14:20:30Z</updated>
     </source>
   </entry>
 
@@ -1003,7 +1005,7 @@ CO,WY,NE,KS,OK,NM,AZ,UT
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-27T22:00:34Z</updated>
+      <updated>2013-03-28T14:20:29Z</updated>
     </source>
   </entry>
 
@@ -1202,9 +1204,9 @@ dimensions.</p>
     <source>
       <id>http://fseoane.net/blog/</id>
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
-      <link href="http://fseoane.net/blog//feed/rss.xml" rel="self" type="application/atom+xml"/>
+      <link href="http://fseoane.net/blog/feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-03-27T22:00:19Z</updated>
+      <updated>2013-03-28T14:20:16Z</updated>
     </source>
   </entry>
 
@@ -1287,7 +1289,7 @@ dimensions.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-03-27T22:00:22Z</updated>
+      <updated>2013-03-28T14:20:18Z</updated>
     </source>
   </entry>
 
@@ -1318,7 +1320,7 @@ dimensions.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-03-27T22:00:22Z</updated>
+      <updated>2013-03-28T14:20:18Z</updated>
     </source>
   </entry>
 
@@ -1410,7 +1412,7 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-27T22:00:34Z</updated>
+      <updated>2013-03-28T14:20:29Z</updated>
     </source>
   </entry>
 
@@ -1450,9 +1452,9 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
     <source>
       <id>http://fseoane.net/blog/</id>
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
-      <link href="http://fseoane.net/blog//feed/rss.xml" rel="self" type="application/atom+xml"/>
+      <link href="http://fseoane.net/blog/feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-03-27T22:00:19Z</updated>
+      <updated>2013-03-28T14:20:16Z</updated>
     </source>
   </entry>
 
@@ -1560,7 +1562,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-27T22:00:34Z</updated>
+      <updated>2013-03-28T14:20:30Z</updated>
     </source>
   </entry>
 
@@ -1716,7 +1718,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-27T22:00:34Z</updated>
+      <updated>2013-03-28T14:20:30Z</updated>
     </source>
   </entry>
 
@@ -1938,7 +1940,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-03-27T22:00:39Z</updated>
+      <updated>2013-03-28T14:20:34Z</updated>
     </source>
   </entry>
 
@@ -2432,7 +2434,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-03-27T22:00:38Z</updated>
+      <updated>2013-03-28T14:20:34Z</updated>
     </source>
   </entry>
 
@@ -2621,7 +2623,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site, I guess...</subtitle>
       <title>Gilbert Gede's Blog</title>
-      <updated>2013-03-27T22:00:28Z</updated>
+      <updated>2013-03-28T14:20:24Z</updated>
     </source>
   </entry>
 
@@ -3696,7 +3698,7 @@ f_durations.write('\n')
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2013-03-21T19:40:40Z</updated>
+      <updated>2013-03-28T09:00:41Z</updated>
     </source>
   </entry>
 
@@ -3861,9 +3863,9 @@ f_durations.write('\n')
     <source>
       <id>http://fseoane.net/blog/</id>
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
-      <link href="http://fseoane.net/blog//feed/rss.xml" rel="self" type="application/atom+xml"/>
+      <link href="http://fseoane.net/blog/feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-03-27T22:00:18Z</updated>
+      <updated>2013-03-28T14:20:15Z</updated>
     </source>
   </entry>
 
@@ -3938,7 +3940,7 @@ f_durations.write('\n')
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2013-03-27T22:00:31Z</updated>
+      <updated>2013-03-28T14:20:26Z</updated>
     </source>
   </entry>
 
@@ -4083,7 +4085,7 @@ RuntimeError: maximum recursion depth exceeded in comparison
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-03-27T22:00:22Z</updated>
+      <updated>2013-03-28T14:20:18Z</updated>
     </source>
   </entry>
 
@@ -4126,7 +4128,7 @@ b. Add this line to your bash_profile.</p>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-03-27T22:00:38Z</updated>
+      <updated>2013-03-28T14:20:34Z</updated>
     </source>
   </entry>
 
@@ -4210,7 +4212,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-03-27T22:00:22Z</updated>
+      <updated>2013-03-28T14:20:18Z</updated>
     </source>
   </entry>
 
@@ -4246,7 +4248,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-03-27T22:00:22Z</updated>
+      <updated>2013-03-28T14:20:18Z</updated>
     </source>
   </entry>
 
@@ -4482,7 +4484,7 @@ Out[74]: True
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-03-27T22:00:38Z</updated>
+      <updated>2013-03-28T14:20:34Z</updated>
     </source>
   </entry>
 
@@ -4600,7 +4602,7 @@ commits are much more like my usual ones.
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-03-27T22:00:37Z</updated>
+      <updated>2013-03-28T14:20:32Z</updated>
     </source>
   </entry>
 
@@ -4633,7 +4635,7 @@ commits are much more like my usual ones.
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2013-03-27T22:00:37Z</updated>
+      <updated>2013-03-28T14:20:33Z</updated>
     </source>
   </entry>
 
@@ -4667,7 +4669,7 @@ commits are much more like my usual ones.
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2013-03-21T19:40:39Z</updated>
+      <updated>2013-03-28T09:00:41Z</updated>
     </source>
   </entry>
 
@@ -4778,7 +4780,7 @@ Out[24]: 6
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-03-27T22:00:37Z</updated>
+      <updated>2013-03-28T14:20:32Z</updated>
     </source>
   </entry>
 
@@ -4897,7 +4899,7 @@ Out[24]: 6
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2013-03-27T22:00:37Z</updated>
+      <updated>2013-03-28T14:20:33Z</updated>
     </source>
   </entry>
 
@@ -4929,7 +4931,7 @@ Out[24]: 6
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-03-27T22:00:38Z</updated>
+      <updated>2013-03-28T14:20:34Z</updated>
     </source>
   </entry>
 
@@ -4970,7 +4972,7 @@ Out[24]: 6
       <link href="http://blog.krastanov.org/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>Stefan's Blog » SymPy</title>
-      <updated>2013-03-21T19:40:39Z</updated>
+      <updated>2013-03-28T09:00:41Z</updated>
     </source>
   </entry>
 
@@ -5073,7 +5075,7 @@ StopIteration:
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-03-27T22:00:38Z</updated>
+      <updated>2013-03-28T14:20:34Z</updated>
     </source>
   </entry>
 
@@ -5132,7 +5134,7 @@ StopIteration:
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-03-27T22:00:36Z</updated>
+      <updated>2013-03-28T14:20:32Z</updated>
     </source>
   </entry>
 
@@ -5162,7 +5164,7 @@ StopIteration:
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2013-03-27T22:00:37Z</updated>
+      <updated>2013-03-28T14:20:33Z</updated>
     </source>
   </entry>
 

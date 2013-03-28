@@ -84,7 +84,7 @@
 
 &lt;p&gt;&lt;em&gt;This post uses some LaTeX. You may want to read it on the original site.&lt;/em&gt;&lt;/p&gt;
 
-&lt;p&gt;In my &lt;a href=&quot;http://matthewrocklin.com/blog/feed.sympy.xml&quot;&gt;last post&lt;/a&gt; I showed how SymPy can benefit from Theano. In particular Theano provided a mature platform for code generation that outperformed SymPy’s attempt at the same problem. I argued that projects should stick to one specialty and depend on others for secondary concerns. Interfaces are better than add-ons.&lt;/p&gt;
+&lt;p&gt;In my &lt;a href=&quot;http://matthewrocklin.com/blog/work/2013/03/19/SymPy-Theano-part-1/&quot;&gt;last post&lt;/a&gt; I showed how SymPy can benefit from Theano. In particular Theano provided a mature platform for code generation that outperformed SymPy’s attempt at the same problem. I argued that projects should stick to one specialty and depend on others for secondary concerns. Interfaces are better than add-ons.&lt;/p&gt;
 
 &lt;p&gt;In this post I’ll show how Theano can benefit from SymPy. In particular I’ll demonstrate the practicality of SymPy’s impressive scalar simplification routines for generating efficient programs.&lt;/p&gt;
 
@@ -169,7 +169,8 @@ Operations:  18&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Here is some setup code that you can safely ignore:&lt;/p&gt;
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;fgraph_of&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;exprs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
     &lt;span class=&quot;sd&quot;&gt;&quot;&quot;&quot; Transform SymPy expressions into Theano Computation &quot;&quot;&quot;&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;ins&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;outs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;theano_code&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)],&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;theano_code&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;exprs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;outs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;theano_code&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;exprs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;ins&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;theano&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;gof&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;graph&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;inputs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;outs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
     &lt;span class=&quot;n&quot;&gt;ins&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;outs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;theano&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;gof&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;graph&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;clone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ins&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;outs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
     &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;theano&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;gof&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FunctionGraph&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ins&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;outs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 
@@ -314,7 +315,8 @@ plot(xx, fn_numpy(xx))&lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;This weekend I built up a translation from SymPy expressions to Theano computations. This builds off of &lt;a href=&quot;http://github.com/nouiz/theano_sympy/&quot;&gt;old work&lt;/a&gt; done with &lt;a href=&quot;http://github.com/nouiz&quot;&gt;Frederic Bastien&lt;/a&gt; at SciPy2012.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt;&amp;gt; fn_theano  = theano_function([x], [expr], dims={x: 1}, dtypes={x: 'float64'})
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt;&amp;gt; from sympy.printing.theanocode import theano_function
+&amp;gt;&amp;gt;&amp;gt; fn_theano  = theano_function([x], [expr], dims={x: 1}, dtypes={x: 'float64'})
 &amp;gt;&amp;gt;&amp;gt; timeit fn_theano(xx)
 1000 loops, best of 3: 1.04 ms per loop&lt;/code&gt;&lt;/pre&gt;
 
