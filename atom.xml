@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2013-03-29T17:00:47Z</updated>
+  <updated>2013-03-29T23:40:33Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -198,7 +198,122 @@ Operations after Theano Simplification:  17</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-29T17:00:41Z</updated>
+      <updated>2013-03-29T23:40:28Z</updated>
+    </source>
+  </entry>
+
+  <entry>
+    <id>tag:fseoane.net/blog,2013-03-27:2013/householder-matrices/</id>
+    <link href="http://fseoane.net/blog/2013/householder-matrices/" rel="alternate" type="text/html"/>
+    <title>Householder matrices</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p><strong> Note: if you don't visualize the math correctly come to its
+<a href="http://fseoane.net/blog/2013/householder-matrices/">original location</a>
+</strong></p>
+<p>Householder matrices are square matrices of the form</p>
+<p>$$ P = I - \beta v v^T$$</p>
+<p>where $\beta$ is a scalar and $v$ is a vector. It has the useful
+property that for suitable chosen $v$ and $\beta$ it makes the product
+$P x$ to zero out all of the coordinates but one, that is, $P x =
+\|x\| e_1$. The following code, given $x$, finds the values of $\beta,
+v$ that verify that property. The algorithm can be found in several
+textbooks <sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup></p>
+<div class="codehilite"><pre><span class="k">def</span> <span class="nf">house</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    Given a vetor x, computes vectors v with v[0] = 1</span>
+<span class="sd">    and scalar beta such that P = I - beta v v^T</span>
+<span class="sd">    is orthogonal and P x = ||x|| e_1</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : array, shape (n,) or (n, 1)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    beta : scalar</span>
+<span class="sd">    v : array, shape (n, 1)</span>
+<span class="sd">    """</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+    <span class="k">if</span> <span class="n">sigma</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">mu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">sigma</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">mu</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span> <span class="n">sigma</span> <span class="o">/</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">mu</span><span class="p">)</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">+</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">v</span> <span class="o">/=</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">beta</span><span class="p">,</span> <span class="n">v</span>
+</pre></div>
+
+
+<p>As promised, this computes the parameters of $P$ such that $P x = \|x\| e_1$,
+exact to 15 decimals:</p>
+<div class="codehilite"><pre><span class="o">&gt;&gt;&gt;</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">beta</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">house</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">-</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">print</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span> 
+<span class="p">[</span> <span class="mf">1.</span> <span class="o">-</span><span class="mf">0.</span> <span class="o">-</span><span class="mf">0.</span>  <span class="mf">0.</span> <span class="o">-</span><span class="mf">0.</span><span class="p">]</span>
+</pre></div>
+
+
+<p>This property is what it makes Householder matrices useful in
+the context of numerical analysis. It can be used for example to
+compute the QR decomposition of a given matrix. The idea is to
+succesively zero out the sub-diagonal elements, thus leaving a
+triangular matrix at the end. In the first iteration we compute a
+Householder matrix $P_0$ such that $P_0 X$ has only zero below the
+diagonal of the first column, then compute a Householder matrix $P_1$
+such that $P_1 X$ zeroes out the subdiagonal elements of the second
+column and so on. At the end we will have that $P_0 P_1 ... P_n X$ is
+an upper triangular matrix. Since all $P_i$ are orthogonal, the
+product $P_0 P_1 ... P_n$ is again an orthogonal matrix, namely the
+$Q$ matrix in the QR decomposition.</p>
+<p>If we choose X as 20-by-20 random matrix, with colors representing
+different values</p>
+<p><img alt="QR decomposition" src="http://fseoane.net/blog/static/images/2013/house_random.png"/></p>
+<p>we can see the process of the Householder matrices being applied one
+by one to obtain an upper triangular matrix</p>
+<p><img alt="QR decomposition" src="http://fseoane.net/blog/static/images/2013/house.gif"/></p>
+<p>A similar application of Householder matrices is to reduce a given
+symmetric matrix to tridiagonal form, which proceeds in a similar way
+as in the QR algorithm, only that now we multiply by the matrix $X$ by
+the left <em>and right</em> with the Householder matrices. Also, in this case
+we seek for Householder matrices that zero out the elements of the
+subdiagonal plus one, instead of just subdiagonal elements. This
+algorithm is used for example as a preprocessing step for <a href="http://www.netlib.org/lapack/lug/node70.html">most dense
+eigensolvers</a></p>
+<p><img alt="Tridiagonalization" src="http://fseoane.net/blog/static/images/2013/house_tridiag.gif"/></p>
+<div class="footnote">
+<hr/>
+<ol>
+<li id="fn:1">
+<p>"Matrix Computations" third edition, Golub &amp; VanLoan (Algorithm 5.1.1). <a href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
+</li>
+<li id="fn:2">
+<p>Code to reproduce the figures <a href="http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/householder.ipynb">can be found here</a>, source for the IPython notebook <a href="http://fseoane.net/blog/static/uploads/2013/householder.ipynb">can be found here</a> <a href="http://fseoane.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
+</li>
+</ol>
+</div></div>
+    </summary>
+    <updated>2013-03-26T23:00:00Z</updated>
+    <category term="machine learning"/>
+    <category term="ordinal regression"/>
+    <category term="loss function"/>
+    <author>
+      <name>Fabian Pedregosa</name>
+    </author>
+    <source>
+      <id>http://fseoane.net/blog/</id>
+      <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
+      <link href="http://fseoane.net/blog/feed/rss.xml" rel="self" type="application/atom+xml"/>
+      <title>I say things</title>
+      <updated>2013-03-29T23:40:15Z</updated>
     </source>
   </entry>
 
@@ -341,7 +456,7 @@ legend(['$R_{31}$', "$R'_{31}$"])</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-29T17:00:41Z</updated>
+      <updated>2013-03-29T23:40:28Z</updated>
     </source>
   </entry>
 
@@ -387,7 +502,7 @@ legend(['$R_{31}$', "$R'_{31}$"])</code></pre>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-03-29T17:00:21Z</updated>
+      <updated>2013-03-29T23:40:18Z</updated>
     </source>
   </entry>
 
@@ -413,7 +528,7 @@ of loss functions are:</p>
 <li>Logistic loss, $\log(1 + \exp{f(x_i) y_i})$</li>
 </ul>
 <p><img alt="Loss functions" src="http://fseoane.net/blog/static/images/2013/loss_functions.png"/></p>
-<p><sup id="fnref:1"><a class="footnote-ref" href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup></p>
+<p><sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup></p>
 <p>In the paper <a href="http://citeseer.ist.psu.edu/viewdoc/summary?doi=10.1.1.124.9242">Loss functions for preference levels: Regression with
 discrete ordered
 labels</a>,
@@ -451,7 +566,7 @@ each time a threshold is crossed.</p>
 <hr/>
 <ol>
 <li id="fn:1">
-<p>Code for generating all figures can be found <a href="http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/ordinal%2520regression%2520loss%2520functions.ipynb">here</a> <a class="footnote-backref" href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
+<p>Code for generating all figures can be found <a href="http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/ordinal%2520regression%2520loss%2520functions.ipynb">here</a> <a href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
 </li>
 </ol>
 </div></div>
@@ -468,7 +583,7 @@ each time a threshold is crossed.</p>
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog/feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-03-29T17:00:18Z</updated>
+      <updated>2013-03-29T23:40:15Z</updated>
     </source>
   </entry>
 
@@ -544,7 +659,7 @@ each time a threshold is crossed.</p>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-29T17:00:42Z</updated>
+      <updated>2013-03-29T23:40:29Z</updated>
     </source>
   </entry>
 
@@ -629,7 +744,7 @@ each time a threshold is crossed.</p>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-29T17:00:42Z</updated>
+      <updated>2013-03-29T23:40:29Z</updated>
     </source>
   </entry>
 
@@ -666,7 +781,7 @@ each time a threshold is crossed.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-03-29T17:00:21Z</updated>
+      <updated>2013-03-29T23:40:18Z</updated>
     </source>
   </entry>
 
@@ -790,7 +905,7 @@ run(0, tail,  conso(head, tail, (1, 2, 3, 4)))
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-29T17:00:41Z</updated>
+      <updated>2013-03-29T23:40:28Z</updated>
     </source>
   </entry>
 
@@ -888,7 +1003,7 @@ CO,WY,NE,KS,OK,NM,AZ,UT
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-29T17:00:41Z</updated>
+      <updated>2013-03-29T23:40:28Z</updated>
     </source>
   </entry>
 
@@ -1005,7 +1120,7 @@ CO,WY,NE,KS,OK,NM,AZ,UT
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-29T17:00:41Z</updated>
+      <updated>2013-03-29T23:40:28Z</updated>
     </source>
   </entry>
 
@@ -1206,7 +1321,7 @@ dimensions.</p>
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog/feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-03-29T17:00:19Z</updated>
+      <updated>2013-03-29T23:40:16Z</updated>
     </source>
   </entry>
 
@@ -1289,7 +1404,7 @@ dimensions.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-03-29T17:00:21Z</updated>
+      <updated>2013-03-29T23:40:18Z</updated>
     </source>
   </entry>
 
@@ -1320,7 +1435,7 @@ dimensions.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-03-29T17:00:21Z</updated>
+      <updated>2013-03-29T23:40:18Z</updated>
     </source>
   </entry>
 
@@ -1412,7 +1527,7 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-29T17:00:41Z</updated>
+      <updated>2013-03-29T23:40:28Z</updated>
     </source>
   </entry>
 
@@ -1421,7 +1536,7 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
     <link href="http://fseoane.net/blog/2012/singular-value-decomposition-in-scipy/" rel="alternate" type="text/html"/>
     <title>Singular Value Decomposition in SciPy</title>
     <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>SciPy contains two methods to compute the singular value decomposition (SVD) of a matrix: <code>scipy.linalg.svd</code> and <code>scipy.sparse.linalg.svds</code>. In this post I'll compare both methods for the task of computing the full SVD of a large dense matrix.</p>
-<p>The first method, <code>scipy.linalg.svd</code>, is perhaps the best known and uses the linear algebra library <a href="http://www.netlib.org/lapack/">LAPACK</a> to handle the computations. This implements the Golub-Kahan-Reisch algorithm <sup id="fnref:1"><a class="footnote-ref" href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup>, which is accurate and highly efficient with a cost of O(n^3) floating-point operations <sup id="fnref:2"><a class="footnote-ref" href="http://fseoane.net/blog/feed/#fn:2" rel="footnote">2</a></sup>.</p>
+<p>The first method, <code>scipy.linalg.svd</code>, is perhaps the best known and uses the linear algebra library <a href="http://www.netlib.org/lapack/">LAPACK</a> to handle the computations. This implements the Golub-Kahan-Reisch algorithm <sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup>, which is accurate and highly efficient with a cost of O(n^3) floating-point operations <sup id="fnref:2"><a href="http://fseoane.net/blog/feed/#fn:2" rel="footnote">2</a></sup>.</p>
 <p>The second method is <code>scipy.sparse.linalg.svds</code> and despite it's name it works fine also for dense arrays. This implementation is based on the <a href="http://www.caam.rice.edu/software/ARPACK/">ARPACK</a> library and consists of an iterative procedure that finds the SVD decomposition by reducing the problem to an eigendecomposition on the array X -&gt; dot(X.T, X). This method is usually very effective when the input matrix X is sparse or only the largest singular values are required. There are other SVD solvers that I did not consider, such as <a href="http://pypi.python.org/pypi/sparsesvd/">sparsesvd</a> or <a href="http://pysparse.sourceforge.net/introduction.html#jdsym">pysparse.jdsym</a>, but my points for the sparse solve probably hold for those packages too since they both implement iterative algorithms based on the same principles.</p>
 <p>When the input matrix is dense and all the singular values are required, the first method is usually more efficient. To support this statement I've created a little benchmark: timings for both methods as a function of the size of the matrices. Notice that we are in a case that is clearly favorable to the <code>linalg.svd</code>: after all <code>sparse.linalg.svds</code> was not created with this setting in mind, it was created for sparse matrices or dense matrices with some special structure. We will see however that even in this setting it has interesting advantages.</p>
 <p>I'll create random square matrices with different sizes and plot the timings for both methods. For the benchmarks I used SciPy v0.12 linked against Intel Math Kernel Library v11. Both methods are single-threaded (I had to set OMP_NUM_THREADS=1 so that MKL does not try to parallelize the computations). <a href="https://gist.github.com/4250756#file-svd_timing-py">[code]</a></p>
@@ -1434,10 +1549,10 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
 <hr/>
 <ol>
 <li id="fn:1">
-<p>Calculating the singular values and pseudo-inverse of a matrix, <em>Golub, Gene H., Kahan, William</em>, 1965, <a href="http://www.jstor.org/stable/2949777">JSTOR</a> <a class="footnote-backref" href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
+<p>Calculating the singular values and pseudo-inverse of a matrix, <em>Golub, Gene H., Kahan, William</em>, 1965, <a href="http://www.jstor.org/stable/2949777">JSTOR</a> <a href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
 </li>
 <li id="fn:2">
-<p>A Survey of Singular Value Decomposition Methods and Performance Comparison of Some Available Serial Codes, <em>Plassman, Gerald E.</em> 2005 <a href="http://research.microsoft.com/en-us/um/people/zhoulin/2005-a%20survey%20of%20singular%20value%20decomposition_plassman.pdf">PDF</a> <a class="footnote-backref" href="http://fseoane.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
+<p>A Survey of Singular Value Decomposition Methods and Performance Comparison of Some Available Serial Codes, <em>Plassman, Gerald E.</em> 2005 <a href="http://research.microsoft.com/en-us/um/people/zhoulin/2005-a%20survey%20of%20singular%20value%20decomposition_plassman.pdf">PDF</a> <a href="http://fseoane.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
 </li>
 </ol>
 </div></div>
@@ -1454,7 +1569,7 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog/feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-03-29T17:00:19Z</updated>
+      <updated>2013-03-29T23:40:16Z</updated>
     </source>
   </entry>
 
@@ -1562,7 +1677,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-29T17:00:41Z</updated>
+      <updated>2013-03-29T23:40:28Z</updated>
     </source>
   </entry>
 
@@ -1718,7 +1833,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-29T17:00:41Z</updated>
+      <updated>2013-03-29T23:40:29Z</updated>
     </source>
   </entry>
 
@@ -1940,7 +2055,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-03-29T17:00:46Z</updated>
+      <updated>2013-03-29T23:40:33Z</updated>
     </source>
   </entry>
 
@@ -2434,7 +2549,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-03-29T17:00:46Z</updated>
+      <updated>2013-03-29T23:40:33Z</updated>
     </source>
   </entry>
 
@@ -2623,7 +2738,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site, I guess...</subtitle>
       <title>Gilbert Gede's Blog</title>
-      <updated>2013-03-29T17:00:35Z</updated>
+      <updated>2013-03-29T23:40:23Z</updated>
     </source>
   </entry>
 
@@ -3782,8 +3897,8 @@ f_durations.write('\n')
     <span class="k">print</span><span class="p">(</span><span class="s">'Kendall correlation coefficient for block </span><span class="si">%s</span><span class="s">: </span><span class="si">%.5f</span><span class="s">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">tau</span><span class="p">))</span>
 </pre></div>
 
-<div class="codehilite"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> 0<span class="p">:</span> 0<span class="p">.</span>71122
-<span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> 1<span class="p">:</span> 0<span class="p">.</span>84387
+<div class="codehilite"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">0</span><span class="p">:</span> <span class="mf">0.71122</span>
+<span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">1</span><span class="p">:</span> <span class="mf">0.84387</span>
 </pre></div>
 
 
@@ -3845,8 +3960,8 @@ f_durations.write('\n')
     <span class="k">print</span><span class="p">(</span><span class="s">'Kendall correlation coefficient for block </span><span class="si">%s</span><span class="s">: </span><span class="si">%.5f</span><span class="s">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">tau</span><span class="p">))</span>
 </pre></div>
 
-<div class="codehilite"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> 0<span class="p">:</span> 0<span class="p">.</span>83627
-<span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> 1<span class="p">:</span> 0<span class="p">.</span>84387
+<div class="codehilite"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">0</span><span class="p">:</span> <span class="mf">0.83627</span>
+<span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">1</span><span class="p">:</span> <span class="mf">0.84387</span>
 </pre></div>
 
 
@@ -3865,7 +3980,7 @@ f_durations.write('\n')
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog/feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-03-29T17:00:17Z</updated>
+      <updated>2013-03-29T23:40:14Z</updated>
     </source>
   </entry>
 
@@ -3940,7 +4055,7 @@ f_durations.write('\n')
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2013-03-29T17:00:37Z</updated>
+      <updated>2013-03-29T23:40:25Z</updated>
     </source>
   </entry>
 
@@ -4085,7 +4200,7 @@ RuntimeError: maximum recursion depth exceeded in comparison
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-03-29T17:00:21Z</updated>
+      <updated>2013-03-29T23:40:18Z</updated>
     </source>
   </entry>
 
@@ -4128,7 +4243,7 @@ b. Add this line to your bash_profile.</p>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-03-29T17:00:46Z</updated>
+      <updated>2013-03-29T23:40:33Z</updated>
     </source>
   </entry>
 
@@ -4212,7 +4327,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-03-29T17:00:21Z</updated>
+      <updated>2013-03-29T23:40:18Z</updated>
     </source>
   </entry>
 
@@ -4248,7 +4363,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-03-29T17:00:21Z</updated>
+      <updated>2013-03-29T23:40:18Z</updated>
     </source>
   </entry>
 
@@ -4484,7 +4599,7 @@ Out[74]: True
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-03-29T17:00:46Z</updated>
+      <updated>2013-03-29T23:40:33Z</updated>
     </source>
   </entry>
 
@@ -4602,7 +4717,7 @@ commits are much more like my usual ones.
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-03-29T17:00:44Z</updated>
+      <updated>2013-03-29T23:40:31Z</updated>
     </source>
   </entry>
 
@@ -4635,7 +4750,7 @@ commits are much more like my usual ones.
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2013-03-29T17:00:45Z</updated>
+      <updated>2013-03-29T23:40:32Z</updated>
     </source>
   </entry>
 
@@ -4780,7 +4895,7 @@ Out[24]: 6
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-03-29T17:00:44Z</updated>
+      <updated>2013-03-29T23:40:31Z</updated>
     </source>
   </entry>
 
@@ -4899,7 +5014,7 @@ Out[24]: 6
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2013-03-29T17:00:45Z</updated>
+      <updated>2013-03-29T23:40:32Z</updated>
     </source>
   </entry>
 
@@ -4931,7 +5046,7 @@ Out[24]: 6
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-03-29T17:00:46Z</updated>
+      <updated>2013-03-29T23:40:33Z</updated>
     </source>
   </entry>
 
@@ -5075,7 +5190,7 @@ StopIteration:
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-03-29T17:00:46Z</updated>
+      <updated>2013-03-29T23:40:33Z</updated>
     </source>
   </entry>
 
@@ -5134,7 +5249,7 @@ StopIteration:
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-03-29T17:00:44Z</updated>
+      <updated>2013-03-29T23:40:31Z</updated>
     </source>
   </entry>
 
@@ -5164,49 +5279,7 @@ StopIteration:
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2013-03-29T17:00:45Z</updated>
-    </source>
-  </entry>
-
-  <entry>
-    <id>http://www.catchmrbharath.in/programming/2012/07/23/gsoc-week-9</id>
-    <link href="http://www.catchmrbharath.in/programming/2012/07/23/gsoc-week-9" rel="alternate" type="text/html"/>
-    <title>Gsoc week 9</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>This has been a really unproductive week. I was sick with fever for almost three days and could not spend my time on anything. I spent the next days getting the basic svgfig backend for 2d line plots. There are lots of issues with svgfig, and hence I am of the opinion svgfig should be used only for displaying images on the google app engine ie sympy live. First on the list is no support for 3-D graphs. I think this is ok, because there are not many libraries even in javascript which can do 3D plotting. Also, I am having problems with implementing contour plots and surface plots in svgfig. I am experimenting with a way, which would involve using marching squares algorithm to plot contour plots.</p>
-
-<p>I think I am a little behind my gsoc schedule, and I should speed up things a little in the next few weeks.</p>
-
-<p>So these are the things that I have to address</p>
-
-<ul>
-<li>Integration of svgfig with sympy live</li>
-
-<li>Fix the multiple spawning of windows in matplotlib issue.</li>
-
-<li>Fix the plot tests. As of now, the tests do nothing, as the process_series is not called if show is set to False.</li>
-
-<li>I have been toying around with ipython to get isympy notebook and qtconsole working. The problem I am facing is, there are 2 instances of qtconsole created, instead of one, when I run it. I will have to figure out the problem.</li>
-
-<li>Address the issues regarding the adaptive sampling of 2d plots.</li>
-
-<li>Clean up my branch of implicit plotting (This is almost done).</li>
-
-<li>Split the plot function into plot, plot3d, implicit_plot functions.</li>
-</ul>
-
-<p>I don’t think I will be able to do all of these by the end of gsoc period. But my priority will be getting the implicit plotting and svgfig backend working and getting my pull requests merged.</p></div>
-    </summary>
-    <updated>2012-07-23T07:00:00Z</updated>
-    <published>2012-07-23T07:00:00Z</published>
-    <source>
-      <author>
-        <name>Bharath M R</name>
-      </author>
-      <link href="" rel="alternate" type="text/html"/>
-      <link href="http://catchmrbharath.github.com/programming.xml" rel="self" type="application/rss+xml"/>
-      <subtitle>Posts categorized as 'programming'</subtitle>
-      <title>- Programming</title>
-      <updated>2012-10-11T13:20:19Z</updated>
+      <updated>2013-03-29T23:40:32Z</updated>
     </source>
   </entry>
 </feed>

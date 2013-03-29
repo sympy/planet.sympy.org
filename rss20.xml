@@ -186,6 +186,106 @@ Operations after Theano Simplification:  17&lt;/code&gt;&lt;/pre&gt;
 	<pubDate>Thu, 28 Mar 2013 07:00:00 +0000</pubDate>
 </item>
 <item>
+	<title>Fabian Pedregosa: Householder matrices</title>
+	<guid isPermaLink="false">tag:fseoane.net/blog,2013-03-27:2013/householder-matrices/</guid>
+	<link>http://fseoane.net/blog/2013/householder-matrices/</link>
+	<description>&lt;p&gt;&lt;strong&gt; Note: if you don't visualize the math correctly come to its
+&lt;a href=&quot;http://fseoane.net/blog/2013/householder-matrices/&quot;&gt;original location&lt;/a&gt;
+&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Householder matrices are square matrices of the form&lt;/p&gt;
+&lt;p&gt;$$ P = I - \beta v v^T$$&lt;/p&gt;
+&lt;p&gt;where $\beta$ is a scalar and $v$ is a vector. It has the useful
+property that for suitable chosen $v$ and $\beta$ it makes the product
+$P x$ to zero out all of the coordinates but one, that is, $P x =
+\|x\| e_1$. The following code, given $x$, finds the values of $\beta,
+v$ that verify that property. The algorithm can be found in several
+textbooks &lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;http://fseoane.net/blog/feed/#fn:1&quot; rel=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+&lt;div class=&quot;codehilite&quot;&gt;&lt;pre&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;house&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;sd&quot;&gt;&quot;&quot;&quot;&lt;/span&gt;
+&lt;span class=&quot;sd&quot;&gt;    Given a vetor x, computes vectors v with v[0] = 1&lt;/span&gt;
+&lt;span class=&quot;sd&quot;&gt;    and scalar beta such that P = I - beta v v^T&lt;/span&gt;
+&lt;span class=&quot;sd&quot;&gt;    is orthogonal and P x = ||x|| e_1&lt;/span&gt;
+
+&lt;span class=&quot;sd&quot;&gt;    Parameters&lt;/span&gt;
+&lt;span class=&quot;sd&quot;&gt;    ----------&lt;/span&gt;
+&lt;span class=&quot;sd&quot;&gt;    x : array, shape (n,) or (n, 1)&lt;/span&gt;
+
+&lt;span class=&quot;sd&quot;&gt;    Returns&lt;/span&gt;
+&lt;span class=&quot;sd&quot;&gt;    -------&lt;/span&gt;
+&lt;span class=&quot;sd&quot;&gt;    beta : scalar&lt;/span&gt;
+&lt;span class=&quot;sd&quot;&gt;    v : array, shape (n, 1)&lt;/span&gt;
+&lt;span class=&quot;sd&quot;&gt;    &quot;&quot;&quot;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;asarray&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ndim&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[:,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;newaxis&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;sigma&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;linalg&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;norm&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vstack&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:]))&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sigma&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;beta&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sqrt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sigma&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sigma&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;beta&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sigma&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;beta&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;As promised, this computes the parameters of $P$ such that $P x = \|x\| e_1$,
+exact to 15 decimals:&lt;/p&gt;
+&lt;div class=&quot;codehilite&quot;&gt;&lt;pre&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;randn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;beta&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;house&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;P&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;eye&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;beta&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;round&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;P&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;linalg&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;norm&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;decimals&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;15&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; 
+&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;1.&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.&lt;/span&gt;  &lt;span class=&quot;mf&quot;&gt;0.&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This property is what it makes Householder matrices useful in
+the context of numerical analysis. It can be used for example to
+compute the QR decomposition of a given matrix. The idea is to
+succesively zero out the sub-diagonal elements, thus leaving a
+triangular matrix at the end. In the first iteration we compute a
+Householder matrix $P_0$ such that $P_0 X$ has only zero below the
+diagonal of the first column, then compute a Householder matrix $P_1$
+such that $P_1 X$ zeroes out the subdiagonal elements of the second
+column and so on. At the end we will have that $P_0 P_1 ... P_n X$ is
+an upper triangular matrix. Since all $P_i$ are orthogonal, the
+product $P_0 P_1 ... P_n$ is again an orthogonal matrix, namely the
+$Q$ matrix in the QR decomposition.&lt;/p&gt;
+&lt;p&gt;If we choose X as 20-by-20 random matrix, with colors representing
+different values&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://fseoane.net/blog/static/images/2013/house_random.png&quot; alt=&quot;QR decomposition&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;we can see the process of the Householder matrices being applied one
+by one to obtain an upper triangular matrix&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://fseoane.net/blog/static/images/2013/house.gif&quot; alt=&quot;QR decomposition&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;A similar application of Householder matrices is to reduce a given
+symmetric matrix to tridiagonal form, which proceeds in a similar way
+as in the QR algorithm, only that now we multiply by the matrix $X$ by
+the left &lt;em&gt;and right&lt;/em&gt; with the Householder matrices. Also, in this case
+we seek for Householder matrices that zero out the elements of the
+subdiagonal plus one, instead of just subdiagonal elements. This
+algorithm is used for example as a preprocessing step for &lt;a href=&quot;http://www.netlib.org/lapack/lug/node70.html&quot;&gt;most dense
+eigensolvers&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://fseoane.net/blog/static/images/2013/house_tridiag.gif&quot; alt=&quot;Tridiagonalization&quot; /&gt;&lt;/p&gt;
+&lt;div class=&quot;footnote&quot;&gt;
+&lt;hr /&gt;
+&lt;ol&gt;
+&lt;li id=&quot;fn:1&quot;&gt;
+&lt;p&gt;&quot;Matrix Computations&quot; third edition, Golub &amp;amp; VanLoan (Algorithm 5.1.1). &lt;a href=&quot;http://fseoane.net/blog/feed/#fnref:1&quot; rev=&quot;footnote&quot; title=&quot;Jump back to footnote 1 in the text&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&quot;fn:2&quot;&gt;
+&lt;p&gt;Code to reproduce the figures &lt;a href=&quot;http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/householder.ipynb&quot;&gt;can be found here&lt;/a&gt;, source for the IPython notebook &lt;a href=&quot;http://fseoane.net/blog/static/uploads/2013/householder.ipynb&quot;&gt;can be found here&lt;/a&gt; &lt;a href=&quot;http://fseoane.net/blog/feed/#fnref:2&quot; rev=&quot;footnote&quot; title=&quot;Jump back to footnote 2 in the text&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;</description>
+	<pubDate>Tue, 26 Mar 2013 23:00:00 +0000</pubDate>
+</item>
+<item>
 	<title>MRocklin: SymPy -&gt; Theano -- Code Generation</title>
 	<guid isPermaLink="true">http://matthewrocklin.com/blog//work/2013/03/19/SymPy-Theano-part-1</guid>
 	<link>http://matthewrocklin.com/blog//work/2013/03/19/SymPy-Theano-part-1</link>
@@ -364,7 +464,7 @@ of loss functions are:&lt;/p&gt;
 &lt;li&gt;Logistic loss, $\log(1 + \exp{f(x_i) y_i})$&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;&lt;img src=&quot;http://fseoane.net/blog/static/images/2013/loss_functions.png&quot; alt=&quot;Loss functions&quot; /&gt;&lt;/p&gt;
-&lt;p&gt;&lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;http://fseoane.net/blog/feed/#fn:1&quot; class=&quot;footnote-ref&quot; rel=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+&lt;p&gt;&lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;http://fseoane.net/blog/feed/#fn:1&quot; rel=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
 &lt;p&gt;In the paper &lt;a href=&quot;http://citeseer.ist.psu.edu/viewdoc/summary?doi=10.1.1.124.9242&quot;&gt;Loss functions for preference levels: Regression with
 discrete ordered
 labels&lt;/a&gt;,
@@ -402,7 +502,7 @@ each time a threshold is crossed.&lt;/p&gt;
 &lt;hr /&gt;
 &lt;ol&gt;
 &lt;li id=&quot;fn:1&quot;&gt;
-&lt;p&gt;Code for generating all figures can be found &lt;a href=&quot;http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/ordinal%2520regression%2520loss%2520functions.ipynb&quot;&gt;here&lt;/a&gt; &lt;a href=&quot;http://fseoane.net/blog/feed/#fnref:1&quot; rev=&quot;footnote&quot; class=&quot;footnote-backref&quot; title=&quot;Jump back to footnote 1 in the text&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Code for generating all figures can be found &lt;a href=&quot;http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/ordinal%2520regression%2520loss%2520functions.ipynb&quot;&gt;here&lt;/a&gt; &lt;a href=&quot;http://fseoane.net/blog/feed/#fnref:1&quot; rev=&quot;footnote&quot; title=&quot;Jump back to footnote 1 in the text&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ol&gt;
 &lt;/div&gt;</description>
@@ -1175,7 +1275,7 @@ sin(x)**2 + cos(x)**2 -&amp;gt; 1 &lt;/code&gt;&lt;/pre&gt;
 	<guid isPermaLink="false">tag:fseoane.net/blog,2012-12-08:2012/singular-value-decomposition-in-scipy/</guid>
 	<link>http://fseoane.net/blog/2012/singular-value-decomposition-in-scipy/</link>
 	<description>&lt;p&gt;SciPy contains two methods to compute the singular value decomposition (SVD) of a matrix: &lt;code&gt;scipy.linalg.svd&lt;/code&gt; and &lt;code&gt;scipy.sparse.linalg.svds&lt;/code&gt;. In this post I'll compare both methods for the task of computing the full SVD of a large dense matrix.&lt;/p&gt;
-&lt;p&gt;The first method, &lt;code&gt;scipy.linalg.svd&lt;/code&gt;, is perhaps the best known and uses the linear algebra library &lt;a href=&quot;http://www.netlib.org/lapack/&quot;&gt;LAPACK&lt;/a&gt; to handle the computations. This implements the Golub-Kahan-Reisch algorithm &lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;http://fseoane.net/blog/feed/#fn:1&quot; class=&quot;footnote-ref&quot; rel=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;, which is accurate and highly efficient with a cost of O(n^3) floating-point operations &lt;sup id=&quot;fnref:2&quot;&gt;&lt;a href=&quot;http://fseoane.net/blog/feed/#fn:2&quot; class=&quot;footnote-ref&quot; rel=&quot;footnote&quot;&gt;2&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+&lt;p&gt;The first method, &lt;code&gt;scipy.linalg.svd&lt;/code&gt;, is perhaps the best known and uses the linear algebra library &lt;a href=&quot;http://www.netlib.org/lapack/&quot;&gt;LAPACK&lt;/a&gt; to handle the computations. This implements the Golub-Kahan-Reisch algorithm &lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;http://fseoane.net/blog/feed/#fn:1&quot; rel=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;, which is accurate and highly efficient with a cost of O(n^3) floating-point operations &lt;sup id=&quot;fnref:2&quot;&gt;&lt;a href=&quot;http://fseoane.net/blog/feed/#fn:2&quot; rel=&quot;footnote&quot;&gt;2&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
 &lt;p&gt;The second method is &lt;code&gt;scipy.sparse.linalg.svds&lt;/code&gt; and despite it's name it works fine also for dense arrays. This implementation is based on the &lt;a href=&quot;http://www.caam.rice.edu/software/ARPACK/&quot;&gt;ARPACK&lt;/a&gt; library and consists of an iterative procedure that finds the SVD decomposition by reducing the problem to an eigendecomposition on the array X -&amp;gt; dot(X.T, X). This method is usually very effective when the input matrix X is sparse or only the largest singular values are required. There are other SVD solvers that I did not consider, such as &lt;a href=&quot;http://pypi.python.org/pypi/sparsesvd/&quot;&gt;sparsesvd&lt;/a&gt; or &lt;a href=&quot;http://pysparse.sourceforge.net/introduction.html#jdsym&quot;&gt;pysparse.jdsym&lt;/a&gt;, but my points for the sparse solve probably hold for those packages too since they both implement iterative algorithms based on the same principles.&lt;/p&gt;
 &lt;p&gt;When the input matrix is dense and all the singular values are required, the first method is usually more efficient. To support this statement I've created a little benchmark: timings for both methods as a function of the size of the matrices. Notice that we are in a case that is clearly favorable to the &lt;code&gt;linalg.svd&lt;/code&gt;: after all &lt;code&gt;sparse.linalg.svds&lt;/code&gt; was not created with this setting in mind, it was created for sparse matrices or dense matrices with some special structure. We will see however that even in this setting it has interesting advantages.&lt;/p&gt;
 &lt;p&gt;I'll create random square matrices with different sizes and plot the timings for both methods. For the benchmarks I used SciPy v0.12 linked against Intel Math Kernel Library v11. Both methods are single-threaded (I had to set OMP_NUM_THREADS=1 so that MKL does not try to parallelize the computations). &lt;a href=&quot;https://gist.github.com/4250756#file-svd_timing-py&quot;&gt;[code]&lt;/a&gt;&lt;/p&gt;
@@ -1188,10 +1288,10 @@ sin(x)**2 + cos(x)**2 -&amp;gt; 1 &lt;/code&gt;&lt;/pre&gt;
 &lt;hr /&gt;
 &lt;ol&gt;
 &lt;li id=&quot;fn:1&quot;&gt;
-&lt;p&gt;Calculating the singular values and pseudo-inverse of a matrix, &lt;em&gt;Golub, Gene H., Kahan, William&lt;/em&gt;, 1965, &lt;a href=&quot;http://www.jstor.org/stable/2949777&quot;&gt;JSTOR&lt;/a&gt; &lt;a href=&quot;http://fseoane.net/blog/feed/#fnref:1&quot; rev=&quot;footnote&quot; class=&quot;footnote-backref&quot; title=&quot;Jump back to footnote 1 in the text&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Calculating the singular values and pseudo-inverse of a matrix, &lt;em&gt;Golub, Gene H., Kahan, William&lt;/em&gt;, 1965, &lt;a href=&quot;http://www.jstor.org/stable/2949777&quot;&gt;JSTOR&lt;/a&gt; &lt;a href=&quot;http://fseoane.net/blog/feed/#fnref:1&quot; rev=&quot;footnote&quot; title=&quot;Jump back to footnote 1 in the text&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;li id=&quot;fn:2&quot;&gt;
-&lt;p&gt;A Survey of Singular Value Decomposition Methods and Performance Comparison of Some Available Serial Codes, &lt;em&gt;Plassman, Gerald E.&lt;/em&gt; 2005 &lt;a href=&quot;http://research.microsoft.com/en-us/um/people/zhoulin/2005-a%20survey%20of%20singular%20value%20decomposition_plassman.pdf&quot;&gt;PDF&lt;/a&gt; &lt;a href=&quot;http://fseoane.net/blog/feed/#fnref:2&quot; rev=&quot;footnote&quot; class=&quot;footnote-backref&quot; title=&quot;Jump back to footnote 2 in the text&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;A Survey of Singular Value Decomposition Methods and Performance Comparison of Some Available Serial Codes, &lt;em&gt;Plassman, Gerald E.&lt;/em&gt; 2005 &lt;a href=&quot;http://research.microsoft.com/en-us/um/people/zhoulin/2005-a%20survey%20of%20singular%20value%20decomposition_plassman.pdf&quot;&gt;PDF&lt;/a&gt; &lt;a href=&quot;http://fseoane.net/blog/feed/#fnref:2&quot; rev=&quot;footnote&quot; title=&quot;Jump back to footnote 2 in the text&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ol&gt;
 &lt;/div&gt;</description>
@@ -3304,8 +3404,8 @@ f_durations.write('\n')
     &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'Kendall correlation coefficient for block &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%s&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;: &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%.5f&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tau&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;div class=&quot;codehilite&quot;&gt;&lt;pre&gt;&lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; 0&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; 0&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;71122
-&lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; 1&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; 0&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;84387
+&lt;div class=&quot;codehilite&quot;&gt;&lt;pre&gt;&lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.71122&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.84387&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
@@ -3367,8 +3467,8 @@ f_durations.write('\n')
     &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'Kendall correlation coefficient for block &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%s&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;: &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%.5f&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tau&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;div class=&quot;codehilite&quot;&gt;&lt;pre&gt;&lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; 0&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; 0&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;83627
-&lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; 1&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; 0&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;84387
+&lt;div class=&quot;codehilite&quot;&gt;&lt;pre&gt;&lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.83627&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.84387&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
@@ -4156,35 +4256,6 @@ StopIteration:
 &lt;p&gt;In terms of the bigger picture with respect to my GSoC goals, it may look like I’m a little behind schedule but since I’m  simultaneously working on two of my goals right now which will get knocked off, in the worst case scenario, in the next two weeks. I will still have a couple more weeks to work on my final goal which is the addition and improvement of the code output functionality of mechanics. At this time, it looks like I will meet my goals and in the worst case scenario, I will be mid way through my last goal.&lt;/p&gt;
 &lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/angadhsympy.wordpress.com/305/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/angadhsympy.wordpress.com/305/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=angadhsympy.wordpress.com&amp;amp;blog=35620584&amp;amp;post=305&amp;amp;subd=angadhsympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
 	<pubDate>Sat, 28 Jul 2012 10:54:09 +0000</pubDate>
-</item>
-<item>
-	<title>Bharath M R: Gsoc week 9</title>
-	<guid isPermaLink="true">http://www.catchmrbharath.in/programming/2012/07/23/gsoc-week-9</guid>
-	<link>http://www.catchmrbharath.in/programming/2012/07/23/gsoc-week-9</link>
-	<description>&lt;p&gt;This has been a really unproductive week. I was sick with fever for almost three days and could not spend my time on anything. I spent the next days getting the basic svgfig backend for 2d line plots. There are lots of issues with svgfig, and hence I am of the opinion svgfig should be used only for displaying images on the google app engine ie sympy live. First on the list is no support for 3-D graphs. I think this is ok, because there are not many libraries even in javascript which can do 3D plotting. Also, I am having problems with implementing contour plots and surface plots in svgfig. I am experimenting with a way, which would involve using marching squares algorithm to plot contour plots.&lt;/p&gt;
-
-&lt;p&gt;I think I am a little behind my gsoc schedule, and I should speed up things a little in the next few weeks.&lt;/p&gt;
-
-&lt;p&gt;So these are the things that I have to address&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Integration of svgfig with sympy live&lt;/li&gt;
-
-&lt;li&gt;Fix the multiple spawning of windows in matplotlib issue.&lt;/li&gt;
-
-&lt;li&gt;Fix the plot tests. As of now, the tests do nothing, as the process_series is not called if show is set to False.&lt;/li&gt;
-
-&lt;li&gt;I have been toying around with ipython to get isympy notebook and qtconsole working. The problem I am facing is, there are 2 instances of qtconsole created, instead of one, when I run it. I will have to figure out the problem.&lt;/li&gt;
-
-&lt;li&gt;Address the issues regarding the adaptive sampling of 2d plots.&lt;/li&gt;
-
-&lt;li&gt;Clean up my branch of implicit plotting (This is almost done).&lt;/li&gt;
-
-&lt;li&gt;Split the plot function into plot, plot3d, implicit_plot functions.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;I don’t think I will be able to do all of these by the end of gsoc period. But my priority will be getting the implicit plotting and svgfig backend working and getting my pull requests merged.&lt;/p&gt;</description>
-	<pubDate>Mon, 23 Jul 2012 07:00:00 +0000</pubDate>
 </item>
 
 </channel>
