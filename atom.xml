@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2013-03-29T23:40:33Z</updated>
+  <updated>2013-03-30T00:20:34Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,117 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry>
+    <id>tag:fseoane.net/blog,2013-03-30:2013/householder-matrices/</id>
+    <link href="http://fseoane.net/blog/2013/householder-matrices/" rel="alternate" type="text/html"/>
+    <title>Householder matrices</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Householder matrices are square matrices of the form</p>
+<p>$$ P = I - \beta v v^T$$</p>
+<p>where $\beta$ is a scalar and $v$ is a vector. It has the useful
+property that for suitable chosen $v$ and $\beta$ it makes the product
+$P x$ to zero out all of the coordinates but one, that is, $P x =
+\|x\| e_1$. The following code, given $x$, finds the values of $\beta,
+v$ that verify that property. The algorithm can be found in several
+textbooks <sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup></p>
+<div class="codehilite"><pre><span class="k">def</span> <span class="nf">house</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    Given a vetor x, computes vectors v with v[0] = 1</span>
+<span class="sd">    and scalar beta such that P = I - beta v v^T</span>
+<span class="sd">    is orthogonal and P x = ||x|| e_1</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : array, shape (n,) or (n, 1)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    beta : scalar</span>
+<span class="sd">    v : array, shape (n, 1)</span>
+<span class="sd">    """</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+    <span class="k">if</span> <span class="n">sigma</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">mu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">sigma</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">mu</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span> <span class="n">sigma</span> <span class="o">/</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">mu</span><span class="p">)</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">+</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">v</span> <span class="o">/=</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">beta</span><span class="p">,</span> <span class="n">v</span>
+</pre></div>
+
+
+<p>As promised, this computes the parameters of $P$ such that $P x = \|x\| e_1$,
+exact to 15 decimals:</p>
+<div class="codehilite"><pre><span class="o">&gt;&gt;&gt;</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">beta</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">house</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">-</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">print</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span> 
+<span class="p">[</span> <span class="mf">1.</span> <span class="o">-</span><span class="mf">0.</span> <span class="o">-</span><span class="mf">0.</span>  <span class="mf">0.</span> <span class="o">-</span><span class="mf">0.</span><span class="p">]</span>
+</pre></div>
+
+
+<p>This property is what it makes Householder matrices useful in
+the context of numerical analysis. It can be used for example to
+compute the QR decomposition of a given matrix. The idea is to
+succesively zero out the sub-diagonal elements, thus leaving a
+triangular matrix at the end. In the first iteration we compute a
+Householder matrix $P_0$ such that $P_0 X$ has only zero below the
+diagonal of the first column, then compute a Householder matrix $P_1$
+such that $P_1 X$ zeroes out the subdiagonal elements of the second
+column and so on. At the end we will have that $P_0 P_1 ... P_n X$ is
+an upper triangular matrix. Since all $P_i$ are orthogonal, the
+product $P_0 P_1 ... P_n$ is again an orthogonal matrix, namely the
+$Q$ matrix in the QR decomposition.</p>
+<p>If we choose X as 20-by-20 random matrix, with colors representing
+different values</p>
+<p><img alt="QR decomposition" src="http://fseoane.net/blog/static/images/2013/house_random.png"/></p>
+<p>we can see the process of the Householder matrices being applied one
+by one to obtain an upper triangular matrix</p>
+<p><img alt="QR decomposition" src="http://fseoane.net/blog/static/images/2013/house.gif"/></p>
+<p>A similar application of Householder matrices is to reduce a given
+symmetric matrix to tridiagonal form, which proceeds in a similar way
+as in the QR algorithm, only that now we multiply by the matrix $X$ by
+the left <em>and right</em> with the Householder matrices. Also, in this case
+we seek for Householder matrices that zero out the elements of the
+subdiagonal plus one, instead of just subdiagonal elements. This
+algorithm is used for example as a preprocessing step for <a href="http://www.netlib.org/lapack/lug/node70.html">most dense
+eigensolvers</a></p>
+<p><img alt="Tridiagonalization" src="http://fseoane.net/blog/static/images/2013/house_tridiag.gif"/></p>
+<div class="footnote">
+<hr/>
+<ol>
+<li id="fn:1">
+<p>"Matrix Computations" third edition, Golub &amp; VanLoan (Algorithm 5.1.1). <a href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
+</li>
+<li id="fn:2">
+<p>Code to reproduce the figures <a href="http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/householder.ipynb">can be found here</a>, source for the IPython notebook <a href="http://fseoane.net/blog/static/uploads/2013/householder.ipynb">can be found here</a> <a href="http://fseoane.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
+</li>
+</ol>
+</div></div>
+    </summary>
+    <updated>2013-03-29T23:00:00Z</updated>
+    <category term="linear algebra"/>
+    <category term="householder"/>
+    <author>
+      <name>Fabian Pedregosa</name>
+    </author>
+    <source>
+      <id>http://fseoane.net/blog/</id>
+      <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
+      <link href="http://fseoane.net/blog/feed/rss.xml" rel="self" type="application/atom+xml"/>
+      <title>I say things</title>
+      <updated>2013-03-30T00:20:16Z</updated>
+    </source>
+  </entry>
 
   <entry>
     <id>http://matthewrocklin.com/blog//work/2013/03/28/SymPy-Theano-part-2</id>
@@ -198,7 +309,7 @@ Operations after Theano Simplification:  17</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-29T23:40:28Z</updated>
+      <updated>2013-03-30T00:20:29Z</updated>
     </source>
   </entry>
 
@@ -313,7 +424,7 @@ eigensolvers</a></p>
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog/feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-03-29T23:40:15Z</updated>
+      <updated>2013-03-30T00:00:17Z</updated>
     </source>
   </entry>
 
@@ -456,7 +567,7 @@ legend(['$R_{31}$', "$R'_{31}$"])</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-29T23:40:28Z</updated>
+      <updated>2013-03-30T00:20:29Z</updated>
     </source>
   </entry>
 
@@ -502,7 +613,7 @@ legend(['$R_{31}$', "$R'_{31}$"])</code></pre>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-03-29T23:40:18Z</updated>
+      <updated>2013-03-30T00:20:18Z</updated>
     </source>
   </entry>
 
@@ -583,7 +694,7 @@ each time a threshold is crossed.</p>
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog/feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-03-29T23:40:15Z</updated>
+      <updated>2013-03-30T00:20:16Z</updated>
     </source>
   </entry>
 
@@ -659,7 +770,7 @@ each time a threshold is crossed.</p>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-29T23:40:29Z</updated>
+      <updated>2013-03-30T00:20:30Z</updated>
     </source>
   </entry>
 
@@ -744,7 +855,7 @@ each time a threshold is crossed.</p>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-29T23:40:29Z</updated>
+      <updated>2013-03-30T00:20:30Z</updated>
     </source>
   </entry>
 
@@ -781,7 +892,7 @@ each time a threshold is crossed.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-03-29T23:40:18Z</updated>
+      <updated>2013-03-30T00:20:18Z</updated>
     </source>
   </entry>
 
@@ -905,7 +1016,7 @@ run(0, tail,  conso(head, tail, (1, 2, 3, 4)))
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-29T23:40:28Z</updated>
+      <updated>2013-03-30T00:20:29Z</updated>
     </source>
   </entry>
 
@@ -1003,7 +1114,7 @@ CO,WY,NE,KS,OK,NM,AZ,UT
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-29T23:40:28Z</updated>
+      <updated>2013-03-30T00:20:29Z</updated>
     </source>
   </entry>
 
@@ -1120,7 +1231,7 @@ CO,WY,NE,KS,OK,NM,AZ,UT
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-29T23:40:28Z</updated>
+      <updated>2013-03-30T00:20:29Z</updated>
     </source>
   </entry>
 
@@ -1321,7 +1432,7 @@ dimensions.</p>
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog/feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-03-29T23:40:16Z</updated>
+      <updated>2013-03-30T00:20:16Z</updated>
     </source>
   </entry>
 
@@ -1404,7 +1515,7 @@ dimensions.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-03-29T23:40:18Z</updated>
+      <updated>2013-03-30T00:20:19Z</updated>
     </source>
   </entry>
 
@@ -1435,7 +1546,7 @@ dimensions.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-03-29T23:40:18Z</updated>
+      <updated>2013-03-30T00:20:18Z</updated>
     </source>
   </entry>
 
@@ -1527,7 +1638,7 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-29T23:40:28Z</updated>
+      <updated>2013-03-30T00:20:29Z</updated>
     </source>
   </entry>
 
@@ -1569,7 +1680,7 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog/feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-03-29T23:40:16Z</updated>
+      <updated>2013-03-30T00:20:17Z</updated>
     </source>
   </entry>
 
@@ -1677,7 +1788,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-29T23:40:28Z</updated>
+      <updated>2013-03-30T00:20:29Z</updated>
     </source>
   </entry>
 
@@ -1833,7 +1944,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-03-29T23:40:29Z</updated>
+      <updated>2013-03-30T00:20:30Z</updated>
     </source>
   </entry>
 
@@ -2055,7 +2166,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-03-29T23:40:33Z</updated>
+      <updated>2013-03-30T00:20:34Z</updated>
     </source>
   </entry>
 
@@ -2549,7 +2660,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-03-29T23:40:33Z</updated>
+      <updated>2013-03-30T00:20:34Z</updated>
     </source>
   </entry>
 
@@ -2738,7 +2849,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site, I guess...</subtitle>
       <title>Gilbert Gede's Blog</title>
-      <updated>2013-03-29T23:40:23Z</updated>
+      <updated>2013-03-30T00:20:23Z</updated>
     </source>
   </entry>
 
@@ -3980,7 +4091,7 @@ f_durations.write('\n')
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog/feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-03-29T23:40:14Z</updated>
+      <updated>2013-03-30T00:20:15Z</updated>
     </source>
   </entry>
 
@@ -4055,7 +4166,7 @@ f_durations.write('\n')
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2013-03-29T23:40:25Z</updated>
+      <updated>2013-03-30T00:20:26Z</updated>
     </source>
   </entry>
 
@@ -4200,7 +4311,7 @@ RuntimeError: maximum recursion depth exceeded in comparison
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-03-29T23:40:18Z</updated>
+      <updated>2013-03-30T00:20:18Z</updated>
     </source>
   </entry>
 
@@ -4243,7 +4354,7 @@ b. Add this line to your bash_profile.</p>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-03-29T23:40:33Z</updated>
+      <updated>2013-03-30T00:20:34Z</updated>
     </source>
   </entry>
 
@@ -4327,7 +4438,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-03-29T23:40:18Z</updated>
+      <updated>2013-03-30T00:20:18Z</updated>
     </source>
   </entry>
 
@@ -4363,7 +4474,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-03-29T23:40:18Z</updated>
+      <updated>2013-03-30T00:20:19Z</updated>
     </source>
   </entry>
 
@@ -4599,7 +4710,7 @@ Out[74]: True
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-03-29T23:40:33Z</updated>
+      <updated>2013-03-30T00:20:34Z</updated>
     </source>
   </entry>
 
@@ -4717,7 +4828,7 @@ commits are much more like my usual ones.
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-03-29T23:40:31Z</updated>
+      <updated>2013-03-30T00:20:32Z</updated>
     </source>
   </entry>
 
@@ -4750,7 +4861,7 @@ commits are much more like my usual ones.
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2013-03-29T23:40:32Z</updated>
+      <updated>2013-03-30T00:20:33Z</updated>
     </source>
   </entry>
 
@@ -4895,7 +5006,7 @@ Out[24]: 6
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-03-29T23:40:31Z</updated>
+      <updated>2013-03-30T00:20:32Z</updated>
     </source>
   </entry>
 
@@ -5014,7 +5125,7 @@ Out[24]: 6
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2013-03-29T23:40:32Z</updated>
+      <updated>2013-03-30T00:20:33Z</updated>
     </source>
   </entry>
 
@@ -5046,7 +5157,7 @@ Out[24]: 6
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-03-29T23:40:33Z</updated>
+      <updated>2013-03-30T00:20:34Z</updated>
     </source>
   </entry>
 
@@ -5190,7 +5301,7 @@ StopIteration:
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-03-29T23:40:33Z</updated>
+      <updated>2013-03-30T00:20:34Z</updated>
     </source>
   </entry>
 
@@ -5249,37 +5360,7 @@ StopIteration:
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-03-29T23:40:31Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://angadhsympy.wordpress.com/?p=305</id>
-    <link href="http://angadhsympy.wordpress.com/2012/07/28/gsoc-blog-post/" rel="alternate" type="text/html"/>
-    <title>GSoC Blog post</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">In the week accompanying and the weeks following the evaluation, I have been working on the implementation of Lagrange’s method to the ‘mechanics’ armory. A lot can be written on the method but  I will spare the details here for now. In terms of progress on the coding itself, I feel like I have made significant [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=angadhsympy.wordpress.com&amp;blog=35620584&amp;post=305&amp;subd=angadhsympy&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>In the week accompanying and the weeks following the evaluation, I have been working on the implementation of <a href="http://en.wikipedia.org/wiki/Lagrangian_mechanics">Lagrange’s method</a> to the ‘mechanics’ armory. A lot can be written on the method but  I will spare the details here for now. In terms of progress on the coding itself, I feel like I have made significant strides in completing it. I expect to open a pull request in the middle of the upcoming week on Lagrange’s method, once I have some more of the ‘kinks’ ironed out.</p>
-<p>I’m simultaneously working on the documentation aspect mentioned on my proposal. Currently, I’m working on adding to the theoretical or ‘text-book’ documentation that mechanics has on sympy docs. Specifically, I’m working on the theoretical material of the helper functions that I have added. Ideally, I will be opening a PR for this at the same time as the PR for Lagrange but that may not happen.</p>
-<p>I would also like to apologise for missing out on the blog post last week. There were certain extenuating circumstances with respect to my physical health that I had to deal with coupled with a failure of my internet connection (which my ISP finally resolved on Wednesday). With regards to my health- I have had a troublesome knee problem which needed surgery. I had put off the surgery until the end of August but unfortunately the situation took a turn for the worse in the week following the evaluation. Anyhow it ended with me requiring an ACL reconstruction and meniscus removal. Unexpected but I have tried hard to not let it hamper productivity as best as possible. Nonetheless I apologise for my tardiness.</p>
-<p>In terms of the bigger picture with respect to my GSoC goals, it may look like I’m a little behind schedule but since I’m  simultaneously working on two of my goals right now which will get knocked off, in the worst case scenario, in the next two weeks. I will still have a couple more weeks to work on my final goal which is the addition and improvement of the code output functionality of mechanics. At this time, it looks like I will meet my goals and in the worst case scenario, I will be mid way through my last goal.</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/angadhsympy.wordpress.com/305/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/angadhsympy.wordpress.com/305/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=angadhsympy.wordpress.com&amp;blog=35620584&amp;post=305&amp;subd=angadhsympy&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2012-07-28T10:54:09Z</updated>
-    <category term="Uncategorized"/>
-    <author>
-      <name>angadhn</name>
-    </author>
-    <source>
-      <id>http://angadhsympy.wordpress.com</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://angadhsympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://angadhsympy.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://angadhsympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
-      <title>GSoC 2012 blog</title>
-      <updated>2013-03-29T23:40:32Z</updated>
+      <updated>2013-03-30T00:20:32Z</updated>
     </source>
   </entry>
 </feed>
