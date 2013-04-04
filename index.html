@@ -238,9 +238,9 @@ Operations:  18</code></pre>
 
 <p>Scalar differentiation is actually a very simple transformation.</p>
 
-<p>You need to know how to transform all of the elementary functions (<code>exp, sin, cos, polynomials, etc...</code>), the chain rule, and that’s it. Theorems behind automatic differentiation state that the cost of a derivative will be at most five times the cost of the original. In this case we’re guaranteed to have at most <code>17*5 == 85</code> operations in the derivative computation; this holds in our case because <code>48 &lt; 85</code></p>
+<p>You need to know how to transform all of the elementary functions (<code>exp, log, sin, cos, polynomials, etc...</code>), the chain rule, and that’s it. Theorems behind automatic differentiation state that the cost of a derivative will be at most five times the cost of the original. In this case we’re guaranteed to have at most <code>17*5 == 85</code> operations in the derivative computation; this holds in our case because <code>48 &lt; 85</code></p>
 
-<p>However derivatives are often far simpler than this upper bound. We see that after simplification the operation count of the derivative is <code>18</code>, only one more than the original. This is common.</p>
+<p>However derivatives are often far simpler than this upper bound. We see that after simplification the operation count of the derivative is <code>18</code>, only one more than the original. This is common in practice.</p>
 
 <h2 id="theano_simplification">Theano Simplification</h2>
 
@@ -567,7 +567,7 @@ plot(xx, fn_numpy(xx))</code></pre>
 
 <p>Theano generates <code>C</code> code that performs the same loop fusion done in <code>Fortran</code> but it incurs a bit more startup time. It performs somewhere between the <code>numpy</code> and <code>Fortran</code> solutions.</p>
 
-<p>However, the <code>SymPy -&gt; Theano</code> system only takes up about a page of code while the <code>lambdify</code> and <code>autowrap</code> modules are substantially more complex. Additionally, Theano is actively developed and is sure to improve and track changes in hardware well into the future. <code>lambdify</code> and <code>autowrap</code> have been relatively untouched over the past year.</p>
+<p>However, the <code>SymPy to Theano</code> translation interface only takes up about a page of code while the <code>lambdify</code> and <code>autowrap</code> modules are substantially more complex. Additionally, Theano is actively developed and is sure to improve and track changes in hardware well into the future. <code>lambdify</code> and <code>autowrap</code> have been relatively untouched over the past year. For example Theano is able to seemlessly compile these computations to the GPU.</p>
 
 <h2 id="leveraging_theano">Leveraging Theano</h2>
 
@@ -606,6 +606,8 @@ legend(['$R_{31}$', "$R'_{31}$"])</code></pre>
 <p>When we extend this experiment and vary the number of simultaneous derivatives we observe the following runtimes</p>
 
 <p><img src="http://mrocklin.github.com/blog/images/profile-theano-fortran-numpy.png" alt="" /></p>
+
+<p>In the case of highly structured computation Theano is able to scale very favorably.</p>
 
 <h2 id="conclusion">Conclusion</h2>
 
@@ -6102,7 +6104,7 @@ StopIteration:
 
 <p>
 <strong>Last updated:</strong><br>
-April 04, 2013 02:00 PM<br>
+April 04, 2013 04:40 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>

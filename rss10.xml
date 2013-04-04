@@ -249,9 +249,9 @@ Operations:  18&lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Scalar differentiation is actually a very simple transformation.&lt;/p&gt;
 
-&lt;p&gt;You need to know how to transform all of the elementary functions (&lt;code&gt;exp, sin, cos, polynomials, etc...&lt;/code&gt;), the chain rule, and that’s it. Theorems behind automatic differentiation state that the cost of a derivative will be at most five times the cost of the original. In this case we’re guaranteed to have at most &lt;code&gt;17*5 == 85&lt;/code&gt; operations in the derivative computation; this holds in our case because &lt;code&gt;48 &amp;lt; 85&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;You need to know how to transform all of the elementary functions (&lt;code&gt;exp, log, sin, cos, polynomials, etc...&lt;/code&gt;), the chain rule, and that’s it. Theorems behind automatic differentiation state that the cost of a derivative will be at most five times the cost of the original. In this case we’re guaranteed to have at most &lt;code&gt;17*5 == 85&lt;/code&gt; operations in the derivative computation; this holds in our case because &lt;code&gt;48 &amp;lt; 85&lt;/code&gt;&lt;/p&gt;
 
-&lt;p&gt;However derivatives are often far simpler than this upper bound. We see that after simplification the operation count of the derivative is &lt;code&gt;18&lt;/code&gt;, only one more than the original. This is common.&lt;/p&gt;
+&lt;p&gt;However derivatives are often far simpler than this upper bound. We see that after simplification the operation count of the derivative is &lt;code&gt;18&lt;/code&gt;, only one more than the original. This is common in practice.&lt;/p&gt;
 
 &lt;h2 id=&quot;theano_simplification&quot;&gt;Theano Simplification&lt;/h2&gt;
 
@@ -519,7 +519,7 @@ plot(xx, fn_numpy(xx))&lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Theano generates &lt;code&gt;C&lt;/code&gt; code that performs the same loop fusion done in &lt;code&gt;Fortran&lt;/code&gt; but it incurs a bit more startup time. It performs somewhere between the &lt;code&gt;numpy&lt;/code&gt; and &lt;code&gt;Fortran&lt;/code&gt; solutions.&lt;/p&gt;
 
-&lt;p&gt;However, the &lt;code&gt;SymPy -&amp;gt; Theano&lt;/code&gt; system only takes up about a page of code while the &lt;code&gt;lambdify&lt;/code&gt; and &lt;code&gt;autowrap&lt;/code&gt; modules are substantially more complex. Additionally, Theano is actively developed and is sure to improve and track changes in hardware well into the future. &lt;code&gt;lambdify&lt;/code&gt; and &lt;code&gt;autowrap&lt;/code&gt; have been relatively untouched over the past year.&lt;/p&gt;
+&lt;p&gt;However, the &lt;code&gt;SymPy to Theano&lt;/code&gt; translation interface only takes up about a page of code while the &lt;code&gt;lambdify&lt;/code&gt; and &lt;code&gt;autowrap&lt;/code&gt; modules are substantially more complex. Additionally, Theano is actively developed and is sure to improve and track changes in hardware well into the future. &lt;code&gt;lambdify&lt;/code&gt; and &lt;code&gt;autowrap&lt;/code&gt; have been relatively untouched over the past year. For example Theano is able to seemlessly compile these computations to the GPU.&lt;/p&gt;
 
 &lt;h2 id=&quot;leveraging_theano&quot;&gt;Leveraging Theano&lt;/h2&gt;
 
@@ -558,6 +558,8 @@ legend(['$R_{31}$', &quot;$R'_{31}$&quot;])&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;When we extend this experiment and vary the number of simultaneous derivatives we observe the following runtimes&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://mrocklin.github.com/blog/images/profile-theano-fortran-numpy.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;In the case of highly structured computation Theano is able to scale very favorably.&lt;/p&gt;
 
 &lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
 
