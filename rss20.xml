@@ -617,13 +617,13 @@ each time a threshold is crossed.&lt;/p&gt;
 
 &lt;p&gt;If you have no preconceptions about the rate then this problem is easy. You just divide total counts by total time and you’re done.&lt;/p&gt;
 
-&lt;p&gt;A more complex problem arises when external theory provides prior information about your rate parameter (for example physics might impose rules on the rate of radioactive decay). Lets model this problem in SymPy. For the sake of concreteness lets arbitrarily assume that \( \lambda \), the rate parameter, follows a Beta distribution with parameters &lt;code&gt;a&lt;/code&gt; and &lt;code&gt;b&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;A more complex problem arises when external theory provides prior information about your rate parameter (for example physics might impose rules on the rate of radioactive decay). Lets model this problem in SymPy. For the sake of concreteness lets arbitrarily assume that $\lambda$, the rate parameter, follows a Beta distribution with parameters &lt;code&gt;a&lt;/code&gt; and &lt;code&gt;b&lt;/code&gt;.&lt;/p&gt;
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;symbols&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'a,b'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;positive&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;lam&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Symbol&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'lambda'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;positive&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;rate&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Beta&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lam&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;count&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Poisson&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'X'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;In the lab we observe many samples \( x_i \) taken from &lt;code&gt;count&lt;/code&gt;. From these we wish to find the most likely value of &lt;code&gt;rate&lt;/code&gt;. The probability of any single value of &lt;code&gt;rate&lt;/code&gt; given our data can be rewritten with Bayes’ rule.&lt;/p&gt;
+&lt;p&gt;In the lab we observe many samples $x_i$ taken from &lt;code&gt;count&lt;/code&gt;. From these we wish to find the most likely value of &lt;code&gt;rate&lt;/code&gt;. The probability of any single value of &lt;code&gt;rate&lt;/code&gt; given our data can be rewritten with Bayes’ rule.&lt;/p&gt;
 
 &lt;p&gt;$$ p(\lambda \vert x_i) \propto \prod_i p(x_i \vert \lambda) \cdot p(\lambda) $$&lt;/p&gt;
 
@@ -633,7 +633,7 @@ each time a threshold is crossed.&lt;/p&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;$$ p(x_i \vert \lambda) = \frac{\lambda^{x}}{e^{\lambda} x!} \;\;\;\; p(\lambda) = \frac{\lambda^{a - 1} \left(- \lambda + 1\right)^{b - 1} \Gamma\left(a + b\right)}{\Gamma\left(a\right) \Gamma\left(b\right)}$$&lt;/p&gt;
 
-&lt;p&gt;To find the maximizer of \( p(\lambda \vert x_i) \) we set the derivative equal to zero. We simplify the computation by taking the &lt;code&gt;log&lt;/code&gt;. Because &lt;code&gt;log&lt;/code&gt; is monotonic this does not change the solution.&lt;/p&gt;
+&lt;p&gt;To find the maximizer of $p(\lambda \vert x_i)$ we set the derivative equal to zero. We simplify the computation by taking the &lt;code&gt;log&lt;/code&gt;. Because &lt;code&gt;log&lt;/code&gt; is monotonic this does not change the solution.&lt;/p&gt;
 
 &lt;p&gt;$$ 0 = \frac{d}{d\lambda} \log\left( \prod_i p(x_i \vert \lambda) \cdot p(\lambda)\right) = \frac{d}{d\lambda} \sum_i \log(p(x_i \vert \lambda) \cdot p(\lambda)) $$&lt;/p&gt;
 
