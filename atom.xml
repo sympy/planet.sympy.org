@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2013-04-04T16:40:33Z</updated>
+  <updated>2013-04-05T12:20:30Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,160 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry>
+    <id>http://matthewrocklin.com/blog//work/2013/04/05/SymPy-Theano-part-3</id>
+    <link href="http://matthewrocklin.com/blog//work/2013/04/05/SymPy-Theano-part-3" rel="alternate" type="text/html"/>
+    <title>SymPy -&gt; Theano -- Matrix Expressions</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><h2 id="introduction">Introduction</h2>
+
+<p><em>This post uses some LaTeX. You may want to read it on the <a href="http://matthewrocklin.com/blog/work/2013/04/05/SymPy-Theano-part-3/">original site</a>.</em></p>
+
+<p>This is the last of a three part series connecting SymPy and Theano to transform mathematical expressions into efficient numeric code (see <a href="http://matthewrocklin.com/blog/work/2013/03/19/SymPy-Theano-part-1/">part 1</a> and <a href="http://matthewrocklin.com/blog/work/2013/03/28/SymPy-Theano-part-2/">part 2</a>). We have seen that it is simple and computationally profitable to combine the best parts of both projects.</p>
+
+<p>In this post we’ll switch from computing scalar expressionss to computing matrix expressions. We’ll define the Kalman filter in SymPy and send it to Theano for code generation. We’ll then use SymPy to define a more performant blocked version of the same algorithm.</p>
+
+<h2 id="kalman_filter">Kalman Filter</h2>
+
+<p>The <a href="http://en.wikipedia.org/wiki/Kalman_filter">Kalman filter</a> is an algorithm to compute the Bayesian update of a normal random variable given a linear observation with normal noise. It is commonly used when an uncertain quantity is updated with the results of noisy observations. For example it is used in weather forecasting after weather stations report in with new measurements, in aircraft/car control to automatically adjust for external conditions real-time, or even on your smartphone’s GPS navigation as you update your position based on fuzzy GPS signals. It’s everywhere, it’s important, and it needs to be computed quickly and continuously. It suits our needs today because it can be completely defined with a pair of matrix expressions.</p>
+<div class="highlight"><pre><code class="python"><span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">MatrixSymbol</span><span class="p">,</span> <span class="n">latex</span>
+<span class="n">n</span>       <span class="o">=</span> <span class="mi">1000</span>                          <span class="c"># Number of variables in our system/current state</span>
+<span class="n">k</span>       <span class="o">=</span> <span class="mi">500</span>                           <span class="c"># Number of variables in the observation</span>
+<span class="n">mu</span>      <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'mu'</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>      <span class="c"># Mean of current state</span>
+<span class="n">Sigma</span>   <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'Sigma'</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>   <span class="c"># Covariance of current state</span>
+<span class="n">H</span>       <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'H'</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>       <span class="c"># A measurement operator on current state</span>
+<span class="n">R</span>       <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'R'</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>       <span class="c"># Covariance of measurement noise</span>
+<span class="n">data</span>    <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'data'</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>    <span class="c"># Observed measurement data</span>
+
+<span class="n">newmu</span>   <span class="o">=</span> <span class="n">mu</span> <span class="o">+</span> <span class="n">Sigma</span><span class="o">*</span><span class="n">H</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="p">(</span><span class="n">R</span> <span class="o">+</span> <span class="n">H</span><span class="o">*</span><span class="n">Sigma</span><span class="o">*</span><span class="n">H</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">I</span> <span class="o">*</span> <span class="p">(</span><span class="n">H</span><span class="o">*</span><span class="n">mu</span> <span class="o">-</span> <span class="n">data</span><span class="p">)</span>      <span class="c"># Updated mean</span>
+<span class="n">newSigma</span><span class="o">=</span> <span class="n">Sigma</span> <span class="o">-</span> <span class="n">Sigma</span><span class="o">*</span><span class="n">H</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="p">(</span><span class="n">R</span> <span class="o">+</span> <span class="n">H</span><span class="o">*</span><span class="n">Sigma</span><span class="o">*</span><span class="n">H</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">I</span> <span class="o">*</span> <span class="n">H</span> <span class="o">*</span> <span class="n">Sigma</span>       <span class="c"># Updated covariance</span>
+
+<span class="k">print</span> <span class="n">latex</span><span class="p">(</span><span class="n">newmu</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">latex</span><span class="p">(</span><span class="n">newSigma</span><span class="p">)</span>
+</code></pre></div>
+<p>$$ \Sigma H^T \left(H \Sigma H^T + R\right)^{-1} \left(-data + H \mu\right) + \mu $$ $$ - \Sigma H^T \left(H \Sigma H^T + R\right)^{-1} H \Sigma + \Sigma $$</p>
+
+<h2 id="theano_execution">Theano Execution</h2>
+
+<p>The objects above are for symbolic mathematics, not for numeric computation. If we want to compute this expression we pass our expressions to Theano.</p>
+<div class="highlight"><pre><code class="python"><span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">mu</span><span class="p">,</span> <span class="n">Sigma</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">data</span><span class="p">]</span>
+<span class="n">outputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">newmu</span><span class="p">,</span> <span class="n">newSigma</span><span class="p">]</span>
+<span class="n">dtypes</span> <span class="o">=</span> <span class="p">{</span><span class="n">inp</span><span class="p">:</span> <span class="s">'float64'</span> <span class="k">for</span> <span class="n">inp</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">}</span>
+
+<span class="kn">from</span> <span class="nn">sympy.printing.theanocode</span> <span class="kn">import</span> <span class="n">theano_function</span>
+<span class="n">f</span> <span class="o">=</span> <span class="n">theano_function</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">dtypes</span><span class="o">=</span><span class="n">dtypes</span><span class="p">)</span>
+</code></pre></div>
+<p>Theano builds a Python function that calls down to a combination of low-level <code>C</code> code, <code>scipy</code> functions, and calls to the highly optimized <code>DGEMM</code> routine for matrix multiplication. As input this function takes five numpy arrays corresponding to our five symbolic <code>inputs</code> and produces two numpy arrays corresponding to our two symbolic <code>outputs</code>. <a href="https://github.com/sympy/sympy/pull/1965">Recent work</a> allows <em>any</em> SymPy matrix expression to be translated to and run by Theano.</p>
+<div class="highlight"><pre><code class="python"><span class="kn">import</span> <span class="nn">numpy</span>
+<span class="n">ninputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="o">*</span><span class="n">i</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s">'float64'</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">]</span>
+<span class="n">nmu</span><span class="p">,</span> <span class="n">nSigma</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">ninputs</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="blocked_execution">Blocked Execution</h2>
+
+<p>These arrays are too large to fit comfortably in the fastest parts of the memory hierarchy. As a result each sequential <code>C</code>, <code>scipy</code>, or <code>DGEMM</code> call needs to move big chunks of memory around while it computes. After one operation completes the next operation moves around the same memory while it performs its task. This repeated memory shuffling hurts performance.</p>
+
+<p>A common approach to reduce memory shuffling is to cut the computation into smaller blocks. We then perform as many computations as possible on a single block before moving on. This is a standard technique in matrix multiplication.</p>
+<div class="highlight"><pre><code class="python"><span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">BlockMatrix</span><span class="p">,</span> <span class="n">block_collapse</span>
+<span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">G</span><span class="p">,</span> <span class="n">K</span> <span class="o">=</span> <span class="p">[</span><span class="n">MatrixSymbol</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="s">'ABCDEFGK'</span><span class="p">]</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">BlockMatrix</span><span class="p">([[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">],</span>
+                 <span class="p">[</span><span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="p">]])</span>
+<span class="n">Y</span> <span class="o">=</span> <span class="n">BlockMatrix</span><span class="p">([[</span><span class="n">E</span><span class="p">,</span> <span class="n">F</span><span class="p">],</span>
+                 <span class="p">[</span><span class="n">G</span><span class="p">,</span> <span class="n">K</span><span class="p">]])</span>
+<span class="k">print</span> <span class="n">latex</span><span class="p">(</span><span class="n">X</span><span class="o">*</span><span class="n">Y</span><span class="p">)</span>
+</code></pre></div>
+<p>$$ \begin{bmatrix} A &amp; B \\ C &amp; D \end{bmatrix} \begin{bmatrix} E &amp; F \\ G &amp; K \end{bmatrix}$$</p>
+<div class="highlight"><pre><code class="python"><span class="k">print</span> <span class="n">latex</span><span class="p">(</span><span class="n">block_collapse</span><span class="p">(</span><span class="n">X</span><span class="o">*</span><span class="n">Y</span><span class="p">))</span>
+</code></pre></div>
+<p>$$ \begin{bmatrix} A E + B G &amp; A F + B K \\ C E + D G &amp; C F + D K\end{bmatrix} $$</p>
+
+<p>We are now able to focus on substantially smaller chunks of the array. For example we can choose to keep <code>A</code> in local memory and perform all computations that involve <code>A</code>. We will still need to shuffle some memory around (this is inevitable) but by organizing with blocks we’re able to shuffle less.</p>
+
+<p>This idea extends beyond matrix multiplication. For example, SymPy knows how to block a matrix inverse</p>
+<div class="highlight"><pre><code class="python"><span class="k">print</span> <span class="n">latex</span><span class="p">(</span><span class="n">block_collapse</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">I</span><span class="p">))</span>
+</code></pre></div>
+<p>$$ \begin{bmatrix} \left(- B D^{-1} C + A\right)^{-1} &amp; - A^{-1} B \left(- C A^{-1} B + D\right)^{-1} \\ - \left(- C A^{-1} B + D\right)^{-1} C A^{-1} &amp; \left(- C A^{-1} B + D\right)^{-1} \end{bmatrix} $$</p>
+
+<p>High performance dense linear algebra libraries hard-code all of these tricks into each individual routine. The call to the general matrix multiply routine <code>DGEMM</code> performs blocked matrix multiply within the call. The call to the general matrix solve routine <code>DGESV</code> can perform blocked matrix solve. Unfortunately these routines are unable to coordinate blocked computation <em>between</em> calls.</p>
+
+<p>Fortunately, SymPy and Theano can.</p>
+
+<p>SymPy can define and reduce the blocked matrix expressions using relations like what are shown above.</p>
+<div class="highlight"><pre><code class="python"><span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">blockcut</span><span class="p">,</span> <span class="n">block_collapse</span>
+<span class="n">blocksizes</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">Sigma</span><span class="p">:</span> <span class="p">[(</span><span class="n">n</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">n</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">n</span><span class="o">/</span><span class="mi">2</span><span class="p">)],</span>
+        <span class="n">H</span><span class="p">:</span>     <span class="p">[(</span><span class="n">k</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">k</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">n</span><span class="o">/</span><span class="mi">2</span><span class="p">)],</span>
+        <span class="n">R</span><span class="p">:</span>     <span class="p">[(</span><span class="n">k</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">k</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="n">k</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">k</span><span class="o">/</span><span class="mi">2</span><span class="p">)],</span>
+        <span class="n">mu</span><span class="p">:</span>    <span class="p">[(</span><span class="n">n</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">n</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)],</span>
+        <span class="n">data</span><span class="p">:</span>  <span class="p">[(</span><span class="n">k</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">k</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)]</span>
+        <span class="p">}</span>
+<span class="n">blockinputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">blockcut</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="o">*</span><span class="n">blocksizes</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">]</span>
+<span class="n">blockoutputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">o</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">blockinputs</span><span class="p">)))</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">]</span>
+<span class="n">collapsed_outputs</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">block_collapse</span><span class="p">,</span> <span class="n">blockoutputs</span><span class="p">)</span>
+
+<span class="n">fblocked</span> <span class="o">=</span> <span class="n">theano_function</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">collapsed_outputs</span><span class="p">,</span> <span class="n">dtypes</span><span class="o">=</span><span class="n">dtypes</span><span class="p">)</span>
+</code></pre></div>
+<p>Theano is then able to coordinate this computation and compile it to low-level code. At this stage the expresssions/computations are fairly complex and difficult to present. Here is an image of the computation (click for zoomable PDF) as a directed acyclic graph.</p>
+
+<p><a href="http://mrocklin.github.com/blog/images/fblocked.pdf"><img alt="" src="http://mrocklin.github.com/blog/images/fblocked-small.png"/></a></p>
+
+<h2 id="results">Results</h2>
+
+<p>Lets time each function on the same inputs and see which is faster</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">timeit</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">ninputs</span><span class="p">)</span>
+<span class="mi">1</span> <span class="n">loops</span><span class="p">,</span> <span class="n">best</span> <span class="n">of</span> <span class="mi">3</span><span class="p">:</span> <span class="mf">2.69</span> <span class="n">s</span> <span class="n">per</span> <span class="n">loop</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">timeit</span> <span class="n">fblocked</span><span class="p">(</span><span class="o">*</span><span class="n">ninputs</span><span class="p">)</span>
+<span class="mi">1</span> <span class="n">loops</span><span class="p">,</span> <span class="n">best</span> <span class="n">of</span> <span class="mi">3</span><span class="p">:</span> <span class="mf">2.12</span> <span class="n">s</span> <span class="n">per</span> <span class="n">loop</span>
+</code></pre></div>
+<p>That’s a 20% performance increase from just a few lines of high-level code.</p>
+
+<p>Blocked matrix multiply and blocked solve routines have long been established as <em>a good idea</em>. High level mathematical and array programming libraries like SymPy and Theano allow us to extend this good idea to <em>arbitrary</em> array computations.</p>
+
+<h2 id="analysis">Analysis</h2>
+
+<h3 id="good_things">Good Things</h3>
+
+<p>First, lets note that we’re not introducing a new library for dense linear algebra. Instead we’re noting that pre-existing general purpose high-level tools can be composed to that effect.</p>
+
+<p>Second, lets acknoledge that we could take this further. For example Theano seemlessly handles GPU interactions. We could take this same code to a GPU accelerated machine and it would just run faster without any action on our part.</p>
+
+<h3 id="bad_things">Bad Things</h3>
+
+<p>However, there are some drawbacks.</p>
+
+<p>Frequent readers of my blog might recall a <a href="http://matthewrocklin.com/blog/work/2012/11/24/Kalman-Filter/">previous post about the Kalman filter</a>. In it I showed how we could use SymPy’s inference engine to select appropriate BLAS/LAPACK calls. For example we could infer that because $ H \Sigma H^T + R $ was symmetric positive definite we could use the substantially more efficient <code>POSV</code> routine for matrix solve rather than <code>GESV</code> (<code>POSV</code> uses the Cholesky algorithm for decomposition rather than straight LU). Theano doesn’t support the specialized BLAS/LAPACK routines though, so we are unable to take advantage of this benefit. The lower-level interface (Theano) is not sufficiently rich to use all information captured in the higher-level (SymPy) representation.</p>
+
+<p>Also, I’ve noticed that the blocked version of this computation experiences some significant roundoff errors (on the order of <code>1e-3</code>). I’m in the process of tracking this down. The problem must occur somewhere in the following tool-chain</p>
+
+<pre><code>SymPy -&gt; Blocking -&gt; Theano -&gt; SciPy -&gt; C routines -&gt; BLAS</code></pre>
+
+<p>Debugging in this context can be wonderful if all elements are well unit-tested. If they’re not (they’re not) then tracking down errors like this requires an unfortunate breadth of expertise.</p>
+
+<h2 id="references">References</h2>
+
+<p>Scripts</p>
+
+<ul>
+<li><a href="http://mrocklin.github.com/blog/scripts/kalman.py">Kalman example</a></li>
+
+<li><a href="http://mrocklin.github.com/blog/scripts/blocks.py">Block Matrix example</a></li>
+
+<li><a href="http://mrocklin.github.com/blog/scripts/kalman_blocked.py">Block Kalman</a></li>
+</ul></div>
+    </summary>
+    <updated>2013-04-05T07:00:00Z</updated>
+    <source>
+      <id>http://matthewrocklin.com/blog/</id>
+      <author>
+        <name>MRocklin</name>
+      </author>
+      <link href="http://matthewrocklin.com/blog/" rel="alternate" type="text/html"/>
+      <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
+      <subtitle>Posts tagged as 'SymPy'</subtitle>
+      <title>Working notes by Matthew Rocklin - SymPy</title>
+      <updated>2013-04-05T12:20:24Z</updated>
+    </source>
+  </entry>
 
   <entry>
     <id>tag:fseoane.net/blog,2013-03-30:2013/householder-matrices/</id>
@@ -309,7 +463,7 @@ Operations after Theano Simplification:  17</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-04-04T16:40:27Z</updated>
+      <updated>2013-04-05T12:20:24Z</updated>
     </source>
   </entry>
 
@@ -569,7 +723,7 @@ legend(['$R_{31}$', "$R'_{31}$"])</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-04-04T16:40:27Z</updated>
+      <updated>2013-04-05T12:20:24Z</updated>
     </source>
   </entry>
 
@@ -615,7 +769,7 @@ legend(['$R_{31}$', "$R'_{31}$"])</code></pre>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-04-04T16:40:09Z</updated>
+      <updated>2013-04-05T12:20:10Z</updated>
     </source>
   </entry>
 
@@ -772,7 +926,7 @@ each time a threshold is crossed.</p>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-04-04T16:40:28Z</updated>
+      <updated>2013-04-05T12:20:25Z</updated>
     </source>
   </entry>
 
@@ -857,7 +1011,7 @@ each time a threshold is crossed.</p>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-04-04T16:40:27Z</updated>
+      <updated>2013-04-05T12:20:24Z</updated>
     </source>
   </entry>
 
@@ -894,7 +1048,7 @@ each time a threshold is crossed.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-04-04T16:40:09Z</updated>
+      <updated>2013-04-05T12:20:10Z</updated>
     </source>
   </entry>
 
@@ -1018,7 +1172,7 @@ run(0, tail,  conso(head, tail, (1, 2, 3, 4)))
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-04-04T16:40:27Z</updated>
+      <updated>2013-04-05T12:20:24Z</updated>
     </source>
   </entry>
 
@@ -1116,7 +1270,7 @@ CO,WY,NE,KS,OK,NM,AZ,UT
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-04-04T16:40:27Z</updated>
+      <updated>2013-04-05T12:20:24Z</updated>
     </source>
   </entry>
 
@@ -1233,7 +1387,7 @@ CO,WY,NE,KS,OK,NM,AZ,UT
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-04-04T16:40:27Z</updated>
+      <updated>2013-04-05T12:20:24Z</updated>
     </source>
   </entry>
 
@@ -1517,7 +1671,7 @@ dimensions.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-04-04T16:40:09Z</updated>
+      <updated>2013-04-05T12:20:10Z</updated>
     </source>
   </entry>
 
@@ -1548,7 +1702,7 @@ dimensions.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-04-04T16:40:09Z</updated>
+      <updated>2013-04-05T12:20:10Z</updated>
     </source>
   </entry>
 
@@ -1640,7 +1794,7 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-04-04T16:40:27Z</updated>
+      <updated>2013-04-05T12:20:24Z</updated>
     </source>
   </entry>
 
@@ -1790,7 +1944,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-04-04T16:40:27Z</updated>
+      <updated>2013-04-05T12:20:24Z</updated>
     </source>
   </entry>
 
@@ -1946,7 +2100,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-04-04T16:40:27Z</updated>
+      <updated>2013-04-05T12:00:31Z</updated>
     </source>
   </entry>
 
@@ -2168,7 +2322,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-04-04T16:40:32Z</updated>
+      <updated>2013-04-05T12:20:30Z</updated>
     </source>
   </entry>
 
@@ -2662,7 +2816,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-04-04T16:40:32Z</updated>
+      <updated>2013-04-05T12:20:30Z</updated>
     </source>
   </entry>
 
@@ -2851,7 +3005,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site, I guess...</subtitle>
       <title>Gilbert Gede's Blog</title>
-      <updated>2013-04-04T16:40:20Z</updated>
+      <updated>2013-04-05T12:20:16Z</updated>
     </source>
   </entry>
 
@@ -4168,7 +4322,7 @@ f_durations.write('\n')
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2013-04-04T16:40:23Z</updated>
+      <updated>2013-04-05T12:20:19Z</updated>
     </source>
   </entry>
 
@@ -4313,7 +4467,7 @@ RuntimeError: maximum recursion depth exceeded in comparison
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-04-04T16:40:09Z</updated>
+      <updated>2013-04-05T12:20:10Z</updated>
     </source>
   </entry>
 
@@ -4356,7 +4510,7 @@ b. Add this line to your bash_profile.</p>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-04-04T16:40:32Z</updated>
+      <updated>2013-04-05T12:20:30Z</updated>
     </source>
   </entry>
 
@@ -4440,7 +4594,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-04-04T16:40:09Z</updated>
+      <updated>2013-04-05T12:20:10Z</updated>
     </source>
   </entry>
 
@@ -4476,7 +4630,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-04-04T16:40:09Z</updated>
+      <updated>2013-04-05T12:20:10Z</updated>
     </source>
   </entry>
 
@@ -4712,7 +4866,7 @@ Out[74]: True
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-04-04T16:40:32Z</updated>
+      <updated>2013-04-05T12:20:30Z</updated>
     </source>
   </entry>
 
@@ -4830,7 +4984,7 @@ commits are much more like my usual ones.
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-04-04T16:40:30Z</updated>
+      <updated>2013-04-05T12:20:27Z</updated>
     </source>
   </entry>
 
@@ -4863,7 +5017,7 @@ commits are much more like my usual ones.
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2013-04-04T16:40:31Z</updated>
+      <updated>2013-04-05T12:20:28Z</updated>
     </source>
   </entry>
 
@@ -5008,7 +5162,7 @@ Out[24]: 6
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-04-04T16:40:30Z</updated>
+      <updated>2013-04-05T12:20:27Z</updated>
     </source>
   </entry>
 
@@ -5127,7 +5281,7 @@ Out[24]: 6
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2013-04-04T16:40:31Z</updated>
+      <updated>2013-04-05T12:20:28Z</updated>
     </source>
   </entry>
 
@@ -5159,7 +5313,7 @@ Out[24]: 6
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-04-04T16:40:32Z</updated>
+      <updated>2013-04-05T12:20:29Z</updated>
     </source>
   </entry>
 
@@ -5303,66 +5457,7 @@ StopIteration:
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-04-04T16:40:32Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://scolobb.wordpress.com/?p=308</id>
-    <link href="http://scolobb.wordpress.com/2012/07/29/the-reflection-about-inference/" rel="alternate" type="text/html"/>
-    <title>The Reflection about Inference</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">This week I have been working both on fixing some existing code (including diagram layout) and on better understanding the code that I am going to write next. As far as the fixes are concerned, I have further polished the diagram layout code, including the addition of some pretty printing for DiagramGrid. I didn’t initially [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=308&amp;subd=scolobb&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>This week I have been working both on fixing some existing code (including <a href="https://github.com/sympy/sympy/pull/1429">diagram layout</a>) and on better understanding the code that I am going to write next.  As far as the fixes are concerned, I have further polished the diagram layout code, including the addition of some pretty printing for <tt>DiagramGrid</tt>.  I didn’t initially expect pretty printing to be useful for this class; however, it turned out that being able to quickly glance at the grid itself was very helpful in certain situations.</p>
-<p>Something which makes me very content is that I have finally submitted a fix for the sort key problem for unordered collections.  The essence of the problem is as follows.  With hash randomisation enabled, the order of <tt>Basic.args</tt> changes on every run.  On the other hand, <tt>Basic.sort_key</tt> traverses the arguments in the order in which they are stored; therefore, sort keys are dependent on the actual order of the arguments.  This has given me trouble when working on laying out diagrams, specifically, in handling groups.  The thing is that the group handling code relies on <tt>FiniteSet</tt> (this maybe isn’t the best idea, but that’s a different story, really <img alt=":-)" class="wp-smiley" src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif"/> ): groups are eventually converted to <tt>FiniteSet</tt>‘s of <tt>FiniteSet</tt>‘s.  To assure stable output, the collection of <tt>FiniteSet</tt>‘s is <em>sorted</em>.  However, due to the influence of hash randomisation on sort keys, this sorting would <em>not</em> actually produce the desired consequences.  There was a similar problem in the same block of functionality which had to do with sorting <tt>Diagram</tt>‘s; the issue there was that a <tt>Diagram</tt> stores <tt>Dict</tt>‘s which, being unordered collections, were subject to the same sort key trouble.  Pull request <a href="https://github.com/sympy/sympy/pull/1446">#1446</a> fixes all of these issues and, finally, the diagram drawing code almost always passes all of its tests.</p>
-<p>It is worth mentioning that while the fix for the sort key problem was not included in the <a href="https://github.com/sympy/sympy/pull/1429">#1429</a>, I was inclined to classify all problems as related to <tt>FiniteSet.sort_key</tt>.  With the fix in the branch, it turned out that there were some other subtle sorting issues, which I am still fixing.</p>
-<p>I have also sent pull request <a href="https://github.com/sympy/sympy/pull/1440">#1440</a> which fixes the pretty printing of morphisms and diagrams, introduced by myself in <a href="https://github.com/sympy/sympy/pull/1338">#1338</a>.  Initially, I would use short Unicode arrows for pretty printing morphisms, but Tom and I have arrived at the conclusion that these arrows look too condensed.  I have then chosen to use long Unicode arrows; it turned out however that Unicode characters which span more than one symbol are not rendered consistently across different machines.  On my computer, the longer arrow would overlap with the next character in line; on Tom’s, it would not.  Aaron has suggested building up arrows out of em dashes and black right-pointing triangles, and this seems to work better, although it still looks ugly with some fonts (e.g., the default font in <em>rxvt-unicode</em>, as reported by Tom).</p>
-<p>I have also promised to implement variable-length horizontal arrows.  I have decided to postpone this for now, however, in order to better focus on my GSoC project.  I will keep that task in mind, however, and will most probably return to it in a couple of days.</p>
-<p>As for deciding the commutativity of diagrams, I have run into an unexpected conceptual problem, arising from the fundamental difference between diagrams with conclusions and without conclusions.  Before explaining the problem, I will remind the description of these two types of constructions.  A commutative diagram is a collection of morphisms (which usually form a connected directed graph) with the property that composing all morphisms along any two paths between any two objects produces the same composite morphism.  While being quite general, in category theory it is customary to produce statements like “if there are such morphisms, there exist such morphisms, and the diagram is commutative”.  This statement is clearly an implication.  The class <tt>Diagram</tt> is a representation of the second type of statement and contains sets of premise morphisms and conclusion morphisms.  <tt>Diagram</tt> is also conventionally capable of representing simple commutativity if no conclusions are specified.</p>
-<p>While I was initially quite comfortable with using <tt>Diagram</tt> for both types of statements, I am really inclined to considering the creation of two separate classes now.  Thus I plan to rename <tt>Diagram</tt> to <tt>Implication</tt> and add a different  <tt>Diagram</tt> which will represent what I used to call “commutative diagram without conclusions”.  That is, <tt>Diagram</tt> will hold only one collection of morphisms.</p>
-<p>With this separation, it is immediately clear that, in the context of my model, the question “Is this diagram commutative?” actually incorporates two totally different questions:</p>
-<ol>
-<li>Is this <tt>Diagram</tt> commutative?</li>
-<li>Is this <tt>Implication</tt> true and commutative?</li>
-</ol>
-<p>Fortunately for me ( <img alt=":-)" class="wp-smiley" src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif"/>  ), this newly-discovered separation does not remove the possibility of answering both questions with almost the same algorithm.  I will start with question (1) to further stress the difference between the semantics of diagrams and implications.</p>
-<p>Consider a collection of <tt>Diagram</tt>‘s and <tt>Implication</tt>‘s known to be commutative.  (By saying “an <tt>Implication</tt> is commutative” I will abuse the terminology and mean “an <tt>Implication</tt> is true and commutative.”)  We need to decide whether the target <tt>Diagram</tt> is commutative.  The algorithm I will describe is based on <a href="http://en.wikipedia.org/wiki/Backward_chaining">backward chaining</a> and is therefore recursive.  A recursive step consists of two stages: the <em>commutativity</em> stage and the <em>inference</em> stage.  The goal of the commutativity stage is to decide whether the current version of the target <tt>Diagram</tt> is commutative; the goal of the inference stage is to see whether applying one of the <tt>Implication</tt>‘s will make the target <tt>Diagram</tt> commutative.</p>
-<p>The commutativity stage starts with taking every morphism of the target <tt>Diagram</tt> and putting each of them into its own commutative subdiagram.  Now, for each commutative subdiagram, the algorithm will pick a subset of morphisms and will then put the subsets together to form another subdiagram.  This subdiagram will then be compared with each of the <tt>Diagram</tt>‘s known to be commutative.  If a match is found, the subdiagram is added to the set of commutative subdiagrams.  Then, all possible “absorptions” among the diagrams are performed (i.e., if subdiagram <img alt="A" class="latex" src="http://s0.wp.com/latex.php?latex=A&amp;bg=000000&amp;fg=b8babb&amp;s=0" title="A"/> is a subdiagram of <img alt="B" class="latex" src="http://s0.wp.com/latex.php?latex=B&amp;bg=000000&amp;fg=b8babb&amp;s=0" title="B"/>, the subdiagram <img alt="A" class="latex" src="http://s0.wp.com/latex.php?latex=A&amp;bg=000000&amp;fg=b8babb&amp;s=0" title="A"/> is removed from the collection of subdiagrams (for obvious reasons)) and the iteration returns to its start, where it picks subsets of the new subdiagrams.  Since the number of morphisms in the diagram is finite, this process is finite.  If, in the end, the collection of commutative subdiagrams contains only the target diagram, it is deemed commutative.</p>
-<p>Note that this alrogithm is very similar to one of the methods of finding all prime implicants of a boolean function (we called that Blake-Poretski algorithm at the university, but I cannot find any references on my Internet).  I have considered the possibilities of directly converting the commutativity stage to a boolean function minimisation problem, but I haven’t found a sufficiently elegant way yet.</p>
-<p>The inference stage exactly follows the idea of backward chaining.  For each <tt>Implication</tt> an attempt is made to find the embedding of the premises into the target <tt>Diagram</tt>.  If such an embedding is found, the corresponding conclusions are added to a copy of the target <tt>Diagram</tt> and a recursive examination of the modified <tt>Diagram</tt> is made.  The found embedding of one of the <tt>Implication</tt>‘s plus the added conclusions are propagated down the recursion tree as commutative subdiagrams.  The commutative stages of the following recursive calls will take their commutativity for granted.</p>
-<p>If one of these recursive calls returns a positive result, this positive result is propagated up the call stack.  If neither of the recursive calls returned a positive result, or if no embedding of an <tt>Implication</tt> has been found in a certain recursive call, a negative result is returned from this recursive call.</p>
-<p>Note that it actually was the inference stage that I described in my original GSoC <a href="https://github.com/sympy/sympy/wiki/GSoC-2012-Application-Sergiu-Ivanov:-Category-Theory-Module">proposal</a>.</p>
-<p>Before showing how to answer question (2), I would like to analyse the algorithm idea I have just presented a little bit.  One can see that the commutativity and inference stages are <em>very</em> different; so different, in fact, that they are almost independent.  Therefore, these two bits of functionality will live in separate pieces of code, and will be later combined to function together.  I will start by defining two internal classes, <tt>_CommutativityStage</tt> and <tt>_InferenceStage</tt> which will host the corresponding functions.  The code that will actually combine the two will either be a global function or a class; this will be clearer later and is not important at the moment.</p>
-<p>Question (2) now: “Is the given <tt>Implication</tt> true (and commutative)?”.  In this case, one should start from the premises of the given <tt>Implication</tt> and apply the same strategy as in answering question (1).  Here, however, the terminal criterion is that the target <tt>Diagram</tt> (obtained from the premises of the original <tt>Implication</tt>) is commutative <em>and</em> contains the conclusions of the original <tt>Implication</tt>.</p>
-<p>A remark about comparing diagrams is due here: this is nothing but the <a href="http://en.wikipedia.org/wiki/Subgraph_isomorphism_problem">subgraph isomorphism problem</a>.  I have already found <a href="http://scolobb.wordpress.com/feed/software.nju.edu.cn/lingzong/papers/SGI.pdf">this paper</a> (haven’t read it yet), but I’m open to other paper suggestions in this regard <img alt=":-)" class="wp-smiley" src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif"/> </p>
-<p>EDIT: I have decided to not follow this article and instead focus on a more basic solution.  Should the need occur, I will implement this (apparently) more efficient version.</p>
-<p>It is necessary to keep in mind that, besides finding the subgraph isomporphism proper, the code will have to pay attention to morphism properties as well.</p>
-<p>Now, the most attentive readers might have already remarked that semantically splitting the class <tt>Diagram</tt> into two will impact diagram drawing.  Yet, the impact will be rather modest, since the drawing code already knows how to deal with something similar to <tt>Implication</tt>; adding explicit support for new <tt>Diagram</tt> is going to require minimal effort.</p>
-<p>In this blog post, I recognize that my initial class model was flawed in yet another place.  I try to see this is as a sign of personal progress, though <img alt=":-)" class="wp-smiley" src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif"/> </p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/scolobb.wordpress.com/308/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/scolobb.wordpress.com/308/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=scolobb.wordpress.com&amp;blog=35433045&amp;post=308&amp;subd=scolobb&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2012-07-29T19:20:53Z</updated>
-    <category term="SymPy"/>
-    <category term="backward chaining"/>
-    <category term="deciding commutativity"/>
-    <category term="diagram layout"/>
-    <category term="pretty printing"/>
-    <category term="sort key"/>
-    <category term="string representation"/>
-    <category term="subgraph isomorphism problem"/>
-    <author>
-      <name>scolobb</name>
-    </author>
-    <source>
-      <id>http://scolobb.wordpress.com</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://scolobb.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://scolobb.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://scolobb.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>Reports of quests for adventures and coadventures</subtitle>
-      <title>Coaquarium</title>
-      <updated>2013-04-04T16:40:30Z</updated>
+      <updated>2013-04-05T12:20:30Z</updated>
     </source>
   </entry>
 </feed>
