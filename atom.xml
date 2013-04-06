@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2013-04-05T13:00:40Z</updated>
+  <updated>2013-04-06T03:00:34Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,140 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry xml:lang="en">
+    <id>http://asmeurersympy.wordpress.com/?p=1282</id>
+    <link href="http://asmeurersympy.wordpress.com/2013/04/06/how-to-make-attributes-un-inheritable-in-python-using-descriptors/" rel="alternate" type="text/html"/>
+    <title>How to make attributes un-inheritable in Python using descriptors</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">For https://github.com/sympy/sympy/pull/1969, and previous work at https://github.com/sympy/sympy/pull/1901, we added the ability for the SymPy doctester to run or not run doctests conditionally depending on whether or not required external dependencies are installed. This means that for example we can doctest all the plotting examples without them failing when matplotlib is not installed. For functions, this [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1282&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" width="1"/></div>
+    </summary>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>For <a href="https://github.com/sympy/sympy/pull/1969" rel="nofollow">https://github.com/sympy/sympy/pull/1969</a>, and previous work at <a href="https://github.com/sympy/sympy/pull/1901" rel="nofollow">https://github.com/sympy/sympy/pull/1901</a>, we added the ability for the SymPy doctester to run or not run doctests conditionally depending on whether or not required external dependencies are installed. This means that for example we can doctest all the plotting examples without them failing when matplotlib is not installed. </p>
+<p>For functions, this is as easy as decorating the function with <code>@doctest_depends</code>, which adds the attribute <code>_doctest_depends_on</code> to the function with a list of what dependencies the doctest depends on. The doctest will then not run the doctest unless those dependencies are installed.</p>
+<p>For classes, this is not so easy. Ideally, one could just define <code>_doctest_depends_on</code> as an attribute of the class. However, the issue is that with classes, we have inheritance. But if class <code>A</code> has a docstring with a doctest that depends on some modules, it doesn’t mean that a subclass <code>B</code> of <code>A</code> will have a doctest that does.  </p>
+<p>Really, what we need to do is to decorate the docstring itself, not the class. Unfortunately, Python does not allow adding attributes to strings</p>
+<pre class="brush: python; title: ; notranslate">&gt;&gt;&gt; a = ""
+&gt;&gt;&gt; a.x = 1
+Traceback (most recent call last):
+  File "&lt;stdin&gt;", line 1, in &lt;module&gt;
+AttributeError: 'str' object has no attribute 'x'
+</pre>
+<p>So what we have to do is to create a attribute that doesn’t inherit.  </p>
+<p>I had for some time wanted to give <a href="http://docs.python.org/2/howto/descriptor.html">descriptors</a> in Python a try, since they are a cool feature, but also the second most complicated feature in Python (the first is metaclasses). If you don’t know what a descriptor is, I recommend reading <a href="http://python-history.blogspot.com/2010/06/inside-story-on-new-style-classes.html?m=1">this blog post</a> by Guido van Rossum, the creator of Python. It’s the best explanation of the feature there is.  </p>
+<p>Basically, Python lets attributes define what happens when they are accessed (like <code>a.x</code>).  You may already know that objects can define how their attributes are accessed via <code>__getattr__</code>. This is different. With descriptors, the <em>attributes themselves</em> define what happens.  This may sound less useful, but in fact, it’s a very core feature of the language. </p>
+<p>If you’ve ever wondered how <code>property</code>, <code>classmethod</code>, or <code>staticmethod</code> work in Python, the answer is descriptors. Basically, if you have something like</p>
+<pre class="brush: python; title: ; notranslate">class A(object):
+    def f(self):
+        return 1
+    f = property(f)
+</pre>
+<p>Then <code>A().f</code> magically calls what would normally be <code>A().f()</code>. The way it works is that <code>property</code> defines the <code>__get__</code> method, which returns <code>f(obj)</code>, where <code>obj</code> is the calling object, here <code>A()</code> (remember in Python that the first argument of a method, usually called <code>self</code> is the object that calls the method).  </p>
+<p>Descriptors can allow method to define arbitrary behavior when called, set, or deleted.  To make an attribute inaccessible to subclasses, then, you just need to define a descriptor that prevents the attribute from being accessed if the class of the calling object is not the original class.  Here is some code:</p>
+<pre class="brush: python; title: ; notranslate">class nosubclasses(object):
+    def __init__(self, f, cls):
+        self.f = f
+        self.cls = cls
+    def __get__(self, obj, type=None):
+        if type == self.cls:
+            if hasattr(self.f, '__get__'):
+                return self.f.__get__(obj, type)
+            return self.f
+        raise AttributeError
+</pre>
+<p>it works like this</p>
+<pre class="brush: python; title: ; notranslate">In [2]: class MyClass(object):
+   ...:     x = 1
+   ...:
+
+In [3]: MyClass.x = nosubclasses(MyClass.x, MyClass)
+
+In [4]: class MySubclass(MyClass):
+   ...:     pass
+   ...:
+
+In [5]: MyClass.x
+Out[5]: 1
+
+In [6]: MyClass().x
+Out[6]: 1
+
+In [80]: MySubclass.x
+---------------------------------------------------------------------------
+AttributeError                            Traceback (most recent call last)
+&lt;ipython-input-80-2b2f456dd101&gt; in &lt;module&gt;()
+----&gt; 1 MySubclass.x
+
+&lt;ipython-input-51-7fe1b5063367&gt; in __get__(self, obj, type)
+      8                 return self.f.__get__(obj, type)
+      9             return self.f
+---&gt; 10         raise AttributeError
+
+AttributeError:
+
+In [81]: MySubclass().x
+---------------------------------------------------------------------------
+AttributeError                            Traceback (most recent call last)
+&lt;ipython-input-81-93764eeb9948&gt; in &lt;module&gt;()
+----&gt; 1 MySubclass().x
+
+&lt;ipython-input-51-7fe1b5063367&gt; in __get__(self, obj, type)
+      8                 return self.f.__get__(obj, type)
+      9             return self.f
+---&gt; 10         raise AttributeError
+
+AttributeError:
+</pre>
+<p>Note that by using the third argument to <code>__get__</code>, this works regardless if the attribute is accessed from the class or the object. I have to call <code>__get__</code> on <code>self.f</code> again if it has it to ensure that the right thing happens if the attribute has other descriptor logic defined (and note that regular methods have descriptor logic defined—that’s how they convert the first argument <code>self</code> to implicitly be the calling object).</p>
+<p>One could easily make class decorator that automatically adds the attribute to the class in a non-inheritable way:</p>
+<pre class="brush: python; title: ; notranslate">def nosubclass_x(args):
+    def _wrapper(cls):
+        cls.x = nosubclasses(args, cls)
+        return cls
+    return _wrapper
+</pre>
+<p>This automatically adds the property <code>x</code> to the decorated class with the value given in the decorator, and it won’t be accessible to subclasses:</p>
+<pre class="brush: python; title: ; notranslate">In [87]: @nosubclass_x(1)
+   ....: class MyClass(object):
+   ....:     pass
+   ....:
+
+In [88]: MyClass().x
+Out[88]: 1
+
+In [89]: MySubclass().x
+---------------------------------------------------------------------------
+AttributeError                            Traceback (most recent call last)
+&lt;ipython-input-89-93764eeb9948&gt; in &lt;module&gt;()
+----&gt; 1 MySubclass().x
+
+&lt;ipython-input-51-7fe1b5063367&gt; in __get__(self, obj, type)
+      8                 return self.f.__get__(obj, type)
+      9             return self.f
+---&gt; 10         raise AttributeError
+
+AttributeError:
+</pre>
+<p>For SymPy, we can’t use class decorators because we still support Python 2.5, and they were introduced in Python 2.6. The best work around is to just call <code>Class.attribute = nosubclasses(Class.attribute, Class)</code> after the class definition. Unfortunately, you can’t access a class inside its definition like you can with functions, so this has to go at the end. </p>
+<p><strong>Name Mangling</strong></p>
+<p>After coming up with all this, I remembered that Python already has a pretty standard way to define attributes in such a way that subclasses won’t have access to them. All you have to do is use two underscores before the name, like <code>__x</code>, and it will be <a href="http://docs.python.org/2/reference/expressions.html#atom-identifiers">name mangled</a>. This means that the name will be renamed to <code>_classname__x</code> outside the class definition. The name will not be inherited by subclasses.  There are some subtleties with this, particularly for strange class names (names that are too long, or names that begin with an underscore). I <a href="http://stackoverflow.com/q/15845931/161801">asked about this on StackOverflow</a>. The best answer is that there was a function in the standard library, but it was removed in Python 3. My tests reveal that the behavior is different in CPYthon than in PyPy, so getting it right for every possible class is nontrivial. The descriptor thing should work everywhere, though.  On the other hand, <code>getattr(obj, '_' + obj.__class__.__name__ + attributename)</code> will work 99% of the time, and is much easier both to write and to understand than the descriptor. </p>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/asmeurersympy.wordpress.com/1282/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/asmeurersympy.wordpress.com/1282/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1282&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" width="1"/></div>
+    </content>
+    <updated>2013-04-06T02:49:13Z</updated>
+    <category term="Uncategorized"/>
+    <author>
+      <name>Aaron Meurer</name>
+    </author>
+    <source>
+      <id>http://asmeurersympy.wordpress.com</id>
+      <logo>http://1.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=http%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
+      <link href="http://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
+      <title>Aaron Meurer's SymPy Blog</title>
+      <updated>2013-04-06T03:00:11Z</updated>
+    </source>
+  </entry>
 
   <entry>
     <id>http://matthewrocklin.com/blog//work/2013/04/05/SymPy-Theano-part-3</id>
@@ -161,7 +295,7 @@
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-04-05T13:00:34Z</updated>
+      <updated>2013-04-06T03:00:28Z</updated>
     </source>
   </entry>
 
@@ -463,7 +597,7 @@ Operations after Theano Simplification:  17</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-04-05T13:00:33Z</updated>
+      <updated>2013-04-06T03:00:27Z</updated>
     </source>
   </entry>
 
@@ -723,7 +857,7 @@ legend(['$R_{31}$', "$R'_{31}$"])</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-04-05T13:00:33Z</updated>
+      <updated>2013-04-06T03:00:27Z</updated>
     </source>
   </entry>
 
@@ -769,7 +903,7 @@ legend(['$R_{31}$', "$R'_{31}$"])</code></pre>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-04-05T13:00:18Z</updated>
+      <updated>2013-04-06T03:00:11Z</updated>
     </source>
   </entry>
 
@@ -926,7 +1060,7 @@ each time a threshold is crossed.</p>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-04-05T13:00:34Z</updated>
+      <updated>2013-04-06T03:00:28Z</updated>
     </source>
   </entry>
 
@@ -1011,7 +1145,7 @@ each time a threshold is crossed.</p>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-04-05T13:00:34Z</updated>
+      <updated>2013-04-06T03:00:28Z</updated>
     </source>
   </entry>
 
@@ -1048,7 +1182,7 @@ each time a threshold is crossed.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-04-05T13:00:18Z</updated>
+      <updated>2013-04-06T03:00:11Z</updated>
     </source>
   </entry>
 
@@ -1172,7 +1306,7 @@ run(0, tail,  conso(head, tail, (1, 2, 3, 4)))
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-04-05T13:00:34Z</updated>
+      <updated>2013-04-06T03:00:28Z</updated>
     </source>
   </entry>
 
@@ -1270,7 +1404,7 @@ CO,WY,NE,KS,OK,NM,AZ,UT
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-04-05T13:00:34Z</updated>
+      <updated>2013-04-06T03:00:28Z</updated>
     </source>
   </entry>
 
@@ -1387,7 +1521,7 @@ CO,WY,NE,KS,OK,NM,AZ,UT
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-04-05T13:00:33Z</updated>
+      <updated>2013-04-06T03:00:27Z</updated>
     </source>
   </entry>
 
@@ -1671,7 +1805,7 @@ dimensions.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-04-05T13:00:18Z</updated>
+      <updated>2013-04-06T03:00:11Z</updated>
     </source>
   </entry>
 
@@ -1702,7 +1836,7 @@ dimensions.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-04-05T13:00:18Z</updated>
+      <updated>2013-04-06T03:00:11Z</updated>
     </source>
   </entry>
 
@@ -1794,7 +1928,7 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-04-05T13:00:33Z</updated>
+      <updated>2013-04-06T03:00:28Z</updated>
     </source>
   </entry>
 
@@ -1944,7 +2078,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-04-05T13:00:34Z</updated>
+      <updated>2013-04-06T03:00:28Z</updated>
     </source>
   </entry>
 
@@ -2322,7 +2456,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-04-05T13:00:39Z</updated>
+      <updated>2013-04-06T03:00:34Z</updated>
     </source>
   </entry>
 
@@ -2816,7 +2950,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-04-05T13:00:39Z</updated>
+      <updated>2013-04-06T03:00:33Z</updated>
     </source>
   </entry>
 
@@ -3005,7 +3139,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site, I guess...</subtitle>
       <title>Gilbert Gede's Blog</title>
-      <updated>2013-04-05T13:00:27Z</updated>
+      <updated>2013-04-06T03:00:21Z</updated>
     </source>
   </entry>
 
@@ -4322,7 +4456,7 @@ f_durations.write('\n')
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2013-04-05T13:00:30Z</updated>
+      <updated>2013-04-06T03:00:24Z</updated>
     </source>
   </entry>
 
@@ -4467,7 +4601,7 @@ RuntimeError: maximum recursion depth exceeded in comparison
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-04-05T13:00:18Z</updated>
+      <updated>2013-04-06T03:00:11Z</updated>
     </source>
   </entry>
 
@@ -4510,7 +4644,7 @@ b. Add this line to your bash_profile.</p>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-04-05T13:00:39Z</updated>
+      <updated>2013-04-06T03:00:33Z</updated>
     </source>
   </entry>
 
@@ -4594,7 +4728,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-04-05T13:00:18Z</updated>
+      <updated>2013-04-06T03:00:11Z</updated>
     </source>
   </entry>
 
@@ -4630,7 +4764,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-04-05T13:00:18Z</updated>
+      <updated>2013-04-06T03:00:11Z</updated>
     </source>
   </entry>
 
@@ -4866,7 +5000,7 @@ Out[74]: True
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-04-05T13:00:39Z</updated>
+      <updated>2013-04-06T03:00:33Z</updated>
     </source>
   </entry>
 
@@ -4984,7 +5118,7 @@ commits are much more like my usual ones.
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-04-05T13:00:37Z</updated>
+      <updated>2013-04-06T03:00:31Z</updated>
     </source>
   </entry>
 
@@ -5017,7 +5151,7 @@ commits are much more like my usual ones.
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2013-04-05T13:00:38Z</updated>
+      <updated>2013-04-06T03:00:32Z</updated>
     </source>
   </entry>
 
@@ -5162,7 +5296,7 @@ Out[24]: 6
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-04-05T13:00:37Z</updated>
+      <updated>2013-04-06T03:00:31Z</updated>
     </source>
   </entry>
 
@@ -5281,7 +5415,7 @@ Out[24]: 6
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2013-04-05T13:00:37Z</updated>
+      <updated>2013-04-06T03:00:32Z</updated>
     </source>
   </entry>
 
@@ -5313,7 +5447,7 @@ Out[24]: 6
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-04-05T13:00:39Z</updated>
+      <updated>2013-04-06T03:00:33Z</updated>
     </source>
   </entry>
 
@@ -5425,39 +5559,6 @@ StopIteration:
       <subtitle>A. Makelov</subtitle>
       <title>Not really blogging » Google Summer of Code 2012</title>
       <updated>2013-02-12T06:40:44Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://rhoforsympy.wordpress.com/?p=222</id>
-    <link href="http://rhoforsympy.wordpress.com/2012/07/30/week-10-finishing-up-density-matrices/" rel="alternate" type="text/html"/>
-    <title>Week 10: Finishing up density matrices!</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">This week I largely wrapped up most of the items I had listed in the proposal. The current pending PR addresses and completes most of the major features I had proposed to implement. Some minor issues that are still pending should be addressed during the next week. 1. Adjust qapply() to complete some density based [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;blog=34650270&amp;post=222&amp;subd=rhoforsympy&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>This week I largely wrapped up most of the items I had listed in the proposal. The current pending PR addresses and completes most of the major features I had proposed to implement. Some minor issues that are still pending should be addressed during the next week.</p>
-<p>1. Adjust qapply() to complete some density based operations more gracefully.</p>
-<p>2. Relocate the trace.py modules from core to another suggested folder. There have been some discussions on this on the mailing thread, which I plan to re-initiate and get a closure on this week.</p>
-<p>Apart from these 2 items, based on some IRC discussions I had with Brian during past week, I have started looking at following 2 items. My plan is to work on the following 2 items during this month.</p>
-<p>1. Finish up implementation of Shor’s algorithm currently available here: <a href="https://github.com/addisonc/sympy/blob/addison-main/sympy/physics/quantum/shor.py">git</a></p>
-<p>2.  Implement the fidelity and trace distances for density matrices: <a href="http://en.wikipedia.org/wiki/Fidelity_of_quantum_states">Ref</a></p>
-<div>Happy Coding!</div>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/rhoforsympy.wordpress.com/222/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/rhoforsympy.wordpress.com/222/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;blog=34650270&amp;post=222&amp;subd=rhoforsympy&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2012-07-30T04:03:39Z</updated>
-    <category term="GSoc"/>
-    <author>
-      <name>grdvnl</name>
-    </author>
-    <source>
-      <id>http://rhoforsympy.wordpress.com</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://rhoforsympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://rhoforsympy.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://rhoforsympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>..where we discuss density operators wrt SymPy</subtitle>
-      <title>rhoforsympy</title>
-      <updated>2013-04-05T13:00:39Z</updated>
     </source>
   </entry>
 </feed>

@@ -13,6 +13,7 @@
 
 	<items>
 		<rdf:Seq>
+			<rdf:li rdf:resource="http://asmeurersympy.wordpress.com/?p=1282" />
 			<rdf:li rdf:resource="http://matthewrocklin.com/blog//work/2013/04/05/SymPy-Theano-part-3" />
 			<rdf:li rdf:resource="tag:fseoane.net/blog,2013-03-30:2013/householder-matrices/" />
 			<rdf:li rdf:resource="http://matthewrocklin.com/blog//work/2013/03/28/SymPy-Theano-part-2" />
@@ -72,11 +73,125 @@
 			<rdf:li rdf:resource="http://rhoforsympy.wordpress.com/?p=235" />
 			<rdf:li rdf:resource="http://krastanov.wordpress.com/?p=551" />
 			<rdf:li rdf:resource="http://amakelov.wordpress.com/?p=429" />
-			<rdf:li rdf:resource="http://rhoforsympy.wordpress.com/?p=222" />
 		</rdf:Seq>
 	</items>
 </channel>
 
+<item rdf:about="http://asmeurersympy.wordpress.com/?p=1282">
+	<title>Aaron Meurer: How to make attributes un-inheritable in Python using descriptors</title>
+	<link>http://asmeurersympy.wordpress.com/2013/04/06/how-to-make-attributes-un-inheritable-in-python-using-descriptors/</link>
+	<content:encoded>&lt;p&gt;For &lt;a href=&quot;https://github.com/sympy/sympy/pull/1969&quot; rel=&quot;nofollow&quot;&gt;https://github.com/sympy/sympy/pull/1969&lt;/a&gt;, and previous work at &lt;a href=&quot;https://github.com/sympy/sympy/pull/1901&quot; rel=&quot;nofollow&quot;&gt;https://github.com/sympy/sympy/pull/1901&lt;/a&gt;, we added the ability for the SymPy doctester to run or not run doctests conditionally depending on whether or not required external dependencies are installed. This means that for example we can doctest all the plotting examples without them failing when matplotlib is not installed. &lt;/p&gt;
+&lt;p&gt;For functions, this is as easy as decorating the function with &lt;code&gt;@doctest_depends&lt;/code&gt;, which adds the attribute &lt;code&gt;_doctest_depends_on&lt;/code&gt; to the function with a list of what dependencies the doctest depends on. The doctest will then not run the doctest unless those dependencies are installed.&lt;/p&gt;
+&lt;p&gt;For classes, this is not so easy. Ideally, one could just define &lt;code&gt;_doctest_depends_on&lt;/code&gt; as an attribute of the class. However, the issue is that with classes, we have inheritance. But if class &lt;code&gt;A&lt;/code&gt; has a docstring with a doctest that depends on some modules, it doesn’t mean that a subclass &lt;code&gt;B&lt;/code&gt; of &lt;code&gt;A&lt;/code&gt; will have a doctest that does.  &lt;/p&gt;
+&lt;p&gt;Really, what we need to do is to decorate the docstring itself, not the class. Unfortunately, Python does not allow adding attributes to strings&lt;/p&gt;
+&lt;pre class=&quot;brush: python; title: ; notranslate&quot;&gt;&amp;gt;&amp;gt;&amp;gt; a = &quot;&quot;
+&amp;gt;&amp;gt;&amp;gt; a.x = 1
+Traceback (most recent call last):
+  File &quot;&amp;lt;stdin&amp;gt;&quot;, line 1, in &amp;lt;module&amp;gt;
+AttributeError: 'str' object has no attribute 'x'
+&lt;/pre&gt;
+&lt;p&gt;So what we have to do is to create a attribute that doesn’t inherit.  &lt;/p&gt;
+&lt;p&gt;I had for some time wanted to give &lt;a href=&quot;http://docs.python.org/2/howto/descriptor.html&quot;&gt;descriptors&lt;/a&gt; in Python a try, since they are a cool feature, but also the second most complicated feature in Python (the first is metaclasses). If you don’t know what a descriptor is, I recommend reading &lt;a href=&quot;http://python-history.blogspot.com/2010/06/inside-story-on-new-style-classes.html?m=1&quot;&gt;this blog post&lt;/a&gt; by Guido van Rossum, the creator of Python. It’s the best explanation of the feature there is.  &lt;/p&gt;
+&lt;p&gt;Basically, Python lets attributes define what happens when they are accessed (like &lt;code&gt;a.x&lt;/code&gt;).  You may already know that objects can define how their attributes are accessed via &lt;code&gt;__getattr__&lt;/code&gt;. This is different. With descriptors, the &lt;em&gt;attributes themselves&lt;/em&gt; define what happens.  This may sound less useful, but in fact, it’s a very core feature of the language. &lt;/p&gt;
+&lt;p&gt;If you’ve ever wondered how &lt;code&gt;property&lt;/code&gt;, &lt;code&gt;classmethod&lt;/code&gt;, or &lt;code&gt;staticmethod&lt;/code&gt; work in Python, the answer is descriptors. Basically, if you have something like&lt;/p&gt;
+&lt;pre class=&quot;brush: python; title: ; notranslate&quot;&gt;class A(object):
+    def f(self):
+        return 1
+    f = property(f)
+&lt;/pre&gt;
+&lt;p&gt;Then &lt;code&gt;A().f&lt;/code&gt; magically calls what would normally be &lt;code&gt;A().f()&lt;/code&gt;. The way it works is that &lt;code&gt;property&lt;/code&gt; defines the &lt;code&gt;__get__&lt;/code&gt; method, which returns &lt;code&gt;f(obj)&lt;/code&gt;, where &lt;code&gt;obj&lt;/code&gt; is the calling object, here &lt;code&gt;A()&lt;/code&gt; (remember in Python that the first argument of a method, usually called &lt;code&gt;self&lt;/code&gt; is the object that calls the method).  &lt;/p&gt;
+&lt;p&gt;Descriptors can allow method to define arbitrary behavior when called, set, or deleted.  To make an attribute inaccessible to subclasses, then, you just need to define a descriptor that prevents the attribute from being accessed if the class of the calling object is not the original class.  Here is some code:&lt;/p&gt;
+&lt;pre class=&quot;brush: python; title: ; notranslate&quot;&gt;class nosubclasses(object):
+    def __init__(self, f, cls):
+        self.f = f
+        self.cls = cls
+    def __get__(self, obj, type=None):
+        if type == self.cls:
+            if hasattr(self.f, '__get__'):
+                return self.f.__get__(obj, type)
+            return self.f
+        raise AttributeError
+&lt;/pre&gt;
+&lt;p&gt;it works like this&lt;/p&gt;
+&lt;pre class=&quot;brush: python; title: ; notranslate&quot;&gt;In [2]: class MyClass(object):
+   ...:     x = 1
+   ...:
+
+In [3]: MyClass.x = nosubclasses(MyClass.x, MyClass)
+
+In [4]: class MySubclass(MyClass):
+   ...:     pass
+   ...:
+
+In [5]: MyClass.x
+Out[5]: 1
+
+In [6]: MyClass().x
+Out[6]: 1
+
+In [80]: MySubclass.x
+---------------------------------------------------------------------------
+AttributeError                            Traceback (most recent call last)
+&amp;lt;ipython-input-80-2b2f456dd101&amp;gt; in &amp;lt;module&amp;gt;()
+----&amp;gt; 1 MySubclass.x
+
+&amp;lt;ipython-input-51-7fe1b5063367&amp;gt; in __get__(self, obj, type)
+      8                 return self.f.__get__(obj, type)
+      9             return self.f
+---&amp;gt; 10         raise AttributeError
+
+AttributeError:
+
+In [81]: MySubclass().x
+---------------------------------------------------------------------------
+AttributeError                            Traceback (most recent call last)
+&amp;lt;ipython-input-81-93764eeb9948&amp;gt; in &amp;lt;module&amp;gt;()
+----&amp;gt; 1 MySubclass().x
+
+&amp;lt;ipython-input-51-7fe1b5063367&amp;gt; in __get__(self, obj, type)
+      8                 return self.f.__get__(obj, type)
+      9             return self.f
+---&amp;gt; 10         raise AttributeError
+
+AttributeError:
+&lt;/pre&gt;
+&lt;p&gt;Note that by using the third argument to &lt;code&gt;__get__&lt;/code&gt;, this works regardless if the attribute is accessed from the class or the object. I have to call &lt;code&gt;__get__&lt;/code&gt; on &lt;code&gt;self.f&lt;/code&gt; again if it has it to ensure that the right thing happens if the attribute has other descriptor logic defined (and note that regular methods have descriptor logic defined—that’s how they convert the first argument &lt;code&gt;self&lt;/code&gt; to implicitly be the calling object).&lt;/p&gt;
+&lt;p&gt;One could easily make class decorator that automatically adds the attribute to the class in a non-inheritable way:&lt;/p&gt;
+&lt;pre class=&quot;brush: python; title: ; notranslate&quot;&gt;def nosubclass_x(args):
+    def _wrapper(cls):
+        cls.x = nosubclasses(args, cls)
+        return cls
+    return _wrapper
+&lt;/pre&gt;
+&lt;p&gt;This automatically adds the property &lt;code&gt;x&lt;/code&gt; to the decorated class with the value given in the decorator, and it won’t be accessible to subclasses:&lt;/p&gt;
+&lt;pre class=&quot;brush: python; title: ; notranslate&quot;&gt;In [87]: @nosubclass_x(1)
+   ....: class MyClass(object):
+   ....:     pass
+   ....:
+
+In [88]: MyClass().x
+Out[88]: 1
+
+In [89]: MySubclass().x
+---------------------------------------------------------------------------
+AttributeError                            Traceback (most recent call last)
+&amp;lt;ipython-input-89-93764eeb9948&amp;gt; in &amp;lt;module&amp;gt;()
+----&amp;gt; 1 MySubclass().x
+
+&amp;lt;ipython-input-51-7fe1b5063367&amp;gt; in __get__(self, obj, type)
+      8                 return self.f.__get__(obj, type)
+      9             return self.f
+---&amp;gt; 10         raise AttributeError
+
+AttributeError:
+&lt;/pre&gt;
+&lt;p&gt;For SymPy, we can’t use class decorators because we still support Python 2.5, and they were introduced in Python 2.6. The best work around is to just call &lt;code&gt;Class.attribute = nosubclasses(Class.attribute, Class)&lt;/code&gt; after the class definition. Unfortunately, you can’t access a class inside its definition like you can with functions, so this has to go at the end. &lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Name Mangling&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;After coming up with all this, I remembered that Python already has a pretty standard way to define attributes in such a way that subclasses won’t have access to them. All you have to do is use two underscores before the name, like &lt;code&gt;__x&lt;/code&gt;, and it will be &lt;a href=&quot;http://docs.python.org/2/reference/expressions.html#atom-identifiers&quot;&gt;name mangled&lt;/a&gt;. This means that the name will be renamed to &lt;code&gt;_classname__x&lt;/code&gt; outside the class definition. The name will not be inherited by subclasses.  There are some subtleties with this, particularly for strange class names (names that are too long, or names that begin with an underscore). I &lt;a href=&quot;http://stackoverflow.com/q/15845931/161801&quot;&gt;asked about this on StackOverflow&lt;/a&gt;. The best answer is that there was a function in the standard library, but it was removed in Python 3. My tests reveal that the behavior is different in CPYthon than in PyPy, so getting it right for every possible class is nontrivial. The descriptor thing should work everywhere, though.  On the other hand, &lt;code&gt;getattr(obj, '_' + obj.__class__.__name__ + attributename)&lt;/code&gt; will work 99% of the time, and is much easier both to write and to understand than the descriptor. &lt;/p&gt;
+&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/asmeurersympy.wordpress.com/1282/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/asmeurersympy.wordpress.com/1282/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;amp;blog=7467151&amp;amp;post=1282&amp;amp;subd=asmeurersympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
+	<dc:date>2013-04-06T02:49:13+00:00</dc:date>
+	<dc:creator>Aaron Meurer</dc:creator>
+</item>
 <item rdf:about="http://matthewrocklin.com/blog//work/2013/04/05/SymPy-Theano-part-3">
 	<title>MRocklin: SymPy and Theano -- Matrix Expressions</title>
 	<link>http://matthewrocklin.com/blog//work/2013/04/05/SymPy-Theano-part-3</link>
@@ -4484,20 +4599,6 @@ StopIteration:
 &lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/amakelov.wordpress.com/429/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/amakelov.wordpress.com/429/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;amp;blog=35896871&amp;amp;post=429&amp;amp;subd=amakelov&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
 	<dc:date>2012-07-30T13:46:30+00:00</dc:date>
 	<dc:creator>Александър Макелов</dc:creator>
-</item>
-<item rdf:about="http://rhoforsympy.wordpress.com/?p=222">
-	<title>Guru Devanla: Week 10: Finishing up density matrices!</title>
-	<link>http://rhoforsympy.wordpress.com/2012/07/30/week-10-finishing-up-density-matrices/</link>
-	<content:encoded>&lt;p&gt;This week I largely wrapped up most of the items I had listed in the proposal. The current pending PR addresses and completes most of the major features I had proposed to implement. Some minor issues that are still pending should be addressed during the next week.&lt;/p&gt;
-&lt;p&gt;1. Adjust qapply() to complete some density based operations more gracefully.&lt;/p&gt;
-&lt;p&gt;2. Relocate the trace.py modules from core to another suggested folder. There have been some discussions on this on the mailing thread, which I plan to re-initiate and get a closure on this week.&lt;/p&gt;
-&lt;p&gt;Apart from these 2 items, based on some IRC discussions I had with Brian during past week, I have started looking at following 2 items. My plan is to work on the following 2 items during this month.&lt;/p&gt;
-&lt;p&gt;1. Finish up implementation of Shor’s algorithm currently available here: &lt;a href=&quot;https://github.com/addisonc/sympy/blob/addison-main/sympy/physics/quantum/shor.py&quot;&gt;git&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;2.  Implement the fidelity and trace distances for density matrices: &lt;a href=&quot;http://en.wikipedia.org/wiki/Fidelity_of_quantum_states&quot;&gt;Ref&lt;/a&gt;&lt;/p&gt;
-&lt;div&gt;Happy Coding!&lt;/div&gt;
-&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/rhoforsympy.wordpress.com/222/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/rhoforsympy.wordpress.com/222/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;amp;blog=34650270&amp;amp;post=222&amp;amp;subd=rhoforsympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
-	<dc:date>2012-07-30T04:03:39+00:00</dc:date>
-	<dc:creator>grdvnl</dc:creator>
 </item>
 
 </rdf:RDF>
