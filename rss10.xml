@@ -13,6 +13,7 @@
 
 	<items>
 		<rdf:Seq>
+			<rdf:li rdf:resource="tag:blogger.com,1999:blog-2520472460430880330.post-2941331733095011125" />
 			<rdf:li rdf:resource="http://asmeurersympy.wordpress.com/?p=1282" />
 			<rdf:li rdf:resource="http://matthewrocklin.com/blog//work/2013/04/05/SymPy-Theano-part-3" />
 			<rdf:li rdf:resource="tag:fseoane.net/blog,2013-03-30:2013/householder-matrices/" />
@@ -72,11 +73,17 @@
 			<rdf:li rdf:resource="http://angadhsympy.wordpress.com/2012/08/04/gsoc-blog-post-58/" />
 			<rdf:li rdf:resource="http://rhoforsympy.wordpress.com/?p=235" />
 			<rdf:li rdf:resource="http://krastanov.wordpress.com/?p=551" />
-			<rdf:li rdf:resource="http://amakelov.wordpress.com/?p=429" />
 		</rdf:Seq>
 	</items>
 </channel>
 
+<item rdf:about="tag:blogger.com,1999:blog-2520472460430880330.post-2941331733095011125">
+	<title>Official SymPy blog: Google Summer of Code 2013</title>
+	<link>http://sympy.blogspot.com/2013/04/google-summer-of-code-2013.html</link>
+	<content:encoded>SymPy was accepted by Google once again to participate in Google Summer of Code for 2013. Please go to &lt;a href=&quot;http://www.google-melange.com/gsoc/org/google/gsoc2013/sympy&quot;&gt;http://www.google-melange.com/gsoc/org/google/gsoc2013/sympy&lt;/a&gt; for more information about how to apply and get started.</content:encoded>
+	<dc:date>2013-04-08T23:04:34+00:00</dc:date>
+	<dc:creator>Aaron Meurer</dc:creator>
+</item>
 <item rdf:about="http://asmeurersympy.wordpress.com/?p=1282">
 	<title>Aaron Meurer: How to make attributes un-inheritable in Python using descriptors</title>
 	<link>http://asmeurersympy.wordpress.com/2013/04/06/how-to-make-attributes-un-inheritable-in-python-using-descriptors/</link>
@@ -4548,57 +4555,6 @@ Out[24]: 6
 &lt;br /&gt;  &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=blog.krastanov.org&amp;amp;blog=15251174&amp;amp;post=551&amp;amp;subd=krastanov&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
 	<dc:date>2012-08-01T22:59:47+00:00</dc:date>
 	<dc:creator>Stefan Krastanov</dc:creator>
-</item>
-<item rdf:about="http://amakelov.wordpress.com/?p=429">
-	<title>Aleksandar Makelov: Google Summer of Code 2012: Week 10</title>
-	<link>http://amakelov.wordpress.com/2012/07/30/google-summer-of-code-2012-week-10/</link>
-	<content:encoded>&lt;p&gt;Hi all,&lt;/p&gt;
-&lt;p&gt;here’s a brief summary of what I’ve been doing during the 10th week of my GSoC.&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Though I fixed a bug in the SUBGROUPSEARCH function during the week, I ran some more comprehensive tests as I had planned to, and some of them broke the function. If you’re particularly interested, something like that will work:&lt;br /&gt;
-&lt;pre class=&quot;brush: python; wrap-lines: false;&quot;&gt;In [87]: S = SymmetricGroup(5)
-In [88]: prop_fix_3 = lambda x: x(3) == 3
-In [89]: %autoreload
-In [90]: S.subgroup_search(prop_fix_3)
----------------------------------------------------------------------------
-StopIteration                             Traceback (most recent call last)
-&amp;lt;ipython-input-90-6b85aa1285b8&amp;gt; in &amp;lt;module&amp;gt;()
-----&amp;gt; 1 S.subgroup_search(prop_fix_3)
-
-/home/alexander/workspace/sympy/sympy/combinatorics/perm_groups.py in subgroup_search(self, prop, base, strong_gens, tests, init_subgroup)
-2660
-2661                 # this function maintains a partial BSGS structure up to position l
--&amp;gt; 2662                 _insert_point_in_base(res, res_base, res_strong_gens, l, new_point, distr_gens=res_distr_gens, basic_orbits=res_basic_orbits, transversals=res_transversals)
-2663                 # find the l+1-th basic stabilizer
-2664                 new_stab = PermutationGroup(res_distr_gens[l + 1])
-
-/home/alexander/workspace/sympy/sympy/combinatorics/util.py in _insert_point_in_base(group, base, strong_gens, pos, point, distr_gens, basic_orbits, transversals)
-423     # baseswap with the partial BSGS structures. Notice that we need only
-424     # the orbit and transversal of the new point under the last stabilizer
---&amp;gt; 425     new_base, new_strong_gens = group.baseswap(partial_base, strong_gens, pos, randomized=False, transversals=partial_transversals, basic_orbits=partial_basic_orbits, distr_gens=partial_distr_gens)
-426     # amend the basic orbits and transversals
-427     stab_pos = PermutationGroup(distr_gens[pos])
-
-/home/alexander/workspace/sympy/sympy/combinatorics/perm_groups.py in baseswap(self, base, strong_gens, pos, randomized, transversals, basic_orbits, distr_gens)
-2472             # ruling out member of the basic orbit of base[pos] along the way
-2473             while len(current_group.orbit(base[pos])) != size:
--&amp;gt; 2474                 gamma = iter(Gamma).next()
-2475                 x = transversals[pos][gamma]
-2476                 x_inverse = ~x
-
-StopIteration:
-
-&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;
-&lt;p&gt;The reason is certainly the change of base performed on line 11 in the pseudocode (this is also indicated in my code on my local week6 branch &lt;a href=&quot;https://github.com/amakelov/sympy/tree/week6&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt; ). The use of the function BASESWAP there is what gets us into trouble. It is meant to be applied to  base and a strong generating set relative to it, switch two consecutive base points and change the generating set accordinly.  However, in subgroup_search the goal is to change a base &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%28b_1%2C+b_2%2C+%5Cldots%2C+b_l%2C+%5Cldots%2C+b_k%29&amp;amp;bg=ffffff&amp;amp;fg=4b5d67&amp;amp;s=0&quot; alt=&quot;(b_1, b_2, \ldots, b_l, \ldots, b_k)&quot; class=&quot;latex&quot; title=&quot;(b_1, b_2, \ldots, b_l, \ldots, b_k)&quot; /&gt; to &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%28b_1%2C+b_2%2C+%5Cldots%2C+b_l%27%2C+%5Cldots%2C+b_k%29&amp;amp;bg=ffffff&amp;amp;fg=4b5d67&amp;amp;s=0&quot; alt=&quot;(b_1, b_2, \ldots, b_l', \ldots, b_k)&quot; class=&quot;latex&quot; title=&quot;(b_1, b_2, \ldots, b_l', \ldots, b_k)&quot; /&gt; where &lt;img src=&quot;http://s0.wp.com/latex.php?latex=b_l%27&amp;amp;bg=ffffff&amp;amp;fg=4b5d67&amp;amp;s=0&quot; alt=&quot;b_l'&quot; class=&quot;latex&quot; title=&quot;b_l'&quot; /&gt; is a new point. The book ([1]) mentions that this is done by using BASESWAP but doesn’t provide any details. My strategy is the following: I cut the base so that it becomes &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%28b_1%2C+b_2%2C%5Cldots%2C+b_l%29&amp;amp;bg=ffffff&amp;amp;fg=4b5d67&amp;amp;s=0&quot; alt=&quot;(b_1, b_2,\ldots, b_l)&quot; class=&quot;latex&quot; title=&quot;(b_1, b_2,\ldots, b_l)&quot; /&gt; and cut the correponding data structures – the strong generators &lt;strong&gt;strong_gens&lt;/strong&gt;, the &lt;strong&gt;basic_orbits, &lt;/strong&gt; the &lt;strong&gt;transversals&lt;/strong&gt;, and the strong generators distributed according to membership in basic stabilizers &lt;strong&gt;distr_gens &lt;/strong&gt;(I know, I still have to rename this to strong_gens_distr). Then I append the point &lt;img src=&quot;http://s0.wp.com/latex.php?latex=b_l%27&amp;amp;bg=ffffff&amp;amp;fg=4b5d67&amp;amp;s=0&quot; alt=&quot;b_l'&quot; class=&quot;latex&quot; title=&quot;b_l'&quot; /&gt; so that the base is &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%28b_1%2C+b_2%2C+%5Cldots%2C+b_l%2C+b_l%27%29&amp;amp;bg=ffffff&amp;amp;fg=4b5d67&amp;amp;s=0&quot; alt=&quot;(b_1, b_2, \ldots, b_l, b_l')&quot; class=&quot;latex&quot; title=&quot;(b_1, b_2, \ldots, b_l, b_l')&quot; /&gt; and calculate an orbit and transversal for $b_l’$ under the stabilzier of &lt;img src=&quot;http://s0.wp.com/latex.php?latex=b_1%2C+b_2%2C+%5Cldots%2C+b_l&amp;amp;bg=ffffff&amp;amp;fg=4b5d67&amp;amp;s=0&quot; alt=&quot;b_1, b_2, \ldots, b_l&quot; class=&quot;latex&quot; title=&quot;b_1, b_2, \ldots, b_l&quot; /&gt;. Finally I apply BASESWAP to this new base in order to switch the two rightmost points. Then I go back to &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%28b_1%2C+b_2%2C+%5Cldots%2C+b_l%27%2C+%5Cldots%2C+b_k%29&amp;amp;bg=ffffff&amp;amp;fg=4b5d67&amp;amp;s=0&quot; alt=&quot;(b_1, b_2, \ldots, b_l', \ldots, b_k)&quot; class=&quot;latex&quot; title=&quot;(b_1, b_2, \ldots, b_l', \ldots, b_k)&quot; /&gt; by appending what I had cut in the start and calculating a transversal/orbit for &lt;img src=&quot;http://s0.wp.com/latex.php?latex=b_%7Bl%2B1%7D&amp;amp;bg=ffffff&amp;amp;fg=4b5d67&amp;amp;s=0&quot; alt=&quot;b_{l+1}&quot; class=&quot;latex&quot; title=&quot;b_{l+1}&quot; /&gt; under the stabilizer just found, that of &lt;img src=&quot;http://s0.wp.com/latex.php?latex=b_1%2C+%5Cldots%2C+b_l%27&amp;amp;bg=ffffff&amp;amp;fg=4b5d67&amp;amp;s=0&quot; alt=&quot;b_1, \ldots, b_l'&quot; class=&quot;latex&quot; title=&quot;b_1, \ldots, b_l'&quot; /&gt;. Obviously, the resulting BSGS structures are valid only up to position &lt;img src=&quot;http://s0.wp.com/latex.php?latex=l&amp;amp;bg=ffffff&amp;amp;fg=4b5d67&amp;amp;s=0&quot; alt=&quot;l&quot; class=&quot;latex&quot; title=&quot;l&quot; /&gt;, and that’s all the information we can acquire without another application of baseswap or finding another stabilizer ( and in general, finding a stabilizer is a computationally hard task relative to calculating orbits/transversals). The entire purpose of this use of BASESWAP in SUBGROUPSEARCH is to obtain generators for the stabilizer of &lt;img src=&quot;http://s0.wp.com/latex.php?latex=b_1%2C+b_2%2C+%5Cldots%2C+b_l%27&amp;amp;bg=ffffff&amp;amp;fg=4b5d67&amp;amp;s=0&quot; alt=&quot;b_1, b_2, \ldots, b_l'&quot; class=&quot;latex&quot; title=&quot;b_1, b_2, \ldots, b_l'&quot; /&gt; and maintain a base/strong generating set that are valid up to a certain position. There are many such base changes performed on the same base throughout the course of the function and something goes wrong along the way. I still have to figure out why and where.&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;The good news&lt;/strong&gt;: There is a straightforward alternative to using BASESWAP: maintain a list of generators for each of the basic stabilizers in &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%28b_1%2C+b_2%2C+%5Cldots%2C+b_k%29&amp;amp;bg=ffffff&amp;amp;fg=4b5d67&amp;amp;s=0&quot; alt=&quot;(b_1, b_2, \ldots, b_k)&quot; class=&quot;latex&quot; title=&quot;(b_1, b_2, \ldots, b_k)&quot; /&gt; and change it accordingly as the base is changed, using the function stabilizer() in sympy/combinatorics/perm_groups.py. For each base change we have to calculate one more stabilizer, so that’s not terrible. It is also sort of suggested in &lt;a href=&quot;http://www.google.com/url?sa=t&amp;amp;rct=j&amp;amp;q=&amp;amp;esrc=s&amp;amp;source=web&amp;amp;cd=1&amp;amp;ved=0CFIQFjAA&amp;amp;url=http%3A%2F%2Fwww.math.colostate.edu%2F~hulpke%2FCGT%2Fcgtnotes.pdf&amp;amp;ei=u48WUN24M4jf4QS2q4GgBg&amp;amp;usg=AFQjCNHasgOmBkx2AetpE0_-92TFjSyU3A&quot; target=&quot;_blank&quot;&gt;“Notes on Computational Group Theory”&lt;/a&gt; by Alexander Hulpke (page 34). The problem with this approach is that stabilizer() tends to return a group with many generators, and repeated applications keep increasing this number. However, using this &lt;strong&gt;removed the bug from SUBGROUPSEARCH. &lt;/strong&gt;As before, more comprehensive tests are on the way : )&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Yet another alternative : &lt;/strong&gt;we can use the incremental Schreier-Sims algorithm with the new base &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%28b_1%2C+%5Cldots%2C+b_l%27%2C+%5Cldots%2C+b_k%29&amp;amp;bg=ffffff&amp;amp;fg=4b5d67&amp;amp;s=0&quot; alt=&quot;(b_1, \ldots, b_l', \ldots, b_k)&quot; class=&quot;latex&quot; title=&quot;(b_1, \ldots, b_l', \ldots, b_k)&quot; /&gt; and the strong generating set for &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%28b_1%2C+%5Cldots%2C+b_l%2C+%5Cldots%2C+b_k%29&amp;amp;bg=ffffff&amp;amp;fg=4b5d67&amp;amp;s=0&quot; alt=&quot;(b_1, \ldots, b_l, \ldots, b_k)&quot; class=&quot;latex&quot; title=&quot;(b_1, \ldots, b_l, \ldots, b_k)&quot; /&gt;. There will likely be redundant generators after that, and it will probably involve more computation than finding a single stabilizer. However, in the long run (since there are many base changes performed) this might perform faster (due to the increasing number of generators that stabilizer() tends to create). I have not tried that approach yet.&lt;/li&gt;
-&lt;li&gt;Other than that, I had &lt;a href=&quot;https://github.com/sympy/sympy/pull/1406&quot; target=&quot;_blank&quot;&gt;my latest major pull request&lt;/a&gt; merged! Thanks a lot to &lt;a href=&quot;https://github.com/Krastanov&quot; target=&quot;_blank&quot;&gt;Stefan&lt;/a&gt; and my mentor &lt;a href=&quot;https://github.com/wdjoyner&quot; target=&quot;_blank&quot;&gt;David&lt;/a&gt; for the review! That was the largest one so far…&lt;/li&gt;
-&lt;li&gt;I started reading about some of the applications of subgroup search; subgroup intersection seems to be the easiest to implement, so I’ll probably go for it first.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;That’s it for now : )&lt;/p&gt;
-&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/amakelov.wordpress.com/429/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/amakelov.wordpress.com/429/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=amakelov.wordpress.com&amp;amp;blog=35896871&amp;amp;post=429&amp;amp;subd=amakelov&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
-	<dc:date>2012-07-30T13:46:30+00:00</dc:date>
-	<dc:creator>Александър Макелов</dc:creator>
 </item>
 
 </rdf:RDF>
