@@ -23,6 +23,82 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>April 15, 2013</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://fseoane.net/blog/" title="I say things">Fabian Pedregosa</a></h3>
+
+
+<div class="entrygroup" id="tag:fseoane.net/blog,2013-04-16:2013/isotonic-regression/">
+<h4><a href="http://fseoane.net/blog/2013/isotonic-regression/">Isotonic Regression</a></h4>
+<div class="entry">
+<div class="content">
+<p>My latest contribution for <a href="http://scikit-learn.org">scikit-learn</a> is
+ an implementation of the isotonic regression model that I coded with
+ <a href="https://twitter.com/nvaroqua">Nelle Varoquaux</a> and
+ <a href="http://alexandre.gramfort.net/">Alexandre Gramfort</a>. This model
+ finds the best least squares fit to a set of points, given the
+ constraint that the fit must be a non-decreasing
+ function. <a href="http://scikit-learn.sourceforge.net/dev/auto_examples/plot_isotonic_regression.html">The example</a>
+ on the scikit-learn website gives an intuition on this model.</p>
+<p><img src="http://fseoane.net/blog/static/images/2013/plot_isotonic_regression_1.png" alt="isotonic regression" /></p>
+<p>The original points are in red, and the estimated ones are in
+green. As you can see, there is one estimation (green point) for each
+data sample (red point). Calling $y \in \mathbb{R}^n$ the input data,
+the model can be written concisely as an optimization problem over $x$</p>
+<p>$$ 
+\text{argmin}_x \|y - x \|^2 \\
+\text{subject to } x_0 \leq x_1 \leq \cdots \leq x_n
+$$</p>
+<p>The algorithm implemented in scikit-learn <sup id="fnref:3"><a href="http://fseoane.net/blog/feed/#fn:3" rel="footnote">3</a></sup> is the pool adjacent
+violators algorithm <sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup>, which is an efficient linear time
+$\mathcal{O}(n)$ algorithm. The algorithm sweeps through the data
+looking for violations of the monotonicity constraint. When it finds
+one, it adjusts the estimate to the best possible fit with
+constraints. Sometimes it also needs to modify previous points to make
+sure the new estimate does not violate the constraints. The following
+picture shows how it proceeds at each iteration</p>
+<p><img src="http://fseoane.net/blog/static/images/2013/isotonic.gif" alt="isotonic regression" /></p>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p>"Active set algorithms for isotonic regression; A unifying
+framework", Michael J. Best, Nilotpal Chakravarti <a href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
+</li>
+<li id="fn:2">
+<p>Python notebook to generate the figures: <a href="http://fseoane.net/blog/static/uploads/2013/isotonic_regression_sklearn.ipynb">ipynb</a> and <a href="http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/isotonic_regression_sklearn.ipynb">web version</a> <a href="http://fseoane.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
+</li>
+<li id="fn:3">
+<p>The algorithm is used through the sklearn.isotonic.IsotonicRegression object (<a href="http://scikit-learn.org/dev/modules/generated/sklearn.isotonic.IsotonicRegression.html">doc</a>) or the function sklearn.isotonic.isotonic_regression (<a href="http://scikit-learn.org/dev/modules/generated/sklearn.isotonic.isotonic_regression.html">doc</a>) <a href="http://fseoane.net/blog/feed/#fnref:3" rev="footnote" title="Jump back to footnote 3 in the text">↩</a></p>
+</li>
+</ol>
+</div></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://fseoane.net/blog/2013/isotonic-regression/">by Fabian Pedregosa at April 15, 2013 10:00 PM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>April 08, 2013</h2>
 
 <div class="channelgroup">
@@ -398,7 +474,7 @@ $P x$ to zero out all of the coordinates but one, that is, $P x =
 \|x\| e_1$. The following code, given $x$, finds the values of $\beta,
 v$ that verify that property. The algorithm can be found in several
 textbooks <sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup></p>
-<div class="codehilite"><pre><span class="k">def</span> <span class="nf">house</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<div class="highlight"><pre><span class="k">def</span> <span class="nf">house</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
     <span class="sd">"""</span>
 <span class="sd">    Given a vetor x, computes vectors v with v[0] = 1</span>
 <span class="sd">    and scalar beta such that P = I - beta v v^T</span>
@@ -434,7 +510,7 @@ textbooks <sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" rel="fo
 
 <p>As promised, this computes the parameters of $P$ such that $P x = \|x\| e_1$,
 exact to 15 decimals:</p>
-<div class="codehilite"><pre><span class="o">&gt;&gt;&gt;</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">5</span>
+<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">5</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">beta</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">house</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">-</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
@@ -1914,7 +1990,7 @@ inverted. Note that args must be a tuple consisting of the different
 arguments, thus the parenthesis around <code>a</code>. The third item is a
 dictionary <code>kw</code> specifying the keyword arguments. Here kw is optional
 and is omitted.</p>
-<div class="codehilite"><pre><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">memory_profiler</span> <span class="kn">import</span> <span class="n">memory_usage</span>
+<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">memory_profiler</span> <span class="kn">import</span> <span class="n">memory_usage</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="c"># create a random matrix</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
@@ -1928,7 +2004,7 @@ and is omitted.</p>
 t0 + .01, t0 + .02, ...)</code> at which the measurements where taken. Now I can
 use that to for example plot the memory consumption as a function of
 time:</p>
-<div class="codehilite"><pre><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">pl</span>
+<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">pl</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mem_usage</span><span class="p">))</span> <span class="o">*</span> <span class="o">.</span><span class="mo">01</span><span class="p">,</span> <span class="n">mem_usage</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'linalg.pinv'</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'Time (in seconds)'</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'Memory consumption (in MB)'</span><span class="p">)</span>
@@ -1946,7 +2022,7 @@ a function of the input data. One obvious way we can do this is by
 calling the same function each time with a different input and take as
 memory consumption the maximum consumption over time. This way we will
 have a memory usage for each input.</p>
-<div class="codehilite"><pre><span class="o">&gt;&gt;&gt;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span>
+<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span>
 <span class="o">...</span>    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">i</span><span class="p">,</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">i</span><span class="p">)</span>
 <span class="o">...</span>    <span class="n">mem_usage</span> <span class="o">=</span> <span class="n">memory_usage</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">,</span> <span class="p">(</span><span class="n">A</span><span class="p">,)))</span>
 <span class="o">...</span>    <span class="k">print</span> <span class="nb">max</span><span class="p">(</span><span class="n">mem_usage</span><span class="p">)</span>
@@ -1960,7 +2036,7 @@ have a memory usage for each input.</p>
 
 <p>It is now possible to plot these results as a function of the
 dimensions.</p>
-<div class="codehilite"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">pl</span>
 <span class="kn">from</span> <span class="nn">memory_profiler</span> <span class="kn">import</span> <span class="n">memory_usage</span>
 
@@ -4816,7 +4892,7 @@ f_durations.write('\n')
     <span class="k">print</span><span class="p">(</span><span class="s">'Kendall correlation coefficient for block </span><span class="si">%s</span><span class="s">: </span><span class="si">%.5f</span><span class="s">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">tau</span><span class="p">))</span>
 </pre></div>
 
-<div class="codehilite"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">0</span><span class="p">:</span> <span class="mf">0.71122</span>
+<div class="highlight"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">0</span><span class="p">:</span> <span class="mf">0.71122</span>
 <span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">1</span><span class="p">:</span> <span class="mf">0.84387</span>
 </pre></div>
 
@@ -4879,7 +4955,7 @@ f_durations.write('\n')
     <span class="k">print</span><span class="p">(</span><span class="s">'Kendall correlation coefficient for block </span><span class="si">%s</span><span class="s">: </span><span class="si">%.5f</span><span class="s">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">tau</span><span class="p">))</span>
 </pre></div>
 
-<div class="codehilite"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">0</span><span class="p">:</span> <span class="mf">0.83627</span>
+<div class="highlight"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">0</span><span class="p">:</span> <span class="mf">0.83627</span>
 <span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">1</span><span class="p">:</span> <span class="mf">0.84387</span>
 </pre></div>
 
@@ -6114,53 +6190,6 @@ Out[24]: 6
 </div>
 
 </div>
-<div class="daygroup">
-<h2>August 01, 2012</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://blog.krastanov.org" title="Stefan's Blog » SymPy">Stefan Krastanov</a></h3>
-
-
-<div class="entrygroup" id="http://krastanov.wordpress.com/?p=551">
-<h4 lang="en"><a href="http://blog.krastanov.org/2012/08/02/the-diffgeom-module-status-report/">The diffgeom Module – Status Report</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>I have written already a few posts about the theory behind the module, the structure of the module, etc. However, besides some rare examples, I have not described in much details how the work progresses. So here is a short summary (check the git log for more details):</p>
-<ul>
-<li>The basics about coordinate systems and fields are already in. There are numerous issues with all the simplify-like algorithms inside SymPy, however they are slowly ironed out.</li>
-<li>Some simplistic methods for work with integral curves are implemented.</li>
-<li>The basics of tensor/wedge products are in. Many simplification routines can be added. Contraction between tensor products and vectors is possible (special case of “lowering of an index”).</li>
-<li>Over-a-map, pushforwards and pullbacks are not implemented yet.</li>
-<li>Instead of them I have focused my work on derivatives and curvature tensors. For the moment work on these can be done in a limited coordinate-dependent way. A longer post explaining the theory is coming and with it an implementation slightly less dependent on coordinates (working with Christoffel symbols is a pain).</li>
-<li>Hodge star operator – still not implemented.</li>
-</ul>
-<p>An example that I want to implement is a theorem that in irrotational cosmology isotropy implies homogeneity. Doing this will be the first non-trivial example in this module.</p>
-<p>A serendipitous detour from the project was my work on the differential equations solver. Aaron had implemented a very thorough solver for single equations. I had tried to extend it in a few simple ways in order to work with systems of ODEs and initial conditions. However this led me to Jordan forms of matrices, generalized eigenvectors and a bunch of interesting details on which I work in my free time (especially this week).</p>
-<br />  <img src="http://stats.wordpress.com/b.gif?host=blog.krastanov.org&amp;blog=15251174&amp;post=551&amp;subd=krastanov&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://blog.krastanov.org/2012/08/02/the-diffgeom-module-status-report/">by Stefan Krastanov at August 01, 2012 10:59 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -6205,7 +6234,7 @@ Out[24]: 6
 <a href="" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a class="message" title="404: not found">Django-SymPy</a>
 </li>
 <li>
-<a href="http://fseoane.net/blog/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://fseoane.net/blog/" class="message" title="no activity in 7 days">Fabian Pedregosa</a>
+<a href="http://fseoane.net/blog/feed/rss.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://fseoane.net/blog/" title="I say things">Fabian Pedregosa</a>
 </li>
 <li>
 <a href="http://gsoc-mathtex.blogspot.com/feeds/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://gsoc-mathtex.blogspot.com/" class="message" title="no activity in 7 days">Freddie Witherden</a>
@@ -6235,13 +6264,13 @@ Out[24]: 6
 <a href="http://sympystats.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sympystats.wordpress.com" class="message" title="no activity in 7 days">Matthew Rocklin</a>
 </li>
 <li>
-<a href="http://www.blogger.com/feeds/2520472460430880330/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sympy.blogspot.com/" title="The Official SymPy Blog">Official SymPy blog</a>
+<a href="http://sympy.blogspot.com/feeds/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sympy.blogspot.com/" class="message" title="no activity in 7 days">Official SymPy blog</a>
 </li>
 <li>
 <a href="http://ondrejcertik.blogspot.com/feeds/posts/default/-/sympy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://ondrejcertik.blogspot.com/search/label/sympy" class="message" title="no activity in 7 days">Ondřej Čertík</a>
 </li>
 <li>
-<a href="http://www.blogger.com/feeds/436496352933562096/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://robert-code.blogspot.com/" class="message" title="no activity in 7 days">Robert Schwarz</a>
+<a href="http://robert-code.blogspot.com/feeds/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://robert-code.blogspot.com/" class="message" title="no activity in 7 days">Robert Schwarz</a>
 </li>
 <li>
 <a href="http://saptman.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://saptman.wordpress.com" class="message" title="no activity in 7 days">Saptarshi Mandal</a>
@@ -6274,7 +6303,7 @@ Out[24]: 6
 
 <p>
 <strong>Last updated:</strong><br>
-April 13, 2013 07:20 AM<br>
+April 17, 2013 09:00 AM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>

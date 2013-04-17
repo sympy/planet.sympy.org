@@ -8,6 +8,53 @@
 	<description>Planet SymPy - http://planet.sympy.org/</description>
 
 <item>
+	<title>Fabian Pedregosa: Isotonic Regression</title>
+	<guid isPermaLink="false">tag:fseoane.net/blog,2013-04-16:2013/isotonic-regression/</guid>
+	<link>http://fseoane.net/blog/2013/isotonic-regression/</link>
+	<description>&lt;p&gt;My latest contribution for &lt;a href=&quot;http://scikit-learn.org&quot;&gt;scikit-learn&lt;/a&gt; is
+ an implementation of the isotonic regression model that I coded with
+ &lt;a href=&quot;https://twitter.com/nvaroqua&quot;&gt;Nelle Varoquaux&lt;/a&gt; and
+ &lt;a href=&quot;http://alexandre.gramfort.net/&quot;&gt;Alexandre Gramfort&lt;/a&gt;. This model
+ finds the best least squares fit to a set of points, given the
+ constraint that the fit must be a non-decreasing
+ function. &lt;a href=&quot;http://scikit-learn.sourceforge.net/dev/auto_examples/plot_isotonic_regression.html&quot;&gt;The example&lt;/a&gt;
+ on the scikit-learn website gives an intuition on this model.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://fseoane.net/blog/static/images/2013/plot_isotonic_regression_1.png&quot; alt=&quot;isotonic regression&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;The original points are in red, and the estimated ones are in
+green. As you can see, there is one estimation (green point) for each
+data sample (red point). Calling $y \in \mathbb{R}^n$ the input data,
+the model can be written concisely as an optimization problem over $x$&lt;/p&gt;
+&lt;p&gt;$$ 
+\text{argmin}_x \|y - x \|^2 \\
+\text{subject to } x_0 \leq x_1 \leq \cdots \leq x_n
+$$&lt;/p&gt;
+&lt;p&gt;The algorithm implemented in scikit-learn &lt;sup id=&quot;fnref:3&quot;&gt;&lt;a href=&quot;http://fseoane.net/blog/feed/#fn:3&quot; rel=&quot;footnote&quot;&gt;3&lt;/a&gt;&lt;/sup&gt; is the pool adjacent
+violators algorithm &lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;http://fseoane.net/blog/feed/#fn:1&quot; rel=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;, which is an efficient linear time
+$\mathcal{O}(n)$ algorithm. The algorithm sweeps through the data
+looking for violations of the monotonicity constraint. When it finds
+one, it adjusts the estimate to the best possible fit with
+constraints. Sometimes it also needs to modify previous points to make
+sure the new estimate does not violate the constraints. The following
+picture shows how it proceeds at each iteration&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://fseoane.net/blog/static/images/2013/isotonic.gif&quot; alt=&quot;isotonic regression&quot; /&gt;&lt;/p&gt;
+&lt;div class=&quot;footnote&quot;&gt;
+&lt;hr /&gt;
+&lt;ol&gt;
+&lt;li id=&quot;fn:1&quot;&gt;
+&lt;p&gt;&quot;Active set algorithms for isotonic regression; A unifying
+framework&quot;, Michael J. Best, Nilotpal Chakravarti &lt;a href=&quot;http://fseoane.net/blog/feed/#fnref:1&quot; rev=&quot;footnote&quot; title=&quot;Jump back to footnote 1 in the text&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&quot;fn:2&quot;&gt;
+&lt;p&gt;Python notebook to generate the figures: &lt;a href=&quot;http://fseoane.net/blog/static/uploads/2013/isotonic_regression_sklearn.ipynb&quot;&gt;ipynb&lt;/a&gt; and &lt;a href=&quot;http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/isotonic_regression_sklearn.ipynb&quot;&gt;web version&lt;/a&gt; &lt;a href=&quot;http://fseoane.net/blog/feed/#fnref:2&quot; rev=&quot;footnote&quot; title=&quot;Jump back to footnote 2 in the text&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&quot;fn:3&quot;&gt;
+&lt;p&gt;The algorithm is used through the sklearn.isotonic.IsotonicRegression object (&lt;a href=&quot;http://scikit-learn.org/dev/modules/generated/sklearn.isotonic.IsotonicRegression.html&quot;&gt;doc&lt;/a&gt;) or the function sklearn.isotonic.isotonic_regression (&lt;a href=&quot;http://scikit-learn.org/dev/modules/generated/sklearn.isotonic.isotonic_regression.html&quot;&gt;doc&lt;/a&gt;) &lt;a href=&quot;http://fseoane.net/blog/feed/#fnref:3&quot; rev=&quot;footnote&quot; title=&quot;Jump back to footnote 3 in the text&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;</description>
+	<pubDate>Mon, 15 Apr 2013 22:00:00 +0000</pubDate>
+</item>
+<item>
 	<title>Official SymPy blog: Google Summer of Code 2013</title>
 	<guid isPermaLink="false">tag:blogger.com,1999:blog-2520472460430880330.post-2941331733095011125</guid>
 	<link>http://sympy.blogspot.com/2013/04/google-summer-of-code-2013.html</link>
@@ -283,7 +330,7 @@ $P x$ to zero out all of the coordinates but one, that is, $P x =
 \|x\| e_1$. The following code, given $x$, finds the values of $\beta,
 v$ that verify that property. The algorithm can be found in several
 textbooks &lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;http://fseoane.net/blog/feed/#fn:1&quot; rel=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
-&lt;div class=&quot;codehilite&quot;&gt;&lt;pre&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;house&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;house&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
     &lt;span class=&quot;sd&quot;&gt;&quot;&quot;&quot;&lt;/span&gt;
 &lt;span class=&quot;sd&quot;&gt;    Given a vetor x, computes vectors v with v[0] = 1&lt;/span&gt;
 &lt;span class=&quot;sd&quot;&gt;    and scalar beta such that P = I - beta v v^T&lt;/span&gt;
@@ -319,7 +366,7 @@ textbooks &lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;http://fseoane.net/
 
 &lt;p&gt;As promised, this computes the parameters of $P$ such that $P x = \|x\| e_1$,
 exact to 15 decimals:&lt;/p&gt;
-&lt;div class=&quot;codehilite&quot;&gt;&lt;pre&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;
 &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;randn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;beta&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;house&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;P&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;eye&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;beta&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
@@ -1408,7 +1455,7 @@ inverted. Note that args must be a tuple consisting of the different
 arguments, thus the parenthesis around &lt;code&gt;a&lt;/code&gt;. The third item is a
 dictionary &lt;code&gt;kw&lt;/code&gt; specifying the keyword arguments. Here kw is optional
 and is omitted.&lt;/p&gt;
-&lt;div class=&quot;codehilite&quot;&gt;&lt;pre&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;memory_profiler&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memory_usage&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;memory_profiler&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memory_usage&lt;/span&gt;
 &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;numpy&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;np&lt;/span&gt;
 &lt;span class=&quot;c&quot;&gt;# create a random matrix&lt;/span&gt;
 &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;randn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;500&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;500&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
@@ -1422,7 +1469,7 @@ and is omitted.&lt;/p&gt;
 t0 + .01, t0 + .02, ...)&lt;/code&gt; at which the measurements where taken. Now I can
 use that to for example plot the memory consumption as a function of
 time:&lt;/p&gt;
-&lt;div class=&quot;codehilite&quot;&gt;&lt;pre&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;pylab&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;pl&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;pylab&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;pl&lt;/span&gt;
 &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;plot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;arange&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mem_usage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mo&quot;&gt;01&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mem_usage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;label&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'linalg.pinv'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xlabel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'Time (in seconds)'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ylabel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'Memory consumption (in MB)'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
@@ -1440,7 +1487,7 @@ a function of the input data. One obvious way we can do this is by
 calling the same function each time with a different input and take as
 memory consumption the maximum consumption over time. This way we will
 have a memory usage for each input.&lt;/p&gt;
-&lt;div class=&quot;codehilite&quot;&gt;&lt;pre&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
 &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;A&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;randn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;mem_usage&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memory_usage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;linalg&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pinv&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;A&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,)))&lt;/span&gt;
 &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;    &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;max&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mem_usage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
@@ -1454,7 +1501,7 @@ have a memory usage for each input.&lt;/p&gt;
 
 &lt;p&gt;It is now possible to plot these results as a function of the
 dimensions.&lt;/p&gt;
-&lt;div class=&quot;codehilite&quot;&gt;&lt;pre&gt;&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;numpy&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;np&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;numpy&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;np&lt;/span&gt;
 &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;pylab&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;pl&lt;/span&gt;
 &lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;memory_profiler&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memory_usage&lt;/span&gt;
 
@@ -3767,7 +3814,7 @@ f_durations.write('\n')
     &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'Kendall correlation coefficient for block &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%s&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;: &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%.5f&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tau&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;div class=&quot;codehilite&quot;&gt;&lt;pre&gt;&lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.71122&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.71122&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.84387&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
@@ -3830,7 +3877,7 @@ f_durations.write('\n')
     &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'Kendall correlation coefficient for block &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%s&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;: &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%.5f&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tau&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;div class=&quot;codehilite&quot;&gt;&lt;pre&gt;&lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.83627&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.83627&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.84387&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
@@ -4493,24 +4540,6 @@ Out[24]: 6
 &lt;p&gt;&lt;a href=&quot;http://rhoforsympy.files.wordpress.com/2012/08/fidelity-qubit2.png&quot;&gt;&lt;img src=&quot;http://rhoforsympy.files.wordpress.com/2012/08/fidelity-qubit2.png?w=500&amp;amp;h=369&quot; title=&quot;fidelity-qubit&quot; height=&quot;369&quot; width=&quot;500&quot; alt=&quot;&quot; class=&quot;alignleft size-full wp-image-243&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/rhoforsympy.wordpress.com/235/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/rhoforsympy.wordpress.com/235/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;amp;blog=34650270&amp;amp;post=235&amp;amp;subd=rhoforsympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
 	<pubDate>Fri, 03 Aug 2012 21:19:25 +0000</pubDate>
-</item>
-<item>
-	<title>Stefan Krastanov: The diffgeom Module – Status Report</title>
-	<guid isPermaLink="false">http://krastanov.wordpress.com/?p=551</guid>
-	<link>http://blog.krastanov.org/2012/08/02/the-diffgeom-module-status-report/</link>
-	<description>&lt;p&gt;I have written already a few posts about the theory behind the module, the structure of the module, etc. However, besides some rare examples, I have not described in much details how the work progresses. So here is a short summary (check the git log for more details):&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;The basics about coordinate systems and fields are already in. There are numerous issues with all the simplify-like algorithms inside SymPy, however they are slowly ironed out.&lt;/li&gt;
-&lt;li&gt;Some simplistic methods for work with integral curves are implemented.&lt;/li&gt;
-&lt;li&gt;The basics of tensor/wedge products are in. Many simplification routines can be added. Contraction between tensor products and vectors is possible (special case of “lowering of an index”).&lt;/li&gt;
-&lt;li&gt;Over-a-map, pushforwards and pullbacks are not implemented yet.&lt;/li&gt;
-&lt;li&gt;Instead of them I have focused my work on derivatives and curvature tensors. For the moment work on these can be done in a limited coordinate-dependent way. A longer post explaining the theory is coming and with it an implementation slightly less dependent on coordinates (working with Christoffel symbols is a pain).&lt;/li&gt;
-&lt;li&gt;Hodge star operator – still not implemented.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;An example that I want to implement is a theorem that in irrotational cosmology isotropy implies homogeneity. Doing this will be the first non-trivial example in this module.&lt;/p&gt;
-&lt;p&gt;A serendipitous detour from the project was my work on the differential equations solver. Aaron had implemented a very thorough solver for single equations. I had tried to extend it in a few simple ways in order to work with systems of ODEs and initial conditions. However this led me to Jordan forms of matrices, generalized eigenvectors and a bunch of interesting details on which I work in my free time (especially this week).&lt;/p&gt;
-&lt;br /&gt;  &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=blog.krastanov.org&amp;amp;blog=15251174&amp;amp;post=551&amp;amp;subd=krastanov&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
-	<pubDate>Wed, 01 Aug 2012 22:59:47 +0000</pubDate>
 </item>
 
 </channel>
