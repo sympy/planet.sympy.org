@@ -43,7 +43,7 @@
 <p><strong>TL;DR: I've implementing a logistic ordinal regression or
   proportional odds model. <a href="http://github.com/fabianp/minirank/blob/master/minirank/logistic.py">Here is the Python code</a></strong></p>
 <p>The <em>logistic ordinal regression</em> model, also known as the
-proportional odds was introduced in the early 80s by McCullagh [<sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" class="footnote-ref" rel="footnote">1</a></sup>, <sup id="fnref:2"><a href="http://fseoane.net/blog/feed/#fn:2" class="footnote-ref" rel="footnote">2</a></sup>]
+proportional odds was introduced in the early 80s by McCullagh [<sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup>, <sup id="fnref:2"><a href="http://fseoane.net/blog/feed/#fn:2" rel="footnote">2</a></sup>]
 and is a generalized linear model specially tailored for the case of
 predicting ordinal variables, that is, variables that are discrete (as
 in classification) but which can be ordered (as in regression). It can
@@ -60,7 +60,7 @@ P(y \leq j|X_i) = \phi(\theta_j - w^T X_i) = \frac{1}{1 + \exp(w^T X_i - \theta_
 $$</p>
 <p>where $w, \theta$ are vectors to be estimated from the data and $\phi$
 is the logistic function defined as $\phi(t) = 1 / (1 + \exp(-t))$.</p>
-&lt;figure style="float: left; max-width: 380px; margin: 0px 15px 15px 0px"&gt;
+&lt;figure style="float: left; width: 380px; margin: 0px 15px 15px 0px"&gt;
 <img src="http://fseoane.net/blog/static/images/2013/ordinal_1.png" />
 <img src="http://fseoane.net/blog/static/images/2013/ordinal_logistic.png" />
 
@@ -83,7 +83,7 @@ $\theta_{0} = - \infty$ and $\theta_K = + \infty$.</p>
 produces a set of values that are well separated into the different
 classes by the different thresholds $\theta$. We choose a logistic
 function to model the probability $P(y \leq j|X_i)$ but other choices
-are possible. In the proportional hazards model <sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" class="footnote-ref" rel="footnote">1</a></sup> the probability
+are possible. In the proportional hazards model <sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup> the probability
 is modeled as $-\log(1 - P(y \leq j | X_i)) = \exp(\theta_j - w^T
 X_i)$. Other link functions are possible, where the link function
 satisfies $\text{link}(P(y \leq j | X_i)) = \theta_j - w^T X_i$. Under
@@ -152,14 +152,14 @@ this particular dataset:</p>
 <ol>
 <li id="fn:1">
 <p>"Regression models for ordinal data", P. McCullagh, Journal of
-the royal statistical society. Series B (Methodological), 1980 <a href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" class="footnote-backref" title="Jump back to footnote 1 in the text">↩</a></p>
+the royal statistical society. Series B (Methodological), 1980 <a href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
 </li>
 <li id="fn:2">
-<p>"Generalized Linear Models", P. McCullagh and J. A. Nelder (Book) <a href="http://fseoane.net/blog/feed/#fnref:2" rev="footnote" class="footnote-backref" title="Jump back to footnote 2 in the text">↩</a></p>
+<p>"Generalized Linear Models", P. McCullagh and J. A. Nelder (Book) <a href="http://fseoane.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
 </li>
 <li id="fn:3">
 <p>"Loss Functions for Preference Levels : Regression with Discrete
-Ordered Labels", Jason D. M. Rennie, Nathan Srebro <a href="http://fseoane.net/blog/feed/#fnref:3" rev="footnote" class="footnote-backref" title="Jump back to footnote 3 in the text">↩</a></p>
+Ordered Labels", Jason D. M. Rennie, Nathan Srebro <a href="http://fseoane.net/blog/feed/#fnref:3" rev="footnote" title="Jump back to footnote 3 in the text">↩</a></p>
 </li>
 </ol>
 </div></div>
@@ -215,8 +215,8 @@ the model can be written concisely as an optimization problem over $x$</p>
 \text{argmin}_x \|y - x \|^2 \\
 \text{subject to } x_0 \leq x_1 \leq \cdots \leq x_n
 $$</p>
-<p>The algorithm implemented in scikit-learn <sup id="fnref:3"><a href="http://fseoane.net/blog/feed/#fn:3" class="footnote-ref" rel="footnote">3</a></sup> is the pool adjacent
-violators algorithm <sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" class="footnote-ref" rel="footnote">1</a></sup>, which is an efficient linear time
+<p>The algorithm implemented in scikit-learn <sup id="fnref:3"><a href="http://fseoane.net/blog/feed/#fn:3" rel="footnote">3</a></sup> is the pool adjacent
+violators algorithm <sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup>, which is an efficient linear time
 $\mathcal{O}(n)$ algorithm. The algorithm sweeps through the data
 looking for violations of the monotonicity constraint. When it finds
 one, it adjusts the estimate to the best possible fit with
@@ -229,13 +229,13 @@ picture shows how it proceeds at each iteration</p>
 <ol>
 <li id="fn:1">
 <p>"Active set algorithms for isotonic regression; A unifying
-framework", Michael J. Best, Nilotpal Chakravarti <a href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" class="footnote-backref" title="Jump back to footnote 1 in the text">↩</a></p>
+framework", Michael J. Best, Nilotpal Chakravarti <a href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
 </li>
 <li id="fn:2">
-<p>Python notebook to generate the figures: <a href="http://fseoane.net/blog/static/uploads/2013/isotonic_regression_sklearn.ipynb">ipynb</a> and <a href="http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/isotonic_regression_sklearn.ipynb">web version</a> <a href="http://fseoane.net/blog/feed/#fnref:2" rev="footnote" class="footnote-backref" title="Jump back to footnote 2 in the text">↩</a></p>
+<p>Python notebook to generate the figures: <a href="http://fseoane.net/blog/static/uploads/2013/isotonic_regression_sklearn.ipynb">ipynb</a> and <a href="http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/isotonic_regression_sklearn.ipynb">web version</a> <a href="http://fseoane.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
 </li>
 <li id="fn:3">
-<p>The algorithm is used through the sklearn.isotonic.IsotonicRegression object (<a href="http://scikit-learn.org/dev/modules/generated/sklearn.isotonic.IsotonicRegression.html">doc</a>) or the function sklearn.isotonic.isotonic_regression (<a href="http://scikit-learn.org/dev/modules/generated/sklearn.isotonic.isotonic_regression.html">doc</a>) <a href="http://fseoane.net/blog/feed/#fnref:3" rev="footnote" class="footnote-backref" title="Jump back to footnote 3 in the text">↩</a></p>
+<p>The algorithm is used through the sklearn.isotonic.IsotonicRegression object (<a href="http://scikit-learn.org/dev/modules/generated/sklearn.isotonic.IsotonicRegression.html">doc</a>) or the function sklearn.isotonic.isotonic_regression (<a href="http://scikit-learn.org/dev/modules/generated/sklearn.isotonic.isotonic_regression.html">doc</a>) <a href="http://fseoane.net/blog/feed/#fnref:3" rev="footnote" title="Jump back to footnote 3 in the text">↩</a></p>
 </li>
 </ol>
 </div></div>
@@ -631,8 +631,8 @@ property that for suitable chosen $v$ and $\beta$ it makes the product
 $P x$ to zero out all of the coordinates but one, that is, $P x =
 \|x\| e_1$. The following code, given $x$, finds the values of $\beta,
 v$ that verify that property. The algorithm can be found in several
-textbooks <sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" class="footnote-ref" rel="footnote">1</a></sup></p>
-<div class="codehilite"><pre><span class="k">def</span> <span class="nf">house</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+textbooks <sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup></p>
+<div class="highlight"><pre><span class="k">def</span> <span class="nf">house</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
     <span class="sd">"""</span>
 <span class="sd">    Given a vetor x, computes vectors v with v[0] = 1</span>
 <span class="sd">    and scalar beta such that P = I - beta v v^T</span>
@@ -668,7 +668,7 @@ textbooks <sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" class="
 
 <p>As promised, this computes the parameters of $P$ such that $P x = \|x\| e_1$,
 exact to 15 decimals:</p>
-<div class="codehilite"><pre><span class="o">&gt;&gt;&gt;</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">5</span>
+<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">5</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">beta</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">house</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">-</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
@@ -708,10 +708,10 @@ eigensolvers</a></p>
 <hr />
 <ol>
 <li id="fn:1">
-<p>"Matrix Computations" third edition, Golub &amp; VanLoan (Algorithm 5.1.1). <a href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" class="footnote-backref" title="Jump back to footnote 1 in the text">↩</a></p>
+<p>"Matrix Computations" third edition, Golub &amp; VanLoan (Algorithm 5.1.1). <a href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
 </li>
 <li id="fn:2">
-<p>Code to reproduce the figures <a href="http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/householder.ipynb">can be found here</a>, source for the IPython notebook <a href="http://fseoane.net/blog/static/uploads/2013/householder.ipynb">can be found here</a> <a href="http://fseoane.net/blog/feed/#fnref:2" rev="footnote" class="footnote-backref" title="Jump back to footnote 2 in the text">↩</a></p>
+<p>Code to reproduce the figures <a href="http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/householder.ipynb">can be found here</a>, source for the IPython notebook <a href="http://fseoane.net/blog/static/uploads/2013/householder.ipynb">can be found here</a> <a href="http://fseoane.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
 </li>
 </ol>
 </div></div>
@@ -1321,7 +1321,7 @@ of loss functions are:</p>
 <li>Logistic loss, $\log(1 + \exp{f(x_i) y_i})$</li>
 </ul>
 <p><img src="http://fseoane.net/blog/static/images/2013/loss_functions.png" alt="Loss functions" /></p>
-<p><sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" class="footnote-ref" rel="footnote">1</a></sup></p>
+<p><sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup></p>
 <p>In the paper <a href="http://citeseer.ist.psu.edu/viewdoc/summary?doi=10.1.1.124.9242">Loss functions for preference levels: Regression with
 discrete ordered
 labels</a>,
@@ -1359,7 +1359,7 @@ each time a threshold is crossed.</p>
 <hr />
 <ol>
 <li id="fn:1">
-<p>Code for generating all figures can be found <a href="http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/ordinal%2520regression%2520loss%2520functions.ipynb">here</a> <a href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" class="footnote-backref" title="Jump back to footnote 1 in the text">↩</a></p>
+<p>Code for generating all figures can be found <a href="http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/ordinal%2520regression%2520loss%2520functions.ipynb">here</a> <a href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
 </li>
 </ol>
 </div></div>
@@ -2148,7 +2148,7 @@ inverted. Note that args must be a tuple consisting of the different
 arguments, thus the parenthesis around <code>a</code>. The third item is a
 dictionary <code>kw</code> specifying the keyword arguments. Here kw is optional
 and is omitted.</p>
-<div class="codehilite"><pre><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">memory_profiler</span> <span class="kn">import</span> <span class="n">memory_usage</span>
+<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">memory_profiler</span> <span class="kn">import</span> <span class="n">memory_usage</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="c"># create a random matrix</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
@@ -2162,7 +2162,7 @@ and is omitted.</p>
 t0 + .01, t0 + .02, ...)</code> at which the measurements where taken. Now I can
 use that to for example plot the memory consumption as a function of
 time:</p>
-<div class="codehilite"><pre><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">pl</span>
+<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">pl</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mem_usage</span><span class="p">))</span> <span class="o">*</span> <span class="o">.</span><span class="mo">01</span><span class="p">,</span> <span class="n">mem_usage</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'linalg.pinv'</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'Time (in seconds)'</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'Memory consumption (in MB)'</span><span class="p">)</span>
@@ -2180,7 +2180,7 @@ a function of the input data. One obvious way we can do this is by
 calling the same function each time with a different input and take as
 memory consumption the maximum consumption over time. This way we will
 have a memory usage for each input.</p>
-<div class="codehilite"><pre><span class="o">&gt;&gt;&gt;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span>
+<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span>
 <span class="o">...</span>    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">i</span><span class="p">,</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">i</span><span class="p">)</span>
 <span class="o">...</span>    <span class="n">mem_usage</span> <span class="o">=</span> <span class="n">memory_usage</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">,</span> <span class="p">(</span><span class="n">A</span><span class="p">,)))</span>
 <span class="o">...</span>    <span class="k">print</span> <span class="nb">max</span><span class="p">(</span><span class="n">mem_usage</span><span class="p">)</span>
@@ -2194,7 +2194,7 @@ have a memory usage for each input.</p>
 
 <p>It is now possible to plot these results as a function of the
 dimensions.</p>
-<div class="codehilite"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">pl</span>
 <span class="kn">from</span> <span class="nn">memory_profiler</span> <span class="kn">import</span> <span class="n">memory_usage</span>
 
@@ -2494,7 +2494,7 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
 <div class="entry">
 <div class="content">
 <p>SciPy contains two methods to compute the singular value decomposition (SVD) of a matrix: <code>scipy.linalg.svd</code> and <code>scipy.sparse.linalg.svds</code>. In this post I'll compare both methods for the task of computing the full SVD of a large dense matrix.</p>
-<p>The first method, <code>scipy.linalg.svd</code>, is perhaps the best known and uses the linear algebra library <a href="http://www.netlib.org/lapack/">LAPACK</a> to handle the computations. This implements the Golub-Kahan-Reisch algorithm <sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" class="footnote-ref" rel="footnote">1</a></sup>, which is accurate and highly efficient with a cost of O(n^3) floating-point operations <sup id="fnref:2"><a href="http://fseoane.net/blog/feed/#fn:2" class="footnote-ref" rel="footnote">2</a></sup>.</p>
+<p>The first method, <code>scipy.linalg.svd</code>, is perhaps the best known and uses the linear algebra library <a href="http://www.netlib.org/lapack/">LAPACK</a> to handle the computations. This implements the Golub-Kahan-Reisch algorithm <sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup>, which is accurate and highly efficient with a cost of O(n^3) floating-point operations <sup id="fnref:2"><a href="http://fseoane.net/blog/feed/#fn:2" rel="footnote">2</a></sup>.</p>
 <p>The second method is <code>scipy.sparse.linalg.svds</code> and despite it's name it works fine also for dense arrays. This implementation is based on the <a href="http://www.caam.rice.edu/software/ARPACK/">ARPACK</a> library and consists of an iterative procedure that finds the SVD decomposition by reducing the problem to an eigendecomposition on the array X -&gt; dot(X.T, X). This method is usually very effective when the input matrix X is sparse or only the largest singular values are required. There are other SVD solvers that I did not consider, such as <a href="http://pypi.python.org/pypi/sparsesvd/">sparsesvd</a> or <a href="http://pysparse.sourceforge.net/introduction.html#jdsym">pysparse.jdsym</a>, but my points for the sparse solve probably hold for those packages too since they both implement iterative algorithms based on the same principles.</p>
 <p>When the input matrix is dense and all the singular values are required, the first method is usually more efficient. To support this statement I've created a little benchmark: timings for both methods as a function of the size of the matrices. Notice that we are in a case that is clearly favorable to the <code>linalg.svd</code>: after all <code>sparse.linalg.svds</code> was not created with this setting in mind, it was created for sparse matrices or dense matrices with some special structure. We will see however that even in this setting it has interesting advantages.</p>
 <p>I'll create random square matrices with different sizes and plot the timings for both methods. For the benchmarks I used SciPy v0.12 linked against Intel Math Kernel Library v11. Both methods are single-threaded (I had to set OMP_NUM_THREADS=1 so that MKL does not try to parallelize the computations). <a href="https://gist.github.com/4250756#file-svd_timing-py">[code]</a></p>
@@ -2507,10 +2507,10 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
 <hr />
 <ol>
 <li id="fn:1">
-<p>Calculating the singular values and pseudo-inverse of a matrix, <em>Golub, Gene H., Kahan, William</em>, 1965, <a href="http://www.jstor.org/stable/2949777">JSTOR</a> <a href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" class="footnote-backref" title="Jump back to footnote 1 in the text">↩</a></p>
+<p>Calculating the singular values and pseudo-inverse of a matrix, <em>Golub, Gene H., Kahan, William</em>, 1965, <a href="http://www.jstor.org/stable/2949777">JSTOR</a> <a href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
 </li>
 <li id="fn:2">
-<p>A Survey of Singular Value Decomposition Methods and Performance Comparison of Some Available Serial Codes, <em>Plassman, Gerald E.</em> 2005 <a href="http://research.microsoft.com/en-us/um/people/zhoulin/2005-a%20survey%20of%20singular%20value%20decomposition_plassman.pdf">PDF</a> <a href="http://fseoane.net/blog/feed/#fnref:2" rev="footnote" class="footnote-backref" title="Jump back to footnote 2 in the text">↩</a></p>
+<p>A Survey of Singular Value Decomposition Methods and Performance Comparison of Some Available Serial Codes, <em>Plassman, Gerald E.</em> 2005 <a href="http://research.microsoft.com/en-us/um/people/zhoulin/2005-a%20survey%20of%20singular%20value%20decomposition_plassman.pdf">PDF</a> <a href="http://fseoane.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
 </li>
 </ol>
 </div></div>
@@ -5050,8 +5050,8 @@ f_durations.write('\n')
     <span class="k">print</span><span class="p">(</span><span class="s">'Kendall correlation coefficient for block </span><span class="si">%s</span><span class="s">: </span><span class="si">%.5f</span><span class="s">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">tau</span><span class="p">))</span>
 </pre></div>
 
-<div class="codehilite"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> 0<span class="p">:</span> 0<span class="p">.</span>71122
-<span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> 1<span class="p">:</span> 0<span class="p">.</span>84387
+<div class="highlight"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">0</span><span class="p">:</span> <span class="mf">0.71122</span>
+<span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">1</span><span class="p">:</span> <span class="mf">0.84387</span>
 </pre></div>
 
 
@@ -5113,8 +5113,8 @@ f_durations.write('\n')
     <span class="k">print</span><span class="p">(</span><span class="s">'Kendall correlation coefficient for block </span><span class="si">%s</span><span class="s">: </span><span class="si">%.5f</span><span class="s">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">tau</span><span class="p">))</span>
 </pre></div>
 
-<div class="codehilite"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> 0<span class="p">:</span> 0<span class="p">.</span>83627
-<span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> 1<span class="p">:</span> 0<span class="p">.</span>84387
+<div class="highlight"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">0</span><span class="p">:</span> <span class="mf">0.83627</span>
+<span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">1</span><span class="p">:</span> <span class="mf">0.84387</span>
 </pre></div>
 
 
@@ -6419,7 +6419,7 @@ Out[24]: 6
 
 <p>
 <strong>Last updated:</strong><br>
-May 02, 2013 04:01 PM<br>
+May 02, 2013 05:20 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
