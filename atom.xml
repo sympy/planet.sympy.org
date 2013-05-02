@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2013-05-02T06:20:25Z</updated>
+  <updated>2013-05-02T16:01:07Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,151 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry>
+    <id>tag:fseoane.net/blog,2013-05-02:2013/logistic-ordinal-regression/</id>
+    <link href="http://fseoane.net/blog/2013/logistic-ordinal-regression/" rel="alternate" type="text/html"/>
+    <title>Logistic Ordinal Regression</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p><strong>TL;DR: I've implementing a logistic ordinal regression or
+  proportional odds model. <a href="http://github.com/fabianp/minirank/blob/master/minirank/logistic.py">Here is the Python code</a></strong></p>
+<p>The <em>logistic ordinal regression</em> model, also known as the
+proportional odds was introduced in the early 80s by McCullagh [<sup id="fnref:1"><a class="footnote-ref" href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup>, <sup id="fnref:2"><a class="footnote-ref" href="http://fseoane.net/blog/feed/#fn:2" rel="footnote">2</a></sup>]
+and is a generalized linear model specially tailored for the case of
+predicting ordinal variables, that is, variables that are discrete (as
+in classification) but which can be ordered (as in regression). It can
+be seen as an extension of the logistic regression model to the
+ordinal setting.</p>
+<p>Given $X \in \mathbb{R}^{n \times p}$ input data and $y \in
+\mathbb{N}^n$ target values. For simplicity we assume $y$ is a
+non-decreasing vector, that is, $y_1 \leq y_2 \leq ...$. Just as the
+logistic regression models posterior probability $P(y=j|X_i)$ as the
+logistic function, in the logistic ordinal regression we model the
+<em>cummulative</em> probability as the logistic function. That is,</p>
+<p>$$
+P(y \leq j|X_i) = \phi(\theta_j - w^T X_i) = \frac{1}{1 + \exp(w^T X_i - \theta_j)}
+$$</p>
+<p>where $w, \theta$ are vectors to be estimated from the data and $\phi$
+is the logistic function defined as $\phi(t) = 1 / (1 + \exp(-t))$.</p>
+&lt;figure style="float: left; max-width: 380px; margin: 0px 15px 15px 0px"&gt;
+<img src="http://fseoane.net/blog/static/images/2013/ordinal_1.png"/>
+<img src="http://fseoane.net/blog/static/images/2013/ordinal_logistic.png"/>
+
+&lt;figcaption style="margin-left: 10px; margin-right: 5px"&gt;Toy example with three classes denoted in different colors. Also shown the vector of coefficients $w$ and the thresholds $\theta_0$ and $\theta_1$&lt;/figcaption&gt;
+
+&lt;/figure&gt;
+
+<p>Compared to multiclass logistic regression, we have added the
+constrain that the hyperplanes that separate the different classes are
+<em>parallel</em> for all classes, that is, the vector $w$ is common across
+classes. To decide to which class will $X_i$ be predicted we make use
+of the vector of thresholds $\theta$. If there are $K$ different
+classes, $\theta$ is a non-decreasing vector (that is, $\theta_1 \leq
+\theta_2 \leq ... \leq \theta_{K-1}$) of size $K-1$. We will then
+assign the class $j$ if the prediction $w^T X$ (recall that it's a
+linear model) lies in the interval $[\theta_{j-1}, \theta_{j}[$. In
+order to keep the same definition for extremal classes, we define
+$\theta_{0} = - \infty$ and $\theta_K = + \infty$.</p>
+<p>The intuition is that we are seeking a vector $w$ such that $X w$
+produces a set of values that are well separated into the different
+classes by the different thresholds $\theta$. We choose a logistic
+function to model the probability $P(y \leq j|X_i)$ but other choices
+are possible. In the proportional hazards model <sup id="fnref:1"><a class="footnote-ref" href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup> the probability
+is modeled as $-\log(1 - P(y \leq j | X_i)) = \exp(\theta_j - w^T
+X_i)$. Other link functions are possible, where the link function
+satisfies $\text{link}(P(y \leq j | X_i)) = \theta_j - w^T X_i$. Under
+this framework, the logistic ordinal regression model has a logistic
+link function and the proportional hazards model has a log-log link
+function.</p>
+<p>The logistic ordinal regression model is also known as the
+proportional odds model, because the
+<a href="http://en.wikipedia.org/wiki/Odds_ratio">ratio of corresponding odds</a>
+for two different samples $X_1$ and $X_2$ is $\exp(w^T(X_1 - X_2))$ and
+so does not depend on the class $j$ but only on the difference between
+the samples $X_1$ and $X_2$.</p>
+<h3>Optimization</h3>
+
+<p>Model estimation can be posed as an optimization problem. Here, we
+minimize the loss function for the model, defined as minus the
+log-likelihood:</p>
+<p>$\begin{align}
+\mathcal{L}(w, \theta) &amp;= - \sum_{i=1}^n \log(\phi(\theta_{y_i-1} - w^T X_i) -  \phi(\theta_{y_i} - w^T X_i)) \\
+&amp;= \sum_{i=1}^n w^T X_i  - \log(\exp(\theta_{y_i}) - \exp(\theta_{y_i-1}))  + \log(\phi(\theta_{y_i -1} - w^T X_i)) + \log(\phi(\theta_{y_i} - w^T X_i)) \\
+\end{align}$</p>
+<p>In this sum all terms are convex on $w$, thus the loss function is
+convex over $w$. It might be also jointly convex over $w$ and
+$\theta$, although I haven't checked. I use the function
+<code>fmin_slsqp</code> in <code>scipy.optimize</code> to optimize
+$\mathcal{L}$ under the constraint that $\theta$ is a non-decreasing
+vector. There might be better options, I don't know. If you do know,
+please leave a comment!.</p>
+<p>Using the formula $\log(\phi(t))^\prime = (1 - \phi(t))$, we can compute the gradient of the loss function as </p>
+<p>$\begin{align}
+\nabla_w \mathcal{L}(w, \theta) &amp;= \sum_{i=1}^n X_i ( -1 + \phi(\theta_{y_i -1} - w^T X_i)) + \phi(\theta_{y_i} - w^T X_i)) \\
+% \nabla_\theta \mathcal{L}(w, \theta) &amp;= \sum_{i=1}^n - \frac{e_{y_i} \exp(\theta_{y_i}) - e_{y_i -1} \exp(\theta_{y_i -1})}{\exp(\theta_{y_i}) - \exp(\theta_{y_i-1})} \\
+\nabla_\theta \mathcal{L}(w, \theta) &amp;= \sum_{i=1}^n e_{y_i} \left(1 - \phi(\theta_{y_i} - w^T X_i) - \frac{1}{1 - \exp(\theta_{y_i -1} - \theta_{y_i})}\right)  \\
+ &amp; \qquad  + e_{y_i -1}\left(1 - \phi(\theta_{y_i -1} - w^T X_i) - \frac{1}{1 - \exp(- (\theta_{y_i-1} - \theta_{y_i}))}\right)
+\end{align}$</p>
+<p>where $e_i$ is the $i$th canonical vector.</p>
+<h3>Code</h3>
+
+<p>I've implemented a Python version of this algorithm using Scipy's
+<code>optimize.fmin_slsqp</code> function. This takes as arguments the
+loss function, the gradient denoted before and a function that is
+&gt; 0 when the inequalities on $\theta$ are satisfied.</p>
+<p><a href="http://github.com/fabianp/minirank/blob/master/minirank/logistic.py">Code
+can be found here</a> as part of the <a href="https://github.com/fabianp/minirank">minirank</a> package, which
+is my sandbox for code related to ranking and ordinal regression. At
+some point I would like to submit it to scikit-learn but right now the
+I don't know how the code will scale to medium-scale problems, but I
+suspect not great. I also plan to add some more features like $\ell_2$
+regularization to the model.</p>
+<h3>Performance</h3>
+
+<p>I compared the performance of this model in the sense of mean absolute
+error <a href="http://nbviewer.ipython.org/urls/raw.github.com/fabianp/minirank/master/notebooks/comparison_ordinal_logistic.ipynb">(IPython
+notebook)</a> on the <a href="http://scikit-learn.org/dev/modules/generated/sklearn.datasets.load_boston.html">boston
+house-prices dataset</a>. To have an ordinal variable, I
+rounded the values to the closest integer, which gave me a problem of
+size 506 $\times$ 13 with 46 different target values. Although not a
+huge increase in accuracy, this model did give me better results on
+this particular dataset:</p>
+&lt;figure&gt;
+<img src="http://fseoane.net/blog/static/images/2013/bars_ordinal.png"/>
+&lt;/figure&gt;
+
+<div class="footnote">
+<hr/>
+<ol>
+<li id="fn:1">
+<p>"Regression models for ordinal data", P. McCullagh, Journal of
+the royal statistical society. Series B (Methodological), 1980 <a class="footnote-backref" href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
+</li>
+<li id="fn:2">
+<p>"Generalized Linear Models", P. McCullagh and J. A. Nelder (Book) <a class="footnote-backref" href="http://fseoane.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
+</li>
+<li id="fn:3">
+<p>"Loss Functions for Preference Levels : Regression with Discrete
+Ordered Labels", Jason D. M. Rennie, Nathan Srebro <a class="footnote-backref" href="http://fseoane.net/blog/feed/#fnref:3" rev="footnote" title="Jump back to footnote 3 in the text">↩</a></p>
+</li>
+</ol>
+</div></div>
+    </summary>
+    <updated>2013-05-01T22:00:00Z</updated>
+    <category term="machine learning"/>
+    <category term="ordinal regression"/>
+    <category term="Python"/>
+    <category term="ranking"/>
+    <author>
+      <name>Fabian Pedregosa</name>
+    </author>
+    <source>
+      <id>http://fseoane.net/blog/</id>
+      <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
+      <link href="http://fseoane.net/blog/feed/rss.xml" rel="self" type="application/atom+xml"/>
+      <title>I say things</title>
+      <updated>2013-05-02T16:00:45Z</updated>
+    </source>
+  </entry>
 
   <entry>
     <id>tag:fseoane.net/blog,2013-04-16:2013/isotonic-regression/</id>
@@ -32,8 +177,8 @@ the model can be written concisely as an optimization problem over $x$</p>
 \text{argmin}_x \|y - x \|^2 \\
 \text{subject to } x_0 \leq x_1 \leq \cdots \leq x_n
 $$</p>
-<p>The algorithm implemented in scikit-learn <sup id="fnref:3"><a href="http://fseoane.net/blog/feed/#fn:3" rel="footnote">3</a></sup> is the pool adjacent
-violators algorithm <sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup>, which is an efficient linear time
+<p>The algorithm implemented in scikit-learn <sup id="fnref:3"><a class="footnote-ref" href="http://fseoane.net/blog/feed/#fn:3" rel="footnote">3</a></sup> is the pool adjacent
+violators algorithm <sup id="fnref:1"><a class="footnote-ref" href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup>, which is an efficient linear time
 $\mathcal{O}(n)$ algorithm. The algorithm sweeps through the data
 looking for violations of the monotonicity constraint. When it finds
 one, it adjusts the estimate to the best possible fit with
@@ -46,13 +191,13 @@ picture shows how it proceeds at each iteration</p>
 <ol>
 <li id="fn:1">
 <p>"Active set algorithms for isotonic regression; A unifying
-framework", Michael J. Best, Nilotpal Chakravarti <a href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
+framework", Michael J. Best, Nilotpal Chakravarti <a class="footnote-backref" href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
 </li>
 <li id="fn:2">
-<p>Python notebook to generate the figures: <a href="http://fseoane.net/blog/static/uploads/2013/isotonic_regression_sklearn.ipynb">ipynb</a> and <a href="http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/isotonic_regression_sklearn.ipynb">web version</a> <a href="http://fseoane.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
+<p>Python notebook to generate the figures: <a href="http://fseoane.net/blog/static/uploads/2013/isotonic_regression_sklearn.ipynb">ipynb</a> and <a href="http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/isotonic_regression_sklearn.ipynb">web version</a> <a class="footnote-backref" href="http://fseoane.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
 </li>
 <li id="fn:3">
-<p>The algorithm is used through the sklearn.isotonic.IsotonicRegression object (<a href="http://scikit-learn.org/dev/modules/generated/sklearn.isotonic.IsotonicRegression.html">doc</a>) or the function sklearn.isotonic.isotonic_regression (<a href="http://scikit-learn.org/dev/modules/generated/sklearn.isotonic.isotonic_regression.html">doc</a>) <a href="http://fseoane.net/blog/feed/#fnref:3" rev="footnote" title="Jump back to footnote 3 in the text">↩</a></p>
+<p>The algorithm is used through the sklearn.isotonic.IsotonicRegression object (<a href="http://scikit-learn.org/dev/modules/generated/sklearn.isotonic.IsotonicRegression.html">doc</a>) or the function sklearn.isotonic.isotonic_regression (<a href="http://scikit-learn.org/dev/modules/generated/sklearn.isotonic.isotonic_regression.html">doc</a>) <a class="footnote-backref" href="http://fseoane.net/blog/feed/#fnref:3" rev="footnote" title="Jump back to footnote 3 in the text">↩</a></p>
 </li>
 </ol>
 </div></div>
@@ -70,7 +215,7 @@ framework", Michael J. Best, Nilotpal Chakravarti <a href="http://fseoane.net/b
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog/feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-04-20T09:20:17Z</updated>
+      <updated>2013-05-02T16:00:47Z</updated>
     </source>
   </entry>
 
@@ -239,7 +384,7 @@ AttributeError:
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-05-02T06:20:08Z</updated>
+      <updated>2013-05-02T16:00:49Z</updated>
     </source>
   </entry>
 
@@ -393,7 +538,7 @@ AttributeError:
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-05-02T06:20:20Z</updated>
+      <updated>2013-05-02T16:01:02Z</updated>
     </source>
   </entry>
 
@@ -408,8 +553,8 @@ property that for suitable chosen $v$ and $\beta$ it makes the product
 $P x$ to zero out all of the coordinates but one, that is, $P x =
 \|x\| e_1$. The following code, given $x$, finds the values of $\beta,
 v$ that verify that property. The algorithm can be found in several
-textbooks <sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup></p>
-<div class="highlight"><pre><span class="k">def</span> <span class="nf">house</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+textbooks <sup id="fnref:1"><a class="footnote-ref" href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup></p>
+<div class="codehilite"><pre><span class="k">def</span> <span class="nf">house</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
     <span class="sd">"""</span>
 <span class="sd">    Given a vetor x, computes vectors v with v[0] = 1</span>
 <span class="sd">    and scalar beta such that P = I - beta v v^T</span>
@@ -445,7 +590,7 @@ textbooks <sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" rel="fo
 
 <p>As promised, this computes the parameters of $P$ such that $P x = \|x\| e_1$,
 exact to 15 decimals:</p>
-<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">5</span>
+<div class="codehilite"><pre><span class="o">&gt;&gt;&gt;</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">5</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">beta</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">house</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">-</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
@@ -485,10 +630,10 @@ eigensolvers</a></p>
 <hr/>
 <ol>
 <li id="fn:1">
-<p>"Matrix Computations" third edition, Golub &amp; VanLoan (Algorithm 5.1.1). <a href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
+<p>"Matrix Computations" third edition, Golub &amp; VanLoan (Algorithm 5.1.1). <a class="footnote-backref" href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
 </li>
 <li id="fn:2">
-<p>Code to reproduce the figures <a href="http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/householder.ipynb">can be found here</a>, source for the IPython notebook <a href="http://fseoane.net/blog/static/uploads/2013/householder.ipynb">can be found here</a> <a href="http://fseoane.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
+<p>Code to reproduce the figures <a href="http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/householder.ipynb">can be found here</a>, source for the IPython notebook <a href="http://fseoane.net/blog/static/uploads/2013/householder.ipynb">can be found here</a> <a class="footnote-backref" href="http://fseoane.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
 </li>
 </ol>
 </div></div>
@@ -505,7 +650,7 @@ eigensolvers</a></p>
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog/feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-04-20T09:20:16Z</updated>
+      <updated>2013-05-02T16:00:46Z</updated>
     </source>
   </entry>
 
@@ -696,7 +841,7 @@ Operations after Theano Simplification:  17</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-05-02T06:20:19Z</updated>
+      <updated>2013-05-02T16:01:01Z</updated>
     </source>
   </entry>
 
@@ -956,7 +1101,7 @@ legend(['$R_{31}$', "$R'_{31}$"])</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-05-02T06:20:20Z</updated>
+      <updated>2013-05-02T16:01:01Z</updated>
     </source>
   </entry>
 
@@ -1002,7 +1147,7 @@ legend(['$R_{31}$', "$R'_{31}$"])</code></pre>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-05-02T06:20:08Z</updated>
+      <updated>2013-05-02T16:00:49Z</updated>
     </source>
   </entry>
 
@@ -1028,7 +1173,7 @@ of loss functions are:</p>
 <li>Logistic loss, $\log(1 + \exp{f(x_i) y_i})$</li>
 </ul>
 <p><img alt="Loss functions" src="http://fseoane.net/blog/static/images/2013/loss_functions.png"/></p>
-<p><sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup></p>
+<p><sup id="fnref:1"><a class="footnote-ref" href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup></p>
 <p>In the paper <a href="http://citeseer.ist.psu.edu/viewdoc/summary?doi=10.1.1.124.9242">Loss functions for preference levels: Regression with
 discrete ordered
 labels</a>,
@@ -1066,7 +1211,7 @@ each time a threshold is crossed.</p>
 <hr/>
 <ol>
 <li id="fn:1">
-<p>Code for generating all figures can be found <a href="http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/ordinal%2520regression%2520loss%2520functions.ipynb">here</a> <a href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
+<p>Code for generating all figures can be found <a href="http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/ordinal%2520regression%2520loss%2520functions.ipynb">here</a> <a class="footnote-backref" href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
 </li>
 </ol>
 </div></div>
@@ -1083,7 +1228,7 @@ each time a threshold is crossed.</p>
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog/feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-04-20T09:20:16Z</updated>
+      <updated>2013-05-02T16:00:46Z</updated>
     </source>
   </entry>
 
@@ -1159,7 +1304,7 @@ each time a threshold is crossed.</p>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-05-02T06:20:20Z</updated>
+      <updated>2013-05-02T16:01:02Z</updated>
     </source>
   </entry>
 
@@ -1244,7 +1389,7 @@ each time a threshold is crossed.</p>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-05-02T06:20:20Z</updated>
+      <updated>2013-05-02T16:01:02Z</updated>
     </source>
   </entry>
 
@@ -1281,7 +1426,7 @@ each time a threshold is crossed.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-05-02T06:20:08Z</updated>
+      <updated>2013-05-02T16:00:49Z</updated>
     </source>
   </entry>
 
@@ -1405,7 +1550,7 @@ run(0, tail,  conso(head, tail, (1, 2, 3, 4)))
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-05-02T06:20:20Z</updated>
+      <updated>2013-05-02T16:01:02Z</updated>
     </source>
   </entry>
 
@@ -1503,7 +1648,7 @@ CO,WY,NE,KS,OK,NM,AZ,UT
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-05-02T06:20:20Z</updated>
+      <updated>2013-05-02T16:01:02Z</updated>
     </source>
   </entry>
 
@@ -1620,7 +1765,7 @@ CO,WY,NE,KS,OK,NM,AZ,UT
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-05-02T06:20:20Z</updated>
+      <updated>2013-05-02T16:01:01Z</updated>
     </source>
   </entry>
 
@@ -1740,7 +1885,7 @@ inverted. Note that args must be a tuple consisting of the different
 arguments, thus the parenthesis around <code>a</code>. The third item is a
 dictionary <code>kw</code> specifying the keyword arguments. Here kw is optional
 and is omitted.</p>
-<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">memory_profiler</span> <span class="kn">import</span> <span class="n">memory_usage</span>
+<div class="codehilite"><pre><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">memory_profiler</span> <span class="kn">import</span> <span class="n">memory_usage</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="c"># create a random matrix</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
@@ -1754,7 +1899,7 @@ and is omitted.</p>
 t0 + .01, t0 + .02, ...)</code> at which the measurements where taken. Now I can
 use that to for example plot the memory consumption as a function of
 time:</p>
-<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">pl</span>
+<div class="codehilite"><pre><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">pl</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mem_usage</span><span class="p">))</span> <span class="o">*</span> <span class="o">.</span><span class="mo">01</span><span class="p">,</span> <span class="n">mem_usage</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'linalg.pinv'</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'Time (in seconds)'</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'Memory consumption (in MB)'</span><span class="p">)</span>
@@ -1772,7 +1917,7 @@ a function of the input data. One obvious way we can do this is by
 calling the same function each time with a different input and take as
 memory consumption the maximum consumption over time. This way we will
 have a memory usage for each input.</p>
-<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span>
+<div class="codehilite"><pre><span class="o">&gt;&gt;&gt;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span>
 <span class="o">...</span>    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">i</span><span class="p">,</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">i</span><span class="p">)</span>
 <span class="o">...</span>    <span class="n">mem_usage</span> <span class="o">=</span> <span class="n">memory_usage</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">,</span> <span class="p">(</span><span class="n">A</span><span class="p">,)))</span>
 <span class="o">...</span>    <span class="k">print</span> <span class="nb">max</span><span class="p">(</span><span class="n">mem_usage</span><span class="p">)</span>
@@ -1786,7 +1931,7 @@ have a memory usage for each input.</p>
 
 <p>It is now possible to plot these results as a function of the
 dimensions.</p>
-<div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<div class="codehilite"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">pl</span>
 <span class="kn">from</span> <span class="nn">memory_profiler</span> <span class="kn">import</span> <span class="n">memory_usage</span>
 
@@ -1821,7 +1966,7 @@ dimensions.</p>
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog/feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-04-20T09:20:16Z</updated>
+      <updated>2013-05-02T16:00:47Z</updated>
     </source>
   </entry>
 
@@ -1904,7 +2049,7 @@ dimensions.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-05-02T06:20:09Z</updated>
+      <updated>2013-05-02T16:00:49Z</updated>
     </source>
   </entry>
 
@@ -1935,7 +2080,7 @@ dimensions.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-05-02T06:20:08Z</updated>
+      <updated>2013-05-02T16:00:49Z</updated>
     </source>
   </entry>
 
@@ -2027,7 +2172,7 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-05-02T06:20:20Z</updated>
+      <updated>2013-05-02T16:01:02Z</updated>
     </source>
   </entry>
 
@@ -2036,7 +2181,7 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
     <link href="http://fseoane.net/blog/2012/singular-value-decomposition-in-scipy/" rel="alternate" type="text/html"/>
     <title>Singular Value Decomposition in SciPy</title>
     <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>SciPy contains two methods to compute the singular value decomposition (SVD) of a matrix: <code>scipy.linalg.svd</code> and <code>scipy.sparse.linalg.svds</code>. In this post I'll compare both methods for the task of computing the full SVD of a large dense matrix.</p>
-<p>The first method, <code>scipy.linalg.svd</code>, is perhaps the best known and uses the linear algebra library <a href="http://www.netlib.org/lapack/">LAPACK</a> to handle the computations. This implements the Golub-Kahan-Reisch algorithm <sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup>, which is accurate and highly efficient with a cost of O(n^3) floating-point operations <sup id="fnref:2"><a href="http://fseoane.net/blog/feed/#fn:2" rel="footnote">2</a></sup>.</p>
+<p>The first method, <code>scipy.linalg.svd</code>, is perhaps the best known and uses the linear algebra library <a href="http://www.netlib.org/lapack/">LAPACK</a> to handle the computations. This implements the Golub-Kahan-Reisch algorithm <sup id="fnref:1"><a class="footnote-ref" href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup>, which is accurate and highly efficient with a cost of O(n^3) floating-point operations <sup id="fnref:2"><a class="footnote-ref" href="http://fseoane.net/blog/feed/#fn:2" rel="footnote">2</a></sup>.</p>
 <p>The second method is <code>scipy.sparse.linalg.svds</code> and despite it's name it works fine also for dense arrays. This implementation is based on the <a href="http://www.caam.rice.edu/software/ARPACK/">ARPACK</a> library and consists of an iterative procedure that finds the SVD decomposition by reducing the problem to an eigendecomposition on the array X -&gt; dot(X.T, X). This method is usually very effective when the input matrix X is sparse or only the largest singular values are required. There are other SVD solvers that I did not consider, such as <a href="http://pypi.python.org/pypi/sparsesvd/">sparsesvd</a> or <a href="http://pysparse.sourceforge.net/introduction.html#jdsym">pysparse.jdsym</a>, but my points for the sparse solve probably hold for those packages too since they both implement iterative algorithms based on the same principles.</p>
 <p>When the input matrix is dense and all the singular values are required, the first method is usually more efficient. To support this statement I've created a little benchmark: timings for both methods as a function of the size of the matrices. Notice that we are in a case that is clearly favorable to the <code>linalg.svd</code>: after all <code>sparse.linalg.svds</code> was not created with this setting in mind, it was created for sparse matrices or dense matrices with some special structure. We will see however that even in this setting it has interesting advantages.</p>
 <p>I'll create random square matrices with different sizes and plot the timings for both methods. For the benchmarks I used SciPy v0.12 linked against Intel Math Kernel Library v11. Both methods are single-threaded (I had to set OMP_NUM_THREADS=1 so that MKL does not try to parallelize the computations). <a href="https://gist.github.com/4250756#file-svd_timing-py">[code]</a></p>
@@ -2049,10 +2194,10 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
 <hr/>
 <ol>
 <li id="fn:1">
-<p>Calculating the singular values and pseudo-inverse of a matrix, <em>Golub, Gene H., Kahan, William</em>, 1965, <a href="http://www.jstor.org/stable/2949777">JSTOR</a> <a href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
+<p>Calculating the singular values and pseudo-inverse of a matrix, <em>Golub, Gene H., Kahan, William</em>, 1965, <a href="http://www.jstor.org/stable/2949777">JSTOR</a> <a class="footnote-backref" href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
 </li>
 <li id="fn:2">
-<p>A Survey of Singular Value Decomposition Methods and Performance Comparison of Some Available Serial Codes, <em>Plassman, Gerald E.</em> 2005 <a href="http://research.microsoft.com/en-us/um/people/zhoulin/2005-a%20survey%20of%20singular%20value%20decomposition_plassman.pdf">PDF</a> <a href="http://fseoane.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
+<p>A Survey of Singular Value Decomposition Methods and Performance Comparison of Some Available Serial Codes, <em>Plassman, Gerald E.</em> 2005 <a href="http://research.microsoft.com/en-us/um/people/zhoulin/2005-a%20survey%20of%20singular%20value%20decomposition_plassman.pdf">PDF</a> <a class="footnote-backref" href="http://fseoane.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
 </li>
 </ol>
 </div></div>
@@ -2069,7 +2214,7 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog/feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-04-20T09:20:17Z</updated>
+      <updated>2013-05-02T16:00:47Z</updated>
     </source>
   </entry>
 
@@ -2177,7 +2322,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-05-02T06:20:20Z</updated>
+      <updated>2013-05-02T16:01:02Z</updated>
     </source>
   </entry>
 
@@ -2555,7 +2700,7 @@ E(exp(I*t*X))</code></pre>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-05-02T06:20:24Z</updated>
+      <updated>2013-05-02T16:01:06Z</updated>
     </source>
   </entry>
 
@@ -3049,7 +3194,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-05-02T06:20:24Z</updated>
+      <updated>2013-05-02T16:01:06Z</updated>
     </source>
   </entry>
 
@@ -3238,7 +3383,7 @@ x ** 1 -&gt; x</code></pre>
       <link href="http://gilbertgede.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site, I guess...</subtitle>
       <title>Gilbert Gede's Blog</title>
-      <updated>2013-05-02T06:20:14Z</updated>
+      <updated>2013-05-02T16:00:55Z</updated>
     </source>
   </entry>
 
@@ -4397,8 +4542,8 @@ f_durations.write('\n')
     <span class="k">print</span><span class="p">(</span><span class="s">'Kendall correlation coefficient for block </span><span class="si">%s</span><span class="s">: </span><span class="si">%.5f</span><span class="s">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">tau</span><span class="p">))</span>
 </pre></div>
 
-<div class="highlight"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">0</span><span class="p">:</span> <span class="mf">0.71122</span>
-<span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">1</span><span class="p">:</span> <span class="mf">0.84387</span>
+<div class="codehilite"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> 0<span class="p">:</span> 0<span class="p">.</span>71122
+<span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> 1<span class="p">:</span> 0<span class="p">.</span>84387
 </pre></div>
 
 
@@ -4460,8 +4605,8 @@ f_durations.write('\n')
     <span class="k">print</span><span class="p">(</span><span class="s">'Kendall correlation coefficient for block </span><span class="si">%s</span><span class="s">: </span><span class="si">%.5f</span><span class="s">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">tau</span><span class="p">))</span>
 </pre></div>
 
-<div class="highlight"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">0</span><span class="p">:</span> <span class="mf">0.83627</span>
-<span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">1</span><span class="p">:</span> <span class="mf">0.84387</span>
+<div class="codehilite"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> 0<span class="p">:</span> 0<span class="p">.</span>83627
+<span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> 1<span class="p">:</span> 0<span class="p">.</span>84387
 </pre></div>
 
 
@@ -4480,7 +4625,7 @@ f_durations.write('\n')
       <link href="http://fseoane.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fseoane.net/blog/feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2013-04-20T09:20:15Z</updated>
+      <updated>2013-05-02T16:00:45Z</updated>
     </source>
   </entry>
 
@@ -4555,7 +4700,7 @@ f_durations.write('\n')
       <link href="http://sympystats.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another WordPress.com site</subtitle>
       <title>sympy-stats</title>
-      <updated>2013-05-02T06:20:16Z</updated>
+      <updated>2013-05-02T16:00:58Z</updated>
     </source>
   </entry>
 
@@ -4700,7 +4845,7 @@ RuntimeError: maximum recursion depth exceeded in comparison
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-05-02T06:20:08Z</updated>
+      <updated>2013-05-02T16:00:49Z</updated>
     </source>
   </entry>
 
@@ -4743,7 +4888,7 @@ b. Add this line to your bash_profile.</p>
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-05-02T06:20:24Z</updated>
+      <updated>2013-05-02T16:01:06Z</updated>
     </source>
   </entry>
 
@@ -4827,7 +4972,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-05-02T06:20:08Z</updated>
+      <updated>2013-05-02T16:00:49Z</updated>
     </source>
   </entry>
 
@@ -4863,7 +5008,7 @@ Out[8]: 0.5
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-05-02T06:20:08Z</updated>
+      <updated>2013-05-02T16:00:49Z</updated>
     </source>
   </entry>
 
@@ -5100,7 +5245,7 @@ Out[74]: True
       <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>..where we discuss density operators wrt SymPy</subtitle>
       <title>rhoforsympy</title>
-      <updated>2013-05-02T06:20:24Z</updated>
+      <updated>2013-05-02T16:01:06Z</updated>
     </source>
   </entry>
 
@@ -5218,7 +5363,7 @@ commits are much more like my usual ones.
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-05-02T06:20:22Z</updated>
+      <updated>2013-05-02T16:01:05Z</updated>
     </source>
   </entry>
 
@@ -5251,7 +5396,7 @@ commits are much more like my usual ones.
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2013-05-02T06:20:23Z</updated>
+      <updated>2013-05-02T16:01:05Z</updated>
     </source>
   </entry>
 
@@ -5396,7 +5541,7 @@ Out[24]: 6
       <link href="http://scolobb.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Reports of quests for adventures and coadventures</subtitle>
       <title>Coaquarium</title>
-      <updated>2013-05-02T06:20:22Z</updated>
+      <updated>2013-05-02T16:01:04Z</updated>
     </source>
   </entry>
 
@@ -5515,39 +5660,7 @@ Out[24]: 6
       <link href="http://angadhsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>4 out of 5 dentists recommend this WordPress.com site</subtitle>
       <title>GSoC 2012 blog</title>
-      <updated>2013-05-02T06:20:23Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://rhoforsympy.wordpress.com/?p=235</id>
-    <link href="http://rhoforsympy.wordpress.com/2012/08/03/week-11-fidelity-of-quantum-states/" rel="alternate" type="text/html"/>
-    <title>Week 11:  Fidelity of quantum states</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">As discussed in my previous weeks report, this week I started addressing some of the issues in the pending PR’s and all the pending PRs were merged! In addition to getting the pending PRs accepted, I have stated working on 2 other tasks. One of them, that was completed is the feature to compute Fidelity [...]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;blog=34650270&amp;post=235&amp;subd=rhoforsympy&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>As discussed in my previous weeks report, this week I started addressing some of the issues in the pending PR’s and all the pending PRs were merged!</p>
-<p>In addition to getting the pending PRs accepted, I have stated working on 2 other tasks. One of them, that was completed is the feature to compute Fidelity (<a href="https://github.com/sympy/sympy/pull/1459">PR 1459</a>) of quantum states.  Some screen-shots follow (taken from notebook examples available with code base). Information regarding fidelity can be found at these 2 wikis: <a href="http://en.wikipedia.org/wiki/Fidelity_of_quantum_states">1</a>, <a href="http://www.quantiki.org/wiki/Fidelity">2</a></p>
-<p>For the next week, my plan is to finish up work on the implementation of Shor’s algorithm available <a href="https://github.com/addisonc/sympy/blob/addison-main/sympy/physics/quantum/shor.py">here</a>.</p>
-<p>Here are some examples of using the fidelity function:</p>
-<p><a href="http://rhoforsympy.files.wordpress.com/2012/08/fidelity_ket.png"><img alt="" class="alignleft size-full wp-image-238" height="382" src="http://rhoforsympy.files.wordpress.com/2012/08/fidelity_ket.png?w=500&amp;h=382" title="fidelity_ket" width="500"/></a></p>
-<p><a href="http://rhoforsympy.files.wordpress.com/2012/08/fidelity-qubit2.png"><img alt="" class="alignleft size-full wp-image-243" height="369" src="http://rhoforsympy.files.wordpress.com/2012/08/fidelity-qubit2.png?w=500&amp;h=369" title="fidelity-qubit" width="500"/></a></p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/rhoforsympy.wordpress.com/235/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/rhoforsympy.wordpress.com/235/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;blog=34650270&amp;post=235&amp;subd=rhoforsympy&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2012-08-03T21:19:25Z</updated>
-    <category term="GSoc"/>
-    <author>
-      <name>grdvnl</name>
-    </author>
-    <source>
-      <id>http://rhoforsympy.wordpress.com</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://rhoforsympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://rhoforsympy.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://rhoforsympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://rhoforsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>..where we discuss density operators wrt SymPy</subtitle>
-      <title>rhoforsympy</title>
-      <updated>2013-05-02T06:20:24Z</updated>
+      <updated>2013-05-02T16:01:05Z</updated>
     </source>
   </entry>
 </feed>
