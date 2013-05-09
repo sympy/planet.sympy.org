@@ -33,17 +33,17 @@
 
 
 
-<h3><a href="http://fseoane.net/blog/" title="I say things">Fabian Pedregosa</a></h3>
+<h3><a href="http://fabianp.net/blog/" title="I say things">Fabian Pedregosa</a></h3>
 
 
-<div class="entrygroup" id="tag:fseoane.net/blog,2013-05-02:2013/logistic-ordinal-regression/">
-<h4><a href="http://fseoane.net/blog/2013/logistic-ordinal-regression/">Logistic Ordinal Regression</a></h4>
+<div class="entrygroup" id="tag:fabianp.net/blog,2013-05-02:2013/logistic-ordinal-regression/">
+<h4><a href="http://fabianp.net/blog/2013/logistic-ordinal-regression/">Logistic Ordinal Regression</a></h4>
 <div class="entry">
 <div class="content">
 <p><strong>TL;DR: I've implemented a logistic ordinal regression or
   proportional odds model. <a href="http://github.com/fabianp/minirank/blob/master/minirank/logistic.py">Here is the Python code</a></strong></p>
 <p>The <em>logistic ordinal regression</em> model, also known as the
-proportional odds was introduced in the early 80s by McCullagh [<sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup>, <sup id="fnref:2"><a href="http://fseoane.net/blog/feed/#fn:2" rel="footnote">2</a></sup>]
+proportional odds was introduced in the early 80s by McCullagh [<sup id="fnref:1"><a href="http://fabianp.net/blog/feed/#fn:1" rel="footnote">1</a></sup>, <sup id="fnref:2"><a href="http://fabianp.net/blog/feed/#fn:2" rel="footnote">2</a></sup>]
 and is a generalized linear model specially tailored for the case of
 predicting ordinal variables, that is, variables that are discrete (as
 in classification) but which can be ordered (as in regression). It can
@@ -61,8 +61,8 @@ $$</p>
 <p>where $w, \theta$ are vectors to be estimated from the data and $\phi$
 is the logistic function defined as $\phi(t) = 1 / (1 + \exp(-t))$.</p>
 &lt;figure style="float: left; width: 380px; margin: 0px 15px 15px 0px"&gt;
-<img src="http://fseoane.net/blog/static/images/2013/ordinal_1.png" />
-<img src="http://fseoane.net/blog/static/images/2013/ordinal_logistic.png" />
+<img src="http://fabianp.net/blog/static/images/2013/ordinal_1.png" />
+<img src="http://fabianp.net/blog/static/images/2013/ordinal_logistic.png" />
 
 &lt;figcaption style="margin-left: 10px; margin-right: 5px"&gt;Toy example with three classes denoted in different colors. Also shown the vector of coefficients $w$ and the thresholds $\theta_0$ and $\theta_1$&lt;/figcaption&gt;
 
@@ -83,7 +83,7 @@ $\theta_{0} = - \infty$ and $\theta_K = + \infty$.</p>
 produces a set of values that are well separated into the different
 classes by the different thresholds $\theta$. We choose a logistic
 function to model the probability $P(y \leq j|X_i)$ but other choices
-are possible. In the proportional hazards model <sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup> the probability
+are possible. In the proportional hazards model <sup id="fnref:1"><a href="http://fabianp.net/blog/feed/#fn:1" rel="footnote">1</a></sup> the probability
 is modeled as $-\log(1 - P(y \leq j | X_i)) = \exp(\theta_j - w^T
 X_i)$. Other link functions are possible, where the link function
 satisfies $\text{link}(P(y \leq j | X_i)) = \theta_j - w^T X_i$. Under
@@ -131,8 +131,9 @@ can be found here</a> as part of the <a href="https://github.com/fabianp/miniran
 is my sandbox for code related to ranking and ordinal regression. At
 some point I would like to submit it to scikit-learn but right now the
 I don't know how the code will scale to medium-scale problems, but I
-suspect not great. I also plan to add some more features like $\ell_2$
-regularization to the model.</p>
+suspect not great. On top of that I'm not sure if there is a real demand
+of these models for scikit-learn and I don't want to bloat the package
+with unused features.</p>
 <h3>Performance</h3>
 
 <p>I compared the prediction accuracy of this model in the sense of mean absolute
@@ -144,7 +145,7 @@ size 506 $\times$ 13 with 46 different target values. Although not a
 huge increase in accuracy, this model did give me better results on
 this particular dataset:</p>
 &lt;figure&gt;
-<img src="http://fseoane.net/blog/static/images/2013/bars_ordinal.png" />
+<img src="http://fabianp.net/blog/static/images/2013/bars_ordinal.png" />
 &lt;/figure&gt;
 
 <p>Here, ordinal logistic regression is the best-performing model,
@@ -155,14 +156,14 @@ regression model.</p>
 <ol>
 <li id="fn:1">
 <p>"Regression models for ordinal data", P. McCullagh, Journal of
-the royal statistical society. Series B (Methodological), 1980 <a href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
+the royal statistical society. Series B (Methodological), 1980 <a href="http://fabianp.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
 </li>
 <li id="fn:2">
-<p>"Generalized Linear Models", P. McCullagh and J. A. Nelder (Book) <a href="http://fseoane.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
+<p>"Generalized Linear Models", P. McCullagh and J. A. Nelder (Book) <a href="http://fabianp.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
 </li>
 <li id="fn:3">
 <p>"Loss Functions for Preference Levels : Regression with Discrete
-Ordered Labels", Jason D. M. Rennie, Nathan Srebro <a href="http://fseoane.net/blog/feed/#fnref:3" rev="footnote" title="Jump back to footnote 3 in the text">↩</a></p>
+Ordered Labels", Jason D. M. Rennie, Nathan Srebro <a href="http://fabianp.net/blog/feed/#fnref:3" rev="footnote" title="Jump back to footnote 3 in the text">↩</a></p>
 </li>
 </ol>
 </div></div>
@@ -174,7 +175,7 @@ Ordered Labels", Jason D. M. Rennie, Nathan Srebro <a href="http://fseoane.net/
 
 
 <p class="date">
-<a href="http://fseoane.net/blog/2013/logistic-ordinal-regression/">by Fabian Pedregosa at May 01, 2013 10:00 PM</a>
+<a href="http://fabianp.net/blog/2013/logistic-ordinal-regression/">by Fabian Pedregosa at May 01, 2013 10:00 PM</a>
 </p>
 </div>
 </div>
@@ -194,11 +195,11 @@ Ordered Labels", Jason D. M. Rennie, Nathan Srebro <a href="http://fseoane.net/
 
 
 
-<h3><a href="http://fseoane.net/blog/" title="I say things">Fabian Pedregosa</a></h3>
+<h3><a href="http://fabianp.net/blog/" title="I say things">Fabian Pedregosa</a></h3>
 
 
-<div class="entrygroup" id="tag:fseoane.net/blog,2013-04-16:2013/isotonic-regression/">
-<h4><a href="http://fseoane.net/blog/2013/isotonic-regression/">Isotonic Regression</a></h4>
+<div class="entrygroup" id="tag:fabianp.net/blog,2013-04-16:2013/isotonic-regression/">
+<h4><a href="http://fabianp.net/blog/2013/isotonic-regression/">Isotonic Regression</a></h4>
 <div class="entry">
 <div class="content">
 <p>My latest contribution for <a href="http://scikit-learn.org">scikit-learn</a> is
@@ -209,7 +210,7 @@ Ordered Labels", Jason D. M. Rennie, Nathan Srebro <a href="http://fseoane.net/
  constraint that the fit must be a non-decreasing
  function. <a href="http://scikit-learn.sourceforge.net/dev/auto_examples/plot_isotonic_regression.html">The example</a>
  on the scikit-learn website gives an intuition on this model.</p>
-<p><img src="http://fseoane.net/blog/static/images/2013/plot_isotonic_regression_1.png" alt="isotonic regression" /></p>
+<p><img src="http://fabianp.net/blog/static/images/2013/plot_isotonic_regression_1.png" alt="isotonic regression" /></p>
 <p>The original points are in red, and the estimated ones are in
 green. As you can see, there is one estimation (green point) for each
 data sample (red point). Calling $y \in \mathbb{R}^n$ the input data,
@@ -218,27 +219,27 @@ the model can be written concisely as an optimization problem over $x$</p>
 \text{argmin}_x \|y - x \|^2 \\
 \text{subject to } x_0 \leq x_1 \leq \cdots \leq x_n
 $$</p>
-<p>The algorithm implemented in scikit-learn <sup id="fnref:3"><a href="http://fseoane.net/blog/feed/#fn:3" rel="footnote">3</a></sup> is the pool adjacent
-violators algorithm <sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup>, which is an efficient linear time
+<p>The algorithm implemented in scikit-learn <sup id="fnref:3"><a href="http://fabianp.net/blog/feed/#fn:3" rel="footnote">3</a></sup> is the pool adjacent
+violators algorithm <sup id="fnref:1"><a href="http://fabianp.net/blog/feed/#fn:1" rel="footnote">1</a></sup>, which is an efficient linear time
 $\mathcal{O}(n)$ algorithm. The algorithm sweeps through the data
 looking for violations of the monotonicity constraint. When it finds
 one, it adjusts the estimate to the best possible fit with
 constraints. Sometimes it also needs to modify previous points to make
 sure the new estimate does not violate the constraints. The following
 picture shows how it proceeds at each iteration</p>
-<p><img src="http://fseoane.net/blog/static/images/2013/isotonic.gif" alt="isotonic regression" /></p>
+<p><img src="http://fabianp.net/blog/static/images/2013/isotonic.gif" alt="isotonic regression" /></p>
 <div class="footnote">
 <hr />
 <ol>
 <li id="fn:1">
 <p>"Active set algorithms for isotonic regression; A unifying
-framework", Michael J. Best, Nilotpal Chakravarti <a href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
+framework", Michael J. Best, Nilotpal Chakravarti <a href="http://fabianp.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
 </li>
 <li id="fn:2">
-<p>Python notebook to generate the figures: <a href="http://fseoane.net/blog/static/uploads/2013/isotonic_regression_sklearn.ipynb">ipynb</a> and <a href="http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/isotonic_regression_sklearn.ipynb">web version</a> <a href="http://fseoane.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
+<p>Python notebook to generate the figures: <a href="http://fabianp.net/blog/static/uploads/2013/isotonic_regression_sklearn.ipynb">ipynb</a> and <a href="http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/isotonic_regression_sklearn.ipynb">web version</a> <a href="http://fabianp.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
 </li>
 <li id="fn:3">
-<p>The algorithm is used through the sklearn.isotonic.IsotonicRegression object (<a href="http://scikit-learn.org/dev/modules/generated/sklearn.isotonic.IsotonicRegression.html">doc</a>) or the function sklearn.isotonic.isotonic_regression (<a href="http://scikit-learn.org/dev/modules/generated/sklearn.isotonic.isotonic_regression.html">doc</a>) <a href="http://fseoane.net/blog/feed/#fnref:3" rev="footnote" title="Jump back to footnote 3 in the text">↩</a></p>
+<p>The algorithm is used through the sklearn.isotonic.IsotonicRegression object (<a href="http://scikit-learn.org/dev/modules/generated/sklearn.isotonic.IsotonicRegression.html">doc</a>) or the function sklearn.isotonic.isotonic_regression (<a href="http://scikit-learn.org/dev/modules/generated/sklearn.isotonic.isotonic_regression.html">doc</a>) <a href="http://fabianp.net/blog/feed/#fnref:3" rev="footnote" title="Jump back to footnote 3 in the text">↩</a></p>
 </li>
 </ol>
 </div></div>
@@ -250,7 +251,7 @@ framework", Michael J. Best, Nilotpal Chakravarti <a href="http://fseoane.net/b
 
 
 <p class="date">
-<a href="http://fseoane.net/blog/2013/isotonic-regression/">by Fabian Pedregosa at April 15, 2013 10:00 PM</a>
+<a href="http://fabianp.net/blog/2013/isotonic-regression/">by Fabian Pedregosa at April 15, 2013 10:00 PM</a>
 </p>
 </div>
 </div>
@@ -620,11 +621,11 @@ AttributeError:
 
 
 
-<h3><a href="http://fseoane.net/blog/" title="I say things">Fabian Pedregosa</a></h3>
+<h3><a href="http://fabianp.net/blog/" title="I say things">Fabian Pedregosa</a></h3>
 
 
-<div class="entrygroup" id="tag:fseoane.net/blog,2013-03-30:2013/householder-matrices/">
-<h4><a href="http://fseoane.net/blog/2013/householder-matrices/">Householder matrices</a></h4>
+<div class="entrygroup" id="tag:fabianp.net/blog,2013-03-30:2013/householder-matrices/">
+<h4><a href="http://fabianp.net/blog/2013/householder-matrices/">Householder matrices</a></h4>
 <div class="entry">
 <div class="content">
 <p>Householder matrices are square matrices of the form</p>
@@ -634,7 +635,7 @@ property that for suitable chosen $v$ and $\beta$ it makes the product
 $P x$ to zero out all of the coordinates but one, that is, $P x =
 \|x\| e_1$. The following code, given $x$, finds the values of $\beta,
 v$ that verify that property. The algorithm can be found in several
-textbooks <sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup></p>
+textbooks <sup id="fnref:1"><a href="http://fabianp.net/blog/feed/#fn:1" rel="footnote">1</a></sup></p>
 <div class="highlight"><pre><span class="k">def</span> <span class="nf">house</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
     <span class="sd">"""</span>
 <span class="sd">    Given a vetor x, computes vectors v with v[0] = 1</span>
@@ -694,10 +695,10 @@ product $P_0 P_1 ... P_n$ is again an orthogonal matrix, namely the
 $Q$ matrix in the QR decomposition.</p>
 <p>If we choose X as 20-by-20 random matrix, with colors representing
 different values</p>
-<p><img src="http://fseoane.net/blog/static/images/2013/house_random.png" alt="QR decomposition" /></p>
+<p><img src="http://fabianp.net/blog/static/images/2013/house_random.png" alt="QR decomposition" /></p>
 <p>we can see the process of the Householder matrices being applied one
 by one to obtain an upper triangular matrix</p>
-<p><img src="http://fseoane.net/blog/static/images/2013/house.gif" alt="QR decomposition" /></p>
+<p><img src="http://fabianp.net/blog/static/images/2013/house.gif" alt="QR decomposition" /></p>
 <p>A similar application of Householder matrices is to reduce a given
 symmetric matrix to tridiagonal form, which proceeds in a similar way
 as in the QR algorithm, only that now we multiply by the matrix $X$ by
@@ -706,15 +707,15 @@ we seek for Householder matrices that zero out the elements of the
 subdiagonal plus one, instead of just subdiagonal elements. This
 algorithm is used for example as a preprocessing step for <a href="http://www.netlib.org/lapack/lug/node70.html">most dense
 eigensolvers</a></p>
-<p><img src="http://fseoane.net/blog/static/images/2013/house_tridiag.gif" alt="Tridiagonalization" /></p>
+<p><img src="http://fabianp.net/blog/static/images/2013/house_tridiag.gif" alt="Tridiagonalization" /></p>
 <div class="footnote">
 <hr />
 <ol>
 <li id="fn:1">
-<p>"Matrix Computations" third edition, Golub &amp; VanLoan (Algorithm 5.1.1). <a href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
+<p>"Matrix Computations" third edition, Golub &amp; VanLoan (Algorithm 5.1.1). <a href="http://fabianp.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
 </li>
 <li id="fn:2">
-<p>Code to reproduce the figures <a href="http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/householder.ipynb">can be found here</a>, source for the IPython notebook <a href="http://fseoane.net/blog/static/uploads/2013/householder.ipynb">can be found here</a> <a href="http://fseoane.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
+<p>Code to reproduce the figures <a href="http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/householder.ipynb">can be found here</a>, source for the IPython notebook <a href="http://fseoane.net/blog/static/uploads/2013/householder.ipynb">can be found here</a> <a href="http://fabianp.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
 </li>
 </ol>
 </div></div>
@@ -726,7 +727,7 @@ eigensolvers</a></p>
 
 
 <p class="date">
-<a href="http://fseoane.net/blog/2013/householder-matrices/">by Fabian Pedregosa at March 29, 2013 11:00 PM</a>
+<a href="http://fabianp.net/blog/2013/householder-matrices/">by Fabian Pedregosa at March 29, 2013 11:00 PM</a>
 </p>
 </div>
 </div>
@@ -934,135 +935,6 @@ Operations after Theano Simplification:  17</code></pre>
 
 <p class="date">
 <a href="http://matthewrocklin.com/blog//work/2013/03/28/SymPy-Theano-part-2">March 28, 2013 07:00 AM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
-<div class="daygroup">
-<h2>March 26, 2013</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://fseoane.net/blog/" title="I say things">Fabian Pedregosa</a></h3>
-
-
-<div class="entrygroup" id="tag:fseoane.net/blog,2013-03-27:2013/householder-matrices/">
-<h4><a href="http://fseoane.net/blog/2013/householder-matrices/">Householder matrices</a></h4>
-<div class="entry">
-<div class="content">
-<p><strong> Note: if you don't visualize the math correctly come to its
-<a href="http://fseoane.net/blog/2013/householder-matrices/">original location</a>
-</strong></p>
-<p>Householder matrices are square matrices of the form</p>
-<p>$$ P = I - \beta v v^T$$</p>
-<p>where $\beta$ is a scalar and $v$ is a vector. It has the useful
-property that for suitable chosen $v$ and $\beta$ it makes the product
-$P x$ to zero out all of the coordinates but one, that is, $P x =
-\|x\| e_1$. The following code, given $x$, finds the values of $\beta,
-v$ that verify that property. The algorithm can be found in several
-textbooks <sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup></p>
-<div class="codehilite"><pre><span class="k">def</span> <span class="nf">house</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-    <span class="sd">"""</span>
-<span class="sd">    Given a vetor x, computes vectors v with v[0] = 1</span>
-<span class="sd">    and scalar beta such that P = I - beta v v^T</span>
-<span class="sd">    is orthogonal and P x = ||x|| e_1</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    x : array, shape (n,) or (n, 1)</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    beta : scalar</span>
-<span class="sd">    v : array, shape (n, 1)</span>
-<span class="sd">    """</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
-    <span class="n">sigma</span> <span class="o">=</span> <span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
-    <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
-    <span class="k">if</span> <span class="n">sigma</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">beta</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">mu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">sigma</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">mu</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span> <span class="n">sigma</span> <span class="o">/</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">mu</span><span class="p">)</span>
-        <span class="n">beta</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">+</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
-        <span class="n">v</span> <span class="o">/=</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">beta</span><span class="p">,</span> <span class="n">v</span>
-</pre></div>
-
-
-<p>As promised, this computes the parameters of $P$ such that $P x = \|x\| e_1$,
-exact to 15 decimals:</p>
-<div class="codehilite"><pre><span class="o">&gt;&gt;&gt;</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">5</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">beta</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">house</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">-</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="k">print</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span> 
-<span class="p">[</span> <span class="mf">1.</span> <span class="o">-</span><span class="mf">0.</span> <span class="o">-</span><span class="mf">0.</span>  <span class="mf">0.</span> <span class="o">-</span><span class="mf">0.</span><span class="p">]</span>
-</pre></div>
-
-
-<p>This property is what it makes Householder matrices useful in
-the context of numerical analysis. It can be used for example to
-compute the QR decomposition of a given matrix. The idea is to
-succesively zero out the sub-diagonal elements, thus leaving a
-triangular matrix at the end. In the first iteration we compute a
-Householder matrix $P_0$ such that $P_0 X$ has only zero below the
-diagonal of the first column, then compute a Householder matrix $P_1$
-such that $P_1 X$ zeroes out the subdiagonal elements of the second
-column and so on. At the end we will have that $P_0 P_1 ... P_n X$ is
-an upper triangular matrix. Since all $P_i$ are orthogonal, the
-product $P_0 P_1 ... P_n$ is again an orthogonal matrix, namely the
-$Q$ matrix in the QR decomposition.</p>
-<p>If we choose X as 20-by-20 random matrix, with colors representing
-different values</p>
-<p><img src="http://fseoane.net/blog/static/images/2013/house_random.png" alt="QR decomposition" /></p>
-<p>we can see the process of the Householder matrices being applied one
-by one to obtain an upper triangular matrix</p>
-<p><img src="http://fseoane.net/blog/static/images/2013/house.gif" alt="QR decomposition" /></p>
-<p>A similar application of Householder matrices is to reduce a given
-symmetric matrix to tridiagonal form, which proceeds in a similar way
-as in the QR algorithm, only that now we multiply by the matrix $X$ by
-the left <em>and right</em> with the Householder matrices. Also, in this case
-we seek for Householder matrices that zero out the elements of the
-subdiagonal plus one, instead of just subdiagonal elements. This
-algorithm is used for example as a preprocessing step for <a href="http://www.netlib.org/lapack/lug/node70.html">most dense
-eigensolvers</a></p>
-<p><img src="http://fseoane.net/blog/static/images/2013/house_tridiag.gif" alt="Tridiagonalization" /></p>
-<div class="footnote">
-<hr />
-<ol>
-<li id="fn:1">
-<p>"Matrix Computations" third edition, Golub &amp; VanLoan (Algorithm 5.1.1). <a href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
-</li>
-<li id="fn:2">
-<p>Code to reproduce the figures <a href="http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/householder.ipynb">can be found here</a>, source for the IPython notebook <a href="http://fseoane.net/blog/static/uploads/2013/householder.ipynb">can be found here</a> <a href="http://fseoane.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
-</li>
-</ol>
-</div></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://fseoane.net/blog/2013/householder-matrices/">by Fabian Pedregosa at March 26, 2013 11:00 PM</a>
 </p>
 </div>
 </div>
@@ -1299,11 +1171,11 @@ legend(['$R_{31}$', "$R'_{31}$"])</code></pre>
 
 
 
-<h3><a href="http://fseoane.net/blog/" title="I say things">Fabian Pedregosa</a></h3>
+<h3><a href="http://fabianp.net/blog/" title="I say things">Fabian Pedregosa</a></h3>
 
 
-<div class="entrygroup" id="tag:fseoane.net/blog,2013-02-27:2013/loss-functions-for-ordinal-regression/">
-<h4><a href="http://fseoane.net/blog/2013/loss-functions-for-ordinal-regression/">Loss Functions for Ordinal regression</a></h4>
+<div class="entrygroup" id="tag:fabianp.net/blog,2013-02-27:2013/loss-functions-for-ordinal-regression/">
+<h4><a href="http://fabianp.net/blog/2013/loss-functions-for-ordinal-regression/">Loss Functions for Ordinal regression</a></h4>
 <div class="entry">
 <div class="content">
 <p><strong> Note: this post contains a fair amount of LaTeX, if you don't
@@ -1323,8 +1195,8 @@ of loss functions are:</p>
 <li>Hinge loss, $\text{max}(0, 1 - f(x_i) y_i)$</li>
 <li>Logistic loss, $\log(1 + \exp{f(x_i) y_i})$</li>
 </ul>
-<p><img src="http://fseoane.net/blog/static/images/2013/loss_functions.png" alt="Loss functions" /></p>
-<p><sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup></p>
+<p><img src="http://fabianp.net/blog/static/images/2013/loss_functions.png" alt="Loss functions" /></p>
+<p><sup id="fnref:1"><a href="http://fabianp.net/blog/feed/#fn:1" rel="footnote">1</a></sup></p>
 <p>In the paper <a href="http://citeseer.ist.psu.edu/viewdoc/summary?doi=10.1.1.124.9242">Loss functions for preference levels: Regression with
 discrete ordered
 labels</a>,
@@ -1349,20 +1221,20 @@ must be verified that $f(x_i) &gt; \theta_0$ and $f(x_i) &gt; \theta_1$ as
 well as $f(x_i) &lt; \theta_3 &lt; \theta_4 &lt; \theta_5$. Treating this as
 K-1=6 independent classification problems produces the following
 family of loss functions (for a hinge loss):</p>
-<p><img src="http://fseoane.net/blog/static/images/2013/loss_functions_ordinal.png" alt="Ordinal loss functions" /></p>
+<p><img src="http://fabianp.net/blog/static/images/2013/loss_functions_ordinal.png" alt="Ordinal loss functions" /></p>
 <p>The idea behind Rennie's paper is to sum all these loss function to
 produce a single optimization problem that is then the sum of all
 threshold violations. Here, not only the function increases when
 thresholds are violated, but the slope of the loss function increases
 each time a threshold is crossed.</p>
-<p><img src="http://fseoane.net/blog/static/images/2013/loss_functions_ordinal2.png" alt="Ordinal loss functions" /></p>
+<p><img src="http://fabianp.net/blog/static/images/2013/loss_functions_ordinal2.png" alt="Ordinal loss functions" /></p>
 
 
 <div class="footnote">
 <hr />
 <ol>
 <li id="fn:1">
-<p>Code for generating all figures can be found <a href="http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/ordinal%2520regression%2520loss%2520functions.ipynb">here</a> <a href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
+<p>Code for generating all figures can be found <a href="http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/ordinal%2520regression%2520loss%2520functions.ipynb">here</a> <a href="http://fabianp.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
 </li>
 </ol>
 </div></div>
@@ -1374,7 +1246,7 @@ each time a threshold is crossed.</p>
 
 
 <p class="date">
-<a href="http://fseoane.net/blog/2013/loss-functions-for-ordinal-regression/">by Fabian Pedregosa at February 26, 2013 11:00 PM</a>
+<a href="http://fabianp.net/blog/2013/loss-functions-for-ordinal-regression/">by Fabian Pedregosa at February 26, 2013 11:00 PM</a>
 </p>
 </div>
 </div>
@@ -2121,11 +1993,11 @@ CO,WY,NE,KS,OK,NM,AZ,UT
 
 
 
-<h3><a href="http://fseoane.net/blog/" title="I say things">Fabian Pedregosa</a></h3>
+<h3><a href="http://fabianp.net/blog/" title="I say things">Fabian Pedregosa</a></h3>
 
 
-<div class="entrygroup" id="tag:fseoane.net/blog,2013-01-04:2013/memory-plots-with-memory_profiler/">
-<h4><a href="http://fseoane.net/blog/2013/memory-plots-with-memory_profiler/">Memory plots with memory_profiler</a></h4>
+<div class="entrygroup" id="tag:fabianp.net/blog,2013-01-04:2013/memory-plots-with-memory_profiler/">
+<h4><a href="http://fabianp.net/blog/2013/memory-plots-with-memory_profiler/">Memory plots with memory_profiler</a></h4>
 <div class="entry">
 <div class="content">
 <p>Besides performing a line-by-line analysis of memory consumption,
@@ -2173,7 +2045,7 @@ time:</p>
 </pre></div>
 
 
-<p><img src="http://fseoane.net/blog/static/images/2013/plot_memory_pinv.png" alt="Memory plot" /></p>
+<p><img src="http://fabianp.net/blog/static/images/2013/plot_memory_pinv.png" alt="Memory plot" /></p>
 <p>This will give the memory usage of a single function across time, which 
 might be interesting for example to detect temporaries that would be
 created during the execution. </p>
@@ -2218,7 +2090,7 @@ dimensions.</p>
 </pre></div>
 
 
-<p><img src="http://fseoane.net/blog/static/images/2013/plot_memory_pinv_2.png" alt="Memory plot" /></p></div>
+<p><img src="http://fabianp.net/blog/static/images/2013/plot_memory_pinv_2.png" alt="Memory plot" /></p></div>
 
 
 
@@ -2227,7 +2099,7 @@ dimensions.</p>
 
 
 <p class="date">
-<a href="http://fseoane.net/blog/2013/memory-plots-with-memory_profiler/">by Fabian Pedregosa at January 03, 2013 11:00 PM</a>
+<a href="http://fabianp.net/blog/2013/memory-plots-with-memory_profiler/">by Fabian Pedregosa at January 03, 2013 11:00 PM</a>
 </p>
 </div>
 </div>
@@ -2489,15 +2361,15 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
 
 
 
-<h3><a href="http://fseoane.net/blog/" title="I say things">Fabian Pedregosa</a></h3>
+<h3><a href="http://fabianp.net/blog/" title="I say things">Fabian Pedregosa</a></h3>
 
 
-<div class="entrygroup" id="tag:fseoane.net/blog,2012-12-08:2012/singular-value-decomposition-in-scipy/">
-<h4><a href="http://fseoane.net/blog/2012/singular-value-decomposition-in-scipy/">Singular Value Decomposition in SciPy</a></h4>
+<div class="entrygroup" id="tag:fabianp.net/blog,2012-12-08:2012/singular-value-decomposition-in-scipy/">
+<h4><a href="http://fabianp.net/blog/2012/singular-value-decomposition-in-scipy/">Singular Value Decomposition in SciPy</a></h4>
 <div class="entry">
 <div class="content">
 <p>SciPy contains two methods to compute the singular value decomposition (SVD) of a matrix: <code>scipy.linalg.svd</code> and <code>scipy.sparse.linalg.svds</code>. In this post I'll compare both methods for the task of computing the full SVD of a large dense matrix.</p>
-<p>The first method, <code>scipy.linalg.svd</code>, is perhaps the best known and uses the linear algebra library <a href="http://www.netlib.org/lapack/">LAPACK</a> to handle the computations. This implements the Golub-Kahan-Reisch algorithm <sup id="fnref:1"><a href="http://fseoane.net/blog/feed/#fn:1" rel="footnote">1</a></sup>, which is accurate and highly efficient with a cost of O(n^3) floating-point operations <sup id="fnref:2"><a href="http://fseoane.net/blog/feed/#fn:2" rel="footnote">2</a></sup>.</p>
+<p>The first method, <code>scipy.linalg.svd</code>, is perhaps the best known and uses the linear algebra library <a href="http://www.netlib.org/lapack/">LAPACK</a> to handle the computations. This implements the Golub-Kahan-Reisch algorithm <sup id="fnref:1"><a href="http://fabianp.net/blog/feed/#fn:1" rel="footnote">1</a></sup>, which is accurate and highly efficient with a cost of O(n^3) floating-point operations <sup id="fnref:2"><a href="http://fabianp.net/blog/feed/#fn:2" rel="footnote">2</a></sup>.</p>
 <p>The second method is <code>scipy.sparse.linalg.svds</code> and despite it's name it works fine also for dense arrays. This implementation is based on the <a href="http://www.caam.rice.edu/software/ARPACK/">ARPACK</a> library and consists of an iterative procedure that finds the SVD decomposition by reducing the problem to an eigendecomposition on the array X -&gt; dot(X.T, X). This method is usually very effective when the input matrix X is sparse or only the largest singular values are required. There are other SVD solvers that I did not consider, such as <a href="http://pypi.python.org/pypi/sparsesvd/">sparsesvd</a> or <a href="http://pysparse.sourceforge.net/introduction.html#jdsym">pysparse.jdsym</a>, but my points for the sparse solve probably hold for those packages too since they both implement iterative algorithms based on the same principles.</p>
 <p>When the input matrix is dense and all the singular values are required, the first method is usually more efficient. To support this statement I've created a little benchmark: timings for both methods as a function of the size of the matrices. Notice that we are in a case that is clearly favorable to the <code>linalg.svd</code>: after all <code>sparse.linalg.svds</code> was not created with this setting in mind, it was created for sparse matrices or dense matrices with some special structure. We will see however that even in this setting it has interesting advantages.</p>
 <p>I'll create random square matrices with different sizes and plot the timings for both methods. For the benchmarks I used SciPy v0.12 linked against Intel Math Kernel Library v11. Both methods are single-threaded (I had to set OMP_NUM_THREADS=1 so that MKL does not try to parallelize the computations). <a href="https://gist.github.com/4250756#file-svd_timing-py">[code]</a></p>
@@ -2510,10 +2382,10 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
 <hr />
 <ol>
 <li id="fn:1">
-<p>Calculating the singular values and pseudo-inverse of a matrix, <em>Golub, Gene H., Kahan, William</em>, 1965, <a href="http://www.jstor.org/stable/2949777">JSTOR</a> <a href="http://fseoane.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
+<p>Calculating the singular values and pseudo-inverse of a matrix, <em>Golub, Gene H., Kahan, William</em>, 1965, <a href="http://www.jstor.org/stable/2949777">JSTOR</a> <a href="http://fabianp.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
 </li>
 <li id="fn:2">
-<p>A Survey of Singular Value Decomposition Methods and Performance Comparison of Some Available Serial Codes, <em>Plassman, Gerald E.</em> 2005 <a href="http://research.microsoft.com/en-us/um/people/zhoulin/2005-a%20survey%20of%20singular%20value%20decomposition_plassman.pdf">PDF</a> <a href="http://fseoane.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
+<p>A Survey of Singular Value Decomposition Methods and Performance Comparison of Some Available Serial Codes, <em>Plassman, Gerald E.</em> 2005 <a href="http://research.microsoft.com/en-us/um/people/zhoulin/2005-a%20survey%20of%20singular%20value%20decomposition_plassman.pdf">PDF</a> <a href="http://fabianp.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
 </li>
 </ol>
 </div></div>
@@ -2525,7 +2397,7 @@ sin(x)**2 + cos(x)**2 -&gt; 1 </code></pre>
 
 
 <p class="date">
-<a href="http://fseoane.net/blog/2012/singular-value-decomposition-in-scipy/">by Fabian Pedregosa at December 07, 2012 11:00 PM</a>
+<a href="http://fabianp.net/blog/2012/singular-value-decomposition-in-scipy/">by Fabian Pedregosa at December 07, 2012 11:00 PM</a>
 </p>
 </div>
 </div>
@@ -4970,11 +4842,11 @@ f_durations.write('\n')
 
 
 
-<h3><a href="http://fseoane.net/blog/" title="I say things">Fabian Pedregosa</a></h3>
+<h3><a href="http://fabianp.net/blog/" title="I say things">Fabian Pedregosa</a></h3>
 
 
-<div class="entrygroup" id="tag:fseoane.net/blog,2012-10-23:2012/learning-to-rank-with-scikit-learn-the-pairwise-transform/">
-<h4><a href="http://fseoane.net/blog/2012/learning-to-rank-with-scikit-learn-the-pairwise-transform/">Learning to rank with scikit-learn: the pairwise transform</a></h4>
+<div class="entrygroup" id="tag:fabianp.net/blog,2012-10-23:2012/learning-to-rank-with-scikit-learn-the-pairwise-transform/">
+<h4><a href="http://fabianp.net/blog/2012/learning-to-rank-with-scikit-learn-the-pairwise-transform/">Learning to rank with scikit-learn: the pairwise transform</a></h4>
 <div class="entry">
 <div class="content">
 <p>This tutorial introduces the concept of pairwise preference used in most <a href="http://en.wikipedia.org/wiki/Learning_to_rank">ranking problems</a>. I'll use scikit-learn and for learning and matplotlib for visualization.</p>
@@ -5131,7 +5003,7 @@ f_durations.write('\n')
 
 
 <p class="date">
-<a href="http://fseoane.net/blog/2012/learning-to-rank-with-scikit-learn-the-pairwise-transform/">by Fabian Pedregosa at October 22, 2012 10:00 PM</a>
+<a href="http://fabianp.net/blog/2012/learning-to-rank-with-scikit-learn-the-pairwise-transform/">by Fabian Pedregosa at October 22, 2012 10:00 PM</a>
 </p>
 </div>
 </div>
@@ -6309,6 +6181,48 @@ Out[24]: 6
 </div>
 
 </div>
+<div class="daygroup">
+<h2>August 03, 2012</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://rhoforsympy.wordpress.com" title="rhoforsympy">Guru Devanla</a></h3>
+
+
+<div class="entrygroup" id="http://rhoforsympy.wordpress.com/?p=235">
+<h4 lang="en"><a href="http://rhoforsympy.wordpress.com/2012/08/03/week-11-fidelity-of-quantum-states/">Week 11:  Fidelity of quantum states</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p>As discussed in my previous weeks report, this week I started addressing some of the issues in the pending PR’s and all the pending PRs were merged!</p>
+<p>In addition to getting the pending PRs accepted, I have stated working on 2 other tasks. One of them, that was completed is the feature to compute Fidelity (<a href="https://github.com/sympy/sympy/pull/1459">PR 1459</a>) of quantum states.  Some screen-shots follow (taken from notebook examples available with code base). Information regarding fidelity can be found at these 2 wikis: <a href="http://en.wikipedia.org/wiki/Fidelity_of_quantum_states">1</a>, <a href="http://www.quantiki.org/wiki/Fidelity">2</a></p>
+<p>For the next week, my plan is to finish up work on the implementation of Shor’s algorithm available <a href="https://github.com/addisonc/sympy/blob/addison-main/sympy/physics/quantum/shor.py">here</a>.</p>
+<p>Here are some examples of using the fidelity function:</p>
+<p><a href="http://rhoforsympy.files.wordpress.com/2012/08/fidelity_ket.png"><img src="http://rhoforsympy.files.wordpress.com/2012/08/fidelity_ket.png?w=500&amp;h=382" title="fidelity_ket" height="382" width="500" alt="" class="alignleft size-full wp-image-238" /></a></p>
+<p><a href="http://rhoforsympy.files.wordpress.com/2012/08/fidelity-qubit2.png"><img src="http://rhoforsympy.files.wordpress.com/2012/08/fidelity-qubit2.png?w=500&amp;h=369" title="fidelity-qubit" height="369" width="500" alt="" class="alignleft size-full wp-image-243" /></a></p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/rhoforsympy.wordpress.com/235/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/rhoforsympy.wordpress.com/235/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;blog=34650270&amp;post=235&amp;subd=rhoforsympy&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://rhoforsympy.wordpress.com/2012/08/03/week-11-fidelity-of-quantum-states/">by grdvnl at August 03, 2012 09:19 PM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
 
 
 <div class="sidebar">
@@ -6353,7 +6267,7 @@ Out[24]: 6
 <a href="" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a class="message" title="404: not found">Django-SymPy</a>
 </li>
 <li>
-<a href="http://fseoane.net/blog/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://fseoane.net/blog/" class="message" title="no activity in 7 days">Fabian Pedregosa</a>
+<a href="http://fabianp.net/blog/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://fabianp.net/blog/" class="message" title="no activity in 7 days">Fabian Pedregosa</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/7648717043547744590/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://gsoc-mathtex.blogspot.com/" class="message" title="no activity in 7 days">Freddie Witherden</a>
@@ -6422,7 +6336,7 @@ Out[24]: 6
 
 <p>
 <strong>Last updated:</strong><br>
-May 08, 2013 10:20 PM<br>
+May 09, 2013 09:00 AM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
