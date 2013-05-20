@@ -90,7 +90,8 @@ them against state of the art implementations such as
 model, in the hope that not only the conclusions but also the process would be
 useful for future comparisons and benchmarks.&lt;/p&gt;
 &lt;h2&gt;Function evaluation&lt;/h2&gt;
-&lt;p&gt;The loss function for the logistic regression, i.e. the function to be minimized is&lt;/p&gt;
+&lt;p&gt;The loss function for the $\ell_2$-regularized logistic regression, i.e. the
+function to be minimized is&lt;/p&gt;
 &lt;p&gt;$$
 \mathcal{L}(w, \lambda, X, y) = - \sum_{i=1}^n \log(\phi(y_i w^T X_i)) + \lambda w^T w
 $$&lt;/p&gt;
@@ -168,15 +169,16 @@ $$&lt;/p&gt;
 
 
 &lt;h2&gt;Benchmarks&lt;/h2&gt;
-&lt;p&gt;I tried several methods. There is one first-order method (that is, it only makes
-use of the gradient and not of the Hessian), &lt;a href=&quot;http://en.wikipedia.org/wiki/Nonlinear_conjugate_gradient_method&quot;&gt;Conjugate
+&lt;p&gt;I tried several methods to estimate this $\ell_2$-regularized logistic regression. There is
+one first-order method (that is, it only makes use of the gradient and not of
+the Hessian), &lt;a href=&quot;http://en.wikipedia.org/wiki/Nonlinear_conjugate_gradient_method&quot;&gt;Conjugate
 Gradient&lt;/a&gt;
 whereas all the others are &lt;a href=&quot;http://en.wikipedia.org/wiki /Quasi-Newton_methods&quot;&gt;Quasi-Newton methods&lt;/a&gt;. The method I tested are:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;CG&lt;/strong&gt; = Conjugate Gradient as implemented in &lt;code&gt;scipy.optimize.fmin_cg&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;TNC&lt;/strong&gt; = Truncated Newton as implemented in &lt;code&gt;scipy.optimize.fmin_tnc&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;BFGS&lt;/strong&gt; = Broyden–Fletcher–Goldfarb–Shanno method, as implemented in &lt;code&gt;scipy.optimize.fmin_bfgs&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;L-BFGS-B&lt;/strong&gt; = Limited-memory &lt;a href=&quot;http://en.wikipedia.org/wiki/BFGS_method&quot;&gt;BFGS&lt;/a&gt; as implemented in &lt;code&gt;scipy.optimize.fmin_l_bfgs_b&lt;/code&gt;. Contrary to the BFGS algorithm, which is written in Python, this one wraps a C implementation.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;L-BFGS&lt;/strong&gt; = Limited-memory &lt;a href=&quot;http://en.wikipedia.org/wiki/BFGS_method&quot;&gt;BFGS&lt;/a&gt; as implemented in &lt;code&gt;scipy.optimize.fmin_l_bfgs_b&lt;/code&gt;. Contrary to the BFGS algorithm, which is written in Python, this one wraps a C implementation.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Trust Region&lt;/strong&gt; = Trust Region Newton method &lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;http://fa.bianp.net/blog/feed/#fn:1&quot; rel=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;. This is the solver used by &lt;a href=&quot;http://www.csie.ntu.edu.tw/~cjlin/liblinear/&quot;&gt;LIBLINEAR&lt;/a&gt; that I've wrapped to accept any Python function in the package &lt;a href=&quot;http://github.com/fabianp/pytron/&quot;&gt;pytron&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;To assure the most accurate results across implementations, all timings were
@@ -193,9 +195,9 @@ fixed to 1.&lt;/p&gt;
 &lt;p&gt;In this setting variables are typically uncorrelated and most solvers perform
 decently:&lt;/p&gt;
 &lt;p&gt;&lt;img src=&quot;http://fa.bianp.net/blog/static/images/2013/comparison_logistic_corr_0.png&quot; alt=&quot;Benchmark Logistic&quot; /&gt;&lt;/p&gt;
-&lt;p&gt;Here, the Trust Region and L-BFGS-B solver perform almost equally good, with
+&lt;p&gt;Here, the Trust Region and L-BFGS solver perform almost equally good, with
 Conjugate Gradient and Truncated Newton falling shortly behind. The huge
-difference between BFGS and L-BFGS-B might as well be an implementation issue since with sufficient memory I would have thought that both algorithms should perform similarly.
+difference between BFGS and L-BFGS might as well be an implementation issue since with sufficient memory I would have thought that both algorithms should perform similarly.
 Since I still had memory left and was not swapping I suspect that the BFGS
 algorithm, being implemented in Python might suffer more from creation of
 temporary arrays.&lt;/p&gt;
@@ -4059,8 +4061,8 @@ f_durations.write('\n')
     &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'Kendall correlation coefficient for block &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%s&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;: &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%.5f&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tau&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.71122&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.84387&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.71122&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.84387&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
@@ -4122,8 +4124,8 @@ f_durations.write('\n')
     &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'Kendall correlation coefficient for block &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%s&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;: &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%.5f&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tau&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.83627&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.84387&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.83627&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Kendall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correlation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coefficient&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.84387&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 

@@ -50,7 +50,8 @@ them against state of the art implementations such as
 model, in the hope that not only the conclusions but also the process would be
 useful for future comparisons and benchmarks.</p>
 <h2>Function evaluation</h2>
-<p>The loss function for the logistic regression, i.e. the function to be minimized is</p>
+<p>The loss function for the $\ell_2$-regularized logistic regression, i.e. the
+function to be minimized is</p>
 <p>$$
 \mathcal{L}(w, \lambda, X, y) = - \sum_{i=1}^n \log(\phi(y_i w^T X_i)) + \lambda w^T w
 $$</p>
@@ -128,15 +129,16 @@ $$</p>
 
 
 <h2>Benchmarks</h2>
-<p>I tried several methods. There is one first-order method (that is, it only makes
-use of the gradient and not of the Hessian), <a href="http://en.wikipedia.org/wiki/Nonlinear_conjugate_gradient_method">Conjugate
+<p>I tried several methods to estimate this $\ell_2$-regularized logistic regression. There is
+one first-order method (that is, it only makes use of the gradient and not of
+the Hessian), <a href="http://en.wikipedia.org/wiki/Nonlinear_conjugate_gradient_method">Conjugate
 Gradient</a>
 whereas all the others are <a href="http://en.wikipedia.org/wiki /Quasi-Newton_methods">Quasi-Newton methods</a>. The method I tested are:</p>
 <ul>
 <li><strong>CG</strong> = Conjugate Gradient as implemented in <code>scipy.optimize.fmin_cg</code></li>
 <li><strong>TNC</strong> = Truncated Newton as implemented in <code>scipy.optimize.fmin_tnc</code></li>
 <li><strong>BFGS</strong> = Broyden–Fletcher–Goldfarb–Shanno method, as implemented in <code>scipy.optimize.fmin_bfgs</code>.</li>
-<li><strong>L-BFGS-B</strong> = Limited-memory <a href="http://en.wikipedia.org/wiki/BFGS_method">BFGS</a> as implemented in <code>scipy.optimize.fmin_l_bfgs_b</code>. Contrary to the BFGS algorithm, which is written in Python, this one wraps a C implementation.</li>
+<li><strong>L-BFGS</strong> = Limited-memory <a href="http://en.wikipedia.org/wiki/BFGS_method">BFGS</a> as implemented in <code>scipy.optimize.fmin_l_bfgs_b</code>. Contrary to the BFGS algorithm, which is written in Python, this one wraps a C implementation.</li>
 <li><strong>Trust Region</strong> = Trust Region Newton method <sup id="fnref:1"><a href="http://fa.bianp.net/blog/feed/#fn:1" rel="footnote">1</a></sup>. This is the solver used by <a href="http://www.csie.ntu.edu.tw/~cjlin/liblinear/">LIBLINEAR</a> that I've wrapped to accept any Python function in the package <a href="http://github.com/fabianp/pytron/">pytron</a></li>
 </ul>
 <p>To assure the most accurate results across implementations, all timings were
@@ -153,9 +155,9 @@ fixed to 1.</p>
 <p>In this setting variables are typically uncorrelated and most solvers perform
 decently:</p>
 <p><img src="http://fa.bianp.net/blog/static/images/2013/comparison_logistic_corr_0.png" alt="Benchmark Logistic" /></p>
-<p>Here, the Trust Region and L-BFGS-B solver perform almost equally good, with
+<p>Here, the Trust Region and L-BFGS solver perform almost equally good, with
 Conjugate Gradient and Truncated Newton falling shortly behind. The huge
-difference between BFGS and L-BFGS-B might as well be an implementation issue since with sufficient memory I would have thought that both algorithms should perform similarly.
+difference between BFGS and L-BFGS might as well be an implementation issue since with sufficient memory I would have thought that both algorithms should perform similarly.
 Since I still had memory left and was not swapping I suspect that the BFGS
 algorithm, being implemented in Python might suffer more from creation of
 temporary arrays.</p>
@@ -5116,8 +5118,8 @@ f_durations.write('\n')
     <span class="k">print</span><span class="p">(</span><span class="s">'Kendall correlation coefficient for block </span><span class="si">%s</span><span class="s">: </span><span class="si">%.5f</span><span class="s">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">tau</span><span class="p">))</span>
 </pre></div>
 
-<div class="highlight"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">0</span><span class="p">:</span> <span class="mf">0.71122</span>
-<span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">1</span><span class="p">:</span> <span class="mf">0.84387</span>
+<div class="highlight"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">0</span><span class="o">:</span> <span class="mf">0.71122</span>
+<span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">1</span><span class="o">:</span> <span class="mf">0.84387</span>
 </pre></div>
 
 
@@ -5179,8 +5181,8 @@ f_durations.write('\n')
     <span class="k">print</span><span class="p">(</span><span class="s">'Kendall correlation coefficient for block </span><span class="si">%s</span><span class="s">: </span><span class="si">%.5f</span><span class="s">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">tau</span><span class="p">))</span>
 </pre></div>
 
-<div class="highlight"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">0</span><span class="p">:</span> <span class="mf">0.83627</span>
-<span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">1</span><span class="p">:</span> <span class="mf">0.84387</span>
+<div class="highlight"><pre><span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">0</span><span class="o">:</span> <span class="mf">0.83627</span>
+<span class="n">Kendall</span> <span class="n">correlation</span> <span class="n">coefficient</span> <span class="k">for</span> <span class="n">block</span> <span class="mi">1</span><span class="o">:</span> <span class="mf">0.84387</span>
 </pre></div>
 
 
@@ -6485,7 +6487,7 @@ Out[24]: 6
 
 <p>
 <strong>Last updated:</strong><br>
-May 20, 2013 02:20 AM<br>
+May 20, 2013 11:40 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
