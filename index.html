@@ -23,6 +23,195 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>May 19, 2013</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://fabianp.net/blog/" title="I say things">Fabian Pedregosa</a></h3>
+
+
+<div class="entrygroup" id="tag:fabianp.net/blog,2013-05-20:2013/numerical-optimizers-for-logistic-regression/">
+<h4><a href="http://fabianp.net/blog/2013/numerical-optimizers-for-logistic-regression/">Numerical optimizers for Logistic Regression</a></h4>
+<div class="entry">
+<div class="content">
+<p>Following a challenge proposed by <a href="http://gael-varoquaux.info">Gael</a> to <a href="https://team.inria.fr/parietal/">my
+group</a> I compared several implementations of
+Logistic Regression. The task was to implement a Logistic Regression model
+using standard optimization tools from <code>scipy.optimize</code> and compare
+them against state of the art implementations such as
+<a href="http://www.csie.ntu.edu.tw/~cjlin/liblinear/">LIBLINEAR</a>.</p>
+<p>In this blog post I'll write down all the implementation details of this
+model, in the hope that not only the conclusions but also the process would be
+useful for future comparisons and benchmarks.</p>
+<h2>Function evaluation</h2>
+<p>The loss function for the logistic regression, i.e. the function to be minimized is</p>
+<p>$$
+\mathcal{L}(w, \theta, \lambda, X, y) = - \sum_{i=1}^n \log(\phi(y_i w^T X_i)) + \lambda w^T w
+$$</p>
+<p>where $\phi(t) = 1. / (1 + \exp(-t))$ is the <a href="http://en.wikipedia.org/wiki/Logistic_function">logistic
+function</a> and $\lambda w^T w$ is the regularization term. However, this
+formulation is not great from a practical standpoint. Even for not unlikely
+values of $t$ such as $t = -100$, $\exp(100)$ will overflow, assigning the
+loss an (erroneous) value of $+\infty$. For this reason <sup id="fnref:1"><a href="http://fa.bianp.net/blog/feed/#fn:1" rel="footnote">1</a></sup>, we evaluate
+$\log(\phi(t))$ as </p>
+<p>$$
+\log(\phi(t)) = 
+\begin{cases}
+- \log(1 + \exp(-t)) \text{ if } t &gt; 0 \\
+t - \log(1 + \exp(t)) \text{ if } t \leq 0\\
+\end{cases}
+$$</p>
+<p>The gradient of the loss function is given by</p>
+<p>$$
+\nabla_w \mathcal{L} = \sum_{i=1}^n y_i X_i (\phi(y_i w^T X_i) - 1) + \lambda w
+$$</p>
+<p>Similarly, the logistic function $\phi$ used here can be computed in a more
+stable way using the formula</p>
+<p>$$
+\phi(t) = \begin{cases}
+1 / (1 + \exp(-t)) \text{ if } t &gt; 0 \\
+\exp(t) / (1 + \exp(t)) \text{ if } t \leq 0\\
+\end{cases}
+$$</p>
+<p>Finally, we will also need the Hessian for some second-order methods, which is given by</p>
+<p>$$
+\nabla_w ^2 \mathcal{L} = X^T D X + \lambda I
+$$</p>
+<p>where $I$ is the identity matrix and $D$ is a diagonal matrix given by $D_{ii} = \phi(y_i w^T X_i)(1 - \phi(y_i w^T X_i))$.</p>
+<p>In Python, these function can be written as</p>
+<div class="highlight"><pre><span class="k">def</span> <span class="nf">phi</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
+    <span class="c"># logistic function</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+    <span class="n">out</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">t</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+    <span class="n">exp_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+    <span class="n">out</span><span class="p">[</span><span class="o">~</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">exp_t</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">+</span> <span class="n">exp_t</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+<span class="k">def</span> <span class="nf">loss</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+    <span class="c"># logistic loss function</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+    <span class="n">yz</span> <span class="o">=</span> <span class="n">y</span> <span class="o">*</span> <span class="n">z</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">yz</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">yz</span><span class="p">)</span>
+    <span class="n">out</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">yz</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+    <span class="n">out</span><span class="p">[</span><span class="o">~</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">yz</span><span class="p">[</span><span class="o">~</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">yz</span><span class="p">[</span><span class="o">~</span><span class="n">idx</span><span class="p">])))</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">+</span> <span class="o">.</span><span class="mi">5</span> <span class="o">*</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">w</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+<span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+    <span class="c"># gradient of the logistic loss</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">phi</span><span class="p">(</span><span class="n">y</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span>
+    <span class="n">z0</span> <span class="o">=</span> <span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span>
+    <span class="n">grad</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">z0</span><span class="p">)</span> <span class="o">+</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">w</span>
+    <span class="k">return</span> <span class="n">grad</span>
+
+<span class="k">def</span> <span class="nf">hessian</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+    <span class="c"># hessian of the logistic loss</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">phi</span><span class="p">(</span><span class="n">y</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">z</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">z</span><span class="p">)</span>
+    <span class="n">wa</span> <span class="o">=</span> <span class="n">d</span> <span class="o">*</span> <span class="n">X</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="n">Hs</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">wa</span><span class="p">)</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">Hs</span> <span class="o">+</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">s</span>
+    <span class="k">return</span>  <span class="n">out</span>
+</pre></div>
+
+
+<h2>Benchmarks</h2>
+<p>I tried several methods. There is one first-order method (that is, it only makes
+use of the gradient and not of the Hessian), <a href="http://en.wikipedia.org/wiki/Nonlinear_conjugate_gradient_method">Conjugate
+Gradient</a>
+whereas all the others are <a href="http://en.wikipedia.org/wiki /Quasi-Newton_methods">Quasi-Newton methods</a>. The method I tested are:</p>
+<ul>
+<li><strong>CG</strong> = Conjugate Gradient as implemented in <code>scipy.optimize.fmin_cg</code></li>
+<li><strong>TNC</strong> = Truncated Newton as implemented in <code>scipy.optimize.fmin_tnc</code></li>
+<li><strong>BFGS</strong> = Broyden–Fletcher–Goldfarb–Shanno method, as implemented in <code>scipy.optimize.fmin_bfgs</code>.</li>
+<li><strong>L-BFGS-B</strong> = Limited-memory <a href="http://en.wikipedia.org/wiki/BFGS_method">BFGS</a> as implemented in <code>scipy.optimize.fmin_l_bfgs_b</code>. Contrary to the BFGS algorithm, which is written in Python, this one wraps a C implementation.</li>
+<li><strong>Trust Region</strong> = Trust Region Newton method <sup id="fnref:1"><a href="http://fa.bianp.net/blog/feed/#fn:1" rel="footnote">1</a></sup>. This is the solver used by <a href="http://www.csie.ntu.edu.tw/~cjlin/liblinear/">LIBLINEAR</a> that I've wrapped to accept any Python function in the package <a href="http://github.com/fabianp/pytron/">pytron</a></li>
+</ul>
+<p>To assure the most accurate results across implementations, all timings were
+collected by callback functions that were called from the algorithm on each
+iteration. Finally, I plot the maximum absolute value of the gradient (=the
+l-infinity norm of the gradient) with respect to time.</p>
+<p>The synthetic data used in the benchmarks was generated as described in <sup id="fnref:2"><a href="http://fa.bianp.net/blog/feed/#fn:2" rel="footnote">2</a></sup> and consists
+primarily of the design matrix $X$ being Gaussian noise, the vector of
+coefficients is drawn also from a Gaussian distribution and the explained
+variable $y$ is generated as $y = \text{sign}(X w)$. We then perturb matrix
+$X$ by adding Gaussian noise with covariance 0.8. The number of samples and features
+was fixed to $10^4$ and $10^3$ respectively. The penalization parameter $\lambda$ was
+fixed to 1.</p>
+<p>In this setting variables are typically uncorrelated and most solvers perform
+decently:</p>
+<p><img src="http://fa.bianp.net/blog/static/images/2013/comparison_logistic_corr_0.png" alt="Benchmark Logistic" /></p>
+<p>Here, the Trust Region and L-BFGS-B solver perform almost equally good, with
+Conjugate Gradient and Truncated Newton falling shortly behind. The huge
+difference between BFGS and L-BFGS-B might as well be an implementation issue since with sufficient memory I would have thought that both algorithms should perform similarly.
+Since I still had memory left and was not swapping I suspect that the BFGS
+algorithm, being implemented in Python might suffer more from creation of
+temporary arrays.</p>
+<p>To make things more interesting, we now make the design to be slightly more
+correlated. We do so by adding a constant term of 1 to the matrix $X$ and
+adding also a column vector of ones this matrix to account for the intercept. These are the results:</p>
+<p><img src="http://fa.bianp.net/blog/static/images/2013/comparison_logistic_corr_1.png" alt="Benchmark Logistic" /></p>
+<p>Here, we already see that second-order methods dominate over first-order
+methods (well, except for BFGS), with Trust Region clearly dominating the
+picture but with TNC not far behind.</p>
+<p>Finally, if we force the matrix to be even more correlated (we add 10. to the
+design matrix $X$), then we have:</p>
+<p><img src="http://fa.bianp.net/blog/static/images/2013/comparison_logistic_corr_10.png" alt="Benchmark Logistic" /></p>
+<p>Here, the Trust-Region method has the same timing as before, but all other
+methods have got substantially worse.The Trust Region
+method, unlike the other methods is surprisingly robust to correlated designs.</p>
+<p>To sum up, the Trust Region method performs extremely well for optimizing the
+Logistic Regression model under different conditionings of the design matrix.
+The <a href="http://www.csie.ntu.edu.tw/~cjlin/liblinear/">LIBLINEAR</a> software uses
+this solver and thus has similar performance, with the sole exception that the
+evaluation of the logistic function and its derivatives is done in C++ instead
+of Python. In practice, however, due to the small number of iterations of this
+solver I haven't seen any significant difference.</p>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p>A similar development can be found in the source code of <a href="http://www.csie.ntu.edu.tw/~cjlin/liblinear/">LIBLINEAR</a>, and is probably also used elsewhere. <a href="http://fa.bianp.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
+</li>
+<li id="fn:2">
+<p>"A comparison of numerical optimizers for logistic regression", P. Minka, <a href="http://research.microsoft.com/en-us/um/people/minka/papers/logreg/">URL</a> <a href="http://fa.bianp.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
+</li>
+<li id="fn:3">
+<p>"Newton's Method for Large Bound-Constrained Optimization Problems", Chih-Jen Lin, Jorge J. More <a href="http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.45.7340">URL</a> <a href="http://fa.bianp.net/blog/feed/#fnref:3" rev="footnote" title="Jump back to footnote 3 in the text">↩</a></p>
+</li>
+<li id="fn:4">
+<p><a href="http://nbviewer.ipython.org/urls/raw.github.com/fabianp/pytron/master/doc/benchmark_logistic.ipynb">IPython Notebook to reproduce the benchmarks</a> <a href="https://github.com/fabianp/pytron/blob/master/doc/benchmark_logistic.ipynb">source</a> <a href="http://fa.bianp.net/blog/feed/#fnref:4" rev="footnote" title="Jump back to footnote 4 in the text">↩</a></p>
+</li>
+</ol>
+</div></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://fabianp.net/blog/2013/numerical-optimizers-for-logistic-regression/">by Fabian Pedregosa at May 19, 2013 10:00 PM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>May 01, 2013</h2>
 
 <div class="channelgroup">
@@ -6181,48 +6370,6 @@ Out[24]: 6
 </div>
 
 </div>
-<div class="daygroup">
-<h2>August 03, 2012</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://rhoforsympy.wordpress.com" title="rhoforsympy">Guru Devanla</a></h3>
-
-
-<div class="entrygroup" id="http://rhoforsympy.wordpress.com/?p=235">
-<h4 lang="en"><a href="http://rhoforsympy.wordpress.com/2012/08/03/week-11-fidelity-of-quantum-states/">Week 11:  Fidelity of quantum states</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>As discussed in my previous weeks report, this week I started addressing some of the issues in the pending PR’s and all the pending PRs were merged!</p>
-<p>In addition to getting the pending PRs accepted, I have stated working on 2 other tasks. One of them, that was completed is the feature to compute Fidelity (<a href="https://github.com/sympy/sympy/pull/1459">PR 1459</a>) of quantum states.  Some screen-shots follow (taken from notebook examples available with code base). Information regarding fidelity can be found at these 2 wikis: <a href="http://en.wikipedia.org/wiki/Fidelity_of_quantum_states">1</a>, <a href="http://www.quantiki.org/wiki/Fidelity">2</a></p>
-<p>For the next week, my plan is to finish up work on the implementation of Shor’s algorithm available <a href="https://github.com/addisonc/sympy/blob/addison-main/sympy/physics/quantum/shor.py">here</a>.</p>
-<p>Here are some examples of using the fidelity function:</p>
-<p><a href="http://rhoforsympy.files.wordpress.com/2012/08/fidelity_ket.png"><img src="http://rhoforsympy.files.wordpress.com/2012/08/fidelity_ket.png?w=500&amp;h=382" title="fidelity_ket" height="382" width="500" alt="" class="alignleft size-full wp-image-238" /></a></p>
-<p><a href="http://rhoforsympy.files.wordpress.com/2012/08/fidelity-qubit2.png"><img src="http://rhoforsympy.files.wordpress.com/2012/08/fidelity-qubit2.png?w=500&amp;h=369" title="fidelity-qubit" height="369" width="500" alt="" class="alignleft size-full wp-image-243" /></a></p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/rhoforsympy.wordpress.com/235/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/rhoforsympy.wordpress.com/235/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=rhoforsympy.wordpress.com&amp;blog=34650270&amp;post=235&amp;subd=rhoforsympy&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://rhoforsympy.wordpress.com/2012/08/03/week-11-fidelity-of-quantum-states/">by grdvnl at August 03, 2012 09:19 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -6249,7 +6396,7 @@ Out[24]: 6
 <a href="http://brianegranger.com/?feed=rss2" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://brianegranger.com" class="message" title="no activity in 7 days">Brian Granger</a>
 </li>
 <li>
-<a href="http://straightupcoding.blogspot.com/feeds/posts/default/-/SymPy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://straightupcoding.blogspot.com/search/label/SymPy" class="message" title="no activity in 7 days">Brian Jorgensen</a>
+<a href="http://www.blogger.com/feeds/267967203861801529/posts/default/-/SymPy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://straightupcoding.blogspot.com/search/label/SymPy" class="message" title="no activity in 7 days">Brian Jorgensen</a>
 </li>
 <li>
 <a href="http://lasympy.blogspot.com/feeds/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://lasympy.blogspot.com/" class="message" title="no activity in 7 days">Chris Wu</a>
@@ -6267,7 +6414,7 @@ Out[24]: 6
 <a href="" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a class="message" title="404: not found">Django-SymPy</a>
 </li>
 <li>
-<a href="http://fa.bianp.net/blog/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://fabianp.net/blog/" class="message" title="no activity in 7 days">Fabian Pedregosa</a>
+<a href="http://fa.bianp.net/blog/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://fabianp.net/blog/" title="I say things">Fabian Pedregosa</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/7648717043547744590/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://gsoc-mathtex.blogspot.com/" class="message" title="no activity in 7 days">Freddie Witherden</a>
@@ -6336,7 +6483,7 @@ Out[24]: 6
 
 <p>
 <strong>Last updated:</strong><br>
-May 19, 2013 10:40 AM<br>
+May 20, 2013 01:00 AM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
