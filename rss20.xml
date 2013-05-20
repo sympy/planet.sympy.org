@@ -23,14 +23,16 @@ useful for future comparisons and benchmarks.&lt;/p&gt;
 &lt;h2&gt;Function evaluation&lt;/h2&gt;
 &lt;p&gt;The loss function for the logistic regression, i.e. the function to be minimized is&lt;/p&gt;
 &lt;p&gt;$$
-\mathcal{L}(w, \theta, \lambda, X, y) = - \sum_{i=1}^n \log(\phi(y_i w^T X_i)) + \lambda w^T w
+\mathcal{L}(w, \lambda, X, y) = - \sum_{i=1}^n \log(\phi(y_i w^T X_i)) + \lambda w^T w
 $$&lt;/p&gt;
 &lt;p&gt;where $\phi(t) = 1. / (1 + \exp(-t))$ is the &lt;a href=&quot;http://en.wikipedia.org/wiki/Logistic_function&quot;&gt;logistic
-function&lt;/a&gt; and $\lambda w^T w$ is the regularization term. However, this
-formulation is not great from a practical standpoint. Even for not unlikely
-values of $t$ such as $t = -100$, $\exp(100)$ will overflow, assigning the
-loss an (erroneous) value of $+\infty$. For this reason &lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;http://fa.bianp.net/blog/feed/#fn:1&quot; rel=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;, we evaluate
-$\log(\phi(t))$ as &lt;/p&gt;
+function&lt;/a&gt;, $\lambda w^T w$ is
+the regularization term and $X, y$ is the input data, with $X \in
+\mathbb{R}^{n \times p}$ and $y \in \{-1, 1\}^n$. However, this formulation is
+not great from a practical standpoint. Even for not unlikely values of $t$
+such as $t = -100$, $\exp(100)$ will overflow, assigning the loss an
+(erroneous) value of $+\infty$. For this reason &lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;http://fa.bianp.net/blog/feed/#fn:1&quot; rel=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;, we evaluate
+$\log(\phi(t))$ as&lt;/p&gt;
 &lt;p&gt;$$
 \log(\phi(t)) = 
 \begin{cases}
