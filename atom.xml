@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2013-06-29T19:20:34Z</updated>
+  <updated>2013-06-29T19:40:38Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,39 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry>
+    <id>tag:blogger.com,1999:blog-5472769892551526876.post-8215975183868191855</id>
+    <link href="http://codesachin.blogspot.com/feeds/8215975183868191855/comments/default" rel="replies" type="application/atom+xml"/>
+    <link href="http://www.blogger.com/comment.g?blogID=5472769892551526876&amp;postID=8215975183868191855" rel="replies" type="text/html"/>
+    <link href="http://www.blogger.com/feeds/5472769892551526876/posts/default/8215975183868191855" rel="edit" type="application/atom+xml"/>
+    <link href="http://www.blogger.com/feeds/5472769892551526876/posts/default/8215975183868191855" rel="self" type="application/atom+xml"/>
+    <link href="http://codesachin.blogspot.com/2013/06/gsoc-week-2-reference-frames.html" rel="alternate" type="text/html"/>
+    <title>GSoC: Week 2 : Reference Frames</title>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><div dir="ltr" style="text-align: left;">This is an update for the second week of my GSoC coding period. Its been long and quite tedious (though very interesting at times), as far as the code was concerned. Got a lot of stuff done in the commits this week, and I guess the major components of the reference frame class are now in place. Well, I can't be sure whether its perfect till Gilbert reviews it, but all that we discussed is more or less there. The things that got done this week-<br/><br/><ul style="text-align: left;"><li>The initializer for the MovingRefFrame class. Its huge and dense as I had said earlier, but it gets the job done well, and prevents any 'special cases' from wreaking havoc while at the same time giving all the needed functionality. As mentioned in the last week, the functions for boundary conditions have now been implemented in a file of their own, and they get called in this class' 'init' function. There were some other issues as well, like allowing velocities to be defined in frames that don't 'exist' yet, etc. But thankfully, they got solved after some thinking(read: thinking hard).</li><li>I rewrote the tree algorithm for finding relative motion parameters, since the one I had implemented earlier went via the global frame everytime- something that made the whole process very inefficient(and computationally impractical) at times. To get an idea of what I am talking about, imagine a 100 reference frames, each defined at some orientation/position wrt its predecessor. Now I want to know the motion of the 98th frame wrt the 96th. Earlier, I would find the motion of the 98th wrt the first(global) frame, do the same for 96th, and then 'process' the info to get the required motion params. Some tests with the current framework made me realise how stupid that was. So now, it just goes this way - 98th-&gt;97th-&gt;96th, the way its supposed to be.</li></ul><div>A small mock SymPy session with the use of this class is shown below-</div><div>The conditions are-</div><div>1) A frame R1</div><div>2) A frame R2 defined wrt R1, such that it initially coincides with R1, but has angular velocity of <span style="background-color: white; font-family: arial, sans-serif; font-size: x-small; line-height: 16px;"><b>k̂</b></span><span style="background-color: white; font-family: sans-serif; font-size: 13px; line-height: 19.1875px;"> </span>wrt it</div><div>3) A frame R3 defined wrt R2, such that it has a constant position vector of <span style="background-color: white; color: #444444; font-family: arial, sans-serif; font-size: x-small; line-height: 16px;"><b> î</b></span><span style="font-size: x-small;"><span style="background-color: #f9f9f9; font-family: sans-serif; line-height: 31px; text-align: center;"> </span></span> wrt it.</div><div>Since R2 is rotating wrt R1, R3's position vector wrt R1 will be a function of time, as expected. Heres the working-</div><div><br/></div><pre style=""><code style="color: black;"> &gt;&gt;&gt; from sympy.physics.mechanics import MovingRefFrame  <br/> &gt;&gt;&gt; R1 = MovingRefFrame('R1', parentframe=None)  <br/> &gt;&gt;&gt; R2 = MovingRefFrame('R2', parentframe = R1, ang_vel = R1.basis(2))  <br/> &gt;&gt;&gt; R3 = MovingRefFrame('R3', parentframe = R2, pos_vector = R2.basis(0))<br/> &gt;&gt;&gt; R1.express(R3.pos_vector_in(R1))  <br/> - cos(t)*R1.basis(0) - sin(t)*R1.basis(1)  <br/></code></pre><div><br/>Thats all for now. You can have a look at the <a href="https://github.com/sympy/sympy/pull/2187">PR</a> if you wish. The coming week will majorly be spent fine-tuning my current code and making it perfectly compatible with Prasoon's API, adding a few other helper functions if needed, and writing unit tests/example docs for all that's implemented so far.<br/>Have a great week :-)</div></div></div>
+    </content>
+    <updated>2013-06-29T19:36:40Z</updated>
+    <published>2013-06-29T13:35:00Z</published>
+    <author>
+      <name>Sachin Joglekar</name>
+      <email>noreply@blogger.com</email>
+      <uri>https://plus.google.com/106302547764750990775</uri>
+    </author>
+    <source>
+      <id>tag:blogger.com,1999:blog-5472769892551526876</id>
+      <author>
+        <name>Sachin Joglekar</name>
+        <email>noreply@blogger.com</email>
+      </author>
+      <link href="http://codesachin.blogspot.com/feeds/posts/default" rel="http://schemas.google.com/g/2005#feed" type="application/atom+xml"/>
+      <link href="http://www.blogger.com/feeds/5472769892551526876/posts/default" rel="self" type="application/atom+xml"/>
+      <link href="http://codesachin.blogspot.com/" rel="alternate" type="text/html"/>
+      <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
+      <subtitle>-Sachin Joglekar-</subtitle>
+      <title>Dream. Think. Code.</title>
+      <updated>2013-06-29T19:36:40Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en">
     <id>http://theperceptiveway.wordpress.com/?p=61</id>
@@ -46,7 +79,7 @@
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-06-29T19:20:31Z</updated>
+      <updated>2013-06-29T19:40:32Z</updated>
     </source>
   </entry>
 
@@ -78,7 +111,7 @@
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-06-29T19:20:31Z</updated>
+      <updated>2013-06-29T19:40:34Z</updated>
     </source>
   </entry>
 
@@ -110,40 +143,7 @@
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-06-29T19:20:31Z</updated>
-    </source>
-  </entry>
-
-  <entry>
-    <id>tag:blogger.com,1999:blog-5472769892551526876.post-8215975183868191855</id>
-    <link href="http://codesachin.blogspot.com/feeds/8215975183868191855/comments/default" rel="replies" type="application/atom+xml"/>
-    <link href="http://www.blogger.com/comment.g?blogID=5472769892551526876&amp;postID=8215975183868191855" rel="replies" type="text/html"/>
-    <link href="http://www.blogger.com/feeds/5472769892551526876/posts/default/8215975183868191855" rel="edit" type="application/atom+xml"/>
-    <link href="http://www.blogger.com/feeds/5472769892551526876/posts/default/8215975183868191855" rel="self" type="application/atom+xml"/>
-    <link href="http://codesachin.blogspot.com/2013/06/gsoc-week-2-reference-frames.html" rel="alternate" type="text/html"/>
-    <title>GSoC: Week 2 : Reference Frames</title>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><div dir="ltr" style="text-align: left;">This is an update for the second week of my GSoC coding period. Its been long and quite tedious (though very interesting at times), as far as the code was concerned. Got a lot of stuff done in the commits this week, and I guess the major components of the reference frame class are now in place. Well, I can't be sure whether its perfect till Gilbert reviews it, but all that we discussed is more or less there. The things that got done this week-<br/><br/><ul style="text-align: left;"><li>The initializer for the MovingRefFrame class. Its huge and dense as I had said earlier, but it gets the job done well, and prevents any 'special cases' from wreaking havoc while at the same time giving all the needed functionality. As mentioned in the last week, the functions for boundary conditions have now been implemented in a file of their own, and they get called in this class' 'init' function. There were some other issues as well, like allowing velocities to be defined in frames that don't 'exist' yet, etc. But thankfully, they got solved after some thinking(read: thinking hard).</li><li>I rewrote the tree algorithm for finding relative motion parameters, since the one I had implemented earlier went via the global frame everytime- something that made the whole process very inefficient(and computationally impractical) at times. To get an idea of what I am talking about, imagine a 100 reference frames, each defined at some orientation/position wrt its predecessor. Now I want to know the motion of the 98th frame wrt the 96th. Earlier, I would find the motion of the 98th wrt the first(global) frame, do the same for 96th, and then 'process' the info to get the required motion params. Some tests with the current framework made me realise how stupid that was. So now, it just goes this way - 98th-&gt;97th-&gt;96th, the way its supposed to be.</li></ul><div>A small mock SymPy session with the use of this class is shown below-</div><div>The conditions are-</div><div>1) A frame R1</div><div>2) A frame R2 defined wrt R1, such that it initially coincides with R1, but has angular velocity of <span style="background-color: white; font-family: arial, sans-serif; font-size: x-small; line-height: 16px;">k̂</span><span style="background-color: white; font-family: sans-serif; font-size: 13px; line-height: 19.1875px;"> </span>wrt it</div><div>3) A frame R3 defined wrt R2, such that it has a constant position vector of <span style="font-size: x-small;"> <span style="background-color: #f9f9f9; font-family: sans-serif; line-height: 31px; text-align: center;">ĵ </span></span> it.</div><div>Since R2 is rotating wrt R1, R3's position vector wrt R1 will be a function of time, as expected. Heres the working-</div><div><br/></div><pre style=""><code style="color: black;"> &gt;&gt;&gt; from sympy.physics.mechanics import MovingRefFrame  <br/> &gt;&gt;&gt; R1 = MovingRefFrame('R1', parentframe=None)  <br/> &gt;&gt;&gt; R2 = MovingRefFrame('R2', parentframe = R1, ang_vel = R1.basis(2))  <br/> &gt;&gt;&gt; R3 = MovingRefFrame('R3', parentframe = R2, pos_vector = R2.basis(0))<br/> &gt;&gt;&gt; R1.express(R3.pos_vector_in(R1))  <br/> - cos(t)*R1.basis(0) - sin(t)*R1.basis(1)  <br/></code></pre><div><br/>Thats all for now. You can have a look at the <a href="https://github.com/sympy/sympy/pull/2187">PR</a> if you wish. The coming week will majorly be spent fine-tuning my current code and making it perfectly compatible with Prasoon's API, adding a few other helper functions if needed, and writing unit tests/example docs for all that's implemented so far.<br/>Have a great week :-)</div></div></div>
-    </content>
-    <updated>2013-06-29T13:35:46Z</updated>
-    <published>2013-06-29T13:35:00Z</published>
-    <author>
-      <name>Sachin Joglekar</name>
-      <email>noreply@blogger.com</email>
-      <uri>https://plus.google.com/106302547764750990775</uri>
-    </author>
-    <source>
-      <id>tag:blogger.com,1999:blog-5472769892551526876</id>
-      <author>
-        <name>Sachin Joglekar</name>
-        <email>noreply@blogger.com</email>
-      </author>
-      <link href="http://codesachin.blogspot.com/feeds/posts/default" rel="http://schemas.google.com/g/2005#feed" type="application/atom+xml"/>
-      <link href="http://www.blogger.com/feeds/5472769892551526876/posts/default" rel="self" type="application/atom+xml"/>
-      <link href="http://codesachin.blogspot.com/" rel="alternate" type="text/html"/>
-      <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
-      <subtitle>-Sachin Joglekar-</subtitle>
-      <title>Dream. Think. Code.</title>
-      <updated>2013-06-29T13:35:46Z</updated>
+      <updated>2013-06-29T19:40:34Z</updated>
     </source>
   </entry>
 
@@ -261,7 +261,7 @@
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-06-29T19:20:31Z</updated>
+      <updated>2013-06-29T19:40:34Z</updated>
     </source>
   </entry>
 
@@ -373,7 +373,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Can I help u ?</subtitle>
       <title>Geeks at Work</title>
-      <updated>2013-06-29T19:20:30Z</updated>
+      <updated>2013-06-29T19:40:31Z</updated>
     </source>
   </entry>
 
@@ -471,7 +471,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>-Sachin Joglekar-</subtitle>
       <title>Dream. Think. Code.</title>
-      <updated>2013-06-29T13:35:46Z</updated>
+      <updated>2013-06-29T19:36:40Z</updated>
     </source>
   </entry>
 
@@ -504,7 +504,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>-Sachin Joglekar-</subtitle>
       <title>Dream. Think. Code.</title>
-      <updated>2013-06-29T13:35:46Z</updated>
+      <updated>2013-06-29T19:36:40Z</updated>
     </source>
   </entry>
 
@@ -532,7 +532,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-06-29T19:20:31Z</updated>
+      <updated>2013-06-29T19:40:34Z</updated>
     </source>
   </entry>
 
@@ -611,6 +611,9 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
     </content>
     <updated>2013-06-21T12:01:54Z</updated>
     <category term="GSoC-2013-SymPy"/>
+    <category term="Diophantine Equations"/>
+    <category term="Linear diophantine Equation"/>
+    <category term="Number Theory"/>
     <author>
       <name>thilinarmtb</name>
     </author>
@@ -623,7 +626,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-06-29T19:20:31Z</updated>
+      <updated>2013-06-29T19:40:32Z</updated>
     </source>
   </entry>
 
@@ -656,7 +659,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>-Sachin Joglekar-</subtitle>
       <title>Dream. Think. Code.</title>
-      <updated>2013-06-29T13:35:46Z</updated>
+      <updated>2013-06-29T19:36:40Z</updated>
     </source>
   </entry>
 
@@ -687,7 +690,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-06-29T19:20:31Z</updated>
+      <updated>2013-06-29T19:40:34Z</updated>
     </source>
   </entry>
 
@@ -793,7 +796,7 @@ into a text file. For those interested, however I made a few changes manually ev
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-06-29T19:20:31Z</updated>
+      <updated>2013-06-29T19:40:34Z</updated>
     </source>
   </entry>
 
@@ -870,7 +873,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-06-29T19:20:31Z</updated>
+      <updated>2013-06-29T19:40:32Z</updated>
     </source>
   </entry>
 
@@ -949,7 +952,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>-Sachin Joglekar-</subtitle>
       <title>Dream. Think. Code.</title>
-      <updated>2013-06-29T13:35:46Z</updated>
+      <updated>2013-06-29T19:36:40Z</updated>
     </source>
   </entry>
 
@@ -1015,7 +1018,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>-Sachin Joglekar-</subtitle>
       <title>Dream. Think. Code.</title>
-      <updated>2013-06-29T13:35:46Z</updated>
+      <updated>2013-06-29T19:36:40Z</updated>
     </source>
   </entry>
 
@@ -1048,7 +1051,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>-Sachin Joglekar-</subtitle>
       <title>Dream. Think. Code.</title>
-      <updated>2013-06-29T13:35:46Z</updated>
+      <updated>2013-06-29T19:36:40Z</updated>
     </source>
   </entry>
 
@@ -1123,7 +1126,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Can I help u ?</subtitle>
       <title>Geeks at Work</title>
-      <updated>2013-06-29T19:20:30Z</updated>
+      <updated>2013-06-29T19:40:31Z</updated>
     </source>
   </entry>
 
@@ -1151,7 +1154,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="https://sites.google.com/feeds/content/site/v9joshi/batch" rel="http://schemas.google.com/g/2005#batch" type="application/atom+xml"/>
       <link href="https://sites.google.com/feeds/content/site/v9joshi?parent=5420265600325595988&amp;kind=announcement" rel="self" type="application/atom+xml"/>
       <title>Posts of GSoC Blog</title>
-      <updated>2013-06-29T19:20:32Z</updated>
+      <updated>2013-06-29T19:40:37Z</updated>
     </source>
   </entry>
 
@@ -1246,7 +1249,7 @@ based features.</p></div></td></tr></tbody></table></div>
       <link href="https://sites.google.com/feeds/content/site/v9joshi/batch" rel="http://schemas.google.com/g/2005#batch" type="application/atom+xml"/>
       <link href="https://sites.google.com/feeds/content/site/v9joshi?parent=5420265600325595988&amp;kind=announcement" rel="self" type="application/atom+xml"/>
       <title>Posts of GSoC Blog</title>
-      <updated>2013-06-29T19:20:32Z</updated>
+      <updated>2013-06-29T19:40:37Z</updated>
     </source>
   </entry>
 
@@ -1276,7 +1279,7 @@ based features.</p></div></td></tr></tbody></table></div>
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-06-29T19:20:31Z</updated>
+      <updated>2013-06-29T19:40:34Z</updated>
     </source>
   </entry>
 
@@ -1326,7 +1329,7 @@ Here D is a non square positive integer.</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-06-29T19:20:31Z</updated>
+      <updated>2013-06-29T19:40:32Z</updated>
     </source>
   </entry>
 
@@ -1431,7 +1434,7 @@ Here D is a non square positive integer.</p>
       <link href="http://brianegranger.com" rel="alternate" type="text/html"/>
       <subtitle>Physics ∩ Computing</subtitle>
       <title>Brian E. Granger</title>
-      <updated>2013-06-29T19:20:14Z</updated>
+      <updated>2013-06-29T19:40:17Z</updated>
     </source>
   </entry>
 
@@ -1784,7 +1787,7 @@ however produce walking like behavior in a 2-D Slinky by using the model
       <link href="https://sites.google.com/feeds/content/site/v9joshi/batch" rel="http://schemas.google.com/g/2005#batch" type="application/atom+xml"/>
       <link href="https://sites.google.com/feeds/content/site/v9joshi?parent=5420265600325595988&amp;kind=announcement" rel="self" type="application/atom+xml"/>
       <title>Posts of GSoC Blog</title>
-      <updated>2013-06-29T19:20:32Z</updated>
+      <updated>2013-06-29T19:40:37Z</updated>
     </source>
   </entry>
 
@@ -2165,7 +2168,7 @@ AttributeError:
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-06-29T19:20:08Z</updated>
+      <updated>2013-06-29T19:40:15Z</updated>
     </source>
   </entry>
 
@@ -2319,7 +2322,7 @@ AttributeError:
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-06-29T19:20:25Z</updated>
+      <updated>2013-06-29T19:40:26Z</updated>
     </source>
   </entry>
 
@@ -2622,7 +2625,7 @@ Operations after Theano Simplification:  17</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-06-29T19:20:24Z</updated>
+      <updated>2013-06-29T19:40:26Z</updated>
     </source>
   </entry>
 
@@ -2767,7 +2770,7 @@ legend(['$R_{31}$', "$R'_{31}$"])</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-06-29T19:20:24Z</updated>
+      <updated>2013-06-29T19:40:26Z</updated>
     </source>
   </entry>
 
@@ -2813,7 +2816,7 @@ legend(['$R_{31}$', "$R'_{31}$"])</code></pre>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-06-29T19:20:08Z</updated>
+      <updated>2013-06-29T19:40:15Z</updated>
     </source>
   </entry>
 
@@ -2970,7 +2973,7 @@ each time a threshold is crossed.</p>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-06-29T19:20:25Z</updated>
+      <updated>2013-06-29T19:40:27Z</updated>
     </source>
   </entry>
 
@@ -3055,7 +3058,7 @@ each time a threshold is crossed.</p>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-06-29T19:20:25Z</updated>
+      <updated>2013-06-29T19:40:26Z</updated>
     </source>
   </entry>
 
@@ -3092,7 +3095,7 @@ each time a threshold is crossed.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-06-29T19:20:08Z</updated>
+      <updated>2013-06-29T19:40:15Z</updated>
     </source>
   </entry>
 
@@ -3216,7 +3219,7 @@ run(0, tail,  conso(head, tail, (1, 2, 3, 4)))
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-06-29T19:20:24Z</updated>
+      <updated>2013-06-29T19:40:26Z</updated>
     </source>
   </entry>
 
@@ -3314,7 +3317,7 @@ CO,WY,NE,KS,OK,NM,AZ,UT
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-06-29T19:20:25Z</updated>
+      <updated>2013-06-29T19:40:26Z</updated>
     </source>
   </entry>
 
@@ -3431,7 +3434,7 @@ CO,WY,NE,KS,OK,NM,AZ,UT
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-06-29T19:20:24Z</updated>
+      <updated>2013-06-29T19:40:26Z</updated>
     </source>
   </entry>
 
@@ -3460,7 +3463,7 @@ CO,WY,NE,KS,OK,NM,AZ,UT
       <link href="http://brianegranger.com" rel="alternate" type="text/html"/>
       <subtitle>Physics ∩ Computing</subtitle>
       <title>Brian E. Granger</title>
-      <updated>2013-06-29T19:20:14Z</updated>
+      <updated>2013-06-29T19:40:17Z</updated>
     </source>
   </entry>
 
@@ -3520,7 +3523,7 @@ CO,WY,NE,KS,OK,NM,AZ,UT
       <link href="http://brianegranger.com" rel="alternate" type="text/html"/>
       <subtitle>Physics ∩ Computing</subtitle>
       <title>Brian E. Granger</title>
-      <updated>2013-06-29T19:20:14Z</updated>
+      <updated>2013-06-29T19:40:17Z</updated>
     </source>
   </entry>
 
@@ -3715,7 +3718,7 @@ dimensions.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-06-29T19:20:08Z</updated>
+      <updated>2013-06-29T19:40:15Z</updated>
     </source>
   </entry>
 
@@ -3746,7 +3749,7 @@ dimensions.</p>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-06-29T19:20:08Z</updated>
+      <updated>2013-06-29T19:40:15Z</updated>
     </source>
   </entry>
 </feed>
