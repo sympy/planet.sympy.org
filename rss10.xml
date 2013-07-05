@@ -13,6 +13,7 @@
 
 	<items>
 		<rdf:Seq>
+			<rdf:li rdf:resource="http://sophiessympyblog.wordpress.com/?p=147" />
 			<rdf:li rdf:resource="http://meclark256.wordpress.com/?p=44" />
 			<rdf:li rdf:resource="http://manojbits.wordpress.com/?p=560" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-6568744196982634289.post-1968760474047261373" />
@@ -72,11 +73,26 @@
 			<rdf:li rdf:resource="http://matthewrocklin.com/blog//work/2013/02/25/MaximumAposteriori" />
 			<rdf:li rdf:resource="http://manojbits.wordpress.com/?p=403" />
 			<rdf:li rdf:resource="http://matthewrocklin.com/blog//work/2013/02/05/Assuming" />
-			<rdf:li rdf:resource="http://asmeurersympy.wordpress.com/?p=1204" />
 		</rdf:Seq>
 	</items>
 </channel>
 
+<item rdf:about="http://sophiessympyblog.wordpress.com/?p=147">
+	<title>Katja Sophie Hotz: Third week</title>
+	<link>http://sophiessympyblog.wordpress.com/2013/07/05/third-week/</link>
+	<content:encoded>&lt;p style=&quot;text-align: justify;&quot;&gt;This week I finished implementing a working version of the modular GCD algorithm for multivariate integer polynomials. As I mentioned last week, Monagan and Wittkopf [1] only described their algorithm for bivariate integer polynomials, so figuring out the right generalization was the main obstacle. This took more time than expected, but I am very happy to report that it seems to have worked out.&lt;/p&gt;
+&lt;p style=&quot;text-align: justify;&quot;&gt;To help me understand the multivariate case, I implemented parts of Brown’s original algorithm [2]. Brown uses a recursive subroutine (Algorithm P) to compute the GCD in &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cmathbb+Z_p%5Bx_0%2C+%5Cldots%2C+x_%7Bk-1%7D%5D&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\mathbb Z_p[x_0, \ldots, x_{k-1}]&quot; class=&quot;latex&quot; title=&quot;\mathbb Z_p[x_0, \ldots, x_{k-1}]&quot; /&gt;. It reduces the problem step by step by evaluating the polynomials at &lt;img src=&quot;http://s0.wp.com/latex.php?latex=x_%7Bk-1%7D+%3D+a&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;x_{k-1} = a&quot; class=&quot;latex&quot; title=&quot;x_{k-1} = a&quot; /&gt; for suitable &lt;img src=&quot;http://s0.wp.com/latex.php?latex=a+%5Cin+%5Cmathbb+Z_p&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;a \in \mathbb Z_p&quot; class=&quot;latex&quot; title=&quot;a \in \mathbb Z_p&quot; /&gt; and then calling Algorithm P recursively to compute the GCD in &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cmathbb+Z_p%5Bx_0%2C+%5Cldots%2C+x_%7Bk-2%7D%5D&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\mathbb Z_p[x_0, \ldots, x_{k-2}]&quot; class=&quot;latex&quot; title=&quot;\mathbb Z_p[x_0, \ldots, x_{k-2}]&quot; /&gt;. Each time a GCD in &lt;img src=&quot;http://s0.wp.com/latex.php?latex=k-1&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;k-1&quot; class=&quot;latex&quot; title=&quot;k-1&quot; /&gt; variables has been computed, it uses a version of the Chinese Remainder Theorem for polynomial rings to interpolate the GCD in &lt;img src=&quot;http://s0.wp.com/latex.php?latex=k&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;k&quot; class=&quot;latex&quot; title=&quot;k&quot; /&gt; variables. At the deepest recursion level the problem is reduced to a univariate one, in which case we can just use the Euclidean Algorithm to compute the GCD.&lt;/p&gt;
+&lt;p style=&quot;text-align: justify;&quot;&gt;In the bivariate case, however, there is no need for this recursive subroutine, because the problem is reduced to a univariate one after evaluating in only one variable. This made it harder to figure out which ideas used in [1] could be generalized to the multivariate case.&lt;/p&gt;
+&lt;p style=&quot;text-align: justify;&quot;&gt;There are two major improvements in the algorithm from [1] compared to Brown’s original one. First, it tries to detect unlucky primes and evaluation points, i.e. ones where we get a wrong result, as soon as possible. This is done by successively calculating tight degree bounds during the recursion and comparing them with the degrees of the computed GCDs. In addition, those bounds provide a much better estimate for the number of needed evaluation points.&lt;br /&gt;
+Another improvement is to wait until enough evaluation points are found and then interpolate in one go. This has the advantage that interpolation is only done if enough (lucky) evaluation points can be found. It also avoids creating a lot of intermediate polynomials.&lt;br /&gt;
+I was able to make use of both of them in my implementation for the multivariate case.&lt;/p&gt;
+&lt;p style=&quot;text-align: justify;&quot;&gt;Next week I will complete the documentation, write additional tests and tidy up the code. If everything goes well, I should be able to make a pull request by the end of next week.&lt;/p&gt;
+&lt;p style=&quot;text-align: justify;&quot;&gt;[1] &lt;a href=&quot;http://www.cecm.sfu.ca/~monaganm/papers/BrownGCD.pdf&quot; rel=&quot;nofollow&quot;&gt;http://www.cecm.sfu.ca/~monaganm/papers/BrownGCD.pdf&lt;/a&gt;&lt;br /&gt;
+[2] &lt;a href=&quot;http://dl.acm.org/citation.cfm?id=321664&quot; rel=&quot;nofollow&quot;&gt;http://dl.acm.org/citation.cfm?id=321664&lt;/a&gt;&lt;/p&gt;
+&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/147/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/147/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;amp;blog=53034828&amp;amp;post=147&amp;amp;subd=sophiessympyblog&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
+	<dc:date>2013-07-05T22:26:34+00:00</dc:date>
+	<dc:creator>katjasophie</dc:creator>
+</item>
 <item rdf:about="http://meclark256.wordpress.com/?p=44">
 	<title>Mary Clark: On Semisimple Lie Algebras (Part 1)</title>
 	<link>http://meclark256.wordpress.com/2013/07/03/on-semisimple-lie-algebras-part-1/</link>
@@ -2188,24 +2204,6 @@ as the required output.&lt;/p&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;All &lt;code&gt;ask&lt;/code&gt; calls within this block have global-like access to the knowledge &lt;code&gt;Q.positive(x)&lt;/code&gt; and &lt;code&gt;Q.positive(y)&lt;/code&gt;. These calls may be at top level as in the example above or buried deeply within function calls. This arrangement is convenient because we do not need to pass down &lt;code&gt;facts&lt;/code&gt; through all function calls. This knowledge is pervasive like a global variable but contained within the &lt;code&gt;with assuming&lt;/code&gt; clause.&lt;/p&gt;</content:encoded>
 	<dc:date>2013-02-05T08:00:00+00:00</dc:date>
-</item>
-<item rdf:about="http://asmeurersympy.wordpress.com/?p=1204">
-	<title>Aaron Meurer: Tip for debugging SymPy with PuDB</title>
-	<link>https://asmeurersympy.wordpress.com/2013/01/28/tip-for-debugging-sympy-with-pudb/</link>
-	<content:encoded>&lt;p&gt;Usually, when I debug SymPy code with &lt;a href=&quot;http://asmeurersympy.wordpress.com/2010/06/04/pudb-a-better-python-debugger/&quot;&gt;PuDB&lt;/a&gt;, I create a script that calls the code, then I put a &lt;/p&gt;
-&lt;pre class=&quot;brush: python; title: ; notranslate&quot;&gt;import pudb; pudb.set_trace()
-&lt;/pre&gt;
-&lt;p&gt;in the SymPy library code where I want to start debugging. But this is annoying, first because I have to create the script, and second, because I have to modify the library code, and there’s always the risk of accidentally commiting that.  Also, if I want to start debugging somewhere else, I have to edit the files and change it.&lt;/p&gt;
-&lt;p&gt;Well, I just figured out a better way.  &lt;del datetime=&quot;2013-01-30T02:32:19+00:00&quot;&gt;First, if you haven’t already, add an alias like this in your bash config file (&lt;code&gt;~/.profile&lt;/code&gt; or &lt;code&gt;~/.bashrc&lt;/code&gt;):&lt;code&gt;alias pudb='python -m pudb.run&lt;/code&gt;.&lt;/del&gt; &lt;i&gt;As of &lt;a href=&quot;https://github.com/inducer/pudb/pull/54&quot;&gt;this pull request&lt;/a&gt;, this is no longer necessary.  A &lt;code&gt;pudb&lt;/code&gt; script is installed automatically with PuDB.&lt;/i&gt;&lt;/p&gt;
-&lt;p&gt;This will let you run &lt;code&gt;pudb script.py&lt;/code&gt; to debug &lt;code&gt;script.py&lt;/code&gt;.  &lt;del datetime=&quot;2013-02-05T04:22:39+00:00&quot;&gt;Next, start PuDB. It doesn’t matter with what. You can just run &lt;code&gt;touch test.py&lt;/code&gt;, and then &lt;code&gt;pudb test.py&lt;/code&gt;.&lt;/del&gt;  &lt;i&gt;It occured to me that you can just set the breakpoint when starting isympy with PuDB.&lt;/i&gt;&lt;/p&gt;
-&lt;p&gt;Now, press &lt;code&gt;m&lt;/code&gt;, and navigate to where in the library code you want to start debugging.  It also helps to use &lt;code&gt;/&lt;/code&gt; to search the current file and &lt;code&gt;L&lt;/code&gt; to jump to a specific line.  When you get to the line where you want to start debugging, press &lt;code&gt;b&lt;/code&gt; to set a breakpoint. You can do this in multiple places if you want.&lt;/p&gt;
-&lt;p&gt;Now, you just have to start &lt;code&gt;isympy&lt;/code&gt; from within PuDB.  Just run &lt;code&gt;pudb bin/isympy&lt;/code&gt;, and immediately press &lt;code&gt;c&lt;/code&gt; to jump to the interactive prompt.  Now, run whatever code you want to debug.  When it gets to the breakpoint, PuDB will open, and you can start debugging.  If you type &lt;code&gt;c&lt;/code&gt; to continue, it will go back to isympy. But the next time you run something that hits the breakpoint, it will open PuDB again. &lt;/p&gt;
-&lt;p&gt;This trick works because breakpoints are saved to file (at &lt;code&gt;~/.config/pudb/saved-breakpoints&lt;/code&gt;). In fact, if you want, you can just modify that file in the first step.  You can edit your saved breakpoints in the bottom right pane of PuDB. &lt;/p&gt;
-&lt;p&gt;When you are done and you type &lt;code&gt;Ctrl-D&lt;/code&gt; PuDB will pop-up again, asking if you want to quit.  That’s because it was running the whole time, underneath isympy.  Just press &lt;code&gt;q&lt;/code&gt;.  Note that you should avoid pressing &lt;code&gt;q&lt;/code&gt; while debugging, or else PuDB will quit, and you will be left with just normal isympy (it won’t break at your breakpoints any more).  Actually, if you do this, but doing &lt;code&gt;Ctrl-D&lt;/code&gt; still opens the PuDB prompt, you can just press “Restart”, and it should start working again.  Note that “Restart” will not actually reset isympy:  all your saved variables will still be the same, and any changes to the library code will not be reloaded.  To do that, you have to completely exit and start over again.&lt;/p&gt;
-&lt;p&gt;Of course, there is nothing SymPy specific about this trick. As long as you have a script that acts as an entry point to an interactive console for your application, you can use it.  If you just use IPython, you can use something like &lt;code&gt;pudb /bin/ipython&lt;/code&gt; (replace &lt;code&gt;/bin/ipython&lt;/code&gt; with the output of &lt;code&gt;which ipython&lt;/code&gt;).  &lt;/p&gt;
-&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/asmeurersympy.wordpress.com/1204/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/asmeurersympy.wordpress.com/1204/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;https://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;amp;blog=7467151&amp;amp;post=1204&amp;amp;subd=asmeurersympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
-	<dc:date>2013-01-28T00:43:49+00:00</dc:date>
-	<dc:creator>Aaron Meurer</dc:creator>
 </item>
 
 </rdf:RDF>

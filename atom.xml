@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2013-07-05T22:20:30Z</updated>
+  <updated>2013-07-05T22:40:31Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,41 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry xml:lang="en">
+    <id>http://sophiessympyblog.wordpress.com/?p=147</id>
+    <link href="http://sophiessympyblog.wordpress.com/2013/07/05/third-week/" rel="alternate" type="text/html"/>
+    <title>Third week</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">This week I finished implementing a working version of the modular GCD algorithm for multivariate integer polynomials. As I mentioned last week, Monagan and Wittkopf [1] only described their algorithm for bivariate integer polynomials, so figuring out the right generalization was the main obstacle. This took more time than expected, but I am very happy […]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=147&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" width="1"/></div>
+    </summary>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p style="text-align: justify;">This week I finished implementing a working version of the modular GCD algorithm for multivariate integer polynomials. As I mentioned last week, Monagan and Wittkopf [1] only described their algorithm for bivariate integer polynomials, so figuring out the right generalization was the main obstacle. This took more time than expected, but I am very happy to report that it seems to have worked out.</p>
+<p style="text-align: justify;">To help me understand the multivariate case, I implemented parts of Brown’s original algorithm [2]. Brown uses a recursive subroutine (Algorithm P) to compute the GCD in <img alt="\mathbb Z_p[x_0, \ldots, x_{k-1}]" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Z_p%5Bx_0%2C+%5Cldots%2C+x_%7Bk-1%7D%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\mathbb Z_p[x_0, \ldots, x_{k-1}]"/>. It reduces the problem step by step by evaluating the polynomials at <img alt="x_{k-1} = a" class="latex" src="http://s0.wp.com/latex.php?latex=x_%7Bk-1%7D+%3D+a&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="x_{k-1} = a"/> for suitable <img alt="a \in \mathbb Z_p" class="latex" src="http://s0.wp.com/latex.php?latex=a+%5Cin+%5Cmathbb+Z_p&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="a \in \mathbb Z_p"/> and then calling Algorithm P recursively to compute the GCD in <img alt="\mathbb Z_p[x_0, \ldots, x_{k-2}]" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Z_p%5Bx_0%2C+%5Cldots%2C+x_%7Bk-2%7D%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\mathbb Z_p[x_0, \ldots, x_{k-2}]"/>. Each time a GCD in <img alt="k-1" class="latex" src="http://s0.wp.com/latex.php?latex=k-1&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="k-1"/> variables has been computed, it uses a version of the Chinese Remainder Theorem for polynomial rings to interpolate the GCD in <img alt="k" class="latex" src="http://s0.wp.com/latex.php?latex=k&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="k"/> variables. At the deepest recursion level the problem is reduced to a univariate one, in which case we can just use the Euclidean Algorithm to compute the GCD.</p>
+<p style="text-align: justify;">In the bivariate case, however, there is no need for this recursive subroutine, because the problem is reduced to a univariate one after evaluating in only one variable. This made it harder to figure out which ideas used in [1] could be generalized to the multivariate case.</p>
+<p style="text-align: justify;">There are two major improvements in the algorithm from [1] compared to Brown’s original one. First, it tries to detect unlucky primes and evaluation points, i.e. ones where we get a wrong result, as soon as possible. This is done by successively calculating tight degree bounds during the recursion and comparing them with the degrees of the computed GCDs. In addition, those bounds provide a much better estimate for the number of needed evaluation points.<br/>
+Another improvement is to wait until enough evaluation points are found and then interpolate in one go. This has the advantage that interpolation is only done if enough (lucky) evaluation points can be found. It also avoids creating a lot of intermediate polynomials.<br/>
+I was able to make use of both of them in my implementation for the multivariate case.</p>
+<p style="text-align: justify;">Next week I will complete the documentation, write additional tests and tidy up the code. If everything goes well, I should be able to make a pull request by the end of next week.</p>
+<p style="text-align: justify;">[1] <a href="http://www.cecm.sfu.ca/~monaganm/papers/BrownGCD.pdf" rel="nofollow">http://www.cecm.sfu.ca/~monaganm/papers/BrownGCD.pdf</a><br/>
+[2] <a href="http://dl.acm.org/citation.cfm?id=321664" rel="nofollow">http://dl.acm.org/citation.cfm?id=321664</a></p>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/147/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/147/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=147&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" width="1"/></div>
+    </content>
+    <updated>2013-07-05T22:26:34Z</updated>
+    <category term="Uncategorized"/>
+    <author>
+      <name>katjasophie</name>
+    </author>
+    <source>
+      <id>http://sophiessympyblog.wordpress.com</id>
+      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
+      <link href="http://sophiessympyblog.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://sophiessympyblog.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://sophiessympyblog.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <subtitle>my gsoc 2013 project</subtitle>
+      <title>sophie's sympy blog</title>
+      <updated>2013-07-05T22:40:29Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en">
     <id>http://meclark256.wordpress.com/?p=44</id>
@@ -59,7 +94,7 @@
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-05T22:20:27Z</updated>
+      <updated>2013-07-05T22:40:28Z</updated>
     </source>
   </entry>
 
@@ -243,7 +278,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="https://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-07-05T22:20:07Z</updated>
+      <updated>2013-07-05T22:40:08Z</updated>
     </source>
   </entry>
 
@@ -348,7 +383,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-05T22:20:27Z</updated>
+      <updated>2013-07-05T22:40:27Z</updated>
     </source>
   </entry>
 
@@ -380,7 +415,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-05T22:20:28Z</updated>
+      <updated>2013-07-05T22:40:29Z</updated>
     </source>
   </entry>
 
@@ -412,7 +447,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-05T22:20:27Z</updated>
+      <updated>2013-07-05T22:40:29Z</updated>
     </source>
   </entry>
 
@@ -530,7 +565,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-05T22:20:27Z</updated>
+      <updated>2013-07-05T22:40:28Z</updated>
     </source>
   </entry>
 
@@ -642,7 +677,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Can I help u ?</subtitle>
       <title>Geeks at Work</title>
-      <updated>2013-07-05T22:20:26Z</updated>
+      <updated>2013-07-05T22:40:27Z</updated>
     </source>
   </entry>
 
@@ -801,7 +836,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-05T22:20:28Z</updated>
+      <updated>2013-07-05T22:40:29Z</updated>
     </source>
   </entry>
 
@@ -895,7 +930,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-05T22:20:27Z</updated>
+      <updated>2013-07-05T22:40:27Z</updated>
     </source>
   </entry>
 
@@ -959,7 +994,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-05T22:20:27Z</updated>
+      <updated>2013-07-05T22:40:28Z</updated>
     </source>
   </entry>
 
@@ -1065,7 +1100,7 @@ into a text file. For those interested, however I made a few changes manually ev
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-05T22:20:27Z</updated>
+      <updated>2013-07-05T22:40:28Z</updated>
     </source>
   </entry>
 
@@ -1142,7 +1177,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-05T22:20:26Z</updated>
+      <updated>2013-07-05T22:40:27Z</updated>
     </source>
   </entry>
 
@@ -1395,7 +1430,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Can I help u ?</subtitle>
       <title>Geeks at Work</title>
-      <updated>2013-07-05T22:20:26Z</updated>
+      <updated>2013-07-05T22:40:27Z</updated>
     </source>
   </entry>
 
@@ -1423,7 +1458,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="https://sites.google.com/feeds/content/site/v9joshi/batch" rel="http://schemas.google.com/g/2005#batch" type="application/atom+xml"/>
       <link href="https://sites.google.com/feeds/content/site/v9joshi?parent=5420265600325595988&amp;kind=announcement" rel="self" type="application/atom+xml"/>
       <title>Posts of GSoC Blog</title>
-      <updated>2013-07-05T22:20:28Z</updated>
+      <updated>2013-07-05T22:40:29Z</updated>
     </source>
   </entry>
 
@@ -1518,7 +1553,7 @@ based features.</p></div></td></tr></tbody></table></div>
       <link href="https://sites.google.com/feeds/content/site/v9joshi/batch" rel="http://schemas.google.com/g/2005#batch" type="application/atom+xml"/>
       <link href="https://sites.google.com/feeds/content/site/v9joshi?parent=5420265600325595988&amp;kind=announcement" rel="self" type="application/atom+xml"/>
       <title>Posts of GSoC Blog</title>
-      <updated>2013-07-05T22:20:28Z</updated>
+      <updated>2013-07-05T22:40:29Z</updated>
     </source>
   </entry>
 
@@ -1548,7 +1583,7 @@ based features.</p></div></td></tr></tbody></table></div>
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-05T22:20:28Z</updated>
+      <updated>2013-07-05T22:40:29Z</updated>
     </source>
   </entry>
 
@@ -1598,7 +1633,7 @@ Here D is a non square positive integer.</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-05T22:20:26Z</updated>
+      <updated>2013-07-05T22:40:27Z</updated>
     </source>
   </entry>
 
@@ -1703,7 +1738,7 @@ Here D is a non square positive integer.</p>
       <link href="http://brianegranger.com" rel="alternate" type="text/html"/>
       <subtitle>Physics ∩ Computing</subtitle>
       <title>Brian E. Granger</title>
-      <updated>2013-07-05T22:20:11Z</updated>
+      <updated>2013-07-05T22:40:12Z</updated>
     </source>
   </entry>
 
@@ -2056,7 +2091,7 @@ however produce walking like behavior in a 2-D Slinky by using the model
       <link href="https://sites.google.com/feeds/content/site/v9joshi/batch" rel="http://schemas.google.com/g/2005#batch" type="application/atom+xml"/>
       <link href="https://sites.google.com/feeds/content/site/v9joshi?parent=5420265600325595988&amp;kind=announcement" rel="self" type="application/atom+xml"/>
       <title>Posts of GSoC Blog</title>
-      <updated>2013-07-05T22:20:28Z</updated>
+      <updated>2013-07-05T22:40:29Z</updated>
     </source>
   </entry>
 
@@ -2477,7 +2512,7 @@ AttributeError:
       <link href="https://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-07-05T22:20:07Z</updated>
+      <updated>2013-07-05T22:40:08Z</updated>
     </source>
   </entry>
 
@@ -2631,7 +2666,7 @@ AttributeError:
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-07-05T22:20:21Z</updated>
+      <updated>2013-07-05T22:40:22Z</updated>
     </source>
   </entry>
 
@@ -2934,7 +2969,7 @@ Operations after Theano Simplification:  17</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-07-05T22:20:20Z</updated>
+      <updated>2013-07-05T22:40:21Z</updated>
     </source>
   </entry>
 
@@ -3079,7 +3114,7 @@ legend(['$R_{31}$', "$R'_{31}$"])</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-07-05T22:20:20Z</updated>
+      <updated>2013-07-05T22:40:21Z</updated>
     </source>
   </entry>
 
@@ -3125,7 +3160,7 @@ legend(['$R_{31}$', "$R'_{31}$"])</code></pre>
       <link href="https://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-07-05T22:20:07Z</updated>
+      <updated>2013-07-05T22:40:08Z</updated>
     </source>
   </entry>
 
@@ -3282,7 +3317,7 @@ each time a threshold is crossed.</p>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-07-05T22:20:21Z</updated>
+      <updated>2013-07-05T22:40:22Z</updated>
     </source>
   </entry>
 
@@ -3416,44 +3451,7 @@ as the required output.</p>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-07-05T22:20:21Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://asmeurersympy.wordpress.com/?p=1204</id>
-    <link href="https://asmeurersympy.wordpress.com/2013/01/28/tip-for-debugging-sympy-with-pudb/" rel="alternate" type="text/html"/>
-    <title>Tip for debugging SymPy with PuDB</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Usually, when I debug SymPy code with PuDB, I create a script that calls the code, then I put a in the SymPy library code where I want to start debugging. But this is annoying, first because I have to create the script, and second, because I have to modify the library code, and there’s […]<img alt="" border="0" height="1" src="https://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1204&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Usually, when I debug SymPy code with <a href="http://asmeurersympy.wordpress.com/2010/06/04/pudb-a-better-python-debugger/">PuDB</a>, I create a script that calls the code, then I put a </p>
-<pre class="brush: python; title: ; notranslate">import pudb; pudb.set_trace()
-</pre>
-<p>in the SymPy library code where I want to start debugging. But this is annoying, first because I have to create the script, and second, because I have to modify the library code, and there’s always the risk of accidentally commiting that.  Also, if I want to start debugging somewhere else, I have to edit the files and change it.</p>
-<p>Well, I just figured out a better way.  <del datetime="2013-01-30T02:32:19+00:00">First, if you haven’t already, add an alias like this in your bash config file (<code>~/.profile</code> or <code>~/.bashrc</code>):<code>alias pudb='python -m pudb.run</code>.</del> <i>As of <a href="https://github.com/inducer/pudb/pull/54">this pull request</a>, this is no longer necessary.  A <code>pudb</code> script is installed automatically with PuDB.</i></p>
-<p>This will let you run <code>pudb script.py</code> to debug <code>script.py</code>.  <del datetime="2013-02-05T04:22:39+00:00">Next, start PuDB. It doesn’t matter with what. You can just run <code>touch test.py</code>, and then <code>pudb test.py</code>.</del>  <i>It occured to me that you can just set the breakpoint when starting isympy with PuDB.</i></p>
-<p>Now, press <code>m</code>, and navigate to where in the library code you want to start debugging.  It also helps to use <code>/</code> to search the current file and <code>L</code> to jump to a specific line.  When you get to the line where you want to start debugging, press <code>b</code> to set a breakpoint. You can do this in multiple places if you want.</p>
-<p>Now, you just have to start <code>isympy</code> from within PuDB.  Just run <code>pudb bin/isympy</code>, and immediately press <code>c</code> to jump to the interactive prompt.  Now, run whatever code you want to debug.  When it gets to the breakpoint, PuDB will open, and you can start debugging.  If you type <code>c</code> to continue, it will go back to isympy. But the next time you run something that hits the breakpoint, it will open PuDB again. </p>
-<p>This trick works because breakpoints are saved to file (at <code>~/.config/pudb/saved-breakpoints</code>). In fact, if you want, you can just modify that file in the first step.  You can edit your saved breakpoints in the bottom right pane of PuDB. </p>
-<p>When you are done and you type <code>Ctrl-D</code> PuDB will pop-up again, asking if you want to quit.  That’s because it was running the whole time, underneath isympy.  Just press <code>q</code>.  Note that you should avoid pressing <code>q</code> while debugging, or else PuDB will quit, and you will be left with just normal isympy (it won’t break at your breakpoints any more).  Actually, if you do this, but doing <code>Ctrl-D</code> still opens the PuDB prompt, you can just press “Restart”, and it should start working again.  Note that “Restart” will not actually reset isympy:  all your saved variables will still be the same, and any changes to the library code will not be reloaded.  To do that, you have to completely exit and start over again.</p>
-<p>Of course, there is nothing SymPy specific about this trick. As long as you have a script that acts as an entry point to an interactive console for your application, you can use it.  If you just use IPython, you can use something like <code>pudb /bin/ipython</code> (replace <code>/bin/ipython</code> with the output of <code>which ipython</code>).  </p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/asmeurersympy.wordpress.com/1204/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/asmeurersympy.wordpress.com/1204/"/></a> <img alt="" border="0" height="1" src="https://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1204&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2013-01-28T00:43:49Z</updated>
-    <category term="Uncategorized"/>
-    <author>
-      <name>Aaron Meurer</name>
-    </author>
-    <source>
-      <id>https://asmeurersympy.wordpress.com</id>
-      <logo>https://secure.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=https%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
-      <link href="https://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="https://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="https://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="https://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
-      <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-07-05T22:20:07Z</updated>
+      <updated>2013-07-05T22:40:22Z</updated>
     </source>
   </entry>
 </feed>
