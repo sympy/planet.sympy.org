@@ -33,6 +33,38 @@
 
 
 
+<h3><a href="http://codesachin.blogspot.com/" title="Dream. Think. Code.">Sachin Joglekar</a></h3>
+
+
+<div class="entrygroup" id="tag:blogger.com,1999:blog-5472769892551526876.post-2643645454030390642">
+<h4><a href="http://codesachin.blogspot.com/2013/07/singletons-in-python-and-gsoc-update.html">Singletons in Python (and GSoC update)</a></h4>
+<div class="entry">
+<div class="content">
+<div style="text-align: left;" dir="ltr">This week, there isn't any interesting stuff to write about as far as the project is concerned, as I pretty much cleaned up what I had done in the previous two weeks. By 'clean up', I mean PEP-8 modifications to the existing code and rectification of some tiny(but serious) conceptual errors in the MovingRefFrame methods. I also spent quite some time reviewing, or rather, trying to understand Prasoon's code. I pulled his vector branch on my machine and started executing some tests on it. I have left some comments on his <a href="https://github.com/sympy/sympy/pull/2208">PR</a>, and hopefully they will get sorted out soon. One good thing is, I also wrote the first draft of my code for Particle class-including methods for angular momentum, translational motion calculation, etc. This wasnt much of a problem, as I 'attached' a dedicated reference frame to each Particle that would be initialized. Hence, all of Particle's methods would call the relevant methods in MovingRefFrame.<br /><br />I got to learn about a pretty neat method of implementing Singleton classes in Python. How? I saw the __new__ method being called in Prasoon's code, and after an hour of going from website to website, I somehow ended up learning this.<br /><br />Have a look at the following code-<br /><pre style=""><code style="color: black;">1:  class MutableSingletonClass(object):  <br />2:    instance = None  <br />3:      <br />4:    def __new__(cls, *args, **kwargs):  <br />5:      print ("In __new__")  <br />6:      instance = cls.instance  <br />7:      if instance is None:  <br />8:        print ("No instance found")  <br />9:        instance = cls.instance = \  <br />10:              object.__new__(cls)  <br />11:      else:  <br />12:        print ("Instance found")  <br />13:      return instance  <br />14:      <br />15:    def __init__(self, *args, **kwargs):  <br />16:      print ("In __init__")  <br />17:      pass  <br />18:    <br />19:  class Class1(MutableSingletonClass):  <br />20:    def __init__(self, x):  <br />21:      print ("In Class1 __init__")  <br />22:      self.x = x  </code></pre><br />MutableSingletonClass's subclasses (and that class itself) will have <i>only </i>one instance being generated per session (the first time, that is). The next time you try to initialize a new instance of Class1, that <i>same </i>instance that was created earlier will be modified. Mind you, that one common instance WILL be modified everytime you call the constructor with new arguments. The reason this happens is, every time __new__ returns an object (which __new__ ensures is only one per session in this case), the __init__method is called. You cannot avoid that.<br />To get a better idea, look at the output-<br /><pre style=""><code style="color: black;">1:  &gt;&gt;&gt; c1 = Class1(3)  <br />2:  In __new__  <br />3:  No instance found  <br />4:  In Class1 __init__  <br />5:  &gt;&gt;&gt; c2 = Class1(4)  <br />6:  In __new__  <br />7:  Instance found  <br />8:  In Class1 __init__  <br />9:  &gt;&gt;&gt; c1.x  <br />10:  4  <br />11:  &gt;&gt;&gt;c1 == c2  <br />12:  True  <br /></code></pre><br />Now, if we want to implement a <b style="font-style: italic;">real </b>Singleton type, the <a href="http://www.python.org/download/releases/2.2/descrintro/#__new__">Python docs</a> show a nice method-<br /><br /><pre style=""><code style="color: black;">1:  class FixedSingletonClass(object):  <br />2:    instance = None  <br />3:      <br />4:    def __new__(cls, *args, **kwargs):  <br />5:      print ("In __new__")  <br />6:      instance = cls.instance  <br />7:      if instance is not None:  <br />8:        print ("Instance found")  <br />9:      else:  <br />10:        print ("No instance found")  <br />11:        instance = cls.instance = \  <br />12:              object.__new__(cls)  <br />13:        instance.init(*args, **kwargs)  <br />14:      return instance  <br />15:    <br />16:    def init(self, *args, **kwargs):  <br />17:      #This is where the subclasses should implement their  <br />18:      #initialization  <br />19:      pass  <br />20:      <br />21:    def __init__(self, *args, **kwargs):  <br />22:      #Subclasses should only define this as a dummy so users no which  <br />23:      #arguments to pass for initialization  <br />24:      print ("In __init__")  <br />25:      pass  <br />26:    <br />27:  class Class2(FixedSingletonClass):  <br />28:    def init(self, x):  <br />29:      print ("In Class2 init")  <br />30:      self.x = x  <br />31:    <br />32:    def __init__(self, x):  <br />33:      print("In Class2 __init__")  <br />34:      pass  <br /></code></pre><br />As you can see here, this implementation reduces the __init__ method to a mere formality/dummy (just to tell the users which values to enter for initialization, in the shell). Actually speaking, all the work is done by the 'init' method, which can now be controlled by the program. Hence, this real initializer (not __init__) is called <i>only </i>once..the first time an instance of Class2 is created. The rest of the times, __init__ <i>is </i>called, but it makes no changes to the existing instance. This ensures all references of Class2 point to a common instance.<br />Hence, the output-<br /><pre style=""><code style="color: black;">1:  &gt;&gt;&gt; d1 = Class2(5)  <br />2:  In __new__  <br />3:  No instance found  <br />4:  In Class2 init  <br />5:  In Class2 init  <br />6:  &gt;&gt;&gt; d2 = Class2(10)  <br />7:  In __new__  <br />8:  Instance found  <br />9:  In Class2 init  <br />10:  &gt;&gt;&gt; d1.x  <br />11:  5  <br />12:  &gt;&gt;&gt; assert d1 is d2  <br /></code></pre><br />I hope this was useful.<br />That's all for now.<br />Have a great week ahead :-)</div></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://codesachin.blogspot.com/2013/07/singletons-in-python-and-gsoc-update.html">by Sachin Joglekar (noreply@blogger.com) at July 06, 2013 01:16 PM</a>
+</p>
+</div>
+</div>
+
+
+
+</div>
+<div class="channelgroup">
+
+
+
+
+
+
+
 <h3><a href="http://musingsofafriend.wordpress.com" title="musings of a friend - Prasoon Shukla » SymPy">Prasoon Shukla</a></h3>
 
 
@@ -3691,98 +3723,6 @@ each time a threshold is crossed.</p>
 </div>
 
 </div>
-<div class="daygroup">
-<h2>February 25, 2013</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://matthewrocklin.com/blog/" title="Working notes by Matthew Rocklin - SymPy">MRocklin</a></h3>
-
-
-<div class="entrygroup" id="http://matthewrocklin.com/blog//work/2013/02/25/MaximumAposteriori">
-<h4><a href="http://matthewrocklin.com/blog//work/2013/02/25/MaximumAposteriori">Maximum a Posteriori Estimation</a></h4>
-<div class="entry">
-<div class="content">
-<p><em>Disclaimer: I know relatively little about this application. Corrections welcome.</em></p>
-
-<p>In this post we see how SymPy can simplify common numeric calculations, particularly in Bayesian inference problems.</p>
-
-<p>Imagine you are a scientist studying some <a href="http://en.wikipedia.org/wiki/Poisson_process">counting process</a> (like radioactive decay or the number of page requests on a web server). You describe this process with a <a href="http://en.wikipedia.org/wiki/Poisson_distribution">Poisson random variable</a> and try to learn the rate parameter of this distribution by observing some random samples.</p>
-
-<p>If you have no preconceptions about the rate then this problem is easy. You just divide total counts by total time and you’re done.</p>
-
-<p>A more complex problem arises when external theory provides prior information about your rate parameter (for example physics might impose rules on the rate of radioactive decay). Lets model this problem in SymPy. For the sake of concreteness lets arbitrarily assume that $\lambda$, the rate parameter, follows a Beta distribution with parameters <code>a</code> and <code>b</code>.</p>
-<div class="highlight"><pre><code class="python"><span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="s">'a,b'</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">lam</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'lambda'</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">rate</span> <span class="o">=</span> <span class="n">Beta</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
-<span class="n">count</span> <span class="o">=</span> <span class="n">Poisson</span><span class="p">(</span><span class="s">'X'</span><span class="p">,</span> <span class="n">rate</span><span class="p">)</span>
-</code></pre></div>
-<p>In the lab we observe many samples $x_i$ taken from <code>count</code>. From these we wish to find the most likely value of <code>rate</code>. The probability of any single value of <code>rate</code> given our data can be rewritten with Bayes’ rule.</p>
-
-<p>$$ p(\lambda \vert x_i) \propto \prod_i p(x_i \vert \lambda) \cdot p(\lambda) $$</p>
-
-<p>In this case the distributions are given by</p>
-<div class="highlight"><pre><code class="python"><span class="n">pdf</span> <span class="o">=</span> <span class="n">density</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">rate</span><span class="p">);</span>  <span class="k">print</span> <span class="n">latex</span><span class="p">(</span><span class="n">pdf</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>  <span class="c"># density of count, given rate</span>
-<span class="n">pdf</span> <span class="o">=</span> <span class="n">density</span><span class="p">(</span><span class="n">rate</span><span class="p">);</span>         <span class="k">print</span> <span class="n">latex</span><span class="p">(</span><span class="n">pdf</span><span class="p">(</span><span class="n">lam</span><span class="p">))</span>
-</code></pre></div>
-<p>$$ p(x_i \vert \lambda) = \frac{\lambda^{x}}{e^{\lambda} x!} \;\;\;\; p(\lambda) = \frac{\lambda^{a - 1} \left(- \lambda + 1\right)^{b - 1} \Gamma\left(a + b\right)}{\Gamma\left(a\right) \Gamma\left(b\right)}$$</p>
-
-<p>To find the maximizer of $p(\lambda \vert x_i)$ we set the derivative equal to zero. We simplify the computation by taking the <code>log</code>. Because <code>log</code> is monotonic this does not change the solution.</p>
-
-<p>$$ 0 = \frac{d}{d\lambda} \log\left( \prod_i p(x_i \vert \lambda) \cdot p(\lambda)\right) = \frac{d}{d\lambda} \sum_i \log(p(x_i \vert \lambda) \cdot p(\lambda)) $$</p>
-
-<p>We can accomplish this in SymPy with the following code</p>
-<div class="highlight"><pre><code class="python"><span class="c"># Model `n` observations with a function `data` indexed by integer `i`</span>
-<span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="s">'i,n'</span><span class="p">,</span> <span class="n">integer</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">data</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="s">'data'</span><span class="p">)</span>
-</code></pre></div><div class="highlight"><pre><code class="python"><span class="c"># Compute log likelihood</span>
-<span class="n">loglikelihood</span> <span class="o">=</span> <span class="n">log</span><span class="p">(</span><span class="n">Product</span><span class="p">(</span><span class="n">density</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">rate</span><span class="p">)(</span><span class="n">data</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="o">*</span> <span class="n">density</span><span class="p">(</span><span class="n">rate</span><span class="p">)(</span><span class="n">lam</span><span class="p">),</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">)))</span>
-<span class="n">Eq</span><span class="p">(</span><span class="n">simplify</span><span class="p">(</span><span class="n">loglikeihood</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">lam</span><span class="p">)),</span> <span class="mi">0</span><span class="p">)</span>
-</code></pre></div>
-<p>$$ \sum_{i=1}^{n} \frac{a \left(\lambda - 1\right) + b \lambda - \lambda \left(\lambda - 1\right) - 2 \lambda + \left(\lambda - 1\right) \operatorname{data}{\left[i \right]} + 1}{\lambda \left(\lambda - 1\right)} = 0 $$</p>
-
-<h2 id="discussion">Discussion</h2>
-
-<p>SymPy reduces this Bayesian inference problem to finding roots of the above equation. I suspect that many prevalent numeric problems could be similarly accelerated through a symbolic preprocessing step.</p>
-
-<p>Looking at the equation above it’s clear that this problem can be simplified further. However I like the existing solution because it does not depend on the user possessing any mathematical expertise beyond the ability to describe their mathematical model (the derivatives, log, etc… are generally applicable to this problem). In what other automated ways can SymPy further process computations like this? What are other ways that aren’t in SymPy but could be developed in the future?</p>
-
-<p>I suspect that the problem given here is analytically solvable. To the extent possible SymPy should try to solve these problems. However for the vast number of problems without analytic solutions I suspect there is still a great deal we can do, either by reducing the problem as above or through the mathematically informed selection of numeric algorithms.</p>
-
-<p>Various root finding algorithms are appropriate in different cases. Wikipedia suggests <a href="http://en.wikipedia.org/wiki/Householder%27s_method">Householder’s Method</a>, a generalization on Newton’s method for scalar systems with known derivatives. Perhaps in cases where SymPy is unable to solve the problem analytically it could select the correct numeric algorithm. Is this a reasonable use case for SymPy?</p>
-
-<h2 id="references">References</h2>
-
-<ul>
-<li><a href="http://en.wikipedia.org/wiki/Maximum_a_posteriori_estimation">Maximum A Posteriori Estimation</a></li>
-
-<li><a href="http://en.wikipedia.org/wiki/Poisson_process">Poisson process</a></li>
-
-<li><a href="http://en.wikipedia.org/wiki/Householder%27s_method">Householder’s Method</a></li>
-</ul></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://matthewrocklin.com/blog//work/2013/02/25/MaximumAposteriori">February 25, 2013 08:00 AM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -3926,7 +3866,7 @@ each time a threshold is crossed.</p>
 
 <p>
 <strong>Last updated:</strong><br>
-July 06, 2013 11:20 AM<br>
+July 06, 2013 01:20 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
