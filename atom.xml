@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2013-07-06T13:20:37Z</updated>
+  <updated>2013-07-06T18:00:42Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -40,7 +40,7 @@
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>-Sachin Joglekar-</subtitle>
       <title>Dream. Think. Code.</title>
-      <updated>2013-07-06T13:16:27Z</updated>
+      <updated>2013-07-06T16:54:06Z</updated>
     </source>
   </entry>
 
@@ -107,12 +107,12 @@
 <h4><strong>Case D &lt; 0</strong></h4>
 <p>Since D &lt; 0,  equation becomes x**2 + |D| * y**2 = N, which is always positive or zero. So there are no solutions when  N &lt; 0 and only the trivial solution x = 0 and y = 0 when N = 0. If N &gt; 0, we can note that |D| * y**2 &lt;= N which implies y &lt;= sqrt(N/|D|), so a brute force search on this interval would find us all the solutions. That’s what I did in this case. But there are more better ways like using methods of binary quadratic forms for positive definite forms. I hope to implement it in the near future.</p>
 <h4><strong>Case D = 0</strong></h4>
-<p>Equation reduces to x**2 = N, solution procedure is straight forward and no solutions exist if N &lt; 0 or N is square free.</p>
+<p>Equation reduces to x**2 = N, solution procedure is straight forward and no solutions exist if N &lt; 0 or N is not a perfect square.</p>
 <h4><strong>Case D &gt; 0</strong></h4>
 <p>If D is a square, then let D = r**2 for some integer r. Then the LHS is x**2 – r**2 * y**2 = N –&gt; (x – r*y) (x + r*y) = N. Now if N = 0 either x – r*y = 0 or x+ r*y = 0 and the parametric solutions for the above two cases are (r*t, t), (-r*t, t) respectively. If N does not equal zero, then both x – r*y and x + r*y should be factors of N. We should find an upper bound M to y so that we can search through the solutions in the range 0 &lt;= y &lt;= M (We don’t have to consider negative solutions, reason is explained later in the article).  Let x – r*y = a and x + r*y = b. Solving for y we get y = (b – a)/(2*r). Now N = (x – r*y) * (x + r*y) = a * b so b &lt;= N and a &gt;= 1 since a is a positive factor o f N. which implies b &lt;= N and -a &lt;= -1. Now adding up the two inequalities gives b – a &lt;= N – 1 which gives y &lt;= (N – 1)/ (2*r) which is the required upper bound.</p>
-<p>Now suppose D is square free. If  N = 0, x**2 – D*y**2 = 0 –&gt; x**2 = D * y**2.  Supoose y is non zero. Then y should divide x (Otherwise y**2 can’t divide x**2 which is the case here). Putting x = k*y on the LHS one can see that D = k**2 which is in contradiction to D being square free. So y = 0 and consequently x = 0. Hence if N = 0 we will have only the trivial solution x = 0 and y = 0. Now if N is non zero comes our main case.</p>
+<p>Now suppose D is not a perfect square. If  N = 0, x**2 – D*y**2 = 0 –&gt; x**2 = D * y**2.  Supoose y is non zero. Then y should divide x (Otherwise y**2 can’t divide x**2 which is the case here). Putting x = k*y on the LHS one can see that D = k**2 which is in contradiction to D being square free. So y = 0 and consequently x = 0. Hence if N = 0 we will have only the trivial solution x = 0 and y = 0. Now if N is non zero comes our main case.</p>
 <p><em>PQa Algorithm</em></p>
-<p>This algorithm computes the continued fraction expansion of the quadratic irrational (P + sqrt(D))/Q and some auxiliary variables, i.e of numbers like (2 + sqrt(3))/5 and (-34 + sqrt(19))/24. Note that D should be square free otherwise the expression (P + sqrt(D))/Q will not be a quadratic irrational. For more details on algorithm refer [2]. Algorithm takes three variables P, Q, D as input and output six quantities P_i, Q_i, a_i, A_i, B_i and G_i for each time it’s called for a given set of initial values (This is implemented as a generator, please see python documentation). a_i is the ith term of continued fraction expansion of (P + sqrt(D))/Q and others are required in the LMM algorithm described below. Here i &gt;= 0.</p>
+<p>This algorithm computes the continued fraction expansion of the quadratic irrational (P + sqrt(D))/Q and some auxiliary variables, i.e of numbers like (2 + sqrt(3))/5 and (-34 + sqrt(19))/24. Note that D should not be perfect square otherwise the expression (P + sqrt(D))/Q will not be a quadratic irrational. For more details on algorithm refer [2]. Algorithm takes three variables P, Q, D as input and output six quantities P_i, Q_i, a_i, A_i, B_i and G_i for each time it’s called for a given set of initial values (This is implemented as a generator, please see python documentation). a_i is the ith term of continued fraction expansion of (P + sqrt(D))/Q and others are required in the LMM algorithm described below. Here i &gt;= 0.</p>
 <p>It is also important to know that continued fraction representation of a quadratic irrationality is periodic after a few terms. In the solution we need to know the sum of length of the aperiodic part and the periodic part. I implemented a separate function, length() to find this.</p>
 <p><em>LMM Algorithm</em></p>
 <p>LMM algorithm finds fundamental solutions of the each equivalence class of the solution set of x**2 – D * y**2 = N. We have to construct the general solution of each class afterwards. Here is a rough description how the algorithm works.</p>
@@ -146,7 +146,7 @@
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-06T13:20:33Z</updated>
+      <updated>2013-07-06T18:00:39Z</updated>
     </source>
   </entry>
 
@@ -181,7 +181,7 @@ I was able to make use of both of them in my implementation for the multivariate
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-06T13:20:35Z</updated>
+      <updated>2013-07-06T18:00:39Z</updated>
     </source>
   </entry>
 
@@ -233,7 +233,7 @@ I was able to make use of both of them in my implementation for the multivariate
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-06T13:20:34Z</updated>
+      <updated>2013-07-06T18:00:39Z</updated>
     </source>
   </entry>
 
@@ -417,7 +417,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-07-06T13:20:09Z</updated>
+      <updated>2013-07-06T18:00:10Z</updated>
     </source>
   </entry>
 
@@ -483,7 +483,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>-Sachin Joglekar-</subtitle>
       <title>Dream. Think. Code.</title>
-      <updated>2013-07-06T13:16:27Z</updated>
+      <updated>2013-07-06T16:54:06Z</updated>
     </source>
   </entry>
 
@@ -522,7 +522,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-06T13:20:33Z</updated>
+      <updated>2013-07-06T18:00:39Z</updated>
     </source>
   </entry>
 
@@ -554,7 +554,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-06T13:20:35Z</updated>
+      <updated>2013-07-06T18:00:39Z</updated>
     </source>
   </entry>
 
@@ -586,7 +586,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-06T13:20:35Z</updated>
+      <updated>2013-07-06T18:00:39Z</updated>
     </source>
   </entry>
 
@@ -704,7 +704,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-06T13:20:34Z</updated>
+      <updated>2013-07-06T18:00:39Z</updated>
     </source>
   </entry>
 
@@ -816,7 +816,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Can I help u ?</subtitle>
       <title>Geeks at Work</title>
-      <updated>2013-07-06T13:20:32Z</updated>
+      <updated>2013-07-06T18:00:37Z</updated>
     </source>
   </entry>
 
@@ -914,7 +914,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>-Sachin Joglekar-</subtitle>
       <title>Dream. Think. Code.</title>
-      <updated>2013-07-06T13:16:27Z</updated>
+      <updated>2013-07-06T16:54:06Z</updated>
     </source>
   </entry>
 
@@ -947,7 +947,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>-Sachin Joglekar-</subtitle>
       <title>Dream. Think. Code.</title>
-      <updated>2013-07-06T13:16:27Z</updated>
+      <updated>2013-07-06T16:54:06Z</updated>
     </source>
   </entry>
 
@@ -975,7 +975,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-06T13:20:35Z</updated>
+      <updated>2013-07-06T18:00:39Z</updated>
     </source>
   </entry>
 
@@ -1069,7 +1069,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-06T13:20:33Z</updated>
+      <updated>2013-07-06T18:00:39Z</updated>
     </source>
   </entry>
 
@@ -1102,7 +1102,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>-Sachin Joglekar-</subtitle>
       <title>Dream. Think. Code.</title>
-      <updated>2013-07-06T13:16:27Z</updated>
+      <updated>2013-07-06T16:54:06Z</updated>
     </source>
   </entry>
 
@@ -1133,7 +1133,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-06T13:20:34Z</updated>
+      <updated>2013-07-06T18:00:39Z</updated>
     </source>
   </entry>
 
@@ -1239,7 +1239,7 @@ into a text file. For those interested, however I made a few changes manually ev
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-06T13:20:34Z</updated>
+      <updated>2013-07-06T18:00:39Z</updated>
     </source>
   </entry>
 
@@ -1316,7 +1316,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-06T13:20:33Z</updated>
+      <updated>2013-07-06T18:00:39Z</updated>
     </source>
   </entry>
 
@@ -1395,7 +1395,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>-Sachin Joglekar-</subtitle>
       <title>Dream. Think. Code.</title>
-      <updated>2013-07-06T13:16:27Z</updated>
+      <updated>2013-07-06T16:54:06Z</updated>
     </source>
   </entry>
 
@@ -1461,7 +1461,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>-Sachin Joglekar-</subtitle>
       <title>Dream. Think. Code.</title>
-      <updated>2013-07-06T13:16:27Z</updated>
+      <updated>2013-07-06T16:54:06Z</updated>
     </source>
   </entry>
 
@@ -1494,7 +1494,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>-Sachin Joglekar-</subtitle>
       <title>Dream. Think. Code.</title>
-      <updated>2013-07-06T13:16:27Z</updated>
+      <updated>2013-07-06T16:54:06Z</updated>
     </source>
   </entry>
 
@@ -1569,7 +1569,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Can I help u ?</subtitle>
       <title>Geeks at Work</title>
-      <updated>2013-07-06T13:20:32Z</updated>
+      <updated>2013-07-06T18:00:37Z</updated>
     </source>
   </entry>
 
@@ -1597,7 +1597,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="https://sites.google.com/feeds/content/site/v9joshi/batch" rel="http://schemas.google.com/g/2005#batch" type="application/atom+xml"/>
       <link href="https://sites.google.com/feeds/content/site/v9joshi?parent=5420265600325595988&amp;kind=announcement" rel="self" type="application/atom+xml"/>
       <title>Posts of GSoC Blog</title>
-      <updated>2013-07-06T13:20:35Z</updated>
+      <updated>2013-07-06T18:00:40Z</updated>
     </source>
   </entry>
 
@@ -1692,7 +1692,7 @@ based features.</p></div></td></tr></tbody></table></div>
       <link href="https://sites.google.com/feeds/content/site/v9joshi/batch" rel="http://schemas.google.com/g/2005#batch" type="application/atom+xml"/>
       <link href="https://sites.google.com/feeds/content/site/v9joshi?parent=5420265600325595988&amp;kind=announcement" rel="self" type="application/atom+xml"/>
       <title>Posts of GSoC Blog</title>
-      <updated>2013-07-06T13:20:35Z</updated>
+      <updated>2013-07-06T18:00:40Z</updated>
     </source>
   </entry>
 
@@ -1722,7 +1722,7 @@ based features.</p></div></td></tr></tbody></table></div>
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-06T13:20:35Z</updated>
+      <updated>2013-07-06T18:00:40Z</updated>
     </source>
   </entry>
 
@@ -1772,7 +1772,7 @@ Here D is a non square positive integer.</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-06T13:20:33Z</updated>
+      <updated>2013-07-06T18:00:39Z</updated>
     </source>
   </entry>
 
@@ -1877,7 +1877,7 @@ Here D is a non square positive integer.</p>
       <link href="http://brianegranger.com" rel="alternate" type="text/html"/>
       <subtitle>Physics ∩ Computing</subtitle>
       <title>Brian E. Granger</title>
-      <updated>2013-07-06T13:20:16Z</updated>
+      <updated>2013-07-06T18:00:24Z</updated>
     </source>
   </entry>
 
@@ -2230,7 +2230,7 @@ however produce walking like behavior in a 2-D Slinky by using the model
       <link href="https://sites.google.com/feeds/content/site/v9joshi/batch" rel="http://schemas.google.com/g/2005#batch" type="application/atom+xml"/>
       <link href="https://sites.google.com/feeds/content/site/v9joshi?parent=5420265600325595988&amp;kind=announcement" rel="self" type="application/atom+xml"/>
       <title>Posts of GSoC Blog</title>
-      <updated>2013-07-06T13:20:35Z</updated>
+      <updated>2013-07-06T18:00:40Z</updated>
     </source>
   </entry>
 
@@ -2651,7 +2651,7 @@ AttributeError:
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-07-06T13:20:09Z</updated>
+      <updated>2013-07-06T18:00:10Z</updated>
     </source>
   </entry>
 
@@ -2805,7 +2805,7 @@ AttributeError:
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-07-06T13:20:26Z</updated>
+      <updated>2013-07-06T18:00:33Z</updated>
     </source>
   </entry>
 
@@ -3108,7 +3108,7 @@ Operations after Theano Simplification:  17</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-07-06T13:20:26Z</updated>
+      <updated>2013-07-06T18:00:32Z</updated>
     </source>
   </entry>
 
@@ -3253,7 +3253,7 @@ legend(['$R_{31}$', "$R'_{31}$"])</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-07-06T13:20:26Z</updated>
+      <updated>2013-07-06T18:00:32Z</updated>
     </source>
   </entry>
 
@@ -3299,7 +3299,7 @@ legend(['$R_{31}$', "$R'_{31}$"])</code></pre>
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-07-06T13:20:08Z</updated>
+      <updated>2013-07-06T18:00:10Z</updated>
     </source>
   </entry>
 
