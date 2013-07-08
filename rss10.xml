@@ -13,6 +13,7 @@
 
 	<items>
 		<rdf:Seq>
+			<rdf:li rdf:resource="tag:blogger.com,1999:blog-7526836182390500993.post-2448841775059804252" />
 			<rdf:li rdf:resource="http://geekiology.wordpress.com/?p=292" />
 			<rdf:li rdf:resource="http://asmeurersympy.wordpress.com/?p=1348" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-2736678015821545355.post-83592426202169687" />
@@ -72,11 +73,17 @@
 			<rdf:li rdf:resource="http://asmeurersympy.wordpress.com/?p=1282" />
 			<rdf:li rdf:resource="http://matthewrocklin.com/blog//work/2013/04/05/SymPy-Theano-part-3" />
 			<rdf:li rdf:resource="tag:fabianp.net/blog,2013-03-30:2013/householder-matrices/" />
-			<rdf:li rdf:resource="http://matthewrocklin.com/blog//work/2013/03/28/SymPy-Theano-part-2" />
 		</rdf:Seq>
 	</items>
 </channel>
 
+<item rdf:about="tag:blogger.com,1999:blog-7526836182390500993.post-2448841775059804252">
+	<title>Tarun Gaba: GSoC Report Week 3</title>
+	<link>http://tarun-gaba.blogspot.com/2013/07/gsoc-report-week-3.html</link>
+	<content:encoded>&lt;div style=&quot;text-align: left;&quot; dir=&quot;ltr&quot;&gt;So, week three has also came to an end.&lt;br /&gt;Main considerations for this week were to write some unit tests, which would be determining the way main coding is to be done.&lt;br /&gt;As per the timeline,  all tests for Python side, should be complete by the coming week, i.e. which has started from today.&lt;br /&gt;&lt;br /&gt;As for now, I have almost completed tests for Shape class, and I have written some tests for VisualizationFrame. After that I would focus on tests for Scene class, which would act as a manager class, for holding and manipulating JSON data from the Python side, as well as be able to display output in IPython output cells, as well as fire up a server in case of Python interpreter.&lt;br /&gt;&lt;br /&gt;Scene and VisualizationFrame are very important classes for this package. They make up the majority of the API for the visualization implementations.&lt;br /&gt;Also there has been a little confusion on the extent of modularity the package would/should provide.&lt;br /&gt;&lt;br /&gt;Hopefully in a few days things would be more clear, so that I would be able to write tests more exhaustively according to the same.&lt;br /&gt;&lt;br /&gt;Anyways regarding general stuff, the summer period is amazing, and I am getting good responses from my mentor, and also huge support from the community people. So, it makes things easier to do, when we have so much people to help out there, which is also one of the perks of the open source environment.&lt;br /&gt;&lt;br /&gt;Cheers&lt;br /&gt;&lt;br /&gt;&lt;/div&gt;</content:encoded>
+	<dc:date>2013-07-08T17:34:47+00:00</dc:date>
+	<dc:creator>TARUN GABA</dc:creator>
+</item>
 <item rdf:about="http://geekiology.wordpress.com/?p=292">
 	<title>Chetna Gupta: Parametric Lograthimic Derivative</title>
 	<link>http://geekiology.wordpress.com/2013/07/08/parametric-lograthimic-derivative/</link>
@@ -1788,183 +1795,6 @@ eigensolvers&lt;/a&gt;&lt;/p&gt;
 &lt;/div&gt;</content:encoded>
 	<dc:date>2013-03-29T23:00:00+00:00</dc:date>
 	<dc:creator>Fabian Pedregosa</dc:creator>
-</item>
-<item rdf:about="http://matthewrocklin.com/blog//work/2013/03/28/SymPy-Theano-part-2">
-	<title>MRocklin: SymPy and Theano -- Scalar Simplification</title>
-	<link>http://matthewrocklin.com/blog//work/2013/03/28/SymPy-Theano-part-2</link>
-	<content:encoded>&lt;h2 id=&quot;introduction&quot;&gt;Introduction&lt;/h2&gt;
-
-&lt;p&gt;&lt;em&gt;This post uses some LaTeX. You may want to read it on the original site.&lt;/em&gt;&lt;/p&gt;
-
-&lt;p&gt;In my &lt;a href=&quot;http://matthewrocklin.com/blog/work/2013/03/19/SymPy-Theano-part-1/&quot;&gt;last post&lt;/a&gt; I showed how SymPy can benefit from Theano. In particular Theano provided a mature platform for code generation that outperformed SymPy’s attempt at the same problem. I argued that projects should stick to one specialty and depend on others for secondary concerns. Interfaces are better than add-ons.&lt;/p&gt;
-
-&lt;p&gt;In this post I’ll show how Theano can benefit from SymPy. In particular I’ll demonstrate the practicality of SymPy’s impressive scalar simplification routines for generating efficient programs.&lt;/p&gt;
-
-&lt;p&gt;After re-reading over this post I realize that it’s somewhat long. I’ve decided to put the results first in hopes that it’ll motivate you to keep reading.&lt;/p&gt;
-&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Project&lt;/th&gt;&lt;th&gt;operation count&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;SymPy&lt;/td&gt;&lt;td style=&quot;text-align: center;&quot;&gt;27&lt;/td&gt;
-&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Theano&lt;/td&gt;&lt;td style=&quot;text-align: center;&quot;&gt;24&lt;/td&gt;
-&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;SymPy+Theano&lt;/td&gt;&lt;td style=&quot;text-align: center;&quot;&gt;17&lt;/td&gt;
-&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
-&lt;p&gt;Now, lets find out what those numbers mean.&lt;/p&gt;
-
-&lt;h2 id=&quot;example_problem&quot;&gt;Example problem&lt;/h2&gt;
-
-&lt;p&gt;We use a larger version of our problem from last time; a radial wavefunction corresponding to &lt;code&gt;n = 6&lt;/code&gt; and &lt;code&gt;l = 2&lt;/code&gt; for Carbon (&lt;code&gt;Z = 6&lt;/code&gt;)&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;from sympy.physics.hydrogen import R_nl
-from sympy.abc import x
-n, l, Z = 6, 2, 6
-expr = R_nl(n, l, x, Z)
-print latex(expr)&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;$$\frac{1}{210} \sqrt{70} x^{2} \left(- \frac{4}{3} x^{3} + 16 x^{2} - 56 x + 56\right) e^{- x}$$&lt;/p&gt;
-
-&lt;p&gt;We want to generate code to compute both this expression and its derivative. Both SymPy and Theano can compute and simplify derivatives. In this post we’ll measure the complexity of a computation that simultaneously computes both the above expression and its derivative. We’ll arrive at this computation through a couple of different routes that use overlapping parts of SymPy and Theano. This will supply a couple of direct comparisons.&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;Disclaimer: I’ve chosen a larger expression here to exaggerate results. Simpler expressions yield less impressive results.&lt;/em&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;simplification&quot;&gt;Simplification&lt;/h2&gt;
-
-&lt;p&gt;We show the expression, it’s derivative, and SymPy’s simplification of that derivative. In each case we quantify the complexity of the expression by the number of algebraic operations&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;The target expression:&lt;/strong&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;print latex(expr)&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;$$\frac{1}{210} \sqrt{70} x^{2} \left(- \frac{4}{3} x^{3} + 16 x^{2} - 56 x + 56\right) e^{- x}$$&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;print &quot;Operations: &quot;, count_ops(expr)
-Operations:  17&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;strong&gt;It’s derivative&lt;/strong&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;print latex(expr.diff(x))&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;$$ \frac{1}{210} \sqrt{70} x^{2} \left(- 4 x^{2} + 32 x - 56\right) e^{- x} - \frac{1}{210} \sqrt{70} x^{2} \left(- \frac{4}{3} x^{3} + 16 x^{2} - 56 x + 56\right) e^{- x} + \frac{1}{105} \sqrt{70} x \left(- \frac{4}{3} x^{3} + 16 x^{2} - 56 x + 56\right) e^{- x} $$&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;print &quot;Operations: &quot;, count_ops(expr.diff(x))
-Operations:  48&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;strong&gt;The result of &lt;code&gt;simplify&lt;/code&gt;&lt;/strong&gt; on the derivative. Note the significant cancellation of the above expression.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;print latex(simplify(expr.diff(x)))&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;$$ \frac{2}{315} \sqrt{70} x \left(x^{4} - 17 x^{3} + 90 x^{2} - 168 x + 84\right) e^{- x} $$&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;print &quot;Operations: &quot;, count_ops(simplify(expr.diff(x)))
-Operations:  18&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;strong&gt;An unevaluated derivative object&lt;/strong&gt;. We’ll end up passing this to Theano so that it computes the derivative on its own.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;print latex(Derivative(expr, x))&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;$$ \frac{\partial}{\partial x}\left(\frac{1}{210} \sqrt{70} x^{2} \left(- \frac{4}{3} x^{3} + 16 x^{2} - 56 x + 56\right) e^{- x}\right) $$&lt;/p&gt;
-
-&lt;h2 id=&quot;bounds_on_the_cost_of_differentiation&quot;&gt;Bounds on the cost of Differentiation&lt;/h2&gt;
-
-&lt;p&gt;Scalar differentiation is actually a very simple transformation.&lt;/p&gt;
-
-&lt;p&gt;You need to know how to transform all of the elementary functions (&lt;code&gt;exp, log, sin, cos, polynomials, etc...&lt;/code&gt;), the chain rule, and that’s it. Theorems behind automatic differentiation state that the cost of a derivative will be at most five times the cost of the original. In this case we’re guaranteed to have at most &lt;code&gt;17*5 == 85&lt;/code&gt; operations in the derivative computation; this holds in our case because &lt;code&gt;48 &amp;lt; 85&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;However derivatives are often far simpler than this upper bound. We see that after simplification the operation count of the derivative is &lt;code&gt;18&lt;/code&gt;, only one more than the original. This is common in practice.&lt;/p&gt;
-
-&lt;h2 id=&quot;theano_simplification&quot;&gt;Theano Simplification&lt;/h2&gt;
-
-&lt;p&gt;Like SymPy, Theano transforms graphs to mathematically equivalent but computationally more efficient representations. It provides standard compiler optimizations like constant folding, and common sub-expressions as well as array specific optimizations like the element-wise operation fusion.&lt;/p&gt;
-
-&lt;p&gt;Because users regularly handle mathematical terms Theano also provides a set of optimizations to simplify some common scalar expressions. For example Theano will convert expressions like &lt;code&gt;x*y/x&lt;/code&gt; to &lt;code&gt;y&lt;/code&gt;. In this sense it overlaps with SymPy’s &lt;code&gt;simplify&lt;/code&gt; functions. This post is largely a demonstration that SymPy’s scalar simplifications are far more powerful than Theano’s and that their use can result in significant improvements. This shouldn’t be surprising. Sympians are devoted to scalar simplification to a degree that far exceeds the Theano community’s devotion to this topic.&lt;/p&gt;
-
-&lt;h2 id=&quot;experiment&quot;&gt;Experiment&lt;/h2&gt;
-
-&lt;p&gt;We’ll compute the derivative of our radial wavefunction and then simplify the result. We’ll do this using both SymPy’s derivative and simplify routines and using Theano’s derivative and simplify routines. We’ll then compare the two results by counting the number of required operations.&lt;/p&gt;
-
-&lt;p&gt;Here is some setup code that you can safely ignore:&lt;/p&gt;
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;fgraph_of&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;exprs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
-    &lt;span class=&quot;sd&quot;&gt;&quot;&quot;&quot; Transform SymPy expressions into Theano Computation &quot;&quot;&quot;&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;outs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;theano_code&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;exprs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;ins&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;theano&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;gof&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;graph&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;inputs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;outs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;ins&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;outs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;theano&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;gof&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;graph&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;clone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ins&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;outs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;theano&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;gof&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FunctionGraph&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ins&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;outs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;theano_simplify&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fgraph&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
-    &lt;span class=&quot;sd&quot;&gt;&quot;&quot;&quot; Simplify a Theano Computation &quot;&quot;&quot;&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;mode&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;theano&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;compile&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get_default_mode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;excluding&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;fusion&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;fgraph&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fgraph&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;clone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;mode&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;optimizer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;optimize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fgraph&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fgraph&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;theano_count_ops&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fgraph&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
-    &lt;span class=&quot;sd&quot;&gt;&quot;&quot;&quot; Count the number of Scalar operations in a Theano Computation &quot;&quot;&quot;&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;filter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;lambda&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;isinstance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;op&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;theano&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tensor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Elemwise&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
-                      &lt;span class=&quot;n&quot;&gt;fgraph&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;apply_nodes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;In SymPy we create both an unevaluated derivative and a fully evaluated and sympy-simplified version. We translate each to Theano, simplify within Theano, and then count the number of operations both before and after simplification. In this way we can see the value added by both SymPy’s and Theano’s optimizations.&lt;/p&gt;
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;n&quot;&gt;exprs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Derivative&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;expr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;    &lt;span class=&quot;c&quot;&gt;# derivative computed in Theano&lt;/span&gt;
-         &lt;span class=&quot;n&quot;&gt;simplify&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;expr&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;diff&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))]&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;# derivative computed in SymPy, also sympy-simplified&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;expr&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;exprs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;fgraph&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fgraph_of&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;expr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;simp_fgraph&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;theano_simplify&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fgraph&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;latex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;expr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Operations:                             &quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;theano_count_ops&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fgraph&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Operations after Theano Simplification: &quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;theano_count_ops&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;simp_fgraph&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;Theano Only&lt;/p&gt;
-
-&lt;p&gt;$$ \frac{\partial}{\partial x}\left(\frac{1}{210} \sqrt{70} x^{2} \left(- \frac{4}{3} x^{3} + 16 x^{2} - 56 x + 56\right) e^{- x}\right) $$&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Operations:                              40
-Operations after Theano Simplification:  21&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;SymPy + Theano&lt;/p&gt;
-
-&lt;p&gt;$$ \frac{2}{315} \sqrt{70} x \left(x^{4} - 17 x^{3} + 90 x^{2} - 168 x + 84\right) e^{- x} $$&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Operations:                              13
-Operations after Theano Simplification:  10&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;analysis&quot;&gt;Analysis&lt;/h2&gt;
-
-&lt;p&gt;On its own Theano produces a derivative expression that is about as complex as the unsimplified SymPy version. Theano simplification then does a surprisingly good job, roughly halving the amount of work needed (&lt;code&gt;40 -&amp;gt; 21&lt;/code&gt;) to compute the result. If you dig deeper however you find that this isn’t because it was able to algebraically simplify the computation (it wasn’t) but rather because the computation contained several common sub-expressions. The Theano version looks a lot like the unsimplified SymPy version. Note the common sub-expressions like &lt;code&gt;56*x&lt;/code&gt; below.&lt;/p&gt;
-
-&lt;p&gt;$$ \frac{1}{210} \sqrt{70} x^{2} \left(- 4 x^{2} + 32 x - 56\right) e^{- x} - \frac{1}{210} \sqrt{70} x^{2} \left(- \frac{4}{3} x^{3} + 16 x^{2} - 56 x + 56\right) e^{- x} + \frac{1}{105} \sqrt{70} x \left(- \frac{4}{3} x^{3} + 16 x^{2} - 56 x + 56\right) e^{- x} $$&lt;/p&gt;
-
-&lt;p&gt;The pure-SymPy simplified result is again substantially more efficient (&lt;code&gt;13&lt;/code&gt; operations). Interestingly Theano is still able to improve on this, again not because of additional algebraic simplification but rather due to constant folding. The two projects simplify in orthogonal ways.&lt;/p&gt;
-
-&lt;h2 id=&quot;simultaneous_computation&quot;&gt;Simultaneous Computation&lt;/h2&gt;
-
-&lt;p&gt;When we compute both the expression and its derivative simultaneously we find substantial benefits from using the two projects together.&lt;/p&gt;
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;n&quot;&gt;orig_expr&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;R_nl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;l&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;expr&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;exprs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;fgraph&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fgraph_of&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;expr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;orig_expr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;simp_fgraph&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;theano_simplify&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fgraph&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;latex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;expr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;orig_expr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Operations:                             &quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fgraph&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;apply_nodes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Operations after Theano Simplification: &quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;simp_fgraph&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;apply_nodes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;$$ \begin{pmatrix}\frac{\partial}{\partial x}\left(\frac{1}{210} \sqrt{70} x^{2} \left(- \frac{4}{3} x^{3} + 16 x^{2} - 56 x + 56\right) e^{- x}\right), &amp;amp; \frac{1}{210} \sqrt{70} x^{2} \left(- \frac{4}{3} x^{3} + 16 x^{2} - 56 x + 56\right) e^{- x}\end{pmatrix} $$&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Operations:                              57
-Operations after Theano Simplification:  24&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;$$ \begin{pmatrix}\frac{2}{315} \sqrt{70} x \left(x^{4} - 17 x^{3} + 90 x^{2} - 168 x + 84\right) e^{- x}, &amp;amp; \frac{1}{210} \sqrt{70} x^{2} \left(- \frac{4}{3} x^{3} + 16 x^{2} - 56 x + 56\right) e^{- x}\end{pmatrix} $$&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Operations:                              27
-Operations after Theano Simplification:  17&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The combination of SymPy’s scalar simplification and Theano’s common sub-expression optimization yields a significantly simpler computation than either project could do independently.&lt;/p&gt;
-
-&lt;p&gt;To summarize&lt;/p&gt;
-&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Project&lt;/th&gt;&lt;th&gt;operation count&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;SymPy&lt;/td&gt;&lt;td style=&quot;text-align: center;&quot;&gt;27&lt;/td&gt;
-&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Theano&lt;/td&gt;&lt;td style=&quot;text-align: center;&quot;&gt;24&lt;/td&gt;
-&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;SymPy+Theano&lt;/td&gt;&lt;td style=&quot;text-align: center;&quot;&gt;17&lt;/td&gt;
-&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
-&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;http://mrocklin.github.com/blog/scripts/sympy_theano_simplification.py&quot;&gt;A script of this session&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</content:encoded>
-	<dc:date>2013-03-28T07:00:00+00:00</dc:date>
 </item>
 
 </rdf:RDF>

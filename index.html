@@ -33,6 +33,38 @@
 
 
 
+<h3><a href="http://tarun-gaba.blogspot.com/" title="Tarun Gaba">Tarun Gaba</a></h3>
+
+
+<div class="entrygroup" id="tag:blogger.com,1999:blog-7526836182390500993.post-2448841775059804252">
+<h4><a href="http://tarun-gaba.blogspot.com/2013/07/gsoc-report-week-3.html">GSoC Report Week 3</a></h4>
+<div class="entry">
+<div class="content">
+<div style="text-align: left;" dir="ltr">So, week three has also came to an end.<br />Main considerations for this week were to write some unit tests, which would be determining the way main coding is to be done.<br />As per the timeline,  all tests for Python side, should be complete by the coming week, i.e. which has started from today.<br /><br />As for now, I have almost completed tests for Shape class, and I have written some tests for VisualizationFrame. After that I would focus on tests for Scene class, which would act as a manager class, for holding and manipulating JSON data from the Python side, as well as be able to display output in IPython output cells, as well as fire up a server in case of Python interpreter.<br /><br />Scene and VisualizationFrame are very important classes for this package. They make up the majority of the API for the visualization implementations.<br />Also there has been a little confusion on the extent of modularity the package would/should provide.<br /><br />Hopefully in a few days things would be more clear, so that I would be able to write tests more exhaustively according to the same.<br /><br />Anyways regarding general stuff, the summer period is amazing, and I am getting good responses from my mentor, and also huge support from the community people. So, it makes things easier to do, when we have so much people to help out there, which is also one of the perks of the open source environment.<br /><br />Cheers<br /><br /></div></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://tarun-gaba.blogspot.com/2013/07/gsoc-report-week-3.html">by TARUN GABA (noreply@blogger.com) at July 08, 2013 05:34 PM</a>
+</p>
+</div>
+</div>
+
+
+
+</div>
+<div class="channelgroup">
+
+
+
+
+
+
+
 <h3><a href="http://geekiology.wordpress.com" title="Risch Algorithm">Chetna Gupta</a></h3>
 
 
@@ -3360,213 +3392,6 @@ eigensolvers</a></p>
 </div>
 
 </div>
-<div class="daygroup">
-<h2>March 28, 2013</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://matthewrocklin.com/blog/" title="Working notes by Matthew Rocklin - SymPy">MRocklin</a></h3>
-
-
-<div class="entrygroup" id="http://matthewrocklin.com/blog//work/2013/03/28/SymPy-Theano-part-2">
-<h4><a href="http://matthewrocklin.com/blog//work/2013/03/28/SymPy-Theano-part-2">SymPy and Theano -- Scalar Simplification</a></h4>
-<div class="entry">
-<div class="content">
-<h2 id="introduction">Introduction</h2>
-
-<p><em>This post uses some LaTeX. You may want to read it on the original site.</em></p>
-
-<p>In my <a href="http://matthewrocklin.com/blog/work/2013/03/19/SymPy-Theano-part-1/">last post</a> I showed how SymPy can benefit from Theano. In particular Theano provided a mature platform for code generation that outperformed SymPy’s attempt at the same problem. I argued that projects should stick to one specialty and depend on others for secondary concerns. Interfaces are better than add-ons.</p>
-
-<p>In this post I’ll show how Theano can benefit from SymPy. In particular I’ll demonstrate the practicality of SymPy’s impressive scalar simplification routines for generating efficient programs.</p>
-
-<p>After re-reading over this post I realize that it’s somewhat long. I’ve decided to put the results first in hopes that it’ll motivate you to keep reading.</p>
-<table><thead><tr><th>Project</th><th>operation count</th></tr></thead><tbody><tr><td style="text-align: left;">SymPy</td><td style="text-align: center;">27</td>
-</tr><tr><td style="text-align: left;">Theano</td><td style="text-align: center;">24</td>
-</tr><tr><td style="text-align: left;">SymPy+Theano</td><td style="text-align: center;">17</td>
-</tr></tbody></table>
-<p>Now, lets find out what those numbers mean.</p>
-
-<h2 id="example_problem">Example problem</h2>
-
-<p>We use a larger version of our problem from last time; a radial wavefunction corresponding to <code>n = 6</code> and <code>l = 2</code> for Carbon (<code>Z = 6</code>)</p>
-
-<pre><code>from sympy.physics.hydrogen import R_nl
-from sympy.abc import x
-n, l, Z = 6, 2, 6
-expr = R_nl(n, l, x, Z)
-print latex(expr)</code></pre>
-
-<p>$$\frac{1}{210} \sqrt{70} x^{2} \left(- \frac{4}{3} x^{3} + 16 x^{2} - 56 x + 56\right) e^{- x}$$</p>
-
-<p>We want to generate code to compute both this expression and its derivative. Both SymPy and Theano can compute and simplify derivatives. In this post we’ll measure the complexity of a computation that simultaneously computes both the above expression and its derivative. We’ll arrive at this computation through a couple of different routes that use overlapping parts of SymPy and Theano. This will supply a couple of direct comparisons.</p>
-
-<p><em>Disclaimer: I’ve chosen a larger expression here to exaggerate results. Simpler expressions yield less impressive results.</em></p>
-
-<h2 id="simplification">Simplification</h2>
-
-<p>We show the expression, it’s derivative, and SymPy’s simplification of that derivative. In each case we quantify the complexity of the expression by the number of algebraic operations</p>
-
-<p><strong>The target expression:</strong></p>
-
-<pre><code>print latex(expr)</code></pre>
-
-<p>$$\frac{1}{210} \sqrt{70} x^{2} \left(- \frac{4}{3} x^{3} + 16 x^{2} - 56 x + 56\right) e^{- x}$$</p>
-
-<pre><code>print "Operations: ", count_ops(expr)
-Operations:  17</code></pre>
-
-<p><strong>It’s derivative</strong></p>
-
-<pre><code>print latex(expr.diff(x))</code></pre>
-
-<p>$$ \frac{1}{210} \sqrt{70} x^{2} \left(- 4 x^{2} + 32 x - 56\right) e^{- x} - \frac{1}{210} \sqrt{70} x^{2} \left(- \frac{4}{3} x^{3} + 16 x^{2} - 56 x + 56\right) e^{- x} + \frac{1}{105} \sqrt{70} x \left(- \frac{4}{3} x^{3} + 16 x^{2} - 56 x + 56\right) e^{- x} $$</p>
-
-<pre><code>print "Operations: ", count_ops(expr.diff(x))
-Operations:  48</code></pre>
-
-<p><strong>The result of <code>simplify</code></strong> on the derivative. Note the significant cancellation of the above expression.</p>
-
-<pre><code>print latex(simplify(expr.diff(x)))</code></pre>
-
-<p>$$ \frac{2}{315} \sqrt{70} x \left(x^{4} - 17 x^{3} + 90 x^{2} - 168 x + 84\right) e^{- x} $$</p>
-
-<pre><code>print "Operations: ", count_ops(simplify(expr.diff(x)))
-Operations:  18</code></pre>
-
-<p><strong>An unevaluated derivative object</strong>. We’ll end up passing this to Theano so that it computes the derivative on its own.</p>
-
-<pre><code>print latex(Derivative(expr, x))</code></pre>
-
-<p>$$ \frac{\partial}{\partial x}\left(\frac{1}{210} \sqrt{70} x^{2} \left(- \frac{4}{3} x^{3} + 16 x^{2} - 56 x + 56\right) e^{- x}\right) $$</p>
-
-<h2 id="bounds_on_the_cost_of_differentiation">Bounds on the cost of Differentiation</h2>
-
-<p>Scalar differentiation is actually a very simple transformation.</p>
-
-<p>You need to know how to transform all of the elementary functions (<code>exp, log, sin, cos, polynomials, etc...</code>), the chain rule, and that’s it. Theorems behind automatic differentiation state that the cost of a derivative will be at most five times the cost of the original. In this case we’re guaranteed to have at most <code>17*5 == 85</code> operations in the derivative computation; this holds in our case because <code>48 &lt; 85</code></p>
-
-<p>However derivatives are often far simpler than this upper bound. We see that after simplification the operation count of the derivative is <code>18</code>, only one more than the original. This is common in practice.</p>
-
-<h2 id="theano_simplification">Theano Simplification</h2>
-
-<p>Like SymPy, Theano transforms graphs to mathematically equivalent but computationally more efficient representations. It provides standard compiler optimizations like constant folding, and common sub-expressions as well as array specific optimizations like the element-wise operation fusion.</p>
-
-<p>Because users regularly handle mathematical terms Theano also provides a set of optimizations to simplify some common scalar expressions. For example Theano will convert expressions like <code>x*y/x</code> to <code>y</code>. In this sense it overlaps with SymPy’s <code>simplify</code> functions. This post is largely a demonstration that SymPy’s scalar simplifications are far more powerful than Theano’s and that their use can result in significant improvements. This shouldn’t be surprising. Sympians are devoted to scalar simplification to a degree that far exceeds the Theano community’s devotion to this topic.</p>
-
-<h2 id="experiment">Experiment</h2>
-
-<p>We’ll compute the derivative of our radial wavefunction and then simplify the result. We’ll do this using both SymPy’s derivative and simplify routines and using Theano’s derivative and simplify routines. We’ll then compare the two results by counting the number of required operations.</p>
-
-<p>Here is some setup code that you can safely ignore:</p>
-<div class="highlight"><pre><code class="python"><span class="k">def</span> <span class="nf">fgraph_of</span><span class="p">(</span><span class="o">*</span><span class="n">exprs</span><span class="p">):</span>
-    <span class="sd">""" Transform SymPy expressions into Theano Computation """</span>
-    <span class="n">outs</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">theano_code</span><span class="p">,</span> <span class="n">exprs</span><span class="p">)</span>
-    <span class="n">ins</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">gof</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">inputs</span><span class="p">(</span><span class="n">outs</span><span class="p">)</span>
-    <span class="n">ins</span><span class="p">,</span> <span class="n">outs</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">gof</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">ins</span><span class="p">,</span> <span class="n">outs</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">theano</span><span class="o">.</span><span class="n">gof</span><span class="o">.</span><span class="n">FunctionGraph</span><span class="p">(</span><span class="n">ins</span><span class="p">,</span> <span class="n">outs</span><span class="p">)</span>
-
-<span class="k">def</span> <span class="nf">theano_simplify</span><span class="p">(</span><span class="n">fgraph</span><span class="p">):</span>
-    <span class="sd">""" Simplify a Theano Computation """</span>
-    <span class="n">mode</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">compile</span><span class="o">.</span><span class="n">get_default_mode</span><span class="p">()</span><span class="o">.</span><span class="n">excluding</span><span class="p">(</span><span class="s">"fusion"</span><span class="p">)</span>
-    <span class="n">fgraph</span> <span class="o">=</span> <span class="n">fgraph</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
-    <span class="n">mode</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">fgraph</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">fgraph</span>
-
-<span class="k">def</span> <span class="nf">theano_count_ops</span><span class="p">(</span><span class="n">fgraph</span><span class="p">):</span>
-    <span class="sd">""" Count the number of Scalar operations in a Theano Computation """</span>
-    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">n</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">op</span><span class="p">,</span> <span class="n">theano</span><span class="o">.</span><span class="n">tensor</span><span class="o">.</span><span class="n">Elemwise</span><span class="p">),</span>
-                      <span class="n">fgraph</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">))</span>
-</code></pre></div>
-<p>In SymPy we create both an unevaluated derivative and a fully evaluated and sympy-simplified version. We translate each to Theano, simplify within Theano, and then count the number of operations both before and after simplification. In this way we can see the value added by both SymPy’s and Theano’s optimizations.</p>
-<div class="highlight"><pre><code class="python"><span class="n">exprs</span> <span class="o">=</span> <span class="p">[</span><span class="n">Derivative</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span>    <span class="c"># derivative computed in Theano</span>
-         <span class="n">simplify</span><span class="p">(</span><span class="n">expr</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">x</span><span class="p">))]</span> <span class="c"># derivative computed in SymPy, also sympy-simplified</span>
-
-<span class="k">for</span> <span class="n">expr</span> <span class="ow">in</span> <span class="n">exprs</span><span class="p">:</span>
-    <span class="n">fgraph</span> <span class="o">=</span> <span class="n">fgraph_of</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
-    <span class="n">simp_fgraph</span> <span class="o">=</span> <span class="n">theano_simplify</span><span class="p">(</span><span class="n">fgraph</span><span class="p">)</span>
-    <span class="k">print</span> <span class="n">latex</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
-    <span class="k">print</span> <span class="s">"Operations:                             "</span><span class="p">,</span> <span class="n">theano_count_ops</span><span class="p">(</span><span class="n">fgraph</span><span class="p">)</span>
-    <span class="k">print</span> <span class="s">"Operations after Theano Simplification: "</span><span class="p">,</span> <span class="n">theano_count_ops</span><span class="p">(</span><span class="n">simp_fgraph</span><span class="p">)</span>
-</code></pre></div>
-<p>Theano Only</p>
-
-<p>$$ \frac{\partial}{\partial x}\left(\frac{1}{210} \sqrt{70} x^{2} \left(- \frac{4}{3} x^{3} + 16 x^{2} - 56 x + 56\right) e^{- x}\right) $$</p>
-
-<pre><code>Operations:                              40
-Operations after Theano Simplification:  21</code></pre>
-
-<p>SymPy + Theano</p>
-
-<p>$$ \frac{2}{315} \sqrt{70} x \left(x^{4} - 17 x^{3} + 90 x^{2} - 168 x + 84\right) e^{- x} $$</p>
-
-<pre><code>Operations:                              13
-Operations after Theano Simplification:  10</code></pre>
-
-<h2 id="analysis">Analysis</h2>
-
-<p>On its own Theano produces a derivative expression that is about as complex as the unsimplified SymPy version. Theano simplification then does a surprisingly good job, roughly halving the amount of work needed (<code>40 -&gt; 21</code>) to compute the result. If you dig deeper however you find that this isn’t because it was able to algebraically simplify the computation (it wasn’t) but rather because the computation contained several common sub-expressions. The Theano version looks a lot like the unsimplified SymPy version. Note the common sub-expressions like <code>56*x</code> below.</p>
-
-<p>$$ \frac{1}{210} \sqrt{70} x^{2} \left(- 4 x^{2} + 32 x - 56\right) e^{- x} - \frac{1}{210} \sqrt{70} x^{2} \left(- \frac{4}{3} x^{3} + 16 x^{2} - 56 x + 56\right) e^{- x} + \frac{1}{105} \sqrt{70} x \left(- \frac{4}{3} x^{3} + 16 x^{2} - 56 x + 56\right) e^{- x} $$</p>
-
-<p>The pure-SymPy simplified result is again substantially more efficient (<code>13</code> operations). Interestingly Theano is still able to improve on this, again not because of additional algebraic simplification but rather due to constant folding. The two projects simplify in orthogonal ways.</p>
-
-<h2 id="simultaneous_computation">Simultaneous Computation</h2>
-
-<p>When we compute both the expression and its derivative simultaneously we find substantial benefits from using the two projects together.</p>
-<div class="highlight"><pre><code class="python"><span class="n">orig_expr</span> <span class="o">=</span> <span class="n">R_nl</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">Z</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">expr</span> <span class="ow">in</span> <span class="n">exprs</span><span class="p">:</span>
-    <span class="n">fgraph</span> <span class="o">=</span> <span class="n">fgraph_of</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">orig_expr</span><span class="p">)</span>
-    <span class="n">simp_fgraph</span> <span class="o">=</span> <span class="n">theano_simplify</span><span class="p">(</span><span class="n">fgraph</span><span class="p">)</span>
-    <span class="k">print</span> <span class="n">latex</span><span class="p">((</span><span class="n">expr</span><span class="p">,</span> <span class="n">orig_expr</span><span class="p">))</span>
-    <span class="k">print</span> <span class="s">"Operations:                             "</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">fgraph</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">)</span>
-    <span class="k">print</span> <span class="s">"Operations after Theano Simplification: "</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">simp_fgraph</span><span class="o">.</span><span class="n">apply_nodes</span><span class="p">)</span>
-</code></pre></div>
-<p>$$ \begin{pmatrix}\frac{\partial}{\partial x}\left(\frac{1}{210} \sqrt{70} x^{2} \left(- \frac{4}{3} x^{3} + 16 x^{2} - 56 x + 56\right) e^{- x}\right), &amp; \frac{1}{210} \sqrt{70} x^{2} \left(- \frac{4}{3} x^{3} + 16 x^{2} - 56 x + 56\right) e^{- x}\end{pmatrix} $$</p>
-
-<pre><code>Operations:                              57
-Operations after Theano Simplification:  24</code></pre>
-
-<p>$$ \begin{pmatrix}\frac{2}{315} \sqrt{70} x \left(x^{4} - 17 x^{3} + 90 x^{2} - 168 x + 84\right) e^{- x}, &amp; \frac{1}{210} \sqrt{70} x^{2} \left(- \frac{4}{3} x^{3} + 16 x^{2} - 56 x + 56\right) e^{- x}\end{pmatrix} $$</p>
-
-<pre><code>Operations:                              27
-Operations after Theano Simplification:  17</code></pre>
-
-<p>The combination of SymPy’s scalar simplification and Theano’s common sub-expression optimization yields a significantly simpler computation than either project could do independently.</p>
-
-<p>To summarize</p>
-<table><thead><tr><th>Project</th><th>operation count</th></tr></thead><tbody><tr><td style="text-align: left;">SymPy</td><td style="text-align: center;">27</td>
-</tr><tr><td style="text-align: left;">Theano</td><td style="text-align: center;">24</td>
-</tr><tr><td style="text-align: left;">SymPy+Theano</td><td style="text-align: center;">17</td>
-</tr></tbody></table>
-<h2 id="references">References</h2>
-
-<ul>
-<li><a href="http://mrocklin.github.com/blog/scripts/sympy_theano_simplification.py">A script of this session</a></li>
-</ul></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://matthewrocklin.com/blog//work/2013/03/28/SymPy-Theano-part-2">March 28, 2013 07:00 AM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -3710,7 +3535,7 @@ Operations after Theano Simplification:  17</code></pre>
 
 <p>
 <strong>Last updated:</strong><br>
-July 08, 2013 12:40 PM<br>
+July 08, 2013 05:40 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
