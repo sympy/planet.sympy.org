@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2013-07-08T08:20:35Z</updated>
+  <updated>2013-07-08T12:20:31Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,44 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry xml:lang="en">
+    <id>http://geekiology.wordpress.com/?p=292</id>
+    <link href="http://geekiology.wordpress.com/2013/07/08/parametric-lograthimic-derivative/" rel="alternate" type="text/html"/>
+    <title>Parametric Lograthimic Derivative</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">“Sometimes you have to give up the fight and walk away, and move on to something that’s more productive”. This Week has been full of moments of happiness and sorrow, ecstasy and blues, chaos and system which have all undergone a “git-rebase” to fit into this blog post There have been moments when I have […]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=geekiology.wordpress.com&amp;blog=36553244&amp;post=292&amp;subd=geekiology&amp;ref=&amp;feed=1" width="1"/></div>
+    </summary>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>“Sometimes you have to give up the fight and walk away, and move on to something that’s more productive”. This Week has been full of moments of happiness and sorrow, ecstasy and blues, chaos and system which have all undergone a “git-rebase” to fit into this blog post<br/>
+There have been moments when I have felt that things would start working just to realize that there is a lot of heuristic code-snippets, awaiting me to fix their failures. Here is another one “The Great Parametric Log Derivative Problem” which looks like the last problem to me at the moment (hoping it is the last).<br/>
+Okay so let me put the important things before I let any of them go unsaid.<br/>
+Parametric Lograthimic Derivative which is currently implemented in prde.py has a heuristic code working ie is given a differntial field K of characterstic 0, a hyperexponential monomial <img alt="\theta " class="latex" src="http://s0.wp.com/latex.php?latex=%5Ctheta+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="\theta "/> over K for <img alt="f \in K " class="latex" src="http://s0.wp.com/latex.php?latex=f+%5Cin+K+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="f \in K "/> to decide whether there are integers <img alt="n, m \in Z " class="latex" src="http://s0.wp.com/latex.php?latex=n%2C+m+%5Cin+Z+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="n, m \in Z "/> with <img alt="n \ne 0 " class="latex" src="http://s0.wp.com/latex.php?latex=n+%5Cne+0+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="n \ne 0 "/> such that <img alt="nf = \frac{Dv}{v} + m\frac{D\theta}{\theta} " class="latex" src="http://s0.wp.com/latex.php?latex=nf+%3D+%5Cfrac%7BDv%7D%7Bv%7D+%2B+m%5Cfrac%7BD%5Ctheta%7D%7B%5Ctheta%7D+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="nf = \frac{Dv}{v} + m\frac{D\theta}{\theta} "/><br/>
+has a solution <img alt="v \in K " class="latex" src="http://s0.wp.com/latex.php?latex=v+%5Cin+K+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="v \in K "/> and to find one such solution if there are solutions.</p>
+<p>This problem arises from determining wheteher elements of <img alt="K(\theta) " class="latex" src="http://s0.wp.com/latex.php?latex=K%28%5Ctheta%29+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="K(\theta) "/> are log-derivative of elements of <img alt="K(\theta) " class="latex" src="http://s0.wp.com/latex.php?latex=K%28%5Ctheta%29+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="K(\theta) "/> or log derivative of <img alt="K(\theta) " class="latex" src="http://s0.wp.com/latex.php?latex=K%28%5Ctheta%29+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="K(\theta) "/> -radical<br/>
+Though as mentioned above we have a heuristic but not a complete solution Or if I  put this correctly the parametric log derivative heuristics would fail for most of the cases that are required to be tested in integrate_hypertangent (added in risch.py)<br/>
+So here is what needs to be done or probably what looks like the rescue system for now. Yes you gussed it right! Structure theorem has been completely awesome through out, trying to rescue this risch_integrate from each tide of NotImplementedError(though they don’t do it very easily).</p>
+<p>According to structure theorem, f satisfying the <img alt="nf = \frac{Dv}{v} + m\frac{D\theta}{\theta} " class="latex" src="http://s0.wp.com/latex.php?latex=nf+%3D+%5Cfrac%7BDv%7D%7Bv%7D+%2B+m%5Cfrac%7BD%5Ctheta%7D%7B%5Ctheta%7D+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="nf = \frac{Dv}{v} + m\frac{D\theta}{\theta} "/> equation has an elementary integral over K, which turns out always to be the case in the parametric log derivative problem that arise from the integration of elemetary functions. Let F be an elementary extension of <img alt="K(\theta) " class="latex" src="http://s0.wp.com/latex.php?latex=K%28%5Ctheta%29+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="K(\theta) "/> and g <img alt="\in " class="latex" src="http://s0.wp.com/latex.php?latex=%5Cin+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="\in "/> F be such that <img alt="f = Dg " class="latex" src="http://s0.wp.com/latex.php?latex=f+%3D+Dg+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="f = Dg "/>. Then <img alt="nf = \frac{Dv}{v} + m\frac{D\theta}{\theta} " class="latex" src="http://s0.wp.com/latex.php?latex=nf+%3D+%5Cfrac%7BDv%7D%7Bv%7D+%2B+m%5Cfrac%7BD%5Ctheta%7D%7B%5Ctheta%7D+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="nf = \frac{Dv}{v} + m\frac{D\theta}{\theta} "/> has a solution with <img alt="n \ne 0 " class="latex" src="http://s0.wp.com/latex.php?latex=n+%5Cne+0+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="n \ne 0 "/> we get <img alt="nf = \frac{Dv}{v} + m\frac{D(\theta)}{\theta} = \frac{D(v\theta ^m)}{v\theta ^m} " class="latex" src="http://s0.wp.com/latex.php?latex=nf+%3D+%5Cfrac%7BDv%7D%7Bv%7D+%2B+m%5Cfrac%7BD%28%5Ctheta%29%7D%7B%5Ctheta%7D+%3D+%5Cfrac%7BD%28v%5Ctheta+%5Em%29%7D%7Bv%5Ctheta+%5Em%7D+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="nf = \frac{Dv}{v} + m\frac{D(\theta)}{\theta} = \frac{D(v\theta ^m)}{v\theta ^m} "/> which implies that <img alt="f = Dq " class="latex" src="http://s0.wp.com/latex.php?latex=f+%3D+Dq+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="f = Dq "/> is a log derivative of an F-radical, which ultimately turn outs to be <img alt="\sum r_i Dt_i + \sum r_i \frac{Dt_i}{t_i} = f " class="latex" src="http://s0.wp.com/latex.php?latex=%5Csum+r_i+Dt_i+%2B+%5Csum+r_i+%5Cfrac%7BDt_i%7D%7Bt_i%7D+%3D+f+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="\sum r_i Dt_i + \sum r_i \frac{Dt_i}{t_i} = f "/><br/>
+Finding the rational solutions for all <img alt="r_i " class="latex" src="http://s0.wp.com/latex.php?latex=r_i+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="r_i "/> can be done by considering it a system of one linear equation for the r,’s with coefficients in F, then applying constant_system (in prde.py) to obtain a system with coefficients in C and the same constant solutions. Assuming that we have a vector space basis containing 1 for C over Q, projecting that system on 1 yields a system with coefficients in Q and the same rational solutions for <img alt="r_i " class="latex" src="http://s0.wp.com/latex.php?latex=r_i+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="r_i "/>.<br/>
+I know this is a lot of talking and nothing like psudeo code, though we can draw some sort of code out of this, but that is actually the major concern for now. We don’t really have psudeo codes for the rest of the sections and it takes a bit longer to actually see how the implementation should be planned to fit into all the conditions. I cannot assure that everything would start working because there are thin lines which would probbaly now start connecting rde.py , prde.py and cds.py together and if any of them have some failures which bottlenecks the test-cases of other, I would have to redraw the dots to get better interconnections</p>
+<p>…. (Hope we get them get connected soon)</p>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/geekiology.wordpress.com/292/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/geekiology.wordpress.com/292/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=geekiology.wordpress.com&amp;blog=36553244&amp;post=292&amp;subd=geekiology&amp;ref=&amp;feed=1" width="1"/></div>
+    </content>
+    <updated>2013-07-08T01:01:32Z</updated>
+    <category term="Uncategorized"/>
+    <author>
+      <name>chetnagupta</name>
+    </author>
+    <source>
+      <id>http://geekiology.wordpress.com</id>
+      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
+      <link href="http://geekiology.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://geekiology.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://geekiology.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <subtitle>Can I help u ?</subtitle>
+      <title>Geeks at Work</title>
+      <updated>2013-07-08T12:20:27Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en">
     <id>http://asmeurersympy.wordpress.com/?p=1348</id>
@@ -73,7 +111,7 @@ fab vagrant release
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-07-08T08:20:13Z</updated>
+      <updated>2013-07-08T12:20:10Z</updated>
     </source>
   </entry>
 
@@ -245,7 +283,7 @@ fab vagrant release
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-08T08:20:32Z</updated>
+      <updated>2013-07-08T12:20:27Z</updated>
     </source>
   </entry>
 
@@ -280,7 +318,7 @@ I was able to make use of both of them in my implementation for the multivariate
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-08T08:20:33Z</updated>
+      <updated>2013-07-08T12:20:28Z</updated>
     </source>
   </entry>
 
@@ -332,7 +370,7 @@ I was able to make use of both of them in my implementation for the multivariate
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-08T08:20:33Z</updated>
+      <updated>2013-07-08T12:20:28Z</updated>
     </source>
   </entry>
 
@@ -516,7 +554,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-07-08T08:20:13Z</updated>
+      <updated>2013-07-08T12:20:10Z</updated>
     </source>
   </entry>
 
@@ -621,7 +659,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-08T08:20:32Z</updated>
+      <updated>2013-07-08T12:20:27Z</updated>
     </source>
   </entry>
 
@@ -653,7 +691,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-08T08:20:33Z</updated>
+      <updated>2013-07-08T12:20:28Z</updated>
     </source>
   </entry>
 
@@ -685,7 +723,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-08T08:20:33Z</updated>
+      <updated>2013-07-08T12:20:28Z</updated>
     </source>
   </entry>
 
@@ -803,7 +841,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-08T08:20:33Z</updated>
+      <updated>2013-07-08T12:20:28Z</updated>
     </source>
   </entry>
 
@@ -915,7 +953,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Can I help u ?</subtitle>
       <title>Geeks at Work</title>
-      <updated>2013-07-08T08:20:30Z</updated>
+      <updated>2013-07-08T12:20:26Z</updated>
     </source>
   </entry>
 
@@ -1074,7 +1112,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-08T08:20:33Z</updated>
+      <updated>2013-07-08T12:20:28Z</updated>
     </source>
   </entry>
 
@@ -1168,7 +1206,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-08T08:20:32Z</updated>
+      <updated>2013-07-08T12:20:27Z</updated>
     </source>
   </entry>
 
@@ -1232,7 +1270,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-08T08:20:33Z</updated>
+      <updated>2013-07-08T12:20:28Z</updated>
     </source>
   </entry>
 
@@ -1338,7 +1376,7 @@ into a text file. For those interested, however I made a few changes manually ev
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-08T08:20:33Z</updated>
+      <updated>2013-07-08T12:20:28Z</updated>
     </source>
   </entry>
 
@@ -1415,7 +1453,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-08T08:20:32Z</updated>
+      <updated>2013-07-08T12:20:27Z</updated>
     </source>
   </entry>
 
@@ -1668,7 +1706,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Can I help u ?</subtitle>
       <title>Geeks at Work</title>
-      <updated>2013-07-08T08:20:30Z</updated>
+      <updated>2013-07-08T12:20:27Z</updated>
     </source>
   </entry>
 
@@ -1696,7 +1734,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="https://sites.google.com/feeds/content/site/v9joshi/batch" rel="http://schemas.google.com/g/2005#batch" type="application/atom+xml"/>
       <link href="https://sites.google.com/feeds/content/site/v9joshi?parent=5420265600325595988&amp;kind=announcement" rel="self" type="application/atom+xml"/>
       <title>Posts of GSoC Blog</title>
-      <updated>2013-07-08T08:20:33Z</updated>
+      <updated>2013-07-08T12:20:29Z</updated>
     </source>
   </entry>
 
@@ -1791,7 +1829,7 @@ based features.</p></div></td></tr></tbody></table></div>
       <link href="https://sites.google.com/feeds/content/site/v9joshi/batch" rel="http://schemas.google.com/g/2005#batch" type="application/atom+xml"/>
       <link href="https://sites.google.com/feeds/content/site/v9joshi?parent=5420265600325595988&amp;kind=announcement" rel="self" type="application/atom+xml"/>
       <title>Posts of GSoC Blog</title>
-      <updated>2013-07-08T08:20:33Z</updated>
+      <updated>2013-07-08T12:20:29Z</updated>
     </source>
   </entry>
 
@@ -1821,7 +1859,7 @@ based features.</p></div></td></tr></tbody></table></div>
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-08T08:20:33Z</updated>
+      <updated>2013-07-08T12:20:28Z</updated>
     </source>
   </entry>
 
@@ -1871,7 +1909,7 @@ Here D is a non square positive integer.</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-08T08:20:32Z</updated>
+      <updated>2013-07-08T12:20:27Z</updated>
     </source>
   </entry>
 
@@ -1976,7 +2014,7 @@ Here D is a non square positive integer.</p>
       <link href="http://brianegranger.com" rel="alternate" type="text/html"/>
       <subtitle>Physics ∩ Computing</subtitle>
       <title>Brian E. Granger</title>
-      <updated>2013-07-08T08:20:15Z</updated>
+      <updated>2013-07-08T12:20:12Z</updated>
     </source>
   </entry>
 
@@ -2329,7 +2367,7 @@ however produce walking like behavior in a 2-D Slinky by using the model
       <link href="https://sites.google.com/feeds/content/site/v9joshi/batch" rel="http://schemas.google.com/g/2005#batch" type="application/atom+xml"/>
       <link href="https://sites.google.com/feeds/content/site/v9joshi?parent=5420265600325595988&amp;kind=announcement" rel="self" type="application/atom+xml"/>
       <title>Posts of GSoC Blog</title>
-      <updated>2013-07-08T08:20:33Z</updated>
+      <updated>2013-07-08T12:20:29Z</updated>
     </source>
   </entry>
 
@@ -2750,7 +2788,7 @@ AttributeError:
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-07-08T08:20:13Z</updated>
+      <updated>2013-07-08T12:20:10Z</updated>
     </source>
   </entry>
 
@@ -2904,7 +2942,7 @@ AttributeError:
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-07-08T08:20:25Z</updated>
+      <updated>2013-07-08T12:20:21Z</updated>
     </source>
   </entry>
 
@@ -3207,152 +3245,7 @@ Operations after Theano Simplification:  17</code></pre>
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-07-08T08:20:25Z</updated>
-    </source>
-  </entry>
-
-  <entry>
-    <id>http://matthewrocklin.com/blog//work/2013/03/19/SymPy-Theano-part-1</id>
-    <link href="http://matthewrocklin.com/blog//work/2013/03/19/SymPy-Theano-part-1" rel="alternate" type="text/html"/>
-    <title>SymPy and Theano -- Code Generation</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>No one is good at everything, that’s why we have society.</p>
-
-<p>No project is good at everything, that’s why we have interfaces.</p>
-
-<p>This is the first of three posts that join <code>SymPy</code>, a library for symbolic mathematics, and <code>Theano</code>, a library for mathematical compilation to numeric code. Each library does a few things really well. Each library also over-reaches bit and does a few things not-as-well. Fortunately the two libraries have clear and simple data structures and so can be used together effectively.</p>
-
-<p>In this post I’ll focus on how SymPy can use Theano to generate efficient code.</p>
-
-<h2 id="physics">Physics</h2>
-
-<p>SymPy knows Physics. For example, here is the radial wavefunction corresponding to <code>n = 3</code> and <code>l = 1</code> for Carbon (<code>Z = 6</code>)</p>
-
-<pre><code>from sympy.physics.hydrogen import R_nl
-from sympy.abc import x
-expr = R_nl(3, 1, x, 6)
-print latex(expr)</code></pre>
-
-<p>$$\frac{8}{3} x \left(- 4 x + 4\right) e^{- 2 x}$$</p>
-
-<p>SymPy is great at this. It can manipulate high level mathematical expressions very naturally. When it comes to numeric computation it is less effective.</p>
-
-<h2 id="numerics">Numerics</h2>
-
-<p>Fortunately there are methods to offload the work to numerical projects like <code>numpy</code> or to generate and compile straight <code>Fortran</code> code. Here we use two existing methods to create two identical vectorized functions to compute the above expression.</p>
-
-<pre><code>from sympy.utilities.autowrap import ufuncify
-from sympy.utilities.lambdify import lambdify
-fn_numpy   = lambdify(x, expr, 'numpy')
-fn_fortran = ufuncify([x], expr)</code></pre>
-
-<p><code>fn_numpy</code> replaces each of the SymPy operations with the equivalent function from the popular NumPy package. <code>fn_fortran</code> generates and compiles low-level Fortran code and uses <code>f2py</code> to bind it to a Python function. They each use <code>numpy</code> arrays as common data structures, supporting broad interoperability with the rest of the Scientific Python ecosystem. They both work well and produce identical results.</p>
-
-<pre><code>&gt;&gt;&gt; from numpy import linspace
-&gt;&gt;&gt; xx = linspace(0, 1, 5)
-&gt;&gt;&gt; fn_numpy(xx)
-[ 0.          1.21306132  0.98101184  0.44626032  0.        ]
-&gt;&gt;&gt; fn_fortran(xx)
-[ 0.          1.21306132  0.98101184  0.44626032  0.        ]</code></pre>
-
-<p>We use these functions and <code>matplotlib</code> to plot the original equation</p>
-
-<pre><code>from pylab import plot, show, legend
-xx = linspace(0, 5, 50000)
-plot(xx, fn_numpy(xx))</code></pre>
-
-<p><img alt="" src="http://mrocklin.github.com/blog/images/R_31.png"/></p>
-
-<h2 id="performance">Performance</h2>
-
-<p>When we profile these functions we find that the <code>Fortran</code> solution runs a bit faster. This is because it is able to fuse all of the scalar operations into one loop while the <code>numpy</code> solution walks over memory several times, performing each operation individually. Jensen wrote a more thorough <a href="http://ojensen.wordpress.com/2010/08/10/fast-ufunc-ish-hydrogen-solutions/">blogpost about this</a> when he worked on code generation. He shows substantial performance increases as the complexity of the mathematical expression increases.</p>
-
-<pre><code>&gt;&gt;&gt; timeit fn_numpy(xx)
-1000 loops, best of 3: 1.4 ms per loop
-&gt;&gt;&gt; timeit fn_fortran(xx)
-1000 loops, best of 3: 884 us per loop</code></pre>
-
-<p>This weekend I built up a translation from SymPy expressions to Theano computations. This builds off of <a href="http://github.com/nouiz/theano_sympy/">old work</a> done with <a href="http://github.com/nouiz">Frederic Bastien</a> at SciPy2012.</p>
-
-<pre><code>&gt;&gt;&gt; from sympy.printing.theanocode import theano_function
-&gt;&gt;&gt; fn_theano  = theano_function([x], [expr], dims={x: 1}, dtypes={x: 'float64'})
-&gt;&gt;&gt; timeit fn_theano(xx)
-1000 loops, best of 3: 1.04 ms per loop</code></pre>
-
-<p>Theano generates <code>C</code> code that performs the same loop fusion done in <code>Fortran</code> but it incurs a bit more startup time. It performs somewhere between the <code>numpy</code> and <code>Fortran</code> solutions.</p>
-
-<p>However, the <code>SymPy to Theano</code> translation interface only takes up about a page of code while the <code>lambdify</code> and <code>autowrap</code> modules are substantially more complex. Additionally, Theano is actively developed and is sure to improve and track changes in hardware well into the future. <code>lambdify</code> and <code>autowrap</code> have been relatively untouched over the past year. For example Theano is able to seemlessly compile these computations to the GPU.</p>
-
-<h2 id="leveraging_theano">Leveraging Theano</h2>
-
-<p>In the above example we used Theano to copy the behavior of SymPy’s existing <code>numpy</code> and <code>Fortran</code> numeric solutions. Theano is capable of substantially more than this. To show a simple example we’ll compute both our original output and the derivative simultaneously.</p>
-
-<pre><code>outputs = expr, simplify(expr.diff(x))
-print latex(outputs)</code></pre>
-
-<p>$$ \begin{pmatrix}\frac{8}{3} x \left(- 4 x + 4\right) e^{- 2 x}, &amp; \frac{32}{3} \left(2 x^{2} - 4 x + 1\right) e^{- 2 x}\end{pmatrix} $$</p>
-
-<p>We redefine our functions to produce both outputs, instead of just <code>expr</code> alone</p>
-
-<pre><code>fn_numpy  = lambdify([x], outputs, 'numpy')
-fn_theano = theano_function([x], outputs, dims={x: 1}, dtypes={x: 'float64'})
-
-fns_fortran = [ufuncify([x], output) for output in outputs]
-fn_fortran  = lambda xx: [fn_fortran(xx) for fn_fortran in fns_fortran]</code></pre>
-
-<p>The expression and its derivative look like this:</p>
-
-<pre><code>for y in fn_theano(xx):
-    plot(xx, y)
-legend(['$R_{31}$', "$R'_{31}$"])</code></pre>
-
-<p><img alt="" src="http://mrocklin.github.com/blog/images/R_31_prime.png"/></p>
-
-<p>Because Theano handles common subexpressions well it is able to perform the extra computation with only a very slight increase in runtime, easily eclipsing either of the other two options.</p>
-
-<pre><code>&gt;&gt;&gt; timeit fn_numpy(xx)
-100 loops, best of 3: 2.85 ms per loop
-&gt;&gt;&gt; timeit fn_fortran(xx)
-1000 loops, best of 3: 1.8 ms per loop
-&gt;&gt;&gt; timeit fn_theano(xx)
-1000 loops, best of 3: 1.16 ms per loop</code></pre>
-
-<p>When we extend this experiment and vary the number of simultaneous derivatives we observe the following runtimes</p>
-
-<p><img alt="" src="http://mrocklin.github.com/blog/images/profile-theano-fortran-numpy.png"/></p>
-
-<p>In the case of highly structured computation Theano is able to scale very favorably.</p>
-
-<h2 id="conclusion">Conclusion</h2>
-
-<p>The Theano project is devoted to code generation at a level that exceeds the devotion of SymPy to this same topic. This is natural and prevalent. When we combine the good parts of both projects we often achieve a better result than with an in-house solution</p>
-
-<p>In-house solutions to foreign problems lack persistence. As programmers within an ecosystem we should make projects that do one thing well and provide clean interfaces and simple data structures to encourage inter-project communication.</p>
-
-<h2 id="references">References</h2>
-
-<ul>
-<li><a href="http://sympy.org/">SymPy</a></li>
-
-<li><a href="http://deeplearning.net/software/theano">Theano</a></li>
-
-<li><a href="http://ojensen.wordpress.com/2010/08/10/fast-ufunc-ish-hydrogen-solutions/">Jensen’s Blogpost</a></li>
-
-<li><a href="https://github.com/mrocklin/sympy/tree/theano-print">Development git repository</a></li>
-
-<li><a href="http://mrocklin.github.com/blog/scripts/sympy_theano_printing.ipynb">IPython notebook of this work</a></li>
-</ul></div>
-    </summary>
-    <updated>2013-03-19T07:00:00Z</updated>
-    <source>
-      <id>http://matthewrocklin.com/blog/</id>
-      <author>
-        <name>MRocklin</name>
-      </author>
-      <link href="http://matthewrocklin.com/blog/" rel="alternate" type="text/html"/>
-      <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
-      <subtitle>Posts tagged as 'SymPy'</subtitle>
-      <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-07-08T08:20:25Z</updated>
+      <updated>2013-07-08T12:20:21Z</updated>
     </source>
   </entry>
 </feed>
