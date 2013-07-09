@@ -23,6 +23,42 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>July 09, 2013</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://sympymatrix.blogspot.com/" title="Sympy Fast Matrix">Saurabh Jha</a></h3>
+
+
+<div class="entrygroup" id="tag:blogger.com,1999:blog-2736678015821545355.post-1967164123336361963">
+<h4><a href="http://sympymatrix.blogspot.com/2013/07/some-improved-profiles-of-dense-matrix.html">Some improved profiles of dense matrix</a></h4>
+<div class="entry">
+<div class="content">
+<div style="text-align: left;" dir="ltr"><br />I have some improved profiles of dense addition and multiplication, the fundamental operators of dense matrix. For all the description of various functions I use, please see this <a href="https://github.com/SaurabhJha/sympy/commit/395cefeb1dd70940cc5ee674c09ec60031aaff76">commit.</a><br /><br />I diden't use gmpy now, because I was not able to get these to work. I was not able to see how can I use it. So here the focus is only on the data structures of Dense Matrix.<br /><br />I am not posting full profiles but only those operations that comparatively cost more.<br /><br />========================================================================<br />First of all we will look at the creation of matrices itself.<br /><br /><br />cProfile.run("generate_matrix(1000, ZZ)")<br />         4009035 function calls in 2.915 seconds<br />ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br />      1        0.673    0.673    2.901    2.901 matrices.py:81(_handle_creation_inputs)<br />1000000  0.741    0.000    0.985    0.000 numbers.py:1522(__new__)<br />1000000  1.159    0.000    2.144    0.000 sympify.py:50(sympify)<br />1001005  0.244    0.000    0.244    0.000 {isinstance}<br />1003000  0.079    0.000    0.079    0.000 {method 'append' of 'list' objects}<span style="white-space: pre;" class="Apple-tab-span">	</span><br /><br />cProfile.run("generate_matrix2(1000, ZZ)")<br />         4005 function calls in 0.003 seconds<br />ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br />     1    0.002    0.002    0.003    0.003 densetools.py:157(generate_matrix2)<br />    <br /><br />cProfile.run("generate_matrix(2000, ZZ)")<br />         16018035 function calls in 11.980 seconds<br />ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br />           1    2.769    2.769   11.933   11.933 matrices.py:81(_handle_creation_inputs)<br />4000000   3.046    0.000    4.055    0.000 numbers.py:1522(__new__)   <br />4000000   4.763    0.000    8.818    0.000 sympify.py:50(sympify)<br />4002005   1.010    0.000    1.010    0.000 {isinstance}<br />4006000   0.325    0.000    0.325    0.000 {method 'append' of 'list' objects}<br /><br /><br />cProfile.run("generate_matrix2(2000, ZZ)")<br />         8005 function calls in 0.006 seconds<br /><br />ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br />     1    0.003    0.003    0.006    0.006 densetools.py:157(generate_matrix2)<br />  2000    0.001    0.000    0.002    0.000 domain.py:67(__call__)<br /><br />Bottlenecks: sympify, numbers, isinstance.<br /><br />Will sympify and numbers problems get solved if we use gmpy.<br />========================================================================<br /><br />Let's look at addition now.<br /><br /><span id="goog_1615297234"></span><span id="goog_1615297235"></span>a = generate_matrix(1000, ZZ)<br /><br />cProfile.run("a + a")<br />         10006072 function calls in 6.123 seconds<br />ncalls    tottime  percall  cumtime  percall filename:lineno(function)<br />1000000    0.423    0.000    0.739    0.000 matrices.py:152(&lt;lambda&gt;)<br />1000000    0.666    0.000    3.566    0.000 matrices.py:519(&lt;lambda&gt;)<br />            2    0.667    0.334    2.078    1.039 matrices.py:81(_handle_creation_inputs)<br />1000000    0.831    0.000    1.079    0.000 numbers.py:1522(__new__)<br />1000000    1.256    0.000    2.900    0.000 numbers.py:1588(__add__)<br />2000000    0.663    0.000    0.663    0.000 sympify.py:50(sympify)<br />3001006    0.814    0.000    0.814    0.000 {isinstance}<br />      1001    0.622    0.001    4.927    0.005 {map}<span style="white-space: pre;" class="Apple-tab-span">	</span><br /><br />cProfile.run("_add(a, a, ZZ)")<br />         11010042 function calls in 7.284 seconds<br /><br /> ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br />      1000    1.286    0.001    3.805    0.004 densetools.py:27(_addr)<br />2000000    1.295    0.000    1.592    0.000 domain.py:64(new)<br />2000000    0.849    0.000    2.440    0.000 domain.py:67(__call__)<br />            1    0.789    0.789    3.425    3.425 matrices.py:81(_handle_creation_inputs)<br />1000000    0.889    0.000    1.181    0.000 numbers.py:1522(__new__)<br />2000000    0.297    0.000    0.297    0.000 numbers.py:1552(__int__)<br />1000000    1.349    0.000    2.530    0.000 sympify.py:50(sympify)<br />1001005    0.292    0.000    0.292    0.000 {isinstance}<br />2002000    0.178    0.000    0.178    0.000 {method 'append' of 'list' objects}<br /><br /><br />cProfile.run("_add2(a, a, ZZ)")<br />         7005012 function calls in 3.870 seconds<br /> ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br />   1000    1.293    0.001    3.830    0.004 densetools.py:27(_addr)<br />2000000    1.303    0.000    1.600    0.000 domain.py:64(new)<br />2000000    0.857    0.000    2.458    0.000 domain.py:67(__call__)<br />2000000    0.298    0.000    0.298    0.000 numbers.py:1552(__int__)<br /><br /><br />Bottlenecks: lambda, numbers, simplify, is instance in original implementation and domains in second one.<br /><br /><br />========================================================================<br /><br />Let's look at multiplication now.<br /><br />a = generate_matrix(100, ZZ)<br /><br />cProfile.run("a*a")<br />         11060373 function calls in 7.685 seconds<br /><br />ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br /> 10000    0.781    0.000    7.611    0.001 matrices.py:463(&lt;lambda&gt;)<br />990000    0.669    0.000    3.597    0.000 matrices.py:464(&lt;lambda&gt;)<br />2000000   1.790    0.000    2.274    0.000 numbers.py:1522(__new__)<br />990000    1.223    0.000    2.928    0.000 numbers.py:1588(__add__)<br />1000000   1.257    0.000    2.916    0.000 numbers.py:1612(__mul__)<br />  10000   0.268    0.000    3.865    0.000 {_functools.reduce}<br />5980002    1.585    0.000    1.585    0.000 {isinstance}<br /><br /><br />cProfile.run("_mulmatmat(a, a, ZZ)")<br />         6070642 function calls in 3.732 seconds<br /> ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br />  10000    1.159    0.000    3.688    0.000 densetools.py:112(_mulrc)<br />2000000    1.339    0.000    1.639    0.000 domain.py:64(new)<br />2000000    0.889    0.000    2.527    0.000 domain.py:67(__call__)<br />2000000    0.300    0.000    0.300    0.000 numbers.py:1552(__int__)<br /><br />cProfile.run("_mulmatmat2(a, a, ZZ)")<br />         6030112 function calls in 3.526 seconds<br /><br /> ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br />  10000    1.106    0.000    3.517    0.000 densetools.py:112(_mulrc)<br />2000000    1.279    0.000    1.564    0.000 domain.py:64(new)<br />2000000    0.846    0.000    2.411    0.000 domain.py:67(__call__)<br />2000000    0.286    0.000    0.286    0.000 numbers.py:1552(__int__)<br /><br />This seems promising,  but the domains itself consume a lot of space. So will gmpy boost this up?<br /><br /><br />Conclusion:<br /><br />For addition, we _add2 &gt;&gt; _add but for multiplication, we have _mulmatmat2 ~ _mulmatmat2. So, the situation is somewhat more interesting. A new data structure alone will not fix it. How about making a new basic dense matrix again focssing just on arithmetics, slicing operations and solving equations using rref?<br /><br /><br /><ul style="text-align: left;"><li>Can we make reductions to lambda calls?</li><li>Can numbers.py bottleneck be solved by gmpy?</li></ul><div><br /></div></div></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://sympymatrix.blogspot.com/2013/07/some-improved-profiles-of-dense-matrix.html">by Saurabh Jha (noreply@blogger.com) at July 09, 2013 10:14 AM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>July 08, 2013</h2>
 
 <div class="channelgroup">
@@ -3266,132 +3302,6 @@ AttributeError:
 </div>
 
 </div>
-<div class="daygroup">
-<h2>March 29, 2013</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://fabianp.net/blog/" title="I say things">Fabian Pedregosa</a></h3>
-
-
-<div class="entrygroup" id="tag:fabianp.net/blog,2013-03-30:2013/householder-matrices/">
-<h4><a href="http://fabianp.net/blog/2013/householder-matrices/">Householder matrices</a></h4>
-<div class="entry">
-<div class="content">
-<p>Householder matrices are square matrices of the form</p>
-<p>$$ P = I - \beta v v^T$$</p>
-<p>where $\beta$ is a scalar and $v$ is a vector. It has the useful
-property that for suitable chosen $v$ and $\beta$ it makes the product
-$P x$ to zero out all of the coordinates but one, that is, $P x =
-\|x\| e_1$. The following code, given $x$, finds the values of $\beta,
-v$ that verify that property. The algorithm can be found in several
-textbooks <sup id="fnref:1"><a href="http://fa.bianp.net/blog/feed/#fn:1" rel="footnote">1</a></sup></p>
-<div class="highlight"><pre><span class="k">def</span> <span class="nf">house</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-    <span class="sd">"""</span>
-<span class="sd">    Given a vetor x, computes vectors v with v[0] = 1</span>
-<span class="sd">    and scalar beta such that P = I - beta v v^T</span>
-<span class="sd">    is orthogonal and P x = ||x|| e_1</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    x : array, shape (n,) or (n, 1)</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    beta : scalar</span>
-<span class="sd">    v : array, shape (n, 1)</span>
-<span class="sd">    """</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
-    <span class="n">sigma</span> <span class="o">=</span> <span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
-    <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
-    <span class="k">if</span> <span class="n">sigma</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">beta</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">mu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">sigma</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">mu</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span> <span class="n">sigma</span> <span class="o">/</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">mu</span><span class="p">)</span>
-        <span class="n">beta</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">+</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
-        <span class="n">v</span> <span class="o">/=</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">beta</span><span class="p">,</span> <span class="n">v</span>
-</pre></div>
-
-
-<p>As promised, this computes the parameters of $P$ such that $P x = \|x\| e_1$,
-exact to 15 decimals:</p>
-<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">5</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">beta</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">house</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">-</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="k">print</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span> 
-<span class="p">[</span> <span class="mf">1.</span> <span class="o">-</span><span class="mf">0.</span> <span class="o">-</span><span class="mf">0.</span>  <span class="mf">0.</span> <span class="o">-</span><span class="mf">0.</span><span class="p">]</span>
-</pre></div>
-
-
-<p>This property is what it makes Householder matrices useful in
-the context of numerical analysis. It can be used for example to
-compute the QR decomposition of a given matrix. The idea is to
-succesively zero out the sub-diagonal elements, thus leaving a
-triangular matrix at the end. In the first iteration we compute a
-Householder matrix $P_0$ such that $P_0 X$ has only zero below the
-diagonal of the first column, then compute a Householder matrix $P_1$
-such that $P_1 X$ zeroes out the subdiagonal elements of the second
-column and so on. At the end we will have that $P_0 P_1 ... P_n X$ is
-an upper triangular matrix. Since all $P_i$ are orthogonal, the
-product $P_0 P_1 ... P_n$ is again an orthogonal matrix, namely the
-$Q$ matrix in the QR decomposition.</p>
-<p>If we choose X as 20-by-20 random matrix, with colors representing
-different values</p>
-<p><img src="http://fa.bianp.net/blog/static/images/2013/house_random.png" alt="QR decomposition" /></p>
-<p>we can see the process of the Householder matrices being applied one
-by one to obtain an upper triangular matrix</p>
-<p><img src="http://fa.bianp.net/blog/static/images/2013/house.gif" alt="QR decomposition" /></p>
-<p>A similar application of Householder matrices is to reduce a given
-symmetric matrix to tridiagonal form, which proceeds in a similar way
-as in the QR algorithm, only that now we multiply by the matrix $X$ by
-the left <em>and right</em> with the Householder matrices. Also, in this case
-we seek for Householder matrices that zero out the elements of the
-subdiagonal plus one, instead of just subdiagonal elements. This
-algorithm is used for example as a preprocessing step for <a href="http://www.netlib.org/lapack/lug/node70.html">most dense
-eigensolvers</a></p>
-<p><img src="http://fa.bianp.net/blog/static/images/2013/house_tridiag.gif" alt="Tridiagonalization" /></p>
-<div class="footnote">
-<hr />
-<ol>
-<li id="fn:1">
-<p>"Matrix Computations" third edition, Golub &amp; VanLoan (Algorithm 5.1.1). <a href="http://fa.bianp.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
-</li>
-<li id="fn:2">
-<p>Code to reproduce the figures <a href="http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/householder.ipynb">can be found here</a>, source for the IPython notebook <a href="http://fseoane.net/blog/static/uploads/2013/householder.ipynb">can be found here</a> <a href="http://fa.bianp.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
-</li>
-</ol>
-</div></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://fabianp.net/blog/2013/householder-matrices/">by Fabian Pedregosa at March 29, 2013 11:00 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -3535,7 +3445,7 @@ eigensolvers</a></p>
 
 <p>
 <strong>Last updated:</strong><br>
-July 08, 2013 05:40 PM<br>
+July 09, 2013 10:20 AM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>

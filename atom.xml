@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2013-07-08T17:40:31Z</updated>
+  <updated>2013-07-09T10:20:31Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,39 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry>
+    <id>tag:blogger.com,1999:blog-2736678015821545355.post-1967164123336361963</id>
+    <link href="http://sympymatrix.blogspot.com/feeds/1967164123336361963/comments/default" rel="replies" type="application/atom+xml"/>
+    <link href="http://sympymatrix.blogspot.com/2013/07/some-improved-profiles-of-dense-matrix.html#comment-form" rel="replies" type="text/html"/>
+    <link href="http://www.blogger.com/feeds/2736678015821545355/posts/default/1967164123336361963" rel="edit" type="application/atom+xml"/>
+    <link href="http://www.blogger.com/feeds/2736678015821545355/posts/default/1967164123336361963" rel="self" type="application/atom+xml"/>
+    <link href="http://sympymatrix.blogspot.com/2013/07/some-improved-profiles-of-dense-matrix.html" rel="alternate" type="text/html"/>
+    <title>Some improved profiles of dense matrix</title>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><div dir="ltr" style="text-align: left;"><br/>I have some improved profiles of dense addition and multiplication, the fundamental operators of dense matrix. For all the description of various functions I use, please see this <a href="https://github.com/SaurabhJha/sympy/commit/395cefeb1dd70940cc5ee674c09ec60031aaff76">commit.</a><br/><br/>I diden't use gmpy now, because I was not able to get these to work. I was not able to see how can I use it. So here the focus is only on the data structures of Dense Matrix.<br/><br/>I am not posting full profiles but only those operations that comparatively cost more.<br/><br/>========================================================================<br/>First of all we will look at the creation of matrices itself.<br/><br/><br/>cProfile.run("generate_matrix(1000, ZZ)")<br/>         4009035 function calls in 2.915 seconds<br/>ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br/>      1        0.673    0.673    2.901    2.901 matrices.py:81(_handle_creation_inputs)<br/>1000000  0.741    0.000    0.985    0.000 numbers.py:1522(__new__)<br/>1000000  1.159    0.000    2.144    0.000 sympify.py:50(sympify)<br/>1001005  0.244    0.000    0.244    0.000 {isinstance}<br/>1003000  0.079    0.000    0.079    0.000 {method 'append' of 'list' objects}<span class="Apple-tab-span" style="white-space: pre;">	</span><br/><br/>cProfile.run("generate_matrix2(1000, ZZ)")<br/>         4005 function calls in 0.003 seconds<br/>ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br/>     1    0.002    0.002    0.003    0.003 densetools.py:157(generate_matrix2)<br/>    <br/><br/>cProfile.run("generate_matrix(2000, ZZ)")<br/>         16018035 function calls in 11.980 seconds<br/>ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br/>           1    2.769    2.769   11.933   11.933 matrices.py:81(_handle_creation_inputs)<br/>4000000   3.046    0.000    4.055    0.000 numbers.py:1522(__new__)   <br/>4000000   4.763    0.000    8.818    0.000 sympify.py:50(sympify)<br/>4002005   1.010    0.000    1.010    0.000 {isinstance}<br/>4006000   0.325    0.000    0.325    0.000 {method 'append' of 'list' objects}<br/><br/><br/>cProfile.run("generate_matrix2(2000, ZZ)")<br/>         8005 function calls in 0.006 seconds<br/><br/>ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br/>     1    0.003    0.003    0.006    0.006 densetools.py:157(generate_matrix2)<br/>  2000    0.001    0.000    0.002    0.000 domain.py:67(__call__)<br/><br/>Bottlenecks: sympify, numbers, isinstance.<br/><br/>Will sympify and numbers problems get solved if we use gmpy.<br/>========================================================================<br/><br/>Let's look at addition now.<br/><br/><span id="goog_1615297234"/><span id="goog_1615297235"/>a = generate_matrix(1000, ZZ)<br/><br/>cProfile.run("a + a")<br/>         10006072 function calls in 6.123 seconds<br/>ncalls    tottime  percall  cumtime  percall filename:lineno(function)<br/>1000000    0.423    0.000    0.739    0.000 matrices.py:152(&lt;lambda&gt;)<br/>1000000    0.666    0.000    3.566    0.000 matrices.py:519(&lt;lambda&gt;)<br/>            2    0.667    0.334    2.078    1.039 matrices.py:81(_handle_creation_inputs)<br/>1000000    0.831    0.000    1.079    0.000 numbers.py:1522(__new__)<br/>1000000    1.256    0.000    2.900    0.000 numbers.py:1588(__add__)<br/>2000000    0.663    0.000    0.663    0.000 sympify.py:50(sympify)<br/>3001006    0.814    0.000    0.814    0.000 {isinstance}<br/>      1001    0.622    0.001    4.927    0.005 {map}<span class="Apple-tab-span" style="white-space: pre;">	</span><br/><br/>cProfile.run("_add(a, a, ZZ)")<br/>         11010042 function calls in 7.284 seconds<br/><br/> ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br/>      1000    1.286    0.001    3.805    0.004 densetools.py:27(_addr)<br/>2000000    1.295    0.000    1.592    0.000 domain.py:64(new)<br/>2000000    0.849    0.000    2.440    0.000 domain.py:67(__call__)<br/>            1    0.789    0.789    3.425    3.425 matrices.py:81(_handle_creation_inputs)<br/>1000000    0.889    0.000    1.181    0.000 numbers.py:1522(__new__)<br/>2000000    0.297    0.000    0.297    0.000 numbers.py:1552(__int__)<br/>1000000    1.349    0.000    2.530    0.000 sympify.py:50(sympify)<br/>1001005    0.292    0.000    0.292    0.000 {isinstance}<br/>2002000    0.178    0.000    0.178    0.000 {method 'append' of 'list' objects}<br/><br/><br/>cProfile.run("_add2(a, a, ZZ)")<br/>         7005012 function calls in 3.870 seconds<br/> ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br/>   1000    1.293    0.001    3.830    0.004 densetools.py:27(_addr)<br/>2000000    1.303    0.000    1.600    0.000 domain.py:64(new)<br/>2000000    0.857    0.000    2.458    0.000 domain.py:67(__call__)<br/>2000000    0.298    0.000    0.298    0.000 numbers.py:1552(__int__)<br/><br/><br/>Bottlenecks: lambda, numbers, simplify, is instance in original implementation and domains in second one.<br/><br/><br/>========================================================================<br/><br/>Let's look at multiplication now.<br/><br/>a = generate_matrix(100, ZZ)<br/><br/>cProfile.run("a*a")<br/>         11060373 function calls in 7.685 seconds<br/><br/>ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br/> 10000    0.781    0.000    7.611    0.001 matrices.py:463(&lt;lambda&gt;)<br/>990000    0.669    0.000    3.597    0.000 matrices.py:464(&lt;lambda&gt;)<br/>2000000   1.790    0.000    2.274    0.000 numbers.py:1522(__new__)<br/>990000    1.223    0.000    2.928    0.000 numbers.py:1588(__add__)<br/>1000000   1.257    0.000    2.916    0.000 numbers.py:1612(__mul__)<br/>  10000   0.268    0.000    3.865    0.000 {_functools.reduce}<br/>5980002    1.585    0.000    1.585    0.000 {isinstance}<br/><br/><br/>cProfile.run("_mulmatmat(a, a, ZZ)")<br/>         6070642 function calls in 3.732 seconds<br/> ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br/>  10000    1.159    0.000    3.688    0.000 densetools.py:112(_mulrc)<br/>2000000    1.339    0.000    1.639    0.000 domain.py:64(new)<br/>2000000    0.889    0.000    2.527    0.000 domain.py:67(__call__)<br/>2000000    0.300    0.000    0.300    0.000 numbers.py:1552(__int__)<br/><br/>cProfile.run("_mulmatmat2(a, a, ZZ)")<br/>         6030112 function calls in 3.526 seconds<br/><br/> ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br/>  10000    1.106    0.000    3.517    0.000 densetools.py:112(_mulrc)<br/>2000000    1.279    0.000    1.564    0.000 domain.py:64(new)<br/>2000000    0.846    0.000    2.411    0.000 domain.py:67(__call__)<br/>2000000    0.286    0.000    0.286    0.000 numbers.py:1552(__int__)<br/><br/>This seems promising,  but the domains itself consume a lot of space. So will gmpy boost this up?<br/><br/><br/>Conclusion:<br/><br/>For addition, we _add2 &gt;&gt; _add but for multiplication, we have _mulmatmat2 ~ _mulmatmat2. So, the situation is somewhat more interesting. A new data structure alone will not fix it. How about making a new basic dense matrix again focssing just on arithmetics, slicing operations and solving equations using rref?<br/><br/><br/><ul style="text-align: left;"><li>Can we make reductions to lambda calls?</li><li>Can numbers.py bottleneck be solved by gmpy?</li></ul><div><br/></div></div></div>
+    </content>
+    <updated>2013-07-09T10:14:42Z</updated>
+    <published>2013-07-09T10:14:00Z</published>
+    <author>
+      <name>Saurabh Jha</name>
+      <email>noreply@blogger.com</email>
+      <uri>http://www.blogger.com/profile/06730324274224921613</uri>
+    </author>
+    <source>
+      <id>tag:blogger.com,1999:blog-2736678015821545355</id>
+      <author>
+        <name>Saurabh Jha</name>
+        <email>noreply@blogger.com</email>
+        <uri>http://www.blogger.com/profile/06730324274224921613</uri>
+      </author>
+      <link href="http://sympymatrix.blogspot.com/feeds/posts/default" rel="http://schemas.google.com/g/2005#feed" type="application/atom+xml"/>
+      <link href="http://www.blogger.com/feeds/2736678015821545355/posts/default" rel="self" type="application/atom+xml"/>
+      <link href="http://sympymatrix.blogspot.com/" rel="alternate" type="text/html"/>
+      <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
+      <title>Sympy Fast Matrix</title>
+      <updated>2013-07-09T10:14:42Z</updated>
+    </source>
+  </entry>
 
   <entry>
     <id>tag:blogger.com,1999:blog-7526836182390500993.post-2448841775059804252</id>
@@ -77,7 +110,7 @@ I know this is a lot of talking and nothing like psudeo code, though we can draw
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Can I help u ?</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-08T17:40:27Z</updated>
+      <updated>2013-07-09T10:20:25Z</updated>
     </source>
   </entry>
 
@@ -143,7 +176,7 @@ fab vagrant release
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-07-08T17:40:09Z</updated>
+      <updated>2013-07-09T10:20:09Z</updated>
     </source>
   </entry>
 
@@ -176,7 +209,7 @@ fab vagrant release
       <link href="http://sympymatrix.blogspot.com/" rel="alternate" type="text/html"/>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>Sympy Fast Matrix</title>
-      <updated>2013-07-06T18:35:33Z</updated>
+      <updated>2013-07-09T10:14:42Z</updated>
     </source>
   </entry>
 
@@ -315,7 +348,7 @@ fab vagrant release
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-08T17:40:28Z</updated>
+      <updated>2013-07-09T10:20:26Z</updated>
     </source>
   </entry>
 
@@ -350,7 +383,7 @@ I was able to make use of both of them in my implementation for the multivariate
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-08T17:40:29Z</updated>
+      <updated>2013-07-09T10:20:27Z</updated>
     </source>
   </entry>
 
@@ -402,7 +435,7 @@ I was able to make use of both of them in my implementation for the multivariate
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-08T17:40:28Z</updated>
+      <updated>2013-07-09T10:20:26Z</updated>
     </source>
   </entry>
 
@@ -586,7 +619,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-07-08T17:40:09Z</updated>
+      <updated>2013-07-09T10:20:09Z</updated>
     </source>
   </entry>
 
@@ -619,7 +652,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://sympymatrix.blogspot.com/" rel="alternate" type="text/html"/>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>Sympy Fast Matrix</title>
-      <updated>2013-07-06T18:35:33Z</updated>
+      <updated>2013-07-09T10:14:42Z</updated>
     </source>
   </entry>
 
@@ -691,7 +724,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-08T17:40:28Z</updated>
+      <updated>2013-07-09T10:20:26Z</updated>
     </source>
   </entry>
 
@@ -723,7 +756,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-08T17:40:29Z</updated>
+      <updated>2013-07-09T10:20:27Z</updated>
     </source>
   </entry>
 
@@ -755,7 +788,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-08T17:40:29Z</updated>
+      <updated>2013-07-09T10:20:27Z</updated>
     </source>
   </entry>
 
@@ -842,7 +875,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://sympymatrix.blogspot.com/" rel="alternate" type="text/html"/>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>Sympy Fast Matrix</title>
-      <updated>2013-07-06T18:35:33Z</updated>
+      <updated>2013-07-09T10:14:42Z</updated>
     </source>
   </entry>
 
@@ -873,7 +906,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-08T17:40:28Z</updated>
+      <updated>2013-07-09T10:20:26Z</updated>
     </source>
   </entry>
 
@@ -985,7 +1018,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Can I help u ?</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-08T17:40:27Z</updated>
+      <updated>2013-07-09T10:20:25Z</updated>
     </source>
   </entry>
 
@@ -1050,7 +1083,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://sympymatrix.blogspot.com/" rel="alternate" type="text/html"/>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>Sympy Fast Matrix</title>
-      <updated>2013-07-06T18:35:33Z</updated>
+      <updated>2013-07-09T10:14:42Z</updated>
     </source>
   </entry>
 
@@ -1144,7 +1177,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-08T17:40:29Z</updated>
+      <updated>2013-07-09T10:20:27Z</updated>
     </source>
   </entry>
 
@@ -1238,7 +1271,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-08T17:40:28Z</updated>
+      <updated>2013-07-09T10:20:26Z</updated>
     </source>
   </entry>
 
@@ -1302,7 +1335,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-08T17:40:28Z</updated>
+      <updated>2013-07-09T10:20:26Z</updated>
     </source>
   </entry>
 
@@ -1408,7 +1441,7 @@ into a text file. For those interested, however I made a few changes manually ev
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-08T17:40:28Z</updated>
+      <updated>2013-07-09T10:20:26Z</updated>
     </source>
   </entry>
 
@@ -1485,7 +1518,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-08T17:40:28Z</updated>
+      <updated>2013-07-09T10:20:26Z</updated>
     </source>
   </entry>
 
@@ -1597,7 +1630,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://sympymatrix.blogspot.com/" rel="alternate" type="text/html"/>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>Sympy Fast Matrix</title>
-      <updated>2013-07-06T18:35:33Z</updated>
+      <updated>2013-07-09T10:14:42Z</updated>
     </source>
   </entry>
 
@@ -1738,7 +1771,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Can I help u ?</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-08T17:40:27Z</updated>
+      <updated>2013-07-09T10:20:25Z</updated>
     </source>
   </entry>
 
@@ -1766,7 +1799,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="https://sites.google.com/feeds/content/site/v9joshi/batch" rel="http://schemas.google.com/g/2005#batch" type="application/atom+xml"/>
       <link href="https://sites.google.com/feeds/content/site/v9joshi?parent=5420265600325595988&amp;kind=announcement" rel="self" type="application/atom+xml"/>
       <title>Posts of GSoC Blog</title>
-      <updated>2013-07-08T17:40:30Z</updated>
+      <updated>2013-07-09T10:20:27Z</updated>
     </source>
   </entry>
 
@@ -1861,7 +1894,7 @@ based features.</p></div></td></tr></tbody></table></div>
       <link href="https://sites.google.com/feeds/content/site/v9joshi/batch" rel="http://schemas.google.com/g/2005#batch" type="application/atom+xml"/>
       <link href="https://sites.google.com/feeds/content/site/v9joshi?parent=5420265600325595988&amp;kind=announcement" rel="self" type="application/atom+xml"/>
       <title>Posts of GSoC Blog</title>
-      <updated>2013-07-08T17:40:30Z</updated>
+      <updated>2013-07-09T10:20:27Z</updated>
     </source>
   </entry>
 
@@ -1891,7 +1924,7 @@ based features.</p></div></td></tr></tbody></table></div>
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-08T17:40:29Z</updated>
+      <updated>2013-07-09T10:20:27Z</updated>
     </source>
   </entry>
 
@@ -1941,7 +1974,7 @@ Here D is a non square positive integer.</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-08T17:40:28Z</updated>
+      <updated>2013-07-09T10:20:26Z</updated>
     </source>
   </entry>
 
@@ -2046,7 +2079,7 @@ Here D is a non square positive integer.</p>
       <link href="http://brianegranger.com" rel="alternate" type="text/html"/>
       <subtitle>Physics ∩ Computing</subtitle>
       <title>Brian E. Granger</title>
-      <updated>2013-07-08T17:40:12Z</updated>
+      <updated>2013-07-09T10:20:11Z</updated>
     </source>
   </entry>
 
@@ -2399,7 +2432,7 @@ however produce walking like behavior in a 2-D Slinky by using the model
       <link href="https://sites.google.com/feeds/content/site/v9joshi/batch" rel="http://schemas.google.com/g/2005#batch" type="application/atom+xml"/>
       <link href="https://sites.google.com/feeds/content/site/v9joshi?parent=5420265600325595988&amp;kind=announcement" rel="self" type="application/atom+xml"/>
       <title>Posts of GSoC Blog</title>
-      <updated>2013-07-08T17:40:30Z</updated>
+      <updated>2013-07-09T10:20:27Z</updated>
     </source>
   </entry>
 
@@ -2820,7 +2853,7 @@ AttributeError:
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-07-08T17:40:09Z</updated>
+      <updated>2013-07-09T10:20:09Z</updated>
     </source>
   </entry>
 
@@ -2974,119 +3007,7 @@ AttributeError:
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-07-08T17:40:22Z</updated>
-    </source>
-  </entry>
-
-  <entry>
-    <id>tag:fabianp.net/blog,2013-03-30:2013/householder-matrices/</id>
-    <link href="http://fabianp.net/blog/2013/householder-matrices/" rel="alternate" type="text/html"/>
-    <title>Householder matrices</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Householder matrices are square matrices of the form</p>
-<p>$$ P = I - \beta v v^T$$</p>
-<p>where $\beta$ is a scalar and $v$ is a vector. It has the useful
-property that for suitable chosen $v$ and $\beta$ it makes the product
-$P x$ to zero out all of the coordinates but one, that is, $P x =
-\|x\| e_1$. The following code, given $x$, finds the values of $\beta,
-v$ that verify that property. The algorithm can be found in several
-textbooks <sup id="fnref:1"><a href="http://fa.bianp.net/blog/feed/#fn:1" rel="footnote">1</a></sup></p>
-<div class="highlight"><pre><span class="k">def</span> <span class="nf">house</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-    <span class="sd">"""</span>
-<span class="sd">    Given a vetor x, computes vectors v with v[0] = 1</span>
-<span class="sd">    and scalar beta such that P = I - beta v v^T</span>
-<span class="sd">    is orthogonal and P x = ||x|| e_1</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    x : array, shape (n,) or (n, 1)</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    beta : scalar</span>
-<span class="sd">    v : array, shape (n, 1)</span>
-<span class="sd">    """</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
-    <span class="n">sigma</span> <span class="o">=</span> <span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
-    <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
-    <span class="k">if</span> <span class="n">sigma</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">beta</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">mu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">sigma</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">mu</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span> <span class="n">sigma</span> <span class="o">/</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">mu</span><span class="p">)</span>
-        <span class="n">beta</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">+</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
-        <span class="n">v</span> <span class="o">/=</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">beta</span><span class="p">,</span> <span class="n">v</span>
-</pre></div>
-
-
-<p>As promised, this computes the parameters of $P$ such that $P x = \|x\| e_1$,
-exact to 15 decimals:</p>
-<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">5</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">beta</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">house</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">-</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="k">print</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span> 
-<span class="p">[</span> <span class="mf">1.</span> <span class="o">-</span><span class="mf">0.</span> <span class="o">-</span><span class="mf">0.</span>  <span class="mf">0.</span> <span class="o">-</span><span class="mf">0.</span><span class="p">]</span>
-</pre></div>
-
-
-<p>This property is what it makes Householder matrices useful in
-the context of numerical analysis. It can be used for example to
-compute the QR decomposition of a given matrix. The idea is to
-succesively zero out the sub-diagonal elements, thus leaving a
-triangular matrix at the end. In the first iteration we compute a
-Householder matrix $P_0$ such that $P_0 X$ has only zero below the
-diagonal of the first column, then compute a Householder matrix $P_1$
-such that $P_1 X$ zeroes out the subdiagonal elements of the second
-column and so on. At the end we will have that $P_0 P_1 ... P_n X$ is
-an upper triangular matrix. Since all $P_i$ are orthogonal, the
-product $P_0 P_1 ... P_n$ is again an orthogonal matrix, namely the
-$Q$ matrix in the QR decomposition.</p>
-<p>If we choose X as 20-by-20 random matrix, with colors representing
-different values</p>
-<p><img alt="QR decomposition" src="http://fa.bianp.net/blog/static/images/2013/house_random.png"/></p>
-<p>we can see the process of the Householder matrices being applied one
-by one to obtain an upper triangular matrix</p>
-<p><img alt="QR decomposition" src="http://fa.bianp.net/blog/static/images/2013/house.gif"/></p>
-<p>A similar application of Householder matrices is to reduce a given
-symmetric matrix to tridiagonal form, which proceeds in a similar way
-as in the QR algorithm, only that now we multiply by the matrix $X$ by
-the left <em>and right</em> with the Householder matrices. Also, in this case
-we seek for Householder matrices that zero out the elements of the
-subdiagonal plus one, instead of just subdiagonal elements. This
-algorithm is used for example as a preprocessing step for <a href="http://www.netlib.org/lapack/lug/node70.html">most dense
-eigensolvers</a></p>
-<p><img alt="Tridiagonalization" src="http://fa.bianp.net/blog/static/images/2013/house_tridiag.gif"/></p>
-<div class="footnote">
-<hr/>
-<ol>
-<li id="fn:1">
-<p>"Matrix Computations" third edition, Golub &amp; VanLoan (Algorithm 5.1.1). <a href="http://fa.bianp.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
-</li>
-<li id="fn:2">
-<p>Code to reproduce the figures <a href="http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/householder.ipynb">can be found here</a>, source for the IPython notebook <a href="http://fseoane.net/blog/static/uploads/2013/householder.ipynb">can be found here</a> <a href="http://fa.bianp.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
-</li>
-</ol>
-</div></div>
-    </summary>
-    <updated>2013-03-29T23:00:00Z</updated>
-    <category term="linear algebra"/>
-    <category term="householder"/>
-    <category term="QR"/>
-    <author>
-      <name>Fabian Pedregosa</name>
-    </author>
-    <source>
-      <id>http://fabianp.net/blog/</id>
-      <link href="http://fabianp.net/blog/" rel="alternate" type="text/html"/>
-      <link href="http://fa.bianp.net/blog/feed/rss.xml" rel="self" type="application/atom+xml"/>
-      <title>I say things</title>
-      <updated>2013-05-23T14:00:16Z</updated>
+      <updated>2013-07-09T10:20:20Z</updated>
     </source>
   </entry>
 </feed>
