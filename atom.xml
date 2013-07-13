@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2013-07-13T11:00:38Z</updated>
+  <updated>2013-07-13T13:40:32Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,39 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry>
+    <id>tag:blogger.com,1999:blog-5472769892551526876.post-1263476314884744181</id>
+    <link href="http://codesachin.blogspot.com/feeds/1263476314884744181/comments/default" rel="replies" type="application/atom+xml"/>
+    <link href="http://www.blogger.com/comment.g?blogID=5472769892551526876&amp;postID=1263476314884744181" rel="replies" type="text/html"/>
+    <link href="http://www.blogger.com/feeds/5472769892551526876/posts/default/1263476314884744181" rel="edit" type="application/atom+xml"/>
+    <link href="http://www.blogger.com/feeds/5472769892551526876/posts/default/1263476314884744181" rel="self" type="application/atom+xml"/>
+    <link href="http://codesachin.blogspot.com/2013/07/gsoc-week4-improvements.html" rel="alternate" type="text/html"/>
+    <title>GSoC Week4: Improvements</title>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><div dir="ltr" style="text-align: left;">This has been a slow week, with a lot of ups and downs, work-wise.<br/>Firstly, my laptop's LAN card decided to stop working properly, keeping me busy talking to the Dell customer service and convincing them that something <i>is </i>wrong with the thing. After a lot of troubleshooting and failed tests on their part (they even tried remote desktop connection to see what was going wrong), they finally agreed that something needs to be done. I hope it gets fixed before I go back to campus.<br/><br/>As far as the GSoC work is concerned, firstly, I got the Particle code finalised on Tuesday after a review by Gilbert.<br/>Next, I spent the whole of Wednesday hacking the old mechanics framework to act as the base to test my own code on. I felt the need to do this, as I was anxious to see whether my own work was functioning as I thought it would, and it would take some time before Prasoon could get his framework in a completely consistent state (thats natural, considering the complexity of the work involved). It took a lot of time, as I had to tweak the old framework to support coordinate variables, use substitution on them during re-expression and time-differentiation, and so on...<br/>Finally, I got it to work and tested my own code. It worked perfectly! There were a few errors that had to be rectified for the tuple-args format to function, but the rest of it went smoothly.<br/><br/>This is a <i>real </i>SymPy session using the hacked module and my own work-<br/><pre style=""><code style="color: black;">1:  &gt;&gt;&gt; O = MovingRefFrame('O')  <br/>2:  &gt;&gt;&gt; F1 = MovingRefFrame('F1', trans_vel = 3 * O.x + 4 * O.y,  <br/>3:                    pos_vector_b = O.x + O.y + O.z, parentframe = O)  <br/>4:  &gt;&gt;&gt; F1.pos_vector_in(O)  <br/>5:  (3*t + 1)*O.x + (4*t + 1)*O.y + O.z  <br/>6:  &gt;&gt;&gt; Q = Symbol('Q', positive = True)  <br/>7:  &gt;&gt;&gt; F2 = MovingRefFrame('F2', ang_vel = Q * O.z, parentframe = O)  <br/>8:  &gt;&gt;&gt; F3 = MovingRefFrame('F3', pos_vector = F2.x, parentframe = F2)  <br/>9:  &gt;&gt;&gt; F3.pos_vector_in(O)  <br/>10:  F2.x  <br/>11:  &gt;&gt;&gt; O.express(F3.trans_acc_in(O))  <br/>12:  - Q**2*cos(Q*t)*O.x - Q**2*sin(Q*t)*O.y  <br/>13:  &gt;&gt;&gt; P = Symbol('P')  <br/>14:  &gt;&gt;&gt; F4 = MovingRefFrame('F4', orient_type = 'Axis', orient_amount = [P * t, F1.x], \  <br/>15:                    parentframe = F1)  <br/>16:  &gt;&gt;&gt; F4.ang_vel_in(F3)  <br/>17:  P*F1.x - Q*O.z  <br/>18:  &gt;&gt;&gt; F5 = MovingRefFrame('F5', orient_type = 'Axis', orient_amount = [Q, F1.x], \  <br/>19:                    trans_vel = ((0, 0, 1), 0), parentframe = F4)  <br/>20:  &gt;&gt;&gt; F3.express(F5.pos_vector_in(O))  <br/>21:  (-t*sin(Q*t)*sin(P*t + Q) + 4*t*sin(Q*t) + 3*t*cos(Q*t) + sqrt(2)*sin(Q*t + pi/4))*F3.x + (-3*t*sin(Q*t) - t*sin(P*t + Q)*cos(Q*t) + 4*t*cos(Q*t) + sqrt(2)*cos(Q*t + pi/4))*F3.y + (t*cos(P*t + Q) + 1)*F3.z  <br/>22:  &gt;&gt;&gt; F5.pos_vector_in(F4)  <br/>23:  - t*sin(Q)*F4.y + t*cos(Q)*F4.z  <br/>24:  &gt;&gt;&gt; F5.trans_vel_in(O)  <br/>25:  (-P*t*cos(Q) - sin(Q))*F4.y + (-P*t*sin(Q) + cos(Q))*F4.z + 3*O.x + 4*O.y  <br/></code></pre><br/>Line 3 means that frame F1 should have an initial position of O.x + O.y + O.z wrt O. Substituting t = 0 in the output at line 5 will confirm this. To put in the boundary conditions at some other value of time, user just has to enter the keyword arg 't'.<br/>Line 21 adequately shows how complicated things can get after a while.<br/>Line 19 is an example how a tuple argument can be used in the new framework to position/orient new frames wrt their parents. Line 19 essentially means that F5 will have a translational velocity of 1 * F5.z after being oriented as per the user's conditions.<br/>(All these things are adequately explained in the docs)<br/><br/>This work with the old module convinced me that dynamicsymbols should also be a part of my own work, since it makes handling of time variables <i>considerably</i> simpler. Hence, I added the function in my last commit to the PR.<br/><br/>Last but not the least, I planned out some basic vector/scalar field functions for my E-M module. But more on that later.<br/><br/>Now that I have my entire workspace up and running on my old laptop (temporarily), I will continue with the following work in the coming time-<br/>1) Enable users to enter initial orientation in the same way they enter the time-dependent orientation. As of now, they get to do so only by entering the initial rotation in terms of a vector. Awkward, I agree.<br/>2) Write tests for the MovingRefFrame and Particle classes as well as all the helper functions. Now that I have a system to test these things on, it will be much easier to do so.<br/>3) Start working on the last part of the new framework - dyadics.<br/><br/>Thats all for now.<br/>Have a great week ahead :-)</div></div>
+    </content>
+    <updated>2013-07-13T13:26:18Z</updated>
+    <published>2013-07-13T13:26:00Z</published>
+    <author>
+      <name>Sachin Joglekar</name>
+      <email>noreply@blogger.com</email>
+      <uri>https://plus.google.com/106302547764750990775</uri>
+    </author>
+    <source>
+      <id>tag:blogger.com,1999:blog-5472769892551526876</id>
+      <author>
+        <name>Sachin Joglekar</name>
+        <email>noreply@blogger.com</email>
+      </author>
+      <link href="http://codesachin.blogspot.com/feeds/posts/default" rel="http://schemas.google.com/g/2005#feed" type="application/atom+xml"/>
+      <link href="http://www.blogger.com/feeds/5472769892551526876/posts/default" rel="self" type="application/atom+xml"/>
+      <link href="http://codesachin.blogspot.com/" rel="alternate" type="text/html"/>
+      <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
+      <subtitle>-Sachin Joglekar-</subtitle>
+      <title>Dream. Think. Code.</title>
+      <updated>2013-07-13T13:26:18Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en">
     <id>http://geekiology.wordpress.com/?p=290</id>
@@ -89,7 +122,7 @@ def coupled_diff_system(b1, b2, c1, c2, DE):<br/>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Can I help u ?</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-13T11:00:32Z</updated>
+      <updated>2013-07-13T13:40:24Z</updated>
     </source>
   </entry>
 
@@ -163,7 +196,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My journey,my life</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-07-13T11:00:33Z</updated>
+      <updated>2013-07-13T13:20:26Z</updated>
     </source>
   </entry>
 
@@ -196,7 +229,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-13T11:00:34Z</updated>
+      <updated>2013-07-13T13:40:25Z</updated>
     </source>
   </entry>
 
@@ -233,7 +266,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-13T11:00:35Z</updated>
+      <updated>2013-07-13T13:40:26Z</updated>
     </source>
   </entry>
 
@@ -336,7 +369,7 @@ I know this is a lot of talking and nothing like psudeo code, though we can draw
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Can I help u ?</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-13T11:00:32Z</updated>
+      <updated>2013-07-13T13:40:24Z</updated>
     </source>
   </entry>
 
@@ -402,7 +435,7 @@ fab vagrant release
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-07-13T11:00:09Z</updated>
+      <updated>2013-07-13T13:40:08Z</updated>
     </source>
   </entry>
 
@@ -468,7 +501,7 @@ fab vagrant release
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>-Sachin Joglekar-</subtitle>
       <title>Dream. Think. Code.</title>
-      <updated>2013-07-10T06:30:49Z</updated>
+      <updated>2013-07-13T13:26:18Z</updated>
     </source>
   </entry>
 
@@ -574,7 +607,7 @@ fab vagrant release
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-13T11:00:34Z</updated>
+      <updated>2013-07-13T13:40:25Z</updated>
     </source>
   </entry>
 
@@ -609,7 +642,7 @@ I was able to make use of both of them in my implementation for the multivariate
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-13T11:00:36Z</updated>
+      <updated>2013-07-13T13:40:30Z</updated>
     </source>
   </entry>
 
@@ -661,7 +694,7 @@ I was able to make use of both of them in my implementation for the multivariate
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-13T11:00:35Z</updated>
+      <updated>2013-07-13T13:40:27Z</updated>
     </source>
   </entry>
 
@@ -719,7 +752,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My journey,my life</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-07-13T11:00:33Z</updated>
+      <updated>2013-07-13T13:20:26Z</updated>
     </source>
   </entry>
 
@@ -845,7 +878,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-07-13T11:00:09Z</updated>
+      <updated>2013-07-13T13:40:08Z</updated>
     </source>
   </entry>
 
@@ -911,7 +944,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>-Sachin Joglekar-</subtitle>
       <title>Dream. Think. Code.</title>
-      <updated>2013-07-10T06:30:49Z</updated>
+      <updated>2013-07-13T13:26:18Z</updated>
     </source>
   </entry>
 
@@ -950,7 +983,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-13T11:00:34Z</updated>
+      <updated>2013-07-13T13:40:25Z</updated>
     </source>
   </entry>
 
@@ -982,7 +1015,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-13T11:00:36Z</updated>
+      <updated>2013-07-13T13:40:30Z</updated>
     </source>
   </entry>
 
@@ -1014,7 +1047,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-13T11:00:35Z</updated>
+      <updated>2013-07-13T13:40:30Z</updated>
     </source>
   </entry>
 
@@ -1132,7 +1165,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-13T11:00:35Z</updated>
+      <updated>2013-07-13T13:40:26Z</updated>
     </source>
   </entry>
 
@@ -1183,7 +1216,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My journey,my life</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-07-13T11:00:33Z</updated>
+      <updated>2013-07-13T13:20:26Z</updated>
     </source>
   </entry>
 
@@ -1244,7 +1277,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Can I help u ?</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-13T11:00:32Z</updated>
+      <updated>2013-07-13T13:40:24Z</updated>
     </source>
   </entry>
 
@@ -1342,7 +1375,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>-Sachin Joglekar-</subtitle>
       <title>Dream. Think. Code.</title>
-      <updated>2013-07-10T06:30:49Z</updated>
+      <updated>2013-07-13T13:26:18Z</updated>
     </source>
   </entry>
 
@@ -1375,7 +1408,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>-Sachin Joglekar-</subtitle>
       <title>Dream. Think. Code.</title>
-      <updated>2013-07-10T06:30:49Z</updated>
+      <updated>2013-07-13T13:26:18Z</updated>
     </source>
   </entry>
 
@@ -1403,7 +1436,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-13T11:00:36Z</updated>
+      <updated>2013-07-13T13:40:30Z</updated>
     </source>
   </entry>
 
@@ -1497,7 +1530,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-13T11:00:34Z</updated>
+      <updated>2013-07-13T13:40:25Z</updated>
     </source>
   </entry>
 
@@ -1530,7 +1563,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>-Sachin Joglekar-</subtitle>
       <title>Dream. Think. Code.</title>
-      <updated>2013-07-10T06:30:49Z</updated>
+      <updated>2013-07-13T13:26:18Z</updated>
     </source>
   </entry>
 
@@ -1561,7 +1594,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-13T11:00:35Z</updated>
+      <updated>2013-07-13T13:40:26Z</updated>
     </source>
   </entry>
 
@@ -1624,7 +1657,7 @@ into a text file. For those interested, however I made a few changes manually ev
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My journey,my life</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-07-13T11:00:34Z</updated>
+      <updated>2013-07-13T13:20:26Z</updated>
     </source>
   </entry>
 
@@ -1667,7 +1700,7 @@ into a text file. For those interested, however I made a few changes manually ev
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-13T11:00:35Z</updated>
+      <updated>2013-07-13T13:40:26Z</updated>
     </source>
   </entry>
 
@@ -1744,7 +1777,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-13T11:00:34Z</updated>
+      <updated>2013-07-13T13:40:25Z</updated>
     </source>
   </entry>
 
@@ -1790,7 +1823,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My journey,my life</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-07-13T11:00:33Z</updated>
+      <updated>2013-07-13T13:20:26Z</updated>
     </source>
   </entry>
 
@@ -1823,7 +1856,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>-Sachin Joglekar-</subtitle>
       <title>Dream. Think. Code.</title>
-      <updated>2013-07-10T06:30:49Z</updated>
+      <updated>2013-07-13T13:26:18Z</updated>
     </source>
   </entry>
 
@@ -1889,7 +1922,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>-Sachin Joglekar-</subtitle>
       <title>Dream. Think. Code.</title>
-      <updated>2013-07-10T06:30:49Z</updated>
+      <updated>2013-07-13T13:26:18Z</updated>
     </source>
   </entry>
 
@@ -1922,7 +1955,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>-Sachin Joglekar-</subtitle>
       <title>Dream. Think. Code.</title>
-      <updated>2013-07-10T06:30:49Z</updated>
+      <updated>2013-07-13T13:26:18Z</updated>
     </source>
   </entry>
 
@@ -1967,7 +2000,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My journey,my life</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-07-13T11:00:33Z</updated>
+      <updated>2013-07-13T13:20:26Z</updated>
     </source>
   </entry>
 
@@ -1997,7 +2030,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Can I help u ?</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-13T11:00:32Z</updated>
+      <updated>2013-07-13T13:40:24Z</updated>
     </source>
   </entry>
 
@@ -2025,7 +2058,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="https://sites.google.com/feeds/content/site/v9joshi/batch" rel="http://schemas.google.com/g/2005#batch" type="application/atom+xml"/>
       <link href="https://sites.google.com/feeds/content/site/v9joshi?parent=5420265600325595988&amp;kind=announcement" rel="self" type="application/atom+xml"/>
       <title>Posts of GSoC Blog</title>
-      <updated>2013-07-13T11:00:36Z</updated>
+      <updated>2013-07-13T13:40:30Z</updated>
     </source>
   </entry>
 
@@ -2120,7 +2153,7 @@ based features.</p></div></td></tr></tbody></table></div>
       <link href="https://sites.google.com/feeds/content/site/v9joshi/batch" rel="http://schemas.google.com/g/2005#batch" type="application/atom+xml"/>
       <link href="https://sites.google.com/feeds/content/site/v9joshi?parent=5420265600325595988&amp;kind=announcement" rel="self" type="application/atom+xml"/>
       <title>Posts of GSoC Blog</title>
-      <updated>2013-07-13T11:00:36Z</updated>
+      <updated>2013-07-13T13:40:30Z</updated>
     </source>
   </entry>
 
@@ -2150,7 +2183,7 @@ based features.</p></div></td></tr></tbody></table></div>
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-13T11:00:36Z</updated>
+      <updated>2013-07-13T13:40:30Z</updated>
     </source>
   </entry>
 
@@ -2200,7 +2233,7 @@ Here D is a non square positive integer.</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-13T11:00:34Z</updated>
+      <updated>2013-07-13T13:40:25Z</updated>
     </source>
   </entry>
 
@@ -2230,7 +2263,7 @@ Here D is a non square positive integer.</p>
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My journey,my life</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-07-13T11:00:33Z</updated>
+      <updated>2013-07-13T13:20:26Z</updated>
     </source>
   </entry>
 
@@ -2305,7 +2338,7 @@ Here D is a non square positive integer.</p>
       <link href="http://brianegranger.com" rel="alternate" type="text/html"/>
       <subtitle>Physics ∩ Computing</subtitle>
       <title>Brian E. Granger</title>
-      <updated>2013-07-13T11:00:18Z</updated>
+      <updated>2013-07-13T13:40:10Z</updated>
     </source>
   </entry>
 
@@ -2658,7 +2691,7 @@ however produce walking like behavior in a 2-D Slinky by using the model
       <link href="https://sites.google.com/feeds/content/site/v9joshi/batch" rel="http://schemas.google.com/g/2005#batch" type="application/atom+xml"/>
       <link href="https://sites.google.com/feeds/content/site/v9joshi?parent=5420265600325595988&amp;kind=announcement" rel="self" type="application/atom+xml"/>
       <title>Posts of GSoC Blog</title>
-      <updated>2013-07-13T11:00:36Z</updated>
+      <updated>2013-07-13T13:40:30Z</updated>
     </source>
   </entry>
 
@@ -2808,46 +2841,6 @@ Ordered Labels", Jason D. M. Rennie, Nathan Srebro <a href="http://fa.bianp.net
       <link href="http://fa.bianp.net/blog/feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
       <updated>2013-05-23T14:00:16Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://manojbits.wordpress.com/?p=407</id>
-    <link href="http://manojbits.wordpress.com/2013/04/22/sympy-and-my-tryst-with-open-source/" rel="alternate" type="text/html"/>
-    <title>The beginning of a journey</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">OK. I had been programming in PyQt4 for about three months, and it was becoming quite monotonous. I wanted to do start doing something different. Moreover my other projects weren’t going as good as expected. Still searching for something to do,  was it just a co-incidence that GSoC was announced that day? I would rate […]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=manojbits.wordpress.com&amp;blog=31971756&amp;post=407&amp;subd=manojbits&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>OK. I had been programming in PyQt4 for about three months, and it was becoming quite monotonous. I wanted to do start doing something different. Moreover my other projects weren’t going as good as expected. Still searching for something to do,  was it just a co-incidence that GSoC was announced that day? I would rate my programming ability, somewhere just above average and my knowledge of python around intermediate. I also knew a bit of ‘C’ that they had taught in college. I was comfortable till arrays, but when pointers started, umm.. well they pointed me away from C. And as for my knowledge about other programming languages, the less I speak about them, the better.</p>
-<p>If I had to have any real shot at GSoC, that was my best opportunity to increase my skillset . I had tried to contribute to open source before for organisations like Orange and Ascend but never reached much after building from source (Quite lucky because those two organisations did not make it to GSoC after all). To begin with mentoring organisations can be broadly classified into OS based and stuff related to maths, CV, ML. Once I tried to write a plugin for Rhythmbox but for some reason I stopped in the middle. As far as Linux goes, though it is my primary OS right now, sincerely speaking I never knew much beyond installing packages and configuring proxy. Also I had just begun with CV and I knew it would take me quite a lot of dedication, for a project related to CV. Seriously not knowing what to do, I just googled “gsoc 2013 python ideas” and the first search result was sympy. I randomly skimmed through the ideas, and found the ones related to the ordinary differential equation solver quite interesting. Not wasting any time, I forked sympy and started looking through the source.</p>
-<p>For the first one hour, I couldn’t understand anything and I felt disappointed. Then I introduced myself to the list, and I was advised to solve existing bugs in the ODE module, instead of looking through the entire source. I did nothing after that, since my exams were there (which I screwed up anyway) , and after they were over I looked into the bug tracker and I found a bug which I believed I could solve. Randomly littering the source code of the ODE module with print statements (Yeah, I’m a beginner) , and after spending two hours, I finally understood what was going on. And then I managed to fix the bug . I ran tests and then sent my first Pull Request. Damn, I had forgotten to add new tests for the bug fixed . After adding tests finally <a href="https://github.com/sympy/sympy/pull/1803" target="_blank">https://github.com/sympy/sympy/pull/1803</a> , it got merged. Woohoo! Nothing can explain that small moment of joy of your first merge. I then played with the source code using random examples, and I managed to find out a couple of bugs myself. I also found support for a few types of first order differential equations missing, and after a lot of work and discussion on my PR’s they got merged.</p>
-<p>In between all this, I had to work for my SoC proposal as well. I first proposed a few ideas, but then I was told that they were trivial in a sense and could be implemented in a single Pull Request. I found something called as a Lie Group solver and I spent a week reading about it. After a lot of edits, I submitted my proposal for  proof reading to the sympy community. <a href="http://asmeurersympy.wordpress.com/">Aaron Meurer t</a>he lead developer of sympy, told my proposal to be good. He also told me that Partial Differential Equation support is missing in sympy and I would have to build the infrastructure myself. So I started to work on it. After two weeks, my PR got merged in master <a href="https://github.com/sympy/sympy/pull/1970" target="_blank">https://github.com/sympy/sympy/pull/1970</a>  and now sympy can solve and check the solution of the most basic partial differential equation.</p>
-<p>Before I go any further, I would like to thank a few people who helped me reach this far.  First of all my parents, who encouraged me to do what I like. Then <a href="https://github.com/jayrambhia">Jay Rambhia</a> , who introduced me to python, without whom I wouldn’t be doing what I am doing now, <a href="http://priyansmurarka.wordpress.com/">Priyans Murarka</a> who kept pushing me on, Manoj Kumar Pandey Sir, my maths professor in semester 2, who gave me the required papers to study about the lie groups solvers, Debajyoti Datta, who gave suggestions to my proposal, the sympy community in general who treated even a rookie like me as a proper professional coder,  <a href="https://github.com/srjoglekar246">Sachin Joglekar</a> for his timely help in git and Eejya Singh (if she ever reads this) who gave me moral support throughout the last part of my proposal. I definitely have more people to thank, but I wouldn’t want this post filled with names of people</p>
-<p>I submitted my <a href="https://google-melange.appspot.com/gsoc/proposal/review/google/gsoc2013/manojkumar/1">GSoC Proposal</a> to melange today, and I have kept my expectations low. Overall this sem has been a roller-coaster ride (with many of my expectations , which I wouldn’t want to mention here crashing) and I hope it doesn’t disappoint any further. Also results are on May 27th, two years back I had given BITSAT the same day and got my “dream branch” (Yeah, Mechanical) which I hadn’t expected at all. Hopefully it is lucky for more than on reason. More on my proposal on May 27th if I get selected and till then sayonara (did I mention I’m learning Japanese?).</p>
-<p>P. S :  Need some motivation to study for my end sem exams. This sem has been very average in terms of academics and thats not a really good thing.</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/manojbits.wordpress.com/407/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/manojbits.wordpress.com/407/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=manojbits.wordpress.com&amp;blog=31971756&amp;post=407&amp;subd=manojbits&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2013-04-22T18:46:48Z</updated>
-    <category term="SymPy"/>
-    <category term="differential"/>
-    <category term="gsoc"/>
-    <category term="ode"/>
-    <category term="opensource"/>
-    <category term="pde"/>
-    <category term="python"/>
-    <category term="sympy."/>
-    <author>
-      <name>Manoj Kumar</name>
-    </author>
-    <source>
-      <id>http://manojbits.wordpress.com</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://manojbits.wordpress.com/category/sympy-2/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://manojbits.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://manojbits.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>My journey,my life</subtitle>
-      <title>Perspective » SymPy</title>
-      <updated>2013-07-13T11:00:33Z</updated>
     </source>
   </entry>
 </feed>
