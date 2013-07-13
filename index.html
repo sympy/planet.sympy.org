@@ -33,6 +33,93 @@
 
 
 
+<h3><a href="http://geekiology.wordpress.com" title="Risch Algorithm">Chetna Gupta</a></h3>
+
+
+<div class="entrygroup" id="http://geekiology.wordpress.com/?p=290">
+<h4 lang="en"><a href="http://geekiology.wordpress.com/2013/07/13/coupled-differential-system/">Coupled Differential System</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p>Pseudo-Code for the coupled_differential_system in cds.py<br />
+<code><br />
+def coupled_diff_system(b1, b2, c1, c2, DE):<br />
+<em><strong>    # taking the general case that is <img src="http://s0.wp.com/latex.php?latex=%5Calpha+%3D+-1+&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="\alpha = -1 " class="latex" title="\alpha = -1 " /></strong></em><br />
+<em><strong>    # it <img src="http://s0.wp.com/latex.php?latex=%5Csqrt-1+does+not+%5Cin+K+&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="\sqrt-1 does not \in K " class="latex" title="\sqrt-1 does not \in K " /></strong></em><br />
+<em><strong>    # <img src="http://s0.wp.com/latex.php?latex=Dy1+%2B+b1%2Ay1+-+b2%2Ay2+%3D+c1+&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="Dy1 + b1*y1 - b2*y2 = c1 " class="latex" title="Dy1 + b1*y1 - b2*y2 = c1 " /></strong></em><br />
+<em><strong>    # <img src="http://s0.wp.com/latex.php?latex=Dy2+%2B+b2%2Ay1+%2B+b1%2Ay2+%3D+c2+&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="Dy2 + b2*y1 + b1*y2 = c2 " class="latex" title="Dy2 + b2*y1 + b1*y2 = c2 " /></strong></em><br />
+<em><strong>    # so we have second order differential equations</strong></em><br />
+<em><strong>    # we are interested in finding s = s1 + <img src="http://s0.wp.com/latex.php?latex=%5Csqrt-1s2+&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="\sqrt-1s2 " class="latex" title="\sqrt-1s2 " /></strong></em><br />
+</code></p>
+<p><code>    <span style="color: #008000;">fa = b1a*b2d + b1d*b2a*i</span><br />
+<span style="color: #008000;">    fd = b1d*b2d</span><br />
+<span style="color: #008000;">    ga = c1a*c2d + c1d*c2a*i</span><br />
+<span style="color: #008000;">    gd = c1d*c2d</span><br />
+<span style="color: #008000;">    _, (fa, fd) = weak_normalizer(fa, fd, DE)</span><br />
+<span style="color: #008000;">    a, (ba, bd), (ca, cd), hn = normal_denom(fa, fd, ga, gd, DE)</span><br />
+<span style="color: #008000;">    A, B, C, hs = special_denom(a, ba, bd, ca, cd, DE)</span><br />
+<span style="color: #008000;">    g = gcd(A, B)</span><br />
+<span style="color: #008000;">    A, B, G = A.quo(g), B.quo(g), [gia.cancel(gid*g, include=True) for</span><br />
+<span style="color: #008000;">    gia, gid in G]</span><br />
+<span style="color: #008000;">    Q, M = prde_linear_constraints(A, B, G, DE)</span><br />
+<span style="color: #008000;">    M, _ = constant_system(M, zeros(M.rows, 1), DE)</span><br />
+<span style="color: #008000;">    n = bound_degree(A, B, C, DE)</span><br />
+<span style="color: #008000;">    b, c, m, alpha, beta = spde(A, B, C, n, DE)</span><br />
+</code></p>
+<p><code>   <strong><em># either proved that there exists y such that</em></strong><br />
+<strong><em>   # y = (alpha*q + beta)/m &amp;&amp; Dq + bq = c</em></strong><br />
+<strong><em>   # else return "No Solution"</em></strong><br />
+</code></p>
+<p><code>     <strong>/non-cancellation cases</strong><br />
+</code></p>
+<p><code>     <span style="color: #008080;">if deg(b) <img src="http://s0.wp.com/latex.php?latex=%5Cle+&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="\le " class="latex" title="\le " /> DE.d.degree(DE.t) - 1 and (derivation(DE.t, DE)==1or DE.d.degree(DE.t) <img src="http://s0.wp.com/latex.php?latex=%3E%3D+2%29+&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="&gt;= 2) " class="latex" title="&gt;= 2) " /> :</span><br />
+<span style="color: #008080;">        H, A = prde_no_cancel_b_small(b, Q, n, DE)</span><br />
+</code></p>
+<p><code>     <span style="color: #ff0000;">else if b!=0 and (derivation(DE.t, DE)==1 or DE.d.degree(DE.t) &gt; max(0, derivation(DE.t, DE) - 1 )):</span><br />
+<span style="color: #ff0000;">        H, A = prde_no_cancel_b_large(b, Q, n, DE)</span><br />
+</code></p>
+<p><code>    <em><strong># A = (c1...cm, d1.. dr)T q = <img src="http://s0.wp.com/latex.php?latex=%5Csum+d_i%2Ah_i+&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="\sum d_i*h_i " class="latex" title="\sum d_i*h_i " /></strong></em><em><strong></strong></em><br />
+</code></p>
+<p><code>    <span style="text-decoration: underline;"><span style="color: #333399; text-decoration: underline;">return y</span></span></code></p>
+<p><code>   <strong>/cancellation cases</strong><br />
+</code></p>
+<p><code>   <span style="color: #ff00ff;">case = DE.case</span><br />
+<span style="color: #ff00ff;">   else if case == <span style="color: #3366ff;">'primitive':</span></span><br />
+<span style="color: #ff00ff;">       (q1, q2) = cds_cancel_prim(a, b1, b2, c1, c2, DE, n)</span><br />
+<span style="color: #ff00ff;">   else if case == 'exp':</span><br />
+<span style="color: #ff00ff;">       (q1, q2) = cds_cancel_exp(a, b1, b2, c1, c2, DE, n)</span><br />
+<span style="color: #ff00ff;">   else if case == 'tan' :</span><br />
+<span style="color: #ff00ff;">       (q1, q2) = cds_cancel_tan(b1, b2, c1, c2, DE, n)</span><br />
+<span style="color: #ff00ff;">   else if case == 'other non linear':</span><br />
+<span style="color: #ff00ff;">       (q1, q2) = cds_cancel_non_linear(b1, b2, c1, c2, DE, n)</span><br />
+</code></p>
+<p><code>   <span style="text-decoration: underline; color: #3366ff;">return y </span><br />
+</code></p>
+<p><em><strong>Where Y = <code>(alpha*q + beta)/m</code> </strong></em><em><strong>q = q1 +  sqrt(-1)*q2</strong></em></p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/geekiology.wordpress.com/290/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/geekiology.wordpress.com/290/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=geekiology.wordpress.com&amp;blog=36553244&amp;post=290&amp;subd=geekiology&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://geekiology.wordpress.com/2013/07/13/coupled-differential-system/">by chetnagupta at July 13, 2013 08:16 AM</a>
+</p>
+</div>
+</div>
+
+
+
+</div>
+<div class="channelgroup">
+
+
+
+
+
+
+
 <h3><a href="http://manojbits.wordpress.com" title="Perspective » SymPy">Manoj Kumar</a></h3>
 
 
@@ -3039,82 +3126,6 @@ Ordered Labels", Jason D. M. Rennie, Nathan Srebro <a href="http://fa.bianp.net
 </div>
 
 </div>
-<div class="daygroup">
-<h2>April 15, 2013</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://fabianp.net/blog/" title="I say things">Fabian Pedregosa</a></h3>
-
-
-<div class="entrygroup" id="tag:fabianp.net/blog,2013-04-16:2013/isotonic-regression/">
-<h4><a href="http://fabianp.net/blog/2013/isotonic-regression/">Isotonic Regression</a></h4>
-<div class="entry">
-<div class="content">
-<p>My latest contribution for <a href="http://scikit-learn.org">scikit-learn</a> is
- an implementation of the isotonic regression model that I coded with
- <a href="https://twitter.com/nvaroqua">Nelle Varoquaux</a> and
- <a href="http://alexandre.gramfort.net/">Alexandre Gramfort</a>. This model
- finds the best least squares fit to a set of points, given the
- constraint that the fit must be a non-decreasing
- function. <a href="http://scikit-learn.sourceforge.net/dev/auto_examples/plot_isotonic_regression.html">The example</a>
- on the scikit-learn website gives an intuition on this model.</p>
-<p><img src="http://fa.bianp.net/blog/static/images/2013/plot_isotonic_regression_1.png" alt="isotonic regression" /></p>
-<p>The original points are in red, and the estimated ones are in
-green. As you can see, there is one estimation (green point) for each
-data sample (red point). Calling $y \in \mathbb{R}^n$ the input data,
-the model can be written concisely as an optimization problem over $x$</p>
-<p>$$ 
-\text{argmin}_x \|y - x \|^2 \\
-\text{subject to } x_0 \leq x_1 \leq \cdots \leq x_n
-$$</p>
-<p>The algorithm implemented in scikit-learn <sup id="fnref:3"><a href="http://fa.bianp.net/blog/feed/#fn:3" rel="footnote">3</a></sup> is the pool adjacent
-violators algorithm <sup id="fnref:1"><a href="http://fa.bianp.net/blog/feed/#fn:1" rel="footnote">1</a></sup>, which is an efficient linear time
-$\mathcal{O}(n)$ algorithm. The algorithm sweeps through the data
-looking for violations of the monotonicity constraint. When it finds
-one, it adjusts the estimate to the best possible fit with
-constraints. Sometimes it also needs to modify previous points to make
-sure the new estimate does not violate the constraints. The following
-picture shows how it proceeds at each iteration</p>
-<p><img src="http://fa.bianp.net/blog/static/images/2013/isotonic.gif" alt="isotonic regression" /></p>
-<div class="footnote">
-<hr />
-<ol>
-<li id="fn:1">
-<p>"Active set algorithms for isotonic regression; A unifying
-framework", Michael J. Best, Nilotpal Chakravarti <a href="http://fa.bianp.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
-</li>
-<li id="fn:2">
-<p>Python notebook to generate the figures: <a href="http://fa.bianp.net/blog/static/uploads/2013/isotonic_regression_sklearn.ipynb">ipynb</a> and <a href="http://nbviewer.ipython.org/url/fseoane.net/blog/static/uploads/2013/isotonic_regression_sklearn.ipynb">web version</a> <a href="http://fa.bianp.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
-</li>
-<li id="fn:3">
-<p>The algorithm is used through the sklearn.isotonic.IsotonicRegression object (<a href="http://scikit-learn.org/dev/modules/generated/sklearn.isotonic.IsotonicRegression.html">doc</a>) or the function sklearn.isotonic.isotonic_regression (<a href="http://scikit-learn.org/dev/modules/generated/sklearn.isotonic.isotonic_regression.html">doc</a>) <a href="http://fa.bianp.net/blog/feed/#fnref:3" rev="footnote" title="Jump back to footnote 3 in the text">↩</a></p>
-</li>
-</ol>
-</div></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://fabianp.net/blog/2013/isotonic-regression/">by Fabian Pedregosa at April 15, 2013 10:00 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -3258,7 +3269,7 @@ framework", Michael J. Best, Nilotpal Chakravarti <a href="http://fa.bianp.net/
 
 <p>
 <strong>Last updated:</strong><br>
-July 13, 2013 08:00 AM<br>
+July 13, 2013 08:20 AM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
