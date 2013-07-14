@@ -23,6 +23,47 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>July 14, 2013</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://sophiessympyblog.wordpress.com" title="sophie's sympy blog">Katja Sophie Hotz</a></h3>
+
+
+<div class="entrygroup" id="http://sophiessympyblog.wordpress.com/?p=174">
+<h4 lang="en"><a href="http://sophiessympyblog.wordpress.com/2013/07/14/fourth-week/">Fourth week</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p style="text-align: justify;">This week I finalized my work on the modular GCD algorithms for integer polynomials and submitted a <a href="https://github.com/sympy/sympy/pull/2281">PR</a> on github!</p>
+<p style="text-align: justify;">I spent my time writing documentation and additional tests and cleaning up my code. Since the <a href="https://github.com/sympy/sympy/pull/2126">new-polys</a> branch was merged a few days ago, I could rewrite some parts of my algorithms to make the code more consistent and elegant. In particular, some of the conversions to dense representation are now being avoided.</p>
+<p style="text-align: justify;">Mateusz showed me the very useful tool <code>coverage_report</code>, which finds untested lines of code. There was quite a lot untested, so I spent some time with the construction of tests. Sometimes finding the right examples was not as easy as it seemed and there are still some lines untested, but I did reach 97% coverage.<br />
+Another new tool I learned to use this week was Sphinx. I like the html documentation very much, since it is a lot more readable than plain text and even supports LaTeX.</p>
+<p style="text-align: justify;">Next week I will start with the modular GCD algorithm for polynomials over algebraic domains.</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/174/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/174/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=174&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://sophiessympyblog.wordpress.com/2013/07/14/fourth-week/">by katjasophie at July 14, 2013 04:52 PM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>July 13, 2013</h2>
 
 <div class="channelgroup">
@@ -2954,168 +2995,6 @@ however produce walking like behavior in a 2-D Slinky by using the model
 </div>
 
 </div>
-<div class="daygroup">
-<h2>May 01, 2013</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://fabianp.net/blog/" title="I say things">Fabian Pedregosa</a></h3>
-
-
-<div class="entrygroup" id="tag:fabianp.net/blog,2013-05-02:2013/logistic-ordinal-regression/">
-<h4><a href="http://fabianp.net/blog/2013/logistic-ordinal-regression/">Logistic Ordinal Regression</a></h4>
-<div class="entry">
-<div class="content">
-<p><strong>TL;DR: I've implemented a logistic ordinal regression or
-  proportional odds model. <a href="http://github.com/fabianp/minirank/blob/master/minirank/logistic.py">Here is the Python code</a></strong></p>
-<p>The <em>logistic ordinal regression</em> model, also known as the
-proportional odds was introduced in the early 80s by McCullagh [<sup id="fnref:1"><a href="http://fa.bianp.net/blog/feed/#fn:1" rel="footnote">1</a></sup>, <sup id="fnref:2"><a href="http://fa.bianp.net/blog/feed/#fn:2" rel="footnote">2</a></sup>]
-and is a generalized linear model specially tailored for the case of
-predicting ordinal variables, that is, variables that are discrete (as
-in classification) but which can be ordered (as in regression). It can
-be seen as an extension of the logistic regression model to the
-ordinal setting. </p>
-<p>Given $X \in \mathbb{R}^{n \times p}$ input data and $y \in
-\mathbb{N}^n$ target values. For simplicity we assume $y$ is a
-non-decreasing vector, that is, $y_1 \leq y_2 \leq ...$. Just as the
-logistic regression models posterior probability $P(y=j|X_i)$ as the
-logistic function, in the logistic ordinal regression we model the
-<em>cummulative</em> probability as the logistic function. That is,</p>
-<p>$$
-P(y \leq j|X_i) = \phi(\theta_j - w^T X_i) = \frac{1}{1 + \exp(w^T X_i - \theta_j)}
-$$</p>
-<p>where $w, \theta$ are vectors to be estimated from the data and $\phi$
-is the logistic function defined as $\phi(t) = 1 / (1 + \exp(-t))$.</p>
-&lt;figure style="float: left; width: 380px; margin: 0px 15px 15px 0px"&gt;
-<img src="http://fa.bianp.net/blog/static/images/2013/ordinal_1.png" />
-<img src="http://fa.bianp.net/blog/static/images/2013/ordinal_logistic.png" />
-
-&lt;figcaption style="margin-left: 10px; margin-right: 5px"&gt;Toy example with three classes denoted in different colors. Also shown the vector of coefficients $w$ and the thresholds $\theta_0$ and $\theta_1$&lt;/figcaption&gt;
-
-&lt;/figure&gt;
-
-<p>Compared to multiclass logistic regression, we have added the
-constrain that the hyperplanes that separate the different classes are
-<em>parallel</em> for all classes, that is, the vector $w$ is common across
-classes. To decide to which class will $X_i$ be predicted we make use
-of the vector of thresholds $\theta$. If there are $K$ different
-classes, $\theta$ is a non-decreasing vector (that is, $\theta_1 \leq
-\theta_2 \leq ... \leq \theta_{K-1}$) of size $K-1$. We will then
-assign the class $j$ if the prediction $w^T X$ (recall that it's a
-linear model) lies in the interval $[\theta_{j-1}, \theta_{j}[$. In
-order to keep the same definition for extremal classes, we define
-$\theta_{0} = - \infty$ and $\theta_K = + \infty$.</p>
-<p>The intuition is that we are seeking a vector $w$ such that $X w$
-produces a set of values that are well separated into the different
-classes by the different thresholds $\theta$. We choose a logistic
-function to model the probability $P(y \leq j|X_i)$ but other choices
-are possible. In the proportional hazards model <sup id="fnref:1"><a href="http://fa.bianp.net/blog/feed/#fn:1" rel="footnote">1</a></sup> the probability
-is modeled as $-\log(1 - P(y \leq j | X_i)) = \exp(\theta_j - w^T
-X_i)$. Other link functions are possible, where the link function
-satisfies $\text{link}(P(y \leq j | X_i)) = \theta_j - w^T X_i$. Under
-this framework, the logistic ordinal regression model has a logistic
-link function and the proportional hazards model has a log-log link
-function.</p>
-<p>The logistic ordinal regression model is also known as the
-proportional odds model, because the
-<a href="http://en.wikipedia.org/wiki/Odds_ratio">ratio of corresponding odds</a>
-for two different samples $X_1$ and $X_2$ is $\exp(w^T(X_1 - X_2))$ and
-so does not depend on the class $j$ but only on the difference between
-the samples $X_1$ and $X_2$.</p>
-<h3>Optimization</h3>
-
-<p>Model estimation can be posed as an optimization problem. Here, we
-minimize the loss function for the model, defined as minus the
-log-likelihood:</p>
-<p>$\begin{align}
-\mathcal{L}(w, \theta) &amp;= - \sum_{i=1}^n \log(\phi(\theta_{y_i} - w^T X_i) -  \phi(\theta_{y_i -1} - w^T X_i)) \\
-&amp;= \sum_{i=1}^n w^T X_i  - \log(\exp(\theta_{y_i}) - \exp(\theta_{y_i-1}))  + \log(\phi(\theta_{y_i -1} - w^T X_i)) + \log(\phi(\theta_{y_i} - w^T X_i)) \\
-\end{align}$</p>
-<p>In this sum all terms are convex on $w$, thus the loss function is
-convex over $w$. It might be also jointly convex over $w$ and
-$\theta$, although I haven't checked. I use the function
-<code>fmin_slsqp</code> in <code>scipy.optimize</code> to optimize
-$\mathcal{L}$ under the constraint that $\theta$ is a non-decreasing
-vector. There might be better options, I don't know. If you do know,
-please leave a comment!.</p>
-<p>Using the formula $\log(\phi(t))^\prime = (1 - \phi(t))$, we can compute the gradient of the loss function as </p>
-<p>$\begin{align}
-\nabla_w \mathcal{L}(w, \theta) &amp;= \sum_{i=1}^n X_i (1 - \phi(\theta_{y_i} - w^T X_i)) - \phi(\theta_{y_i-1} - w^T X_i)) \\
-% \nabla_\theta \mathcal{L}(w, \theta) &amp;= \sum_{i=1}^n - \frac{e_{y_i} \exp(\theta_{y_i}) - e_{y_i -1} \exp(\theta_{y_i -1})}{\exp(\theta_{y_i}) - \exp(\theta_{y_i-1})} \\
-\nabla_\theta \mathcal{L}(w, \theta) &amp;= \sum_{i=1}^n e_{y_i} \left(1 - \phi(\theta_{y_i} - w^T X_i) - \frac{1}{1 - \exp(\theta_{y_i -1} - \theta_{y_i})}\right)  \\
- &amp; \qquad  + e_{y_i -1}\left(1 - \phi(\theta_{y_i -1} - w^T X_i) - \frac{1}{1 - \exp(- (\theta_{y_i-1} - \theta_{y_i}))}\right)
-\end{align}$</p>
-<p>where $e_i$ is the $i$th canonical vector.</p>
-<h3>Code</h3>
-
-<p>I've implemented a Python version of this algorithm using Scipy's
-<code>optimize.fmin_slsqp</code> function. This takes as arguments the
-loss function, the gradient denoted before and a function that is
-&gt; 0 when the inequalities on $\theta$ are satisfied.</p>
-<p><a href="http://github.com/fabianp/minirank/blob/master/minirank/logistic.py">Code
-can be found here</a> as part of the <a href="https://github.com/fabianp/minirank">minirank</a> package, which
-is my sandbox for code related to ranking and ordinal regression. At
-some point I would like to submit it to scikit-learn but right now the
-I don't know how the code will scale to medium-scale problems, but I
-suspect not great. On top of that I'm not sure if there is a real demand
-of these models for scikit-learn and I don't want to bloat the package
-with unused features.</p>
-<h3>Performance</h3>
-
-<p>I compared the prediction accuracy of this model in the sense of mean absolute
-error <a href="http://nbviewer.ipython.org/urls/raw.github.com/fabianp/minirank/master/notebooks/comparison_ordinal_logistic.ipynb">(IPython
-notebook)</a> on the <a href="http://scikit-learn.org/dev/modules/generated/sklearn.datasets.load_boston.html">boston
-house-prices dataset</a>. To have an ordinal variable, I
-rounded the values to the closest integer, which gave me a problem of
-size 506 $\times$ 13 with 46 different target values. Although not a
-huge increase in accuracy, this model did give me better results on
-this particular dataset:</p>
-&lt;figure&gt;
-<img src="http://fa.bianp.net/blog/static/images/2013/bars_ordinal.png" />
-&lt;/figure&gt;
-
-<p>Here, ordinal logistic regression is the best-performing model,
-followed by a Linear Regression model and a One-versus-All Logistic
-regression model as implemented in scikit-learn.</p>
-<div class="footnote">
-<hr />
-<ol>
-<li id="fn:1">
-<p>"Regression models for ordinal data", P. McCullagh, Journal of
-the royal statistical society. Series B (Methodological), 1980 <a href="http://fa.bianp.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
-</li>
-<li id="fn:2">
-<p>"Generalized Linear Models", P. McCullagh and J. A. Nelder (Book) <a href="http://fa.bianp.net/blog/feed/#fnref:2" rev="footnote" title="Jump back to footnote 2 in the text">↩</a></p>
-</li>
-<li id="fn:3">
-<p>"Loss Functions for Preference Levels : Regression with Discrete
-Ordered Labels", Jason D. M. Rennie, Nathan Srebro <a href="http://fa.bianp.net/blog/feed/#fnref:3" rev="footnote" title="Jump back to footnote 3 in the text">↩</a></p>
-</li>
-</ol>
-</div></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://fabianp.net/blog/2013/logistic-ordinal-regression/">by Fabian Pedregosa at May 01, 2013 10:00 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -3124,7 +3003,7 @@ Ordered Labels", Jason D. M. Rennie, Nathan Srebro <a href="http://fa.bianp.net
 <h2>Subscriptions</h2>
 <ul>
 <li>
-<a href="http://asmeurersympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a>
+<a href="http://asmeurersympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://asmeurersympy.wordpress.com" class="message" title="no activity in 7 days">Aaron Meurer</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/936818886435977143/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://addisoncugini.blogspot.com/" class="message" title="no activity in 7 days">Addison Cugini</a>
@@ -3181,7 +3060,7 @@ Ordered Labels", Jason D. M. Rennie, Nathan Srebro <a href="http://fa.bianp.net
 <a href="http://f1728.wordpress.com/category/SymPy/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://f1728.wordpress.com" class="message" title="no activity in 7 days">Jeremias Yehdegho</a>
 </li>
 <li>
-<a href="http://sophiessympyblog.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sophiessympyblog.wordpress.com" class="message" title="no activity in 7 days">Katja Sophie Hotz</a>
+<a href="http://sophiessympyblog.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sophiessympyblog.wordpress.com" title="sophie's sympy blog">Katja Sophie Hotz</a>
 </li>
 <li>
 <a href="" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a class="message" title="404: not found">Kazuo Thow</a>
@@ -3259,7 +3138,7 @@ Ordered Labels", Jason D. M. Rennie, Nathan Srebro <a href="http://fa.bianp.net
 
 <p>
 <strong>Last updated:</strong><br>
-July 13, 2013 01:40 PM<br>
+July 14, 2013 05:00 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
