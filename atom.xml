@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2013-07-15T08:00:40Z</updated>
+  <updated>2013-07-15T17:00:33Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -106,7 +106,7 @@ Another new tool I learned to use this week was Sphinx. I like the html document
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-15T08:00:36Z</updated>
+      <updated>2013-07-15T17:00:31Z</updated>
     </source>
   </entry>
 
@@ -147,109 +147,85 @@ Another new tool I learned to use this week was Sphinx. I like the html document
     <id>http://geekiology.wordpress.com/?p=290</id>
     <link href="http://geekiology.wordpress.com/2013/07/13/coupled-differential-system/" rel="alternate" type="text/html"/>
     <title>Coupled Differential System</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Pseudo-Code for the coupled_differential_system in cds.py (Marked things differently to increase readability of the code snippets required in the method to solve coupled_differential_system) def coupled_diff_system(b1, b2, c1, c2, DE):     # taking the general case that is     # it     #     #     # so we have second order differential equations     # […]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=geekiology.wordpress.com&amp;blog=36553244&amp;post=290&amp;subd=geekiology&amp;ref=&amp;feed=1" width="1"/></div>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Pseudo-Code for the coupled_differential_system in cds.py (Marked things differently to increase readability of the code snippets required in the method to solve coupled_differential_system) I have written this code here due to unavailability of pseudo code and not-working test-cases. So don’t want anything to be left as my guess work. Comments/Reviews about the code or the […]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=geekiology.wordpress.com&amp;blog=36553244&amp;post=290&amp;subd=geekiology&amp;ref=&amp;feed=1" width="1"/></div>
     </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Pseudo-Code for the coupled_differential_system in cds.py (Marked things differently to increase readability of the code snippets required in the method to solve coupled_differential_system)<br/>
-<code><br/>
-def coupled_diff_system(b1, b2, c1, c2, DE):<br/>
-<em><strong>    # taking the general case that is <img alt="\alpha = -1 " class="latex" src="http://s0.wp.com/latex.php?latex=%5Calpha+%3D+-1+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="\alpha = -1 "/></strong></em><br/>
-<em><strong>    # it <img alt="\sqrt-1 does not \in K " class="latex" src="http://s0.wp.com/latex.php?latex=%5Csqrt-1+does+not+%5Cin+K+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="\sqrt-1 does not \in K "/></strong></em><br/>
-<em><strong>    # <img alt="Dy1 + b1*y1 - b2*y2 = c1 " class="latex" src="http://s0.wp.com/latex.php?latex=Dy1+%2B+b1%2Ay1+-+b2%2Ay2+%3D+c1+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="Dy1 + b1*y1 - b2*y2 = c1 "/></strong></em><br/>
-<em><strong>    # <img alt="Dy2 + b2*y1 + b1*y2 = c2 " class="latex" src="http://s0.wp.com/latex.php?latex=Dy2+%2B+b2%2Ay1+%2B+b1%2Ay2+%3D+c2+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="Dy2 + b2*y1 + b1*y2 = c2 "/></strong></em><br/>
-<em><strong>    # so we have second order differential equations</strong></em><br/>
-<em><strong>    # we are interested in finding s = s1 + <img alt="\sqrt-1s2 " class="latex" src="http://s0.wp.com/latex.php?latex=%5Csqrt-1s2+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="\sqrt-1s2 "/></strong></em><br/>
-</code></p>
-<p><code>    <span style="color: #008000;">fa = b1a*b2d + b1d*b2a*i</span><br/>
-<span style="color: #008000;">    fd = b1d*b2d</span><br/>
-<span style="color: #008000;">    ga = c1a*c2d + c1d*c2a*i</span><br/>
-<span style="color: #008000;">    gd = c1d*c2d</span><br/>
-<span style="color: #008000;">    _, (fa, fd) = weak_normalizer(fa, fd, DE)</span><br/>
-<span style="color: #008000;">    a, (ba, bd), (ca, cd), hn = normal_denom(fa, fd, ga, gd, DE)</span><br/>
-<span style="color: #008000;">    A, B, C, hs = special_denom(a, ba, bd, ca, cd, DE)</span><br/>
-<span style="color: #008000;">    g = gcd(A, B)</span><br/>
-<span style="color: #008000;">    A, B, G = A.quo(g), B.quo(g), [gia.cancel(gid*g, include=True) for</span><br/>
-<span style="color: #008000;">    gia, gid in G]</span><br/>
-<span style="color: #008000;">    Q, M = prde_linear_constraints(A, B, G, DE)</span><br/>
-<span style="color: #008000;">    M, _ = constant_system(M, zeros(M.rows, 1), DE)</span><br/>
-<span style="color: #008000;">    n = bound_degree(A, B, C, DE)</span><br/>
-<span style="color: #008000;">    b, c, m, alpha, beta = spde(A, B, C, n, DE)</span><br/>
-</code></p>
-<p><code>    <strong><em># either proved that there exists y such that</em></strong><br/>
-<strong><em>   # y = (alpha*q + beta)/m &amp;&amp; Dq + bq = c</em></strong><br/>
-<strong><em>   # else return "No Solution"</em></strong><br/>
-</code></p>
-<p><code>   <strong>/non-cancellation cases</strong><br/>
-</code></p>
-<p><code>     <span style="color: #008080;">if deg(b) <img alt="\le " class="latex" src="http://s0.wp.com/latex.php?latex=%5Cle+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="\le "/> DE.d.degree(DE.t) - 1 and (derivation(DE.t, DE)==1or DE.d.degree(DE.t) <img alt="&gt;= 2) " class="latex" src="http://s0.wp.com/latex.php?latex=%3E%3D+2%29+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="&gt;= 2) "/> :</span><br/>
-<span style="color: #008080;">        H, A = prde_no_cancel_b_small(b, Q, n, DE)<br/>
-</span>    <span style="color: #ff0000;">else if b!=0 and (derivation(DE.t, DE)==1 or DE.d.degree(DE.t) &gt; max(0, derivation(DE.t, DE) - 1 )):</span><br/>
-<span style="color: #ff0000;">        H, A = prde_no_cancel_b_large(b, Q, n, DE)</span><br/>
-</code></p>
-<p><code>    <em><strong># A = (c1...cm, d1.. dr)T q = <img alt="\sum d_i*h_i " class="latex" src="http://s0.wp.com/latex.php?latex=%5Csum+d_i%2Ah_i+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="\sum d_i*h_i "/></strong></em><br/>
-<span style="text-decoration: underline;"><span style="color: #333399; text-decoration: underline;">return y</span></span></code></p>
-<p><code><br/>
-<strong>/cancellation cases</strong></code></p>
-<p><code><span style="color: #ff00ff;">   case = DE.case</span><br/>
-<span style="color: #ff00ff;">   else if case == <span style="color: #3366ff;">'primitive':</span></span><br/>
-<span style="color: #ff00ff;">       (q1, q2) = cds_cancel_prim(a, b1, b2, c1, c2, DE, n)</span><br/>
-<span style="color: #ff00ff;">   else if case == '<span style="color: #3366ff;">exp</span>':</span><br/>
-<span style="color: #ff00ff;">       (q1, q2) = cds_cancel_exp(a, b1, b2, c1, c2, DE, n)</span><br/>
-<span style="color: #ff00ff;">   else if case == '<span style="color: #3366ff;">tan</span>' :</span><br/>
-<span style="color: #ff00ff;">       (q1, q2) = cds_cancel_tan(b1, b2, c1, c2, DE, n)</span><br/>
-<span style="color: #ff00ff;">   else if case == '<span style="color: #3366ff;">other non linear</span>':</span><br/>
-<span style="color: #ff00ff;">       (q1, q2) = cds_cancel_non_linear(b1, b2, c1, c2, DE, n)</span><br/>
-<span style="text-decoration: underline; color: #3366ff;">return y </span><br/>
-</code></p>
-<p><em><strong>Where Y = <code>(alpha*q + beta)/m</code> </strong></em><em><strong>q = q1 +  sqrt(-1)*q2</strong></em></p>
-<p>There have been a lot of changes in the above code (which shows how the files would integrate to get the cds working)</p>
-<p>————So here is Version 1.1 for the above —————–</p>
-<p>def coupled_DE_System()</p>
-<p style="padding-left: 30px;">from sympy.integrals.rde import (no_cancel_b_large,<br/>
-no_cancel_b_small, no_cancel_equal)<br/>
-b1a, b1d = frac_in(b1, DE.t)<br/>
-b2a, b2d = frac_in(b2, DE.t)<br/>
-c1a, c1d = frac_in(c1, DE.t)<br/>
-c2a, c2d = frac_in(c2, DE.t)<br/>
-fa = b1a*b2d + b1d*b2a*sqrt(-1)<br/>
-fd = b1d*b2d<br/>
-ga = c1a*c2d + c1d*c2a*sqrt(-1)<br/>
-gd = c1d*c2d<br/>
-_, (fa, fd) = weak_normalizer(fa, fd, DE)<br/>
-a, (ba, bd), (ca, cd), hn = normal_denom(fa, fd, ga, gd, DE)<br/>
-A, B, C, hs = special_denom(a, ba, bd, ca, cd, DE)<br/>
-n = bound_degree(A, B, C, DE)<br/>
-b, c, m, alpha, beta = spde(A, B, C, n, DE)<br/>
-# non cancellation cases solve for q<br/>
-if not b.is_zero and (DE.case == ‘base’ or b.degree(DE.t) &gt; max(0, DE.d.degree(DE.t) – 1)):<br/>
-try:<br/>
-q = no_cancel_b_large(b, c, n, DE)<br/>
-return Poly(cancel((alpha*q + beta)/m) , DE.t)<br/>
-except NonElementaryIntegralException:<br/>
-return None<br/>
-elif (b.is_zero or b.degree(DE.t) &lt; DE.d.degree(DE.t) – 1) and (DE.case == ‘base’ or DE.d.degree(DE.t) &gt;= 2):<br/>
-try:<br/>
-q = no_cancel_b_small(b, c, n, DE)<br/>
-return Poly(cancel((alpha*q + beta)/m) , DE.t)<br/>
-except NonElementaryIntegralException:<br/>
-return None<br/>
-elif DE.d.degree(DE.t) &gt;= 2 and b.degree(DE.t) == DE.d.degree(DE.t) – 1 and n &gt; -b.as_poly(DE.t).LC()/DE.d.as_poly(DE.t).LC():<br/>
-try:<br/>
-q = no_cancel_equal(b, c, n, DE)<br/>
-return Poly(cancel((alpha*q + beta)/m) , DE.t)<br/>
-except NonElementaryIntegralException:<br/>
-return None<br/>
-# Does not fall in non cancellation<br/>
-# Hence cancellation cases<br/>
-case = DE.case<br/>
-a = Poly(sqrt(-1) , DE.t)<br/>
-if case == ‘primtive’:<br/>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Pseudo-Code for the coupled_differential_system in cds.py (Marked things differently to increase readability of the code snippets required in the method to solve coupled_differential_system)</p>
+<p>Q, M = prde_linear_constraints(A, B, G, DE)&lt;/span&gt;<br/>
+M, _ = constant_system(M, zeros(M.rows, 1), DE)&lt;/span&gt;<br/>
+n = bound_degree(A, B, C, DE)&lt;/span&gt;<br/>
+b, c, m, alpha, beta = spde(A, B, C, n, DE)&lt;/span&gt;<br/>
+# either proved that there exists y such that&lt;/em&gt;&lt;/strong&gt;<br/>
+# y = (alpha*q + beta)/m &amp;&amp; Dq + bq = c&lt;/em&gt;&lt;/strong&gt;<br/>
+# else return "No Solution"&lt;/em&gt;&lt;/strong&gt;<br/>
+/non-cancellation cases&lt;/strong&gt;<br/>
+if deg(b) <img alt="\le " class="latex" src="http://s0.wp.com/latex.php?latex=%5Cle+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="\le "/> DE.d.degree(DE.t) – 1 and (derivation(DE.t, DE)==1or DE.d.degree(DE.t) <img alt="&gt;= 2) " class="latex" src="http://s0.wp.com/latex.php?latex=%3E%3D+2%29+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="&gt;= 2) "/> :&lt;/span&gt;<br/>
+H, A = prde_no_cancel_b_small(b, Q, n, DE)<br/>
+else if b!=0 and (derivation(DE.t, DE)==1 or DE.d.degree(DE.t) &gt; max(0, derivation(DE.t, DE) – 1 )):&lt;/span&gt;<br/>
+H, A = prde_no_cancel_b_large(b, Q, n, DE)&lt;/span&gt;<br/>
+# A = (c1…cm, d1.. dr)T q = <img alt="\sum d_i*h_i " class="latex" src="http://s0.wp.com/latex.php?latex=%5Csum+d_i%2Ah_i+&amp;bg=ffffff&amp;fg=444444&amp;s=0" title="\sum d_i*h_i "/>&lt;/strong&gt;&lt;/em&gt;<br/>
+return y<br/>
+/cancellation cases<br/>
+case = DE.case&lt;/span&gt;<br/>
+else if case == &lt;span style="color: #3366ff;"&gt;’primitive’:&lt;/span&gt;&lt;/span&gt;<br/>
 (q1, q2) = cds_cancel_prim(a, b1, b2, c1, c2, DE, n)<br/>
-if case == ‘exp’:<br/>
+else if case == ‘&lt;span style="color: #3366ff;"&gt;exp&lt;/span&gt;’:&lt;/span&gt;<br/>
 (q1, q2) = cds_cancel_exp(a, b1, b2, c1, c2, DE, n)<br/>
-if case == ‘tan’:<br/>
-(q1, q2) = cds_cancel_tan(a, b1, b2, c1, c2, DE, n)<br/>
-return Poly(cancel(((q1 + sqrt(-1)*q2)*alpha + beta)/m), DE.t)</p>
-<p>I have written this code here due to unavailability of pseudo code and not-working test-cases. So don’t want anything to be left as my guess work. Comments/Reviews about the code or the style of implementation are most welcome</p>
+else if case == ‘&lt;span style="color: #3366ff;"&gt;tan&lt;/span&gt;’ :&lt;/span&gt;<br/>
+(q1, q2) = cds_cancel_tan(b1, b2, c1, c2, DE, )&lt;/span&gt;<br/>
+else if case == ‘&lt;span style="color: #3366ff;"&gt;other non linear&lt;/span&gt;’:<br/>
+(q1, q2) = cds_cancel_non_linear(b1, b2, c1, c2, DE, n)&lt;/span&gt;<br/>
+return y </p>
+<p>&lt;em&gt;&lt;strong&gt;Where Y = &lt;code&gt;(alpha*q + beta)/m&lt;/code&gt; &lt;/strong&gt;&lt;/em&gt;&lt;em&gt;&lt;strong&gt;q = q1 +  sqrt(-1)*q2&lt;/strong&gt;&lt;/em&gt;</p>
+<p>There have been a lot of changes in the above code (which shows how the files would integrate to get the cds working)</p>
+<p>————So here is Version 1.1 for the above —————–<br/>
+ 1<br/>
+def coupled_DE_System()<br/>
+    from sympy.integrals.rde import (no_cancel_b_large,<br/>
+    no_cancel_b_small, no_cancel_equal)<br/>
+    b1a, b1d = frac_in(b1, DE.t)<br/>
+    b2a, b2d = frac_in(b2, DE.t)<br/>
+    c1a, c1d = frac_in(c1, DE.t)<br/>
+    c2a, c2d = frac_in(c2, DE.t)<br/>
+    fa = b1a*b2d + b1d*b2a*sqrt(-1)<br/>
+    fd = b1d*b2d<br/>
+    ga = c1a*c2d + c1d*c2a*sqrt(-1)<br/>
+    gd = c1d*c2d<br/>
+    _, (fa, fd) = weak_normalizer(fa, fd, DE)<br/>
+    a, (ba, bd), (ca, cd), hn = normal_denom(fa, fd, ga, gd, DE)<br/>
+    A, B, C, hs = special_denom(a, ba, bd, ca, cd, DE)<br/>
+    n = bound_degree(A, B, C, DE)<br/>
+    b, c, m, alpha, beta = spde(A, B, C, n, DE)<br/>
+    # non cancellation cases solve for q<br/>
+    if not b.is_zero and (DE.case == 'base' or b.degree(DE.t) &gt; max(0, DE.d.degree(DE.t) - 1)):<br/>
+        try:<br/>
+           q = no_cancel_b_large(b, c, n, DE)<br/>
+           return Poly(cancel((alpha*q + beta)/m) , DE.t)<br/>
+        except NonElementaryIntegralException:<br/>
+           return None<br/>
+    elif (b.is_zero or b.degree(DE.t) &lt; DE.d.degree(DE.t) - 1) and (DE.case == 'base' or DE.d.degree(DE.t) &gt;= 2):<br/>
+        try:<br/>
+           q = no_cancel_b_small(b, c, n, DE)<br/>
+           return Poly(cancel((alpha*q + beta)/m) , DE.t)<br/>
+        except NonElementaryIntegralException:<br/>
+           return None<br/>
+    elif DE.d.degree(DE.t) &gt;= 2 and b.degree(DE.t) == DE.d.degree(DE.t) - 1 and n &gt; -b.as_poly(DE.t).LC()/DE.d.as_poly(DE.t).LC():<br/>
+        try:<br/>
+           q = no_cancel_equal(b, c, n, DE)<br/>
+           return Poly(cancel((alpha*q + beta)/m) , DE.t)<br/>
+        except NonElementaryIntegralException:<br/>
+           return None<br/>
+    # Does not fall in non cancellation<br/>
+    # Hence cancellation cases<br/>
+    case = DE.case<br/>
+    a = Poly(sqrt(-1) , DE.t)<br/>
+    if case == 'primtive':<br/>
+       (q1, q2) = cds_cancel_prim(a, b1, b2, c1, c2, DE, n)<br/>
+    if case == 'exp':<br/>
+       (q1, q2) = cds_cancel_exp(a, b1, b2, c1, c2, DE, n)<br/>
+    if case == 'tan':<br/>
+       (q1, q2) = cds_cancel_tan(a, b1, b2, c1, c2, DE, n)<br/>
+    return Poly(cancel(((q1 + sqrt(-1)*q2)*alpha + beta)/m), DE.t)</p>
+<p>I have written this code here due to unavailability of pseudo code and not-working test-cases. So don't want anything to be left as my guess work. Comments/Reviews about the code or the style of implementation are most welcome</p>
 <br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/geekiology.wordpress.com/290/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/geekiology.wordpress.com/290/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=geekiology.wordpress.com&amp;blog=36553244&amp;post=290&amp;subd=geekiology&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
     <updated>2013-07-13T08:16:37Z</updated>
@@ -266,7 +242,7 @@ return Poly(cancel(((q1 + sqrt(-1)*q2)*alpha + beta)/m), DE.t)</p>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-15T08:00:33Z</updated>
+      <updated>2013-07-15T17:00:28Z</updated>
     </source>
   </entry>
 
@@ -373,7 +349,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-15T08:00:34Z</updated>
+      <updated>2013-07-15T17:00:29Z</updated>
     </source>
   </entry>
 
@@ -410,7 +386,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-15T08:00:35Z</updated>
+      <updated>2013-07-15T17:00:30Z</updated>
     </source>
   </entry>
 
@@ -513,7 +489,7 @@ I know this is a lot of talking and nothing like psudeo code, though we can draw
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-15T08:00:33Z</updated>
+      <updated>2013-07-15T17:00:28Z</updated>
     </source>
   </entry>
 
@@ -579,7 +555,7 @@ fab vagrant release
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-07-15T08:00:09Z</updated>
+      <updated>2013-07-15T17:00:10Z</updated>
     </source>
   </entry>
 
@@ -751,7 +727,7 @@ fab vagrant release
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-15T08:00:34Z</updated>
+      <updated>2013-07-15T17:00:29Z</updated>
     </source>
   </entry>
 
@@ -786,7 +762,7 @@ I was able to make use of both of them in my implementation for the multivariate
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-15T08:00:36Z</updated>
+      <updated>2013-07-15T17:00:31Z</updated>
     </source>
   </entry>
 
@@ -838,7 +814,7 @@ I was able to make use of both of them in my implementation for the multivariate
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-15T08:00:35Z</updated>
+      <updated>2013-07-15T17:00:30Z</updated>
     </source>
   </entry>
 
@@ -1022,7 +998,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-07-15T08:00:09Z</updated>
+      <updated>2013-07-15T17:00:10Z</updated>
     </source>
   </entry>
 
@@ -1127,7 +1103,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-15T08:00:34Z</updated>
+      <updated>2013-07-15T17:00:29Z</updated>
     </source>
   </entry>
 
@@ -1159,7 +1135,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-15T08:00:36Z</updated>
+      <updated>2013-07-15T17:00:31Z</updated>
     </source>
   </entry>
 
@@ -1191,7 +1167,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-15T08:00:36Z</updated>
+      <updated>2013-07-15T17:00:31Z</updated>
     </source>
   </entry>
 
@@ -1309,7 +1285,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-15T08:00:35Z</updated>
+      <updated>2013-07-15T17:00:30Z</updated>
     </source>
   </entry>
 
@@ -1421,7 +1397,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-15T08:00:33Z</updated>
+      <updated>2013-07-15T17:00:28Z</updated>
     </source>
   </entry>
 
@@ -1580,7 +1556,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-15T08:00:36Z</updated>
+      <updated>2013-07-15T17:00:31Z</updated>
     </source>
   </entry>
 
@@ -1674,7 +1650,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-15T08:00:34Z</updated>
+      <updated>2013-07-15T17:00:29Z</updated>
     </source>
   </entry>
 
@@ -1738,7 +1714,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-15T08:00:35Z</updated>
+      <updated>2013-07-15T17:00:30Z</updated>
     </source>
   </entry>
 
@@ -1844,7 +1820,7 @@ into a text file. For those interested, however I made a few changes manually ev
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-15T08:00:35Z</updated>
+      <updated>2013-07-15T17:00:30Z</updated>
     </source>
   </entry>
 
@@ -1921,7 +1897,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-15T08:00:34Z</updated>
+      <updated>2013-07-15T17:00:29Z</updated>
     </source>
   </entry>
 
@@ -2174,7 +2150,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-15T08:00:33Z</updated>
+      <updated>2013-07-15T17:00:28Z</updated>
     </source>
   </entry>
 
@@ -2202,7 +2178,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="https://sites.google.com/feeds/content/site/v9joshi/batch" rel="http://schemas.google.com/g/2005#batch" type="application/atom+xml"/>
       <link href="https://sites.google.com/feeds/content/site/v9joshi?parent=5420265600325595988&amp;kind=announcement" rel="self" type="application/atom+xml"/>
       <title>Posts of GSoC Blog</title>
-      <updated>2013-07-15T08:00:36Z</updated>
+      <updated>2013-07-15T17:00:31Z</updated>
     </source>
   </entry>
 
@@ -2297,7 +2273,7 @@ based features.</p></div></td></tr></tbody></table></div>
       <link href="https://sites.google.com/feeds/content/site/v9joshi/batch" rel="http://schemas.google.com/g/2005#batch" type="application/atom+xml"/>
       <link href="https://sites.google.com/feeds/content/site/v9joshi?parent=5420265600325595988&amp;kind=announcement" rel="self" type="application/atom+xml"/>
       <title>Posts of GSoC Blog</title>
-      <updated>2013-07-15T08:00:36Z</updated>
+      <updated>2013-07-15T17:00:31Z</updated>
     </source>
   </entry>
 
@@ -2327,7 +2303,7 @@ based features.</p></div></td></tr></tbody></table></div>
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-15T08:00:36Z</updated>
+      <updated>2013-07-15T17:00:31Z</updated>
     </source>
   </entry>
 
@@ -2377,7 +2353,7 @@ Here D is a non square positive integer.</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-15T08:00:34Z</updated>
+      <updated>2013-07-15T17:00:29Z</updated>
     </source>
   </entry>
 
@@ -2482,7 +2458,7 @@ Here D is a non square positive integer.</p>
       <link href="http://brianegranger.com" rel="alternate" type="text/html"/>
       <subtitle>Physics ∩ Computing</subtitle>
       <title>Brian E. Granger</title>
-      <updated>2013-07-15T08:00:20Z</updated>
+      <updated>2013-07-15T17:00:13Z</updated>
     </source>
   </entry>
 
