@@ -23,6 +23,42 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>July 15, 2013</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://sympymatrix.blogspot.com/" title="Sympy Fast Matrix">Saurabh Jha</a></h3>
+
+
+<div class="entrygroup" id="tag:blogger.com,1999:blog-2736678015821545355.post-4476450566660748829">
+<h4><a href="http://sympymatrix.blogspot.com/2013/07/profile-of-new-rref-function-and-some.html">Profile of new  rref function and some comparative profiles for addition</a></h4>
+<div class="entry">
+<div class="content">
+<div style="text-align: left;" dir="ltr">For a new rref given in last commit of [1],  here is the profile for a 200 by 200 matrix--<br /><br /><br /><br />cProfile.run("rref(m, ZZ)")<br />         119411 function calls in 3.140 seconds<br /><br />   Ordered by: standard name<br /><br />   ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br />        1    0.000    0.000    3.140    3.140 &lt;string&gt;:1(&lt;module&gt;)<br />        1    0.000    0.000    0.000    0.000 densetools.py:108(rowdiv)<br />    39800    3.067    0.000    3.115    0.000 densetools.py:115(rowadd)<br />        1    0.025    0.025    3.140    3.140 densetools.py:82(rref)<br />        1    0.000    0.000    0.000    0.000 domain.py:64(new)<br />        1    0.000    0.000    0.000    0.000 domain.py:67(__call__)<br />        1    0.000    0.000    0.000    0.000 {gmpy.mpq}<br />    39803    0.003    0.000    0.003    0.000 {len}<br />        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}<br />    39801    0.045    0.000    0.045    0.000 {range}<br /><div><br /></div><div>In contrast the older rref is </div><div><br /></div><div><div> cProfile.run("a.rref()")</div><div>         766832 function calls in 0.514 seconds</div><div><br /></div><div>   Ordered by: standard name</div><div><br /></div><div>   ncalls  tottime  percall  cumtime  percall filename:lineno(function)</div><div>        1    0.000    0.000    0.514    0.514 &lt;string&gt;:1(&lt;module&gt;)</div><div>    40401    0.027    0.000    0.050    0.000 compatibility.py:19(iterable)</div><div>        2    0.000    0.000    0.000    0.000 compatibility.py:543(as_int)</div><div>    40401    0.025    0.000    0.084    0.000 compatibility.py:64(is_sequence)</div><div>    40400    0.067    0.000    0.427    0.000 dense.py:33(__getitem__)</div><div>        2    0.001    0.000    0.039    0.020 dense.py:588(_new)</div><div>        1    0.000    0.000    0.039    0.039 dense.py:600(as_mutable)</div><div>    40000    0.017    0.000    0.030    0.000 matrices.py:152(&lt;lambda&gt;)</div><div>    40400    0.008    0.000    0.008    0.000 matrices.py:23(_iszero)</div><div>        1    0.040    0.040    0.514    0.514 matrices.py:2414(rref)</div><div>        1    0.000    0.000    0.039    0.039 matrices.py:283(copy)</div><div>    80800    0.076    0.000    0.094    0.000 matrices.py:3571(a2idx)</div><div>    40400    0.012    0.000    0.012    0.000 matrices.py:390(shape)</div><div>        2    0.000    0.000    0.039    0.019 matrices.py:81(_handle_creation_inputs)</div><div>    40400    0.125    0.000    0.359    0.000 matrices.py:977(key2ij)</div><div>    40000    0.013    0.000    0.013    0.000 sympify.py:50(sympify)</div><div>        2    0.000    0.000    0.000    0.000 {built-in method __new__ of type object at 0x10894b248}</div><div>        1    0.000    0.000    0.000    0.000 {callable}</div><div>    40401    0.009    0.000    0.009    0.000 {hasattr}</div><div>   202004    0.056    0.000    0.056    0.000 {isinstance}</div><div>    40401    0.006    0.000    0.006    0.000 {iter}</div><div>    40409    0.004    0.000    0.004    0.000 {len}</div><div>        1    0.009    0.009    0.039    0.039 {map}</div><div>        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}</div><div>    40400    0.020    0.000    0.020    0.000 {zip}</div></div><div><br /></div><div><br /></div><div>So, we have a slowing down of the rref operation. Most of the time is taken by the rowadd.</div><div><br /></div><div>I also realized earlier this week that if I have a 2000 by 2000 matrix like this--</div><div><br /></div><div><div>m, n = [], []</div><div>&gt;&gt;&gt; for i in range(1000, 3000):</div><div>...     n.append(i)</div><div>... </div><div>&gt;&gt;&gt; for i in range(1000, 3000):</div><div>...     m.append(n)</div></div><div><br /></div><div><br /></div><div>I get this profile</div><div><br /></div><div><div>cProfile.run("add(m, m, ZZ)")</div><div>         4008005 function calls in 1.657 seconds</div><div><br /></div><div>   Ordered by: standard name</div><div><br /></div><div>   ncalls  tottime  percall  cumtime  percall filename:lineno(function)</div><div>        1    0.030    0.030    1.657    1.657 &lt;string&gt;:1(&lt;module&gt;)</div><div>     2000    1.335    0.001    1.625    0.001 densetools.py:11(addrow)</div><div>        1    0.002    0.002    1.627    1.627 densetools.py:4(add)</div><div>     2001    0.000    0.000    0.000    0.000 {len}</div><div>  4002000    0.271    0.000    0.271    0.000 {method 'append' of 'list' objects}</div><div>        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}</div><div>     2001    0.019    0.000    0.019    0.000 {range}</div></div><div><br /></div><div>But surprisingly, if I have a matrix like this</div><div><br /></div><div><div>&gt;&gt;&gt; m, n = [], []</div><div>&gt;&gt;&gt; for i in range(1000, 3000):</div><div>...     n.append(ZZ(i))</div><div>... </div><div>&gt;&gt;&gt; for i in range(1000, 3000):</div><div>...     m.append(n)</div><div>... </div></div><div><br /></div><div>I get this--</div><div><br /></div><div><div>cProfile.run("add(m, m, ZZ)")</div><div>         4008005 function calls in 2.855 seconds</div><div><br /></div><div>   Ordered by: standard name</div><div><br /></div><div>   ncalls  tottime  percall  cumtime  percall filename:lineno(function)</div><div>        1    0.402    0.402    2.855    2.855 &lt;string&gt;:1(&lt;module&gt;)</div><div>     2000    2.142    0.001    2.450    0.001 densetools.py:11(addrow)</div><div>        1    0.002    0.002    2.452    2.452 densetools.py:4(add)</div><div>     2001    0.000    0.000    0.000    0.000 {len}</div><div>  4002000    0.287    0.000    0.287    0.000 {method 'append' of 'list' objects}</div><div>        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}</div><div>     2001    0.021    0.000    0.021    0.000 {range}</div></div><div><br /></div><div><br /></div><div>Maybe I am doing this in a wrong way.  I should have speed up because of coercion.</div><div><br /></div><br /><br /><br />[1] https://github.com/sympy/sympy/pull/2248</div></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://sympymatrix.blogspot.com/2013/07/profile-of-new-rref-function-and-some.html">by Saurabh Jha (noreply@blogger.com) at July 15, 2013 07:45 AM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>July 14, 2013</h2>
 
 <div class="channelgroup">
@@ -2878,46 +2914,6 @@ solver I haven't seen any significant difference.</p>
 </div>
 
 </div>
-<div class="daygroup">
-<h2>May 16, 2013</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://geekiology.wordpress.com" title="Geeks at Work">Chetna Gupta</a></h3>
-
-
-<div class="entrygroup" id="http://geekiology.wordpress.com/?p=21">
-<h4 lang="en"><a href="http://geekiology.wordpress.com/2013/05/16/parametric-problems-in-risch-differential-equations/">Risch Algorithm for symbolic integration</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>hey bloggie howz you !</p>
-<p>I guess you would be a very nice friend to me for the next few months as i plan to work on improvisation and improvement of risch differential equations in sympy’s codebase</p>
-<p> </p>
-<p>Hope i don’t bore you much </p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/geekiology.wordpress.com/21/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/geekiology.wordpress.com/21/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=geekiology.wordpress.com&amp;blog=36553244&amp;post=21&amp;subd=geekiology&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://geekiology.wordpress.com/2013/05/16/parametric-problems-in-risch-differential-equations/">by chetnagupta at May 16, 2013 10:54 AM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -3061,7 +3057,7 @@ solver I haven't seen any significant difference.</p>
 
 <p>
 <strong>Last updated:</strong><br>
-July 15, 2013 12:40 AM<br>
+July 15, 2013 08:00 AM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>

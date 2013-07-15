@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2013-07-15T00:40:32Z</updated>
+  <updated>2013-07-15T08:00:40Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,39 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry>
+    <id>tag:blogger.com,1999:blog-2736678015821545355.post-4476450566660748829</id>
+    <link href="http://sympymatrix.blogspot.com/feeds/4476450566660748829/comments/default" rel="replies" type="application/atom+xml"/>
+    <link href="http://sympymatrix.blogspot.com/2013/07/profile-of-new-rref-function-and-some.html#comment-form" rel="replies" type="text/html"/>
+    <link href="http://www.blogger.com/feeds/2736678015821545355/posts/default/4476450566660748829" rel="edit" type="application/atom+xml"/>
+    <link href="http://www.blogger.com/feeds/2736678015821545355/posts/default/4476450566660748829" rel="self" type="application/atom+xml"/>
+    <link href="http://sympymatrix.blogspot.com/2013/07/profile-of-new-rref-function-and-some.html" rel="alternate" type="text/html"/>
+    <title>Profile of new  rref function and some comparative profiles for addition</title>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><div dir="ltr" style="text-align: left;">For a new rref given in last commit of [1],  here is the profile for a 200 by 200 matrix--<br/><br/><br/><br/>cProfile.run("rref(m, ZZ)")<br/>         119411 function calls in 3.140 seconds<br/><br/>   Ordered by: standard name<br/><br/>   ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br/>        1    0.000    0.000    3.140    3.140 &lt;string&gt;:1(&lt;module&gt;)<br/>        1    0.000    0.000    0.000    0.000 densetools.py:108(rowdiv)<br/>    39800    3.067    0.000    3.115    0.000 densetools.py:115(rowadd)<br/>        1    0.025    0.025    3.140    3.140 densetools.py:82(rref)<br/>        1    0.000    0.000    0.000    0.000 domain.py:64(new)<br/>        1    0.000    0.000    0.000    0.000 domain.py:67(__call__)<br/>        1    0.000    0.000    0.000    0.000 {gmpy.mpq}<br/>    39803    0.003    0.000    0.003    0.000 {len}<br/>        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}<br/>    39801    0.045    0.000    0.045    0.000 {range}<br/><div><br/></div><div>In contrast the older rref is </div><div><br/></div><div><div> cProfile.run("a.rref()")</div><div>         766832 function calls in 0.514 seconds</div><div><br/></div><div>   Ordered by: standard name</div><div><br/></div><div>   ncalls  tottime  percall  cumtime  percall filename:lineno(function)</div><div>        1    0.000    0.000    0.514    0.514 &lt;string&gt;:1(&lt;module&gt;)</div><div>    40401    0.027    0.000    0.050    0.000 compatibility.py:19(iterable)</div><div>        2    0.000    0.000    0.000    0.000 compatibility.py:543(as_int)</div><div>    40401    0.025    0.000    0.084    0.000 compatibility.py:64(is_sequence)</div><div>    40400    0.067    0.000    0.427    0.000 dense.py:33(__getitem__)</div><div>        2    0.001    0.000    0.039    0.020 dense.py:588(_new)</div><div>        1    0.000    0.000    0.039    0.039 dense.py:600(as_mutable)</div><div>    40000    0.017    0.000    0.030    0.000 matrices.py:152(&lt;lambda&gt;)</div><div>    40400    0.008    0.000    0.008    0.000 matrices.py:23(_iszero)</div><div>        1    0.040    0.040    0.514    0.514 matrices.py:2414(rref)</div><div>        1    0.000    0.000    0.039    0.039 matrices.py:283(copy)</div><div>    80800    0.076    0.000    0.094    0.000 matrices.py:3571(a2idx)</div><div>    40400    0.012    0.000    0.012    0.000 matrices.py:390(shape)</div><div>        2    0.000    0.000    0.039    0.019 matrices.py:81(_handle_creation_inputs)</div><div>    40400    0.125    0.000    0.359    0.000 matrices.py:977(key2ij)</div><div>    40000    0.013    0.000    0.013    0.000 sympify.py:50(sympify)</div><div>        2    0.000    0.000    0.000    0.000 {built-in method __new__ of type object at 0x10894b248}</div><div>        1    0.000    0.000    0.000    0.000 {callable}</div><div>    40401    0.009    0.000    0.009    0.000 {hasattr}</div><div>   202004    0.056    0.000    0.056    0.000 {isinstance}</div><div>    40401    0.006    0.000    0.006    0.000 {iter}</div><div>    40409    0.004    0.000    0.004    0.000 {len}</div><div>        1    0.009    0.009    0.039    0.039 {map}</div><div>        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}</div><div>    40400    0.020    0.000    0.020    0.000 {zip}</div></div><div><br/></div><div><br/></div><div>So, we have a slowing down of the rref operation. Most of the time is taken by the rowadd.</div><div><br/></div><div>I also realized earlier this week that if I have a 2000 by 2000 matrix like this--</div><div><br/></div><div><div>m, n = [], []</div><div>&gt;&gt;&gt; for i in range(1000, 3000):</div><div>...     n.append(i)</div><div>... </div><div>&gt;&gt;&gt; for i in range(1000, 3000):</div><div>...     m.append(n)</div></div><div><br/></div><div><br/></div><div>I get this profile</div><div><br/></div><div><div>cProfile.run("add(m, m, ZZ)")</div><div>         4008005 function calls in 1.657 seconds</div><div><br/></div><div>   Ordered by: standard name</div><div><br/></div><div>   ncalls  tottime  percall  cumtime  percall filename:lineno(function)</div><div>        1    0.030    0.030    1.657    1.657 &lt;string&gt;:1(&lt;module&gt;)</div><div>     2000    1.335    0.001    1.625    0.001 densetools.py:11(addrow)</div><div>        1    0.002    0.002    1.627    1.627 densetools.py:4(add)</div><div>     2001    0.000    0.000    0.000    0.000 {len}</div><div>  4002000    0.271    0.000    0.271    0.000 {method 'append' of 'list' objects}</div><div>        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}</div><div>     2001    0.019    0.000    0.019    0.000 {range}</div></div><div><br/></div><div>But surprisingly, if I have a matrix like this</div><div><br/></div><div><div>&gt;&gt;&gt; m, n = [], []</div><div>&gt;&gt;&gt; for i in range(1000, 3000):</div><div>...     n.append(ZZ(i))</div><div>... </div><div>&gt;&gt;&gt; for i in range(1000, 3000):</div><div>...     m.append(n)</div><div>... </div></div><div><br/></div><div>I get this--</div><div><br/></div><div><div>cProfile.run("add(m, m, ZZ)")</div><div>         4008005 function calls in 2.855 seconds</div><div><br/></div><div>   Ordered by: standard name</div><div><br/></div><div>   ncalls  tottime  percall  cumtime  percall filename:lineno(function)</div><div>        1    0.402    0.402    2.855    2.855 &lt;string&gt;:1(&lt;module&gt;)</div><div>     2000    2.142    0.001    2.450    0.001 densetools.py:11(addrow)</div><div>        1    0.002    0.002    2.452    2.452 densetools.py:4(add)</div><div>     2001    0.000    0.000    0.000    0.000 {len}</div><div>  4002000    0.287    0.000    0.287    0.000 {method 'append' of 'list' objects}</div><div>        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}</div><div>     2001    0.021    0.000    0.021    0.000 {range}</div></div><div><br/></div><div><br/></div><div>Maybe I am doing this in a wrong way.  I should have speed up because of coercion.</div><div><br/></div><br/><br/><br/>[1] https://github.com/sympy/sympy/pull/2248</div></div>
+    </content>
+    <updated>2013-07-15T07:45:59Z</updated>
+    <published>2013-07-15T07:45:00Z</published>
+    <author>
+      <name>Saurabh Jha</name>
+      <email>noreply@blogger.com</email>
+      <uri>http://www.blogger.com/profile/06730324274224921613</uri>
+    </author>
+    <source>
+      <id>tag:blogger.com,1999:blog-2736678015821545355</id>
+      <author>
+        <name>Saurabh Jha</name>
+        <email>noreply@blogger.com</email>
+        <uri>http://www.blogger.com/profile/06730324274224921613</uri>
+      </author>
+      <link href="http://sympymatrix.blogspot.com/feeds/posts/default" rel="http://schemas.google.com/g/2005#feed" type="application/atom+xml"/>
+      <link href="http://www.blogger.com/feeds/2736678015821545355/posts/default" rel="self" type="application/atom+xml"/>
+      <link href="http://sympymatrix.blogspot.com/" rel="alternate" type="text/html"/>
+      <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
+      <title>Sympy Fast Matrix</title>
+      <updated>2013-07-15T07:45:59Z</updated>
+    </source>
+  </entry>
 
   <entry>
     <id>tag:blogger.com,1999:blog-2520472460430880330.post-7920297498163589526</id>
@@ -73,7 +106,7 @@ Another new tool I learned to use this week was Sphinx. I like the html document
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-15T00:40:30Z</updated>
+      <updated>2013-07-15T08:00:36Z</updated>
     </source>
   </entry>
 
@@ -231,9 +264,9 @@ return Poly(cancel(((q1 + sqrt(-1)*q2)*alpha + beta)/m), DE.t)</p>
       <link href="http://geekiology.wordpress.com" rel="alternate" type="text/html"/>
       <link href="http://geekiology.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>Can I help u ?</subtitle>
+      <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-15T00:40:28Z</updated>
+      <updated>2013-07-15T08:00:33Z</updated>
     </source>
   </entry>
 
@@ -340,7 +373,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-15T00:40:29Z</updated>
+      <updated>2013-07-15T08:00:34Z</updated>
     </source>
   </entry>
 
@@ -377,7 +410,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-15T00:40:30Z</updated>
+      <updated>2013-07-15T08:00:35Z</updated>
     </source>
   </entry>
 
@@ -410,7 +443,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
       <link href="http://sympymatrix.blogspot.com/" rel="alternate" type="text/html"/>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>Sympy Fast Matrix</title>
-      <updated>2013-07-09T10:14:42Z</updated>
+      <updated>2013-07-15T07:45:59Z</updated>
     </source>
   </entry>
 
@@ -478,9 +511,9 @@ I know this is a lot of talking and nothing like psudeo code, though we can draw
       <link href="http://geekiology.wordpress.com" rel="alternate" type="text/html"/>
       <link href="http://geekiology.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>Can I help u ?</subtitle>
+      <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-15T00:40:28Z</updated>
+      <updated>2013-07-15T08:00:33Z</updated>
     </source>
   </entry>
 
@@ -546,7 +579,7 @@ fab vagrant release
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-07-15T00:40:10Z</updated>
+      <updated>2013-07-15T08:00:09Z</updated>
     </source>
   </entry>
 
@@ -579,7 +612,7 @@ fab vagrant release
       <link href="http://sympymatrix.blogspot.com/" rel="alternate" type="text/html"/>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>Sympy Fast Matrix</title>
-      <updated>2013-07-09T10:14:42Z</updated>
+      <updated>2013-07-15T07:45:59Z</updated>
     </source>
   </entry>
 
@@ -718,7 +751,7 @@ fab vagrant release
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-15T00:40:29Z</updated>
+      <updated>2013-07-15T08:00:34Z</updated>
     </source>
   </entry>
 
@@ -753,7 +786,7 @@ I was able to make use of both of them in my implementation for the multivariate
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-15T00:40:30Z</updated>
+      <updated>2013-07-15T08:00:36Z</updated>
     </source>
   </entry>
 
@@ -805,7 +838,7 @@ I was able to make use of both of them in my implementation for the multivariate
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-15T00:40:30Z</updated>
+      <updated>2013-07-15T08:00:35Z</updated>
     </source>
   </entry>
 
@@ -989,7 +1022,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-07-15T00:40:10Z</updated>
+      <updated>2013-07-15T08:00:09Z</updated>
     </source>
   </entry>
 
@@ -1022,7 +1055,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://sympymatrix.blogspot.com/" rel="alternate" type="text/html"/>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>Sympy Fast Matrix</title>
-      <updated>2013-07-09T10:14:42Z</updated>
+      <updated>2013-07-15T07:45:59Z</updated>
     </source>
   </entry>
 
@@ -1094,7 +1127,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-15T00:40:29Z</updated>
+      <updated>2013-07-15T08:00:34Z</updated>
     </source>
   </entry>
 
@@ -1126,7 +1159,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-15T00:40:30Z</updated>
+      <updated>2013-07-15T08:00:36Z</updated>
     </source>
   </entry>
 
@@ -1158,7 +1191,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-15T00:40:30Z</updated>
+      <updated>2013-07-15T08:00:36Z</updated>
     </source>
   </entry>
 
@@ -1245,7 +1278,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://sympymatrix.blogspot.com/" rel="alternate" type="text/html"/>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>Sympy Fast Matrix</title>
-      <updated>2013-07-09T10:14:42Z</updated>
+      <updated>2013-07-15T07:45:59Z</updated>
     </source>
   </entry>
 
@@ -1276,7 +1309,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-15T00:40:30Z</updated>
+      <updated>2013-07-15T08:00:35Z</updated>
     </source>
   </entry>
 
@@ -1386,9 +1419,9 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://geekiology.wordpress.com" rel="alternate" type="text/html"/>
       <link href="http://geekiology.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>Can I help u ?</subtitle>
+      <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-15T00:40:27Z</updated>
+      <updated>2013-07-15T08:00:33Z</updated>
     </source>
   </entry>
 
@@ -1453,7 +1486,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://sympymatrix.blogspot.com/" rel="alternate" type="text/html"/>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>Sympy Fast Matrix</title>
-      <updated>2013-07-09T10:14:42Z</updated>
+      <updated>2013-07-15T07:45:59Z</updated>
     </source>
   </entry>
 
@@ -1547,7 +1580,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-15T00:40:30Z</updated>
+      <updated>2013-07-15T08:00:36Z</updated>
     </source>
   </entry>
 
@@ -1641,7 +1674,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-15T00:40:29Z</updated>
+      <updated>2013-07-15T08:00:34Z</updated>
     </source>
   </entry>
 
@@ -1705,7 +1738,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-15T00:40:30Z</updated>
+      <updated>2013-07-15T08:00:35Z</updated>
     </source>
   </entry>
 
@@ -1811,7 +1844,7 @@ into a text file. For those interested, however I made a few changes manually ev
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-15T00:40:30Z</updated>
+      <updated>2013-07-15T08:00:35Z</updated>
     </source>
   </entry>
 
@@ -1888,7 +1921,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-15T00:40:29Z</updated>
+      <updated>2013-07-15T08:00:34Z</updated>
     </source>
   </entry>
 
@@ -2000,7 +2033,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://sympymatrix.blogspot.com/" rel="alternate" type="text/html"/>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>Sympy Fast Matrix</title>
-      <updated>2013-07-09T10:14:42Z</updated>
+      <updated>2013-07-15T07:45:59Z</updated>
     </source>
   </entry>
 
@@ -2139,9 +2172,9 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://geekiology.wordpress.com" rel="alternate" type="text/html"/>
       <link href="http://geekiology.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>Can I help u ?</subtitle>
+      <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-15T00:40:28Z</updated>
+      <updated>2013-07-15T08:00:33Z</updated>
     </source>
   </entry>
 
@@ -2169,7 +2202,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="https://sites.google.com/feeds/content/site/v9joshi/batch" rel="http://schemas.google.com/g/2005#batch" type="application/atom+xml"/>
       <link href="https://sites.google.com/feeds/content/site/v9joshi?parent=5420265600325595988&amp;kind=announcement" rel="self" type="application/atom+xml"/>
       <title>Posts of GSoC Blog</title>
-      <updated>2013-07-15T00:40:31Z</updated>
+      <updated>2013-07-15T08:00:36Z</updated>
     </source>
   </entry>
 
@@ -2264,7 +2297,7 @@ based features.</p></div></td></tr></tbody></table></div>
       <link href="https://sites.google.com/feeds/content/site/v9joshi/batch" rel="http://schemas.google.com/g/2005#batch" type="application/atom+xml"/>
       <link href="https://sites.google.com/feeds/content/site/v9joshi?parent=5420265600325595988&amp;kind=announcement" rel="self" type="application/atom+xml"/>
       <title>Posts of GSoC Blog</title>
-      <updated>2013-07-15T00:40:31Z</updated>
+      <updated>2013-07-15T08:00:36Z</updated>
     </source>
   </entry>
 
@@ -2294,7 +2327,7 @@ based features.</p></div></td></tr></tbody></table></div>
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-15T00:40:30Z</updated>
+      <updated>2013-07-15T08:00:36Z</updated>
     </source>
   </entry>
 
@@ -2344,7 +2377,7 @@ Here D is a non square positive integer.</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-15T00:40:29Z</updated>
+      <updated>2013-07-15T08:00:34Z</updated>
     </source>
   </entry>
 
@@ -2449,7 +2482,7 @@ Here D is a non square positive integer.</p>
       <link href="http://brianegranger.com" rel="alternate" type="text/html"/>
       <subtitle>Physics ∩ Computing</subtitle>
       <title>Brian E. Granger</title>
-      <updated>2013-07-15T00:40:14Z</updated>
+      <updated>2013-07-15T08:00:20Z</updated>
     </source>
   </entry>
 
@@ -2627,36 +2660,6 @@ solver I haven't seen any significant difference.</p>
       <link href="http://fa.bianp.net/blog/feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
       <updated>2013-05-23T14:00:17Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://geekiology.wordpress.com/?p=21</id>
-    <link href="http://geekiology.wordpress.com/2013/05/16/parametric-problems-in-risch-differential-equations/" rel="alternate" type="text/html"/>
-    <title>Risch Algorithm for symbolic integration</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">hey bloggie howz you ! I guess you would be a very nice friend to me for the next few months as i plan to work on improvisation and improvement of risch differential equations in sympy’s codebase   Hope i don’t bore you much<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=geekiology.wordpress.com&amp;blog=36553244&amp;post=21&amp;subd=geekiology&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>hey bloggie howz you !</p>
-<p>I guess you would be a very nice friend to me for the next few months as i plan to work on improvisation and improvement of risch differential equations in sympy’s codebase</p>
-<p> </p>
-<p>Hope i don’t bore you much </p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/geekiology.wordpress.com/21/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/geekiology.wordpress.com/21/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=geekiology.wordpress.com&amp;blog=36553244&amp;post=21&amp;subd=geekiology&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2013-05-16T10:54:39Z</updated>
-    <category term="Uncategorized"/>
-    <author>
-      <name>chetnagupta</name>
-    </author>
-    <source>
-      <id>http://geekiology.wordpress.com</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://geekiology.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://geekiology.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://geekiology.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>Can I help u ?</subtitle>
-      <title>Geeks at Work</title>
-      <updated>2013-05-29T17:00:28Z</updated>
     </source>
   </entry>
 </feed>
