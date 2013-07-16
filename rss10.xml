@@ -13,6 +13,7 @@
 
 	<items>
 		<rdf:Seq>
+			<rdf:li rdf:resource="tag:blogger.com,1999:blog-7526836182390500993.post-3347566173929214655" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-2736678015821545355.post-4476450566660748829" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-2520472460430880330.post-7920297498163589526" />
 			<rdf:li rdf:resource="http://sophiessympyblog.wordpress.com/?p=174" />
@@ -72,11 +73,17 @@
 			<rdf:li rdf:resource="http://manojbits.wordpress.com/?p=429" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-7526836182390500993.post-8278928756892309073" />
 			<rdf:li rdf:resource="http://www.brianegranger.com/?p=65" />
-			<rdf:li rdf:resource="tag:fabianp.net/blog,2013-05-20:2013/numerical-optimizers-for-logistic-regression/" />
 		</rdf:Seq>
 	</items>
 </channel>
 
+<item rdf:about="tag:blogger.com,1999:blog-7526836182390500993.post-3347566173929214655">
+	<title>Tarun Gaba: GSoC Report Week 4</title>
+	<link>http://tarun-gaba.blogspot.com/2013/07/gsoc-report-week-4.html</link>
+	<content:encoded>&lt;div style=&quot;text-align: left;&quot; dir=&quot;ltr&quot;&gt;Week four is over, and it has been an exhaustive week. I had been working parallely on two instances of project, which are equally relevant.&lt;br /&gt;One is to write a complete extended illustrative example, which involved simulating a three link conical pendulum.&lt;br /&gt;The current work on this problem can be checked here:&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;The problem is a quick implementation of the whole project, and a very naive one. It has some dirty code, and some hacks, which would need addressing during the implementations in the actual project.&lt;br /&gt;&lt;br /&gt;The example is in a stable state, and I have been able to produce static visualizations. With a small change in Javascripts. It can be readily converted to animations.&lt;br /&gt;I have created some instances of classes, according API, with only basic functionality, which has helped in bringing the illustrative example(three link conical pendulum) to life.&lt;br /&gt;The python part of the example is complete, as I have been able to create the JSON file containing the simulation data from the problem.&lt;br /&gt;As far as javascript part is concerned, Only thing left is to animate the visualization by properly reading the simulation data from the JSON object and applying it to the static visualizations.&lt;br /&gt;The simulation data is being stored in the form of a (4 by 4) transformation matrices, which are then mapped to a visualization frame.&lt;br /&gt;the frame will be calling the animation matrices from the javascript side and render them.&lt;br /&gt;&lt;br /&gt;There has been certain issues on converting the symbolic transformation matrices to the numpy, or numerical matrices. I tried using lambdify, but ran into some problems.It seems that lambdify doesnt work properly with the time dependent symbols, i.e it works fine on symbols like:&lt;br /&gt;'a', but fails on 'a(t)'.&lt;br /&gt;&lt;br /&gt;Right now for the example I am using SymPy's evalf method, with substitutions for the symbols.&lt;br /&gt;But it is not considered as efficient as lambdify, so I need to figure out the way to resolve the problem.&lt;br /&gt;&lt;br /&gt;The other part which I am working is to write the unittests for the project. It is getting a bit delayed,&lt;br /&gt;and I am two or three days behind the stipulated timeline. I am hoping to cover it up in the coming two weeks, before the midterm evaluations.&lt;br /&gt;The tests seems to be coming much easier, once I have done the three link pendulum example.&lt;br /&gt;The example has helped me a lot in determining how different classes should be working, so I am a little more confident on the implementations.&lt;br /&gt;It is also because I have already implemented the basic functionality of nearly all classes, I just need to flesh them out, provide some more functionality to them, and they would be ready to be merged into the  master.&lt;br /&gt;&lt;br /&gt;In a nutshell, this week has been  a little exhaustive, but now I feel running towards my milestone at a much better pace.&lt;br /&gt;&lt;br /&gt;Cheers&lt;/div&gt;</content:encoded>
+	<dc:date>2013-07-16T17:47:49+00:00</dc:date>
+	<dc:creator>TARUN GABA</dc:creator>
+</item>
 <item rdf:about="tag:blogger.com,1999:blog-2736678015821545355.post-4476450566660748829">
 	<title>Saurabh Jha: Profile of new  rref function and some comparative profiles for addition</title>
 	<link>http://sympymatrix.blogspot.com/2013/07/profile-of-new-rref-function-and-some.html</link>
@@ -1164,167 +1171,6 @@ Here D is a non square positive integer.&lt;/p&gt;
 &lt;p&gt;Do we really believe all of these reasons? Does this bother anyone else? What would it look like to begin to change our introductory physics courses to address this problem?&lt;/p&gt;</content:encoded>
 	<dc:date>2013-05-23T22:04:19+00:00</dc:date>
 	<dc:creator>Brian Granger</dc:creator>
-</item>
-<item rdf:about="tag:fabianp.net/blog,2013-05-20:2013/numerical-optimizers-for-logistic-regression/">
-	<title>Fabian Pedregosa: Numerical optimizers for Logistic Regression</title>
-	<link>http://fabianp.net/blog/2013/numerical-optimizers-for-logistic-regression/</link>
-	<content:encoded>&lt;p&gt;Following a challenge proposed by &lt;a href=&quot;http://gael-varoquaux.info&quot;&gt;Gael&lt;/a&gt; to &lt;a href=&quot;https://team.inria.fr/parietal/&quot;&gt;my
-group&lt;/a&gt; I compared several implementations of
-Logistic Regression. The task was to implement a Logistic Regression model
-using standard optimization tools from &lt;code&gt;scipy.optimize&lt;/code&gt; and compare
-them against state of the art implementations such as
-&lt;a href=&quot;http://www.csie.ntu.edu.tw/~cjlin/liblinear/&quot;&gt;LIBLINEAR&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;In this blog post I'll write down all the implementation details of this
-model, in the hope that not only the conclusions but also the process would be
-useful for future comparisons and benchmarks.&lt;/p&gt;
-&lt;h2&gt;Function evaluation&lt;/h2&gt;
-&lt;p&gt;The loss function for the $\ell_2$-regularized logistic regression, i.e. the
-function to be minimized is&lt;/p&gt;
-&lt;p&gt;$$
-\mathcal{L}(w, \lambda, X, y) = - \sum_{i=1}^n \log(\phi(y_i w^T X_i)) + \lambda w^T w
-$$&lt;/p&gt;
-&lt;p&gt;where $\phi(t) = 1. / (1 + \exp(-t))$ is the &lt;a href=&quot;http://en.wikipedia.org/wiki/Logistic_function&quot;&gt;logistic
-function&lt;/a&gt;, $\lambda w^T w$ is
-the regularization term and $X, y$ is the input data, with $X \in
-\mathbb{R}^{n \times p}$ and $y \in \{-1, 1\}^n$. However, this formulation is
-not great from a practical standpoint. Even for not unlikely values of $t$
-such as $t = -100$, $\exp(100)$ will overflow, assigning the loss an
-(erroneous) value of $+\infty$. For this reason &lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;http://fa.bianp.net/blog/feed/#fn:1&quot; rel=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;, we evaluate
-$\log(\phi(t))$ as&lt;/p&gt;
-&lt;p&gt;$$
-\log(\phi(t)) = 
-\begin{cases}
-- \log(1 + \exp(-t)) \text{ if } t &amp;gt; 0 \\
-t - \log(1 + \exp(t)) \text{ if } t \leq 0\\
-\end{cases}
-$$&lt;/p&gt;
-&lt;p&gt;The gradient of the loss function is given by&lt;/p&gt;
-&lt;p&gt;$$
-\nabla_w \mathcal{L} = \sum_{i=1}^n y_i X_i (\phi(y_i w^T X_i) - 1) + \lambda w
-$$&lt;/p&gt;
-&lt;p&gt;Similarly, the logistic function $\phi$ used here can be computed in a more
-stable way using the formula&lt;/p&gt;
-&lt;p&gt;$$
-\phi(t) = \begin{cases}
-1 / (1 + \exp(-t)) \text{ if } t &amp;gt; 0 \\
-\exp(t) / (1 + \exp(t)) \text{ if } t \leq 0\\
-\end{cases}
-$$&lt;/p&gt;
-&lt;p&gt;Finally, we will also need the Hessian for some second-order methods, which is given by&lt;/p&gt;
-&lt;p&gt;$$
-\nabla_w ^2 \mathcal{L} = X^T D X + \lambda I
-$$&lt;/p&gt;
-&lt;p&gt;where $I$ is the identity matrix and $D$ is a diagonal matrix given by $D_{ii} = \phi(y_i w^T X_i)(1 - \phi(y_i w^T X_i))$.&lt;/p&gt;
-&lt;p&gt;In Python, these function can be written as&lt;/p&gt;
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;phi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
-    &lt;span class=&quot;c&quot;&gt;# logistic function, returns 1 / (1 + exp(-t))&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;idx&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;out&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;empty&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dtype&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;float&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;idx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;1.&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;exp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;idx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]))&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;exp_t&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;exp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;~&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;idx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;~&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;idx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;exp_t&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;1.&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;exp_t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;out&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;loss&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;w&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;X&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;alpha&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
-    &lt;span class=&quot;c&quot;&gt;# logistic loss function, returns Sum{-log(phi(t))}&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;X&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;w&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;yz&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;idx&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;yz&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;out&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;zeros_like&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;yz&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;idx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;exp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;yz&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;idx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]))&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;~&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;idx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;yz&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;~&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;idx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;exp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;yz&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;~&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;idx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])))&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;out&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;alpha&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;w&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;w&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;out&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;gradient&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;w&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;X&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;alpha&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
-    &lt;span class=&quot;c&quot;&gt;# gradient of the logistic loss&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;X&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;w&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;phi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;z0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;z&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;grad&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;X&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;z0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;alpha&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;w&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;grad&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;hessian&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;w&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;X&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;alpha&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
-    &lt;span class=&quot;c&quot;&gt;# hessian of the logistic loss&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;X&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;w&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;phi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;wa&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;X&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;Hs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;X&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;wa&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;out&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Hs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;alpha&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt;  &lt;span class=&quot;n&quot;&gt;out&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;h2&gt;Benchmarks&lt;/h2&gt;
-&lt;p&gt;I tried several methods to estimate this $\ell_2$-regularized logistic regression. There is
-one first-order method (that is, it only makes use of the gradient and not of
-the Hessian), &lt;a href=&quot;http://en.wikipedia.org/wiki/Nonlinear_conjugate_gradient_method&quot;&gt;Conjugate
-Gradient&lt;/a&gt;
-whereas all the others are &lt;a href=&quot;http://en.wikipedia.org/wiki /Quasi-Newton_methods&quot;&gt;Quasi-Newton methods&lt;/a&gt;. The method I tested are:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;CG&lt;/strong&gt; = Conjugate Gradient as implemented in &lt;code&gt;scipy.optimize.fmin_cg&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;TNC&lt;/strong&gt; = Truncated Newton as implemented in &lt;code&gt;scipy.optimize.fmin_tnc&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;BFGS&lt;/strong&gt; = Broyden–Fletcher–Goldfarb–Shanno method, as implemented in &lt;code&gt;scipy.optimize.fmin_bfgs&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;L-BFGS&lt;/strong&gt; = Limited-memory &lt;a href=&quot;http://en.wikipedia.org/wiki/BFGS_method&quot;&gt;BFGS&lt;/a&gt; as implemented in &lt;code&gt;scipy.optimize.fmin_l_bfgs_b&lt;/code&gt;. Contrary to the BFGS algorithm, which is written in Python, this one wraps a C implementation.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Trust Region&lt;/strong&gt; = Trust Region Newton method &lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;http://fa.bianp.net/blog/feed/#fn:1&quot; rel=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;. This is the solver used by &lt;a href=&quot;http://www.csie.ntu.edu.tw/~cjlin/liblinear/&quot;&gt;LIBLINEAR&lt;/a&gt; that I've wrapped to accept any Python function in the package &lt;a href=&quot;http://github.com/fabianp/pytron/&quot;&gt;pytron&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;To assure the most accurate results across implementations, all timings were
-collected by callback functions that were called from the algorithm on each
-iteration. Finally, I plot the maximum absolute value of the gradient (=the
-infinity norm of the gradient) with respect to time.&lt;/p&gt;
-&lt;p&gt;The synthetic data used in the benchmarks was generated as described in &lt;sup id=&quot;fnref:2&quot;&gt;&lt;a href=&quot;http://fa.bianp.net/blog/feed/#fn:2&quot; rel=&quot;footnote&quot;&gt;2&lt;/a&gt;&lt;/sup&gt; and consists
-primarily of the design matrix $X$ being Gaussian noise, the vector of
-coefficients is drawn also from a Gaussian distribution and the explained
-variable $y$ is generated as $y = \text{sign}(X w)$. We then perturb matrix
-$X$ by adding Gaussian noise with covariance 0.8. The number of samples and features
-was fixed to $10^4$ and $10^3$ respectively. The penalization parameter $\lambda$ was
-fixed to 1.&lt;/p&gt;
-&lt;p&gt;In this setting variables are typically uncorrelated and most solvers perform
-decently:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&quot;http://fa.bianp.net/blog/static/images/2013/comparison_logistic_corr_0.png&quot; alt=&quot;Benchmark Logistic&quot; /&gt;&lt;/p&gt;
-&lt;p&gt;Here, the Trust Region and L-BFGS solver perform almost equally good, with
-Conjugate Gradient and Truncated Newton falling shortly behind. I was surprised
-by the difference between BFGS and L-BFGS, I would have thought that when memory was not an issue both algorithms should perform similarly.&lt;/p&gt;
-&lt;p&gt;To make things more interesting, we now make the design to be slightly more
-correlated. We do so by adding a constant term of 1 to the matrix $X$ and
-adding also a column vector of ones this matrix to account for the intercept. These are the results:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&quot;http://fa.bianp.net/blog/static/images/2013/comparison_logistic_corr_1.png&quot; alt=&quot;Benchmark Logistic&quot; /&gt;&lt;/p&gt;
-&lt;p&gt;Here, we already see that second-order methods dominate over first-order
-methods (well, except for BFGS), with Trust Region clearly dominating the
-picture but with TNC not far behind.&lt;/p&gt;
-&lt;p&gt;Finally, if we force the matrix to be even more correlated (we add 10. to the
-design matrix $X$), then we have:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&quot;http://fa.bianp.net/blog/static/images/2013/comparison_logistic_corr_10.png&quot; alt=&quot;Benchmark Logistic&quot; /&gt;&lt;/p&gt;
-&lt;p&gt;Here, the Trust-Region method has the same timing as before, but all other
-methods have got substantially worse.The Trust Region
-method, unlike the other methods is surprisingly robust to correlated designs.&lt;/p&gt;
-&lt;p&gt;To sum up, the Trust Region method performs extremely well for optimizing the
-Logistic Regression model under different conditionings of the design matrix.
-The &lt;a href=&quot;http://www.csie.ntu.edu.tw/~cjlin/liblinear/&quot;&gt;LIBLINEAR&lt;/a&gt; software uses
-this solver and thus has similar performance, with the sole exception that the
-evaluation of the logistic function and its derivatives is done in C++ instead
-of Python. In practice, however, due to the small number of iterations of this
-solver I haven't seen any significant difference.&lt;/p&gt;
-&lt;div class=&quot;footnote&quot;&gt;
-&lt;hr /&gt;
-&lt;ol&gt;
-&lt;li id=&quot;fn:1&quot;&gt;
-&lt;p&gt;A similar development can be found in the source code of &lt;a href=&quot;http://www.csie.ntu.edu.tw/~cjlin/liblinear/&quot;&gt;LIBLINEAR&lt;/a&gt;, and is probably also used elsewhere. &lt;a href=&quot;http://fa.bianp.net/blog/feed/#fnref:1&quot; rev=&quot;footnote&quot; title=&quot;Jump back to footnote 1 in the text&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li id=&quot;fn:2&quot;&gt;
-&lt;p&gt;&quot;A comparison of numerical optimizers for logistic regression&quot;, P. Minka, &lt;a href=&quot;http://research.microsoft.com/en-us/um/people/minka/papers/logreg/&quot;&gt;URL&lt;/a&gt; &lt;a href=&quot;http://fa.bianp.net/blog/feed/#fnref:2&quot; rev=&quot;footnote&quot; title=&quot;Jump back to footnote 2 in the text&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li id=&quot;fn:3&quot;&gt;
-&lt;p&gt;&quot;Newton's Method for Large Bound-Constrained Optimization Problems&quot;, Chih-Jen Lin, Jorge J. More &lt;a href=&quot;http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.45.7340&quot;&gt;URL&lt;/a&gt; &lt;a href=&quot;http://fa.bianp.net/blog/feed/#fnref:3&quot; rev=&quot;footnote&quot; title=&quot;Jump back to footnote 3 in the text&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li id=&quot;fn:4&quot;&gt;
-&lt;p&gt;&lt;a href=&quot;http://nbviewer.ipython.org/urls/raw.github.com/fabianp/pytron/master/doc/benchmark_logistic.ipynb&quot;&gt;IPython Notebook to reproduce the benchmarks&lt;/a&gt; &lt;a href=&quot;https://github.com/fabianp/pytron/blob/master/doc/benchmark_logistic.ipynb&quot;&gt;source&lt;/a&gt; &lt;a href=&quot;http://fa.bianp.net/blog/feed/#fnref:4&quot; rev=&quot;footnote&quot; title=&quot;Jump back to footnote 4 in the text&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/div&gt;</content:encoded>
-	<dc:date>2013-05-19T22:00:00+00:00</dc:date>
-	<dc:creator>Fabian Pedregosa</dc:creator>
 </item>
 
 </rdf:RDF>
