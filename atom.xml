@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2013-07-16T18:00:33Z</updated>
+  <updated>2013-07-17T20:40:28Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,49 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry xml:lang="en">
+    <id>http://meclark256.wordpress.com/?p=2</id>
+    <link href="http://meclark256.wordpress.com/2013/07/17/dynkin-diagrams-and-cartan-matrices/" rel="alternate" type="text/html"/>
+    <title>Dynkin diagrams and Cartan matrices</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">First off, I’ll start by saying I’ve just made another PR (https://github.com/sympy/sympy/pull/2297) which includes the code for the C and D series, as well as the exception Lie algebras of type E, F, and G. So, this week so far has really been a mix of things, as far as what I’ve been working on. […]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=2&amp;subd=meclark256&amp;ref=&amp;feed=1" width="1"/></div>
+    </summary>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>First off, I’ll start by saying I’ve just made another PR (<a href="https://github.com/sympy/sympy/pull/2297" rel="nofollow">https://github.com/sympy/sympy/pull/2297</a>) which includes the code for the C and D series, as well as the exception Lie algebras of type E, F, and G.  </p>
+<p>So, this week so far has really been a mix of things, as far as what I’ve been working on.  I’ve done a fair amount of (attempting to) clean up code for type_A.py so as to make it ready to actually be merged with sympy master.  I think I’m heading in the right direction on that front, though I doubt that I’m all the way there.  There are always more typos or trailing white spaces to fix.</p>
+<p>I’ve also (more or less) put together Cartan_Matrix.py.  Originally, this was going to be a subclass (I think of CartanType? Not really sure what exactly I was thinking when I wrote my proposal).  However, once I actually started thinking about things (and after consulting with David), I think it actually makes much more sense to just have a single method, called CartanMatrix.  As written, it takes an argument t, and then returns CartanType(t).cartan_matrix.   Then, the user can do things like<br/>
+&gt;&gt;&gt; CartanMatrix(“A2″)<br/>
+[2 -1]<br/>
+[-1 2]</p>
+<p>As written, the naming convention obviously goes against camel case, and is named as if it were a class.  However I’d like to keep it this way.  I’m finding it difficult to be able to vocalise /why/ exactly, so I suppose some discussion on this front would be useful/necessary.</p>
+<p>This sort of leads on to dynkin_diagram.py.  I’m still trying to think/decide whether or not I should go in the same way that I did with cartan_matrix, or if I should make it an actual class.  Currently I don’t have anything about dynkin diagrams coded into type_A, type_B etc but it would be easy enough (once I get past figuring out how to do the ascii art and whatnot) to add that into those files.  Alternatively, I could just hardcode it into dynkin_diagram.py.  I’m thinking that it might make more sense to do things in the same fashion as cartan_matrix, since I don’t really want to have this (potential) class do anything /other/ than display the Dynkin diagram, so it would probably be overkill to have it be a class.  </p>
+<p>In any case, I suppose that I have a little bit more time to think about this, because I need to figure out how exactly to do the ascii art that will be the actual diagrams.  Type A is obviously very easy, because the diagram has no double/triple lines or arrows or weird angles.  I want type A to look like:</p>
+<p>0–0–0….-0</p>
+<p>Type B is again fairly easy:<br/>
+0–0–0….0=&gt;=0</p>
+<p>as is C:<br/>
+0–0–0…0=&lt;=0<br/>
+and type F is very similar.</p>
+<p>However, type G has a triple line with an arrow, and I'm not sure how to do that.  Type E has one edge that sticks up, so it'll take up two or three lines, and I'll need to figure out how to print that out, and similarly for D.</p>
+<p>So….that's pretty much what's going on right now.  Having typed that all out, I think that I have come to a conclusion on how I want to structure dynkin_diagram.py which is good.  It should also be pretty easy to implement things for type_A at the very least, so that's what I'm going to work on tomorrow and Friday.  We'll see where that gets me!</p>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/2/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/2/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=2&amp;subd=meclark256&amp;ref=&amp;feed=1" width="1"/></div>
+    </content>
+    <updated>2013-07-17T20:32:31Z</updated>
+    <category term="Uncategorized"/>
+    <author>
+      <name>meclark256</name>
+    </author>
+    <source>
+      <id>http://meclark256.wordpress.com</id>
+      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
+      <link href="http://meclark256.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://meclark256.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://meclark256.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
+      <title>My GSOC Adventure with SymPy</title>
+      <updated>2013-07-17T20:40:26Z</updated>
+    </source>
+  </entry>
 
   <entry>
     <id>tag:blogger.com,1999:blog-7526836182390500993.post-3347566173929214655</id>
@@ -39,7 +82,7 @@
       <link href="http://tarun-gaba.blogspot.com/" rel="alternate" type="text/html"/>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>Tarun Gaba</title>
-      <updated>2013-07-16T17:47:49Z</updated>
+      <updated>2013-07-17T16:46:49Z</updated>
     </source>
   </entry>
 
@@ -138,7 +181,7 @@ Another new tool I learned to use this week was Sphinx. I like the html document
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-16T18:00:31Z</updated>
+      <updated>2013-07-17T20:40:26Z</updated>
     </source>
   </entry>
 
@@ -293,7 +336,7 @@ Another new tool I learned to use this week was Sphinx. I like the html document
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-16T18:00:28Z</updated>
+      <updated>2013-07-17T20:40:24Z</updated>
     </source>
   </entry>
 
@@ -400,7 +443,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-16T18:00:30Z</updated>
+      <updated>2013-07-17T20:40:25Z</updated>
     </source>
   </entry>
 
@@ -437,7 +480,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-16T18:00:30Z</updated>
+      <updated>2013-07-17T20:40:26Z</updated>
     </source>
   </entry>
 
@@ -502,7 +545,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
       <link href="http://tarun-gaba.blogspot.com/" rel="alternate" type="text/html"/>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>Tarun Gaba</title>
-      <updated>2013-07-16T17:47:49Z</updated>
+      <updated>2013-07-17T16:46:49Z</updated>
     </source>
   </entry>
 
@@ -540,7 +583,7 @@ I know this is a lot of talking and nothing like psudeo code, though we can draw
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-16T18:00:29Z</updated>
+      <updated>2013-07-17T20:40:24Z</updated>
     </source>
   </entry>
 
@@ -606,7 +649,7 @@ fab vagrant release
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-07-16T18:00:09Z</updated>
+      <updated>2013-07-17T20:40:08Z</updated>
     </source>
   </entry>
 
@@ -778,7 +821,7 @@ fab vagrant release
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-16T18:00:30Z</updated>
+      <updated>2013-07-17T20:40:25Z</updated>
     </source>
   </entry>
 
@@ -813,7 +856,7 @@ I was able to make use of both of them in my implementation for the multivariate
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-16T18:00:31Z</updated>
+      <updated>2013-07-17T20:40:26Z</updated>
     </source>
   </entry>
 
@@ -865,7 +908,7 @@ I was able to make use of both of them in my implementation for the multivariate
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-16T18:00:30Z</updated>
+      <updated>2013-07-17T20:40:26Z</updated>
     </source>
   </entry>
 
@@ -999,7 +1042,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://tarun-gaba.blogspot.com/" rel="alternate" type="text/html"/>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>Tarun Gaba</title>
-      <updated>2013-07-16T17:47:49Z</updated>
+      <updated>2013-07-17T16:46:49Z</updated>
     </source>
   </entry>
 
@@ -1049,7 +1092,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-07-16T18:00:09Z</updated>
+      <updated>2013-07-17T20:40:08Z</updated>
     </source>
   </entry>
 
@@ -1154,7 +1197,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-16T18:00:30Z</updated>
+      <updated>2013-07-17T20:40:25Z</updated>
     </source>
   </entry>
 
@@ -1186,7 +1229,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-16T18:00:31Z</updated>
+      <updated>2013-07-17T20:40:26Z</updated>
     </source>
   </entry>
 
@@ -1218,7 +1261,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-16T18:00:31Z</updated>
+      <updated>2013-07-17T20:40:26Z</updated>
     </source>
   </entry>
 
@@ -1336,7 +1379,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-16T18:00:30Z</updated>
+      <updated>2013-07-17T20:40:26Z</updated>
     </source>
   </entry>
 
@@ -1448,7 +1491,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-16T18:00:28Z</updated>
+      <updated>2013-07-17T20:40:24Z</updated>
     </source>
   </entry>
 
@@ -1480,7 +1523,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://tarun-gaba.blogspot.com/" rel="alternate" type="text/html"/>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>Tarun Gaba</title>
-      <updated>2013-07-16T17:47:49Z</updated>
+      <updated>2013-07-17T16:46:49Z</updated>
     </source>
   </entry>
 
@@ -1607,7 +1650,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-16T18:00:31Z</updated>
+      <updated>2013-07-17T20:40:26Z</updated>
     </source>
   </entry>
 
@@ -1701,7 +1744,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-16T18:00:30Z</updated>
+      <updated>2013-07-17T20:40:25Z</updated>
     </source>
   </entry>
 
@@ -1765,7 +1808,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-16T18:00:30Z</updated>
+      <updated>2013-07-17T20:40:26Z</updated>
     </source>
   </entry>
 
@@ -1871,7 +1914,7 @@ into a text file. For those interested, however I made a few changes manually ev
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-16T18:00:30Z</updated>
+      <updated>2013-07-17T20:40:26Z</updated>
     </source>
   </entry>
 
@@ -1903,7 +1946,7 @@ into a text file. For those interested, however I made a few changes manually ev
       <link href="http://tarun-gaba.blogspot.com/" rel="alternate" type="text/html"/>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>Tarun Gaba</title>
-      <updated>2013-07-16T17:47:49Z</updated>
+      <updated>2013-07-17T16:46:49Z</updated>
     </source>
   </entry>
 
@@ -1948,7 +1991,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-16T18:00:30Z</updated>
+      <updated>2013-07-17T20:40:25Z</updated>
     </source>
   </entry>
 
@@ -2201,7 +2244,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-16T18:00:28Z</updated>
+      <updated>2013-07-17T20:40:24Z</updated>
     </source>
   </entry>
 
@@ -2229,7 +2272,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="https://sites.google.com/feeds/content/site/v9joshi/batch" rel="http://schemas.google.com/g/2005#batch" type="application/atom+xml"/>
       <link href="https://sites.google.com/feeds/content/site/v9joshi?parent=5420265600325595988&amp;kind=announcement" rel="self" type="application/atom+xml"/>
       <title>Posts of GSoC Blog</title>
-      <updated>2013-07-16T18:00:31Z</updated>
+      <updated>2013-07-17T20:40:27Z</updated>
     </source>
   </entry>
 
@@ -2324,7 +2367,7 @@ based features.</p></div></td></tr></tbody></table></div>
       <link href="https://sites.google.com/feeds/content/site/v9joshi/batch" rel="http://schemas.google.com/g/2005#batch" type="application/atom+xml"/>
       <link href="https://sites.google.com/feeds/content/site/v9joshi?parent=5420265600325595988&amp;kind=announcement" rel="self" type="application/atom+xml"/>
       <title>Posts of GSoC Blog</title>
-      <updated>2013-07-16T18:00:31Z</updated>
+      <updated>2013-07-17T20:40:27Z</updated>
     </source>
   </entry>
 
@@ -2354,7 +2397,7 @@ based features.</p></div></td></tr></tbody></table></div>
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-16T18:00:31Z</updated>
+      <updated>2013-07-17T20:40:26Z</updated>
     </source>
   </entry>
 
@@ -2404,7 +2447,7 @@ Here D is a non square positive integer.</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-16T18:00:30Z</updated>
+      <updated>2013-07-17T20:40:25Z</updated>
     </source>
   </entry>
 
@@ -2466,50 +2509,7 @@ Here D is a non square positive integer.</p>
       <link href="http://tarun-gaba.blogspot.com/" rel="alternate" type="text/html"/>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>Tarun Gaba</title>
-      <updated>2013-07-16T17:47:49Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en-US">
-    <id>http://www.brianegranger.com/?p=65</id>
-    <link href="http://brianegranger.com/?p=65" rel="alternate" type="text/html"/>
-    <title>Will we ever get past classical physics?</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>As a university physics professor, I regularly teach introductory physics courses (both calculus and algebra based).  Most introductory physics textbooks cover the same set of topics:</p> Newtonian mechanics Waves and sound Thermodynamics Electromagnetism Optics Modern physics (relativity, atomic, nuclear, particle) <p>There is something puzzling but profound about this list of topics.  Why do I say [...]</p></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>As a university physics professor, I regularly teach introductory physics courses (both calculus and algebra based).  Most introductory physics textbooks cover the same set of topics:</p>
-<ul>
-<li>Newtonian mechanics</li>
-<li>Waves and sound</li>
-<li>Thermodynamics</li>
-<li>Electromagnetism</li>
-<li>Optics</li>
-<li>Modern physics (relativity, atomic, nuclear, particle)</li>
-</ul>
-<p>There is something puzzling but profound about this list of topics.  Why do I say this?  <strong>Most of this material is hundreds of years old. </strong> Let’s think about this.</p>
-<p>Newton’s <strong>Principia</strong> was published in 1687.  Maxwell’s <strong>On Physical Lines of Force</strong> was published in 1861.  While there have been many advances in mechanics and electromagnetism since the 17th and 19th centuries, the material covered in introductory physics has been essentially unchanged for hundreds of years.  The same is largely true of thermodynamics and optics.</p>
-<p>What about the small number of topics listed under the heading “modern physics?”  As covered in the introductory physics textbooks and courses, most of this material is still about one hundred years old.  Thus, even though many of he most exciting discoveries in physics have taken place more recently (I am using “recently” very loosely here = the last 100 years) we don’t cover any of these things in our introductory physics classes.</p>
-<p>This has bothered me for a long time and I even feel like a bit of a heretic in bringing this up.  But I think this is a real problem.  Imagine introductory Astronomy without any images from the Hubble Space Telescope.  Imagine introductory Biology without a thorough treatment of DNA and genetics?  These things are laughable. You are probably thinking something like “that would be crazy, it would be so boring and students would be left with a horribly inaccurate impression of the subject.” What is so special about physics that we completely omit all of the spectacular discoveries of the last 100 years? Are students not suffering under this arrangement.</p>
-<p>Here are some of the reasons I have heard for not covering “more recent physics”:</p>
-<ul>
-<li><span style="line-height: 14px;">All of those engineering, chemistry, biology majors really, really need to know all of this classical physics.  The faculty in these other departments would protest loudly if we made any change.</span></li>
-<li>These same majors don’t need to know anything about more recent physics.</li>
-<li>All of the more recent physics is horribly difficult and mathematical, beyond what is realistic to cover in an introductory class.</li>
-<li>To understand more recent physics, you first have to completely understand classical physics.</li>
-</ul>
-<p>Do we really believe all of these reasons? Does this bother anyone else? What would it look like to begin to change our introductory physics courses to address this problem?</p></div>
-    </content>
-    <updated>2013-05-23T22:04:19Z</updated>
-    <category term="Physics"/>
-    <author>
-      <name>Brian Granger</name>
-    </author>
-    <source>
-      <id>http://brianegranger.com</id>
-      <link href="http://brianegranger.com/?feed=rss2" rel="self" type="application/atom+xml"/>
-      <link href="http://brianegranger.com" rel="alternate" type="text/html"/>
-      <subtitle>Physics ∩ Computing</subtitle>
-      <title>Brian E. Granger</title>
-      <updated>2013-07-16T18:00:14Z</updated>
+      <updated>2013-07-17T16:46:49Z</updated>
     </source>
   </entry>
 </feed>

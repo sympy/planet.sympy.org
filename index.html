@@ -23,6 +23,59 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>July 17, 2013</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://meclark256.wordpress.com" title="My GSOC Adventure with SymPy">Mary Clark</a></h3>
+
+
+<div class="entrygroup" id="http://meclark256.wordpress.com/?p=2">
+<h4 lang="en"><a href="http://meclark256.wordpress.com/2013/07/17/dynkin-diagrams-and-cartan-matrices/">Dynkin diagrams and Cartan matrices</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p>First off, I’ll start by saying I’ve just made another PR (<a href="https://github.com/sympy/sympy/pull/2297" rel="nofollow">https://github.com/sympy/sympy/pull/2297</a>) which includes the code for the C and D series, as well as the exception Lie algebras of type E, F, and G.  </p>
+<p>So, this week so far has really been a mix of things, as far as what I’ve been working on.  I’ve done a fair amount of (attempting to) clean up code for type_A.py so as to make it ready to actually be merged with sympy master.  I think I’m heading in the right direction on that front, though I doubt that I’m all the way there.  There are always more typos or trailing white spaces to fix.</p>
+<p>I’ve also (more or less) put together Cartan_Matrix.py.  Originally, this was going to be a subclass (I think of CartanType? Not really sure what exactly I was thinking when I wrote my proposal).  However, once I actually started thinking about things (and after consulting with David), I think it actually makes much more sense to just have a single method, called CartanMatrix.  As written, it takes an argument t, and then returns CartanType(t).cartan_matrix.   Then, the user can do things like<br />
+&gt;&gt;&gt; CartanMatrix(“A2″)<br />
+[2 -1]<br />
+[-1 2]</p>
+<p>As written, the naming convention obviously goes against camel case, and is named as if it were a class.  However I’d like to keep it this way.  I’m finding it difficult to be able to vocalise /why/ exactly, so I suppose some discussion on this front would be useful/necessary.</p>
+<p>This sort of leads on to dynkin_diagram.py.  I’m still trying to think/decide whether or not I should go in the same way that I did with cartan_matrix, or if I should make it an actual class.  Currently I don’t have anything about dynkin diagrams coded into type_A, type_B etc but it would be easy enough (once I get past figuring out how to do the ascii art and whatnot) to add that into those files.  Alternatively, I could just hardcode it into dynkin_diagram.py.  I’m thinking that it might make more sense to do things in the same fashion as cartan_matrix, since I don’t really want to have this (potential) class do anything /other/ than display the Dynkin diagram, so it would probably be overkill to have it be a class.  </p>
+<p>In any case, I suppose that I have a little bit more time to think about this, because I need to figure out how exactly to do the ascii art that will be the actual diagrams.  Type A is obviously very easy, because the diagram has no double/triple lines or arrows or weird angles.  I want type A to look like:</p>
+<p>0–0–0….-0</p>
+<p>Type B is again fairly easy:<br />
+0–0–0….0=&gt;=0</p>
+<p>as is C:<br />
+0–0–0…0=&lt;=0<br />
+and type F is very similar.</p>
+<p>However, type G has a triple line with an arrow, and I'm not sure how to do that.  Type E has one edge that sticks up, so it'll take up two or three lines, and I'll need to figure out how to print that out, and similarly for D.</p>
+<p>So….that's pretty much what's going on right now.  Having typed that all out, I think that I have come to a conclusion on how I want to structure dynkin_diagram.py which is good.  It should also be pretty easy to implement things for type_A at the very least, so that's what I'm going to work on tomorrow and Friday.  We'll see where that gets me!</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/2/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/2/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=2&amp;subd=meclark256&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://meclark256.wordpress.com/2013/07/17/dynkin-diagrams-and-cartan-matrices/">by meclark256 at July 17, 2013 08:32 PM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>July 16, 2013</h2>
 
 <div class="channelgroup">
@@ -2699,62 +2752,6 @@ Here D is a non square positive integer.</p>
 </div>
 
 </div>
-<div class="daygroup">
-<h2>May 23, 2013</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://brianegranger.com" title="Brian E. Granger">Brian Granger</a></h3>
-
-
-<div class="entrygroup" id="http://www.brianegranger.com/?p=65">
-<h4 lang="en-US"><a href="http://brianegranger.com/?p=65">Will we ever get past classical physics?</a></h4>
-<div class="entry">
-<div class="content" lang="en-US">
-<p>As a university physics professor, I regularly teach introductory physics courses (both calculus and algebra based).  Most introductory physics textbooks cover the same set of topics:</p>
-<ul>
-<li>Newtonian mechanics</li>
-<li>Waves and sound</li>
-<li>Thermodynamics</li>
-<li>Electromagnetism</li>
-<li>Optics</li>
-<li>Modern physics (relativity, atomic, nuclear, particle)</li>
-</ul>
-<p>There is something puzzling but profound about this list of topics.  Why do I say this?  <strong>Most of this material is hundreds of years old. </strong> Let’s think about this.</p>
-<p>Newton’s <strong>Principia</strong> was published in 1687.  Maxwell’s <strong>On Physical Lines of Force</strong> was published in 1861.  While there have been many advances in mechanics and electromagnetism since the 17th and 19th centuries, the material covered in introductory physics has been essentially unchanged for hundreds of years.  The same is largely true of thermodynamics and optics.</p>
-<p>What about the small number of topics listed under the heading “modern physics?”  As covered in the introductory physics textbooks and courses, most of this material is still about one hundred years old.  Thus, even though many of he most exciting discoveries in physics have taken place more recently (I am using “recently” very loosely here = the last 100 years) we don’t cover any of these things in our introductory physics classes.</p>
-<p>This has bothered me for a long time and I even feel like a bit of a heretic in bringing this up.  But I think this is a real problem.  Imagine introductory Astronomy without any images from the Hubble Space Telescope.  Imagine introductory Biology without a thorough treatment of DNA and genetics?  These things are laughable. You are probably thinking something like “that would be crazy, it would be so boring and students would be left with a horribly inaccurate impression of the subject.” What is so special about physics that we completely omit all of the spectacular discoveries of the last 100 years? Are students not suffering under this arrangement.</p>
-<p>Here are some of the reasons I have heard for not covering “more recent physics”:</p>
-<ul>
-<li><span style="line-height: 14px;">All of those engineering, chemistry, biology majors really, really need to know all of this classical physics.  The faculty in these other departments would protest loudly if we made any change.</span></li>
-<li>These same majors don’t need to know anything about more recent physics.</li>
-<li>All of the more recent physics is horribly difficult and mathematical, beyond what is realistic to cover in an introductory class.</li>
-<li>To understand more recent physics, you first have to completely understand classical physics.</li>
-</ul>
-<p>Do we really believe all of these reasons? Does this bother anyone else? What would it look like to begin to change our introductory physics courses to address this problem?</p></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://brianegranger.com/?p=65">by Brian Granger at May 23, 2013 10:04 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -2898,7 +2895,7 @@ Here D is a non square positive integer.</p>
 
 <p>
 <strong>Last updated:</strong><br>
-July 16, 2013 06:00 PM<br>
+July 17, 2013 08:40 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
