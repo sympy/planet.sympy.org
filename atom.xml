@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2013-07-20T22:00:30Z</updated>
+  <updated>2013-07-21T04:40:29Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,45 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry xml:lang="en">
+    <id>http://manojbits.wordpress.com/?p=656</id>
+    <link href="http://manojbits.wordpress.com/2013/07/21/back-on-track-hopefully/" rel="alternate" type="text/html"/>
+    <title>Back on track, hopefully</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Hi, If you had read my rant on my previous post and the posts before that too, you would realized my frustration with the Maple Paper. Thankfully Raoul gave me a series of research papers, which gave a more logical way of calculating the infinitesimals. Also, I had been on a “vacation” for four days […]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=manojbits.wordpress.com&amp;blog=31971756&amp;post=656&amp;subd=manojbits&amp;ref=&amp;feed=1" width="1"/></div>
+    </summary>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Hi, If you had read my rant on my previous post and the posts before that too, you would realized my frustration with the Maple Paper. Thankfully Raoul gave me a series of research papers, which gave a more logical way of calculating the infinitesimals. Also, I had been on a “vacation” for four days and hence did nothing those four days. Rejuvenated (I think) after my “vacation”, I plan to speed up work the coming days. However this is what I managed to do, the previous weekend, and yesterday.</p>
+<p>1. <strong>Improve the documentation </strong>: I had written the documentation, using normal English. I rewrote the maths part using sphinx, (which is a tool that helps neat rendering of mathematical stuff) . I had some trouble with the technical mathematical definitions, but thanks to Sean, this PR is finally merged. <a href="https://github.com/sympy/sympy/pull/2282" rel="nofollow">https://github.com/sympy/sympy/pull/2282</a></p>
+<p>2. <strong>Refactor the existing code:  </strong>I also found out I would be needing to rewrite most of my heuristic code, due to the new research paper, I optimized it a bit, meaning it would break if it found the first infinitesimals, instead of looping through to find out all infinitesimals. There is still work to be done, but atleast I got it in. <a href="https://github.com/sympy/sympy/pull/2286" rel="nofollow">https://github.com/sympy/sympy/pull/2286</a></p>
+<p>3. <strong>Rewrite the second heuristic: </strong>In one of my previous posts <a href="http://manojbits.wordpress.com/2013/06/18/algebraicity-dsolve-and-core-sympy/" rel="nofollow">http://manojbits.wordpress.com/2013/06/18/algebraicity-dsolve-and-core-sympy/</a> , I described the second heuristic. However in one of the papers, there seems to a better way to find out if either <img alt="\xi" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cxi&amp;bg=fff&amp;fg=444444&amp;s=0" title="\xi"/> or <img alt="\eta" class="latex" src="http://s0.wp.com/latex.php?latex=%5Ceta&amp;bg=fff&amp;fg=444444&amp;s=0" title="\eta"/> is of the form <img alt="f(x)*g(y)" class="latex" src="http://s0.wp.com/latex.php?latex=f%28x%29%2Ag%28y%29&amp;bg=fff&amp;fg=444444&amp;s=0" title="f(x)*g(y)"/> when the other is zero. Before going into further details, one would have to know what an inverse ode is. An inverse ode is when you replace <img alt="f(x)" class="latex" src="http://s0.wp.com/latex.php?latex=f%28x%29&amp;bg=fff&amp;fg=444444&amp;s=0" title="f(x)"/> by <img alt="x" class="latex" src="http://s0.wp.com/latex.php?latex=x&amp;bg=fff&amp;fg=444444&amp;s=0" title="x"/> and vice versa in the ODE,  For example, the inverse ODE of <img alt="\frac{dy}{dx} = h(x, y)" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cfrac%7Bdy%7D%7Bdx%7D+%3D+h%28x%2C+y%29&amp;bg=fff&amp;fg=444444&amp;s=0" title="\frac{dy}{dx} = h(x, y)"/> would be <img alt="\frac{dy}{dx} = h(y, x)" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cfrac%7Bdy%7D%7Bdx%7D+%3D+h%28y%2C+x%29&amp;bg=fff&amp;fg=444444&amp;s=0" title="\frac{dy}{dx} = h(y, x)"/>. So the paper says that, if  <img alt="\frac{1}{h^2}\frac{\partial^2 \left(\log h \right)}{\partial x \partial y}" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cfrac%7B1%7D%7Bh%5E2%7D%5Cfrac%7B%5Cpartial%5E2+%5Cleft%28%5Clog+h+%5Cright%29%7D%7B%5Cpartial+x+%5Cpartial+y%7D&amp;bg=fff&amp;fg=444444&amp;s=0" title="\frac{1}{h^2}\frac{\partial^2 \left(\log h \right)}{\partial x \partial y}"/> is separable in <img alt="x" class="latex" src="http://s0.wp.com/latex.php?latex=x&amp;bg=fff&amp;fg=444444&amp;s=0" title="x"/> and <img alt="y" class="latex" src="http://s0.wp.com/latex.php?latex=y&amp;bg=fff&amp;fg=444444&amp;s=0" title="y"/> , then <img alt="\eta" class="latex" src="http://s0.wp.com/latex.php?latex=%5Ceta&amp;bg=fff&amp;fg=444444&amp;s=0" title="\eta"/> would be of the form <img alt="f(x)*g(y)" class="latex" src="http://s0.wp.com/latex.php?latex=f%28x%29%2Ag%28y%29&amp;bg=fff&amp;fg=444444&amp;s=0" title="f(x)*g(y)"/> and <img alt="\xi" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cxi&amp;bg=fff&amp;fg=444444&amp;s=0" title="\xi"/> would be zero. Now the factors containing <img alt="x" class="latex" src="http://s0.wp.com/latex.php?latex=x&amp;bg=fff&amp;fg=444444&amp;s=0" title="x"/> when <img alt="\frac{1}{h^2}\frac{\partial^2 \left(\log h \right)}{\partial x \partial y}" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cfrac%7B1%7D%7Bh%5E2%7D%5Cfrac%7B%5Cpartial%5E2+%5Cleft%28%5Clog+h+%5Cright%29%7D%7B%5Cpartial+x+%5Cpartial+y%7D&amp;bg=fff&amp;fg=444444&amp;s=0" title="\frac{1}{h^2}\frac{\partial^2 \left(\log h \right)}{\partial x \partial y}"/> is separated, gives <img alt="f(x)" class="latex" src="http://s0.wp.com/latex.php?latex=f%28x%29&amp;bg=fff&amp;fg=444444&amp;s=0" title="f(x)"/> , and <img alt="g(y)" class="latex" src="http://s0.wp.com/latex.php?latex=g%28y%29&amp;bg=fff&amp;fg=444444&amp;s=0" title="g(y)"/> can be found out by integrating <img alt="e^{f*\frac{\partial }{\partial x}\left( \frac{1}{Fh}\right)}" class="latex" src="http://s0.wp.com/latex.php?latex=e%5E%7Bf%2A%5Cfrac%7B%5Cpartial+%7D%7B%5Cpartial+x%7D%5Cleft%28+%5Cfrac%7B1%7D%7BFh%7D%5Cright%29%7D&amp;bg=fff&amp;fg=444444&amp;s=0" title="e^{f*\frac{\partial }{\partial x}\left( \frac{1}{Fh}\right)}"/> with respect to <img alt="y" class="latex" src="http://s0.wp.com/latex.php?latex=y&amp;bg=fff&amp;fg=444444&amp;s=0" title="y"/>. If you need to know the condition for which, <img alt="\xi" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cxi&amp;bg=fff&amp;fg=444444&amp;s=0" title="\xi"/> is of the form <img alt="f(x)*g(y)" class="latex" src="http://s0.wp.com/latex.php?latex=f%28x%29%2Ag%28y%29&amp;bg=fff&amp;fg=444444&amp;s=0" title="f(x)*g(y)"/> and <img alt="\eta" class="latex" src="http://s0.wp.com/latex.php?latex=%5Ceta&amp;bg=fff&amp;fg=444444&amp;s=0" title="\eta"/> is zero, then one has to apply the same algorithm to the inverse ODE, and reverse the coordinates at the end. I neither know how this works out, nor did I try to find out why, however it works well and that is good enough for me right now.</p>
+<p>I guess that’s all.</p>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/manojbits.wordpress.com/656/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/manojbits.wordpress.com/656/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=manojbits.wordpress.com&amp;blog=31971756&amp;post=656&amp;subd=manojbits&amp;ref=&amp;feed=1" width="1"/></div>
+    </content>
+    <updated>2013-07-21T04:30:29Z</updated>
+    <category term="SymPy"/>
+    <category term="first order"/>
+    <category term="gsoc"/>
+    <category term="gsoc2013"/>
+    <category term="heuristics"/>
+    <category term="lie-group ode"/>
+    <category term="ode"/>
+    <category term="python"/>
+    <category term="sympy."/>
+    <author>
+      <name>Manoj Kumar</name>
+    </author>
+    <source>
+      <id>http://manojbits.wordpress.com</id>
+      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
+      <link href="http://manojbits.wordpress.com/category/sympy-2/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://manojbits.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://manojbits.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <subtitle>My journey,my life</subtitle>
+      <title>Perspective » SymPy</title>
+      <updated>2013-07-21T04:40:25Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en">
     <id>http://theperceptiveway.wordpress.com/?p=104</id>
@@ -57,7 +96,7 @@
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-20T22:00:27Z</updated>
+      <updated>2013-07-21T04:40:26Z</updated>
     </source>
   </entry>
 
@@ -100,7 +139,7 @@ and type F is very similar.</p>
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-20T22:00:28Z</updated>
+      <updated>2013-07-21T04:40:26Z</updated>
     </source>
   </entry>
 
@@ -231,7 +270,7 @@ Another new tool I learned to use this week was Sphinx. I like the html document
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-20T22:00:28Z</updated>
+      <updated>2013-07-21T04:40:27Z</updated>
     </source>
   </entry>
 
@@ -386,7 +425,7 @@ Another new tool I learned to use this week was Sphinx. I like the html document
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-20T22:00:25Z</updated>
+      <updated>2013-07-21T04:40:23Z</updated>
     </source>
   </entry>
 
@@ -460,7 +499,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My journey,my life</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-07-20T03:40:25Z</updated>
+      <updated>2013-07-21T04:40:25Z</updated>
     </source>
   </entry>
 
@@ -493,7 +532,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-20T22:00:27Z</updated>
+      <updated>2013-07-21T04:40:26Z</updated>
     </source>
   </entry>
 
@@ -530,7 +569,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-20T22:00:28Z</updated>
+      <updated>2013-07-21T04:40:26Z</updated>
     </source>
   </entry>
 
@@ -633,7 +672,7 @@ I know this is a lot of talking and nothing like psudeo code, though we can draw
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-20T22:00:25Z</updated>
+      <updated>2013-07-21T04:40:23Z</updated>
     </source>
   </entry>
 
@@ -699,7 +738,7 @@ fab vagrant release
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-07-20T22:00:10Z</updated>
+      <updated>2013-07-21T04:40:07Z</updated>
     </source>
   </entry>
 
@@ -871,7 +910,7 @@ fab vagrant release
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-20T22:00:27Z</updated>
+      <updated>2013-07-21T04:40:26Z</updated>
     </source>
   </entry>
 
@@ -906,7 +945,7 @@ I was able to make use of both of them in my implementation for the multivariate
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-20T22:00:28Z</updated>
+      <updated>2013-07-21T04:40:27Z</updated>
     </source>
   </entry>
 
@@ -958,7 +997,7 @@ I was able to make use of both of them in my implementation for the multivariate
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-20T22:00:28Z</updated>
+      <updated>2013-07-21T04:40:26Z</updated>
     </source>
   </entry>
 
@@ -1016,7 +1055,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My journey,my life</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-07-20T03:40:25Z</updated>
+      <updated>2013-07-21T04:40:25Z</updated>
     </source>
   </entry>
 
@@ -1142,7 +1181,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-07-20T22:00:10Z</updated>
+      <updated>2013-07-21T04:40:07Z</updated>
     </source>
   </entry>
 
@@ -1247,7 +1286,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-20T22:00:27Z</updated>
+      <updated>2013-07-21T04:40:26Z</updated>
     </source>
   </entry>
 
@@ -1279,7 +1318,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-20T22:00:28Z</updated>
+      <updated>2013-07-21T04:40:27Z</updated>
     </source>
   </entry>
 
@@ -1311,7 +1350,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-20T22:00:28Z</updated>
+      <updated>2013-07-21T04:40:27Z</updated>
     </source>
   </entry>
 
@@ -1429,7 +1468,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-20T22:00:28Z</updated>
+      <updated>2013-07-21T04:40:26Z</updated>
     </source>
   </entry>
 
@@ -1480,7 +1519,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My journey,my life</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-07-20T03:40:25Z</updated>
+      <updated>2013-07-21T04:40:25Z</updated>
     </source>
   </entry>
 
@@ -1541,7 +1580,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-20T22:00:25Z</updated>
+      <updated>2013-07-21T04:40:23Z</updated>
     </source>
   </entry>
 
@@ -1700,7 +1739,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-20T22:00:28Z</updated>
+      <updated>2013-07-21T04:40:27Z</updated>
     </source>
   </entry>
 
@@ -1794,7 +1833,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-20T22:00:27Z</updated>
+      <updated>2013-07-21T04:40:26Z</updated>
     </source>
   </entry>
 
@@ -1858,7 +1897,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-20T22:00:28Z</updated>
+      <updated>2013-07-21T04:40:26Z</updated>
     </source>
   </entry>
 
@@ -1921,7 +1960,7 @@ into a text file. For those interested, however I made a few changes manually ev
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My journey,my life</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-07-20T03:40:25Z</updated>
+      <updated>2013-07-21T04:40:25Z</updated>
     </source>
   </entry>
 
@@ -1964,7 +2003,7 @@ into a text file. For those interested, however I made a few changes manually ev
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-20T22:00:28Z</updated>
+      <updated>2013-07-21T04:40:26Z</updated>
     </source>
   </entry>
 
@@ -2041,7 +2080,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-20T22:00:27Z</updated>
+      <updated>2013-07-21T04:40:26Z</updated>
     </source>
   </entry>
 
@@ -2087,7 +2126,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My journey,my life</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-07-20T03:40:25Z</updated>
+      <updated>2013-07-21T04:40:25Z</updated>
     </source>
   </entry>
 
@@ -2264,7 +2303,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My journey,my life</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-07-20T03:40:25Z</updated>
+      <updated>2013-07-21T04:40:25Z</updated>
     </source>
   </entry>
 
@@ -2294,7 +2333,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-20T22:00:25Z</updated>
+      <updated>2013-07-21T04:40:23Z</updated>
     </source>
   </entry>
 
@@ -2322,7 +2361,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="https://sites.google.com/feeds/content/site/v9joshi/batch" rel="http://schemas.google.com/g/2005#batch" type="application/atom+xml"/>
       <link href="https://sites.google.com/feeds/content/site/v9joshi?parent=5420265600325595988&amp;kind=announcement" rel="self" type="application/atom+xml"/>
       <title>Posts of GSoC Blog</title>
-      <updated>2013-07-20T22:00:29Z</updated>
+      <updated>2013-07-21T04:40:27Z</updated>
     </source>
   </entry>
 
@@ -2417,7 +2456,7 @@ based features.</p></div></td></tr></tbody></table></div>
       <link href="https://sites.google.com/feeds/content/site/v9joshi/batch" rel="http://schemas.google.com/g/2005#batch" type="application/atom+xml"/>
       <link href="https://sites.google.com/feeds/content/site/v9joshi?parent=5420265600325595988&amp;kind=announcement" rel="self" type="application/atom+xml"/>
       <title>Posts of GSoC Blog</title>
-      <updated>2013-07-20T22:00:29Z</updated>
+      <updated>2013-07-21T04:40:27Z</updated>
     </source>
   </entry>
 
@@ -2447,7 +2486,7 @@ based features.</p></div></td></tr></tbody></table></div>
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-20T22:00:28Z</updated>
+      <updated>2013-07-21T04:40:27Z</updated>
     </source>
   </entry>
 
@@ -2497,37 +2536,7 @@ Here D is a non square positive integer.</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-20T22:00:27Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://manojbits.wordpress.com/?p=429</id>
-    <link href="http://manojbits.wordpress.com/2013/05/28/gsoc-2013-with-sympy/" rel="alternate" type="text/html"/>
-    <title>GSoC 2013 with SymPy</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Hello. I’ve been lucky enough to be selected to do a project this summer for Sympy. This would be the project proposal that I would be working on, Improved ODE Solver in SymPy and my mentor would be Sean Vig. The application process itself was a good learning experience for me, fixing bugs and adding […]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=manojbits.wordpress.com&amp;blog=31971756&amp;post=429&amp;subd=manojbits&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Hello. I’ve been lucky enough to be selected to do a project this summer for Sympy. This would be the project proposal that I would be working on, <a href="https://google-melange.appspot.com/gsoc/proposal/review/google/gsoc2013/manojkumar/1">Improved ODE Solver in SymPy</a> and my mentor would be Sean Vig. The application process itself was a good learning experience for me, fixing bugs and adding enhancements and was probably one of the reasons I got selected. I hope to increase my programming abilities and contribute in a much bigger way this summer and work toward the development of SymPy. This would be my SymPy blog too, and I would posting atleast one update every week.</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/manojbits.wordpress.com/429/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/manojbits.wordpress.com/429/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=manojbits.wordpress.com&amp;blog=31971756&amp;post=429&amp;subd=manojbits&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2013-05-28T15:22:30Z</updated>
-    <category term="SymPy"/>
-    <category term="gsoc"/>
-    <category term="gsoc2013"/>
-    <category term="sympy."/>
-    <author>
-      <name>Manoj Kumar</name>
-    </author>
-    <source>
-      <id>http://manojbits.wordpress.com</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://manojbits.wordpress.com/category/sympy-2/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://manojbits.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://manojbits.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>My journey,my life</subtitle>
-      <title>Perspective » SymPy</title>
-      <updated>2013-07-20T03:40:25Z</updated>
+      <updated>2013-07-21T04:40:26Z</updated>
     </source>
   </entry>
 </feed>
