@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2013-07-21T08:20:28Z</updated>
+  <updated>2013-07-21T15:00:31Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,41 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry xml:lang="en">
+    <id>http://sophiessympyblog.wordpress.com/?p=197</id>
+    <link href="http://sophiessympyblog.wordpress.com/2013/07/21/fifth-week/" rel="alternate" type="text/html"/>
+    <title>Fifth week</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">I began this week with tracking down two problems with the modular GCD algorithm for multivariate integer polynomials. The first one was fixed by choosing evaluation points randomly instead of in a fixed order. For example, this happened with the polynomials and because is unlucky for every prime, but this was never detected. The second […]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=197&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" width="1"/></div>
+    </summary>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p style="text-align: justify;">I began this week with tracking down two problems with the modular GCD algorithm for multivariate integer polynomials. The first one was fixed by choosing evaluation points randomly instead of in a fixed order. For example, this happened with the polynomials <img alt="f = x + y" class="latex" src="http://s0.wp.com/latex.php?latex=f+%3D+x+%2B+y&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="f = x + y"/> and <img alt="g = x + y + z" class="latex" src="http://s0.wp.com/latex.php?latex=g+%3D+x+%2B+y+%2B+z&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="g = x + y + z"/> because <img alt="z = 0" class="latex" src="http://s0.wp.com/latex.php?latex=z+%3D+0&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="z = 0"/> is unlucky for every prime, but this was never detected.<br/>
+The second problem occurred with polynomials in many variables. If one of the first variables was evaluated at an unlucky point, the algorithm would try out every combination of evaluation points for the remaining variables before the unlucky one was discarded. This was fixed by giving up an evaluation point if too many failures happen.<br/>
+The good news is that now <code>bin/test</code> passes when <code>heugcd</code> is replaced by <code>modgcd_multivariate</code>.</p>
+<p style="text-align: justify;">After that, I started implementing the modular GCD algorithm for polynomials over (simple) algebraic function fields, as described in [1]. The setting is as follows. We consider the field of rational functions in the parameters <img alt="t_1, \ldots, t_k" class="latex" src="http://s0.wp.com/latex.php?latex=t_1%2C+%5Cldots%2C+t_k&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="t_1, \ldots, t_k"/>, i.e. <img alt="\mathbb Q(t_1, \ldots, t_k)" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Q%28t_1%2C+%5Cldots%2C+t_k%29&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\mathbb Q(t_1, \ldots, t_k)"/>. Since we also want to be able to work with expressions like <img alt="\sqrt{2}, \, \sqrt{t_1}" class="latex" src="http://s0.wp.com/latex.php?latex=%5Csqrt%7B2%7D%2C+%5C%2C+%5Csqrt%7Bt_1%7D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\sqrt{2}, \, \sqrt{t_1}"/> etc., we construct a suitable algebraic extension <img alt="L = \mathbb Q(t_1, \ldots, t_k)[z] / \langle m(z) \rangle" class="latex" src="http://s0.wp.com/latex.php?latex=L+%3D+%5Cmathbb+Q%28t_1%2C+%5Cldots%2C+t_k%29%5Bz%5D+%2F+%5Clangle+m%28z%29+%5Crangle&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="L = \mathbb Q(t_1, \ldots, t_k)[z] / \langle m(z) \rangle"/>, where <img alt="m(z) \in \mathbb Q(t_1, \ldots, t_k)[z]" class="latex" src="http://s0.wp.com/latex.php?latex=m%28z%29+%5Cin+%5Cmathbb+Q%28t_1%2C+%5Cldots%2C+t_k%29%5Bz%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="m(z) \in \mathbb Q(t_1, \ldots, t_k)[z]"/> is monic and irreducible. Our goal now is to calculate the GCD of two univariate polynomials <img alt="f(x), g(x) \in L[x]" class="latex" src="http://s0.wp.com/latex.php?latex=f%28x%29%2C+g%28x%29+%5Cin+L%5Bx%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="f(x), g(x) \in L[x]"/>.</p>
+<p style="text-align: justify;">First, the problem is reduced to polynomials over <img alt="\mathbb Z[t_1, \ldots, t_k][z] / \langle m(z) \rangle" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Z%5Bt_1%2C+%5Cldots%2C+t_k%5D%5Bz%5D+%2F+%5Clangle+m%28z%29+%5Crangle&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\mathbb Z[t_1, \ldots, t_k][z] / \langle m(z) \rangle"/> by clearing fractions in <img alt="f" class="latex" src="http://s0.wp.com/latex.php?latex=f&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="f"/> and <img alt="g" class="latex" src="http://s0.wp.com/latex.php?latex=g&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="g"/>. So basically, we are working with polynomials <img alt="f, g \in \mathbb Z[t_1, \ldots, t_k][z, x]" class="latex" src="http://s0.wp.com/latex.php?latex=f%2C+g+%5Cin+%5Cmathbb+Z%5Bt_1%2C+%5Cldots%2C+t_k%5D%5Bz%2C+x%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="f, g \in \mathbb Z[t_1, \ldots, t_k][z, x]"/>. As always, the main loop picks suitable prime numbers <img alt="p" class="latex" src="http://s0.wp.com/latex.php?latex=p&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="p"/>, calculates the GCD of <img alt="f \; \mathrm{mod} \, p" class="latex" src="http://s0.wp.com/latex.php?latex=f+%5C%3B+%5Cmathrm%7Bmod%7D+%5C%2C+p&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="f \; \mathrm{mod} \, p"/> and <img alt="g \; \mathrm{mod} \, p" class="latex" src="http://s0.wp.com/latex.php?latex=g+%5C%3B+%5Cmathrm%7Bmod%7D+%5C%2C+p&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="g \; \mathrm{mod} \, p"/> with algorithm P and combines the new result with previous ones (for different primes) using the Chinese Remainder Theorem. Here we only pick those prime numbers and GCDs, where the leading terms match the one of the new GCD and obtain <img alt="c \; \mathrm{mod}\, m_c" class="latex" src="http://s0.wp.com/latex.php?latex=c+%5C%3B+%5Cmathrm%7Bmod%7D%5C%2C+m_c&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="c \; \mathrm{mod}\, m_c"/>. Next we use integer rational reconstruction (see [2]) on the coefficients of <img alt="c \; \mathrm{mod}\, m_c" class="latex" src="http://s0.wp.com/latex.php?latex=c+%5C%3B+%5Cmathrm%7Bmod%7D%5C%2C+m_c&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="c \; \mathrm{mod}\, m_c"/>, which tries to calculate <img alt="\frac a b \in \mathbb Q" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cfrac+a+b+%5Cin+%5Cmathbb+Q&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\frac a b \in \mathbb Q"/> from <img alt="a b^{-1} \; \mathrm{mod} \, m_c" class="latex" src="http://s0.wp.com/latex.php?latex=a+b%5E%7B-1%7D+%5C%3B+%5Cmathrm%7Bmod%7D+%5C%2C+m_c&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="a b^{-1} \; \mathrm{mod} \, m_c"/>. This will only succeed if <img alt="a" class="latex" src="http://s0.wp.com/latex.php?latex=a&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="a"/> and <img alt="b" class="latex" src="http://s0.wp.com/latex.php?latex=b&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="b"/> are smaller than <img alt="\sqrt{\frac {m_c} 2}" class="latex" src="http://s0.wp.com/latex.php?latex=%5Csqrt%7B%5Cfrac+%7Bm_c%7D+2%7D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\sqrt{\frac {m_c} 2}"/>. Finally we check if we have found our GCD with trial division.</p>
+<p style="text-align: justify;">Algorithm P works by recursively evaluating the parameters <img alt="t_1, \ldots, t_k" class="latex" src="http://s0.wp.com/latex.php?latex=t_1%2C+%5Cldots%2C+t_k&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="t_1, \ldots, t_k"/> for <img alt="f, g" class="latex" src="http://s0.wp.com/latex.php?latex=f%2C+g&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="f, g"/> and <img alt="m" class="latex" src="http://s0.wp.com/latex.php?latex=m&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="m"/>. When there are no parameters left, we have two polynomials in <img alt="\mathbb Z_p[z] / \langle m(z) \rangle [x]" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Z_p%5Bz%5D+%2F+%5Clangle+m%28z%29+%5Crangle+%5Bx%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\mathbb Z_p[z] / \langle m(z) \rangle [x]"/>. Now we try to use the Euclidean Algorithm to compute their GCD. Because <img alt="m(z)" class="latex" src="http://s0.wp.com/latex.php?latex=m%28z%29&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="m(z)"/> may not be irreducible anymore, <img alt="\mathbb Z_p[z] / \langle m(z) \rangle" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Z_p%5Bz%5D+%2F+%5Clangle+m%28z%29+%5Crangle&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\mathbb Z_p[z] / \langle m(z) \rangle"/> is only a ring in general and we may encounter zero divisors. Therefore, it is possible that the Euclidean Algorithm fails. If a recursive call of algorithm P fails, then we have to choose a different evaluation point. Subresults are later combined with similar techniques as above. Again, we verify the result using trial division.</p>
+<p style="text-align: justify;">Next week I hope to finish a working version of this algorithm.</p>
+<p style="text-align: justify;">[1] <a href="http://www.cecm.sfu.ca/~mmonagan/papers/AFGCD.pdf" rel="nofollow">http://www.cecm.sfu.ca/~mmonagan/papers/AFGCD.pdf</a><br/>
+[2] <a href="http://dl.acm.org/citation.cfm?id=806398" rel="nofollow">http://dl.acm.org/citation.cfm?id=806398</a></p>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/197/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/197/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=197&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" width="1"/></div>
+    </content>
+    <updated>2013-07-21T14:58:48Z</updated>
+    <category term="Uncategorized"/>
+    <author>
+      <name>katjasophie</name>
+    </author>
+    <source>
+      <id>http://sophiessympyblog.wordpress.com</id>
+      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
+      <link href="http://sophiessympyblog.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://sophiessympyblog.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://sophiessympyblog.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <subtitle>my gsoc 2013 project</subtitle>
+      <title>sophie's sympy blog</title>
+      <updated>2013-07-21T15:00:28Z</updated>
+    </source>
+  </entry>
 
   <entry>
     <id>tag:blogger.com,1999:blog-5472769892551526876.post-4735040836898965200</id>
@@ -129,7 +164,7 @@
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-21T08:20:25Z</updated>
+      <updated>2013-07-21T15:00:27Z</updated>
     </source>
   </entry>
 
@@ -172,7 +207,7 @@ and type F is very similar.</p>
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-21T08:20:26Z</updated>
+      <updated>2013-07-21T15:00:28Z</updated>
     </source>
   </entry>
 
@@ -303,7 +338,7 @@ Another new tool I learned to use this week was Sphinx. I like the html document
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-21T08:20:26Z</updated>
+      <updated>2013-07-21T15:00:28Z</updated>
     </source>
   </entry>
 
@@ -458,7 +493,7 @@ Another new tool I learned to use this week was Sphinx. I like the html document
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-21T08:20:24Z</updated>
+      <updated>2013-07-21T15:00:26Z</updated>
     </source>
   </entry>
 
@@ -565,7 +600,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-21T08:20:25Z</updated>
+      <updated>2013-07-21T15:00:27Z</updated>
     </source>
   </entry>
 
@@ -602,7 +637,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-21T08:20:26Z</updated>
+      <updated>2013-07-21T15:00:28Z</updated>
     </source>
   </entry>
 
@@ -705,7 +740,7 @@ I know this is a lot of talking and nothing like psudeo code, though we can draw
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-21T08:20:24Z</updated>
+      <updated>2013-07-21T15:00:26Z</updated>
     </source>
   </entry>
 
@@ -771,7 +806,7 @@ fab vagrant release
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-07-21T08:20:07Z</updated>
+      <updated>2013-07-21T15:00:09Z</updated>
     </source>
   </entry>
 
@@ -943,7 +978,7 @@ fab vagrant release
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-21T08:20:25Z</updated>
+      <updated>2013-07-21T15:00:27Z</updated>
     </source>
   </entry>
 
@@ -978,7 +1013,7 @@ I was able to make use of both of them in my implementation for the multivariate
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-21T08:20:26Z</updated>
+      <updated>2013-07-21T15:00:28Z</updated>
     </source>
   </entry>
 
@@ -1030,7 +1065,7 @@ I was able to make use of both of them in my implementation for the multivariate
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-21T08:20:26Z</updated>
+      <updated>2013-07-21T15:00:28Z</updated>
     </source>
   </entry>
 
@@ -1214,7 +1249,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-07-21T08:20:07Z</updated>
+      <updated>2013-07-21T15:00:09Z</updated>
     </source>
   </entry>
 
@@ -1319,7 +1354,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-21T08:20:25Z</updated>
+      <updated>2013-07-21T15:00:27Z</updated>
     </source>
   </entry>
 
@@ -1351,7 +1386,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-21T08:20:26Z</updated>
+      <updated>2013-07-21T15:00:28Z</updated>
     </source>
   </entry>
 
@@ -1383,7 +1418,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-21T08:20:26Z</updated>
+      <updated>2013-07-21T15:00:28Z</updated>
     </source>
   </entry>
 
@@ -1501,7 +1536,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-21T08:20:26Z</updated>
+      <updated>2013-07-21T15:00:28Z</updated>
     </source>
   </entry>
 
@@ -1613,7 +1648,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-21T08:20:24Z</updated>
+      <updated>2013-07-21T15:00:26Z</updated>
     </source>
   </entry>
 
@@ -1772,7 +1807,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-21T08:20:26Z</updated>
+      <updated>2013-07-21T15:00:28Z</updated>
     </source>
   </entry>
 
@@ -1866,7 +1901,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-21T08:20:25Z</updated>
+      <updated>2013-07-21T15:00:27Z</updated>
     </source>
   </entry>
 
@@ -1930,7 +1965,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-21T08:20:26Z</updated>
+      <updated>2013-07-21T15:00:28Z</updated>
     </source>
   </entry>
 
@@ -2036,7 +2071,7 @@ into a text file. For those interested, however I made a few changes manually ev
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-21T08:20:26Z</updated>
+      <updated>2013-07-21T15:00:28Z</updated>
     </source>
   </entry>
 
@@ -2113,7 +2148,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://theperceptiveway.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Thilina Rathnayake</subtitle>
       <title>The Perceptive Way</title>
-      <updated>2013-07-21T08:20:25Z</updated>
+      <updated>2013-07-21T15:00:27Z</updated>
     </source>
   </entry>
 
@@ -2366,7 +2401,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-21T08:20:24Z</updated>
+      <updated>2013-07-21T15:00:26Z</updated>
     </source>
   </entry>
 
@@ -2394,7 +2429,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="https://sites.google.com/feeds/content/site/v9joshi/batch" rel="http://schemas.google.com/g/2005#batch" type="application/atom+xml"/>
       <link href="https://sites.google.com/feeds/content/site/v9joshi?parent=5420265600325595988&amp;kind=announcement" rel="self" type="application/atom+xml"/>
       <title>Posts of GSoC Blog</title>
-      <updated>2013-07-21T08:20:27Z</updated>
+      <updated>2013-07-21T15:00:29Z</updated>
     </source>
   </entry>
 
@@ -2489,37 +2524,7 @@ based features.</p></div></td></tr></tbody></table></div>
       <link href="https://sites.google.com/feeds/content/site/v9joshi/batch" rel="http://schemas.google.com/g/2005#batch" type="application/atom+xml"/>
       <link href="https://sites.google.com/feeds/content/site/v9joshi?parent=5420265600325595988&amp;kind=announcement" rel="self" type="application/atom+xml"/>
       <title>Posts of GSoC Blog</title>
-      <updated>2013-07-21T08:20:27Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://sophiessympyblog.wordpress.com/?p=33</id>
-    <link href="http://sophiessympyblog.wordpress.com/2013/05/30/hello-everybody/" rel="alternate" type="text/html"/>
-    <title>Hello everybody!</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">My name is Katja Sophie Hotz and I am studying Technical Mathematics at the Vienna University of Technology in Austria. I am in the final year of my master’s and have specialized in Mathematics in Computer Science. In this blog I will document the progress on my Google summer of Code 2013 project with the […]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=33&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p style="text-align: justify;">My name is Katja Sophie Hotz and I am studying Technical Mathematics at the Vienna University of Technology in Austria. I am in the final year of my master’s and have specialized in Mathematics in Computer Science.</p>
-<p style="text-align: justify;">In this blog I will document the progress on my Google summer of Code 2013 project with the title “Faster Algorithms for Polynomials over Algebraic Number Fields”.</p>
-<p style="text-align: justify;">The goal of this project is the implementation of faster greatest common divisor and factorization algorithms for univariate and multivariate polynomials over algebraic number fields. This is important for symbolic integration of rational functions and simplification of expressions among other things.</p>
-<p style="text-align: justify;">For more information you can take a look at <a href="https://github.com/sympy/sympy/wiki/GSoC-2013-Application-Katja-Sophie-Hotz:-Faster-Algorithms-for-Polynomials-over-Algebraic-Number-Fields">my proposal</a> on the SymPy Wiki.</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/33/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/33/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=33&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2013-05-30T16:42:18Z</updated>
-    <category term="Uncategorized"/>
-    <author>
-      <name>katjasophie</name>
-    </author>
-    <source>
-      <id>http://sophiessympyblog.wordpress.com</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://sophiessympyblog.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://sophiessympyblog.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://sophiessympyblog.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>my gsoc 2013 project</subtitle>
-      <title>sophie's sympy blog</title>
-      <updated>2013-07-21T08:20:26Z</updated>
+      <updated>2013-07-21T15:00:29Z</updated>
     </source>
   </entry>
 </feed>

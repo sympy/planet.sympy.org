@@ -33,6 +33,47 @@
 
 
 
+<h3><a href="http://sophiessympyblog.wordpress.com" title="sophie's sympy blog">Katja Sophie Hotz</a></h3>
+
+
+<div class="entrygroup" id="http://sophiessympyblog.wordpress.com/?p=197">
+<h4 lang="en"><a href="http://sophiessympyblog.wordpress.com/2013/07/21/fifth-week/">Fifth week</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p style="text-align: justify;">I began this week with tracking down two problems with the modular GCD algorithm for multivariate integer polynomials. The first one was fixed by choosing evaluation points randomly instead of in a fixed order. For example, this happened with the polynomials <img src="http://s0.wp.com/latex.php?latex=f+%3D+x+%2B+y&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="f = x + y" class="latex" title="f = x + y" /> and <img src="http://s0.wp.com/latex.php?latex=g+%3D+x+%2B+y+%2B+z&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="g = x + y + z" class="latex" title="g = x + y + z" /> because <img src="http://s0.wp.com/latex.php?latex=z+%3D+0&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="z = 0" class="latex" title="z = 0" /> is unlucky for every prime, but this was never detected.<br />
+The second problem occurred with polynomials in many variables. If one of the first variables was evaluated at an unlucky point, the algorithm would try out every combination of evaluation points for the remaining variables before the unlucky one was discarded. This was fixed by giving up an evaluation point if too many failures happen.<br />
+The good news is that now <code>bin/test</code> passes when <code>heugcd</code> is replaced by <code>modgcd_multivariate</code>.</p>
+<p style="text-align: justify;">After that, I started implementing the modular GCD algorithm for polynomials over (simple) algebraic function fields, as described in [1]. The setting is as follows. We consider the field of rational functions in the parameters <img src="http://s0.wp.com/latex.php?latex=t_1%2C+%5Cldots%2C+t_k&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="t_1, \ldots, t_k" class="latex" title="t_1, \ldots, t_k" />, i.e. <img src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Q%28t_1%2C+%5Cldots%2C+t_k%29&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\mathbb Q(t_1, \ldots, t_k)" class="latex" title="\mathbb Q(t_1, \ldots, t_k)" />. Since we also want to be able to work with expressions like <img src="http://s0.wp.com/latex.php?latex=%5Csqrt%7B2%7D%2C+%5C%2C+%5Csqrt%7Bt_1%7D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\sqrt{2}, \, \sqrt{t_1}" class="latex" title="\sqrt{2}, \, \sqrt{t_1}" /> etc., we construct a suitable algebraic extension <img src="http://s0.wp.com/latex.php?latex=L+%3D+%5Cmathbb+Q%28t_1%2C+%5Cldots%2C+t_k%29%5Bz%5D+%2F+%5Clangle+m%28z%29+%5Crangle&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="L = \mathbb Q(t_1, \ldots, t_k)[z] / \langle m(z) \rangle" class="latex" title="L = \mathbb Q(t_1, \ldots, t_k)[z] / \langle m(z) \rangle" />, where <img src="http://s0.wp.com/latex.php?latex=m%28z%29+%5Cin+%5Cmathbb+Q%28t_1%2C+%5Cldots%2C+t_k%29%5Bz%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="m(z) \in \mathbb Q(t_1, \ldots, t_k)[z]" class="latex" title="m(z) \in \mathbb Q(t_1, \ldots, t_k)[z]" /> is monic and irreducible. Our goal now is to calculate the GCD of two univariate polynomials <img src="http://s0.wp.com/latex.php?latex=f%28x%29%2C+g%28x%29+%5Cin+L%5Bx%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="f(x), g(x) \in L[x]" class="latex" title="f(x), g(x) \in L[x]" />.</p>
+<p style="text-align: justify;">First, the problem is reduced to polynomials over <img src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Z%5Bt_1%2C+%5Cldots%2C+t_k%5D%5Bz%5D+%2F+%5Clangle+m%28z%29+%5Crangle&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\mathbb Z[t_1, \ldots, t_k][z] / \langle m(z) \rangle" class="latex" title="\mathbb Z[t_1, \ldots, t_k][z] / \langle m(z) \rangle" /> by clearing fractions in <img src="http://s0.wp.com/latex.php?latex=f&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="f" class="latex" title="f" /> and <img src="http://s0.wp.com/latex.php?latex=g&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="g" class="latex" title="g" />. So basically, we are working with polynomials <img src="http://s0.wp.com/latex.php?latex=f%2C+g+%5Cin+%5Cmathbb+Z%5Bt_1%2C+%5Cldots%2C+t_k%5D%5Bz%2C+x%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="f, g \in \mathbb Z[t_1, \ldots, t_k][z, x]" class="latex" title="f, g \in \mathbb Z[t_1, \ldots, t_k][z, x]" />. As always, the main loop picks suitable prime numbers <img src="http://s0.wp.com/latex.php?latex=p&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="p" class="latex" title="p" />, calculates the GCD of <img src="http://s0.wp.com/latex.php?latex=f+%5C%3B+%5Cmathrm%7Bmod%7D+%5C%2C+p&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="f \; \mathrm{mod} \, p" class="latex" title="f \; \mathrm{mod} \, p" /> and <img src="http://s0.wp.com/latex.php?latex=g+%5C%3B+%5Cmathrm%7Bmod%7D+%5C%2C+p&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="g \; \mathrm{mod} \, p" class="latex" title="g \; \mathrm{mod} \, p" /> with algorithm P and combines the new result with previous ones (for different primes) using the Chinese Remainder Theorem. Here we only pick those prime numbers and GCDs, where the leading terms match the one of the new GCD and obtain <img src="http://s0.wp.com/latex.php?latex=c+%5C%3B+%5Cmathrm%7Bmod%7D%5C%2C+m_c&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="c \; \mathrm{mod}\, m_c" class="latex" title="c \; \mathrm{mod}\, m_c" />. Next we use integer rational reconstruction (see [2]) on the coefficients of <img src="http://s0.wp.com/latex.php?latex=c+%5C%3B+%5Cmathrm%7Bmod%7D%5C%2C+m_c&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="c \; \mathrm{mod}\, m_c" class="latex" title="c \; \mathrm{mod}\, m_c" />, which tries to calculate <img src="http://s0.wp.com/latex.php?latex=%5Cfrac+a+b+%5Cin+%5Cmathbb+Q&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\frac a b \in \mathbb Q" class="latex" title="\frac a b \in \mathbb Q" /> from <img src="http://s0.wp.com/latex.php?latex=a+b%5E%7B-1%7D+%5C%3B+%5Cmathrm%7Bmod%7D+%5C%2C+m_c&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="a b^{-1} \; \mathrm{mod} \, m_c" class="latex" title="a b^{-1} \; \mathrm{mod} \, m_c" />. This will only succeed if <img src="http://s0.wp.com/latex.php?latex=a&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="a" class="latex" title="a" /> and <img src="http://s0.wp.com/latex.php?latex=b&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="b" class="latex" title="b" /> are smaller than <img src="http://s0.wp.com/latex.php?latex=%5Csqrt%7B%5Cfrac+%7Bm_c%7D+2%7D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\sqrt{\frac {m_c} 2}" class="latex" title="\sqrt{\frac {m_c} 2}" />. Finally we check if we have found our GCD with trial division.</p>
+<p style="text-align: justify;">Algorithm P works by recursively evaluating the parameters <img src="http://s0.wp.com/latex.php?latex=t_1%2C+%5Cldots%2C+t_k&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="t_1, \ldots, t_k" class="latex" title="t_1, \ldots, t_k" /> for <img src="http://s0.wp.com/latex.php?latex=f%2C+g&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="f, g" class="latex" title="f, g" /> and <img src="http://s0.wp.com/latex.php?latex=m&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="m" class="latex" title="m" />. When there are no parameters left, we have two polynomials in <img src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Z_p%5Bz%5D+%2F+%5Clangle+m%28z%29+%5Crangle+%5Bx%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\mathbb Z_p[z] / \langle m(z) \rangle [x]" class="latex" title="\mathbb Z_p[z] / \langle m(z) \rangle [x]" />. Now we try to use the Euclidean Algorithm to compute their GCD. Because <img src="http://s0.wp.com/latex.php?latex=m%28z%29&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="m(z)" class="latex" title="m(z)" /> may not be irreducible anymore, <img src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Z_p%5Bz%5D+%2F+%5Clangle+m%28z%29+%5Crangle&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\mathbb Z_p[z] / \langle m(z) \rangle" class="latex" title="\mathbb Z_p[z] / \langle m(z) \rangle" /> is only a ring in general and we may encounter zero divisors. Therefore, it is possible that the Euclidean Algorithm fails. If a recursive call of algorithm P fails, then we have to choose a different evaluation point. Subresults are later combined with similar techniques as above. Again, we verify the result using trial division.</p>
+<p style="text-align: justify;">Next week I hope to finish a working version of this algorithm.</p>
+<p style="text-align: justify;">[1] <a href="http://www.cecm.sfu.ca/~mmonagan/papers/AFGCD.pdf" rel="nofollow">http://www.cecm.sfu.ca/~mmonagan/papers/AFGCD.pdf</a><br />
+[2] <a href="http://dl.acm.org/citation.cfm?id=806398" rel="nofollow">http://dl.acm.org/citation.cfm?id=806398</a></p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/197/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/197/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=197&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://sophiessympyblog.wordpress.com/2013/07/21/fifth-week/">by katjasophie at July 21, 2013 02:58 PM</a>
+</p>
+</div>
+</div>
+
+
+
+</div>
+<div class="channelgroup">
+
+
+
+
+
+
+
 <h3><a href="http://codesachin.blogspot.com/" title="Dream. Think. Code.">Sachin Joglekar</a></h3>
 
 
@@ -2720,46 +2761,6 @@ based features.</p></div></td></tr></tbody></table></div>
 </div>
 
 </div>
-<div class="daygroup">
-<h2>May 30, 2013</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://sophiessympyblog.wordpress.com" title="sophie's sympy blog">Katja Sophie Hotz</a></h3>
-
-
-<div class="entrygroup" id="http://sophiessympyblog.wordpress.com/?p=33">
-<h4 lang="en"><a href="http://sophiessympyblog.wordpress.com/2013/05/30/hello-everybody/">Hello everybody!</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p style="text-align: justify;">My name is Katja Sophie Hotz and I am studying Technical Mathematics at the Vienna University of Technology in Austria. I am in the final year of my master’s and have specialized in Mathematics in Computer Science.</p>
-<p style="text-align: justify;">In this blog I will document the progress on my Google summer of Code 2013 project with the title “Faster Algorithms for Polynomials over Algebraic Number Fields”.</p>
-<p style="text-align: justify;">The goal of this project is the implementation of faster greatest common divisor and factorization algorithms for univariate and multivariate polynomials over algebraic number fields. This is important for symbolic integration of rational functions and simplification of expressions among other things.</p>
-<p style="text-align: justify;">For more information you can take a look at <a href="https://github.com/sympy/sympy/wiki/GSoC-2013-Application-Katja-Sophie-Hotz:-Faster-Algorithms-for-Polynomials-over-Algebraic-Number-Fields">my proposal</a> on the SymPy Wiki.</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/33/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/33/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=33&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://sophiessympyblog.wordpress.com/2013/05/30/hello-everybody/">by katjasophie at May 30, 2013 04:42 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -2903,7 +2904,7 @@ based features.</p></div></td></tr></tbody></table></div>
 
 <p>
 <strong>Last updated:</strong><br>
-July 21, 2013 08:20 AM<br>
+July 21, 2013 03:00 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
