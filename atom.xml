@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2013-07-24T12:20:30Z</updated>
+  <updated>2013-07-25T16:00:43Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,131 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry>
+    <id>tag:fabianp.net/blog,2013-07-25:2013/different-ways-to-get-memory-consumption-or-lessons-learned-from-memory_profiler/</id>
+    <link href="http://fabianp.net/blog/2013/different-ways-to-get-memory-consumption-or-lessons-learned-from-memory_profiler/" rel="alternate" type="text/html"/>
+    <title>Different ways to get memory consumption or lessons learned from ``memory_profiler``</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>As part of the development of
+<a href="https://pypi.python.org/pypi/memory_profiler">memory_profiler</a> I've tried
+several ways to get memory usage of a program from within Python. In this post
+I'll describe the different alternatives I've tested.</p>
+<h3>The psutil library</h3>
+<p><a href="https://code.google.com/p/psutil/">psutil</a> is a python library that provides
+an interface for retrieving information on running processes. It provides
+convenient, fast and cross-platform functions to access the memory usage of a
+Python module:</p>
+<div class="highlight"><pre><span class="k">def</span> <span class="nf">memory_usage_psutil</span><span class="p">():</span>
+    <span class="c"># return the memory usage in MB</span>
+    <span class="kn">import</span> <span class="nn">psutil</span>
+    <span class="n">process</span> <span class="o">=</span> <span class="n">psutil</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">())</span>
+    <span class="n">mem</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">get_memory_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="mi">20</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mem</span>
+</pre></div>
+
+
+<p>The above function returns the memory usage of the current Python process in
+MiB. Depending on the platform it will choose the most accurate and fastest
+way to get this information. For example, in Windows it will use the C++ Win32
+API while in Linux it will read from <code>/proc</code>, hiding the implementation
+details and proving on each platform a fast and accurate measurement.</p>
+<p>If you are looking for an easy way to get the memory consumption within Python
+this in my opinion your best shot. </p>
+<h3>The resource module</h3>
+<p>The <a href="http://docs.python.org/2/library/resource.html">resource module</a> is part
+of the standard Python library. It's basically a wrapper around
+&lt;sys&gt;resource.h&gt; <a>getrusage</a>,
+which is a POSIX standard but some methods are <a href="http://linux.die.net/man/2/getrusage">still missing in
+Linux</a> . However, the ones we are
+interested seem to work fine in Ubuntu 10.04. You can get the memory usage
+with this function:</p>
+<div class="highlight"><pre><span class="k">def</span> <span class="nf">memory_usage_resource</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">resource</span>
+    <span class="n">rusage_denom</span> <span class="o">=</span> <span class="mf">1024.</span>
+    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s">'darwin'</span><span class="p">:</span>
+        <span class="c"># ... it seems that in OSX the output is different units ...</span>
+        <span class="n">rusage_denom</span> <span class="o">=</span> <span class="n">rusage_denom</span> <span class="o">*</span> <span class="n">rusage_denom</span>
+    <span class="n">mem</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span> <span class="o">/</span> <span class="n">rusage_denom</span>
+    <span class="k">return</span> <span class="n">mem</span>
+</pre></div>
+
+
+<p>In my experience this approach is several times faster than the one based in
+psutil as was the default way to get the memory usage that I used in
+<code>memory_profiler</code> from version 0.23 up to 0.26. I changed this behavior in
+0.27 after a bug report by <a href="https://github.com/pgervais">Philippe Gervais</a>.
+The problem with this approach is that it seems to report results that are
+slightly different in some cases. Notably it seems to differ when objects
+have been recently liberated from the python interpreter.</p>
+<p>In the following example, orphaned arrays are liberated by the python
+interpreter, which is correctly seen by <code>psutil</code> but not by <code>resource</code>:</p>
+<div class="highlight"><pre><span class="n">mem_resource</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">mem_psutil</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">21</span><span class="p">):</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1000</span> <span class="o">*</span> <span class="n">i</span><span class="p">,</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">i</span><span class="p">))</span>
+    <span class="n">mem_resource</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">memory_usage_resource</span><span class="p">())</span>
+    <span class="n">mem_psutil</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">memory_usage_psutil</span><span class="p">())</span>
+</pre></div>
+
+
+<p><img alt="Memory plot" src="http://fa.bianp.net/blog/static/code/2013/resource_vs_psutil.png"/></p>
+<p>By the way I would be delighted to be corrected if I'm doing something wrong
+or informed of a workaround if this exists (I've got the code to reproduce the
+figures <sup id="fnref:1"><a href="http://fa.bianp.net/blog/feed/#fn:1" rel="footnote">1</a></sup>)</p>
+<h3>querying <code>ps</code> directly</h3>
+<p>The method based on <code>psutils</code> works great but is not available by default on all
+Python systems. Because of this in <code>memory_profiler</code> we use as last resort
+something that's pretty ugly but works reasonably well when all else fails:
+invoking the system's <code>ps</code> command and parsing the output. The code is
+something like::</p>
+<div class="highlight"><pre><span class="k">def</span> <span class="nf">memory_usage_ps</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">subprocess</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="s">'ps'</span><span class="p">,</span> <span class="s">'v'</span><span class="p">,</span> <span class="s">'-p'</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">())],</span>
+    <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span><span class="o">.</span><span class="n">communicate</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">b</span><span class="s">'</span><span class="se">\n</span><span class="s">'</span><span class="p">)</span>
+    <span class="n">vsz_index</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">b</span><span class="s">'RSS'</span><span class="p">)</span>
+    <span class="n">mem</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="n">vsz_index</span><span class="p">])</span> <span class="o">/</span> <span class="mi">1024</span>
+    <span class="k">return</span> <span class="n">mem</span>
+</pre></div>
+
+
+<p>The main disadvantage of this approach is that it needs to fork a process for
+each measurement. For some tasks where you need to get memory usage very fast,
+like in line-by-line memory usage then this be a huge overhead on the code.
+For other tasks such as getting information of long-running processes, where
+the memory usage is anyway working on a separate process this is not too bad.</p>
+<h3>benchmarks</h3>
+<p>Here is a benchmark of the different alternatives presented above. I am
+plotting the time it takes the different approaches to make 100 measurements
+of the memory usage (lower is better). As can be seen the smallest one is
+resource (although it suffers from the issues described above) followed
+closely by <code>psutil</code> which is in my opinion the best option if you can count on
+it being installed on the host system and followed far away by <code>ps</code> which is
+roughly a hundred times slower than <code>psutil</code>.</p>
+<p><img alt="Memory plot" src="http://fa.bianp.net/blog/static/code/2013/time_100_measurements.png"/></p>
+<div class="footnote">
+<hr/>
+<ol>
+<li id="fn:1">
+<p>IPython notebook to reproduce the figures: <a href="http://fa.bianp.net/blog/feed/">html</a> <a href="http://fa.bianp.net/blog/static/code/2013/memory_usage.ipynb">ipynb</a> <a href="http://fa.bianp.net/blog/feed/#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">↩</a></p>
+</li>
+</ol>
+</div></div>
+    </summary>
+    <updated>2013-07-24T22:00:00Z</updated>
+    <category term="Python"/>
+    <category term="memory"/>
+    <category term="memory_profiler"/>
+    <author>
+      <name>Fabian Pedregosa</name>
+    </author>
+    <source>
+      <id>http://fabianp.net/blog/</id>
+      <link href="http://fabianp.net/blog/" rel="alternate" type="text/html"/>
+      <link href="http://fa.bianp.net/blog/feed/rss.xml" rel="self" type="application/atom+xml"/>
+      <title>I say things</title>
+      <updated>2013-07-25T16:00:19Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en">
     <id>http://geekiology.wordpress.com/?p=377</id>
@@ -79,7 +204,7 @@ Signing- off <img alt=":)" class="wp-smiley" src="http://s0.wp.com/wp-includes/i
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-24T12:20:25Z</updated>
+      <updated>2013-07-25T16:00:36Z</updated>
     </source>
   </entry>
 
@@ -146,7 +271,7 @@ The good news is that now <code>bin/test</code> passes when <code>heugcd</code> 
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-24T12:20:28Z</updated>
+      <updated>2013-07-25T16:00:39Z</updated>
     </source>
   </entry>
 
@@ -268,7 +393,7 @@ The good news is that now <code>bin/test</code> passes when <code>heugcd</code> 
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2013-07-24T12:20:27Z</updated>
+      <updated>2013-07-25T16:00:38Z</updated>
     </source>
   </entry>
 
@@ -311,7 +436,7 @@ and type F is very similar.</p>
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-24T12:20:28Z</updated>
+      <updated>2013-07-25T16:00:38Z</updated>
     </source>
   </entry>
 
@@ -442,7 +567,7 @@ Another new tool I learned to use this week was Sphinx. I like the html document
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-24T12:20:28Z</updated>
+      <updated>2013-07-25T16:00:39Z</updated>
     </source>
   </entry>
 
@@ -597,7 +722,7 @@ Another new tool I learned to use this week was Sphinx. I like the html document
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-24T12:20:25Z</updated>
+      <updated>2013-07-25T16:00:37Z</updated>
     </source>
   </entry>
 
@@ -704,7 +829,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2013-07-24T12:20:27Z</updated>
+      <updated>2013-07-25T16:00:38Z</updated>
     </source>
   </entry>
 
@@ -741,7 +866,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-24T12:20:28Z</updated>
+      <updated>2013-07-25T16:00:38Z</updated>
     </source>
   </entry>
 
@@ -844,7 +969,7 @@ I know this is a lot of talking and nothing like psudeo code, though we can draw
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-24T12:20:25Z</updated>
+      <updated>2013-07-25T16:00:37Z</updated>
     </source>
   </entry>
 
@@ -910,7 +1035,7 @@ fab vagrant release
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-07-24T12:20:10Z</updated>
+      <updated>2013-07-25T16:00:22Z</updated>
     </source>
   </entry>
 
@@ -1082,7 +1207,7 @@ fab vagrant release
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2013-07-24T12:20:27Z</updated>
+      <updated>2013-07-25T16:00:38Z</updated>
     </source>
   </entry>
 
@@ -1136,7 +1261,7 @@ fab vagrant release
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2013-07-23T15:00:34Z</updated>
+      <updated>2013-07-25T13:00:28Z</updated>
     </source>
   </entry>
 
@@ -1171,7 +1296,7 @@ I was able to make use of both of them in my implementation for the multivariate
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-24T12:20:28Z</updated>
+      <updated>2013-07-25T16:00:39Z</updated>
     </source>
   </entry>
 
@@ -1223,7 +1348,7 @@ I was able to make use of both of them in my implementation for the multivariate
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-24T12:20:28Z</updated>
+      <updated>2013-07-25T16:00:38Z</updated>
     </source>
   </entry>
 
@@ -1407,7 +1532,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-07-24T12:20:10Z</updated>
+      <updated>2013-07-25T16:00:22Z</updated>
     </source>
   </entry>
 
@@ -1512,7 +1637,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2013-07-24T12:20:27Z</updated>
+      <updated>2013-07-25T16:00:38Z</updated>
     </source>
   </entry>
 
@@ -1544,7 +1669,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-24T12:20:28Z</updated>
+      <updated>2013-07-25T16:00:39Z</updated>
     </source>
   </entry>
 
@@ -1576,7 +1701,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-24T12:20:28Z</updated>
+      <updated>2013-07-25T16:00:39Z</updated>
     </source>
   </entry>
 
@@ -1694,7 +1819,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-24T12:20:28Z</updated>
+      <updated>2013-07-25T16:00:38Z</updated>
     </source>
   </entry>
 
@@ -1806,7 +1931,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-07-24T12:20:25Z</updated>
+      <updated>2013-07-25T16:00:37Z</updated>
     </source>
   </entry>
 
@@ -1965,7 +2090,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-07-24T12:20:28Z</updated>
+      <updated>2013-07-25T16:00:39Z</updated>
     </source>
   </entry>
 
@@ -2059,7 +2184,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2013-07-24T12:20:27Z</updated>
+      <updated>2013-07-25T16:00:37Z</updated>
     </source>
   </entry>
 
@@ -2123,7 +2248,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-24T12:20:28Z</updated>
+      <updated>2013-07-25T16:00:38Z</updated>
     </source>
   </entry>
 
@@ -2229,7 +2354,7 @@ into a text file. For those interested, however I made a few changes manually ev
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-07-24T12:20:28Z</updated>
+      <updated>2013-07-25T16:00:38Z</updated>
     </source>
   </entry>
 
@@ -2306,7 +2431,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2013-07-24T12:20:27Z</updated>
+      <updated>2013-07-25T16:00:37Z</updated>
     </source>
   </entry>
 
@@ -2351,7 +2476,7 @@ diop_&lt;type&gt;(eq)</p>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2013-07-23T15:00:34Z</updated>
+      <updated>2013-07-25T13:00:28Z</updated>
     </source>
   </entry>
 
@@ -2479,39 +2604,6 @@ diop_&lt;type&gt;(eq)</p>
     </content>
     <updated>2013-06-08T13:09:01Z</updated>
     <published>2013-06-07T14:49:00Z</published>
-    <author>
-      <name>Sachin Joglekar</name>
-      <email>noreply@blogger.com</email>
-      <uri>https://plus.google.com/106302547764750990775</uri>
-    </author>
-    <source>
-      <id>tag:blogger.com,1999:blog-5472769892551526876</id>
-      <author>
-        <name>Sachin Joglekar</name>
-        <email>noreply@blogger.com</email>
-      </author>
-      <link href="http://codesachin.blogspot.com/feeds/posts/default" rel="http://schemas.google.com/g/2005#feed" type="application/atom+xml"/>
-      <link href="http://www.blogger.com/feeds/5472769892551526876/posts/default" rel="self" type="application/atom+xml"/>
-      <link href="http://codesachin.blogspot.com/" rel="alternate" type="text/html"/>
-      <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
-      <subtitle>-Sachin Joglekar-</subtitle>
-      <title>Dream. Think. Code.</title>
-      <updated>2013-07-21T06:15:00Z</updated>
-    </source>
-  </entry>
-
-  <entry>
-    <id>tag:blogger.com,1999:blog-5472769892551526876.post-4236705420325481102</id>
-    <link href="http://codesachin.blogspot.com/feeds/4236705420325481102/comments/default" rel="replies" type="application/atom+xml"/>
-    <link href="http://www.blogger.com/comment.g?blogID=5472769892551526876&amp;postID=4236705420325481102" rel="replies" type="text/html"/>
-    <link href="http://www.blogger.com/feeds/5472769892551526876/posts/default/4236705420325481102" rel="edit" type="application/atom+xml"/>
-    <link href="http://www.blogger.com/feeds/5472769892551526876/posts/default/4236705420325481102" rel="self" type="application/atom+xml"/>
-    <link href="http://codesachin.blogspot.com/2013/06/sympylogic-part-1.html" rel="alternate" type="text/html"/>
-    <title>sympy.logic - Part 1</title>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><div dir="ltr" style="text-align: left;">As I have mentioned before, my first work for SymPy was for its logic module. Most of it took inspiration from the digital design and CS-Logic classes I took in my 3rd semester at college. In this post and the next I will try to explain some of the cool features of this module that I have used applied in useful ways.<br/><br/>Note - Quite a bit of this work was done just a few months back by Christopher Smith(<a href="https://github.com/smichr">smichr</a>) and me, and hence is NOT included in the lastest version of SymPy(0.7.2), but will find its way into SymPy 0.7.3. Therefore, there is no documentation on the official website also. However, interested people can fork the SymPy source from its <a href="https://github.com/sympy/sympy">github repo</a> - There is enough of in-code docs to help you.<br/><br/><h4 style="text-align: left;">I) Using the truth table to find SOP/POS form </h4>This is quite useful in digital design, and I myself used this quite a few number of times during my course.<br/>Suppose you have to find the SOP (sum of products) form of a boolean function that has the following specs-<br/>1. <i>The variables (literals) are a,b,c and d</i>.<br/>2. <i>The function MUST return True for the following combinations (in order-a,b,c,d)</i>-<br/>0,0,0,1<br/>0,0,1,1<br/>0,1,1,1<br/>1,0,1,1<br/>1,1,1,1<br/> where 0-false and 1-true<br/>3. <i>The function may give True or False (a dont-care) for the following combinations</i>-<br/>0,0,0,0<br/>0,0,1,0<br/>0,1,0,1<br/><br/>For those of you who may ask WHY we won't care. Simple- These combinations will never occur in our application if used rightly, OR we dont' care about the output even if they do. For example, a function that deals with binary representations of digits from 0-9 will not care about the inputs from 1001, as they will not occur in operation.<br/>4. <i>All the rest of the combinations must return False</i><br/><br/>Python session for this? Here it is -<br/><br/>&gt;&gt;&gt; from sympy.logic import SOPform<br/>&gt;&gt;&gt; minterms = [[0, 0, 0, 1], [0, 0, 1, 1], [0, 1, 1, 1], [1, 0, 1, 1], [1, 1, 1, 1]]<br/>&gt;&gt;&gt; dontcares = [[0, 0, 0, 0], [0, 0, 1, 0], [0, 1, 0, 1]]<br/>&gt;&gt;&gt; SOPform(['a','b','c','d'], minterms, dontcares)<br/><br/>Output - Or(And(Not(a), d), And(c, d))<br/><br/>POS form?<br/><br/>&gt;&gt;&gt; from sympy.logic import POSform<br/>&gt;&gt;&gt; POSform(['a','b','c','d'], minterms, dontcares)<br/><br/>Output - And(Or(Not(a), c), d)<br/><br/><h4 style="text-align: left;">II) Simplification of boolean expressions</h4><div>Suppose you want to simplify a cumbersome boolean expression to something simple. How?</div><div>Use simplify_logic.</div><div><br/></div><div><i>Example expression</i> --&gt; "<span class="invert" style="background-color: #efefff; padding-left: 1pt; padding-right: 1pt; text-decoration: overline; white-space: nowrap;">AB</span><span style="background-color: #efefff; white-space: nowrap;">(</span><span class="invert" style="background-color: #efefff; padding-left: 1pt; padding-right: 1pt; text-decoration: overline; white-space: nowrap;">A</span><span style="background-color: #efefff; white-space: nowrap;"> </span><span style="background-color: #efefff; white-space: nowrap;">+ B)</span>" [Symbols take their usual meaning]</div><div><br/></div><div>On paper, you will have to take the following steps-</div><div><table class="simex" style="background-color: #efefff; margin: 10pt;"><tbody><tr><td class="step" style="padding-right: 20pt; vertical-align: baseline; white-space: nowrap;"><span class="invert" style="padding-left: 1pt; padding-right: 1pt; text-decoration: overline;">AB</span>(<span class="invert" style="padding-left: 1pt; padding-right: 1pt; text-decoration: overline;">A</span> + B)</td><td class="just" style="vertical-align: baseline;"><br/></td></tr><tr><td class="step" style="padding-right: 20pt; vertical-align: baseline; white-space: nowrap;">(<span class="invert" style="padding-left: 1pt; padding-right: 1pt; text-decoration: overline;">A</span> + <span class="invert" style="padding-left: 1pt; padding-right: 1pt; text-decoration: overline;">B</span>)(<span class="invert" style="padding-left: 1pt; padding-right: 1pt; text-decoration: overline;">A</span> + B)</td><td class="just" style="vertical-align: baseline;">DeMorgan's Law</td></tr><tr><td class="step" style="padding-right: 20pt; vertical-align: baseline; white-space: nowrap;"><span class="invert" style="padding-left: 1pt; padding-right: 1pt; text-decoration: overline;">A</span> + <span class="invert" style="padding-left: 1pt; padding-right: 1pt; text-decoration: overline;">B</span>B</td><td class="just" style="vertical-align: baseline;">Distributive law. This step uses the fact that or distributes over and. It can look a bit strange since addition does not distribute over multiplication.</td></tr><tr><td class="step" style="padding-right: 20pt; vertical-align: baseline; white-space: nowrap;"><span class="invert" style="padding-left: 1pt; padding-right: 1pt; text-decoration: overline;">A</span></td><td class="just" style="vertical-align: baseline;">Complement, Identity.</td></tr></tbody></table></div>SymPy console session?<br/><br/>&gt;&gt;&gt; from sympy.logic import simplify_logic<br/>&gt;&gt;&gt; to_be_simplified = '~(A &amp; B) &amp; (~A | B)'<br/>&gt;&gt;&gt; simplify_logic(to_be_simplified)<br/>Output - Not(A)<br/><br/>Period.<br/><h4 style="text-align: left;">III) Conversion between cnf and dnf forms</h4><div>Conversion of boolean expressions to CNF or DNF forms is also possible.</div><div>The code to do this is quite simple -</div><div><br/></div><div><div>&gt;&gt;&gt; from sympy.logic.boolalg import to_dnf</div><div>&gt;&gt;&gt; from sympy.abc import A, B, C, D</div><div>&gt;&gt;&gt; to_dnf(B &amp; (A | C))</div><div>    </div><div>Output - Or(And(A, B), And(B, C))</div></div><div><br/></div><div>sympy.abc generates 'symbols' - Variables that can be used to denote any value. The entire framework of SymPy is based on the concept of Symbols (hence, Symbolic-Py)</div><div><br/></div><div>Thats all for now. In the next post, I will continue with some other features like boolean equality mapping and checking for true-ness of a statement given a set of statements (and using it to find redundancies in databases).</div><div><br/></div></div></div>
-    </content>
-    <updated>2013-06-07T14:22:39Z</updated>
-    <published>2013-06-01T13:15:00Z</published>
     <author>
       <name>Sachin Joglekar</name>
       <email>noreply@blogger.com</email>
