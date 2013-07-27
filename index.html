@@ -23,6 +23,42 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>July 27, 2013</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://codesachin.blogspot.com/" title="Dream. Think. Code.">Sachin Joglekar</a></h3>
+
+
+<div class="entrygroup" id="tag:blogger.com,1999:blog-5472769892551526876.post-6303625907522831747">
+<h4><a href="http://codesachin.blogspot.com/2013/07/gsoc-week-6-first-halfalmost-done.html">GSoC Week 6: First half(almost) done</a></h4>
+<div class="entry">
+<div class="content">
+<div style="text-align: left;" dir="ltr">First, about the work done this week. It took me some time to set up my programming environment and get used to Ubuntu's interface. I fumbled around a bit messing up some things on the way, but now I can say I am quite comfortable...at least with the basics.<br />For one, I got the docs for my work on the logic module merged into the master docs. Aaron also pointed me to the method for merging those changes with the <a href="http://docs.sympy.org/dev/">development version </a> of the SymPy docs. I will try and get it done in a day or two, before I leave for my campus.<br />Second, Gilbert and I submitted a PR to Prasoon's branch with some changes that we made to his code. Since the number of merge conflicts are high, he would most probably be merging the relevant parts manually.<br />Third, I started working on the code for dyadics. Initially, I submitted a <i>slightly </i>modified version of the earlier Dyadic class, but Gilbert soon made me realise that compatibility with SymPy's core would mean a lot more than just a few changes here and there. Sigh.<br />So, I am now busy working on classes for dyadics, compatible with SymPy's global architecture-<br />1) Dyadic(Expr), the super class - all operations and initializations will be handled from here<br />2) BaseDyadic(Dyadic) - the class to represent basic components of dyadics, things like (R1.x|R2.y)<br />3) DyadicAdd(Add, Dyadic) and DyadicMul(Mul, Dyadic) - additions and multiplications of dyadics<br /><br />The last two classes are a little shaky for now, and the code I have submitted at the PR at the time I write this makes it quite evident. Inspite of that, I have got the basic operations- add, sub, mul, div and some others like 'and' to work as expected(conceptually). To see how it looks as of now, you can see <a href="http://pastebin.com/WxJ15ewk">this</a> (real SymPy session with mock arguments). However, it's quite obvious that getting these new classes to behave exactly according to SymPy's way of doing things and return accurate results is going to take quite some time, maybe a week more. Not to forget docs, doc examples and tests.<br /><br />Anyways, I can't believe I am almost at the end of the first half of my GSoC period. I have learnt *quite* a lot, well, that's obvious from my blog posts- not just vector math, but a bunch of Python as well. I am happy with the progress till now, though nothing has been merged yet. But well, Prasoon and my projects are such that when things <i>will </i>get merged, a huge chunk will go in together.<br />I plan to get the mechanics core done perfectly before I start with the EM module..and by 'done perfectly', I mean getting the main code merged, along with a lot of commentary-style documentation on the new module. I also have to enquire about putting deprecation signs on the old module- will have to consult the mailing list for this.<br /><br />As mentioned earlier, I will be moving to Goa on Tuesday, so that period is going to be quite busy with getting things in order @the insti. Then I can start working again.<br />The mid-term GSoC evaluations will be done from 29th to 2nd of August, after which I will get my first big payment in 4-5 days :-)<br /><br />Thats all for now!<br />Have a great week, and 'stay tuned' :-D.</div></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://codesachin.blogspot.com/2013/07/gsoc-week-6-first-halfalmost-done.html">by Sachin Joglekar (noreply@blogger.com) at July 27, 2013 06:32 PM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>July 25, 2013</h2>
 
 <div class="channelgroup">
@@ -2821,42 +2857,6 @@ diop_&lt;type&gt;(eq)</p>
 </div>
 
 </div>
-<div class="daygroup">
-<h2>June 09, 2013</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://sympymatrix.blogspot.com/" title="Sympy Fast Matrix">Saurabh Jha</a></h3>
-
-
-<div class="entrygroup" id="tag:blogger.com,1999:blog-2736678015821545355.post-7082268022627225306">
-<h4><a href="http://sympymatrix.blogspot.com/2013/06/introduction-and-week-1-progress.html">Introduction and Week 1 progress</a></h4>
-<div class="entry">
-<div class="content">
-<div style="text-align: left;" dir="ltr"><b>Introduction:</b><br /><br />My name is Saurabh Jha. I am working on making Sympy matrix module fast. My plan is described in [1].  More broadly, the objectives of my work are--<br /><br /><ul style="text-align: left;"><li>To add support of domains to matrix module so that it achieves speed up in algorithm.</li><li>To make a better and more uniform interface of matrix module. </li></ul><br /><b>Progress this week:</b><br /><br /><ul style="text-align: left;"><li>Fixed row and column methods of SparseMatrix class. Earlier it was giving wrong answers.[2]</li><li>Made row_list and col_list more efficient. Earlier the running time of these operations for an m*n matrix with nnz non-zero elements was theta(m*n). I replaced that with the new code whose running time is theta(nnz). This way we can avoid redundant look ups of all rows and columns.[2]</li><li>Added a new method nnz in sparse matrix which returns the number of non-zero elements of sparse matrix[3]</li><li>Added a function for converting Dictionary Representation of sparse matrices to Compressed Sparse Row(CSR).[3]</li></ul><div><br /></div><br />I learned some key lessons from last week's work. I may be wrong here, but you can afford to be wrong when there are people around to correct you :) :<br /><br /><ul style="text-align: left;"><li>SparseMatrix methods should depend upon number of non-zero elements and not on number of rows and columns.  For a matrix of low sparsity, this will be way more efficient than alternative row/column based algorithms.</li><li>Coding in this phase should be done keeping in mind that from top level they are not supposed to be use. Work should be done keeping speed in mind and not usability.</li><li>Work should be done such that it is reusable in other parts of sympy, like I am using domains of Polys module.</li></ul><div>Next week, I am going to bite the bullet and work on incorporating domains in the operations of matrices. The operations will be implemented as functions first and then these functions will be used in the methods of matrices.</div><div><br /></div><div><br /></div><div>[1] http://www.google-melange.com/gsoc/proposal/review/google/gsoc2013/saurabh_jha/11001</div><div>[2] https://github.com/sympy/sympy/pull/2157</div><div>[3] https://github.com/sympy/sympy/pull/2162</div><div><br /></div></div></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://sympymatrix.blogspot.com/2013/06/introduction-and-week-1-progress.html">by Saurabh Jha (noreply@blogger.com) at June 09, 2013 05:11 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -3000,7 +3000,7 @@ diop_&lt;type&gt;(eq)</p>
 
 <p>
 <strong>Last updated:</strong><br>
-July 27, 2013 05:20 PM<br>
+July 27, 2013 06:40 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
