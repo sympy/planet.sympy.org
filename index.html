@@ -33,6 +33,42 @@
 
 
 
+<h3><a href="http://sophiessympyblog.wordpress.com" title="sophie's sympy blog">Katja Sophie Hotz</a></h3>
+
+
+<div class="entrygroup" id="http://sophiessympyblog.wordpress.com/?p=222">
+<h4 lang="en"><a href="http://sophiessympyblog.wordpress.com/2013/07/28/sixth-week/">Sixth week</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p style="text-align: justify;">This week I implemented most of the modular GCD algorithm for algebraic function fields [1], which I described in my last post. At the moment it works for univariate polynomials over algebraic extensions of <img src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Q&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\mathbb Q" class="latex" title="\mathbb Q" />. Almost everything is in place to also calculate GCDs of polynomials over algebraic function fields, but at the moment there is no (easy) way to represent them, since there is no “<code>AlgebraicFunctionField</code>” domain in sympy yet. However, if we wanted to compute the GCD of two polynomials <img src="http://s0.wp.com/latex.php?latex=f%2C+g+%5Cin+%5Cmathbb+Q%28t_1%2C+%5Cldots%2C+t_k%29%5Bz%5D+%2F+%5Clangle+m%28z%29+%5Crangle+%5Bx%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="f, g \in \mathbb Q(t_1, \ldots, t_k)[z] / \langle m(z) \rangle [x]" class="latex" title="f, g \in \mathbb Q(t_1, \ldots, t_k)[z] / \langle m(z) \rangle [x]" /> right now, we could compute their primitive associates <img src="http://s0.wp.com/latex.php?latex=%5Ccheck+f%2C+%5Ccheck+g+%5Cin+%5Cmathbb+Z%5Bx%2C+t_1%2C+%5Cldots%2C+t_k%2C+z%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\check f, \check g \in \mathbb Z[x, t_1, \ldots, t_k, z]" class="latex" title="\check f, \check g \in \mathbb Z[x, t_1, \ldots, t_k, z]" /> and the minimal polynomial in <img src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Z%5Bt_1%2C+%5Cldots%2C+t_k%2C+z%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\mathbb Z[t_1, \ldots, t_k, z]" class="latex" title="\mathbb Z[t_1, \ldots, t_k, z]" /> manually and then directly use the private function <code>_func_field_modgcd_m</code>.</p>
+<p style="text-align: justify;">So how to handle multivariate inputs? Van Hoeij and Monagan write that for <img src="http://s0.wp.com/latex.php?latex=f%2C+g+%5Cin+%5Cmathbb+Q%28t_1%2C+%5Cldots%2C+t_k%29%5Bz%5D+%2F+%5Clangle+m%28z%29+%5Crangle+%5Bx_1%2C+%5Cldots%2C+x_n%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="f, g \in \mathbb Q(t_1, \ldots, t_k)[z] / \langle m(z) \rangle [x_1, \ldots, x_n]" class="latex" title="f, g \in \mathbb Q(t_1, \ldots, t_k)[z] / \langle m(z) \rangle [x_1, \ldots, x_n]" /> we have to make three additional steps. First, we view <img src="http://s0.wp.com/latex.php?latex=f&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="f" class="latex" title="f" /> and <img src="http://s0.wp.com/latex.php?latex=g&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="g" class="latex" title="g" /> as univariate polynomials in <img src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Q%28t_1%2C+%5Cldots%2C+t_k%29%5Bz%5D+%2F+%5Clangle+m%28z%29+%5Crangle+%5Bx_2%2C+%5Cldots%2C+x_n%5D%5Bx_1%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\mathbb Q(t_1, \ldots, t_k)[z] / \langle m(z) \rangle [x_2, \ldots, x_n][x_1]" class="latex" title="\mathbb Q(t_1, \ldots, t_k)[z] / \langle m(z) \rangle [x_2, \ldots, x_n][x_1]" /> and calculate the GCD of their contents, <img src="http://s0.wp.com/latex.php?latex=c_h&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="c_h" class="latex" title="c_h" />. Here, we have to do multivariate GCD computations in one variable less. After dividing out <img src="http://s0.wp.com/latex.php?latex=c_h&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="c_h" class="latex" title="c_h" />, we treat the variables <img src="http://s0.wp.com/latex.php?latex=x_2%2C+%5Cldots%2C+x_n&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="x_2, \ldots, x_n" class="latex" title="x_2, \ldots, x_n" /> as parameters, i.e. we view <img src="http://s0.wp.com/latex.php?latex=f&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="f" class="latex" title="f" /> and <img src="http://s0.wp.com/latex.php?latex=g&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="g" class="latex" title="g" /> as polynomials over <img src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Q%28t_1%2C+%5Cldots%2C+t_k%2C+x_2%2C+%5Cldots%2C+x_n%29%5Bz%5D+%2F+%5Clangle+m%28z%29+%5Crangle&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\mathbb Q(t_1, \ldots, t_k, x_2, \ldots, x_n)[z] / \langle m(z) \rangle" class="latex" title="\mathbb Q(t_1, \ldots, t_k, x_2, \ldots, x_n)[z] / \langle m(z) \rangle" /> and compute their univariate GCD <img src="http://s0.wp.com/latex.php?latex=h&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="h" class="latex" title="h" />. Finally, we divide out the content of <img src="http://s0.wp.com/latex.php?latex=h&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="h" class="latex" title="h" />, which is again viewed as a polynomial in <img src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Q%28t_1%2C+%5Cldots%2C+t_k%29%5Bz%5D+%2F+%5Clangle+m%28z%29+%5Crangle+%5Bx_2%2C+%5Cldots%2C+x_n%5D%5Bx_1%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\mathbb Q(t_1, \ldots, t_k)[z] / \langle m(z) \rangle [x_2, \ldots, x_n][x_1]" class="latex" title="\mathbb Q(t_1, \ldots, t_k)[z] / \langle m(z) \rangle [x_2, \ldots, x_n][x_1]" />, and multiply it by the correct content <img src="http://s0.wp.com/latex.php?latex=c_h&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="c_h" class="latex" title="c_h" />.</p>
+<p style="text-align: justify;">Next week I plan to cover the multivariate case as well, write tests and documentation and clean up the code.</p>
+<p style="text-align: justify;">[1] <a href="http://www.cecm.sfu.ca/~mmonagan/papers/AFGCD.pdf" rel="nofollow">http://www.cecm.sfu.ca/~mmonagan/papers/AFGCD.pdf</a></p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/222/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/222/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=222&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://sophiessympyblog.wordpress.com/2013/07/28/sixth-week/">by katjasophie at July 28, 2013 11:31 AM</a>
+</p>
+</div>
+</div>
+
+
+
+</div>
+<div class="channelgroup">
+
+
+
+
+
+
+
 <h3><a href="http://manojbits.wordpress.com" title="Perspective » SymPy">Manoj Kumar</a></h3>
 
 
@@ -2817,53 +2853,6 @@ diop_&lt;type&gt;(eq)</p>
 </div>
 
 </div>
-<div class="daygroup">
-<h2>June 11, 2013</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://manojbits.wordpress.com" title="Perspective » SymPy">Manoj Kumar</a></h3>
-
-
-<div class="entrygroup" id="http://manojbits.wordpress.com/?p=487">
-<h4 lang="en"><a href="http://manojbits.wordpress.com/2013/06/11/the-first-heuristic-3/">The first heuristic</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>My GSoC work had been on and off, and I’m nowhere near the required 40 hours for the past one week, due to various reasons. However this is a report of what I had accomplished during the past week.</p>
-<p>The lie group solver for solving Ordinary Differential Equations of the first order, requires as one of the steps, (the major actually, in fact the first six weeks of my project) to solve the following Partial Differential Equation <img src="http://s0.wp.com/latex.php?latex=%5Cfrac%7B%5Cpartial+%5Ceta%7D%7B%5Cpartial+x%7D+%2B+%28%5Cfrac%7B%5Cpartial+%5Ceta%7D%7B%5Cpartial+y%7D+-+%5Cfrac%7B%5Cpartial+%5Cxi%7D%7B%5Cpartial+x%7D%29+%2A+h%28x%2C+y%29+-+%5Cfrac%7B%5Cpartial+%5Cxi%7D%7B%5Cpartial+y%7D%2Ah%28x%2Cy%29%5E%7B2%7D+-+%5Cxi%2A%5Cfrac%7B%5Cpartial+h%7D%7B%5Cpartial+x%7D+-+%5Ceta%2A%5Cfrac%7B%5Cpartial+h%7D%7B%5Cpartial+y%7D&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\frac{\partial \eta}{\partial x} + (\frac{\partial \eta}{\partial y} - \frac{\partial \xi}{\partial x}) * h(x, y) - \frac{\partial \xi}{\partial y}*h(x,y)^{2} - \xi*\frac{\partial h}{\partial x} - \eta*\frac{\partial h}{\partial y}" class="latex" title="\frac{\partial \eta}{\partial x} + (\frac{\partial \eta}{\partial y} - \frac{\partial \xi}{\partial x}) * h(x, y) - \frac{\partial \xi}{\partial y}*h(x,y)^{2} - \xi*\frac{\partial h}{\partial x} - \eta*\frac{\partial h}{\partial y}" /> for <img src="http://s0.wp.com/latex.php?latex=%5Cxi%28x%2C+y%29&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\xi(x, y)" class="latex" title="\xi(x, y)" /> and <img src="http://s0.wp.com/latex.php?latex=%5Ceta%28x%2C+y%29&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\eta(x, y)" class="latex" title="\eta(x, y)" />where <img src="http://s0.wp.com/latex.php?latex=%5Cfrac%7Bdy%7D%7Bdx%7D+%3D+h%28x%2C+y%29&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\frac{dy}{dx} = h(x, y)" class="latex" title="\frac{dy}{dx} = h(x, y)" />. It is pretty strange (atleast I find it) that solving a first order ODE requires solving a much complicated Partial Differential Equation , having two functions in two variables. However that is how things are, and as for how this PDE helps in solving a first order ODE, my blog posts would slowly lead up to that, much like how seemingly unrelated events lead to an awesome climax in a Hollywood thriller flick.</p>
-<p>For now the focus remains on solving the huge PDE that I had mentioned. It looks almost impossible to do so at first sight. However an intelligent method to solve it, would be to guess solutions for <img src="http://s0.wp.com/latex.php?latex=%5Cxi%28x%2C+y%29&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\xi(x, y)" class="latex" title="\xi(x, y)" /> and <img src="http://s0.wp.com/latex.php?latex=%5Ceta%28x%2C+y%29&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\eta(x, y)" class="latex" title="\eta(x, y)" /> and substitute it back in the PDE and check how much it simplifies (almost like how I used to ‘intelligently’ guess solutions to my Organic Chemistry objective examinations).</p>
-<p>The first heuristic and the easiest (according to Maple) involves assuming one of <img src="http://s0.wp.com/latex.php?latex=%5Cxi%28x%2Cy%29&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\xi(x,y)" class="latex" title="\xi(x,y)" /> and <img src="http://s0.wp.com/latex.php?latex=%5Ceta%28x%2Cy%29&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\eta(x,y)" class="latex" title="\eta(x,y)" /> to be zero and the other to be a function of <img src="http://s0.wp.com/latex.php?latex=x&amp;bg=fff&amp;fg=444444&amp;s=0" alt="x" class="latex" title="x" /> or <img src="http://s0.wp.com/latex.php?latex=y&amp;bg=fff&amp;fg=444444&amp;s=0" alt="y" class="latex" title="y" />. This gives us four possibilities</p>
-<p>1.  <img src="http://s0.wp.com/latex.php?latex=%5Cxi%28x%2Cy%29%3D0&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\xi(x,y)=0" class="latex" title="\xi(x,y)=0" /> and <img src="http://s0.wp.com/latex.php?latex=%5Ceta%28x%2C+y%29%3Df%28x%29&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\eta(x, y)=f(x)" class="latex" title="\eta(x, y)=f(x)" /><br />
-2.  <img src="http://s0.wp.com/latex.php?latex=%5Cxi%28x%2Cy%29%3D0&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\xi(x,y)=0" class="latex" title="\xi(x,y)=0" /> and <img src="http://s0.wp.com/latex.php?latex=%5Ceta%28x%2C+y%29%3Df%28y%29&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\eta(x, y)=f(y)" class="latex" title="\eta(x, y)=f(y)" /><br />
-3.  <img src="http://s0.wp.com/latex.php?latex=%5Ceta%28x%2Cy%29%3D0&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\eta(x,y)=0" class="latex" title="\eta(x,y)=0" /> and <img src="http://s0.wp.com/latex.php?latex=%5Cxi%28x%2C+y%29%3Df%28x%29&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\xi(x, y)=f(x)" class="latex" title="\xi(x, y)=f(x)" /><br />
-4. <img src="http://s0.wp.com/latex.php?latex=%5Ceta%28x%2Cy%29%3D0&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\eta(x,y)=0" class="latex" title="\eta(x,y)=0" /> and <img src="http://s0.wp.com/latex.php?latex=%5Cxi%28x%2C+y%29%3Df%28y%29&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\xi(x, y)=f(y)" class="latex" title="\xi(x, y)=f(y)" /></p>
-<p>I would explain how the first case works and the remaining would be self-inferred. Putting <img src="http://s0.wp.com/latex.php?latex=%5Cxi&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\xi" class="latex" title="\xi" /> as 0 and <img src="http://s0.wp.com/latex.php?latex=%5Ceta&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\eta" class="latex" title="\eta" /> as <img src="http://s0.wp.com/latex.php?latex=f%28x%29&amp;bg=fff&amp;fg=444444&amp;s=0" alt="f(x)" class="latex" title="f(x)" /> , the PDE reduces to <img src="http://s0.wp.com/latex.php?latex=%5Cfrac%7Bdf%7D%7Bdx%7D+-+f%2A%5Cfrac%7B%5Cpartial+h%7D%7B%5Cpartial+y%7D&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\frac{df}{dx} - f*\frac{\partial h}{\partial y}" class="latex" title="\frac{df}{dx} - f*\frac{\partial h}{\partial y}" /> . Clearly to solve for <img src="http://s0.wp.com/latex.php?latex=f&amp;bg=fff&amp;fg=444444&amp;s=0" alt="f" class="latex" title="f" /> easily, <img src="http://s0.wp.com/latex.php?latex=%5Cfrac%7B%5Cpartial+h%7D%7B%5Cpartial+y%7D&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\frac{\partial h}{\partial y}" class="latex" title="\frac{\partial h}{\partial y}" /> should be a function of <img src="http://s0.wp.com/latex.php?latex=x&amp;bg=fff&amp;fg=444444&amp;s=0" alt="x" class="latex" title="x" /> for the ODE to be solved easily , since <img src="http://s0.wp.com/latex.php?latex=y&amp;bg=fff&amp;fg=444444&amp;s=0" alt="y" class="latex" title="y" /> is dependent on <img src="http://s0.wp.com/latex.php?latex=x&amp;bg=fff&amp;fg=444444&amp;s=0" alt="x" class="latex" title="x" />. The same logic applies to the other four assumptions. I also wrote a small function called <strong>checkinfosol </strong>that checks if the infinitesimals actually satisfy the PDE. Works fine for now!. On a side note, I just began working on the second heuristic and it seems that they are getting more challenging and I cannot afford to slack any more.</p>
-<p>For those who are interested in the source-code, <a href="https://github.com/sympy/sympy/pull/2143" title="https://github.com/sympy/sympy/pull/2143">https://github.com/sympy/sympy/pull/2143</a> .</p>
-<p>P.S : Sorry, my posts are getting really TL;DR. Too much of this and I’ll consider renaming my blog TL;DR</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/manojbits.wordpress.com/487/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/manojbits.wordpress.com/487/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=manojbits.wordpress.com&amp;blog=31971756&amp;post=487&amp;subd=manojbits&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://manojbits.wordpress.com/2013/06/11/the-first-heuristic-3/">by Manoj Kumar at June 11, 2013 03:19 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -3007,7 +2996,7 @@ diop_&lt;type&gt;(eq)</p>
 
 <p>
 <strong>Last updated:</strong><br>
-July 28, 2013 10:00 AM<br>
+July 28, 2013 11:40 AM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
