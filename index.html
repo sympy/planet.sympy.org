@@ -23,6 +23,59 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>July 29, 2013</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://thilinaatsympy.wordpress.com" title="Thilina's SymPy Blog">Thilina Rathnayake</a></h3>
+
+
+<div class="entrygroup" id="http://thilinaatsympy.wordpress.com/?p=154">
+<h4 lang="en"><a href="http://thilinaatsympy.wordpress.com/2013/07/29/descent-method-with-gaussian-reduction/">Descent method with gaussian reduction.</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p>Sorry for a very late blog post, I had a really busy week and finally I managed to find sometime to write about the progress I made in the last week. I implemented an improved version of the descent method which uses gaussian reduction. I found this algorithm in [1]. Here is a sketch of the algorithm.</p>
+<h3>descent(a, b)</h3>
+<p>1. If <img src="http://s0.wp.com/latex.php?latex=%7Ca%7C+%3E+%7Cb%7C&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="|a| &gt; |b|" class="latex" title="|a| &gt; |b|" /> then swap <img src="http://s0.wp.com/latex.php?latex=a&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="a" class="latex" title="a" /> and <img src="http://s0.wp.com/latex.php?latex=b&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="b" class="latex" title="b" />, solve the resulting equation, then swap <img src="http://s0.wp.com/latex.php?latex=y&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="y" class="latex" title="y" /> and <img src="http://s0.wp.com/latex.php?latex=z&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="z" class="latex" title="z" /> in the solution obtained.<br />
+2. If <img src="http://s0.wp.com/latex.php?latex=b+%3D+1&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="b = 1" class="latex" title="b = 1" /> then set <img src="http://s0.wp.com/latex.php?latex=%28x%2C+y%2C+z%29+%3D+%281%2C+1%2C+0%29&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="(x, y, z) = (1, 1, 0)" class="latex" title="(x, y, z) = (1, 1, 0)" /> and stop.<br />
+3. If <img src="http://s0.wp.com/latex.php?latex=a+%3D+1&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="a = 1" class="latex" title="a = 1" />  then set <img src="http://s0.wp.com/latex.php?latex=%28x%2C+y%2C+z%29+%3D+%281%2C+0%2C+1%29&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="(x, y, z) = (1, 0, 1)" class="latex" title="(x, y, z) = (1, 0, 1)" /> and stop.<br />
+4. If <img src="http://s0.wp.com/latex.php?latex=b+%3D+-1&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="b = -1" class="latex" title="b = -1" /> there is no solution (since <img src="http://s0.wp.com/latex.php?latex=a&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="a" class="latex" title="a" /> must be <img src="http://s0.wp.com/latex.php?latex=-1&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="-1" class="latex" title="-1" />).<br />
+5. If <img src="http://s0.wp.com/latex.php?latex=b+%3D+-a&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="b = -a" class="latex" title="b = -a" /> then set <img src="http://s0.wp.com/latex.php?latex=%28x%2C+y%2C+z%29+%3D+%280%2C+1%2C+1%29&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="(x, y, z) = (0, 1, 1)" class="latex" title="(x, y, z) = (0, 1, 1)" /> and stop.<br />
+6. If <img src="http://s0.wp.com/latex.php?latex=b+%3D+a&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="b = a" class="latex" title="b = a" /> then let <img src="http://s0.wp.com/latex.php?latex=%28x_%7B1%7D%2C+y_%7B1%7D%2C+z_%7B1%7D%29&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="(x_{1}, y_{1}, z_{1})" class="latex" title="(x_{1}, y_{1}, z_{1})" /> be a solution of <img src="http://s0.wp.com/latex.php?latex=X_%7B1%7D%5E2+%2B+Z_%7B1%7D%5E2+%3D+aY_%7B1%7D%5E2+&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="X_{1}^2 + Z_{1}^2 = aY_{1}^2 " class="latex" title="X_{1}^2 + Z_{1}^2 = aY_{1}^2 " />, set <img src="http://s0.wp.com/latex.php?latex=%28x%2C+y%2C+z%29+%3D+%28ay_%7B1%7D%2C+x_%7B1%7D%2C+z_%7B1%7D%29&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="(x, y, z) = (ay_{1}, x_{1}, z_{1})" class="latex" title="(x, y, z) = (ay_{1}, x_{1}, z_{1})" /> and stop.<br />
+7. Let <img src="http://s0.wp.com/latex.php?latex=w&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="w" class="latex" title="w" /> be a solution to <img src="http://s0.wp.com/latex.php?latex=x%5E2+%5Cequiv+a+%28mod+%5C+b%29&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="x^2 \equiv a (mod \ b)" class="latex" title="x^2 \equiv a (mod \ b)" />. with <img src="http://s0.wp.com/latex.php?latex=w+%5Cleq+%7Cb%7C%2F2&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="w \leq |b|/2" class="latex" title="w \leq |b|/2" />, and set <img src="http://s0.wp.com/latex.php?latex=%28x_%7B0%7D%2C+z_%7B0%7D%29+%3D+%28w%2C+1%29&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="(x_{0}, z_{0}) = (w, 1)" class="latex" title="(x_{0}, z_{0}) = (w, 1)" />, so that <img src="http://s0.wp.com/latex.php?latex=x_%7B0%7D%5E2+-+az_%7B0%7D%5E2+%5Cequiv+0+%28mod+%5C+b%29&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="x_{0}^2 - az_{0}^2 \equiv 0 (mod \ b)" class="latex" title="x_{0}^2 - az_{0}^2 \equiv 0 (mod \ b)" />.<br />
+8. Use<strong><em> lattice reduction</em></strong> to find a new nontrivial solution <img src="http://s0.wp.com/latex.php?latex=%28x_%7B0%7D%2C+z_%7B0%7D%29&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="(x_{0}, z_{0})" class="latex" title="(x_{0}, z_{0})" /> to the congruence <img src="http://s0.wp.com/latex.php?latex=X%5E2+-+aZ%5E2+%5Cequiv+0+%28mod+%5C+b%29&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="X^2 - aZ^2 \equiv 0 (mod \ b)" class="latex" title="X^2 - aZ^2 \equiv 0 (mod \ b)" /> with <img src="http://s0.wp.com/latex.php?latex=x_%7B0%7D%5E2+%2B+%7Ca%7Cz_%7B0%7D%5E2&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="x_{0}^2 + |a|z_{0}^2" class="latex" title="x_{0}^2 + |a|z_{0}^2" /> as small as possible.<br />
+9. Set <img src="http://s0.wp.com/latex.php?latex=t+%3D+%28x_%7B0%7D%5E2+-+az_%7B0%7D%5E2%29%2Fb+&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="t = (x_{0}^2 - az_{0}^2)/b " class="latex" title="t = (x_{0}^2 - az_{0}^2)/b " /> and write <img src="http://s0.wp.com/latex.php?latex=t+%3D+t_%7B1%7Dt_%7B2%7D%5E2&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="t = t_{1}t_{2}^2" class="latex" title="t = t_{1}t_{2}^2" /> with <img src="http://s0.wp.com/latex.php?latex=t_%7B1%7D&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="t_{1}" class="latex" title="t_{1}" /> square-free.<br />
+10. Let <img src="http://s0.wp.com/latex.php?latex=%28x_%7B1%7D%2C+y_%7B1%7D%2C+z_%7B1%7D%29&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="(x_{1}, y_{1}, z_{1})" class="latex" title="(x_{1}, y_{1}, z_{1})" /> be a solution to <img src="http://s0.wp.com/latex.php?latex=X%5E2+-+aZ%5E2+%3D+t_%7B1%7DY%5E2&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="X^2 - aZ^2 = t_{1}Y^2" class="latex" title="X^2 - aZ^2 = t_{1}Y^2" /> then<br />
+<img src="http://s0.wp.com/latex.php?latex=%28x%2C+y%2C+z%29+%3D+%28x_%7B0+%7Dx_%7B1%7D+%2B+az_%7B0%7Dz_%7B1%7D%2C+t_%7B1%7Dt_%7B2%7Dy_%7B1%7D%2C+z_%7B0%7Dx_%7B1%7D+%2B+x_%7B0%7Dz_%7B1%7D%29&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="(x, y, z) = (x_{0 }x_{1} + az_{0}z_{1}, t_{1}t_{2}y_{1}, z_{0}x_{1} + x_{0}z_{1})" class="latex" title="(x, y, z) = (x_{0 }x_{1} + az_{0}z_{1}, t_{1}t_{2}y_{1}, z_{0}x_{1} + x_{0}z_{1})" /></p>
+<p>I spent a lot of time finding an algorithm for lattice reduction. There were generalized algorithms but I looked for something which is faster because we are concerned with vectors with two bases. I found  gaussian reduction algorithm in [2] which uses a method specific to this case.</p>
+<h3>References</h3>
+<p>[1] .. Efficient Solution of Rational Conices, J. E. Cremona and D. Rusin, Mathematics of Computation, Volume 00, Number 0.<br />
+[2] .. Gaussian lattice Reduction [online]. Available: <a href="http://home.ie.cuhk.edu.hk/~wkshum/wordpress/?p=404" rel="nofollow">http://home.ie.cuhk.edu.hk/~wkshum/wordpress/?p=404</a></p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/thilinaatsympy.wordpress.com/154/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/thilinaatsympy.wordpress.com/154/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=thilinaatsympy.wordpress.com&amp;blog=52956410&amp;post=154&amp;subd=thilinaatsympy&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://thilinaatsympy.wordpress.com/2013/07/29/descent-method-with-gaussian-reduction/">by thilinarmtb at July 29, 2013 05:59 AM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>July 28, 2013</h2>
 
 <div class="channelgroup">
@@ -2810,46 +2863,6 @@ diop_&lt;type&gt;(eq)</p>
 </div>
 
 
-
-
-<div class="entrygroup" id="http://theperceptiveway.wordpress.com/?p=22">
-<h4 lang="en"><a href="http://thilinaatsympy.wordpress.com/2013/06/13/structure-of-the-diophantine-equation-module/">Structure of the Diophantine equation module</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>The structure of the module is going to be essentially the same as SymPy’s <a href="http://docs.sympy.org/0.7.2/modules/solvers/ode.html">ODE</a> module. ODE module and Diophantine equations (DE) module both need to pattern match a given equation to identify which category it falls and carry out solution procedure accordingly. Below is a pseudo-code representation of the rough structure I wish to follow in the DE module.</p>
-<p dir="ltr">diop_solve(eq):</p>
-<p style="padding-left: 30px;" dir="ltr">type = classify_diop(eq)<br />
-# The required solution routine will be called based on the type<br />
-# returned by classify_diop(). The types returned will be linear,<br />
-# quadratic, pell, and so on.<br />
-diop_&lt;type&gt;(eq)</p>
-<p dir="ltr">classify_diop(eq):</p>
-<p style="padding-left: 30px;" dir="ltr"># Matching “eq” with currently solved equations takes place here.<br />
-# This will return the type of DE and information that was found during<br />
-# matching which will be helpful in solving equation.<br />
-# eg: linear, quadratic, pell … etc.</p>
-<p dir="ltr">diop_linear(eq):</p>
-<p style="padding-left: 30px;" dir="ltr"># This will solve linear DEs.</p>
-<p dir="ltr">diop_pell(eq):</p>
-<p style="padding-left: 30px;" dir="ltr"># This will solve Pell’s equations.</p>
-<p dir="ltr">:</p>
-<p dir="ltr">:</p>
-<p dir="ltr">A separate method will be implemented for each “type” returned by classify_diop(). This structure provide a convenient interface for adding solutions for new type of equations. We just need to implement a solver function for that method and add a line in diop_solve() to call that function if the type returned by classify_diop() is the same.</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/thilinaatsympy.wordpress.com/22/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/thilinaatsympy.wordpress.com/22/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=thilinaatsympy.wordpress.com&amp;blog=52956410&amp;post=22&amp;subd=thilinaatsympy&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://thilinaatsympy.wordpress.com/2013/06/13/structure-of-the-diophantine-equation-module/">by thilinarmtb at June 13, 2013 10:02 AM</a>
-</p>
-</div>
-</div>
-
-
 </div>
 
 </div>
@@ -2975,7 +2988,7 @@ diop_&lt;type&gt;(eq)</p>
 <a href="http://www.blogger.com/feeds/7526836182390500993/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://tarun-gaba.blogspot.com/" class="message" title="no activity in 7 days">Tarun Gaba</a>
 </li>
 <li>
-<a href="http://thilinaatsympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://thilinaatsympy.wordpress.com" class="message" title="no activity in 7 days">Thilina Rathnayake</a>
+<a href="http://thilinaatsympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://thilinaatsympy.wordpress.com" title="Thilina's SymPy Blog">Thilina Rathnayake</a>
 </li>
 <li>
 <a href="http://nessgrh.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://nessgrh.wordpress.com" class="message" title="no activity in 7 days">Tom Bachmann</a>
@@ -2996,7 +3009,7 @@ diop_&lt;type&gt;(eq)</p>
 
 <p>
 <strong>Last updated:</strong><br>
-July 29, 2013 02:40 AM<br>
+July 29, 2013 06:00 AM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
