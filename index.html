@@ -33,6 +33,81 @@
 
 
 
+<h3><a href="http://codesachin.blogspot.com/" title="Dream. Think. Code.">Sachin Joglekar</a></h3>
+
+
+<div class="entrygroup" id="tag:blogger.com,1999:blog-5472769892551526876.post-7293418503164480029">
+<h4><a href="http://codesachin.blogspot.com/2013/08/gsoc-midterm-report-week-7.html">GSoC Midterm Report (Week 7)</a></h4>
+<div class="entry">
+<div class="content">
+<div style="text-align: left;" dir="ltr">Week 7 of GSoC is over, which means I am now in the 'second half' of the coding period. The midterms were conducted by Google from 29th to 2nd, and I am happy to report I passed them :-).<br /><br /><div>As I had predicted in my last blog post, this week wasn't very exciting, atleast as far as the project is concerned. I am now at Goa, and classes have started. However, I did get a few things done - The Dyadic framework is now almost complete, with all the classes functioning as expected (from point of view of dyadic operations). I also added all the special operations like cross, dot, express and time-differentiation. For now, just like last week, they use SymPy Symbols for temporary working.</div><div>Moreover, I finished writing all the tests for my first PR. Gilbert reviewed them, and I made a few changes (mostly API-wise).<br />I also tested my MovingRefFrame implementation of vector time-derivatives on my hacked mechanics module, and I am happy that it worked fine. Thus, I now have the proof-of-concept for all the work I have done so far.</div><div>I have also submitted a PR to get the logic module docs into the online development documentation, but I am quite sure I am going wrong somewhere. I have pinged Aaron, and I hope it gets solved by the end of this week.</div><div><br /></div><div>To sum up my work till now, this is what I got done-</div><div><br /></div><div>1) <span style="font-family: inherit;"><u>MovingRefFrame</u></span> class - The basic class to represent moving reference frames in 3-D space. Inherits from the CoordSysRect class of the new vector module.</div><div><br /></div><div>2) <u>Particle</u> class - Class to represent particles (mass but no volume) in space. Each particle is associated with a frame of its own, and all it's parameters are calculated wrt it.</div><div><br /></div><div>3) Miscellaneous mechanics functions like the ones to obtain position vector given a time-dependent vector and boundary conditions.</div><div><br /></div><div>4) <u>Dyadic</u> framework - Classes Dyadic, BaseDyadic, DyadicAdd, DyadicMul. All these classes are based on relevant SymPy core classes and build dyadic-based functionality on top of them.</div><div></div><div>Currently, I am reading Griffith's book (very helpful suggestion from <a href="https://plus.google.com/109170160946486271280">Aditya</a> - my collegemate) and taking notes for the EM module. Since the development of the new mechanics core is now nearing completion, I can focus time on working on the new addition to sympy.physics.</div><div><br /></div><div>Hence, the coming week will be spent on polishing off the mechanics work, making sure all required parts are in place, maybe helping Prasoon with some functions of vector fields (so that he can concentrate on vector-space integration).<br />Plus, I have to design the vector-dyadic interfacing. Basically, how dyadics will be instantiated from vector 'outer' functions. Obviously, having a dyadic framework is useless without fitting it to the vector module.<br />And last but not the least, I plan to code the electrostatic functions for the EM sub-module by this weekend. Hope I succeed.</div><div><br /></div><div>Have a great week :-)</div></div></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://codesachin.blogspot.com/2013/08/gsoc-midterm-report-week-7.html">by Sachin Joglekar (noreply@blogger.com) at August 04, 2013 02:54 PM</a>
+</p>
+</div>
+</div>
+
+
+
+</div>
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://musingsofafriend.wordpress.com" title="musings of a friend - Prasoon Shukla » SymPy">Prasoon Shukla</a></h3>
+
+
+<div class="entrygroup" id="http://musingsofafriend.wordpress.com/?p=195">
+<h4 lang="en"><a href="http://musingsofafriend.wordpress.com/2013/08/04/gsoc-weeks-6-and-7/">GSoC Weeks 6 and 7</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p>I hadn’t realized that I didn’t write the blog post last week. Sorry! Anyway, let us describe what was done in the last two weeks.</p>
+<p>Okay, so first, off, I passed the midterm evaluation! I hoped I would, of course, but I didn’t know for sure. For the evaluations, I was hoping to get the basic framework of the module to work completely. I was pretty much there but for one particular method – the <em>express</em> method for vectors – wasn’t coming along well; so unwell in fact that I wasn’t even sure what to do at one point.</p>
+<p>Taking a few steps back, in week 6, I was primarily testing and fixing things – and hoping that I’ll be ready with the basic framework working and ready to go. But alas, it was in vain. In the meantime, Gilbert made quite a bit of restructuring to the design of the existing code and made a PR against my branch. I didn’t know about this PR for at least 4 days from the time when it was made. Sachin brought it to my attention – just as the week 6 was ending. By now, I had made some commits of my own. Merge conflicts ensued. I reported this to GIlbert, and, he fixed the merge conflicts. But by the time he did that, I had made some more commits! But I hadn’t pushed them so Gilbert didn’t know about that. Anyway, Gilbert said, and I realized, that the longer I tarry in merging, the more difficult it will get. So, I decided to leave the completion of the express method till later and got on with the merge.</p>
+<p>Let me describe some of these structural changes. The first this is that we now have a new class, BaseVector, that would represent basis vectors. Just as a reminder, this class was called Vector up until the changes. Now, the Vector class is just a <em>foundation</em> class – all classes representing vectors, namely, BaseVector, Vector and VectMul – inherit from this Vector class. This is a more uniform structure, I think. This also reduced the clutter of the code as well.</p>
+<p>Among other changes, we now don’t have <em>exec </em>statements in the initialization of CoordSys classes. Instead, we are now using<em> __setattr__ </em>special function now. This again, helped reduce clutter.</p>
+<p>Anyway, by the end of week 6, Stefan had asked me for a date – so that he could test the orientation methods. I was overly optimistic (as he was keen to point out) and assessed the situation to give him working orient methods by the end of Sunday. Right around this time, the new PR by Gilbert came to my attention. It needed merging and I couldn’t get the work done in time. I wrote and email to Stefan, naturally quite abashed, telling him that I couldn’t deliver the code on the previously accepted time. Stefan pointed me to a study in social science – which explored the lack of pessimism in students. It was quite apt, I tell you. Stefan wished, as did I, that I would learn, and I quote, “<em>the art of pessimism”.</em><i><br />
+</i></p>
+<p>Later, when I had merged the work of Gilbert in my branch, I decided to get back on track. The first order of business was to fix the orientation methods. Now, orientation methods rely heavily on the <em>express</em> method. So, I decided to write that one off first. I spent a day writing and testing things. I was confident that in a day or two at most, things will be good to go. But it seems that the art of pessimism was yet to be learned. Though this time, the problem was not an overestimation of my own abilities. Rather, it was an oversight that caused further delay. I wasn’t quite considering a certain case of vectors – and that had allowed me to cut a few corners. When that particular case finally dawned on me, well, I was quite angry with myself, to say the least. This particular case meant that I’d have to write a more general approach to a couple of methods – among them were <em>separate, dot, expres.</em> Now, this meant quite some work. I fixed the separate method first – but I’m not at all sure what the fixed method will achieve – or that whether it will achieve anything. The new case seems to have made this method redundant. But we shall see. The next in line was the <em>express</em> method – which is the foundation of a very large part of the code. Now, I was at a loss on how to implement this method the most general way – thanks to the new case that I talked about earlier. I had one idea that I had from doing a computer graphics course – but, I wasn’t quite sure about its feasibility. So, I ran for the hills <img src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif" alt=":)" class="wp-smiley" />  I asked a question stating my problems on the ML and got a reply by Sachin. Apparently, there’s an easier method. Gilbert made some further comments and finally, I had a solution – I hope it will work. I am currently coding it away though not wothout some difficulty (read academics).<span style="text-decoration: underline;"><br />
+</span></p>
+<p>Sheeh! That was a long post. I hope to have covered all the major work done in the past two weeks. Hope to have a working implementation ready in a few days. Note that I haven’t said when – I seem to be learning <em>“the art of pessimism”.</em></p>
+<p> <img src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif" alt=":)" class="wp-smiley" /> </p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/musingsofafriend.wordpress.com/195/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/musingsofafriend.wordpress.com/195/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=musingsofafriend.wordpress.com&amp;blog=36409097&amp;post=195&amp;subd=musingsofafriend&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://musingsofafriend.wordpress.com/2013/08/04/gsoc-weeks-6-and-7/">by musingsofafriend at August 04, 2013 02:42 PM</a>
+</p>
+</div>
+</div>
+
+
+
+</div>
+<div class="channelgroup">
+
+
+
+
+
+
+
 <h3><a href="http://manojbits.wordpress.com" title="Perspective » SymPy">Manoj Kumar</a></h3>
 
 
@@ -2746,99 +2821,6 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
 </div>
 
 
-
-</div>
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://thilinaatsympy.wordpress.com" title="Thilina's SymPy Blog">Thilina Rathnayake</a></h3>
-
-
-<div class="entrygroup" id="http://thilinaatsympy.wordpress.com/?p=33">
-<h4 lang="en"><a href="http://thilinaatsympy.wordpress.com/2013/06/21/solving-linear-diophantine-equation/">Solving linear Diophantine equation</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>When the first week of the GSoC comes to an end, I was able to finish implementing solver for the linear Diophantine equations. A linear Diophantine equation is an equation of the form,</p>
-<p><a href="http://thilinaatsympy.files.wordpress.com/2013/06/linear.gif"><img src="http://thilinaatsympy.files.wordpress.com/2013/06/linear.gif?w=600" alt="linear" class="alignnone size-full wp-image-41" /></a> where <a href="http://thilinaatsympy.files.wordpress.com/2013/06/codecogseqn.gif"><img src="http://thilinaatsympy.files.wordpress.com/2013/06/codecogseqn.gif?w=600" alt="CodeCogsEqn" class="alignnone size-full wp-image-43" /></a> and  <em>c</em> are all integers and<a href="http://thilinaatsympy.files.wordpress.com/2013/06/codecogseqn1.gif"><img src="http://thilinaatsympy.files.wordpress.com/2013/06/codecogseqn1.gif?w=600" alt="CodeCogsEqn(1)" class="alignnone size-full wp-image-44" /></a> are integer variables.</p>
-<h4><strong>Case 1: <em>n = 2</em></strong></h4>
-<p dir="ltr">If the linear Diophantine equations has only two variables (<em>n = 2</em>), <a href="http://en.wikipedia.org/wiki/Extended_Euclidean_algorithm">extended Euclid’s algorithm</a> can be used to find the solutions. If solvable, we will have to introduce one parameter. The general form of the equation when<em> n = 2</em> can be expressed as <em>ax + by = c. </em>This is solvable if and only if gcd(a, b) divides c. i.e <em>gcd(c, gcd(a, b)) = gcd(a, b)</em>. Here gcd stands for <em><a href="http://en.wikipedia.org/wiki/Greatest_common_divisor">greatest common divisor</a>.</em> Let<em> x0</em> and<em> y0</em> be a solution, then it can be easily noticed that,<em> x0 + bt</em> and <em>y0 -at</em> are also solutions. We can use this fact to find all the solutions when an initial solution has been found.</p>
-<p dir="ltr"><em>Solution of 10x + 14y = 10</em></p>
-<p dir="ltr">We start by dividing both sides of the equation by<em> gcd(a, b)</em>. If <em>gcd(a, b)</em> does not divide <em>c</em>, then there are no solutions.<em> gcd(4, 6) = 2</em> and<em> 2</em> divides <em>10</em> so this is solvable and dividing by 2 yields,<em> 5x + 7y = 5.</em> Now we should apply extended Euclid’s algorithm. What the algorithm does is finding three values <em>x0, y0</em> and <em>d</em> such that <em>ax0 + by0 = d</em>. Here <em>d = gcd(a, b)</em>. Since we divided the equation by <em>gcd(a, b)</em> at the very beginning,<em> d</em> will always be <em>1</em> in our case. Below is a simplified version of the algorithm used in the solver.</p>
-<p dir="ltr">def extended_euclid(a, b):</p>
-<p dir="ltr">if b == 0:</p>
-<p dir="ltr">    return (1, 0, a)</p>
-<p dir="ltr">else:</p>
-<p dir="ltr">    x0, y0, d = extended_euclid(b, a%b)</p>
-<p dir="ltr">    x, y = y0, x0 – (a//b) * y0</p>
-<p dir="ltr">    return x, y, d</p>
-<p dir="ltr">extended_euclid(5, 7) returns (3, -2 , 1), i.e <em>5*3 – 7*2 = 1</em>. Following is the procedure if you were work this out manually.</p>
-<p dir="ltr"><em>7 = 5*1 + 2</em><br />
-<em>5 = 2*2 + 1</em><br />
-<em>2 = 1*2 + 0</em></p>
-<p dir="ltr">Now starting from the line before the last one we can start going back, <em>1 = 5 – 2*2 = 5 – 2*(7 – 5*1) = 3*5 – 2*7</em> which gives the desired result. Multiplying<em> 5*3 +7*(-2) = 1 </em>by <em>5</em> we get <em>5*15 +7*(-10) = 5</em> which implies that<em> 15</em> and<em> -10</em> are solutions of the initial equation. So all the solutions can be expressed as<em>, x = 15+7t, y = -10-5t</em> where <em>t</em> is an integer.</p>
-<h4><strong>Case 2:<em> n &gt; 2</em></strong></h4>
-<p dir="ltr">If <em>n &gt; 2</em>, we can express two of the variables using the rest of the variables and a parameter. Below is an example for this case.</p>
-<p dir="ltr"><em>Solution of 2x + 3y + 4z = 5</em></p>
-<p>Let’s set<em> x = x</em> and assume<em> y = ax + bm + c</em> and<em> z = dx + em + f</em> where <em>a, b, c, d, e, f</em> are constants to be found. <em>m</em> is the introduced parameter. Plug in these in original equation,</p>
-<p><em>2x + 3(ax + bm + c) + 4(dx + em + f) = 5</em></p>
-<p>By comparing the two sides we get the set of equations<em>, 3c + 4f = 5</em>, <em> 2 + 3a + 4d = 0</em> and <em>3b + 4e = 0</em> all of which are two variable linear DEs. If these can be solved, these will yield infinite number of solutions and any pair of values will be acceptable for<em> (a, d), (b, e)</em> and <em>(c, f)</em>. In this example all three equations are solvable and<em> (a, d) = (2, -2) , (b, e) = (4, -3)</em> and <em>(e, f) = (3, -1)</em> would do the trick. Then the general solution is,<em> x = x, y = 2x + 4m + 3</em> and<em> z = -2x – 3m – 1</em></p>
-<p>In the solver module when more than two variables are involved it is rearranged leaving two variable in one side and all the other variables and constant term in the other side. For example <em>2x + 3y + 4z = 5</em> is assumed to be in the form<em> 2x + 3y = 5 – 4z</em>. Then it finds a separate solution for each of the two equations <em>2x + 3y = 5  –&gt;(1)</em> and<em> 2x + 3y = -4z  –&gt;(2)</em>. First equation returns a parametric solution as discussed in case 1 and the solutions for second one can be found by finding a basic solution(not parametric) for<em> 2x + 3y = -4</em> and multiplying it by<em> z. </em>Adding the two solutions for<em> (1)</em> and<em> (2)</em> yields the solution of the original equation.</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/thilinaatsympy.wordpress.com/33/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/thilinaatsympy.wordpress.com/33/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=thilinaatsympy.wordpress.com&amp;blog=52956410&amp;post=33&amp;subd=thilinaatsympy&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://thilinaatsympy.wordpress.com/2013/06/21/solving-linear-diophantine-equation/">by thilinarmtb at June 21, 2013 12:01 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
-<div class="daygroup">
-<h2>June 20, 2013</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://codesachin.blogspot.com/" title="Dream. Think. Code.">Sachin Joglekar</a></h3>
-
-
-<div class="entrygroup" id="tag:blogger.com,1999:blog-5472769892551526876.post-7592896544614799854">
-<h4><a href="http://codesachin.blogspot.com/2013/06/smart-caching-in-python.html">Smart caching in Python</a></h4>
-<div class="entry">
-<div class="content">
-<div style="text-align: left;" dir="ltr">Prasoon and I are currently looking for ways to reduce the computational load of calculating the DCM(Direction Cosine Matrice) of one frame with respect to another. This DCM is useful to mathematically understand how one reference frame is oriented with respect to another. The reason why we need to find a way is, if we are talking about something like a 100 frames each oriented in some random way with respect to one of its predecessors, it gets <i>pretty </i>messy- for your computer AND you.<br /><div>We thought of various ways, but apart from some <i>very </i>inefficient methods like 'World' frames (to store these DCMs for a particular run of the program) and using a global frame as an intermediate, we really couldn't find anything much. Then Gilbert suggested looking at the way SymPy does caching of some of its methods.</div><div>We may or may not use this technique eventually, but I learnt a cool way to implement <a href="https://en.wikipedia.org/wiki/Cache_(computing)">caching</a> in Python-using dictionaries and method decorators. If you don't know what method decorators are, have a look at <a href="http://simeonfranklin.com/blog/2012/jul/1/python-decorators-in-12-steps/">this</a> - decorators are essentially ways to mutilate(or rather, add to) the functioning of a function/class.</div><div><br /></div><div>I am going to try and show a simplified version of what I found in the SymPy source, their original method is close but much more detailed- for purposes of immutability and debugging and stuff.</div><div><br /></div><div>The components involved in this technique are these - </div><div><br /></div><div>1) CACHE = {}</div><div>This is a Python dictionary (empty intially). This is what we will use as our cache.</div><div><br /></div><div>2) The caching decorator -</div><div><br /></div><div><div>def globalcached(function):</div><div>    @wraps(function)</div><div>    def wrapper(*args):</div><div>        tup = tuple([function] + [args])</div><div>        if tup in CACHE:</div><div>            print('In cache')</div><div>            return CACHE[tup]</div><div>        else:</div><div>            print('Not in cache')</div><div>            temp = function(*args)</div><div>            CACHE[tup] = temp</div><div>            return temp</div><div>    return wrapper</div><div><br /></div><div>Understand what the above will do. <i><b>wraps</b></i> is a decorator from the functools Python library- its there by default. It enables the 'decorated' function to retain the docstring of the original function- we would probably want to retain the docs.</div><div>As you might have understood, 'wrapper' is the modified function that will get executed in place of the original one.</div><div>Now, <i><b>tup</b> </i>is a tuple (tuple is immutable in python and hence hashable. You can only use hashable objects as dictionary keys) containing info about the following-</div><div>i. The function being called</div><div>ii. The arguments of the function</div><div>Thus, I know exactly what function it is, and what it is going to work on. Hence, the code will not directly let the original function go computing again- that may be a waste of resources. It first checks in CACHE, whether it has that particular <i>tup </i>as one its keys. If its not there, then this is the first time that function is being called <i>with those arguments. </i>So, I will calculate the needed quantity, but before returning it, I will store the calculated stuff <i>with tup as the key. </i>Hence, the next time the same function gets called with the very same arguments, the decorator will have a 'deja vu' and return the value- from CACHE. Ingenious, isnt it?</div><div>I don't know how many other projects use this method, or something similar. But its quite cool, it you want speed and you know the computation is going to be intensive.</div><div><br /></div><div>Anyways, here is a snippet using the above decorator-</div><div><pre style=""><code style="color: black;"> CACHE = {}  <br /> def globalcached(function):  <br />   @wraps(function)  <br />   def wrapper(*args):  <br />     tup = tuple([function] + [args])  <br />     if tup in CACHE:  <br />       print('In cache')  <br />       return CACHE[tup]  <br />     else:  <br />       print('Not in cache')  <br />       temp = function(*args)  <br />       CACHE[tup] = temp  <br />       return temp  <br />   return wrapper  <br /> def printcache():  <br />   for x in CACHE:  <br />     print 'Function: ' + str(x[0])  <br />     print 'Arguments: ' + str(x[1:])  <br />     print 'Value: ' + str(CACHE[x])  <br />     print()  <br /> @globalcached  <br /> def myfunction(x, y):  <br />   """ myfunction docs"""  <br />   return x ** 2 - y ** 2  <br /> class SomeClass(object):  <br />   def __init__(self, x):  <br />     self.x = x  <br />   @globalcached  <br />   def function1(self, otherinstance):  <br />     """function1 docs"""  <br />     return otherinstance.x ** 2 - self.x ** 2  <br /></code></pre><br /></div><div><br /></div><div><br /></div><div>Using it in a Python IDLE session-<br /><br /><br /></div><div><pre style=""><code style="color: black;"> &gt;&gt;&gt; myfunction(8, 3)  <br /> Not in cache  <br /> 55  <br /> &gt;&gt;&gt; myfunction(8, 3)  <br /> In cache  <br /> 55  <br /> &gt;&gt;&gt; i1 = SomeClass(4)  <br /> &gt;&gt;&gt; i2 = SomeClass(7)  <br /> &gt;&gt;&gt; i1.function1(i2)  <br /> Not in cache  <br /> 33  <br /> &gt;&gt;&gt; i1.function1(i2)  <br /> In cache  <br /> 33  <br /> &gt;&gt;&gt; myfunction(6, 7)  <br /> Not in cache  <br /> -13  <br /> &gt;&gt;&gt; printcache()  <br /> Function: &lt;function myfunction at 0x026B38B0&gt;  <br /> Arguments: ((8, 3),)  <br /> Value: 55  <br /> ()  <br /> Function: &lt;function function1 at 0x026CD330&gt;  <br /> Arguments: ((&lt;__main__.SomeClass object at 0x026C9B10&gt;, &lt;__main__.SomeClass object at 0x026C9B50&gt;),)  <br /> Value: 33  <br /> ()  <br /> Function: &lt;function myfunction at 0x026B38B0&gt;  <br /> Arguments: ((6, 7),)  <br /> Value: -13  <br /> ()  <br /> &gt;&gt;&gt;   <br /></code></pre><br />I hope its clear now. Its not rocket science, but its a clever way of doing things.<br /><br />Anyways, that's all for now. And btw, thanks to Google for giving us a free membership to ACM for one year. The GSoC welcome package will also be arriving soon, and I am excited :-D</div><div><br /></div><div><br /></div></div></div></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://codesachin.blogspot.com/2013/06/smart-caching-in-python.html">by Sachin Joglekar (noreply@blogger.com) at June 20, 2013 03:31 PM</a>
-</p>
-</div>
-</div>
-
-
 </div>
 
 </div>
@@ -2907,7 +2889,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
 <a href="http://f1728.wordpress.com/category/SymPy/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://f1728.wordpress.com" class="message" title="no activity in 7 days">Jeremias Yehdegho</a>
 </li>
 <li>
-<a href="http://sophiessympyblog.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sophiessympyblog.wordpress.com" title="sophie's sympy blog">Katja Sophie Hotz</a>
+<a href="http://sophiessympyblog.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sophiessympyblog.wordpress.com" class="message" title="no activity in 7 days">Katja Sophie Hotz</a>
 </li>
 <li>
 <a href="" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a class="message" title="404: not found">Kazuo Thow</a>
@@ -2934,13 +2916,13 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
 <a href="http://www.blogger.com/feeds/6568744196982634289/posts/default/-/sympy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://ondrejcertik.blogspot.com/search/label/sympy" title="Ondřej Čertík">Ondřej Čertík</a>
 </li>
 <li>
-<a href="http://musingsofafriend.wordpress.com/tag/sympy/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://musingsofafriend.wordpress.com" class="message" title="no activity in 7 days">Prasoon Shukla</a>
+<a href="http://musingsofafriend.wordpress.com/tag/sympy/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://musingsofafriend.wordpress.com" title="musings of a friend - Prasoon Shukla » SymPy">Prasoon Shukla</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/436496352933562096/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://robert-code.blogspot.com/" class="message" title="no activity in 7 days">Robert Schwarz</a>
 </li>
 <li>
-<a href="http://www.blogger.com/feeds/5472769892551526876/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://codesachin.blogspot.com/" class="message" title="no activity in 7 days">Sachin Joglekar</a>
+<a href="http://www.blogger.com/feeds/5472769892551526876/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://codesachin.blogspot.com/" title="Dream. Think. Code.">Sachin Joglekar</a>
 </li>
 <li>
 <a href="http://saptman.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://saptman.wordpress.com" class="message" title="no activity in 7 days">Saptarshi Mandal</a>
@@ -2985,7 +2967,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
 
 <p>
 <strong>Last updated:</strong><br>
-August 04, 2013 08:00 AM<br>
+August 04, 2013 03:20 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
