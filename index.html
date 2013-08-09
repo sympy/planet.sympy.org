@@ -33,6 +33,59 @@
 
 
 
+<h3><a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
+
+
+<div class="entrygroup" id="http://asmeurersympy.wordpress.com/?p=1362">
+<h4 lang="en"><a href="http://asmeurersympy.wordpress.com/2013/08/09/using-python-3-as-my-default-python/">Using Python 3 as my default Python</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p>So I just finished my internship with <a href="http://continuum.io">Continuum</a>. For the internship, I primarily worked on <a href="http://continuum.io/downloads">Anaconda</a>, their free Python distribution, and <a href="https://github.com/continuumIO/conda">conda</a>, its free (BSD open source) package manager. I might write a blog post about conda later, but suffice it to say that I’m convinced that it is doing package management the right way. One of the major developments this summer that I helped out with was the ability for <a href="http://docs.continuum.io/conda/build.html">anybody to build a conda package</a>, and a site called <a href="https://binstar.org">Binstar</a> where people can upload them (the beta code is “binstar in beta” with no quotes). </p>
+<p>Another thing that happened over the summer is that Almar Klein made conda Python 3 compatible, so that it can be used with the <a href="http://www.pyzo.org">Pyzo</a> project, which is Python 3 only.    The way this was done was by using a single code base for Python 2 and Python 3. Thus, this became the first time I have done any heavy development on Python source that had to be Python 3 compatible from a single codebase (as opposed to using the 2to3 tool). </p>
+<p>Another development this summer was that SymPy was released (<a href="https://github.com/sympy/sympy/releases/tag/sympy-0.7.3">0.7.3</a>). This marked the last release to support Python 2.5. Around the same time, we discussed our Python 3 situation, and how annoying it is to run use2to3 all the time. The result was <a href="https://github.com/sympy/sympy/pull/2318">this pull request</a>, which made SymPy use a single code base for Python 2 and Python 3. Now, that pull request is hard to mull through, but the important part to look at is the <a href="https://github.com/sympy/sympy/pull/2318/files#diff-124">compatibility</a> file. Everything in that file has to be imported and used, because it represents things that are different between Python 2 and Python 3. Ondřej has written more about this on <a href="http://ondrejcertik.blogspot.com/2013/08/how-to-support-both-python-2-and-3.html">his blog</a>. </p>
+<p>In all, I think that supporting Python 2.6-3.3 (not including 3.0 or 3.1) is not that bad. The compatibility file has a few things, but thinking back, it was just that bad or worse supporting Python 2.4-2.7 (heck, back then, we couldn’t even use the <code>all</code> function without importing it). The situation is much better today now that we use Travis too, since any mistake is caught before the pull request is merged. The worst of course is the <code>print</code> function, but since that can be imported from <code>__future__</code>, I will be warned about it pretty fast, since <code>print</code> as a statement is a SyntaxError in that case. It also doesn’t take that long to get into the habit of typing <code>()</code> after <code>print</code>. </p>
+<p>Of course, there are a lot of nice Python 3 only features that we cannot use, but this was the case for supporting Python 2.4-2.7 too (e.g., the with statement and the ternary statement were both introduced in Python 2.5).   So this is really nothing new. There is always a stick to drop the oldest Python version we support, and a lag on what features we can use. Now that we have dropped Python 2.5 support in SymPy, we can finally start using new-style string formatting, abstract base classes, relative imports, and keyword arguments after <code>*args</code>.</p>
+<p>So as a result of this, I’ve come to the conclusion that Python 3 is <em>not</em> another language. It’s just another version of the same language. Supporting Python 2.6-3.3 is no different from supporting Python 2.4-2.7. You have to have some compatibility imports, you can’t use new language features, and you have to have good test coverage. I think that the core Python folks made a mistake by presenting Python 3 as a new language. It has made people antagonistic against Python 3 (well, that and the <code>print</code> function, which was another stupid mistake, because even if it was a good idea, it alone has kept too many people from switching). 2to3 was a mistake too, because it perpetuated this idea. </p>
+<p>In the past, I have always developed against the latest version of Python: 2.6 was the best when I learned Python, and then 2.7. Even though I have had to support back to 2.4, I only used 2.4 explicitly when testing. </p>
+<p>Well, given what I said above, the only logical thing to do is to use Python 3.3 as my main development Python. If you use Anaconda, there are basically two ways you can do this. The first is to just create a Python 3 environment (<code>conda create -n python3 python=3</code>), and put that first in your <code>PATH</code> (you also will need to add <code>source activate python3</code> to your bash profile if you go this route, so that <code>conda install</code> will install into that environment by default). For me, though, I plan to use a Python 3 version of Anaconda, which has Python 3 as the default. The main difference here is that <code>conda</code> itself is written in Python 3. Aside from purity, and the fact that I plan to fix any occasional conda bugs that I come across, the other difference here is that conda itself will default to Python 3 in this case (i.e., when creating a new environment with Python like <code>conda create -n envname python</code>, the Python will be Python 3, not Python 2, and also it will build against Python 3 by default with <code>conda build</code>). Continuum does not yet make Python 3 versions of Anaconda, but there are Python 3 versions of <a href="http://repo.continuum.io/miniconda/index.html">Miniconda</a> (Miniconda3), which is a stripped down version of Anaconda with just Python, the conda package manager, and its dependencies. You can easily install Anaconda into it though with <code>conda install anaconda</code>. I personally prefer to install only what I need to keep the disk usage low (on an SSD, disk space is sparse), so this is perfect for me anyway.</p>
+<p>My recommendation is to put a Python 2 installation second in your PATH, so that you can easily call <code>python2</code> if you want to use Python 2. The easiest way to do this is to create a conda environment for it (<code>conda create -n python2 python=2</code>) and add <code>~/anaconda/envs/python2</code> to your PATH. </p>
+<p>So far, I have run into a few issues:</p>
+<ul>
+<li>Some packages aren’t build for Python 3 yet in Anaconda, or they don’t support it at all.  The biggest blocker in Anaconda is PySide (at least on Mac OS X), though it should be coming soon. </li>
+<li>Some packages only install entry points with a “3″ suffix, which is annoying. The biggest offender here is IPython. I brought up this issue on their <a href="http://mail.scipy.org/pipermail/ipython-dev/2013-August/012074.html">mailing list</a>, <del>so hopefully they will see the light and fix this before the next release</del>, but it hasn’t been implemented yet. I also plan to make sure that the Anaconda package for IPython installs an <code>ipython</code> entry point into Python 3 environments. Even so, one has to remember this when installing old versions of IPython in environments. </li>
+<li>There are some bugs in conda in Python 3. Actually, I suspect that there are bugs in a lot of packages in Python 3, because people don’t develop against it, unless they have excellent test coverage. Even SymPy missed a few print statements. </li>
+<li>You can’t <code>setup.py develop</code> against anything that uses 2to3 (like IPython). </li>
+<li>It’s a little annoying working against old versions of SymPy (e.g., when digging through the git history to track something down), because I have to explicitly use Python 2. Conda makes this easier because I can just create a Python 2 environment and do <code>source activate python2</code> when I am using Python 2. Or, for a one-off, I can just use <code>python2</code>, and keep a Python 2 environment second in my PATH. But this issue is not really new. For example, really old versions of SymPy only work with Python 2.5, because they used <code>as</code> as a variable name.</li>
+<li>Everyone else isn’t using Python 3 yet, so if I write a script that only needs to support “the latest version of Python,” it probably needs to support Python 2.7, or else I should explicitly put <code>/usr/bin/env python3</code> in the shebang line. But for SymPy, I have to be aware of how to support 2.6-3.3, so I have to know all the features that are only in some versions anyway. On the other side of things, if I run some random Python script with a shebang line, it probably is going to expect Python 2 and not Python 3, so I either have to explicitly add <code>python2</code> to the command or activate a Python 2 environment</li>
+<li>Some packages just don’t support Python 3 yet. Fabric (and its main dependency, Paramiko) is the one example I have come across so far in my own work. So I have to fall back to Python 2 if I want to use them. The best thing to do here is to pitch in and help these libraries port themselves.</li>
+</ul>
+<p>I’ll update this list as I come across more issues. </p>
+<p>In all, so far, it’s nothing too bad. Conda makes switching back to Python 2 easy enough, and dealing with these issues are hardly the worst thing I have to deal with when developing with Python. And if anything, seeing Python 2-3 bugs and issues makes me more aware of the differences between the two versions of the language, which is a good things since I have to develop against code that has to support both. </p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/asmeurersympy.wordpress.com/1362/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/asmeurersympy.wordpress.com/1362/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1362&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://asmeurersympy.wordpress.com/2013/08/09/using-python-3-as-my-default-python/">by Aaron Meurer at August 09, 2013 09:59 PM</a>
+</p>
+</div>
+</div>
+
+
+
+</div>
+<div class="channelgroup">
+
+
+
+
+
+
+
 <h3><a href="http://meclark256.wordpress.com" title="My GSOC Adventure with SymPy">Mary Clark</a></h3>
 
 
@@ -2809,42 +2862,6 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
 </div>
 
 </div>
-<div class="daygroup">
-<h2>June 23, 2013</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://sympymatrix.blogspot.com/" title="Sympy Fast Matrix">Saurabh Jha</a></h3>
-
-
-<div class="entrygroup" id="tag:blogger.com,1999:blog-2736678015821545355.post-7871624797346734784">
-<h4><a href="http://sympymatrix.blogspot.com/2013/06/week-2.html">Week 2</a></h4>
-<div class="entry">
-<div class="content">
-<div style="text-align: left;" dir="ltr">It took me a long time to get the CSR to DOK conversion and vice-versa PR[1] to get merged, but it seems fine now. I am thankful to Christopher Smith for helpful discussions and his pushes. Here is my progress in previous two weeks--<br /><br /><br /><ul style="text-align: left;"><li>Reliable CSR to DOK and inverse conversion[1]</li><li>Efficient implementation of sparsematrix-vector product. The running time of the program is O(nnz), where nnz is number of non-zero elements of sparse matrix[2]</li><li>Trying to support domains here. I tried some methods and ultimately chose the one that is similar to one done in polys module.[2]</li><li>Realisation that CSR is not appropriate for CSR + CSR, CSR - CSR and CSR*CSR. This is slower than other dictionary based implementation so I dropped the ideas</li></ul><br />I was poking around with the current sparse code since I want to try my ideas on sparse before getting to dense. I think I have a clear direction for at least the next week.<br /><br /><ul style="text-align: left;"><li>Improving sparse*sparse, I want to play with this idea tomorrow as I suspect I can improve the existing multiplication implementation. The implementation will use dictionaries, not CSR.</li><li>get sparse to support domains. My model would be to have procedural implementation in the new file sparsetools.py and then having these functions "powering" methods of sparse.py</li></ul><div>The current matrix can vaguely be considered as having Level 1 only. My strategy is to get Level 0 up. I don't want to plan more ahead since I think I should just plan on the fly as time comes and not putting any detail plan. </div><div><br /></div><div>One problem I was having last two weeks is I  was not iterating fast enough. Ideally, I should push commits daily so that the code can be reviewed and discussed. It is a good boost for morale. It also makes sure that the project can be done piecemeal. </div><br /><br /><br />[1] <a href="https://github.com/sympy/sympy/pull/2169">PR 2169</a><br />[2] <a href="https://github.com/sympy/sympy/pull/2190">PR 2190</a></div></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://sympymatrix.blogspot.com/2013/06/week-2.html">by Saurabh Jha (noreply@blogger.com) at June 23, 2013 05:07 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -2853,7 +2870,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
 <h2>Subscriptions</h2>
 <ul>
 <li>
-<a href="http://asmeurersympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://asmeurersympy.wordpress.com" class="message" title="no activity in 7 days">Aaron Meurer</a>
+<a href="http://asmeurersympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/936818886435977143/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://addisoncugini.blogspot.com/" class="message" title="no activity in 7 days">Addison Cugini</a>
@@ -2988,7 +3005,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
 
 <p>
 <strong>Last updated:</strong><br>
-August 09, 2013 08:00 PM<br>
+August 09, 2013 10:00 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>

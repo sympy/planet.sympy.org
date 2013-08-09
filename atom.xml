@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2013-08-09T20:00:46Z</updated>
+  <updated>2013-08-09T22:00:51Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,53 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry xml:lang="en">
+    <id>http://asmeurersympy.wordpress.com/?p=1362</id>
+    <link href="http://asmeurersympy.wordpress.com/2013/08/09/using-python-3-as-my-default-python/" rel="alternate" type="text/html"/>
+    <title>Using Python 3 as my default Python</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">So I just finished my internship with Continuum. For the internship, I primarily worked on Anaconda, their free Python distribution, and conda, its free (BSD open source) package manager. I might write a blog post about conda later, but suffice it to say that I’m convinced that it is doing package management the right way. […]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1362&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" width="1"/></div>
+    </summary>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>So I just finished my internship with <a href="http://continuum.io">Continuum</a>. For the internship, I primarily worked on <a href="http://continuum.io/downloads">Anaconda</a>, their free Python distribution, and <a href="https://github.com/continuumIO/conda">conda</a>, its free (BSD open source) package manager. I might write a blog post about conda later, but suffice it to say that I’m convinced that it is doing package management the right way. One of the major developments this summer that I helped out with was the ability for <a href="http://docs.continuum.io/conda/build.html">anybody to build a conda package</a>, and a site called <a href="https://binstar.org">Binstar</a> where people can upload them (the beta code is “binstar in beta” with no quotes). </p>
+<p>Another thing that happened over the summer is that Almar Klein made conda Python 3 compatible, so that it can be used with the <a href="http://www.pyzo.org">Pyzo</a> project, which is Python 3 only.    The way this was done was by using a single code base for Python 2 and Python 3. Thus, this became the first time I have done any heavy development on Python source that had to be Python 3 compatible from a single codebase (as opposed to using the 2to3 tool). </p>
+<p>Another development this summer was that SymPy was released (<a href="https://github.com/sympy/sympy/releases/tag/sympy-0.7.3">0.7.3</a>). This marked the last release to support Python 2.5. Around the same time, we discussed our Python 3 situation, and how annoying it is to run use2to3 all the time. The result was <a href="https://github.com/sympy/sympy/pull/2318">this pull request</a>, which made SymPy use a single code base for Python 2 and Python 3. Now, that pull request is hard to mull through, but the important part to look at is the <a href="https://github.com/sympy/sympy/pull/2318/files#diff-124">compatibility</a> file. Everything in that file has to be imported and used, because it represents things that are different between Python 2 and Python 3. Ondřej has written more about this on <a href="http://ondrejcertik.blogspot.com/2013/08/how-to-support-both-python-2-and-3.html">his blog</a>. </p>
+<p>In all, I think that supporting Python 2.6-3.3 (not including 3.0 or 3.1) is not that bad. The compatibility file has a few things, but thinking back, it was just that bad or worse supporting Python 2.4-2.7 (heck, back then, we couldn’t even use the <code>all</code> function without importing it). The situation is much better today now that we use Travis too, since any mistake is caught before the pull request is merged. The worst of course is the <code>print</code> function, but since that can be imported from <code>__future__</code>, I will be warned about it pretty fast, since <code>print</code> as a statement is a SyntaxError in that case. It also doesn’t take that long to get into the habit of typing <code>()</code> after <code>print</code>. </p>
+<p>Of course, there are a lot of nice Python 3 only features that we cannot use, but this was the case for supporting Python 2.4-2.7 too (e.g., the with statement and the ternary statement were both introduced in Python 2.5).   So this is really nothing new. There is always a stick to drop the oldest Python version we support, and a lag on what features we can use. Now that we have dropped Python 2.5 support in SymPy, we can finally start using new-style string formatting, abstract base classes, relative imports, and keyword arguments after <code>*args</code>.</p>
+<p>So as a result of this, I’ve come to the conclusion that Python 3 is <em>not</em> another language. It’s just another version of the same language. Supporting Python 2.6-3.3 is no different from supporting Python 2.4-2.7. You have to have some compatibility imports, you can’t use new language features, and you have to have good test coverage. I think that the core Python folks made a mistake by presenting Python 3 as a new language. It has made people antagonistic against Python 3 (well, that and the <code>print</code> function, which was another stupid mistake, because even if it was a good idea, it alone has kept too many people from switching). 2to3 was a mistake too, because it perpetuated this idea. </p>
+<p>In the past, I have always developed against the latest version of Python: 2.6 was the best when I learned Python, and then 2.7. Even though I have had to support back to 2.4, I only used 2.4 explicitly when testing. </p>
+<p>Well, given what I said above, the only logical thing to do is to use Python 3.3 as my main development Python. If you use Anaconda, there are basically two ways you can do this. The first is to just create a Python 3 environment (<code>conda create -n python3 python=3</code>), and put that first in your <code>PATH</code> (you also will need to add <code>source activate python3</code> to your bash profile if you go this route, so that <code>conda install</code> will install into that environment by default). For me, though, I plan to use a Python 3 version of Anaconda, which has Python 3 as the default. The main difference here is that <code>conda</code> itself is written in Python 3. Aside from purity, and the fact that I plan to fix any occasional conda bugs that I come across, the other difference here is that conda itself will default to Python 3 in this case (i.e., when creating a new environment with Python like <code>conda create -n envname python</code>, the Python will be Python 3, not Python 2, and also it will build against Python 3 by default with <code>conda build</code>). Continuum does not yet make Python 3 versions of Anaconda, but there are Python 3 versions of <a href="http://repo.continuum.io/miniconda/index.html">Miniconda</a> (Miniconda3), which is a stripped down version of Anaconda with just Python, the conda package manager, and its dependencies. You can easily install Anaconda into it though with <code>conda install anaconda</code>. I personally prefer to install only what I need to keep the disk usage low (on an SSD, disk space is sparse), so this is perfect for me anyway.</p>
+<p>My recommendation is to put a Python 2 installation second in your PATH, so that you can easily call <code>python2</code> if you want to use Python 2. The easiest way to do this is to create a conda environment for it (<code>conda create -n python2 python=2</code>) and add <code>~/anaconda/envs/python2</code> to your PATH. </p>
+<p>So far, I have run into a few issues:</p>
+<ul>
+<li>Some packages aren’t build for Python 3 yet in Anaconda, or they don’t support it at all.  The biggest blocker in Anaconda is PySide (at least on Mac OS X), though it should be coming soon. </li>
+<li>Some packages only install entry points with a “3″ suffix, which is annoying. The biggest offender here is IPython. I brought up this issue on their <a href="http://mail.scipy.org/pipermail/ipython-dev/2013-August/012074.html">mailing list</a>, <del>so hopefully they will see the light and fix this before the next release</del>, but it hasn’t been implemented yet. I also plan to make sure that the Anaconda package for IPython installs an <code>ipython</code> entry point into Python 3 environments. Even so, one has to remember this when installing old versions of IPython in environments. </li>
+<li>There are some bugs in conda in Python 3. Actually, I suspect that there are bugs in a lot of packages in Python 3, because people don’t develop against it, unless they have excellent test coverage. Even SymPy missed a few print statements. </li>
+<li>You can’t <code>setup.py develop</code> against anything that uses 2to3 (like IPython). </li>
+<li>It’s a little annoying working against old versions of SymPy (e.g., when digging through the git history to track something down), because I have to explicitly use Python 2. Conda makes this easier because I can just create a Python 2 environment and do <code>source activate python2</code> when I am using Python 2. Or, for a one-off, I can just use <code>python2</code>, and keep a Python 2 environment second in my PATH. But this issue is not really new. For example, really old versions of SymPy only work with Python 2.5, because they used <code>as</code> as a variable name.</li>
+<li>Everyone else isn’t using Python 3 yet, so if I write a script that only needs to support “the latest version of Python,” it probably needs to support Python 2.7, or else I should explicitly put <code>/usr/bin/env python3</code> in the shebang line. But for SymPy, I have to be aware of how to support 2.6-3.3, so I have to know all the features that are only in some versions anyway. On the other side of things, if I run some random Python script with a shebang line, it probably is going to expect Python 2 and not Python 3, so I either have to explicitly add <code>python2</code> to the command or activate a Python 2 environment</li>
+<li>Some packages just don’t support Python 3 yet. Fabric (and its main dependency, Paramiko) is the one example I have come across so far in my own work. So I have to fall back to Python 2 if I want to use them. The best thing to do here is to pitch in and help these libraries port themselves.</li>
+</ul>
+<p>I’ll update this list as I come across more issues. </p>
+<p>In all, so far, it’s nothing too bad. Conda makes switching back to Python 2 easy enough, and dealing with these issues are hardly the worst thing I have to deal with when developing with Python. And if anything, seeing Python 2-3 bugs and issues makes me more aware of the differences between the two versions of the language, which is a good things since I have to develop against code that has to support both. </p>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/asmeurersympy.wordpress.com/1362/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/asmeurersympy.wordpress.com/1362/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1362&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" width="1"/></div>
+    </content>
+    <updated>2013-08-09T21:59:55Z</updated>
+    <category term="Uncategorized"/>
+    <author>
+      <name>Aaron Meurer</name>
+    </author>
+    <source>
+      <id>http://asmeurersympy.wordpress.com</id>
+      <logo>http://1.gravatar.com/blavatar/51b9e231856e8bf6de4f10e8251149d5?s=96&amp;d=http%3A%2F%2Fs2.wp.com%2Fi%2Fbuttonw-com.png</logo>
+      <link href="http://asmeurersympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://asmeurersympy.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://asmeurersympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
+      <title>Aaron Meurer's SymPy Blog</title>
+      <updated>2013-08-09T22:00:14Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en">
     <id>http://meclark256.wordpress.com/?p=82</id>
@@ -44,7 +91,7 @@
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-08-09T20:00:43Z</updated>
+      <updated>2013-08-09T22:00:48Z</updated>
     </source>
   </entry>
 
@@ -78,7 +125,7 @@ PS2 : I am finally 20 !! <img alt=":D" class="wp-smiley" src="http://s0.wp.com/w
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-08-09T20:00:39Z</updated>
+      <updated>2013-08-09T22:00:44Z</updated>
     </source>
   </entry>
 
@@ -142,7 +189,7 @@ PS2 : I am finally 20 !! <img alt=":D" class="wp-smiley" src="http://s0.wp.com/w
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-08-09T20:00:44Z</updated>
+      <updated>2013-08-09T22:00:49Z</updated>
     </source>
   </entry>
 
@@ -214,7 +261,7 @@ PS2 : I am finally 20 !! <img alt=":D" class="wp-smiley" src="http://s0.wp.com/w
       <link href="http://musingsofafriend.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>The greatest WordPress.com site in all the land!</subtitle>
       <title>musings of a friend - Prasoon Shukla » SymPy</title>
-      <updated>2013-08-09T20:00:43Z</updated>
+      <updated>2013-08-09T22:00:48Z</updated>
     </source>
   </entry>
 
@@ -268,7 +315,7 @@ i] chi (Finds a polynomial <img alt="\chi" class="latex" src="http://s0.wp.com/l
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My perspective of things</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-08-09T20:00:41Z</updated>
+      <updated>2013-08-09T22:00:46Z</updated>
     </source>
   </entry>
 
@@ -362,7 +409,7 @@ i] chi (Finds a polynomial <img alt="\chi" class="latex" src="http://s0.wp.com/l
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2013-08-09T20:00:42Z</updated>
+      <updated>2013-08-09T22:00:46Z</updated>
     </source>
   </entry>
 
@@ -397,7 +444,7 @@ i] chi (Finds a polynomial <img alt="\chi" class="latex" src="http://s0.wp.com/l
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-08-09T20:00:43Z</updated>
+      <updated>2013-08-09T22:00:48Z</updated>
     </source>
   </entry>
 
@@ -474,7 +521,7 @@ i] chi (Finds a polynomial <img alt="\chi" class="latex" src="http://s0.wp.com/l
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2013-08-09T20:00:42Z</updated>
+      <updated>2013-08-09T22:00:46Z</updated>
     </source>
   </entry>
 
@@ -504,7 +551,7 @@ i] chi (Finds a polynomial <img alt="\chi" class="latex" src="http://s0.wp.com/l
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-08-09T20:00:44Z</updated>
+      <updated>2013-08-09T22:00:49Z</updated>
     </source>
   </entry>
 
@@ -546,7 +593,7 @@ i] chi (Finds a polynomial <img alt="\chi" class="latex" src="http://s0.wp.com/l
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My perspective of things</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-08-09T20:00:41Z</updated>
+      <updated>2013-08-09T22:00:46Z</updated>
     </source>
   </entry>
 
@@ -615,7 +662,7 @@ which I’m quite happy with. I though that I was going to have to use a loop, b
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-08-09T20:00:43Z</updated>
+      <updated>2013-08-09T22:00:48Z</updated>
     </source>
   </entry>
 
@@ -812,7 +859,7 @@ Signing- off <img alt=":)" class="wp-smiley" src="http://s0.wp.com/wp-includes/i
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-08-09T20:00:39Z</updated>
+      <updated>2013-08-09T22:00:44Z</updated>
     </source>
   </entry>
 
@@ -844,7 +891,7 @@ Signing- off <img alt=":)" class="wp-smiley" src="http://s0.wp.com/wp-includes/i
       <link href="http://musingsofafriend.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>The greatest WordPress.com site in all the land!</subtitle>
       <title>musings of a friend - Prasoon Shukla » SymPy</title>
-      <updated>2013-08-09T20:00:43Z</updated>
+      <updated>2013-08-09T22:00:48Z</updated>
     </source>
   </entry>
 
@@ -879,7 +926,7 @@ The good news is that now <code>bin/test</code> passes when <code>heugcd</code> 
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-08-09T20:00:44Z</updated>
+      <updated>2013-08-09T22:00:49Z</updated>
     </source>
   </entry>
 
@@ -951,7 +998,7 @@ The good news is that now <code>bin/test</code> passes when <code>heugcd</code> 
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My perspective of things</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-08-09T20:00:41Z</updated>
+      <updated>2013-08-09T22:00:45Z</updated>
     </source>
   </entry>
 
@@ -1001,7 +1048,7 @@ The good news is that now <code>bin/test</code> passes when <code>heugcd</code> 
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2013-08-09T20:00:42Z</updated>
+      <updated>2013-08-09T22:00:46Z</updated>
     </source>
   </entry>
 
@@ -1044,7 +1091,7 @@ and type F is very similar.</p>
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-08-09T20:00:43Z</updated>
+      <updated>2013-08-09T22:00:48Z</updated>
     </source>
   </entry>
 
@@ -1175,7 +1222,7 @@ Another new tool I learned to use this week was Sphinx. I like the html document
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-08-09T20:00:44Z</updated>
+      <updated>2013-08-09T22:00:49Z</updated>
     </source>
   </entry>
 
@@ -1330,7 +1377,7 @@ Another new tool I learned to use this week was Sphinx. I like the html document
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-08-09T20:00:39Z</updated>
+      <updated>2013-08-09T22:00:44Z</updated>
     </source>
   </entry>
 
@@ -1404,7 +1451,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My perspective of things</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-08-09T20:00:41Z</updated>
+      <updated>2013-08-09T22:00:45Z</updated>
     </source>
   </entry>
 
@@ -1437,7 +1484,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2013-08-09T20:00:42Z</updated>
+      <updated>2013-08-09T22:00:47Z</updated>
     </source>
   </entry>
 
@@ -1474,7 +1521,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-08-09T20:00:43Z</updated>
+      <updated>2013-08-09T22:00:48Z</updated>
     </source>
   </entry>
 
@@ -1577,7 +1624,7 @@ I know this is a lot of talking and nothing like psudeo code, though we can draw
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-08-09T20:00:39Z</updated>
+      <updated>2013-08-09T22:00:44Z</updated>
     </source>
   </entry>
 
@@ -1643,7 +1690,7 @@ fab vagrant release
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-08-09T20:00:12Z</updated>
+      <updated>2013-08-09T22:00:14Z</updated>
     </source>
   </entry>
 
@@ -1761,7 +1808,7 @@ fab vagrant release
       <link href="http://musingsofafriend.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>The greatest WordPress.com site in all the land!</subtitle>
       <title>musings of a friend - Prasoon Shukla » SymPy</title>
-      <updated>2013-08-09T20:00:43Z</updated>
+      <updated>2013-08-09T22:00:48Z</updated>
     </source>
   </entry>
 
@@ -1815,7 +1862,7 @@ fab vagrant release
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2013-08-09T20:00:42Z</updated>
+      <updated>2013-08-09T22:00:46Z</updated>
     </source>
   </entry>
 
@@ -1904,7 +1951,7 @@ I was able to make use of both of them in my implementation for the multivariate
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-08-09T20:00:44Z</updated>
+      <updated>2013-08-09T22:00:49Z</updated>
     </source>
   </entry>
 
@@ -1956,7 +2003,7 @@ I was able to make use of both of them in my implementation for the multivariate
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-08-09T20:00:43Z</updated>
+      <updated>2013-08-09T22:00:48Z</updated>
     </source>
   </entry>
 
@@ -2014,7 +2061,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My perspective of things</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-08-09T20:00:41Z</updated>
+      <updated>2013-08-09T22:00:45Z</updated>
     </source>
   </entry>
 
@@ -2140,7 +2187,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-08-09T20:00:12Z</updated>
+      <updated>2013-08-09T22:00:14Z</updated>
     </source>
   </entry>
 
@@ -2245,7 +2292,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2013-08-09T20:00:42Z</updated>
+      <updated>2013-08-09T22:00:47Z</updated>
     </source>
   </entry>
 
@@ -2277,7 +2324,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-08-09T20:00:44Z</updated>
+      <updated>2013-08-09T22:00:49Z</updated>
     </source>
   </entry>
 
@@ -2309,7 +2356,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-08-09T20:00:44Z</updated>
+      <updated>2013-08-09T22:00:49Z</updated>
     </source>
   </entry>
 
@@ -2363,7 +2410,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://musingsofafriend.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>The greatest WordPress.com site in all the land!</subtitle>
       <title>musings of a friend - Prasoon Shukla » SymPy</title>
-      <updated>2013-08-09T20:00:43Z</updated>
+      <updated>2013-08-09T22:00:48Z</updated>
     </source>
   </entry>
 
@@ -2427,7 +2474,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-08-09T20:00:43Z</updated>
+      <updated>2013-08-09T22:00:48Z</updated>
     </source>
   </entry>
 
@@ -2478,7 +2525,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My perspective of things</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-08-09T20:00:41Z</updated>
+      <updated>2013-08-09T22:00:46Z</updated>
     </source>
   </entry>
 
@@ -2539,7 +2586,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-08-09T20:00:39Z</updated>
+      <updated>2013-08-09T22:00:44Z</updated>
     </source>
   </entry>
 
@@ -2572,39 +2619,6 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>Tarun Gaba</title>
       <updated>2013-08-02T03:23:46Z</updated>
-    </source>
-  </entry>
-
-  <entry>
-    <id>tag:blogger.com,1999:blog-2736678015821545355.post-7871624797346734784</id>
-    <link href="http://sympymatrix.blogspot.com/feeds/7871624797346734784/comments/default" rel="replies" type="application/atom+xml"/>
-    <link href="http://sympymatrix.blogspot.com/2013/06/week-2.html#comment-form" rel="replies" type="text/html"/>
-    <link href="http://www.blogger.com/feeds/2736678015821545355/posts/default/7871624797346734784" rel="edit" type="application/atom+xml"/>
-    <link href="http://www.blogger.com/feeds/2736678015821545355/posts/default/7871624797346734784" rel="self" type="application/atom+xml"/>
-    <link href="http://sympymatrix.blogspot.com/2013/06/week-2.html" rel="alternate" type="text/html"/>
-    <title>Week 2</title>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><div dir="ltr" style="text-align: left;">It took me a long time to get the CSR to DOK conversion and vice-versa PR[1] to get merged, but it seems fine now. I am thankful to Christopher Smith for helpful discussions and his pushes. Here is my progress in previous two weeks--<br/><br/><br/><ul style="text-align: left;"><li>Reliable CSR to DOK and inverse conversion[1]</li><li>Efficient implementation of sparsematrix-vector product. The running time of the program is O(nnz), where nnz is number of non-zero elements of sparse matrix[2]</li><li>Trying to support domains here. I tried some methods and ultimately chose the one that is similar to one done in polys module.[2]</li><li>Realisation that CSR is not appropriate for CSR + CSR, CSR - CSR and CSR*CSR. This is slower than other dictionary based implementation so I dropped the ideas</li></ul><br/>I was poking around with the current sparse code since I want to try my ideas on sparse before getting to dense. I think I have a clear direction for at least the next week.<br/><br/><ul style="text-align: left;"><li>Improving sparse*sparse, I want to play with this idea tomorrow as I suspect I can improve the existing multiplication implementation. The implementation will use dictionaries, not CSR.</li><li>get sparse to support domains. My model would be to have procedural implementation in the new file sparsetools.py and then having these functions "powering" methods of sparse.py</li></ul><div>The current matrix can vaguely be considered as having Level 1 only. My strategy is to get Level 0 up. I don't want to plan more ahead since I think I should just plan on the fly as time comes and not putting any detail plan. </div><div><br/></div><div>One problem I was having last two weeks is I  was not iterating fast enough. Ideally, I should push commits daily so that the code can be reviewed and discussed. It is a good boost for morale. It also makes sure that the project can be done piecemeal. </div><br/><br/><br/>[1] <a href="https://github.com/sympy/sympy/pull/2169">PR 2169</a><br/>[2] <a href="https://github.com/sympy/sympy/pull/2190">PR 2190</a></div></div>
-    </content>
-    <updated>2013-06-23T17:07:54Z</updated>
-    <published>2013-06-23T17:07:00Z</published>
-    <author>
-      <name>Saurabh Jha</name>
-      <email>noreply@blogger.com</email>
-      <uri>http://www.blogger.com/profile/06730324274224921613</uri>
-    </author>
-    <source>
-      <id>tag:blogger.com,1999:blog-2736678015821545355</id>
-      <author>
-        <name>Saurabh Jha</name>
-        <email>noreply@blogger.com</email>
-        <uri>http://www.blogger.com/profile/06730324274224921613</uri>
-      </author>
-      <link href="http://sympymatrix.blogspot.com/feeds/posts/default" rel="http://schemas.google.com/g/2005#feed" type="application/atom+xml"/>
-      <link href="http://www.blogger.com/feeds/2736678015821545355/posts/default" rel="self" type="application/atom+xml"/>
-      <link href="http://sympymatrix.blogspot.com/" rel="alternate" type="text/html"/>
-      <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
-      <title>Sympy Fast Matrix</title>
-      <updated>2013-07-15T07:45:59Z</updated>
     </source>
   </entry>
 </feed>
