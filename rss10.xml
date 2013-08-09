@@ -13,6 +13,7 @@
 
 	<items>
 		<rdf:Seq>
+			<rdf:li rdf:resource="http://meclark256.wordpress.com/?p=82" />
 			<rdf:li rdf:resource="http://geekiology.wordpress.com/?p=407" />
 			<rdf:li rdf:resource="http://geekiology.wordpress.com/?p=396" />
 			<rdf:li rdf:resource="http://sophiessympyblog.wordpress.com/?p=246" />
@@ -72,11 +73,28 @@
 			<rdf:li rdf:resource="http://geekiology.wordpress.com/?p=284" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-7526836182390500993.post-434358419365808792" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-2736678015821545355.post-7871624797346734784" />
-			<rdf:li rdf:resource="tag:blogger.com,1999:blog-5472769892551526876.post-8317629035648079156" />
 		</rdf:Seq>
 	</items>
 </channel>
 
+<item rdf:about="http://meclark256.wordpress.com/?p=82">
+	<title>Mary Clark: Week 8</title>
+	<link>http://meclark256.wordpress.com/2013/08/09/week-8/</link>
+	<content:encoded>&lt;p&gt;This week I have been working on the class RootSystem. &lt;/p&gt;
+&lt;p&gt;The first major decision that I had to make about this class was how to encode the CartanType data, for lack of a better way of phrasing it.   There are numerous ways of doing this, but I think that my solution is somewhat elegant.  Effectively, when one calls an instance of the class RootSystem, it takes an argument, cartantype.  Then, the __new__ function takes the input and sets an attribute of RootSystem called cartan_type as CartanType(cartantype).  The code is:&lt;/p&gt;
+&lt;p&gt;class RootSystem(Basic):&lt;/p&gt;
+&lt;p&gt;    def __new__(cls, cartantype):&lt;br /&gt;        “”&quot;&lt;br /&gt;        Creates a new RootSystem object.  This method assigns an attribute&lt;br /&gt;        called cartan_type to each instance of a RootSystem object.  When&lt;br /&gt;        an instance of RootSystem is called, it needs an argument, which &lt;br /&gt;        should be an instance of a simple Lie algebra.  We then take the&lt;br /&gt;        CartanType of this argument and set it as the cartan_type attribute&lt;br /&gt;        of the RootSystem instance.  &lt;br /&gt;        “”&quot;&lt;br /&gt;        obj = Basic.__new__(cls, cartantype)&lt;br /&gt;        obj.cartan_type = CartanType(cartantype)&lt;br /&gt;        return obj&lt;/p&gt;
+&lt;p&gt;By doing this, it means that I don’t need to check the argument and see if it is “A” or “B” or “G” or whatever, and then importing the associated class.  I can just call self.cartan_type.rank() or self.cartan_type.simple_root(i), which I think is quite neat.  &lt;/p&gt;
+&lt;p&gt; &lt;/p&gt;
+&lt;p&gt;I’ve also decided to add a method to the base classes that generates all of their positive roots (and since the negative roots are just minus the positive roots, we effectively have the entire root system).  I think that this will facilitate some of the addition methods that I want to implement in RootSystem.  I have so far done this for types A, B, C, and D. &lt;/p&gt;
+&lt;p&gt; &lt;/p&gt;
+&lt;p&gt;At this point, in RootSystem I have so far implemented a method that generates all the simple roots,  a method for displaying the root space, and then methods which return the Cartan matrix and Dynkin diagram of the Lie algebra.  I am currently pondering on how I want to implement some root addition methods.&lt;/p&gt;
+&lt;p&gt; &lt;/p&gt;
+&lt;p&gt;So yeah, that’s been my week!  To be honest, I think it has been fairly productive, and I am quite pleased about that.&lt;/p&gt;
+&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/82/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/82/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;amp;blog=52875864&amp;amp;post=82&amp;amp;subd=meclark256&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
+	<dc:date>2013-08-09T19:55:18+00:00</dc:date>
+	<dc:creator>meclark256</dc:creator>
+</item>
 <item rdf:about="http://geekiology.wordpress.com/?p=407">
 	<title>Chetna Gupta: Week 6 &amp; 7</title>
 	<link>http://geekiology.wordpress.com/2013/08/09/week-6-7-2/</link>
@@ -1272,13 +1290,6 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise&lt;
 	<content:encoded>&lt;div style=&quot;text-align: left;&quot; dir=&quot;ltr&quot;&gt;It took me a long time to get the CSR to DOK conversion and vice-versa PR[1] to get merged, but it seems fine now. I am thankful to Christopher Smith for helpful discussions and his pushes. Here is my progress in previous two weeks--&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;ul style=&quot;text-align: left;&quot;&gt;&lt;li&gt;Reliable CSR to DOK and inverse conversion[1]&lt;/li&gt;&lt;li&gt;Efficient implementation of sparsematrix-vector product. The running time of the program is O(nnz), where nnz is number of non-zero elements of sparse matrix[2]&lt;/li&gt;&lt;li&gt;Trying to support domains here. I tried some methods and ultimately chose the one that is similar to one done in polys module.[2]&lt;/li&gt;&lt;li&gt;Realisation that CSR is not appropriate for CSR + CSR, CSR - CSR and CSR*CSR. This is slower than other dictionary based implementation so I dropped the ideas&lt;/li&gt;&lt;/ul&gt;&lt;br /&gt;I was poking around with the current sparse code since I want to try my ideas on sparse before getting to dense. I think I have a clear direction for at least the next week.&lt;br /&gt;&lt;br /&gt;&lt;ul style=&quot;text-align: left;&quot;&gt;&lt;li&gt;Improving sparse*sparse, I want to play with this idea tomorrow as I suspect I can improve the existing multiplication implementation. The implementation will use dictionaries, not CSR.&lt;/li&gt;&lt;li&gt;get sparse to support domains. My model would be to have procedural implementation in the new file sparsetools.py and then having these functions &quot;powering&quot; methods of sparse.py&lt;/li&gt;&lt;/ul&gt;&lt;div&gt;The current matrix can vaguely be considered as having Level 1 only. My strategy is to get Level 0 up. I don't want to plan more ahead since I think I should just plan on the fly as time comes and not putting any detail plan. &lt;/div&gt;&lt;div&gt;&lt;br /&gt;&lt;/div&gt;&lt;div&gt;One problem I was having last two weeks is I  was not iterating fast enough. Ideally, I should push commits daily so that the code can be reviewed and discussed. It is a good boost for morale. It also makes sure that the project can be done piecemeal. &lt;/div&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;[1] &lt;a href=&quot;https://github.com/sympy/sympy/pull/2169&quot;&gt;PR 2169&lt;/a&gt;&lt;br /&gt;[2] &lt;a href=&quot;https://github.com/sympy/sympy/pull/2190&quot;&gt;PR 2190&lt;/a&gt;&lt;/div&gt;</content:encoded>
 	<dc:date>2013-06-23T17:07:54+00:00</dc:date>
 	<dc:creator>Saurabh Jha</dc:creator>
-</item>
-<item rdf:about="tag:blogger.com,1999:blog-5472769892551526876.post-8317629035648079156">
-	<title>Sachin Joglekar: Hello World!</title>
-	<link>http://codesachin.blogspot.com/2013/05/hello-world.html</link>
-	<content:encoded>&lt;div style=&quot;text-align: left;&quot; dir=&quot;ltr&quot;&gt;Aha. My first ever blog post. The inspiration for this blog came from the Google Summer of Code program, which will be my primary focus till September.&lt;br /&gt;&lt;div&gt;I came to know that I was selected only yesterday night, and what a day that was! Phew... I was going round in circles thinking about my chances, what I had done right, what I had done wrong, blah blah. Never has been a wait of 24 hours been so torturous. I have to give credit to Gilbert Gede, Sean Vig, Jason Moore, DL Peterson, Angadh and all the other SymPy physics community mentors who helped me shape my proposal to a presentable, well-thought out condition. Earlier it was just one haphazard list of things that I intended to do over the summer(mainly monsoon, due to the late arrival of GSoC), and my chances wouldn't have been half as good without these people giving their input time and again.&lt;/div&gt;&lt;div&gt;Gilbert Gede, from UC-Davis, will be my mentor throughout the whole GSoC period, and I hope to learn a lot from him....not just physics, but also coding and coding styles in general. He is one of the authors of sympy.physics.mechanics (PyDy).&lt;/div&gt;&lt;div&gt;My co-mentor will be Stefan Krastanov, who has done awesome work for SymPy during his GSoC project last year. Considering both my mentors are former GSoCers, their experiences with the program will go a long way in making sure I don't stumble around too much.&lt;/div&gt;&lt;div&gt;I will be working alongside Prasoon Shukla, a student of IIT-R, as his project is closely related to mine in terms of dealing with vector fields.&lt;/div&gt;&lt;div&gt;Some others I need to thank are Christopher Smith, who helped me immensely during my first PRs for SymPy, Aaron, the SymPy head, who took the pains to comment on all my stupid coding mistakes in my initial work, Manoj Kumar, Priyans Murarka, Jay Rambhia and Divyansh Khanna who were great supports during my application period. Thanks to all of you, I am penning my first ever blog post :-)&lt;/div&gt;&lt;div&gt;I hope I have a great 3 months coding for GSoC. I do realise it's not gonna be very easy, and I am bound to get stuck at times, but I hope to live up to my proposal(&lt;a href=&quot;https://github.com/sympy/sympy/wiki/GSOC-2013-Application:-Sachin-Joglekar:-Electromagnetism-module&quot;&gt;https://github.com/sympy/sympy/wiki/GSOC-2013-Application:-Sachin-Joglekar:-Electromagnetism-module&lt;/a&gt;) and finish well what I intend to do, to begin with.&lt;br /&gt;The past few months have been very eventful and anxious at the same time, I hope I can work in peace now. &lt;/div&gt;&lt;div&gt;A lot more blog posts are going to come, mostly about my GSoC work, but some also about the other interesting coding things I do here and there. Hope I live up to the expectations of the SymPy community :-).&lt;/div&gt;&lt;div&gt;&lt;br /&gt;&lt;/div&gt;&lt;div&gt;&lt;br /&gt;&lt;/div&gt;&lt;/div&gt;</content:encoded>
-	<dc:date>2013-06-23T10:58:36+00:00</dc:date>
-	<dc:creator>Sachin Joglekar</dc:creator>
 </item>
 
 </rdf:RDF>
