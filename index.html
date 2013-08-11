@@ -23,6 +23,61 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>August 11, 2013</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://manojbits.wordpress.com" title="Perspective » SymPy">Manoj Kumar</a></h3>
+
+
+<div class="entrygroup" id="http://manojbits.wordpress.com/?p=705">
+<h4 lang="en"><a href="http://manojbits.wordpress.com/2013/08/11/lie-group-hint-for-sympy/">Lie Group hint for SymPy</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p>Hi, this week started with two of my previous PR’s getting merged (finally).</p>
+<p>1.  The heuristics PR – <a href="https://github.com/sympy/sympy/pull/2308" rel="nofollow">https://github.com/sympy/sympy/pull/2308</a><br />
+2. The variable coefficient PDE – <a href="https://github.com/sympy/sympy/pull/2346" rel="nofollow">https://github.com/sympy/sympy/pull/2346</a></p>
+<p>I started working on the integration of the infinitesimals to the present dsolve architecture. Before telling about the issues I ran into (a number of them actually), let me explain the algorithm in a few lines.</p>
+<p>As you know (If you have been following my blog),the past few weeks my focus was on solving this monster PDE.<br />
+<img src="http://s0.wp.com/latex.php?latex=%5Cfrac%7B%5Cpartial+%5Ceta%7D%7B%5Cpartial+x%7D+%2B+%28%5Cfrac%7B%5Cpartial+%5Ceta%7D%7B%5Cpartial+y%7D+-+%5Cfrac%7B%5Cpartial+%5Cxi%7D%7B%5Cpartial+x%7D%29+%2A+h%28x%2C+y%29+-+%5Cfrac%7B%5Cpartial+%5Cxi%7D%7B%5Cpartial+y%7D%2Ah%28x%2Cy%29%5E%7B2%7D+-+%5Cxi%2A%5Cfrac%7B%5Cpartial+h%7D%7B%5Cpartial+x%7D+-+%5Ceta%2A%5Cfrac%7B%5Cpartial+h%7D%7B%5Cpartial+y%7D&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\frac{\partial \eta}{\partial x} + (\frac{\partial \eta}{\partial y} - \frac{\partial \xi}{\partial x}) * h(x, y) - \frac{\partial \xi}{\partial y}*h(x,y)^{2} - \xi*\frac{\partial h}{\partial x} - \eta*\frac{\partial h}{\partial y}" class="latex" title="\frac{\partial \eta}{\partial x} + (\frac{\partial \eta}{\partial y} - \frac{\partial \xi}{\partial x}) * h(x, y) - \frac{\partial \xi}{\partial y}*h(x,y)^{2} - \xi*\frac{\partial h}{\partial x} - \eta*\frac{\partial h}{\partial y}" /><br />
+Why? Well, without going too much into detail, the solution to this PDE, <img src="http://s0.wp.com/latex.php?latex=%5Cxi&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\xi" class="latex" title="\xi" /> and <img src="http://s0.wp.com/latex.php?latex=%5Ceta&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\eta" class="latex" title="\eta" />, give the infinitesimals of the ODE <img src="http://s0.wp.com/latex.php?latex=%5Cfrac%7Bdy%7D%7Bdx%7D+%3D+h%28x%2C+y%29&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\frac{dy}{dx} = h(x, y)" class="latex" title="\frac{dy}{dx} = h(x, y)" />. After getting the infinitesimals, this method is adopted.<br />
+1] One has to solve the Partial Differential Equations (again?)<br />
+   a] <img src="http://s0.wp.com/latex.php?latex=%5Cxi%5Cfrac%7B%5Cpartial+r%7D%7B%5Cpartial+x%7D+%2B+%5Ceta%5Cfrac%7B%5Cpartial+r%7D%7B%5Cpartial+y%7D+%3D+0&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\xi\frac{\partial r}{\partial x} + \eta\frac{\partial r}{\partial y} = 0" class="latex" title="\xi\frac{\partial r}{\partial x} + \eta\frac{\partial r}{\partial y} = 0" /><br />
+   b] <img src="http://s0.wp.com/latex.php?latex=%5Cxi%5Cfrac%7B%5Cpartial+r%7D%7B%5Cpartial+x%7D+%2B+%5Ceta%5Cfrac%7B%5Cpartial+s%7D%7B%5Cpartial+y%7D+%3D+1&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\xi\frac{\partial r}{\partial x} + \eta\frac{\partial s}{\partial y} = 1" class="latex" title="\xi\frac{\partial r}{\partial x} + \eta\frac{\partial s}{\partial y} = 1" /><br />
+2] Now one knows <img src="http://s0.wp.com/latex.php?latex=r&amp;bg=fff&amp;fg=444444&amp;s=0" alt="r" class="latex" title="r" /> and <img src="http://s0.wp.com/latex.php?latex=s&amp;bg=fff&amp;fg=444444&amp;s=0" alt="s" class="latex" title="s" /> in terms of <img src="http://s0.wp.com/latex.php?latex=x&amp;bg=fff&amp;fg=444444&amp;s=0" alt="x" class="latex" title="x" /> and <img src="http://s0.wp.com/latex.php?latex=y&amp;bg=fff&amp;fg=444444&amp;s=0" alt="y" class="latex" title="y" />, doing <img src="http://s0.wp.com/latex.php?latex=%5Cfrac%7Bds%7D%7Bdr%7D+%3D+%5Cfrac%7B%5Cfrac%7B%5Cpartial+s%7D%7B%5Cpartial+x%7D+%2B+%5Cfrac%7B%5Cpartial+s%7D%7B%5Cpartial+y%7D%2Ah%7D%7B%5Cfrac%7B%5Cpartial+s%7D%7B%5Cpartial+x%7D+%2B+%5Cfrac%7B%5Cpartial+s%7D%7B%5Cpartial+y%7D%2Ah%7D&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\frac{ds}{dr} = \frac{\frac{\partial s}{\partial x} + \frac{\partial s}{\partial y}*h}{\frac{\partial s}{\partial x} + \frac{\partial s}{\partial y}*h}" class="latex" title="\frac{ds}{dr} = \frac{\frac{\partial s}{\partial x} + \frac{\partial s}{\partial y}*h}{\frac{\partial s}{\partial x} + \frac{\partial s}{\partial y}*h}" /> and converting the R.H.S in terms of <img src="http://s0.wp.com/latex.php?latex=r&amp;bg=fff&amp;fg=444444&amp;s=0" alt="r" class="latex" title="r" /> and <img src="http://s0.wp.com/latex.php?latex=s&amp;bg=fff&amp;fg=444444&amp;s=0" alt="s" class="latex" title="s" />, reduces into a quadrature, which can be solved quite easily with the ode_separable hint<br />
+3] After solving the ODE, it can be converted back into the original coordinates.</p>
+<p>On a scale of optimism to pessimism, I am somewhere in between a realist and a pessimist, and I have to admit I was slightly disappointed with the effectiveness of the hint, since I was running into various issues, with a few ODEs that I had tested. These were some of them that I had identified.</p>
+<p>1] Problem with Integral: I was testing an ODE in which, <img src="http://s0.wp.com/latex.php?latex=r+%3D+x&amp;bg=fff&amp;fg=444444&amp;s=0" alt="r = x" class="latex" title="r = x" />, and I had to integrate a huge expression, which couldn’t be integrated, something like <img src="http://s0.wp.com/latex.php?latex=%5Cfrac%7B1%7D%7B%5Csqrt%7Ba0+%2B+a1%2Ar+%2B+a2%2Ar%5E%7B2%7D+%2B+a3%5Er%7B3%7D%7D%7D&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\frac{1}{\sqrt{a0 + a1*r + a2*r^{2} + a3^r{3}}}" class="latex" title="\frac{1}{\sqrt{a0 + a1*r + a2*r^{2} + a3^r{3}}}" />, it gave me an output of the form Integral, and when I substitued <img src="http://s0.wp.com/latex.php?latex=r&amp;bg=fff&amp;fg=444444&amp;s=0" alt="r" class="latex" title="r" /> as <img src="http://s0.wp.com/latex.php?latex=x&amp;bg=fff&amp;fg=444444&amp;s=0" alt="x" class="latex" title="x" />, it gave me a definite value, this is because doing subs on an Integral object, doesn’t substitute for the variable with respect to which you are integrating to. I was pointed to this issue by Aaron, which I haven’t looked at yet.</p>
+<p>2] Assumptions: When I was applying to SymPy for Google Summer of Code, I saw this awesome proposal by Tom Bachmann, which seemed Greek and Latin to me then (Some parts of it does still, but never mind). The bottom line, is <img src="http://s0.wp.com/latex.php?latex=%5Cfrac%7Bdr%7D%7Bds%7D&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\frac{dr}{ds}" class="latex" title="\frac{dr}{ds}" /> simplifies to a quadrature, sometimes only when, there are certain assumptions on <img src="http://s0.wp.com/latex.php?latex=r&amp;bg=fff&amp;fg=444444&amp;s=0" alt="r" class="latex" title="r" /> and <img src="http://s0.wp.com/latex.php?latex=s&amp;bg=fff&amp;fg=444444&amp;s=0" alt="s" class="latex" title="s" />. Lets take a random example, suppose <img src="http://s0.wp.com/latex.php?latex=%5Cfrac%7Bdr%7D%7Bds%7D+%3D+log%7Br%5E%7Bs%7D%7D+-+s%2Alog%7Br%7D&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\frac{dr}{ds} = log{r^{s}} - s*log{r}" class="latex" title="\frac{dr}{ds} = log{r^{s}} - s*log{r}" /> reduces to zero only when <img src="http://s0.wp.com/latex.php?latex=r+%3E+0&amp;bg=fff&amp;fg=444444&amp;s=0" alt="r &gt; 0" class="latex" title="r &gt; 0" />, Since the input variable is <img src="http://s0.wp.com/latex.php?latex=x&amp;bg=fff&amp;fg=444444&amp;s=0" alt="x" class="latex" title="x" />, giving assumptions on <img src="http://s0.wp.com/latex.php?latex=x&amp;bg=fff&amp;fg=444444&amp;s=0" alt="x" class="latex" title="x" />, doesn’t seem to affect the assumptions on <img src="http://s0.wp.com/latex.php?latex=r&amp;bg=fff&amp;fg=444444&amp;s=0" alt="r" class="latex" title="r" />.</p>
+<p>3] There are some cases when the final expression, cannot be solved explicitly for <img src="http://s0.wp.com/latex.php?latex=y&amp;bg=fff&amp;fg=444444&amp;s=0" alt="y" class="latex" title="y" /> like this <a href="https://gist.github.com/Manoj-Kumar-S/6201842" rel="nofollow">https://gist.github.com/Manoj-Kumar-S/6201842</a> . I think the best way would be to return it as it is.</p>
+<p>4] Recursion: Take the case of this wonderful ODE, <img src="http://s0.wp.com/latex.php?latex=x%5E%7B2%7D%2A%28-f%28x%29%5E%7B2%7D+%2B+%5Cfrac%7Bdf%7D%7Bdx%7D%29-+a%2Ax%5E%7B2%7D%2Af%28x%29+%2B+2+-+a%2Ax&amp;bg=fff&amp;fg=444444&amp;s=0" alt="x^{2}*(-f(x)^{2} + \frac{df}{dx})- a*x^{2}*f(x) + 2 - a*x" class="latex" title="x^{2}*(-f(x)^{2} + \frac{df}{dx})- a*x^{2}*f(x) + 2 - a*x" />, calculating the infinitesimals, give me <img src="http://s0.wp.com/latex.php?latex=%5Cxi+%3D+x%5E%7B2%7D&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\xi = x^{2}" class="latex" title="\xi = x^{2}" /> and <img src="http://s0.wp.com/latex.php?latex=%5Ceta+%3D+a%2Ax%5E%7B2%7D%2Af%28x%29+-+2+%2B+a%2Ax+%2B+x%5E%7B2%7D%2A%28-f%28x%29%5E%7B2%7D%29&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\eta = a*x^{2}*f(x) - 2 + a*x + x^{2}*(-f(x)^{2})" class="latex" title="\eta = a*x^{2}*f(x) - 2 + a*x + x^{2}*(-f(x)^{2})" />. Since the first step in solving the PDE, <img src="http://s0.wp.com/latex.php?latex=%5Cfrac%7Bdy%7D%7Bdx%7D+%3D+%5Cfrac%7B%5Ceta%7D%7B%5Cxi%7D&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\frac{dy}{dx} = \frac{\eta}{\xi}" class="latex" title="\frac{dy}{dx} = \frac{\eta}{\xi}" /> , it gives the same ODE again.</p>
+<p>Apart from this I believe rest of the code is good.</p>
+<p>P.S: First ten days of college is over. There have been huge disappointments, but apart from that I have enjoyed either roaming outside, and working on my SymPy project, and I have done nothing other than that.</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/manojbits.wordpress.com/705/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/manojbits.wordpress.com/705/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=manojbits.wordpress.com&amp;blog=31971756&amp;post=705&amp;subd=manojbits&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://manojbits.wordpress.com/2013/08/11/lie-group-hint-for-sympy/">by Manoj Kumar at August 11, 2013 03:21 PM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>August 09, 2013</h2>
 
 <div class="channelgroup">
@@ -2827,41 +2882,6 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
 </div>
 
 </div>
-<div class="daygroup">
-<h2>June 24, 2013</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://tarun-gaba.blogspot.com/" title="Tarun Gaba">Tarun Gaba</a></h3>
-
-
-<div class="entrygroup" id="tag:blogger.com,1999:blog-7526836182390500993.post-434358419365808792">
-<div class="entry">
-<div class="content">
-<h2><b>GSoC Report Week 1:</b></h2><b> </b>Finally, the much awaited summer coding period has started. I am already feeling very enthusiastic about it.<br />For the first week<b></b><b>, </b>I have been working on an detailed API, alongwith functions(their arguments and return values). Everything is being fleshed out.<br /><br />Also we(other PyDy members) have been holding discussions on various facets of implementations, how and what would be done for effective visualizations.<br /><br />An illustrative example has also been made, which utilizes different methods from the new API, to demonstrate the complete workflow.<br />The illustrative example can be checked here:<br />https://github.com/PythonDynamics/pydy_examples/pull/11<br /><br />And the API is in development form and can be checked here:<br />http://pydy.org/visualization_temp_api<br /><br />Once the API is in a more finished form it can be ported to a more relevant location(link).<br />In the coming week I hope to write some functions following the API, and related documentation and tests too.<br /><br />Cheers,<br /><h2><b> </b></h2><br /><br /><br /><br /><br /><br /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://tarun-gaba.blogspot.com/2013/06/gsoc-report-week-1-finally-much-awaited.html">by TARUN GABA (noreply@blogger.com) at June 24, 2013 09:14 AM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -2951,16 +2971,16 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
 <a href="http://www.blogger.com/feeds/2520472460430880330/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sympy.blogspot.com/" class="message" title="no activity in 7 days">Official SymPy blog</a>
 </li>
 <li>
-<a href="http://www.blogger.com/feeds/6568744196982634289/posts/default/-/sympy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://ondrejcertik.blogspot.com/search/label/sympy" title="Ondřej Čertík">Ondřej Čertík</a>
+<a href="http://www.blogger.com/feeds/6568744196982634289/posts/default/-/sympy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://ondrejcertik.blogspot.com/search/label/sympy" class="message" title="no activity in 7 days">Ondřej Čertík</a>
 </li>
 <li>
-<a href="http://musingsofafriend.wordpress.com/tag/sympy/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://musingsofafriend.wordpress.com" title="musings of a friend - Prasoon Shukla » SymPy">Prasoon Shukla</a>
+<a href="http://musingsofafriend.wordpress.com/tag/sympy/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://musingsofafriend.wordpress.com" class="message" title="no activity in 7 days">Prasoon Shukla</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/436496352933562096/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://robert-code.blogspot.com/" class="message" title="no activity in 7 days">Robert Schwarz</a>
 </li>
 <li>
-<a href="http://www.blogger.com/feeds/5472769892551526876/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://codesachin.blogspot.com/" title="Dream. Think. Code.">Sachin Joglekar</a>
+<a href="http://codesachin.blogspot.in/feeds/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://codesachin.blogspot.com/" class="message" title="no activity in 7 days">Sachin Joglekar</a>
 </li>
 <li>
 <a href="http://saptman.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://saptman.wordpress.com" class="message" title="no activity in 7 days">Saptarshi Mandal</a>
@@ -2984,7 +3004,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
 <a href="http://www.blogger.com/feeds/7526836182390500993/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://tarun-gaba.blogspot.com/" class="message" title="no activity in 7 days">Tarun Gaba</a>
 </li>
 <li>
-<a href="http://thilinaatsympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://thilinaatsympy.wordpress.com" title="Thilina's SymPy Blog">Thilina Rathnayake</a>
+<a href="http://thilinaatsympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://thilinaatsympy.wordpress.com" class="message" title="no activity in 7 days">Thilina Rathnayake</a>
 </li>
 <li>
 <a href="http://nessgrh.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://nessgrh.wordpress.com" class="message" title="no activity in 7 days">Tom Bachmann</a>
@@ -3005,7 +3025,7 @@ has a solution. Hence returning (y1, y2) if a solution exist, None otherwise</p>
 
 <p>
 <strong>Last updated:</strong><br>
-August 09, 2013 10:00 PM<br>
+August 11, 2013 03:40 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
