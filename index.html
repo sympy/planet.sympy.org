@@ -23,6 +23,143 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>August 14, 2013</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://matthewrocklin.com/blog/" title="Working notes by Matthew Rocklin - SymPy">MRocklin</a></h3>
+
+
+<div class="entrygroup" id="http://matthewrocklin.com/blog//work/2013/08/14/SymPy-Theano-part-4">
+<h4><a href="http://matthewrocklin.com/blog//work/2013/08/14/SymPy-Theano-part-4">Using SymPy within Theano</a></h4>
+<div class="entry">
+<div class="content">
+<p>Several months ago I published a sequence of blogposts about using SymPy and Theano together to generate efficient mathematical codes. Main points from the posts were as follows</p>
+
+<ul>
+<li><a href="http://matthewrocklin.com/blog/work/2013/03/19/SymPy-Theano-part-1/">Code Generation</a>: We created a drop-in replacement for SymPy’s code generation with a thin layer to Theano.</li>
+
+<li><a href="http://matthewrocklin.com/blog/work/2013/03/28/SymPy-Theano-part-2/">Scalar Simplificaiton</a>: We used SymPy’s simplification routines to accelerate programs prior to code printing in Theano</li>
+
+<li><a href="http://matthewrocklin.com/blog/work/2013/04/05/SymPy-Theano-part-3/">Matrix Expressions</a>: We generate fast blocked numeric linear algebra programs from SymPy’s matrix expressions using Theano array operations.</li>
+</ul>
+
+<p>A week ago <a href="https://groups.google.com/d/topic/sympy/VtaxCRNO4sE/discussion">someone popped up on the SymPy mailing list</a> asking if a particular SymPy operation (<code>sympy.Piecewise</code>) could be supported in the SymPy-Theano translation. Because Theano has a similar operation (<code>theano.tensor.switch</code>) it was simple to add this translation. In general though this post raised some interesting questions:</p>
+
+<ul>
+<li>Is there a way to avoid constantly making new translations for operations that exist both in SymPy and in Theano?</li>
+
+<li>What do we do with SymPy’s more exotic operations for which no Theano analog exists? E.g. how do we generate code for factorial or bessel functions?</li>
+</ul>
+
+<p>In an attempt to resolve these issues we recently merged a general <code>SymPyCCode</code> operation into the <code>Theano</code> project. It enables the expression of a Theano scalar operation through SymPy expressions using SymPy’s original code generation capability. For example we can create a simple addition operation like so</p>
+<div class="highlight"><pre><code class="python"><span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">Symbol</span><span class="p">,</span> <span class="n">symbols</span>
+<span class="kn">from</span> <span class="nn">theano.scalar.basic_sympy</span> <span class="kn">import</span> <span class="n">SymPyCCode</span>
+
+<span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="s">'x,y'</span><span class="p">)</span>            <span class="c"># SymPy Symbols</span>
+<span class="n">add</span> <span class="o">=</span> <span class="n">SymPyCCode</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">],</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span>  <span class="c"># A Theano addition operator</span>
+</code></pre></div>
+<p>Theano operators can be applied to Theano variables to make compound Theano expressions</p>
+<div class="highlight"><pre><code class="python"><span class="kn">from</span> <span class="nn">theano.scalar</span> <span class="kn">import</span> <span class="n">floats</span>
+
+<span class="n">xt</span><span class="p">,</span> <span class="n">yt</span> <span class="o">=</span> <span class="n">floats</span><span class="p">(</span><span class="s">'xy'</span><span class="p">)</span>
+<span class="n">zt</span> <span class="o">=</span> <span class="n">add</span><span class="p">(</span><span class="n">xt</span><span class="p">,</span> <span class="n">yt</span><span class="p">)</span>
+</code></pre></div>
+<p>Theano can then turn these expressions into functions</p>
+<div class="highlight"><pre><code class="python"><span class="kn">from</span> <span class="nn">theano</span> <span class="kn">import</span> <span class="n">function</span>
+
+<span class="n">f</span> <span class="o">=</span> <span class="n">function</span><span class="p">([</span><span class="n">xt</span><span class="p">,</span> <span class="n">yt</span><span class="p">],</span> <span class="n">zt</span><span class="p">)</span>
+<span class="n">f</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>  <span class="c"># prints 5.0</span>
+</code></pre></div>
+<p>So we can describe scalar operations in SymPy and use them directly in Theano without having to translate anything. Of course, the <code>add</code> operation is already native in Theano. This is more useful for complex scalar expressions, particularly if Theano does not already have such an operation</p>
+<div class="highlight"><pre><code class="python"><span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">gamma</span>
+<span class="n">theano_gamma</span> <span class="o">=</span> <span class="n">SymPyCCode</span><span class="p">([</span><span class="n">x</span><span class="p">],</span> <span class="n">gamma</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+<span class="kn">from</span> <span class="nn">sympy.stats.crv_types</span> <span class="kn">import</span> <span class="n">NormalDistribution</span>
+<span class="n">mu</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'mu'</span><span class="p">,</span> <span class="n">bounded</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">sigma</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'sigma'</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">normal</span> <span class="o">=</span> <span class="n">SymPyCCode</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">],</span> <span class="n">NormalDistribution</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)(</span><span class="n">x</span><span class="p">))</span>
+</code></pre></div>
+<h2 id="under_the_hood">Under the Hood</h2>
+
+<p>Internally the <code>SymPyCCode</code> op calls SymPy’s C code printers to generate an implementation of the scalar operation. For example the following SymPy code generates C code to compute the probability density function of a normal distribution.</p>
+<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">sympy.printing</span> <span class="kn">import</span> <span class="n">ccode</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ccode</span><span class="p">(</span><span class="n">NormalDistribution</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)(</span><span class="n">x</span><span class="p">))</span>
+<span class="p">(</span><span class="mf">1.0</span><span class="n">L</span><span class="o">/</span><span class="mf">2.0</span><span class="n">L</span><span class="p">)</span><span class="o">*</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="n">L</span><span class="o">/</span><span class="mf">2.0</span><span class="n">L</span><span class="o">*</span><span class="nb">pow</span><span class="p">(</span><span class="o">-</span><span class="n">mu</span> <span class="o">+</span> <span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="nb">pow</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span><span class="o">/</span><span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="n">M_PI</span><span class="p">)</span><span class="o">*</span><span class="n">sigma</span><span class="p">)</span>
+</code></pre></div>
+<p>Theano is then able to use this generated C code within its generated C program. Theano still handles memory, common sub-expressions, arrays, etc. but is now able to leverage SymPy to generate low-level kernels for mathematical operations.</p>
+
+<h2 id="but_dont_use_this">But Don’t Use This</h2>
+
+<p>But you shouldn’t use this mechanism if you don’t have to. Recall from the <a href="http://matthewrocklin.com/blog/work/2013/03/19/SymPy-Theano-part-1/">first post</a> that SymPy can translate many standard operations to Theano directly, without having to wrap the SymPy expressions up in a black box Theano operation. Native translation enables Theano to use many additional optimizations like the use of the GPU, automatic differentiation, and common sub-expression elimination across many expressions. This approach is mainly for cases where your complex scalar expressions don’t translate well to Theano. In some cases the SymPyCCode op may also provide better performance (maybe SymPy’s generated C code is a bit tighter?)</p>
+
+<h2 id="future_work">Future Work</h2>
+
+<p>We need to improve SymPy’s code printers. While they support all the standard operators they neglect to cover the really interesting cases like bessel functions or factorial. These are cases where the numerical analysis community can concisely describe the “right way” to compute many of these operations in isolation. For example the factorial of <code>n</code> can be computed as <code>gamma(n+1)</code>, a fact rarely known by mainstream programmers.</p>
+
+<p>$$ n! = \Gamma(n+1) \;\; \forall n \in \mathbb{N} $$</p>
+
+<p>I’ve been thinking about the right way to do this generally. Right now my thought is that we should create a new <code>expand</code> hint for computation. If you have thoughts I’d love to hear about them; please speak up in the comments.</p>
+
+<h2 id="example">Example</h2>
+
+<p>There are a number of ways to compute a SymPy expression numerically. I’m going to explicily run throuh an example with a few of them below. You should ignore this section if these are already familiar to you.</p>
+
+<p>We create a function to evaluate a normal distribution probability density function for a particular mean and standard deviation across a range of values for <code>x</code>.</p>
+<div class="highlight"><pre><code class="python"><span class="c"># The Target Expression</span>
+<span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">Symbol</span>
+<span class="kn">from</span> <span class="nn">sympy.stats.crv_types</span> <span class="kn">import</span> <span class="n">NormalDistribution</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'x'</span><span class="p">)</span>
+<span class="n">mu</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'mu'</span><span class="p">,</span> <span class="n">bounded</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">sigma</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'sigma'</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">NormalDistribution</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span>
+
+<span class="c"># Make a numpy `ufunc` with Pure SymPy</span>
+<span class="kn">from</span> <span class="nn">sympy.utilities.autowrap</span> <span class="kn">import</span> <span class="n">ufuncify</span>
+<span class="n">f_ufunc</span> <span class="o">=</span> <span class="n">ufuncify</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">],</span> <span class="n">result</span><span class="p">)</span>
+
+<span class="c"># Make a Theano function with SymPy</span>
+<span class="kn">from</span> <span class="nn">sympy.printing.theanocode</span> <span class="kn">import</span> <span class="n">theano_function</span>
+<span class="n">f_sym_theano</span> <span class="o">=</span> <span class="n">theano_function</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">],</span> <span class="p">[</span><span class="n">result</span><span class="p">],</span> <span class="n">dims</span><span class="o">=</span><span class="p">{</span><span class="n">x</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mu</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
+
+<span class="c"># Make a special Theano op using a SymPyCCode</span>
+<span class="kn">from</span> <span class="nn">theano.scalar.basic_sympy</span> <span class="kn">import</span> <span class="n">SymPyCCode</span>
+<span class="kn">from</span> <span class="nn">theano.tensor.elemwise</span> <span class="kn">import</span> <span class="n">Elemwise</span>
+<span class="n">normal_op</span> <span class="o">=</span> <span class="n">Elemwise</span><span class="p">(</span><span class="n">SymPyCCode</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">],</span> <span class="n">result</span><span class="p">))</span>
+
+<span class="c"># And then use that `op` in plain Theano code</span>
+<span class="kn">import</span> <span class="nn">theano</span>
+<span class="n">xt</span>     <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">tensor</span><span class="o">.</span><span class="n">vector</span><span class="p">(</span><span class="s">'x'</span><span class="p">)</span>
+<span class="n">mut</span>    <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">scalar</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="s">'mu'</span><span class="p">)</span>
+<span class="n">sigmat</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">scalar</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="s">'sigma'</span><span class="p">)</span>
+
+<span class="n">ft</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">function</span><span class="p">([</span><span class="n">xt</span><span class="p">,</span> <span class="n">mut</span><span class="p">,</span> <span class="n">sigmat</span><span class="p">],</span> <span class="n">normal_op</span><span class="p">(</span><span class="n">xt</span><span class="p">,</span> <span class="n">mut</span><span class="p">,</span> <span class="n">sigmat</span><span class="p">))</span>
+</code></pre></div></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://matthewrocklin.com/blog//work/2013/08/14/SymPy-Theano-part-4">August 14, 2013 07:00 AM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>August 12, 2013</h2>
 
 <div class="channelgroup">
@@ -2782,42 +2919,6 @@ I have attended the <a href="https://conference.scipy.org/scipy2013/">SciPy 2013
 </div>
 
 </div>
-<div class="daygroup">
-<h2>June 27, 2013</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://sympymatrix.blogspot.com/" title="Sympy Fast Matrix">Saurabh Jha</a></h3>
-
-
-<div class="entrygroup" id="tag:blogger.com,1999:blog-2736678015821545355.post-212141304695696653">
-<h4><a href="http://sympymatrix.blogspot.com/2013/06/week-25-profiling-of-different.html">Week 2.5 Profiling of different implementations of sparse</a></h4>
-<div class="entry">
-<div class="content">
-<div style="text-align: left;" dir="ltr"><br />I spent the last couple of days experimenting with alternate implementation of various algorithms. Here are the results--<br /><br />for three implementations of sparse*sparse-- _mulspsp, _mulspsp2, _mulspsp3, on two matrices<br /><br /><br />a = SparseMatrix(3, 4, {(0, 0): 1, (0, 1): 2, (2, 2): 3})<br />b = SparseMatrix(4, 3, {(0, 0): 2, (0, 2): 4, (1, 2): 5})<br /><br />The profile results are<br /><br /><br />cProfile.run("_mulspsp(a, b, ZZ)")<br />         709 function calls (691 primitive calls) in 0.001 seconds<br /><br />   Ordered by: standard name<br /><br />   ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br />        1    0.000    0.000    0.001    0.001 &lt;string&gt;:1(&lt;module&gt;)<br />        6    0.000    0.000    0.000    0.000 compatibility.py:19(iterable)<br />       38    0.000    0.000    0.000    0.000 compatibility.py:543(as_int)<br />        6    0.000    0.000    0.000    0.000 compatibility.py:64(is_sequence)<br />        9    0.000    0.000    0.000    0.000 domain.py:64(new)<br />        9    0.000    0.000    0.000    0.000 domain.py:67(__call__)<br />       39    0.000    0.000    0.000    0.000 matrices.py:3571(a2idx)<br />       18    0.000    0.000    0.000    0.000 matrices.py:383(__len__)<br />        6    0.000    0.000    0.000    0.000 matrices.py:390(shape)<br />        9    0.000    0.000    0.000    0.000 matrices.py:947(key2bounds)<br />        6    0.000    0.000    0.000    0.000 matrices.py:977(key2ij)<br />        8    0.000    0.000    0.000    0.000 numbers.py:1522(__new__)<br />        3    0.000    0.000    0.000    0.000 numbers.py:1552(__int__)<br />        4    0.000    0.000    0.000    0.000 numbers.py:1595(__radd__)<br />        4    0.000    0.000    0.000    0.000 numbers.py:1619(__rmul__)<br />       10    0.000    0.000    0.000    0.000 numbers.py:1873(__nonzero__)<br />        9    0.000    0.000    0.000    0.000 sparse.py:1046(_new)<br />        9    0.000    0.000    0.000    0.000 sparse.py:163(col)<br />        2    0.000    0.000    0.000    0.000 sparse.py:182(row_list)<br />        6    0.000    0.000    0.000    0.000 sparse.py:201(&lt;lambda&gt;)<br />       19    0.000    0.000    0.000    0.000 sparse.py:34(__init__)<br />        9    0.000    0.000    0.000    0.000 sparse.py:476(submatrix)<br />       33    0.000    0.000    0.001    0.000 sparse.py:83(__getitem__)<br />    33/15    0.000    0.000    0.000    0.000 sparsetools.py:116(_binsearch)<br />        1    0.000    0.000    0.001    0.001 sparsetools.py:43(_mulspsp)<br />        2    0.000    0.000    0.000    0.000 sparsetools.py:5(_doktocsr)<br />        9    0.000    0.000    0.000    0.000 sparsetools.py:95(_mulspvec)<br />       19    0.000    0.000    0.000    0.000 {callable}<br />       18    0.000    0.000    0.000    0.000 {divmod}<br />        6    0.000    0.000    0.000    0.000 {hasattr}<br />      158    0.000    0.000    0.000    0.000 {isinstance}<br />        6    0.000    0.000    0.000    0.000 {iter}<br />      103    0.000    0.000    0.000    0.000 {len}<br />        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}<br />        8    0.000    0.000    0.000    0.000 {method 'extend' of 'list' objects}<br />       24    0.000    0.000    0.000    0.000 {method 'get' of 'dict' objects}<br />        9    0.000    0.000    0.000    0.000 {method 'indices' of 'slice' objects}<br />       21    0.000    0.000    0.000    0.000 {method 'keys' of 'dict' objects}<br />        9    0.000    0.000    0.000    0.000 {range}<br />        2    0.000    0.000    0.000    0.000 {sorted}<br />       17    0.000    0.000    0.000    0.000 {zip}<br /><br /><br />&gt;&gt;&gt; cProfile.run("_mulspsp2(a, b, ZZ)")<br />         585 function calls in 0.001 seconds<br /><br />   Ordered by: standard name<br /><br />   ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br />        1    0.000    0.000    0.001    0.001 &lt;string&gt;:1(&lt;module&gt;)<br />        3    0.000    0.000    0.000    0.000 compatibility.py:19(iterable)<br />       40    0.000    0.000    0.000    0.000 compatibility.py:543(as_int)<br />        3    0.000    0.000    0.000    0.000 compatibility.py:64(is_sequence)<br />        6    0.000    0.000    0.000    0.000 domain.py:64(new)<br />        6    0.000    0.000    0.000    0.000 domain.py:67(__call__)<br />       31    0.000    0.000    0.000    0.000 matrices.py:3571(a2idx)<br />       10    0.000    0.000    0.000    0.000 matrices.py:383(__len__)<br />        3    0.000    0.000    0.000    0.000 matrices.py:390(shape)<br />       15    0.000    0.000    0.000    0.000 matrices.py:947(key2bounds)<br />        3    0.000    0.000    0.000    0.000 matrices.py:977(key2ij)<br />        4    0.000    0.000    0.000    0.000 numbers.py:1522(__new__)<br />        1    0.000    0.000    0.000    0.000 numbers.py:1552(__int__)<br />        2    0.000    0.000    0.000    0.000 numbers.py:1595(__radd__)<br />        2    0.000    0.000    0.000    0.000 numbers.py:1619(__rmul__)<br />        4    0.000    0.000    0.000    0.000 numbers.py:1873(__nonzero__)<br />       15    0.000    0.000    0.000    0.000 sparse.py:1046(_new)<br />        5    0.000    0.000    0.000    0.000 sparse.py:145(row)<br />       10    0.000    0.000    0.000    0.000 sparse.py:163(col)<br />        2    0.000    0.000    0.000    0.000 sparse.py:182(row_list)<br />        3    0.000    0.000    0.000    0.000 sparse.py:201(&lt;lambda&gt;)<br />       20    0.000    0.000    0.000    0.000 sparse.py:34(__init__)<br />       15    0.000    0.000    0.000    0.000 sparse.py:476(submatrix)<br />       28    0.000    0.000    0.001    0.000 sparse.py:83(__getitem__)<br />        2    0.000    0.000    0.000    0.000 sparsetools.py:5(_doktocsr)<br />        1    0.000    0.000    0.001    0.001 sparsetools.py:62(_mulspsp2)<br />        4    0.000    0.000    0.000    0.000 sparsetools.py:95(_mulspvec)<br />       20    0.000    0.000    0.000    0.000 {callable}<br />       10    0.000    0.000    0.000    0.000 {divmod}<br />        3    0.000    0.000    0.000    0.000 {hasattr}<br />      154    0.000    0.000    0.000    0.000 {isinstance}<br />        3    0.000    0.000    0.000    0.000 {iter}<br />       85    0.000    0.000    0.000    0.000 {len}<br />        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}<br />        5    0.000    0.000    0.000    0.000 {method 'extend' of 'list' objects}<br />       13    0.000    0.000    0.000    0.000 {method 'get' of 'dict' objects}<br />       15    0.000    0.000    0.000    0.000 {method 'indices' of 'slice' objects}<br />       22    0.000    0.000    0.000    0.000 {method 'keys' of 'dict' objects}<br />        4    0.000    0.000    0.000    0.000 {range}<br />        2    0.000    0.000    0.000    0.000 {sorted}<br />        9    0.000    0.000    0.000    0.000 {zip}<br /><br /><br />&gt;&gt;&gt; cProfile.run("_mulspsp3(a, b, ZZ)")<br />         159 function calls in 0.000 seconds<br /><br />   Ordered by: standard name<br /><br />   ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br />        1    0.000    0.000    0.000    0.000 &lt;string&gt;:1(&lt;module&gt;)<br />        6    0.000    0.000    0.000    0.000 compatibility.py:19(iterable)<br />        4    0.000    0.000    0.000    0.000 compatibility.py:543(as_int)<br />        7    0.000    0.000    0.000    0.000 compatibility.py:64(is_sequence)<br />        6    0.000    0.000    0.000    0.000 domain.py:64(new)<br />        6    0.000    0.000    0.000    0.000 domain.py:67(__call__)<br />       12    0.000    0.000    0.000    0.000 matrices.py:3571(a2idx)<br />        6    0.000    0.000    0.000    0.000 matrices.py:390(shape)<br />        6    0.000    0.000    0.000    0.000 matrices.py:977(key2ij)<br />        1    0.000    0.000    0.000    0.000 sparse.py:1019(zeros)<br />        2    0.000    0.000    0.000    0.000 sparse.py:182(row_list)<br />        6    0.000    0.000    0.000    0.000 sparse.py:201(&lt;lambda&gt;)<br />        1    0.000    0.000    0.000    0.000 sparse.py:34(__init__)<br />        6    0.000    0.000    0.000    0.000 sparse.py:83(__getitem__)<br />        1    0.000    0.000    0.000    0.000 sparsetools.py:78(_mulspsp3)<br />        1    0.000    0.000    0.000    0.000 {callable}<br />        7    0.000    0.000    0.000    0.000 {hasattr}<br />       43    0.000    0.000    0.000    0.000 {isinstance}<br />        6    0.000    0.000    0.000    0.000 {iter}<br />        8    0.000    0.000    0.000    0.000 {len}<br />        3    0.000    0.000    0.000    0.000 {method 'append' of 'list' objects}<br />        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}<br />        6    0.000    0.000    0.000    0.000 {method 'get' of 'dict' objects}<br />        1    0.000    0.000    0.000    0.000 {method 'iteritems' of 'dict' objects}<br />        3    0.000    0.000    0.000    0.000 {method 'keys' of 'dict' objects}<br />        1    0.000    0.000    0.000    0.000 {range}<br />        2    0.000    0.000    0.000    0.000 {sorted}<br />        6    0.000    0.000    0.000    0.000 {zip}<br /><br /><br />It turns out that the fastest implementation is _mulspsp3 (which is the same as the one used in sparse.py) is fastest.<br /><br />However, great improvement is shown in sparse*vec. I will just take a single example as I have earlier written that new algorithm is O(nnz) asymptotically in any case.<br /><br />m =                              <br /><br />[1, 2, 0, 0, 0, 0]<br />[0, 3, 0, 4, 0, 0]<br />[0, 0, 5, 6, 7, 0]<br />[0, 0, 0, 0, 0, 8]<br /><br />and equivalent csr= [[ZZ(1), ZZ(2), ZZ(3), ZZ(4), ZZ(5), ZZ(6), ZZ(7), ZZ(8)], [0, 1, 1, 3, 2, 3, 4, 5], [0, 2, 4, 7, 8], [4, 6]]<br /><br />n = Matrix([[ZZ(4)], [ZZ(7)], [ZZ(12)], [ZZ(14)], [ZZ(17)], [ZZ(2)]]) (vector)<br /><br />Profile results are given below<br /><br /><br />&gt;&gt;&gt; cProfile.run("m*n")<br />         545 function calls (540 primitive calls) in 0.001 seconds<br /><br />   Ordered by: standard name<br /><br />   ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br />        1    0.000    0.000    0.001    0.001 &lt;string&gt;:1(&lt;module&gt;)<br />       22    0.000    0.000    0.000    0.000 compatibility.py:19(iterable)<br />        4    0.000    0.000    0.000    0.000 compatibility.py:543(as_int)<br />       27    0.000    0.000    0.000    0.000 compatibility.py:64(is_sequence)<br />        1    0.000    0.000    0.000    0.000 dense.py:588(_new)<br />      5/1    0.000    0.000    0.000    0.000 iterables.py:16(flatten)<br />        8    0.000    0.000    0.000    0.000 iterables.py:62(&lt;lambda&gt;)<br />       36    0.000    0.000    0.000    0.000 matrices.py:3571(a2idx)<br />       19    0.000    0.000    0.000    0.000 matrices.py:390(shape)<br />        2    0.000    0.000    0.000    0.000 matrices.py:81(_handle_creation_inputs)<br />       18    0.000    0.000    0.000    0.000 matrices.py:977(key2ij)<br />       16    0.000    0.000    0.000    0.000 numbers.py:1522(__new__)<br />        4    0.000    0.000    0.000    0.000 numbers.py:1588(__add__)<br />        4    0.000    0.000    0.000    0.000 numbers.py:1595(__radd__)<br />        8    0.000    0.000    0.000    0.000 numbers.py:1619(__rmul__)<br />        1    0.000    0.000    0.000    0.000 sparse.py:1019(zeros)<br />        1    0.000    0.000    0.000    0.000 sparse.py:1046(_new)<br />        1    0.000    0.000    0.000    0.000 sparse.py:120(tolist)<br />        2    0.000    0.000    0.000    0.000 sparse.py:182(row_list)<br />       14    0.000    0.000    0.000    0.000 sparse.py:201(&lt;lambda&gt;)<br />        1    0.000    0.000    0.001    0.001 sparse.py:295(multiply)<br />      2/1    0.000    0.000    0.001    0.001 sparse.py:338(__mul__)<br />        2    0.000    0.000    0.000    0.000 sparse.py:34(__init__)<br />       18    0.000    0.000    0.000    0.000 sparse.py:83(__getitem__)<br />        1    0.000    0.000    0.000    0.000 {built-in method __new__ of type object at 0x10a127248}<br />        1    0.000    0.000    0.000    0.000 {callable}<br />       31    0.000    0.000    0.000    0.000 {hasattr}<br />      178    0.000    0.000    0.000    0.000 {isinstance}<br />       22    0.000    0.000    0.000    0.000 {iter}<br />       25    0.000    0.000    0.000    0.000 {len}<br />       10    0.000    0.000    0.000    0.000 {method 'append' of 'list' objects}<br />        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}<br />        4    0.000    0.000    0.000    0.000 {method 'extend' of 'list' objects}<br />       18    0.000    0.000    0.000    0.000 {method 'get' of 'dict' objects}<br />        1    0.000    0.000    0.000    0.000 {method 'iteritems' of 'dict' objects}<br />        3    0.000    0.000    0.000    0.000 {method 'keys' of 'dict' objects}<br />       13    0.000    0.000    0.000    0.000 {range}<br />        2    0.000    0.000    0.000    0.000 {sorted}<br />       18    0.000    0.000    0.000    0.000 {zip}<br /><br /><br />&gt;&gt;&gt; cProfile.run("_mulspvec(csr, n, ZZ)")<br />         104 function calls in 0.000 seconds<br /><br />   Ordered by: standard name<br /><br />   ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br />        1    0.000    0.000    0.000    0.000 &lt;string&gt;:1(&lt;module&gt;)<br />        2    0.000    0.000    0.000    0.000 compatibility.py:543(as_int)<br />        8    0.000    0.000    0.000    0.000 dense.py:33(__getitem__)<br />       12    0.000    0.000    0.000    0.000 domain.py:64(new)<br />       12    0.000    0.000    0.000    0.000 domain.py:67(__call__)<br />        8    0.000    0.000    0.000    0.000 matrices.py:3571(a2idx)<br />        8    0.000    0.000    0.000    0.000 numbers.py:1522(__new__)<br />        7    0.000    0.000    0.000    0.000 numbers.py:1552(__int__)<br />        4    0.000    0.000    0.000    0.000 numbers.py:1595(__radd__)<br />        4    0.000    0.000    0.000    0.000 numbers.py:1619(__rmul__)<br />        1    0.000    0.000    0.000    0.000 sparse.py:34(__init__)<br />        1    0.000    0.000    0.000    0.000 sparsetools.py:95(_mulspvec)<br />        1    0.000    0.000    0.000    0.000 {callable}<br />       25    0.000    0.000    0.000    0.000 {isinstance}<br />        3    0.000    0.000    0.000    0.000 {len}<br />        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}<br />        1    0.000    0.000    0.000    0.000 {method 'keys' of 'dict' objects}<br />        1    0.000    0.000    0.000    0.000 {range}<br />        4    0.000    0.000    0.000    0.000 {zip}<br /><div><br /></div><div>The new implementations of _applyfunc and scaler*sparse give little improvements but the code is simpler and thus less chances for error.</div><div><br /></div><div>All the code can be found at the latest commit of https://github.com/sympy/sympy/pull/2206. Also written there is the rationale of using csr internally.</div><div><br /></div><div><br /></div><div><br /></div><div><br /></div><div><br /></div><br /><br /><br /><br /></div></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://sympymatrix.blogspot.com/2013/06/week-25-profiling-of-different.html">by Saurabh Jha (noreply@blogger.com) at June 27, 2013 09:40 AM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -2889,7 +2990,7 @@ I have attended the <a href="https://conference.scipy.org/scipy2013/">SciPy 2013
 <a href="" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a class="message" title="404: not found">Kazuo Thow</a>
 </li>
 <li>
-<a href="http://matthewrocklin.com/blog//feed.sympy.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://matthewrocklin.com/blog/" class="message" title="no activity in 7 days">MRocklin</a>
+<a href="http://matthewrocklin.com/blog//feed.sympy.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://matthewrocklin.com/blog/" title="Working notes by Matthew Rocklin - SymPy">MRocklin</a>
 </li>
 <li>
 <a href="http://manojbits.wordpress.com/category/sympy-2/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://manojbits.wordpress.com" title="Perspective » SymPy">Manoj Kumar</a>
@@ -2961,7 +3062,7 @@ I have attended the <a href="https://conference.scipy.org/scipy2013/">SciPy 2013
 
 <p>
 <strong>Last updated:</strong><br>
-August 12, 2013 05:00 PM<br>
+August 13, 2013 06:40 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
