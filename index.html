@@ -23,6 +23,47 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>August 16, 2013</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://sophiessympyblog.wordpress.com" title="sophie's sympy blog">Katja Sophie Hotz</a></h3>
+
+
+<div class="entrygroup" id="http://sophiessympyblog.wordpress.com/?p=254">
+<h4 lang="en"><a href="http://sophiessympyblog.wordpress.com/2013/08/16/8th-and-9th-week/">8th and 9th week</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p style="text-align: justify;">Finally, here is my post on the last two weeks. First of all, I submitted a <a href="https://github.com/sympy/sympy/pull/2365" title="Modular GCD for polynomials over algebraic number fields">PR</a> for the modular GCD algorithm for polynomials over algebraic fields. For this, I had to finish and update documentation and write tests.</p>
+<p style="text-align: justify;">Another task was getting my <a href="https://github.com/sympy/sympy/pull/2281" title="modular GCD algorithm for integer polynomials">first PR</a> ready for merging. For this, I needed to cover more lines of the code, since every untested one is “a bug waiting to happen”. The difficulty here is the random choice of evaluation points in <code>_modgcd_multivariate_p</code>. So I searched for an example such that for one prime every evaluation point is unlucky. I am glad I found one, since the only other possibility would have been to add an optional argument to choose the evaluation points manually. Now almost every line is tested and the few ones that are not should be harmless. <img src="http://s1.wp.com/wp-includes/images/smilies/icon_wink.gif" alt=";)" class="wp-smiley" /> </p>
+<p style="text-align: justify;">After that, I thoroughly studied the article [1] on factorization of polynomials over algebraic domains. I also started with the implementation, but I did not get very far yet.</p>
+<p style="text-align: justify;">Sorry for this entry being so late but still so short, I hope that next week there will be more stuff to blog about!</p>
+<p style="text-align: justify;">[1] <a href="http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf" rel="nofollow">http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf</a></p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/254/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/254/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=254&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://sophiessympyblog.wordpress.com/2013/08/16/8th-and-9th-week/">by katjasophie at August 16, 2013 01:29 PM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>August 14, 2013</h2>
 
 <div class="channelgroup">
@@ -2863,60 +2904,6 @@ I have attended the <a href="https://conference.scipy.org/scipy2013/">SciPy 2013
 </div>
 
 
-
-</div>
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://musingsofafriend.wordpress.com" title="musings of a friend - Prasoon Shukla » SymPy">Prasoon Shukla</a></h3>
-
-
-<div class="entrygroup" id="http://musingsofafriend.wordpress.com/?p=177">
-<h4 lang="en"><a href="http://musingsofafriend.wordpress.com/2013/06/29/gsoc-week-2-sympy-development/">GSoC Week 2 : SymPy Development</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>This is the summary of the work done and problems faced by me during my second week of development.</p>
-<p>Okay, so this week, I had planned to add some code that would work more on the structural part of the project. So, first I added support for cylindrical coordinate systems as well as the spherical coordinate system (along with the already present Rectangular coordinates). That was added without any problems.</p>
-<p>The next thing to do was to begin with the classes that will handle the vectors. There are 3 such classes:</p>
-<ol>
-<li><strong>Vector</strong> : This class is designed to hold just the base vectors. Initially, this class was supposed to hold the complete vector field but now we have changed that.</li>
-<li><strong>VectMul</strong> : This class is made to hold product of type <em>scalar * Vector</em>. Also, this can hold items of type <em>scalar * VectAdd (see point 3).</em> This class is subclassed from <strong>Mul</strong>.</li>
-<li><strong>VectAdd </strong>: This is a class subclassed from <strong>Add</strong>. Just like Add, this will hold the sum of Vector and VectMul objects.</li>
-</ol>
-<p>All of these classes initialize a variable<em> is_Vector =True </em>that is used for determining whether the an object is a vectors.</p>
-<p>I have implemented these class in their basic form. Once I had some structure to build on top of,  I started implementing basic functionality on these three classes. Here’s where the problem came. Let us take an example of VectAdd. A VectAdd stores many vector objects added together. Now, there is no requirement for the all the vector objects to be in the same frame. As an example, take this:<i><br />
-</i></p>
-<p><img src="http://s0.wp.com/latex.php?latex=%5Cvec%7Bv%7D+%3D+%5Chat%7Bx%7D+%2B+%5Chat%7B%5Cvarphi%7D&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="\vec{v} = \hat{x} + \hat{\varphi}" class="latex" title="\vec{v} = \hat{x} + \hat{\varphi}" /></p>
-<p>Then clearly, <img src="http://s0.wp.com/latex.php?latex=%5Cvec%7Bv%7D&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="\vec{v}" class="latex" title="\vec{v}" /> has vectors in different coordinate systems. Therefore, implementing even the basic vector operations like the dot product becomes difficult because we need to have components of each vector in every coordinate system.</p>
-<p>Now for this problem, I have tried a couple of things. I still haven’t been able to successfully win over this problem but here’s an approach that I think will work. First, we need to have methods that will take a vector (VectAdd/VectMul/Vector) and output a list of vectors – only this time, each vector will be in different coordinate system. To implement such a method (which I’ll call <em>separate</em>), we need to proceed as follows:</p>
-<ul>
-<li>Loop over the <em>args</em> of the vector and for every different coordinate system you encounter, add that to a dictionary.</li>
-<li>Then, for that dictionary key, the value will be a list that contains the <em>args</em> for which have been defined in that particular coordinate system.</li>
-<li>Now, just take the args and construct a vector from those args – if there’s just one arg, we return it as is; if there are more than one, we return a VectAdd constructed with those args.</li>
-</ul>
-<p>Obviously, the problem doesn’t end there. The Vector/VectAdd/VectMul can each represent vectors. Now, we will need to have methods that do a certain operation (for example the dot product) defined for every such class. A better way would be to make a generic function for each such functionality and indeed, that is what I have tried out with the dot product. But this won’t work until we have completed the separate method.</p>
-<p>I’ll be working on finishing the ‘separate’ method next. Then, if it works as expected, we can move and implement various other vector operators. Also, finishing this method (separate) will give me the opportunity to finally finish the helper methods and have something working – right now, I ‘m just writing the code without knowing how it would work. Anyway, that’s the plan for the next few days.</p>
-<p>And by the way, I just switched to <a href="http://www.gnu.org/s/emacs/" target="_blank" title="Emacs!">Emacs</a> and it’s just great! ^__^ I can finally see what all the buzz was about <img src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif" alt=":)" class="wp-smiley" /> </p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/musingsofafriend.wordpress.com/177/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/musingsofafriend.wordpress.com/177/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=musingsofafriend.wordpress.com&amp;blog=36409097&amp;post=177&amp;subd=musingsofafriend&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://musingsofafriend.wordpress.com/2013/06/29/gsoc-week-2-sympy-development/">by musingsofafriend at June 29, 2013 11:09 AM</a>
-</p>
-</div>
-</div>
-
-
 </div>
 
 </div>
@@ -2985,7 +2972,7 @@ I have attended the <a href="https://conference.scipy.org/scipy2013/">SciPy 2013
 <a href="http://f1728.wordpress.com/category/SymPy/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://f1728.wordpress.com" class="message" title="no activity in 7 days">Jeremias Yehdegho</a>
 </li>
 <li>
-<a href="http://sophiessympyblog.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sophiessympyblog.wordpress.com" class="message" title="no activity in 7 days">Katja Sophie Hotz</a>
+<a href="http://sophiessympyblog.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sophiessympyblog.wordpress.com" title="sophie's sympy blog">Katja Sophie Hotz</a>
 </li>
 <li>
 <a href="" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a class="message" title="404: not found">Kazuo Thow</a>
@@ -3063,7 +3050,7 @@ I have attended the <a href="https://conference.scipy.org/scipy2013/">SciPy 2013
 
 <p>
 <strong>Last updated:</strong><br>
-August 16, 2013 11:40 AM<br>
+August 16, 2013 01:40 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
