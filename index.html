@@ -33,6 +33,38 @@
 
 
 
+<h3><a href="http://codesachin.blogspot.com/" title="Dream. Think. Code.">Sachin Joglekar</a></h3>
+
+
+<div class="entrygroup" id="tag:blogger.com,1999:blog-5472769892551526876.post-60483212976312007">
+<h4><a href="http://codesachin.blogspot.com/2013/08/gsoc-week9-beginning-of-electrostatics.html">GSoC Week9 : Beginning of electrostatics</a></h4>
+<div class="entry">
+<div class="content">
+<div style="text-align: left;" dir="ltr">Week 8 of GSoC is now over, and just 5 more weeks remain till the hard pencils-down date.<br />However, my work on the project will most likely exceed that time, since I will be having my first tests around September 17. I am sure I will be able to get all the code in by that time, but to make the entire work shippable, things like Sphinx documentation, doctests etc will also have to be finished, which may take a little more time beyond the actual deadline.<br /><br />Anyways, coming to this week's work, I wrote some code for electrostatics. I added some functions and the ParticleCharge class (inheriting from Particle of mechanics module).<br />However, the E-M module's handling of charged particles required me to modify my earlier implementation of Particle- most importantly, adding a 'set_motion' method. Like I mentioned earlier, Particle earlier had a frame attached to it. Gilbert and I discussed at length on this, and we agreed that making the <i>user </i>initialize a new frame everytime, just to attach it to a Particle, was quite cumbersome.<br />Hence, I modified the class in the mechanics core- It still has a frame as an attribute, but its now 'hidden' from the user (nothing in Python in hidden from the user, but what I mean here is that the user can do everything with a Particle without caring about the frame). The set_motion method I mentioned earlier just initializes a new frame according to the motion parameters set by the user (similar to MovingRefFrame).<br /><br />The main reason I want a frame attached to a Particle is the ease of inner working. Since a Particle will not have an 'angular acceleration', those parts of the MovingRefFrame code will never really get executed in Particle. However, Gilbert has a point in pointing out that its unnecessarily adding a complex attribute to the class. We havent finalized anything yet, but re-writing the motion-setting methods for Particle would be tedious, and more importantly, will lead to quite a lot of code duplication. Lets see what we end up doing.<br /><br />Anyways, I also finished writing tests for the code I wrote this week, and I am waiting for a review from Gilbert. Jason and he also encouraged me to add example-tests to ensure everything works smoothly.<br />Here are the example tests I wrote (they are really basic, but its better that way, since strenuous tests only make things worse)-<br /><br /><pre style=""><code style="color: black;"> def test_example_1():  <br />   """  <br />   This is a sample example meant to test the basic functionality of  <br />   electrostatics.py  <br />   <br />   Consider a frame R, and a particle charge P(mass m, charge q) situated  <br />   at its origin initially.  <br />   Now, at time t=0, a field R.x+R.y+R.z is 'switched on' and kept that way  <br />   for time 't0'.  <br />   The user needs the x-coordinate of the particle charge as a function of  <br />   time, after the field is switched off at time=t0.  <br />   """  <br />     <br />   #Basic initialization  <br />   m, q = symbols('m q')  <br />   P = ParticleCharge('P', m, q)  <br />   P.set_motion(R, pos_vector = 0)  <br />   field = R.x + R.y + R.z  <br />   time = dynamicsymbols._t  <br />   t0 = Symbol('t0')  <br />   #The acceleration is equal to the electrostatic force experience by the  <br />   #particle charge, divided by its mass  <br />   acceleration = P.electrostatic_force(field)/P.mass  <br />   #Use get_motion_acc from the mechanics core to find velocity and position  <br />   #parameters using acceleration function and boundary conditions  <br />   translation = get_motion_acc(acceleration, \  <br />                  0, P.pos_vector_wrt(R), frame = R)  <br />   #Calculate the motion parameters of the particle charge at time t0  <br />   acceleration = translation[0]  <br />   velocity_at_t0 = translation[1].subs({time:t0})  <br />   position_at_t0 = translation[2].subs({time:t0})  <br />   #Set motion of P accordingly  <br />   P.set_motion(R, trans_acc = 0, trans_vel_b = velocity_at_t0,  <br />          pos_vector_b = position_at_t0)  <br />   #assert that the dot product of P's pos_vector wrt R, with R.x  <br />   #matches the actual result  <br />   assert P.pos_vector_wrt(R).dot(R.x) == \  <br />       q*t*t0/m + q*t0**2/(2*m)  <br />   <br />   <br /> def test_example_2():  <br />   """  <br />   This is a sample example meant to test the basic functionality of  <br />   electrostatics.py  <br />   <br />   Consider a set of 3 particle charges of equal mass and charge placed  <br />   symmetrically on a circle of unit radius around the origin, with one  <br />   point lying at position vector of R.y  <br />   We calculate the energy required to assemble this system of charges from  <br />   infinity(with no kinetic energy in any particle) and find out values of  <br />   the electrostatic fields and potentials at the origin  <br />   """  <br />   <br />   #Basic initialization  <br />   from sympy import sin, cos, pi  <br />   m, q = symbols('m q')  <br />   P = ParticleCharge('P', m, q)  <br />   Q = ParticleCharge('Q', m, q)  <br />   S = ParticleCharge('S', m, q)  <br />   #Place particle charges as per required configuration  <br />   P.set_motion(R, pos_vector = R.y)  <br />   Q.set_motion(R, pos_vector = -cos(pi/6) * R.x + -sin(pi/6) * R.y)  <br />   S.set_motion(R, pos_vector = cos(pi/6) * R.x + -sin(pi/6) * R.y)  <br />   #Check outputs of required values  <br />   assert charge_assembly_energy(P, Q, S) == 3*3**(-0.5)*k*q**2  <br />   assert S.electrostatic_field(R, 0) + \  <br />       Q.electrostatic_field(R, 0) + \  <br />       P.electrostatic_field(R, 0) == 0  <br />   assert P.electrostatic_potential(R, 0) == \  <br />       Q.electrostatic_potential(R, 0) == \  <br />       S.electrostatic_potential(R, 0)  <br /></code></pre><br />If you think the API is a little complex, I think so too, but those modifications are for later. It would be good, according to me, to have something like an 'environment' infrastructure. Basically, the user will keep adding components (fields, particles etc etc) to it, and the constituents will keep getting modified accordingly. However, it will be good to have the module at a certain level of working before thinking on those lines.<br /><br />That's all there is to report for this week. The coming week, I will be reading up on magnetostatics from Griffith's and start coding for the same. However, I am afraid things are only going to get more and more complex hereon. Lets hope for the best.<br /><br />Have a great week :-)<br /><br /></div></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://codesachin.blogspot.com/2013/08/gsoc-week9-beginning-of-electrostatics.html">by Sachin Joglekar (noreply@blogger.com) at August 18, 2013 05:29 PM</a>
+</p>
+</div>
+</div>
+
+
+
+</div>
+<div class="channelgroup">
+
+
+
+
+
+
+
 <h3><a href="http://thilinaatsympy.wordpress.com" title="Thilina's SymPy Blog">Thilina Rathnayake</a></h3>
 
 
@@ -73,7 +105,7 @@
 
 
 <p class="date">
-<a href="http://thilinaatsympy.wordpress.com/2013/08/18/improving-the-solving-process-by-using-cornacchia/">by thilinarmtb at August 18, 2013 04:25 AM</a>
+<a href="http://thilinaatsympy.wordpress.com/2013/08/18/improving-the-solving-process-by-using-cornacchia/">by Thilina Rathnayake at August 18, 2013 04:25 AM</a>
 </p>
 </div>
 </div>
@@ -869,7 +901,7 @@ i] chi (Finds a polynomial <img src="http://s0.wp.com/latex.php?latex=%5Cchi&amp
 
 
 <p class="date">
-<a href="http://thilinaatsympy.wordpress.com/2013/08/04/169/">by thilinarmtb at August 04, 2013 04:49 AM</a>
+<a href="http://thilinaatsympy.wordpress.com/2013/08/04/169/">by Thilina Rathnayake at August 04, 2013 04:49 AM</a>
 </p>
 </div>
 </div>
@@ -1003,7 +1035,7 @@ i] chi (Finds a polynomial <img src="http://s0.wp.com/latex.php?latex=%5Cchi&amp
 
 
 <p class="date">
-<a href="http://thilinaatsympy.wordpress.com/2013/07/29/descent-method-with-gaussian-reduction/">by thilinarmtb at July 29, 2013 05:59 AM</a>
+<a href="http://thilinaatsympy.wordpress.com/2013/07/29/descent-method-with-gaussian-reduction/">by Thilina Rathnayake at July 29, 2013 05:59 AM</a>
 </p>
 </div>
 </div>
@@ -1592,7 +1624,7 @@ The good news is that now <code>bin/test</code> passes when <code>heugcd</code> 
 
 
 <p class="date">
-<a href="http://thilinaatsympy.wordpress.com/2013/07/20/solving-ternary-quadratic-forms-by-descent-method/">by thilinarmtb at July 20, 2013 07:26 PM</a>
+<a href="http://thilinaatsympy.wordpress.com/2013/07/20/solving-ternary-quadratic-forms-by-descent-method/">by Thilina Rathnayake at July 20, 2013 07:26 PM</a>
 </p>
 </div>
 </div>
@@ -2066,7 +2098,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
 
 
 <p class="date">
-<a href="http://thilinaatsympy.wordpress.com/2013/07/12/to-gauss-from-euclid-via-pell/">by thilinarmtb at July 12, 2013 08:45 PM</a>
+<a href="http://thilinaatsympy.wordpress.com/2013/07/12/to-gauss-from-euclid-via-pell/">by Thilina Rathnayake at July 12, 2013 08:45 PM</a>
 </p>
 </div>
 </div>
@@ -2485,7 +2517,7 @@ fab vagrant release
 
 
 <p class="date">
-<a href="http://thilinaatsympy.wordpress.com/2013/07/06/solving-the-generalized-pell-equation/">by thilinarmtb at July 06, 2013 07:52 AM</a>
+<a href="http://thilinaatsympy.wordpress.com/2013/07/06/solving-the-generalized-pell-equation/">by Thilina Rathnayake at July 06, 2013 07:52 AM</a>
 </p>
 </div>
 </div>
@@ -2896,48 +2928,6 @@ I have attended the <a href="https://conference.scipy.org/scipy2013/">SciPy 2013
 </div>
 
 
-
-</div>
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://thilinaatsympy.wordpress.com" title="Thilina's SymPy Blog">Thilina Rathnayake</a></h3>
-
-
-<div class="entrygroup" id="http://thilinaatsympy.wordpress.com/?p=61">
-<h4 lang="en"><a href="http://thilinaatsympy.wordpress.com/2013/06/29/quadratic-diophantine-equation-i/">Quadratic Diophantine equation – I</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>Quadratic Diophantine equation is an equation of the form <em>Ax**2 + Bxy + Cy**2 + Dx + Ey + F = 0</em> where<em> A, B, C, D, E,</em> and <em>F</em> are integer constants and x and y being integer variables. Study of this equation has always been an interesting area among number theorists. The famous pell equation is a special case of the above with<em> delta = B**2-4AC &gt; 0</em> and delta not being a perfect square. Normally, this equation is broken down into five cases for analytical purposes.</p>
-<p>1)<em> A = B = C = 0</em> (Linear case): Reduces to a linear Diophantine equation of two variables.</p>
-<p>2) <em>A = B = 0</em> and<em> C != 0 </em> (Simple hyperbolic case): Equation reduces to <em>(Bx + E) (By + D) = DE – BF, </em>which can be solved by considering the factors of <em>DE – BF</em>.</p>
-<p>3) <em>B**2 – 4AC &lt; 0 </em>(Elliptical case): In this case, values of the x should lie between the roots of the equation <em>(B**2-4AC)x**2 + 2(BE – 2CD)x + E**2 – 4CF = 0. </em>Values for x should be selected so that y is an integer.</p>
-<p>4) <em>B**2 – 4AC = 0 </em>(Parabolic case): Solution procedure is rather complex in this case.</p>
-<p>I will describe these cases in detail in the future posts. I had almost completed the above cases at the start of Week 2.</p>
-<p>5) <em>delta = B**2 – 4AC &gt; 0</em>: This is split into several subcases.<em> </em></p>
-<p><strong>Case <em>delta = B**2 – 4AC &gt; 0</em>:</strong></p>
-<p>Subcase 1:<em> D = E = 0</em>:</p>
-<p>This is the homogeneous case and again considered under two cases <em>F = 0</em> and <em>F != 0</em>. If<em> F = 0</em>, then <em>x = 0</em> and <em>y = 0</em> are solutions. More solutions may exist if<em> B**2 – 4AC</em> is a perfect square. Otherwise<em> x = 0</em> and <em>y = 0</em> is the only solution. I implemented this case in the module. If <em>F != 0</em> the solution procedure is rather complex and involves continued fractions. I am currently working on this.</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/thilinaatsympy.wordpress.com/61/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/thilinaatsympy.wordpress.com/61/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=thilinaatsympy.wordpress.com&amp;blog=52956410&amp;post=61&amp;subd=thilinaatsympy&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://thilinaatsympy.wordpress.com/2013/06/29/quadratic-diophantine-equation-i/">by thilinarmtb at June 29, 2013 07:17 PM</a>
-</p>
-</div>
-</div>
-
-
 </div>
 
 </div>
@@ -3039,7 +3029,7 @@ I have attended the <a href="https://conference.scipy.org/scipy2013/">SciPy 2013
 <a href="http://www.blogger.com/feeds/436496352933562096/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://robert-code.blogspot.com/" class="message" title="no activity in 7 days">Robert Schwarz</a>
 </li>
 <li>
-<a href="http://www.blogger.com/feeds/5472769892551526876/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://codesachin.blogspot.com/" class="message" title="no activity in 7 days">Sachin Joglekar</a>
+<a href="http://www.blogger.com/feeds/5472769892551526876/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://codesachin.blogspot.com/" title="Dream. Think. Code.">Sachin Joglekar</a>
 </li>
 <li>
 <a href="http://saptman.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://saptman.wordpress.com" class="message" title="no activity in 7 days">Saptarshi Mandal</a>
@@ -3084,7 +3074,7 @@ I have attended the <a href="https://conference.scipy.org/scipy2013/">SciPy 2013
 
 <p>
 <strong>Last updated:</strong><br>
-August 18, 2013 05:20 PM<br>
+August 18, 2013 05:40 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
