@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2013-08-18T04:40:34Z</updated>
+  <updated>2013-08-18T05:20:37Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -19,7 +19,7 @@
     </summary>
     <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Hi All, It has been sometime since I last wrote about my project.  I spent most of my time improving the solving methods used in binary quadratic forms. I also did a fair bit of refactoring of the earlier work and bug fixing. The implementation of ternary quadratic forms is now almost done and once the <a href="https://github.com/sympy/sympy/pull/2307">pull request</a> by Pernici gets merged, we can use his function for finding the solutions for the quadratic congruence <img alt="x^2 \equiv a \ (mod \ p)" class="latex" src="http://s0.wp.com/latex.php?latex=x%5E2+%5Cequiv+a+%5C+%28mod+%5C+p%29&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="x^2 \equiv a \ (mod \ p)"/> and the time taken to find the solutions for ternary / binary quadratic forms will be reduced considerably.</p>
 <h4>Tweaks to the algorithms used in solving quadratic binary forms</h4>
-<p>I had a misunderstanding earlier that the binary quadratic form <img alt="ax^2 + by^2 + cz^2 + dx + ey + f = 0" class="latex" src="http://s0.wp.com/latex.php?latex=ax%5E2+%2B+by%5E2+%2B+cz%5E2+%2B+dx+%2B+ey+%2B+f+%3D+0&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="ax^2 + by^2 + cz^2 + dx + ey + f = 0"/> can be converted to the form <img alt="x^2 - Dy^2 = N" class="latex" src="http://s0.wp.com/latex.php?latex=x%5E2+-+Dy%5E2+%3D+N&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="x^2 - Dy^2 = N"/> only in the case <img alt="\Delta &gt; 0" class="latex" src="http://s0.wp.com/latex.php?latex=%5CDelta+%3E+0&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="\Delta &gt; 0"/> and <img alt="\Delta " class="latex" src="http://s0.wp.com/latex.php?latex=%5CDelta+&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="\Delta "/> is not a perfect square. Here <img alt="\Delta = b^2 - 4ac" class="latex" src="http://s0.wp.com/latex.php?latex=%5CDelta+%3D+b%5E2+-+4ac&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="\Delta = b^2 - 4ac"/>. It occurred to me only when I read [1] more carefully that any binary quadratic with <img alt="a \neq 0" class="latex" src="http://s0.wp.com/latex.php?latex=a+%5Cneq+0&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="a \neq 0"/> and <img alt="c \neq 0" class="latex" src="http://s0.wp.com/latex.php?latex=c+%5Cneq+0&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="c \neq 0"/> can be transformed to the latter form. With this new discovery, our treatment of the binary quadratic becomes more general and efficient.  Now in both the cases <img alt="\Delta &gt; 0, \Delta" class="latex" src="http://s0.wp.com/latex.php?latex=%5CDelta+%3E+0%2C+%5CDelta&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="\Delta &gt; 0, \Delta"/> is not a perfect square and <img alt="\Delta &lt; 0" class="latex" src="http://s0.wp.com/latex.php?latex=%5CDelta+%3C+0&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="\Delta &lt; 0"/>, we transform the equation to the form <img alt="x^2 -Dy^2 = N" class="latex" src="http://s0.wp.com/latex.php?latex=x%5E2+-Dy%5E2+%3D+N&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="x^2 -Dy^2 = N"/>. The former case was earlier addressed under solving generalized Pell equation as the equation reduces to a generalized Pell equation in that case. My earlier approach with the latter case was to use brute force. I managed to implement the Cornacchia’s algorithm for this case as suggested by Pernici. Cornacchia’s algorithm can be used to solve the equation <img alt="ax^2 + by^2 = m" class="latex" src="http://s0.wp.com/latex.php?latex=ax%5E2+%2B+by%5E2+%3D+m&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="ax^2 + by^2 = m"/> with <img alt="gcd(a, b) = 1 = gcd(a, m)" class="latex" src="http://s0.wp.com/latex.php?latex=gcd%28a%2C+b%29+%3D+1+%3D+gcd%28a%2C+m%29&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="gcd(a, b) = 1 = gcd(a, m)"/> and <img alt="a &gt; 0, b &gt; 0" class="latex" src="http://s0.wp.com/latex.php?latex=a+%3E+0%2C+b+%3E+0&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="a &gt; 0, b &gt; 0"/>. In our form under the case <img alt="\Delta &lt; 0" class="latex" src="http://s0.wp.com/latex.php?latex=%5CDelta+%3C+0&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="\Delta &lt; 0"/>, <img alt="a = 1" class="latex" src="http://s0.wp.com/latex.php?latex=a+%3D+1&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="a = 1"/> and <img alt="b = -D &gt; 0" class="latex" src="http://s0.wp.com/latex.php?latex=b+%3D+-D+%3E+0&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="b = -D &gt; 0"/>, so these two conditions are automatically fulfilled. Below is a rough outline of the Cornacchia’s algorithm. Refer [2] and [3] for more details.</p>
+<p>I had a misunderstanding earlier that the binary quadratic form <img alt="ax^2 + bxy + cy^2 + dx + ey + f = 0" class="latex" src="http://s0.wp.com/latex.php?latex=ax%5E2+%2B+bxy+%2B+cy%5E2+%2B+dx+%2B+ey+%2B+f+%3D+0&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="ax^2 + bxy + cy^2 + dx + ey + f = 0"/> can be converted to the form <img alt="x^2 - Dy^2 = N" class="latex" src="http://s0.wp.com/latex.php?latex=x%5E2+-+Dy%5E2+%3D+N&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="x^2 - Dy^2 = N"/> only in the case <img alt="\Delta &gt; 0" class="latex" src="http://s0.wp.com/latex.php?latex=%5CDelta+%3E+0&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="\Delta &gt; 0"/> and <img alt="\Delta " class="latex" src="http://s0.wp.com/latex.php?latex=%5CDelta+&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="\Delta "/> is not a perfect square. Here <img alt="\Delta = b^2 - 4ac" class="latex" src="http://s0.wp.com/latex.php?latex=%5CDelta+%3D+b%5E2+-+4ac&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="\Delta = b^2 - 4ac"/>. It occurred to me only when I read [1] more carefully that any binary quadratic with <img alt="a \neq 0" class="latex" src="http://s0.wp.com/latex.php?latex=a+%5Cneq+0&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="a \neq 0"/> and <img alt="c \neq 0" class="latex" src="http://s0.wp.com/latex.php?latex=c+%5Cneq+0&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="c \neq 0"/> can be transformed to the latter form. With this new discovery, our treatment of the binary quadratic becomes more general and efficient.  Now in both the cases <img alt="\Delta &gt; 0, \Delta" class="latex" src="http://s0.wp.com/latex.php?latex=%5CDelta+%3E+0%2C+%5CDelta&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="\Delta &gt; 0, \Delta"/> is not a perfect square and <img alt="\Delta &lt; 0" class="latex" src="http://s0.wp.com/latex.php?latex=%5CDelta+%3C+0&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="\Delta &lt; 0"/>, we transform the equation to the form <img alt="x^2 -Dy^2 = N" class="latex" src="http://s0.wp.com/latex.php?latex=x%5E2+-Dy%5E2+%3D+N&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="x^2 -Dy^2 = N"/>. The former case was earlier addressed under solving generalized Pell equation as the equation reduces to a generalized Pell equation in that case. My earlier approach with the latter case was to use brute force. I managed to implement the Cornacchia’s algorithm for this case as suggested by Pernici. Cornacchia’s algorithm can be used to solve the equation <img alt="ax^2 + by^2 = m" class="latex" src="http://s0.wp.com/latex.php?latex=ax%5E2+%2B+by%5E2+%3D+m&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="ax^2 + by^2 = m"/> with <img alt="gcd(a, b) = 1 = gcd(a, m)" class="latex" src="http://s0.wp.com/latex.php?latex=gcd%28a%2C+b%29+%3D+1+%3D+gcd%28a%2C+m%29&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="gcd(a, b) = 1 = gcd(a, m)"/> and <img alt="a &gt; 0, b &gt; 0" class="latex" src="http://s0.wp.com/latex.php?latex=a+%3E+0%2C+b+%3E+0&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="a &gt; 0, b &gt; 0"/>. In our form under the case <img alt="\Delta &lt; 0" class="latex" src="http://s0.wp.com/latex.php?latex=%5CDelta+%3C+0&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="\Delta &lt; 0"/>, <img alt="a = 1" class="latex" src="http://s0.wp.com/latex.php?latex=a+%3D+1&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="a = 1"/> and <img alt="b = -D &gt; 0" class="latex" src="http://s0.wp.com/latex.php?latex=b+%3D+-D+%3E+0&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="b = -D &gt; 0"/>, so these two conditions are automatically fulfilled. Below is a rough outline of the Cornacchia’s algorithm. Refer [2] and [3] for more details.</p>
 <p>Solving <img alt="ax^2 + by^2 = m" class="latex" src="http://s0.wp.com/latex.php?latex=ax%5E2+%2B+by%5E2+%3D+m&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="ax^2 + by^2 = m"/> by Cornacchia’s method</p>
 <p>1. Let <img alt="p" class="latex" src="http://s0.wp.com/latex.php?latex=p&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="p"/> be such that <img alt="ap + mq = gcd(a, m)" class="latex" src="http://s0.wp.com/latex.php?latex=ap+%2B+mq+%3D+gcd%28a%2C+m%29&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="ap + mq = gcd(a, m)"/>.<br/>
 2. Construct a set <img alt="v" class="latex" src="http://s0.wp.com/latex.php?latex=v&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="v"/> such that <img alt="v = \{ x | x^2 \equiv -bp \ (mod \ m) \}" class="latex" src="http://s0.wp.com/latex.php?latex=v+%3D+%5C%7B+x+%7C+x%5E2+%5Cequiv+-bp+%5C+%28mod+%5C+m%29+%5C%7D&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="v = \{ x | x^2 \equiv -bp \ (mod \ m) \}"/>. We can ommit solutions greater than <img alt="m/2" class="latex" src="http://s0.wp.com/latex.php?latex=m%2F2&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="m/2"/>.<br/>
@@ -61,7 +61,7 @@
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2013-08-18T04:40:30Z</updated>
+      <updated>2013-08-18T05:20:33Z</updated>
     </source>
   </entry>
 
@@ -94,7 +94,7 @@
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-08-18T04:40:31Z</updated>
+      <updated>2013-08-18T05:20:34Z</updated>
     </source>
   </entry>
 
@@ -125,7 +125,7 @@
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-08-18T04:40:32Z</updated>
+      <updated>2013-08-18T05:20:35Z</updated>
     </source>
   </entry>
 
@@ -246,7 +246,7 @@
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-08-18T04:40:20Z</updated>
+      <updated>2013-08-18T05:20:23Z</updated>
     </source>
   </entry>
 
@@ -396,7 +396,7 @@ Why? Well, without going too much into detail, the solution to this PDE, <img al
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My perspective of things</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-08-18T04:40:28Z</updated>
+      <updated>2013-08-18T05:20:32Z</updated>
     </source>
   </entry>
 
@@ -444,7 +444,7 @@ Why? Well, without going too much into detail, the solution to this PDE, <img al
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-08-18T04:40:07Z</updated>
+      <updated>2013-08-18T05:20:14Z</updated>
     </source>
   </entry>
 
@@ -481,7 +481,7 @@ Why? Well, without going too much into detail, the solution to this PDE, <img al
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-08-18T04:40:31Z</updated>
+      <updated>2013-08-18T05:20:34Z</updated>
     </source>
   </entry>
 
@@ -515,7 +515,7 @@ PS2 : I am finally 20 !! <img alt=":D" class="wp-smiley" src="http://s0.wp.com/w
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-08-18T04:40:27Z</updated>
+      <updated>2013-08-18T05:20:30Z</updated>
     </source>
   </entry>
 
@@ -579,7 +579,7 @@ PS2 : I am finally 20 !! <img alt=":D" class="wp-smiley" src="http://s0.wp.com/w
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-08-18T04:40:32Z</updated>
+      <updated>2013-08-18T05:20:35Z</updated>
     </source>
   </entry>
 
@@ -651,7 +651,7 @@ PS2 : I am finally 20 !! <img alt=":D" class="wp-smiley" src="http://s0.wp.com/w
       <link href="http://musingsofafriend.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>The greatest WordPress.com site in all the land!</subtitle>
       <title>musings of a friend - Prasoon Shukla » SymPy</title>
-      <updated>2013-08-18T04:40:31Z</updated>
+      <updated>2013-08-18T05:20:34Z</updated>
     </source>
   </entry>
 
@@ -705,7 +705,7 @@ i] chi (Finds a polynomial <img alt="\chi" class="latex" src="http://s0.wp.com/l
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My perspective of things</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-08-18T04:40:29Z</updated>
+      <updated>2013-08-18T05:20:32Z</updated>
     </source>
   </entry>
 
@@ -799,7 +799,7 @@ i] chi (Finds a polynomial <img alt="\chi" class="latex" src="http://s0.wp.com/l
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2013-08-18T04:40:30Z</updated>
+      <updated>2013-08-18T05:20:33Z</updated>
     </source>
   </entry>
 
@@ -834,7 +834,7 @@ i] chi (Finds a polynomial <img alt="\chi" class="latex" src="http://s0.wp.com/l
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-08-18T04:40:31Z</updated>
+      <updated>2013-08-18T05:20:34Z</updated>
     </source>
   </entry>
 
@@ -911,7 +911,7 @@ i] chi (Finds a polynomial <img alt="\chi" class="latex" src="http://s0.wp.com/l
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2013-08-18T04:40:30Z</updated>
+      <updated>2013-08-18T05:20:33Z</updated>
     </source>
   </entry>
 
@@ -941,7 +941,7 @@ i] chi (Finds a polynomial <img alt="\chi" class="latex" src="http://s0.wp.com/l
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-08-18T04:40:32Z</updated>
+      <updated>2013-08-18T05:20:35Z</updated>
     </source>
   </entry>
 
@@ -983,7 +983,7 @@ i] chi (Finds a polynomial <img alt="\chi" class="latex" src="http://s0.wp.com/l
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My perspective of things</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-08-18T04:40:29Z</updated>
+      <updated>2013-08-18T05:20:32Z</updated>
     </source>
   </entry>
 
@@ -1052,7 +1052,7 @@ which I’m quite happy with. I though that I was going to have to use a loop, b
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-08-18T04:40:31Z</updated>
+      <updated>2013-08-18T05:20:34Z</updated>
     </source>
   </entry>
 
@@ -1249,7 +1249,7 @@ Signing- off <img alt=":)" class="wp-smiley" src="http://s0.wp.com/wp-includes/i
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-08-18T04:40:27Z</updated>
+      <updated>2013-08-18T05:20:30Z</updated>
     </source>
   </entry>
 
@@ -1281,7 +1281,7 @@ Signing- off <img alt=":)" class="wp-smiley" src="http://s0.wp.com/wp-includes/i
       <link href="http://musingsofafriend.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>The greatest WordPress.com site in all the land!</subtitle>
       <title>musings of a friend - Prasoon Shukla » SymPy</title>
-      <updated>2013-08-18T04:40:31Z</updated>
+      <updated>2013-08-18T05:20:34Z</updated>
     </source>
   </entry>
 
@@ -1316,7 +1316,7 @@ The good news is that now <code>bin/test</code> passes when <code>heugcd</code> 
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-08-18T04:40:32Z</updated>
+      <updated>2013-08-18T05:20:35Z</updated>
     </source>
   </entry>
 
@@ -1388,7 +1388,7 @@ The good news is that now <code>bin/test</code> passes when <code>heugcd</code> 
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My perspective of things</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-08-18T04:40:29Z</updated>
+      <updated>2013-08-18T05:20:32Z</updated>
     </source>
   </entry>
 
@@ -1438,7 +1438,7 @@ The good news is that now <code>bin/test</code> passes when <code>heugcd</code> 
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2013-08-18T04:40:30Z</updated>
+      <updated>2013-08-18T05:20:33Z</updated>
     </source>
   </entry>
 
@@ -1481,7 +1481,7 @@ and type F is very similar.</p>
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-08-18T04:40:31Z</updated>
+      <updated>2013-08-18T05:20:34Z</updated>
     </source>
   </entry>
 
@@ -1612,7 +1612,7 @@ Another new tool I learned to use this week was Sphinx. I like the html document
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-08-18T04:40:32Z</updated>
+      <updated>2013-08-18T05:20:35Z</updated>
     </source>
   </entry>
 
@@ -1767,7 +1767,7 @@ Another new tool I learned to use this week was Sphinx. I like the html document
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-08-18T04:40:27Z</updated>
+      <updated>2013-08-18T05:20:30Z</updated>
     </source>
   </entry>
 
@@ -1841,7 +1841,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My perspective of things</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-08-18T04:40:28Z</updated>
+      <updated>2013-08-18T05:20:32Z</updated>
     </source>
   </entry>
 
@@ -1874,7 +1874,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2013-08-18T04:40:30Z</updated>
+      <updated>2013-08-18T05:20:33Z</updated>
     </source>
   </entry>
 
@@ -1911,7 +1911,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-08-18T04:40:31Z</updated>
+      <updated>2013-08-18T05:20:34Z</updated>
     </source>
   </entry>
 
@@ -2014,7 +2014,7 @@ I know this is a lot of talking and nothing like psudeo code, though we can draw
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-08-18T04:40:27Z</updated>
+      <updated>2013-08-18T05:20:30Z</updated>
     </source>
   </entry>
 
@@ -2080,7 +2080,7 @@ fab vagrant release
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-08-18T04:40:07Z</updated>
+      <updated>2013-08-18T05:20:14Z</updated>
     </source>
   </entry>
 
@@ -2198,7 +2198,7 @@ fab vagrant release
       <link href="http://musingsofafriend.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>The greatest WordPress.com site in all the land!</subtitle>
       <title>musings of a friend - Prasoon Shukla » SymPy</title>
-      <updated>2013-08-18T04:40:31Z</updated>
+      <updated>2013-08-18T05:20:34Z</updated>
     </source>
   </entry>
 
@@ -2252,7 +2252,7 @@ fab vagrant release
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2013-08-18T04:40:30Z</updated>
+      <updated>2013-08-18T05:20:33Z</updated>
     </source>
   </entry>
 
@@ -2341,7 +2341,7 @@ I was able to make use of both of them in my implementation for the multivariate
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-08-18T04:40:32Z</updated>
+      <updated>2013-08-18T05:20:35Z</updated>
     </source>
   </entry>
 
@@ -2393,7 +2393,7 @@ I was able to make use of both of them in my implementation for the multivariate
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-08-18T04:40:31Z</updated>
+      <updated>2013-08-18T05:20:34Z</updated>
     </source>
   </entry>
 
@@ -2451,7 +2451,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My perspective of things</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-08-18T04:40:28Z</updated>
+      <updated>2013-08-18T05:20:32Z</updated>
     </source>
   </entry>
 
@@ -2577,7 +2577,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-08-18T04:40:07Z</updated>
+      <updated>2013-08-18T05:20:14Z</updated>
     </source>
   </entry>
 
@@ -2682,7 +2682,7 @@ Poly(3*x*y + x**2).as_dict()
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2013-08-18T04:40:30Z</updated>
+      <updated>2013-08-18T05:20:33Z</updated>
     </source>
   </entry>
 </feed>
