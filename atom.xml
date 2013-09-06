@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2013-09-03T13:20:39Z</updated>
+  <updated>2013-09-06T17:20:33Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,126 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry xml:lang="en">
+    <id>http://manojbits.wordpress.com/?p=746</id>
+    <link href="http://manojbits.wordpress.com/2013/09/06/towards-the-end/" rel="alternate" type="text/html"/>
+    <title>Towards the end</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Hi, I finally managed to do some amount of work for the past ten days, and I’m happy to day that all that I had wanted to do this GSoC has been pushed in and I’m waiting for comments on my final Pull Request. These were the changes that I had made. 1. Making simlar […]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=manojbits.wordpress.com&amp;blog=31971756&amp;post=746&amp;subd=manojbits&amp;ref=&amp;feed=1" width="1"/></div>
+    </summary>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Hi, I finally managed to do some amount of work for the past ten days, and I’m happy to day that all that I had wanted to do this GSoC has been pushed in and I’m waiting for comments on my final Pull Request. These were the changes that I had made.</p>
+<p><strong>1. Making simlar to the series function </strong><br/>
+While playing around with the code, I found out that, doing <strong>series(eq, n=terms)</strong>, gives the series expansion upto <img alt="O(x^n)" class="latex" src="http://s0.wp.com/latex.php?latex=O%28x%5En%29&amp;bg=fff&amp;fg=444444&amp;s=0" title="O(x^n)"/> rather than the nth term. This makes the code look a lot neater too. Also the default power is 6, so I changes that too. For instance, take this sample SymPy session</p>
+<pre class="brush: python; title: ; notranslate">from sympy import dsolve, series
+from sympy.abc import x, y
+f = Function("f")
+pprint(series(exp(x))
+         2    3    4     5        
+        x    x    x     x     ⎛ 6⎞
+1 + x + ── + ── + ── + ─── + O⎝x ⎠
+        2    6    24   120       
+eq = f(x).diff(x) - x*f(x)
+pprint(dsolve(eq, hint='1st_power_series'))
+                2       4        
+            C₀⋅x    C₀⋅x     ⎛ 6⎞
+f(x) = C₀ + ───── + ───── + O⎝x ⎠
+              2       8       
+</pre>
+<p>I also added support for power series solutions of homogeneous differential equations at ordinary points, and regular singular points. A homogeneous second differential equation is of the form <img alt="P(x)\frac{d^2f}{dx^2} + Q(x)\frac{df}{dx} + R(x)" class="latex" src="http://s0.wp.com/latex.php?latex=P%28x%29%5Cfrac%7Bd%5E2f%7D%7Bdx%5E2%7D+%2B+Q%28x%29%5Cfrac%7Bdf%7D%7Bdx%7D+%2B+R%28x%29&amp;bg=fff&amp;fg=444444&amp;s=0" title="P(x)\frac{d^2f}{dx^2} + Q(x)\frac{df}{dx} + R(x)"/>. (Any DE mentioned below is homogeneous second order unless otherwise specified, because typing DE is easier than typing a homogeneous second order differential equation).<br/>
+a] A point <img alt="x0" class="latex" src="http://s0.wp.com/latex.php?latex=x0&amp;bg=fff&amp;fg=444444&amp;s=0" title="x0"/> is said to be ordinary, if <img alt="\frac{Q(x)}{P(x)}" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cfrac%7BQ%28x%29%7D%7BP%28x%29%7D&amp;bg=fff&amp;fg=444444&amp;s=0" title="\frac{Q(x)}{P(x)}"/> and <img alt="\frac{R(x)}{P(x)}" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cfrac%7BR%28x%29%7D%7BP%28x%29%7D&amp;bg=fff&amp;fg=444444&amp;s=0" title="\frac{R(x)}{P(x)}"/> are analytic at the point.<br/>
+b] It is said to be regular singular, if <img alt="(x - x0)\frac{Q(x)}{P(x)}" class="latex" src="http://s0.wp.com/latex.php?latex=%28x+-+x0%29%5Cfrac%7BQ%28x%29%7D%7BP%28x%29%7D&amp;bg=fff&amp;fg=444444&amp;s=0" title="(x - x0)\frac{Q(x)}{P(x)}"/> and <img alt="(x - x0)^2\frac{Q(x)}{P(x)}" class="latex" src="http://s0.wp.com/latex.php?latex=%28x+-+x0%29%5E2%5Cfrac%7BQ%28x%29%7D%7BP%28x%29%7D&amp;bg=fff&amp;fg=444444&amp;s=0" title="(x - x0)^2\frac{Q(x)}{P(x)}"/> are analytic. For simplicity in the series expansions, assumptions are made such that <img alt="P(x)" class="latex" src="http://s0.wp.com/latex.php?latex=P%28x%29&amp;bg=fff&amp;fg=444444&amp;s=0" title="P(x)"/>, <img alt="Q(x)" class="latex" src="http://s0.wp.com/latex.php?latex=Q%28x%29&amp;bg=fff&amp;fg=444444&amp;s=0" title="Q(x)"/> and <img alt="R(x)" class="latex" src="http://s0.wp.com/latex.php?latex=R%28x%29&amp;bg=fff&amp;fg=444444&amp;s=0" title="R(x)"/> are polynomials. Okay, now for a bit more detail</p>
+<p>1. <strong>Ordinary points</strong> : A DE has a power series solution, at <img alt="x0" class="latex" src="http://s0.wp.com/latex.php?latex=x0&amp;bg=fff&amp;fg=444444&amp;s=0" title="x0"/>. This can be found by substituting <img alt="\sum_{k=0}^n a_{n}x^n" class="latex" src="http://s0.wp.com/latex.php?latex=%5Csum_%7Bk%3D0%7D%5En+a_%7Bn%7Dx%5En&amp;bg=fff&amp;fg=444444&amp;s=0" title="\sum_{k=0}^n a_{n}x^n"/> in the DE, and equating the nth coefficient in order to obtain a recurrence relation. However this is not as trivial as it sounds and was one of the more tougher things I had to do.</p>
+<p>Take the general case of <img alt="P(x)\frac{d^2f}{dx^2} + Q(x)\frac{df}{dx} + R(x)" class="latex" src="http://s0.wp.com/latex.php?latex=P%28x%29%5Cfrac%7Bd%5E2f%7D%7Bdx%5E2%7D+%2B+Q%28x%29%5Cfrac%7Bdf%7D%7Bdx%7D+%2B+R%28x%29&amp;bg=fff&amp;fg=444444&amp;s=0" title="P(x)\frac{d^2f}{dx^2} + Q(x)\frac{df}{dx} + R(x)"/>. Substituting <img alt="y" class="latex" src="http://s0.wp.com/latex.php?latex=y&amp;bg=fff&amp;fg=444444&amp;s=0" title="y"/> as <img alt="\sum_{n = 0}^\infty a_{n}x^n" class="latex" src="http://s0.wp.com/latex.php?latex=%5Csum_%7Bn+%3D+0%7D%5E%5Cinfty+a_%7Bn%7Dx%5En&amp;bg=fff&amp;fg=444444&amp;s=0" title="\sum_{n = 0}^\infty a_{n}x^n"/> in the DE. (One has to expand each of the terms <img alt="P(x)" class="latex" src="http://s0.wp.com/latex.php?latex=P%28x%29&amp;bg=fff&amp;fg=444444&amp;s=0" title="P(x)"/>, <img alt="Q(x)" class="latex" src="http://s0.wp.com/latex.php?latex=Q%28x%29&amp;bg=fff&amp;fg=444444&amp;s=0" title="Q(x)"/> and <img alt="R(x)" class="latex" src="http://s0.wp.com/latex.php?latex=R%28x%29&amp;bg=fff&amp;fg=444444&amp;s=0" title="R(x)"/>), make transformations such that for each term the power of <img alt="x" class="latex" src="http://s0.wp.com/latex.php?latex=x&amp;bg=fff&amp;fg=444444&amp;s=0" title="x"/> is <img alt="n" class="latex" src="http://s0.wp.com/latex.php?latex=n&amp;bg=fff&amp;fg=444444&amp;s=0" title="n"/>. The catch here is that the starting point of the summation also changes, so the necessary terms shouls be stripped off such that the starting point is same. This is better explained in one of these tutorials, <a href="http://tutorial.math.lamar.edu/Classes/DE/SeriesSolutions.aspx" rel="nofollow">http://tutorial.math.lamar.edu/Classes/DE/SeriesSolutions.aspx</a> , so you could read that after you’ve read the rest of the blogpost.</p>
+<p>A small sample session.</p>
+<pre class="brush: python; title: ; notranslate">from sympy import *
+from sympy.abc import x, y
+eq = (1 + x**2)*(f(x).diff(x, 2)) + 2*x*(f(x).diff(x)) -2*f(x)
+pprint(eq)
+                          2               
+    d          ⎛ 2    ⎞  d                
+2⋅x⋅──(f(x)) + ⎝x  + 1⎠⋅───(f(x)) - 2⋅f(x)
+    dx                    2               
+                        dx
+pprint(dsolve(eq))
+                 ⎛   4         ⎞        
+                 ⎜  x     2    ⎟    ⎛ 6⎞
+f(x) = C₁⋅x + C₀⋅⎜- ── + x  + 1⎟ + O⎝x ⎠
+                 ⎝  3          ⎠
+eq = f(x).diff(x, 2) + x*(f(x).diff(x)) + f(x)
+pprint(eq)
+                      2      
+  d                  d       
+x⋅──(f(x)) + f(x) + ───(f(x))
+  dx                  2      
+                    dx
+pprint(dsolve(eq))
+            ⎛   2    ⎞      ⎛ 4    2    ⎞        
+            ⎜  x     ⎟      ⎜x    x     ⎟    ⎛ 6⎞
+f(x) = C₁⋅x⋅⎜- ── + 1⎟ + C₀⋅⎜── - ── + 1⎟ + O⎝x ⎠
+            ⎝  3     ⎠      ⎝8    2     ⎠  
+</pre>
+<p>2. <strong>Regular singular points</strong> :<br/>
+    1.  Try expressing <img alt="(x - x0)P(x)" class="latex" src="http://s0.wp.com/latex.php?latex=%28x+-+x0%29P%28x%29&amp;bg=fff&amp;fg=444444&amp;s=0" title="(x - x0)P(x)"/> and <img alt="((x - x0)^{2})Q(x)" class="latex" src="http://s0.wp.com/latex.php?latex=%28%28x+-+x0%29%5E%7B2%7D%29Q%28x%29&amp;bg=fff&amp;fg=444444&amp;s=0" title="((x - x0)^{2})Q(x)"/> as power series<br/>
+        solutions about <img alt="x0" class="latex" src="http://s0.wp.com/latex.php?latex=x0&amp;bg=fff&amp;fg=444444&amp;s=0" title="x0"/>. Find <img alt="p0" class="latex" src="http://s0.wp.com/latex.php?latex=p0&amp;bg=fff&amp;fg=444444&amp;s=0" title="p0"/> and <img alt="q0" class="latex" src="http://s0.wp.com/latex.php?latex=q0&amp;bg=fff&amp;fg=444444&amp;s=0" title="q0"/> which are the constants of the<br/>
+        power series expansions.<br/>
+    2.  Solve the indicial equation <img alt="f(m) = m(m - 1) + m*p0 + q0" class="latex" src="http://s0.wp.com/latex.php?latex=f%28m%29+%3D+m%28m+-+1%29+%2B+m%2Ap0+%2B+q0&amp;bg=fff&amp;fg=444444&amp;s=0" title="f(m) = m(m - 1) + m*p0 + q0"/>, to obtain the<br/>
+        roots <img alt="m1" class="latex" src="http://s0.wp.com/latex.php?latex=m1&amp;bg=fff&amp;fg=444444&amp;s=0" title="m1"/> and <img alt="m2" class="latex" src="http://s0.wp.com/latex.php?latex=m2&amp;bg=fff&amp;fg=444444&amp;s=0" title="m2"/> of the indicial equation.<br/>
+    3.  If <img alt="m1 - m2" class="latex" src="http://s0.wp.com/latex.php?latex=m1+-+m2&amp;bg=fff&amp;fg=444444&amp;s=0" title="m1 - m2"/> is a non integer there exists two series solutions. If<br/>
+        <img alt="m1 = m2" class="latex" src="http://s0.wp.com/latex.php?latex=m1+%3D+m2&amp;bg=fff&amp;fg=444444&amp;s=0" title="m1 = m2"/>, there exists only one solution. If <img alt="m1 - m2" class="latex" src="http://s0.wp.com/latex.php?latex=m1+-+m2&amp;bg=fff&amp;fg=444444&amp;s=0" title="m1 - m2"/> is an integer,<br/>
+        then the existence of one solution is confirmed. The other solution may<br/>
+        or may not exist.</p>
+<p>    The power series solution is of the form <img alt="x^{m}\sum_{n=0}^\infty a_{n}x^n" class="latex" src="http://s0.wp.com/latex.php?latex=x%5E%7Bm%7D%5Csum_%7Bn%3D0%7D%5E%5Cinfty+a_%7Bn%7Dx%5En&amp;bg=fff&amp;fg=444444&amp;s=0" title="x^{m}\sum_{n=0}^\infty a_{n}x^n"/>. The<br/>
+    coefficients are determined by the following recurrence relation.<br/>
+    <img alt="a_{n} = -\frac{\sum_{k=0}^{n-1} q_{n-k} + (m + k)p_{n-k}}{f(m + n)}" class="latex" src="http://s0.wp.com/latex.php?latex=a_%7Bn%7D+%3D+-%5Cfrac%7B%5Csum_%7Bk%3D0%7D%5E%7Bn-1%7D+q_%7Bn-k%7D+%2B+%28m+%2B+k%29p_%7Bn-k%7D%7D%7Bf%28m+%2B+n%29%7D&amp;bg=fff&amp;fg=444444&amp;s=0" title="a_{n} = -\frac{\sum_{k=0}^{n-1} q_{n-k} + (m + k)p_{n-k}}{f(m + n)}"/>. For the case<br/>
+    in which <img alt="m1 - m2" class="latex" src="http://s0.wp.com/latex.php?latex=m1+-+m2&amp;bg=fff&amp;fg=444444&amp;s=0" title="m1 - m2"/> is an integer, it can be seen from the recurrence relation<br/>
+    that for the lower root <img alt="m" class="latex" src="http://s0.wp.com/latex.php?latex=m&amp;bg=fff&amp;fg=444444&amp;s=0" title="m"/>, when <img alt="n" class="latex" src="http://s0.wp.com/latex.php?latex=n&amp;bg=fff&amp;fg=444444&amp;s=0" title="n"/> equals the difference of both the<br/>
+    roots, the denominator becomes zero. So if the numerator is not equal to zero,<br/>
+    a second series solution exists. (Oh and by the way I just copy – pasted the docstring for the<br/>
+    last part, because I was lazy to write the whole thing again <img alt=":P" class="wp-smiley" src="http://s2.wp.com/wp-includes/images/smilies/icon_razz.gif"/> )</p>
+<pre class="brush: python; title: ; notranslate">    eq = x**2*(f(x).diff(x, 2)) - 3*x*(f(x).diff(x)) + (4*x + 4)*f(x)  # One solution
+    pprint(dsolve(eq))
+                ⎛      3                 ⎞        
+              2 ⎜  16⋅x       2          ⎟    ⎛ 6⎞
+   f(x) = C₀⋅x ⋅⎜- ───── + 4⋅x  - 4⋅x + 1⎟ + O⎝x ⎠
+                ⎝    9                   ⎠  
+    eq = x**2*(f(x).diff(x, 2)) - x**2*(f(x).diff(x)) + (
+        x**2 - 2)*f(x)  # Two solutions
+             ⎛    6      5    4    2        ⎞                                    
+             ⎜   x    3⋅x    x    x    x    ⎟                                    
+          C₁⋅⎜- ─── - ──── - ── + ── + ─ + 1⎟         ⎛   3    2        ⎞        
+             ⎝  720    80    8    2    2    ⎠       2 ⎜  x    x    x    ⎟    ⎛ 6⎞
+   f(x) = ─────────────────────────────────── + C₀⋅x ⋅⎜- ── + ── + ─ + 1⎟ + O⎝x ⎠
+                           x                          ⎝  60   20   2    ⎠  
+    </pre>
+<p>Anyway, that sums up my official GSoC work. Now that I just need to address comments made on my PR which is at, <a href="https://github.com/sympy/sympy/pull/2395" rel="nofollow">https://github.com/sympy/sympy/pull/2395</a> . And I just realised that I have my exams coming up the next week, and its been a while since I touched my books (and gone to classes), and thats not a good thing. So have to catch up there. Seems like my whole life is about catching up.</p>
+<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/manojbits.wordpress.com/746/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/manojbits.wordpress.com/746/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=manojbits.wordpress.com&amp;blog=31971756&amp;post=746&amp;subd=manojbits&amp;ref=&amp;feed=1" width="1"/></div>
+    </content>
+    <updated>2013-09-06T17:13:24Z</updated>
+    <category term="SymPy"/>
+    <category term="differential"/>
+    <category term="differential equations"/>
+    <category term="frobenius"/>
+    <category term="gsoc"/>
+    <category term="gsoc2013"/>
+    <category term="ode"/>
+    <category term="power series"/>
+    <category term="python"/>
+    <category term="sympy."/>
+    <author>
+      <name>Manoj Kumar</name>
+    </author>
+    <source>
+      <id>http://manojbits.wordpress.com</id>
+      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
+      <link href="http://manojbits.wordpress.com/category/sympy-2/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://manojbits.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://manojbits.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <subtitle>My perspective of things</subtitle>
+      <title>Perspective » SymPy</title>
+      <updated>2013-09-06T17:20:28Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en">
     <id>http://geekiology.wordpress.com/?p=410</id>
@@ -51,7 +171,7 @@ Cases like above where giving incorrect answers before, have a solution now.</p>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-09-03T13:20:32Z</updated>
+      <updated>2013-09-06T17:20:27Z</updated>
     </source>
   </entry>
 
@@ -84,7 +204,7 @@ Cases like above where giving incorrect answers before, have a solution now.</p>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>-Sachin Joglekar-</subtitle>
       <title>Dream. Think. Code.</title>
-      <updated>2013-09-01T15:01:30Z</updated>
+      <updated>2013-09-06T09:35:19Z</updated>
     </source>
   </entry>
 
@@ -114,7 +234,7 @@ Cases like above where giving incorrect answers before, have a solution now.</p>
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-09-03T13:20:37Z</updated>
+      <updated>2013-09-06T17:20:31Z</updated>
     </source>
   </entry>
 
@@ -160,7 +280,7 @@ We define the <em>denominator </em><img alt="\mathrm{den}(f)" class="latex" src=
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-09-03T13:20:37Z</updated>
+      <updated>2013-09-06T17:20:31Z</updated>
     </source>
   </entry>
 
@@ -209,7 +329,7 @@ We define the <em>denominator </em><img alt="\mathrm{den}(f)" class="latex" src=
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2013-09-03T13:20:35Z</updated>
+      <updated>2013-09-06T17:20:29Z</updated>
     </source>
   </entry>
 
@@ -243,7 +363,7 @@ We define the <em>denominator </em><img alt="\mathrm{den}(f)" class="latex" src=
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-09-03T13:20:36Z</updated>
+      <updated>2013-09-06T17:20:31Z</updated>
     </source>
   </entry>
 
@@ -281,7 +401,7 @@ We define the <em>denominator </em><img alt="\mathrm{den}(f)" class="latex" src=
       <link href="http://musingsofafriend.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>The greatest WordPress.com site in all the land!</subtitle>
       <title>musings of a friend - Prasoon Shukla » SymPy</title>
-      <updated>2013-09-03T13:20:36Z</updated>
+      <updated>2013-09-06T17:20:30Z</updated>
     </source>
   </entry>
 
@@ -352,7 +472,7 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My perspective of things</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-09-03T13:20:33Z</updated>
+      <updated>2013-09-06T17:20:28Z</updated>
     </source>
   </entry>
 
@@ -382,7 +502,7 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-09-03T13:20:36Z</updated>
+      <updated>2013-09-06T17:20:31Z</updated>
     </source>
   </entry>
 
@@ -426,7 +546,7 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-09-03T13:20:07Z</updated>
+      <updated>2013-09-06T17:20:08Z</updated>
     </source>
   </entry>
 
@@ -462,7 +582,7 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My perspective of things</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-09-03T13:20:33Z</updated>
+      <updated>2013-09-06T17:20:28Z</updated>
     </source>
   </entry>
 
@@ -495,7 +615,7 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>-Sachin Joglekar-</subtitle>
       <title>Dream. Think. Code.</title>
-      <updated>2013-09-01T15:01:30Z</updated>
+      <updated>2013-09-06T09:35:19Z</updated>
     </source>
   </entry>
 
@@ -534,7 +654,7 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
       <link href="http://musingsofafriend.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>The greatest WordPress.com site in all the land!</subtitle>
       <title>musings of a friend - Prasoon Shukla » SymPy</title>
-      <updated>2013-09-03T13:20:36Z</updated>
+      <updated>2013-09-06T17:20:30Z</updated>
     </source>
   </entry>
 
@@ -588,7 +708,7 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2013-09-03T13:20:35Z</updated>
+      <updated>2013-09-06T17:20:29Z</updated>
     </source>
   </entry>
 
@@ -621,7 +741,7 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-09-03T13:20:36Z</updated>
+      <updated>2013-09-06T17:20:31Z</updated>
     </source>
   </entry>
 
@@ -652,7 +772,7 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-09-03T13:20:37Z</updated>
+      <updated>2013-09-06T17:20:31Z</updated>
     </source>
   </entry>
 
@@ -773,7 +893,7 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2013-09-03T13:20:23Z</updated>
+      <updated>2013-09-06T17:20:19Z</updated>
     </source>
   </entry>
 
@@ -870,7 +990,7 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>-Sachin Joglekar-</subtitle>
       <title>Dream. Think. Code.</title>
-      <updated>2013-09-01T15:01:30Z</updated>
+      <updated>2013-09-06T09:35:19Z</updated>
     </source>
   </entry>
 
@@ -923,7 +1043,7 @@ Why? Well, without going too much into detail, the solution to this PDE, <img al
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My perspective of things</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-09-03T13:20:33Z</updated>
+      <updated>2013-09-06T17:20:28Z</updated>
     </source>
   </entry>
 
@@ -971,7 +1091,7 @@ Why? Well, without going too much into detail, the solution to this PDE, <img al
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-09-03T13:20:07Z</updated>
+      <updated>2013-09-06T17:20:08Z</updated>
     </source>
   </entry>
 
@@ -1008,7 +1128,7 @@ Why? Well, without going too much into detail, the solution to this PDE, <img al
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-09-03T13:20:36Z</updated>
+      <updated>2013-09-06T17:20:31Z</updated>
     </source>
   </entry>
 
@@ -1042,7 +1162,7 @@ PS2 : I am finally 20 !! <img alt=":D" class="wp-smiley" src="http://s0.wp.com/w
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-09-03T13:20:32Z</updated>
+      <updated>2013-09-06T17:20:27Z</updated>
     </source>
   </entry>
 
@@ -1106,7 +1226,7 @@ PS2 : I am finally 20 !! <img alt=":D" class="wp-smiley" src="http://s0.wp.com/w
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-09-03T13:20:37Z</updated>
+      <updated>2013-09-06T17:20:31Z</updated>
     </source>
   </entry>
 
@@ -1139,7 +1259,7 @@ PS2 : I am finally 20 !! <img alt=":D" class="wp-smiley" src="http://s0.wp.com/w
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>-Sachin Joglekar-</subtitle>
       <title>Dream. Think. Code.</title>
-      <updated>2013-09-01T15:01:30Z</updated>
+      <updated>2013-09-06T09:35:19Z</updated>
     </source>
   </entry>
 
@@ -1178,7 +1298,7 @@ PS2 : I am finally 20 !! <img alt=":D" class="wp-smiley" src="http://s0.wp.com/w
       <link href="http://musingsofafriend.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>The greatest WordPress.com site in all the land!</subtitle>
       <title>musings of a friend - Prasoon Shukla » SymPy</title>
-      <updated>2013-09-03T13:20:36Z</updated>
+      <updated>2013-09-06T17:20:30Z</updated>
     </source>
   </entry>
 
@@ -1232,7 +1352,7 @@ i] chi (Finds a polynomial <img alt="\chi" class="latex" src="http://s0.wp.com/l
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My perspective of things</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-09-03T13:20:33Z</updated>
+      <updated>2013-09-06T17:20:28Z</updated>
     </source>
   </entry>
 
@@ -1326,7 +1446,7 @@ i] chi (Finds a polynomial <img alt="\chi" class="latex" src="http://s0.wp.com/l
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2013-09-03T13:20:35Z</updated>
+      <updated>2013-09-06T17:20:29Z</updated>
     </source>
   </entry>
 
@@ -1361,7 +1481,7 @@ i] chi (Finds a polynomial <img alt="\chi" class="latex" src="http://s0.wp.com/l
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-09-03T13:20:36Z</updated>
+      <updated>2013-09-06T17:20:31Z</updated>
     </source>
   </entry>
 
@@ -1438,7 +1558,7 @@ i] chi (Finds a polynomial <img alt="\chi" class="latex" src="http://s0.wp.com/l
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2013-09-03T13:20:35Z</updated>
+      <updated>2013-09-06T17:20:29Z</updated>
     </source>
   </entry>
 
@@ -1468,7 +1588,7 @@ i] chi (Finds a polynomial <img alt="\chi" class="latex" src="http://s0.wp.com/l
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-09-03T13:20:37Z</updated>
+      <updated>2013-09-06T17:20:31Z</updated>
     </source>
   </entry>
 
@@ -1510,7 +1630,7 @@ i] chi (Finds a polynomial <img alt="\chi" class="latex" src="http://s0.wp.com/l
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My perspective of things</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-09-03T13:20:33Z</updated>
+      <updated>2013-09-06T17:20:28Z</updated>
     </source>
   </entry>
 
@@ -1543,7 +1663,7 @@ i] chi (Finds a polynomial <img alt="\chi" class="latex" src="http://s0.wp.com/l
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>-Sachin Joglekar-</subtitle>
       <title>Dream. Think. Code.</title>
-      <updated>2013-09-01T15:01:30Z</updated>
+      <updated>2013-09-06T09:35:19Z</updated>
     </source>
   </entry>
 
@@ -1579,7 +1699,7 @@ which I’m quite happy with. I though that I was going to have to use a loop, b
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-09-03T13:20:36Z</updated>
+      <updated>2013-09-06T17:20:31Z</updated>
     </source>
   </entry>
 
@@ -1776,7 +1896,7 @@ Signing- off <img alt=":)" class="wp-smiley" src="http://s0.wp.com/wp-includes/i
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-09-03T13:20:32Z</updated>
+      <updated>2013-09-06T17:20:27Z</updated>
     </source>
   </entry>
 
@@ -1808,7 +1928,7 @@ Signing- off <img alt=":)" class="wp-smiley" src="http://s0.wp.com/wp-includes/i
       <link href="http://musingsofafriend.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>The greatest WordPress.com site in all the land!</subtitle>
       <title>musings of a friend - Prasoon Shukla » SymPy</title>
-      <updated>2013-09-03T13:20:36Z</updated>
+      <updated>2013-09-06T17:20:30Z</updated>
     </source>
   </entry>
 
@@ -1843,7 +1963,7 @@ The good news is that now <code>bin/test</code> passes when <code>heugcd</code> 
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-09-03T13:20:37Z</updated>
+      <updated>2013-09-06T17:20:31Z</updated>
     </source>
   </entry>
 
@@ -1876,7 +1996,7 @@ The good news is that now <code>bin/test</code> passes when <code>heugcd</code> 
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>-Sachin Joglekar-</subtitle>
       <title>Dream. Think. Code.</title>
-      <updated>2013-09-01T15:01:30Z</updated>
+      <updated>2013-09-06T09:35:19Z</updated>
     </source>
   </entry>
 
@@ -1915,7 +2035,7 @@ The good news is that now <code>bin/test</code> passes when <code>heugcd</code> 
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My perspective of things</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-09-03T13:20:33Z</updated>
+      <updated>2013-09-06T17:20:28Z</updated>
     </source>
   </entry>
 
@@ -1965,7 +2085,7 @@ The good news is that now <code>bin/test</code> passes when <code>heugcd</code> 
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2013-09-03T13:20:35Z</updated>
+      <updated>2013-09-06T17:20:29Z</updated>
     </source>
   </entry>
 
@@ -2008,7 +2128,7 @@ and type F is very similar.</p>
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-09-03T13:20:36Z</updated>
+      <updated>2013-09-06T17:20:31Z</updated>
     </source>
   </entry>
 
@@ -2139,7 +2259,7 @@ Another new tool I learned to use this week was Sphinx. I like the html document
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2013-09-03T13:20:37Z</updated>
+      <updated>2013-09-06T17:20:31Z</updated>
     </source>
   </entry>
 
@@ -2172,7 +2292,7 @@ Another new tool I learned to use this week was Sphinx. I like the html document
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>-Sachin Joglekar-</subtitle>
       <title>Dream. Think. Code.</title>
-      <updated>2013-09-01T15:01:30Z</updated>
+      <updated>2013-09-06T09:35:19Z</updated>
     </source>
   </entry>
 
@@ -2294,7 +2414,7 @@ Another new tool I learned to use this week was Sphinx. I like the html document
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-09-03T13:20:32Z</updated>
+      <updated>2013-09-06T17:20:27Z</updated>
     </source>
   </entry>
 
@@ -2368,7 +2488,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My perspective of things</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2013-09-03T13:20:33Z</updated>
+      <updated>2013-09-06T17:20:28Z</updated>
     </source>
   </entry>
 
@@ -2401,7 +2521,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2013-09-03T13:20:35Z</updated>
+      <updated>2013-09-06T17:20:29Z</updated>
     </source>
   </entry>
 
@@ -2438,7 +2558,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2013-09-03T13:20:36Z</updated>
+      <updated>2013-09-06T17:20:31Z</updated>
     </source>
   </entry>
 
@@ -2541,7 +2661,7 @@ I know this is a lot of talking and nothing like psudeo code, though we can draw
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2013-09-03T13:20:32Z</updated>
+      <updated>2013-09-06T17:20:27Z</updated>
     </source>
   </entry>
 
@@ -2607,40 +2727,7 @@ fab vagrant release
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2013-09-03T13:20:07Z</updated>
-    </source>
-  </entry>
-
-  <entry>
-    <id>tag:blogger.com,1999:blog-2736678015821545355.post-83592426202169687</id>
-    <link href="http://sympymatrix.blogspot.com/feeds/83592426202169687/comments/default" rel="replies" type="application/atom+xml"/>
-    <link href="http://sympymatrix.blogspot.com/2013/07/profile-results-of-dense-matrix.html#comment-form" rel="replies" type="text/html"/>
-    <link href="http://www.blogger.com/feeds/2736678015821545355/posts/default/83592426202169687" rel="edit" type="application/atom+xml"/>
-    <link href="http://www.blogger.com/feeds/2736678015821545355/posts/default/83592426202169687" rel="self" type="application/atom+xml"/>
-    <link href="http://sympymatrix.blogspot.com/2013/07/profile-results-of-dense-matrix.html" rel="alternate" type="text/html"/>
-    <title>Profile results of Dense Matrix</title>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><div dir="ltr" style="text-align: left;">Seems Planet is now fine. Anyways, here are some profiling results of arithmetic operations of dense matrix. I am working on level 0 currently. [1]<br/><br/>The profile results will be like this- for each operation, the first one is the profile of previous implementation, the second is the profile of new ones and the third is the profile of new one *with last call to Matrix removed*.<br/>For example, I am doing manipulations by first converting matrices to lists. Suppose "result" is the resultant list of the matrix. Then second profiles will be the implementations with returns Matrix(result) and the third ones will return just result.<br/><br/>All the third profiles will be discussed later.<br/><br/><br/>a = Matrix([[3, 4, 5], [6, 7, 8], [9, 10, 11]])<br/>b = Matrix([[4, 5, 6], [7, 8, 9], [10, 11, 12]])<br/><br/><b><br/></b><b>For addition:</b><br/><b><br/></b><br/>cProfile.run("a + b")<br/>         180 function calls in 0.000 seconds<br/><br/>   Ordered by: standard name<br/><br/>   ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br/>        1    0.000    0.000    0.000    0.000 &lt;string&gt;:1(&lt;module&gt;)<br/>        3    0.000    0.000    0.000    0.000 compatibility.py:19(iterable)<br/>        2    0.000    0.000    0.000    0.000 compatibility.py:543(as_int)<br/>        3    0.000    0.000    0.000    0.000 compatibility.py:64(is_sequence)<br/>        1    0.000    0.000    0.000    0.000 decorators.py:105(binary_op_wrapper)<br/>        2    0.000    0.000    0.000    0.000 dense.py:101(tolist)<br/>        1    0.000    0.000    0.000    0.000 dense.py:532(__add__)<br/>        1    0.000    0.000    0.000    0.000 dense.py:573(_force_mutable)<br/>        2    0.000    0.000    0.000    0.000 dense.py:588(_new)<br/>        1    0.000    0.000    0.000    0.000 dense.py:600(as_mutable)<br/>        9    0.000    0.000    0.000    0.000 matrices.py:152(&lt;lambda&gt;)<br/>        1    0.000    0.000    0.000    0.000 matrices.py:283(copy)<br/>        1    0.000    0.000    0.000    0.000 matrices.py:3537(classof)<br/>        2    0.000    0.000    0.000    0.000 matrices.py:383(__len__)<br/>        3    0.000    0.000    0.000    0.000 matrices.py:390(shape)<br/>        1    0.000    0.000    0.000    0.000 matrices.py:508(__add__)<br/>        9    0.000    0.000    0.000    0.000 matrices.py:519(&lt;lambda&gt;)<br/>        2    0.000    0.000    0.000    0.000 matrices.py:81(_handle_creation_inputs)<br/>        9    0.000    0.000    0.000    0.000 numbers.py:1522(__new__)<br/>        9    0.000    0.000    0.000    0.000 numbers.py:1588(__add__)<br/>       18    0.000    0.000    0.000    0.000 sympify.py:50(sympify)<br/>        2    0.000    0.000    0.000    0.000 {built-in method __new__ of type object at 0x10b8fc248}<br/>        1    0.000    0.000    0.000    0.000 {callable}<br/>        2    0.000    0.000    0.000    0.000 {getattr}<br/>        5    0.000    0.000    0.000    0.000 {hasattr}<br/>       36    0.000    0.000    0.000    0.000 {isinstance}<br/>        3    0.000    0.000    0.000    0.000 {iter}<br/>       22    0.000    0.000    0.000    0.000 {len}<br/>        4    0.000    0.000    0.000    0.000 {map}<br/>        3    0.000    0.000    0.000    0.000 {method 'add' of 'set' objects}<br/>       12    0.000    0.000    0.000    0.000 {method 'append' of 'list' objects}<br/>        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}<br/>        1    0.000    0.000    0.000    0.000 {method 'pop' of 'set' objects}<br/>        7    0.000    0.000    0.000    0.000 {range}<br/><br/><br/>cProfile.run("_add(a, b, ZZ)")<br/>         171 function calls in 0.000 seconds<br/><br/>   Ordered by: standard name<br/><br/>   ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br/>        1    0.000    0.000    0.000    0.000 &lt;string&gt;:1(&lt;module&gt;)<br/>        2    0.000    0.000    0.000    0.000 compatibility.py:19(iterable)<br/>        2    0.000    0.000    0.000    0.000 compatibility.py:64(is_sequence)<br/>        2    0.000    0.000    0.000    0.000 dense.py:101(tolist)<br/>        1    0.000    0.000    0.000    0.000 dense.py:588(_new)<br/>        1    0.000    0.000    0.000    0.000 dense.py:597(__new__)<br/>        3    0.000    0.000    0.000    0.000 densetools.py:15(_addr)<br/>        1    0.000    0.000    0.000    0.000 densetools.py:3(_add)<br/>       18    0.000    0.000    0.000    0.000 domain.py:64(new)<br/>       18    0.000    0.000    0.000    0.000 domain.py:67(__call__)<br/>        2    0.000    0.000    0.000    0.000 matrices.py:383(__len__)<br/>        1    0.000    0.000    0.000    0.000 matrices.py:81(_handle_creation_inputs)<br/>        9    0.000    0.000    0.000    0.000 numbers.py:1522(__new__)<br/>       18    0.000    0.000    0.000    0.000 numbers.py:1552(__int__)<br/>        9    0.000    0.000    0.000    0.000 sympify.py:50(sympify)<br/>        1    0.000    0.000    0.000    0.000 {built-in method __new__ of type object at 0x10b8fc248}<br/>        3    0.000    0.000    0.000    0.000 {hasattr}<br/>       17    0.000    0.000    0.000    0.000 {isinstance}<br/>        2    0.000    0.000    0.000    0.000 {iter}<br/>       25    0.000    0.000    0.000    0.000 {len}<br/>        3    0.000    0.000    0.000    0.000 {method 'add' of 'set' objects}<br/>       24    0.000    0.000    0.000    0.000 {method 'append' of 'list' objects}<br/>        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}<br/>        1    0.000    0.000    0.000    0.000 {method 'pop' of 'set' objects}<br/>        6    0.000    0.000    0.000    0.000 {range}<br/><br/><br/>cProfile.run("_add(a, b, ZZ)")<br/>         90 function calls in 0.000 seconds<br/><br/>   Ordered by: standard name<br/><br/>   ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br/>        1    0.000    0.000    0.000    0.000 &lt;string&gt;:1(&lt;module&gt;)<br/>        2    0.000    0.000    0.000    0.000 dense.py:101(tolist)<br/>        3    0.000    0.000    0.000    0.000 densetools.py:15(_addr)<br/>        1    0.000    0.000    0.000    0.000 densetools.py:3(_add)<br/>       18    0.000    0.000    0.000    0.000 domain.py:64(new)<br/>       18    0.000    0.000    0.000    0.000 domain.py:67(__call__)<br/>        2    0.000    0.000    0.000    0.000 matrices.py:383(__len__)<br/>       18    0.000    0.000    0.000    0.000 numbers.py:1552(__int__)<br/>       12    0.000    0.000    0.000    0.000 {len}<br/>       12    0.000    0.000    0.000    0.000 {method 'append' of 'list' objects}<br/>        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}<br/>        2    0.000    0.000    0.000    0.000 {range}<br/><div><br/></div><br/>Conclusion: Improvement is zilch.<br/><br/><b>For Negation:</b><br/><br/><br/>cProfile.run("-a")<br/>         104 function calls (103 primitive calls) in 0.000 seconds<br/><br/>   Ordered by: standard name<br/><br/>   ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br/>        1    0.000    0.000    0.000    0.000 &lt;string&gt;:1(&lt;module&gt;)<br/>        1    0.000    0.000    0.000    0.000 compatibility.py:19(iterable)<br/>        2    0.000    0.000    0.000    0.000 compatibility.py:543(as_int)<br/>        1    0.000    0.000    0.000    0.000 compatibility.py:64(is_sequence)<br/>      2/1    0.000    0.000    0.000    0.000 decorators.py:105(binary_op_wrapper)<br/>        1    0.000    0.000    0.000    0.000 dense.py:548(__mul__)<br/>        1    0.000    0.000    0.000    0.000 dense.py:552(__rmul__)<br/>        2    0.000    0.000    0.000    0.000 dense.py:573(_force_mutable)<br/>        1    0.000    0.000    0.000    0.000 dense.py:588(_new)<br/>        9    0.000    0.000    0.000    0.000 matrices.py:152(&lt;lambda&gt;)<br/>        1    0.000    0.000    0.000    0.000 matrices.py:414(__mul__)<br/>        9    0.000    0.000    0.000    0.000 matrices.py:468(&lt;lambda&gt;)<br/>        1    0.000    0.000    0.000    0.000 matrices.py:470(__rmul__)<br/>        1    0.000    0.000    0.000    0.000 matrices.py:532(__neg__)<br/>        1    0.000    0.000    0.000    0.000 matrices.py:81(_handle_creation_inputs)<br/>        9    0.000    0.000    0.000    0.000 numbers.py:1522(__new__)<br/>        9    0.000    0.000    0.000    0.000 numbers.py:1612(__mul__)<br/>        9    0.000    0.000    0.000    0.000 sympify.py:50(sympify)<br/>        1    0.000    0.000    0.000    0.000 {built-in method __new__ of type object at 0x10a1d9248}<br/>        1    0.000    0.000    0.000    0.000 {callable}<br/>        4    0.000    0.000    0.000    0.000 {getattr}<br/>        5    0.000    0.000    0.000    0.000 {hasattr}<br/>       21    0.000    0.000    0.000    0.000 {isinstance}<br/>        1    0.000    0.000    0.000    0.000 {iter}<br/>        7    0.000    0.000    0.000    0.000 {len}<br/>        2    0.000    0.000    0.000    0.000 {map}<br/>        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}<br/><br/><br/>cProfile.run("_neg(a, ZZ)")<br/>         130 function calls in 0.000 seconds<br/><br/>   Ordered by: standard name<br/><br/>   ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br/>        1    0.000    0.000    0.000    0.000 &lt;string&gt;:1(&lt;module&gt;)<br/>        2    0.000    0.000    0.000    0.000 compatibility.py:19(iterable)<br/>        2    0.000    0.000    0.000    0.000 compatibility.py:64(is_sequence)<br/>        1    0.000    0.000    0.000    0.000 dense.py:101(tolist)<br/>        1    0.000    0.000    0.000    0.000 dense.py:588(_new)<br/>        1    0.000    0.000    0.000    0.000 dense.py:597(__new__)<br/>        1    0.000    0.000    0.000    0.000 densetools.py:34(_neg)<br/>        3    0.000    0.000    0.000    0.000 densetools.py:42(_negr)<br/>        9    0.000    0.000    0.000    0.000 domain.py:64(new)<br/>        9    0.000    0.000    0.000    0.000 domain.py:67(__call__)<br/>        1    0.000    0.000    0.000    0.000 matrices.py:383(__len__)<br/>        1    0.000    0.000    0.000    0.000 matrices.py:81(_handle_creation_inputs)<br/>        9    0.000    0.000    0.000    0.000 numbers.py:1522(__new__)<br/>        9    0.000    0.000    0.000    0.000 numbers.py:1552(__int__)<br/>        9    0.000    0.000    0.000    0.000 sympify.py:50(sympify)<br/>        1    0.000    0.000    0.000    0.000 {built-in method __new__ of type object at 0x10a1d9248}<br/>        3    0.000    0.000    0.000    0.000 {hasattr}<br/>       17    0.000    0.000    0.000    0.000 {isinstance}<br/>        2    0.000    0.000    0.000    0.000 {iter}<br/>       14    0.000    0.000    0.000    0.000 {len}<br/>        3    0.000    0.000    0.000    0.000 {method 'add' of 'set' objects}<br/>       24    0.000    0.000    0.000    0.000 {method 'append' of 'list' objects}<br/>        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}<br/>        1    0.000    0.000    0.000    0.000 {method 'pop' of 'set' objects}<br/>        5    0.000    0.000    0.000    0.000 {range}<br/><br/><br/>cProfile.run("_neg(a, ZZ)")<br/>         49 function calls in 0.000 seconds<br/><br/>   Ordered by: standard name<br/><br/>   ncalls  tottime  percall  cumtime  percall filename:lineno(function)<br/>        1    0.000    0.000    0.000    0.000 &lt;string&gt;:1(&lt;module&gt;)<br/>        1    0.000    0.000    0.000    0.000 dense.py:101(tolist)<br/>        1    0.000    0.000    0.000    0.000 densetools.py:34(_neg)<br/>        3    0.000    0.000    0.000    0.000 densetools.py:42(_negr)<br/>        9    0.000    0.000    0.000    0.000 domain.py:64(new)<br/>        9    0.000    0.000    0.000    0.000 domain.py:67(__call__)<br/>        1    0.000    0.000    0.000    0.000 matrices.py:383(__len__)<br/>        9    0.000    0.000    0.000    0.000 numbers.py:1552(__int__)<br/>        1    0.000    0.000    0.000    0.000 {len}<br/>       12    0.000    0.000    0.000    0.000 {method 'append' of 'list' objects}<br/>        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}<br/>        1    0.000    0.000    0.000    0.000 {range}<br/><div><br/></div><div><br/></div><div>Conclusion: slightly slower.</div><div><br/></div><div><b>For Multiplication Matrix * Matrix:</b></div><div><br/></div><div><div>cProfile.run("a*b")</div><div>         491 function calls in 0.001 seconds</div><div><br/></div><div>   Ordered by: standard name</div><div><br/></div><div>   ncalls  tottime  percall  cumtime  percall filename:lineno(function)</div><div>        1    0.000    0.000    0.001    0.001 &lt;string&gt;:1(&lt;module&gt;)</div><div>       29    0.000    0.000    0.000    0.000 basic.py:81(__new__)</div><div>        2    0.000    0.000    0.000    0.000 compatibility.py:19(iterable)</div><div>        6    0.000    0.000    0.000    0.000 compatibility.py:543(as_int)</div><div>        2    0.000    0.000    0.000    0.000 compatibility.py:64(is_sequence)</div><div>        1    0.000    0.000    0.001    0.001 decorators.py:105(binary_op_wrapper)</div><div>        2    0.000    0.000    0.000    0.000 dense.py:101(tolist)</div><div>        1    0.000    0.000    0.000    0.000 dense.py:210(_eval_transpose)</div><div>        1    0.000    0.000    0.001    0.001 dense.py:548(__mul__)</div><div>        1    0.000    0.000    0.000    0.000 dense.py:573(_force_mutable)</div><div>        3    0.000    0.000    0.001    0.000 dense.py:588(_new)</div><div>        1    0.000    0.000    0.000    0.000 dense.py:600(as_mutable)</div><div>       18    0.000    0.000    0.000    0.000 matrices.py:152(&lt;lambda&gt;)</div><div>        1    0.000    0.000    0.000    0.000 matrices.py:283(copy)</div><div>        1    0.000    0.000    0.000    0.000 matrices.py:298(transpose)</div><div>        1    0.000    0.000    0.000    0.000 matrices.py:3537(classof)</div><div>        2    0.000    0.000    0.000    0.000 matrices.py:383(__len__)</div><div>        1    0.000    0.000    0.001    0.001 matrices.py:414(__mul__)</div><div>        9    0.000    0.000    0.000    0.000 matrices.py:463(&lt;lambda&gt;)</div><div>       18    0.000    0.000    0.000    0.000 matrices.py:464(&lt;lambda&gt;)</div><div>        3    0.000    0.000    0.001    0.000 matrices.py:81(_handle_creation_inputs)</div><div>       54    0.000    0.000    0.000    0.000 numbers.py:1522(__new__)</div><div>       18    0.000    0.000    0.000    0.000 numbers.py:1588(__add__)</div><div>       27    0.000    0.000    0.000    0.000 numbers.py:1612(__mul__)</div><div>        9    0.000    0.000    0.000    0.000 numbers.py:1679(__index__)</div><div>       36    0.000    0.000    0.000    0.000 sympify.py:50(sympify)</div><div>        9    0.000    0.000    0.000    0.000 {_functools.reduce}</div><div>       32    0.000    0.000    0.000    0.000 {built-in method __new__ of type object at 0x10ded7248}</div><div>        3    0.000    0.000    0.000    0.000 {callable}</div><div>        2    0.000    0.000    0.000    0.000 {getattr}</div><div>        3    0.000    0.000    0.000    0.000 {hasattr}</div><div>      146    0.000    0.000    0.000    0.000 {isinstance}</div><div>        2    0.000    0.000    0.000    0.000 {iter}</div><div>       21    0.000    0.000    0.000    0.000 {len}</div><div>        2    0.000    0.000    0.000    0.000 {map}</div><div>        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}</div><div>        6    0.000    0.000    0.000    0.000 {method 'extend' of 'list' objects}</div><div>        7    0.000    0.000    0.000    0.000 {range}</div><div>        9    0.000    0.000    0.000    0.000 {zip}</div><div><br/></div><div><br/></div><div>cProfile.run("_mulmatmat(a, b, ZZ)")</div><div>         285 function calls in 0.000 seconds</div><div><br/></div><div>   Ordered by: standard name</div><div><br/></div><div>   ncalls  tottime  percall  cumtime  percall filename:lineno(function)</div><div>        1    0.000    0.000    0.000    0.000 &lt;string&gt;:1(&lt;module&gt;)</div><div>        2    0.000    0.000    0.000    0.000 compatibility.py:19(iterable)</div><div>        2    0.000    0.000    0.000    0.000 compatibility.py:64(is_sequence)</div><div>        2    0.000    0.000    0.000    0.000 dense.py:101(tolist)</div><div>        1    0.000    0.000    0.000    0.000 dense.py:588(_new)</div><div>        1    0.000    0.000    0.000    0.000 dense.py:597(__new__)</div><div>        1    0.000    0.000    0.000    0.000 densetools.py:49(_mulmatmat)</div><div>        9    0.000    0.000    0.000    0.000 densetools.py:69(_mulrc)</div><div>       54    0.000    0.000    0.000    0.000 domain.py:64(new)</div><div>       54    0.000    0.000    0.000    0.000 domain.py:67(__call__)</div><div>        2    0.000    0.000    0.000    0.000 matrices.py:383(__len__)</div><div>        1    0.000    0.000    0.000    0.000 matrices.py:81(_handle_creation_inputs)</div><div>        9    0.000    0.000    0.000    0.000 numbers.py:1522(__new__)</div><div>       54    0.000    0.000    0.000    0.000 numbers.py:1552(__int__)</div><div>        9    0.000    0.000    0.000    0.000 sympify.py:50(sympify)</div><div>        1    0.000    0.000    0.000    0.000 {built-in method __new__ of type object at 0x10ded7248}</div><div>        3    0.000    0.000    0.000    0.000 {hasattr}</div><div>       17    0.000    0.000    0.000    0.000 {isinstance}</div><div>        2    0.000    0.000    0.000    0.000 {iter}</div><div>       24    0.000    0.000    0.000    0.000 {len}</div><div>        3    0.000    0.000    0.000    0.000 {method 'add' of 'set' objects}</div><div>       24    0.000    0.000    0.000    0.000 {method 'append' of 'list' objects}</div><div>        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}</div><div>        1    0.000    0.000    0.000    0.000 {method 'pop' of 'set' objects}</div><div>        6    0.000    0.000    0.000    0.000 {range}</div><div>        1    0.000    0.000    0.000    0.000 {zip}</div><div><br/></div><div>cProfile.run("_mulmatmat(a, b ,ZZ)")</div><div>         204 function calls in 0.000 seconds</div><div><br/></div><div>   Ordered by: standard name</div><div><br/></div><div>   ncalls  tottime  percall  cumtime  percall filename:lineno(function)</div><div>        1    0.000    0.000    0.000    0.000 &lt;string&gt;:1(&lt;module&gt;)</div><div>        2    0.000    0.000    0.000    0.000 dense.py:101(tolist)</div><div>        1    0.000    0.000    0.000    0.000 densetools.py:49(_mulmatmat)</div><div>        9    0.000    0.000    0.000    0.000 densetools.py:69(_mulrc)</div><div>       54    0.000    0.000    0.000    0.000 domain.py:64(new)</div><div>       54    0.000    0.000    0.000    0.000 domain.py:67(__call__)</div><div>        2    0.000    0.000    0.000    0.000 matrices.py:383(__len__)</div><div>       54    0.000    0.000    0.000    0.000 numbers.py:1552(__int__)</div><div>       11    0.000    0.000    0.000    0.000 {len}</div><div>       12    0.000    0.000    0.000    0.000 {method 'append' of 'list' objects}</div><div>        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}</div><div>        2    0.000    0.000    0.000    0.000 {range}</div><div>        1    0.000    0.000    0.000    0.000 {zip}</div></div><div><br/></div><div>Conclusion: Definitely some improvement.</div><div><br/></div><div><b>For Transpose: </b></div><div><b><br/></b></div><div><div>cProfile.run("a.transpose()")</div><div>         45 function calls in 0.000 seconds</div><div><br/></div><div>   Ordered by: standard name</div><div><br/></div><div>   ncalls  tottime  percall  cumtime  percall filename:lineno(function)</div><div>        1    0.000    0.000    0.000    0.000 &lt;string&gt;:1(&lt;module&gt;)</div><div>        1    0.000    0.000    0.000    0.000 compatibility.py:19(iterable)</div><div>        2    0.000    0.000    0.000    0.000 compatibility.py:543(as_int)</div><div>        1    0.000    0.000    0.000    0.000 compatibility.py:64(is_sequence)</div><div>        1    0.000    0.000    0.000    0.000 dense.py:210(_eval_transpose)</div><div>        1    0.000    0.000    0.000    0.000 dense.py:588(_new)</div><div>        9    0.000    0.000    0.000    0.000 matrices.py:152(&lt;lambda&gt;)</div><div>        1    0.000    0.000    0.000    0.000 matrices.py:298(transpose)</div><div>        1    0.000    0.000    0.000    0.000 matrices.py:81(_handle_creation_inputs)</div><div>        9    0.000    0.000    0.000    0.000 sympify.py:50(sympify)</div><div>        1    0.000    0.000    0.000    0.000 {built-in method __new__ of type object at 0x107365248}</div><div>        1    0.000    0.000    0.000    0.000 {callable}</div><div>        1    0.000    0.000    0.000    0.000 {hasattr}</div><div>        1    0.000    0.000    0.000    0.000 {isinstance}</div><div>        1    0.000    0.000    0.000    0.000 {iter}</div><div>        7    0.000    0.000    0.000    0.000 {len}</div><div>        1    0.000    0.000    0.000    0.000 {map}</div><div>        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}</div><div>        3    0.000    0.000    0.000    0.000 {method 'extend' of 'list' objects}</div><div>        1    0.000    0.000    0.000    0.000 {range}</div><div><br/></div><div>cProfile.run("_transpose(a, ZZ)")</div><div>         71 function calls in 0.000 seconds</div><div><br/></div><div>   Ordered by: standard name</div><div><br/></div><div>   ncalls  tottime  percall  cumtime  percall filename:lineno(function)</div><div>        1    0.000    0.000    0.000    0.000 &lt;string&gt;:1(&lt;module&gt;)</div><div>        2    0.000    0.000    0.000    0.000 compatibility.py:19(iterable)</div><div>        2    0.000    0.000    0.000    0.000 compatibility.py:64(is_sequence)</div><div>        1    0.000    0.000    0.000    0.000 dense.py:101(tolist)</div><div>        1    0.000    0.000    0.000    0.000 dense.py:588(_new)</div><div>        1    0.000    0.000    0.000    0.000 dense.py:597(__new__)</div><div>        1    0.000    0.000    0.000    0.000 densetools.py:86(_transpose)</div><div>        1    0.000    0.000    0.000    0.000 matrices.py:383(__len__)</div><div>        1    0.000    0.000    0.000    0.000 matrices.py:81(_handle_creation_inputs)</div><div>        9    0.000    0.000    0.000    0.000 sympify.py:50(sympify)</div><div>        1    0.000    0.000    0.000    0.000 {built-in method __new__ of type object at 0x107365248}</div><div>        3    0.000    0.000    0.000    0.000 {hasattr}</div><div>        8    0.000    0.000    0.000    0.000 {isinstance}</div><div>        2    0.000    0.000    0.000    0.000 {iter}</div><div>       14    0.000    0.000    0.000    0.000 {len}</div><div>        3    0.000    0.000    0.000    0.000 {method 'add' of 'set' objects}</div><div>       12    0.000    0.000    0.000    0.000 {method 'append' of 'list' objects}</div><div>        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}</div><div>        1    0.000    0.000    0.000    0.000 {method 'pop' of 'set' objects}</div><div>        5    0.000    0.000    0.000    0.000 {range}</div><div>        1    0.000    0.000    0.000    0.000 {zip}</div><div><br/></div><div><br/></div><div>cProfile.run("_transpose(a, ZZ)")</div><div>         8 function calls in 0.000 seconds</div><div><br/></div><div>   Ordered by: standard name</div><div><br/></div><div>   ncalls  tottime  percall  cumtime  percall filename:lineno(function)</div><div>        1    0.000    0.000    0.000    0.000 &lt;string&gt;:1(&lt;module&gt;)</div><div>        1    0.000    0.000    0.000    0.000 dense.py:101(tolist)</div><div>        1    0.000    0.000    0.000    0.000 densetools.py:86(_transpose)</div><div>        1    0.000    0.000    0.000    0.000 matrices.py:383(__len__)</div><div>        1    0.000    0.000    0.000    0.000 {len}</div><div>        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}</div><div>        1    0.000    0.000    0.000    0.000 {range}</div><div>        1    0.000    0.000    0.000    0.000 {zip}</div></div><div><br/></div><div>Conclusion : Not worth it.</div><div><br/></div><div>What is really interesting now is that the third profiles are outperforming others by a huge margin. It turns out that _handle_creation_matrix is takes quite a lot of calls to execute itself. This I think is one of the significant bottlenecks in the current matrix code. </div><div><br/></div><div>It turns out that if we somehow manage to make a more efficient data structure for dense matrix, we can speed up things significantly.</div><div><br/></div><div><br/></div><div><br/></div><div><br/></div><br/><br/>[1] https://github.com/sympy/sympy/pull/2248</div></div>
-    </content>
-    <updated>2013-07-06T18:35:33Z</updated>
-    <published>2013-07-06T18:33:00Z</published>
-    <author>
-      <name>Saurabh Jha</name>
-      <email>noreply@blogger.com</email>
-      <uri>http://www.blogger.com/profile/06730324274224921613</uri>
-    </author>
-    <source>
-      <id>tag:blogger.com,1999:blog-2736678015821545355</id>
-      <author>
-        <name>Saurabh Jha</name>
-        <email>noreply@blogger.com</email>
-        <uri>http://www.blogger.com/profile/06730324274224921613</uri>
-      </author>
-      <link href="http://sympymatrix.blogspot.com/feeds/posts/default" rel="http://schemas.google.com/g/2005#feed" type="application/atom+xml"/>
-      <link href="http://www.blogger.com/feeds/2736678015821545355/posts/default" rel="self" type="application/atom+xml"/>
-      <link href="http://sympymatrix.blogspot.com/" rel="alternate" type="text/html"/>
-      <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
-      <title>Sympy Fast Matrix</title>
-      <updated>2013-07-15T07:45:59Z</updated>
+      <updated>2013-09-06T17:20:08Z</updated>
     </source>
   </entry>
 </feed>
