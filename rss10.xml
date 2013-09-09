@@ -13,6 +13,7 @@
 
 	<items>
 		<rdf:Seq>
+			<rdf:li rdf:resource="http://meclark256.wordpress.com/?p=167" />
 			<rdf:li rdf:resource="http://manojbits.wordpress.com/?p=746" />
 			<rdf:li rdf:resource="http://geekiology.wordpress.com/?p=410" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-5472769892551526876.post-6552318906702222104" />
@@ -72,11 +73,22 @@
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-2736678015821545355.post-1967164123336361963" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-7526836182390500993.post-2448841775059804252" />
 			<rdf:li rdf:resource="http://geekiology.wordpress.com/?p=292" />
-			<rdf:li rdf:resource="http://asmeurersympy.wordpress.com/?p=1348" />
 		</rdf:Seq>
 	</items>
 </channel>
 
+<item rdf:about="http://meclark256.wordpress.com/?p=167">
+	<title>Mary Clark: A late update</title>
+	<link>http://meclark256.wordpress.com/2013/09/09/a-late-update/</link>
+	<content:encoded>&lt;p&gt;This week has been work on the WeylGroup module, unsurprisingly.  I’ve implemented element_order and matrix_form for types A, B, C, D and G2, and matrix_form for E and F.  I think that implementing order for E and F is going to be much more difficult, because it’s not easy at all to realise those two groups as permutations.  I’m going to look for the next day or two to see if I can find a clever way of doing it, but otherwise I’ll just utilise matrix_form to get the matrix representation of the element of the WeylGroup and then just brute force it to find the order of the element by just finding what power of the matrix gives the identity.  &lt;/p&gt;
+&lt;p&gt;I also changed bits in in the root_system PR to utilise Rational(x, y) instead of using floating point numbers. &lt;/p&gt;
+&lt;p&gt;I’m hoping to have most major coding done by the 13th, so I can spend the last 10 days of GSOC writing up more detailed docstrings and fixing other minor errors.&lt;/p&gt;
+&lt;p&gt; &lt;/p&gt;
+&lt;p&gt;Sorry for the short update, but I’m not feeling particularly verbose today.&lt;/p&gt;
+&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/167/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/167/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;amp;blog=52875864&amp;amp;post=167&amp;amp;subd=meclark256&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
+	<dc:date>2013-09-09T01:26:04+00:00</dc:date>
+	<dc:creator>meclark256</dc:creator>
+</item>
 <item rdf:about="http://manojbits.wordpress.com/?p=746">
 	<title>Manoj Kumar: Towards the end</title>
 	<link>http://manojbits.wordpress.com/2013/09/06/towards-the-end/</link>
@@ -1407,53 +1419,6 @@ I know this is a lot of talking and nothing like psudeo code, though we can draw
 &lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/geekiology.wordpress.com/292/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/geekiology.wordpress.com/292/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=geekiology.wordpress.com&amp;amp;blog=36553244&amp;amp;post=292&amp;amp;subd=geekiology&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
 	<dc:date>2013-07-08T01:01:32+00:00</dc:date>
 	<dc:creator>chetnagupta</dc:creator>
-</item>
-<item rdf:about="http://asmeurersympy.wordpress.com/?p=1348">
-	<title>Aaron Meurer: Automating the SymPy release process</title>
-	<link>http://asmeurersympy.wordpress.com/2013/07/07/automating-the-sympy-release-process/</link>
-	<content:encoded>&lt;p&gt;So I have just published &lt;a href=&quot;https://github.com/sympy/sympy/releases/sympy-0.7.3.rc1&quot;&gt;SymPy 0.7.3.rc1&lt;/a&gt;. I’ll write a blog post about the release itself when we release 0.7.3 final, but for now, I wanted to write about how we managed to automate our release process.&lt;/p&gt;
-&lt;p&gt;Our story begins back in October of 2012, when I wrote a long winded &lt;a href=&quot;https://groups.google.com/d/msg/sympy/UfNhyFv-oMg/PkwIz32K-lsJ&quot;&gt;rant&lt;/a&gt; to the mailing list about how long it was taking to get the 0.7.2 release out (it took over a month from the time the release branch was created). &lt;/p&gt;
-&lt;p&gt;The rant is fun, and I recommend reading it. Here are some quotes&lt;/p&gt;
-&lt;p&gt;The intro:&lt;/p&gt;
-&lt;blockquote&gt;&lt;p&gt;
-Now here’s a timeline: 0.7.1 was released July 29, 2011, more than a year and two months ago.  0.7.0 was released just over a month before that, on June 28.  0.6.7 was released March 18, 2010, again over a year before 0.7.0.  In almost two year’s time, we’ve had three releases, and are struggling to get out a fourth.  And it’s not like there were no changes; quite the opposite in fact.  If you look at SymPy 0.6.6 compared to the current master, it’s unbelievable the amount of changes that have gone forward in that time.  We’ve had&lt;br /&gt;
-since then the new polys, at least four completely new submodules (combinatorics, sets, differential geometry, and stats), massive improvements to integration and special functions, a ton of new stuff in the physics module, literally thousands of bug fixes, and the list goes on.  Each of these changes on it’s own was enough to warrant a release. &lt;/p&gt;
-&lt;p&gt;So in case I didn’t make my point, le me state it explicitly: we need to release more often.  We need to release *way* more often.
-&lt;/p&gt;&lt;/blockquote&gt;
-&lt;p&gt;My views on some of the fundamental (non-technical) issues:&lt;/p&gt;
-&lt;blockquote&gt;&lt;p&gt;
-I think that one other thing that has held back many releases is the feeling of “wait, we should put this in the release”. The use of a release branch has helped keep master moving along independently, but there still seems to be the feeling with many branches of, “this is a nice feature, it ought to go in the release.”  My hope is that by making the release process smoother, we can release more often, and this feeling will go away, because it won’t be a big deal if something waits until the next release.  As far as deprecations go, the real issue with them is time, not release numbers.  So if we deprecate a feature today vs. one month from today, it’s not a big deal (as opposed to today vs. a year from today), regardless of how many versions are in between. &lt;/p&gt;
-&lt;p&gt;I read about what GitHub does for their Windows product regarding releasing often on their blog: &lt;a href=&quot;https://github.com/blog/1271-how-we-ship-github-for-windows&quot; rel=&quot;nofollow&quot;&gt;https://github.com/blog/1271-how-we-ship-github-for-windows&lt;/a&gt; (they actually have this philosophy for all their products).  One thing that they said is, “And by shipping updates so often, there is less anxiety about getting a particular feature ready for a particular release. If your pull request isn’t ready to be merged in time for today’s release, relax. There will be another one soon, so make that code shine!”  I think that is exactly the point here.  Another thing that they noted is that automation is the key to doing this, which is what I am aiming for with the above point.
-&lt;/p&gt;&lt;/blockquote&gt;
-&lt;p&gt;My vision:&lt;/p&gt;
-&lt;blockquote&gt;&lt;p&gt;
-Once we start releasing very often (and believe me, this is way down the road, but I’m trying to be forward looking here), we can do away with release candidates.  A release candidate lives in the wild for a week before the full release.  But if we are capable of releasing literally every week, then having release candidates is pointless.  If a bug slips into a release, we just fix it and it will be in the next release.
-&lt;/p&gt;&lt;/blockquote&gt;
-&lt;p&gt;…&lt;/p&gt;
-&lt;blockquote&gt;&lt;p&gt;
-We should release *at least* once a month.  I think that if the process is automated enough, that this will be very possible (as opposed to the current situation, where the release branch lasts longer than a month).  In times of high activity, we can release more often than that (e.g., after a big pull request is merged, we can release).
-&lt;/p&gt;&lt;/blockquote&gt;
-&lt;p&gt;That was October. Today is July. Basically, our release process was way too long. Half of it was testing stuff, half of it was tedious releasing stuff (like making tarballs and so on), and half of it was updating websites. &lt;/p&gt;
-&lt;p&gt;We have moved all our testing to Travis CI. So now every pull request is tested, and we can be pretty much assured that master is always passing the tests.  There is still some work to do here (currently Travis CI doesn’t test with external dependencies), but it’s mostly a solved problem.&lt;/p&gt;
-&lt;p&gt;For updating websites, we conceded that we are not going to update anything that we don’t own. That means no attempting to make Debian or Sage packages, or updating Wikipedia or Freshmeat. Someone else will do that (and does anyone even use Freshmeat any more?). &lt;/p&gt;
-&lt;p&gt;That leaves the releasing itself. It’s still a pain, because we have to make a source tarball, Windows installer, html docs, and pdf docs, and do them all for both Python 2 and Python 3. &lt;/p&gt;
-&lt;p&gt;So Ondrej suggested moving to fabric/vagrant. At the SciPy 2013 sprints, he started working on a fabfile that automates the whole process. Basically vagrant is a predefined Linux virtual machine that makes it easy to make everything completely reproducible. Fabric is a tool that makes it easy to write commands (in Python) that are run on that machine. &lt;/p&gt;
-&lt;p&gt;Building the basic stuff was easy, but I want to automate &lt;em&gt;everything&lt;/em&gt;. So far, not everything is done yet, but we’re getting close. For example, in addition to building the tarballs, the fabric script checks the contents of the tarball against &lt;code&gt;git ls-files&lt;/code&gt; to make sure that nothing is included that shouldn’t be or left out accidentally (and, indeed, we caught some missing files that weren’t included in the tarball, including the README). &lt;/p&gt;
-&lt;p&gt;You can run all this yourself. Checkout the 0.7.3 branch from SymPy, then cd into the release directory, and read the README. Basically, you just install Fabric and Vagrant if you don’t have them already, then run&lt;/p&gt;
-&lt;pre class=&quot;brush: plain; title: ; notranslate&quot;&gt;vagrant up
-fab vagrant prepare
-fab vagrant release
-&lt;/pre&gt;
-&lt;p&gt;Note that this downloads a 280 MB virtual machine, so it will take some time to run for the first time. When you do this, the releases are in the `release` directory. &lt;/p&gt;
-&lt;p&gt;Finally, I uploaded 0.7.3.rc1 to GitHub using the new releases feature. This is what the release looks like on GitHub, from the user point of view&lt;/p&gt;
-&lt;p&gt;&lt;a href=&quot;http://asmeurersympy.files.wordpress.com/2013/07/screenshot-2013-07-06-22-05-31.png&quot;&gt;&lt;img src=&quot;http://asmeurersympy.files.wordpress.com/2013/07/screenshot-2013-07-06-22-05-31.png?w=450&amp;amp;h=260&quot; alt=&quot;SymPy 0.7.3.rc1&quot; width=&quot;450&quot; class=&quot;alignnone size-full wp-image-1352&quot; height=&quot;260&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;This is what it looks like to me&lt;/p&gt;
-&lt;p&gt;&lt;a href=&quot;http://asmeurersympy.files.wordpress.com/2013/07/screenshot-2013-07-06-22-08-19.png&quot;&gt;&lt;img src=&quot;http://asmeurersympy.files.wordpress.com/2013/07/screenshot-2013-07-06-22-08-19.png?w=450&amp;amp;h=470&quot; alt=&quot;SymPy 0.7.3.rc1 Edit&quot; width=&quot;450&quot; class=&quot;alignnone size-full wp-image-1353&quot; height=&quot;470&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;GitHub has (obviously) the best interface I’ve ever seen for this. Of course, even better would be if there were an API, so that I could automate this too.  But since Google’s &lt;a href=&quot;http://google-opensource.blogspot.com/2013/05/a-change-to-google-code-download-service.html&quot;&gt;announcement&lt;/a&gt; that they are discontinuing downloads, we can no longer upload to Google Code. Our plan was to just use PyPI, but I am glad that we can have at least one other location, especially since PyPI is so buggy and unreliable (I can’t even log in, I get a 502).&lt;/p&gt;
-&lt;p&gt;So please download this release candidate and test it. We espeically need people to test the Windows installer, since we haven’t automated that part yet (actually, we are considering not making them any more, especailly given the existence of people like Christoph Gohlke who &lt;a href=&quot;http://www.lfd.uci.edu/~gohlke/pythonlibs/#sympy&quot;&gt;make them&lt;/a&gt; for SymPy anyway, but we’ll see). The only thing that remains to be done is to finish writing the &lt;a href=&quot;https://github.com/sympy/sympy/wiki/release-notes-for-0.7.3&quot;&gt;release notes&lt;/a&gt;. If you made any contributions to SymPy since the last release, please add them there. Or if you want to help out, you can go through our pull requests and make sure that nothing is missing.&lt;/p&gt;
-&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/asmeurersympy.wordpress.com/1348/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/asmeurersympy.wordpress.com/1348/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;amp;blog=7467151&amp;amp;post=1348&amp;amp;subd=asmeurersympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
-	<dc:date>2013-07-07T03:13:57+00:00</dc:date>
-	<dc:creator>Aaron Meurer</dc:creator>
 </item>
 
 </rdf:RDF>
