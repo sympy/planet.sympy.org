@@ -23,6 +23,53 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>September 15, 2013</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://sophiessympyblog.wordpress.com" title="sophie's sympy blog">Katja Sophie Hotz</a></h3>
+
+
+<div class="entrygroup" id="http://sophiessympyblog.wordpress.com/?p=352">
+<h4 lang="en"><a href="http://sophiessympyblog.wordpress.com/2013/09/15/12th-and-13th-week/">12th and 13th week</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p style="text-align: justify;">Here is my status update on the factorization algorithm.</p>
+<p style="text-align: justify;">I was able to close all remaining gaps in the code and the algorithm is working smoothly now. In particular, I implemented the <img src="http://s0.wp.com/latex.php?latex=p&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="p" class="latex" title="p" />-adic lifting I was taking about last time, which should improve performance for polynomials with large coefficients. First, I had to make the Gaussian elimination code in matrices.py a little more flexible. For example, now one can pass a custom elimination function in addition to a custom iszero function. To solve linear systems over the ring <img src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Z_%7Bp%5El%7D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\mathbb Z_{p^l}" class="latex" title="\mathbb Z_{p^l}" />, I then call it in a slightly strange way. Namely, I make calculations modulo <img src="http://s0.wp.com/latex.php?latex=p%5El&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="p^l" class="latex" title="p^l" />, but being zero is checked modulo <img src="http://s0.wp.com/latex.php?latex=p&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="p" class="latex" title="p" />. The only drawback of this approach is that rows that contain only multiples of <img src="http://s0.wp.com/latex.php?latex=p&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="p" class="latex" title="p" /> will be treated as zero rows, thus the set of solutions might get bigger. However, in my use case this should happen only rarely and if it does, it will be detected later in the code.</p>
+<p style="text-align: justify;">In the last week of my GSoC I will keep fine tuning the code and issue a PR for the factorization algorithm.</p>
+<p style="text-align: justify;">Finally, here are some comparisons with <code>%timeit</code>.</p>
+<p style="text-align: justify;">First, a small example. Let <img src="http://s0.wp.com/latex.php?latex=%5Calpha&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\alpha" class="latex" title="\alpha" /> be a root of <img src="http://s0.wp.com/latex.php?latex=t%5E4+%2B+1&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="t^4 + 1" class="latex" title="t^4 + 1" /> and <img src="http://s0.wp.com/latex.php?latex=f+%3D+x%5E4+%2B+y%5E4+%5Cin+%5Cmathbb+Q%28%5Calpha%29%5Bx%2C+y%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="f = x^4 + y^4 \in \mathbb Q(\alpha)[x, y]" class="latex" title="f = x^4 + y^4 \in \mathbb Q(\alpha)[x, y]" />. The current SymPy factorization algorithm needs 166 ms on my laptop, whereas the new one only takes 69.1 ms.</p>
+<p style="text-align: justify;">Now a bigger one. Let <img src="http://s0.wp.com/latex.php?latex=%5Calpha&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\alpha" class="latex" title="\alpha" /> be a root of <img src="http://s0.wp.com/latex.php?latex=t%5E4+%2B+t%5E3+%2B+t%5E2+%2B+t+%2B+1&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="t^4 + t^3 + t^2 + t + 1" class="latex" title="t^4 + t^3 + t^2 + t + 1" /> and <img src="http://s0.wp.com/latex.php?latex=f+%3D+f_1+%5Ccdot+f_2+%5Ccdot+f_3+%5Ccdot+f_4+%5Cin+%5Cmathbb+Q%28%5Calpha%29%5Bx%2C+y%2C+z%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="f = f_1 \cdot f_2 \cdot f_3 \cdot f_4 \in \mathbb Q(\alpha)[x, y, z]" class="latex" title="f = f_1 \cdot f_2 \cdot f_3 \cdot f_4 \in \mathbb Q(\alpha)[x, y, z]" />, where</p>
+<p style="text-align: center;"><img src="http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+f_1+%3D+x%5E2+-+2+%5Calpha+x+-+%28+%5Calpha%5E3+%2B+%5Calpha%5E2+%2B+%5Calpha+%2B+1%29+z%5E2+%2B+%5Calpha%5E2+y+%2B+12+%5Calpha%5E3+&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\displaystyle f_1 = x^2 - 2 \alpha x - ( \alpha^3 + \alpha^2 + \alpha + 1) z^2 + \alpha^2 y + 12 \alpha^3 " class="latex" title="\displaystyle f_1 = x^2 - 2 \alpha x - ( \alpha^3 + \alpha^2 + \alpha + 1) z^2 + \alpha^2 y + 12 \alpha^3 " /><br />
+<img src="http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+f_2+%3D+x%5E2+-+2+%5Calpha%5E2+x+%2B+%5Calpha%5E3+z%5E2+-+%28+%5Calpha%5E3+%2B+%5Calpha%5E2+%2B+%5Calpha+%2B+1%29+y+%2B+12+%5Calpha+&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\displaystyle f_2 = x^2 - 2 \alpha^2 x + \alpha^3 z^2 - ( \alpha^3 + \alpha^2 + \alpha + 1) y + 12 \alpha " class="latex" title="\displaystyle f_2 = x^2 - 2 \alpha^2 x + \alpha^3 z^2 - ( \alpha^3 + \alpha^2 + \alpha + 1) y + 12 \alpha " /><br />
+<img src="http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+f_3+%3D+x%5E2+-+2+%5Calpha%5E3+x+%2B+%5Calpha%5E2+z%5E2+%2B+%5Calpha+y+-+12+%28+%5Calpha%5E3+%2B+%5Calpha%5E2+%2B+%5Calpha+%2B+1%29+&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\displaystyle f_3 = x^2 - 2 \alpha^3 x + \alpha^2 z^2 + \alpha y - 12 ( \alpha^3 + \alpha^2 + \alpha + 1) " class="latex" title="\displaystyle f_3 = x^2 - 2 \alpha^3 x + \alpha^2 z^2 + \alpha y - 12 ( \alpha^3 + \alpha^2 + \alpha + 1) " /><br />
+<img src="http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+f_4+%3D+x%5E2+%2B+2+%28+%5Calpha%5E3+%2B+%5Calpha%5E2+%2B+%5Calpha+%2B+1%29+x+%2B+%5Calpha+z%5E2+%2B+%5Calpha%5E3+y+%2B+12+%5Calpha%5E2+.+&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\displaystyle f_4 = x^2 + 2 ( \alpha^3 + \alpha^2 + \alpha + 1) x + \alpha z^2 + \alpha^3 y + 12 \alpha^2 . " class="latex" title="\displaystyle f_4 = x^2 + 2 ( \alpha^3 + \alpha^2 + \alpha + 1) x + \alpha z^2 + \alpha^3 y + 12 \alpha^2 . " /></p>
+<p style="text-align: justify;">The current SymPy factorization algorithm needs 215 seconds, whereas the new one only takes 60.3 seconds. More than three times faster! <img src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif" alt=":)" class="wp-smiley" /> </p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/352/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/352/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=352&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://sophiessympyblog.wordpress.com/2013/09/15/12th-and-13th-week/">by katjasophie at September 15, 2013 05:56 PM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>September 14, 2013</h2>
 
 <div class="channelgroup">
@@ -2936,76 +2983,6 @@ Another new tool I learned to use this week was Sphinx. I like the html document
 </div>
 
 
-
-</div>
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://manojbits.wordpress.com" title="Perspective » SymPy">Manoj Kumar</a></h3>
-
-
-<div class="entrygroup" id="http://manojbits.wordpress.com/?p=596">
-<h4 lang="en"><a href="http://manojbits.wordpress.com/2013/07/13/stuck-in-the-guessing-game/">Stuck in the guessing game</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>Hello. I had thought that at the time of writing this post, I would have comfortably finished the sixth heuristic. However the Maple paper hasn’t been kind to me, because not knowing how to implement an algorithm is tough enough, but not knowing what the algorithm is, is hell. The good part (?)  is that Sean too had no idea, when he had a quick look (though he said he may help me get some insight later on), when I talked to him on GTalk and Aaron too when I met on IRC. I’ve also not written anything for ten days, so I’m trying to write, a detailed post here, so that if anyone at Planet SymPy stumble upon this, they could comment here.</p>
-<p><strong>The fifth heuristic:</strong><br />
-The Maple paper has been giving me mixed signals, and half of my time goes in interpreting what the authors are trying to say, and most of the time I get it wrong, and so the other half goes in trying to interpret it the right way. So these are the two steps, as described by the paper.<br />
-1. A basis of functions and algebraic objects is built by taking, from the given ODE, all the known functions and composite algebraic objects, together with their derivatives, as well as all the unknown functions<br />
-2. A polynomial of degree 2 in such objects is built; its coefficients, in turn, are polynomials of degree d in <img src="http://s0.wp.com/latex.php?latex=x&amp;bg=fff&amp;fg=444444&amp;s=0" alt="x" class="latex" title="x" /> and <img src="http://s0.wp.com/latex.php?latex=y&amp;bg=fff&amp;fg=444444&amp;s=0" alt="y" class="latex" title="y" /></p>
-<p>So what does this mean? This is what even I was trying to figure out. Let us now look at the single example that they managed to provide.</p>
-<p><img src="http://s0.wp.com/latex.php?latex=x%2A%5Cfrac%7Bdy%7D%7Bdx%7D%2Alog%28x%29%2Asin%28x%29+%2B+cos%28y%29%2A%281+-+x%2Acosy%29+%3D+0&amp;bg=fff&amp;fg=444444&amp;s=0" alt="x*\frac{dy}{dx}*log(x)*sin(x) + cos(y)*(1 - x*cosy) = 0" class="latex" title="x*\frac{dy}{dx}*log(x)*sin(x) + cos(y)*(1 - x*cosy) = 0" />. Rearranging this gives me <img src="http://s0.wp.com/latex.php?latex=h&amp;bg=fff&amp;fg=444444&amp;s=0" alt="h" class="latex" title="h" /> as <img src="http://s0.wp.com/latex.php?latex=%5Cfrac%7Bcos%28y%29%2A%281+-+x%2Acosy%29%7D%7Bx%2Alog%28x%29%2Asin%28x%29%7D&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\frac{cos(y)*(1 - x*cosy)}{x*log(x)*sin(x)}" class="latex" title="\frac{cos(y)*(1 - x*cosy)}{x*log(x)*sin(x)}" />. Fair enough.</p>
-<p>My first impression was that I had to take all algebraic objects from <img src="http://s0.wp.com/latex.php?latex=h&amp;bg=fff&amp;fg=444444&amp;s=0" alt="h" class="latex" title="h" /> like <img src="http://s0.wp.com/latex.php?latex=cos%28y%29%2Fx%2C+x%2Acos%28y%29%5E%7B2%7D%2C+cos%28y%29%2Flog%28x%29%2C+cos%28y%29%2Fsin%28x%29&amp;bg=fff&amp;fg=444444&amp;s=0" alt="cos(y)/x, x*cos(y)^{2}, cos(y)/log(x), cos(y)/sin(x)" class="latex" title="cos(y)/x, x*cos(y)^{2}, cos(y)/log(x), cos(y)/sin(x)" />, and I wrote a bit of optimised <a href="https://github.com/Manoj-Kumar-S/sympy/commit/66362477f8779a9f00ab9bd30b73c99ae966a7e9">code</a>, (atleast I think), I found out that there are 19 possible factors, and according to the step 2, including the derivatives, and the second degree terms I would get a maximum of 19 + 19(derivatives) + 19*<img src="http://s0.wp.com/latex.php?latex=C_%7B2%7D&amp;bg=fff&amp;fg=444444&amp;s=0" alt="C_{2}" class="latex" title="C_{2}" />(second degree terms of power one) + 19(terms of power 2) from which I can built the polynomial. Obviously, substituting it in the PDE, grouping terms, and using solve, would be computationally expensive for SymPy. Sean then told me its since the paper tells only ‘composite algebraic objects’  it is enough to limit to three algebraic objects, <img src="http://s0.wp.com/latex.php?latex=cos%28y%29%2C+x%2Acos%28y%29%5E%7B2%7D%2C+x%2Alog%28x%29%2Asin%28y%29&amp;bg=fff&amp;fg=444444&amp;s=0" alt="cos(y), x*cos(y)^{2}, x*log(x)*sin(y)" class="latex" title="cos(y), x*cos(y)^{2}, x*log(x)*sin(y)" />. So this is the approach, that I used.</p>
-<p>1. Use <strong>as_numer_denom</strong>() to extract the numerator, denominator of unsimplified <img src="http://s0.wp.com/latex.php?latex=h&amp;bg=fff&amp;fg=444444&amp;s=0" alt="h" class="latex" title="h" />,  expand the numerator and denominator,  which would give the list of factors. Obviously suppose I have something like <img src="http://s0.wp.com/latex.php?latex=2%2Asiny&amp;bg=fff&amp;fg=444444&amp;s=0" alt="2*siny" class="latex" title="2*siny" /> and <img src="http://s0.wp.com/latex.php?latex=-+siny&amp;bg=fff&amp;fg=444444&amp;s=0" alt="- siny" class="latex" title="- siny" />, they should be treated as same, I wrote a helper function called _rem_num, which would remove the numeric arguments from <strong>Mul </strong>and <strong>Pow.</strong></p>
-<p>2. Iterate over the list and add derivatives, From this add the second degree terms, and first terms. This gives the basis with which I can build the polynomial. For the given differential equation, I get the following basis, <a href="https://gist.github.com/Manoj-Kumar-S/5989623" rel="nofollow">https://gist.github.com/Manoj-Kumar-S/5989623</a>.</p>
-<p>3. Now, since instead of taking the factors, one at a time, two at a time, three at a time and so on, I thought it would be better to build a general polynomial, <img src="http://s0.wp.com/latex.php?latex=%5Csum_%7Bk%3D1%7D%5EnCk%2Atermk&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\sum_{k=1}^nCk*termk" class="latex" title="\sum_{k=1}^nCk*termk" /> and substitute it in the PDE, <img src="http://s0.wp.com/latex.php?latex=%5Cfrac%7B%5Cpartial+%5Cchi%7D%7B%5Cpartial+x%7D+%2B+h%2A%5Cfrac%7B%5Cpartial+%5Cchi%7D%7B%5Cpartial+y%7D+-+%5Cchi%2A%5Cfrac%7B%5Cpartial+h%7D%7B%5Cpartial+y%7D&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\frac{\partial \chi}{\partial x} + h*\frac{\partial \chi}{\partial y} - \chi*\frac{\partial h}{\partial y}" class="latex" title="\frac{\partial \chi}{\partial x} + h*\frac{\partial \chi}{\partial y} - \chi*\frac{\partial h}{\partial y}" />. If it is a single term polynomial, then the coefficients of the other terms become zero. So the first sub-step is done.</p>
-<p>4. For the second step, Maple says I need bivariate coefficients in <img src="http://s0.wp.com/latex.php?latex=x&amp;bg=fff&amp;fg=444444&amp;s=0" alt="x" class="latex" title="x" /> and <img src="http://s0.wp.com/latex.php?latex=y&amp;bg=fff&amp;fg=444444&amp;s=0" alt="y" class="latex" title="y" />, for the terms in the polynomial, So to sum up this is the pseudocode I used,</p>
-<ul>
-<li>Initialize a coefficient dict to {}</li>
-<li>Take the first term in the basis, substitute it in the PDE, if it simplifies to zero, great you’ve got your infinitesimal, If it doesn’t group the like terms and store it in the coefficient_dict</li>
-<li>Repeat the above mentioned process for all the terms in the basis</li>
-<li>Once, it is done for all the terms in the basis, use solve to find if the coefficients, give a non-trivial solution.</li>
-<li>If it doesn’t then start from beginning, however use <img src="http://s0.wp.com/latex.php?latex=%28a%2Ax+%2B+b%2Ay%29%2Aterm&amp;bg=fff&amp;fg=444444&amp;s=0" alt="(a*x + b*y)*term" class="latex" title="(a*x + b*y)*term" />, and then <img src="http://s0.wp.com/latex.php?latex=a%2Ax%5E%7B2%7D+%2B+b%2Ax%2Ay+%2B+c%2Ay%5E%7B2%7D&amp;bg=fff&amp;fg=444444&amp;s=0" alt="a*x^{2} + b*x*y + c*y^{2}" class="latex" title="a*x^{2} + b*x*y + c*y^{2}" /> till it reaches a maximum limit.</li>
-</ul>
-<p>This is the most optimized way that I could think of,  and the code works well for the example given. But I am facing weird test failures, for the tests that I have added, For example when I do</p>
-<pre class="brush: python; title: ; notranslate">eq3 = (1 + 2*x)*f(x).diff(x) + 2 - 4*exp(-f(x))
-infinitesimals(eq3)
-[{eta(x, f(x)): 0, xi(x, f(x)): 2*x + 1},
-{eta(x, f(x)): 0, xi(x, f(x)): 1/(exp(f(x)) - 2)}]
-</pre>
-<p>However, when I try to print it while running tests, I get an extra term. I have no idea how I get this difference.<br />
-<strong>The sixth heuristic:</strong><br />
-Okay, so this is where I had no idea what to implement and how, and I am in this position for about three days, and that isn’t promising. Let us take the PDE again, <img src="http://s0.wp.com/latex.php?latex=%5Cfrac%7B%5Cpartial+%5Ceta%7D%7B%5Cpartial+x%7D+%2B+%28%5Cfrac%7B%5Cpartial+%5Ceta%7D%7B%5Cpartial+y%7D+-+%5Cfrac%7B%5Cpartial+%5Cxi%7D%7B%5Cpartial+x%7D%29%2Ah+-+%5Cfrac%7B%5Cpartial+%5Ceta%7D%7B%5Cpartial+x%7D%2Ah%5E%7B2%7D+-+%5Cxi%2A%5Cfrac%7B%5Cpartial+h%7D%7B%5Cpartial+x%7D+-+%5Ceta%2A%5Cfrac%7B%5Cpartial+h%7D%7B%5Cpartial+y%7D+%3D+0&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\frac{\partial \eta}{\partial x} + (\frac{\partial \eta}{\partial y} - \frac{\partial \xi}{\partial x})*h - \frac{\partial \eta}{\partial x}*h^{2} - \xi*\frac{\partial h}{\partial x} - \eta*\frac{\partial h}{\partial y} = 0" class="latex" title="\frac{\partial \eta}{\partial x} + (\frac{\partial \eta}{\partial y} - \frac{\partial \xi}{\partial x})*h - \frac{\partial \eta}{\partial x}*h^{2} - \xi*\frac{\partial h}{\partial x} - \eta*\frac{\partial h}{\partial y} = 0" /> . So I make the following four assumptions on <img src="http://s0.wp.com/latex.php?latex=%5Ceta&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\eta" class="latex" title="\eta" /> and <img src="http://s0.wp.com/latex.php?latex=%5Cxi&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\xi" class="latex" title="\xi" /></p>
-<p>1. <img src="http://s0.wp.com/latex.php?latex=%5Ceta+%3D+f%28x%29&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\eta = f(x)" class="latex" title="\eta = f(x)" />, <img src="http://s0.wp.com/latex.php?latex=%5Cxi+%3D+g%28y%29&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\xi = g(y)" class="latex" title="\xi = g(y)" /><br />
-2. <img src="http://s0.wp.com/latex.php?latex=%5Ceta+%3D+f%28x%29&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\eta = f(x)" class="latex" title="\eta = f(x)" />, <img src="http://s0.wp.com/latex.php?latex=%5Cxi+%3D+g%28x%29&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\xi = g(x)" class="latex" title="\xi = g(x)" /><br />
-3. <img src="http://s0.wp.com/latex.php?latex=%5Ceta+%3D+f%28y%29&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\eta = f(y)" class="latex" title="\eta = f(y)" />, <img src="http://s0.wp.com/latex.php?latex=%5Cxi+%3D+g%28y%29&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\xi = g(y)" class="latex" title="\xi = g(y)" /><br />
-4. <img src="http://s0.wp.com/latex.php?latex=%5Ceta+%3D+f%28y%29&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\eta = f(y)" class="latex" title="\eta = f(y)" />, <img src="http://s0.wp.com/latex.php?latex=%5Cxi+%3D+g%28x%29&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\xi = g(x)" class="latex" title="\xi = g(x)" /></p>
-<p>Let us take the fourth assumption, the PDE reduces to <img src="http://s0.wp.com/latex.php?latex=%28%5Cfrac%7Bdf%7D%7Bdy%7D+-+%5Cfrac%7Bdg%7D%7Bdx%7D%29%2Ah+-+f%2A%5Cfrac%7B%5Cpartial+h%7D%7B%5Cpartial+x%7D+-+g%2A%5Cfrac%7B%5Cpartial+h%7D%7B%5Cpartial+y%7D+%3D+0&amp;bg=fff&amp;fg=444444&amp;s=0" alt="(\frac{df}{dy} - \frac{dg}{dx})*h - f*\frac{\partial h}{\partial x} - g*\frac{\partial h}{\partial y} = 0" class="latex" title="(\frac{df}{dy} - \frac{dg}{dx})*h - f*\frac{\partial h}{\partial x} - g*\frac{\partial h}{\partial y} = 0" />. The Maple paper says:<br />
-1. subdivide the equation into subexpressions involving only one of {f, g};<br />
-2. build a list of candidates for f and for g with the solutions to these subexpressions;<br />
-3. build a list of pairs of candidates by taking one candidate from each list.</p>
-<p>Now what on earth, the first step is supposed to mean, I have no idea. My first impression, when I was writing my proposal and a few days back, was that I had to split it into,  two different ODE’s so that I should solve <img src="http://s0.wp.com/latex.php?latex=%5Cfrac%7Bdf%7D%7Bdy%7D+-+f%2A%5Cfrac%7B%5Cpartial+h%7D%7B%5Cpartial+x%7D%3D+0&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\frac{df}{dy} - f*\frac{\partial h}{\partial x}= 0" class="latex" title="\frac{df}{dy} - f*\frac{\partial h}{\partial x}= 0" />and <img src="http://s0.wp.com/latex.php?latex=%5Cfrac%7Bdg%7D%7Bdx%7D%2Ah+%2B+g%2A%5Cfrac%7B%5Cpartial+h%7D%7B%5Cpartial+y%7D+%3D+0&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\frac{dg}{dx}*h + g*\frac{\partial h}{\partial y} = 0" class="latex" title="\frac{dg}{dx}*h + g*\frac{\partial h}{\partial y} = 0" /> individually. However I can never be more wrong, since it then is a sub-part of the first heuristic, and also according to the example given that is <img src="http://s0.wp.com/latex.php?latex=%5Cfrac%7Bdy%7D%7Bdx%7D+%3D+%5Cfrac%7Be%5E%7Bx%7D%7D%7B%5Csqrt%7By%7D%7D%2AF%28%5Csqrt%5B3%5D%7By%7D+-+%5Cfrac%7B3%2Ae%5E%7Bx%7D%7D%7B2%7D%29&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\frac{dy}{dx} = \frac{e^{x}}{\sqrt{y}}*F(\sqrt[3]{y} - \frac{3*e^{x}}{2})" class="latex" title="\frac{dy}{dx} = \frac{e^{x}}{\sqrt{y}}*F(\sqrt[3]{y} - \frac{3*e^{x}}{2})" /> , the infinitesimals found out are <img src="http://s0.wp.com/latex.php?latex=%5Cfrac%7B1%7D%7Be%5E%7Bx%7D%7D&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\frac{1}{e^{x}}" class="latex" title="\frac{1}{e^{x}}" /> and <img src="http://s0.wp.com/latex.php?latex=%5Cfrac%7B1%7D%7B%5Csqrt%7By%7D%7D&amp;bg=fff&amp;fg=444444&amp;s=0" alt="\frac{1}{\sqrt{y}}" class="latex" title="\frac{1}{\sqrt{y}}" /> , there seems to be a term that is common to both <img src="http://s0.wp.com/latex.php?latex=f&amp;bg=fff&amp;fg=444444&amp;s=0" alt="f" class="latex" title="f" /> and <img src="http://s0.wp.com/latex.php?latex=g&amp;bg=fff&amp;fg=444444&amp;s=0" alt="g" class="latex" title="g" />.</p>
-<p>So that sums up, my last ten days coding or trying to code rather. I know Maple is not open-source and all that, but it would have been really nice if they had provided a few more examples on each of the heuristics, instead of just giving a single line which can be comprehended in a thousand different ways.</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/manojbits.wordpress.com/596/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/manojbits.wordpress.com/596/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=manojbits.wordpress.com&amp;blog=31971756&amp;post=596&amp;subd=manojbits&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://manojbits.wordpress.com/2013/07/13/stuck-in-the-guessing-game/">by Manoj Kumar at July 13, 2013 07:46 AM</a>
-</p>
-</div>
-</div>
-
-
 </div>
 
 </div>
@@ -3077,7 +3054,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
 <a href="http://f1728.wordpress.com/category/SymPy/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://f1728.wordpress.com" class="message" title="no activity in 7 days">Jeremias Yehdegho</a>
 </li>
 <li>
-<a href="http://sophiessympyblog.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sophiessympyblog.wordpress.com" class="message" title="no activity in 7 days">Katja Sophie Hotz</a>
+<a href="http://sophiessympyblog.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sophiessympyblog.wordpress.com" title="sophie's sympy blog">Katja Sophie Hotz</a>
 </li>
 <li>
 <a href="" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a class="message" title="404: not found">Kazuo Thow</a>
@@ -3155,7 +3132,7 @@ Okay, so this is where I had no idea what to implement and how, and I am in this
 
 <p>
 <strong>Last updated:</strong><br>
-September 14, 2013 05:40 PM<br>
+September 15, 2013 06:00 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
