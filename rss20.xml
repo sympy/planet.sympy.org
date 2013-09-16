@@ -8,6 +8,14 @@
 	<description>Planet SymPy - http://planet.sympy.org/</description>
 
 <item>
+	<title>Sachin Joglekar: GSoc: Weeks 12 and 13</title>
+	<guid isPermaLink="false">tag:blogger.com,1999:blog-5472769892551526876.post-2963201890134687039</guid>
+	<link>http://codesachin.blogspot.com/2013/09/gsoc-weeks-12-and-13_16.html</link>
+	<description>&lt;div style=&quot;text-align: left;&quot; dir=&quot;ltr&quot;&gt;Work gained pace in the past two weeks.&lt;br /&gt;First off, I got my first GSoC PR merged into the SymPy base. This PR essentially modified the sympy.physics.mechanics core to incorporate the concept of coordinate variables and manipulations on them.&lt;br /&gt;For example, consider a vector V defined in frame R1, with coordinate variables of frame R2 occurring as symbols in its definition. Now,  while calculating d/dt(V) wrt R1, it would be necessary to substitute values of the base scalars of R2 wrt those of R1(as they will be functions of t). One small point- Coordinate variables, as far as possible should &lt;i&gt;not &lt;/i&gt;be used as normal Symbols. This may mislead the 'dt' and 'express' methods to try substitution of variables of frames &lt;i&gt;not&lt;/i&gt; linked to each other.&lt;br /&gt;&lt;br /&gt;We also added a few optimisations, such as a dcm cache(turned out to be trickier than I thought) to 'remember' the DCMs once calculated, for later use. Also added the 'express' and 'dt' methods to the ReferenceFrame class- this would help re-expressions of scalar &lt;i&gt;as well as &lt;/i&gt;vector fields in the said frame. During all these changes, I took care to preserve the old API of SymPy classes and methods- we din't want to make all the code written wrt the previous module version redundant.&lt;br /&gt;&lt;br /&gt;Now, I currently have a PR in the pipeline for adding the get_motion functions to the sympy.physics.mechanics.functions file. After this, I will turn to the rather-tricky task of modifying the Point class to incorporate functionality as needed by ParticleCharge from my EM work (all the while, making sure the previous API does not change). Parallely, I will be adding documentation on my previous PR to the Sphinx docs.&lt;br /&gt;&lt;br /&gt;However, all this after the 18th- the day my first semester exam ends. After that, I can start working on the project full-time again :-).&lt;br /&gt;&lt;br /&gt;Anyways, have a great week :-)&lt;/div&gt;</description>
+	<pubDate>Mon, 16 Sep 2013 12:41:51 +0000</pubDate>
+	<author>noreply@blogger.com (Sachin Joglekar)</author>
+</item>
+<item>
 	<title>Katja Sophie Hotz: 12th and 13th week</title>
 	<guid isPermaLink="false">http://sophiessympyblog.wordpress.com/?p=352</guid>
 	<link>http://sophiessympyblog.wordpress.com/2013/09/15/12th-and-13th-week/</link>
@@ -1278,109 +1286,6 @@ Another new tool I learned to use this week was Sphinx. I like the html document
 	<description>&lt;div style=&quot;text-align: left;&quot; dir=&quot;ltr&quot;&gt;This has been a slow week, with a lot of ups and downs, work-wise.&lt;br /&gt;Firstly, my laptop's LAN card decided to stop working properly, keeping me busy talking to the Dell customer service and convincing them that something &lt;i&gt;is &lt;/i&gt;wrong with the thing. After a lot of troubleshooting and failed tests on their part (they even tried remote desktop connection to see what was going wrong), they finally agreed that something needs to be done. I hope it gets fixed before I go back to campus.&lt;br /&gt;&lt;br /&gt;As far as the GSoC work is concerned, firstly, I got the Particle code finalised on Tuesday after a review by Gilbert.&lt;br /&gt;Next, I spent the whole of Wednesday hacking the old mechanics framework to act as the base to test my own code on. I felt the need to do this, as I was anxious to see whether my own work was functioning as I thought it would, and it would take some time before Prasoon could get his framework in a completely consistent state (thats natural, considering the complexity of the work involved). It took a lot of time, as I had to tweak the old framework to support coordinate variables, use substitution on them during re-expression and time-differentiation, and so on...&lt;br /&gt;Finally, I got it to work and tested my own code. It worked perfectly! There were a few errors that had to be rectified for the tuple-args format to function, but the rest of it went smoothly.&lt;br /&gt;&lt;br /&gt;This is a &lt;i&gt;real &lt;/i&gt;SymPy session using the hacked module and my own work-&lt;br /&gt;&lt;pre style=&quot;&quot;&gt;&lt;code style=&quot;color: black;&quot;&gt;1:  &amp;gt;&amp;gt;&amp;gt; O = MovingRefFrame('O')  &lt;br /&gt;2:  &amp;gt;&amp;gt;&amp;gt; F1 = MovingRefFrame('F1', trans_vel = 3 * O.x + 4 * O.y,  &lt;br /&gt;3:                    pos_vector_b = O.x + O.y + O.z, parentframe = O)  &lt;br /&gt;4:  &amp;gt;&amp;gt;&amp;gt; F1.pos_vector_in(O)  &lt;br /&gt;5:  (3*t + 1)*O.x + (4*t + 1)*O.y + O.z  &lt;br /&gt;6:  &amp;gt;&amp;gt;&amp;gt; Q = Symbol('Q', positive = True)  &lt;br /&gt;7:  &amp;gt;&amp;gt;&amp;gt; F2 = MovingRefFrame('F2', ang_vel = Q * O.z, parentframe = O)  &lt;br /&gt;8:  &amp;gt;&amp;gt;&amp;gt; F3 = MovingRefFrame('F3', pos_vector = F2.x, parentframe = F2)  &lt;br /&gt;9:  &amp;gt;&amp;gt;&amp;gt; F3.pos_vector_in(O)  &lt;br /&gt;10:  F2.x  &lt;br /&gt;11:  &amp;gt;&amp;gt;&amp;gt; O.express(F3.trans_acc_in(O))  &lt;br /&gt;12:  - Q**2*cos(Q*t)*O.x - Q**2*sin(Q*t)*O.y  &lt;br /&gt;13:  &amp;gt;&amp;gt;&amp;gt; P = Symbol('P')  &lt;br /&gt;14:  &amp;gt;&amp;gt;&amp;gt; F4 = MovingRefFrame('F4', orient_type = 'Axis', orient_amount = [P * t, F1.x], \  &lt;br /&gt;15:                    parentframe = F1)  &lt;br /&gt;16:  &amp;gt;&amp;gt;&amp;gt; F4.ang_vel_in(F3)  &lt;br /&gt;17:  P*F1.x - Q*O.z  &lt;br /&gt;18:  &amp;gt;&amp;gt;&amp;gt; F5 = MovingRefFrame('F5', orient_type = 'Axis', orient_amount = [Q, F1.x], \  &lt;br /&gt;19:                    trans_vel = ((0, 0, 1), 0), parentframe = F4)  &lt;br /&gt;20:  &amp;gt;&amp;gt;&amp;gt; F3.express(F5.pos_vector_in(O))  &lt;br /&gt;21:  (-t*sin(Q*t)*sin(P*t + Q) + 4*t*sin(Q*t) + 3*t*cos(Q*t) + sqrt(2)*sin(Q*t + pi/4))*F3.x + (-3*t*sin(Q*t) - t*sin(P*t + Q)*cos(Q*t) + 4*t*cos(Q*t) + sqrt(2)*cos(Q*t + pi/4))*F3.y + (t*cos(P*t + Q) + 1)*F3.z  &lt;br /&gt;22:  &amp;gt;&amp;gt;&amp;gt; F5.pos_vector_in(F4)  &lt;br /&gt;23:  - t*sin(Q)*F4.y + t*cos(Q)*F4.z  &lt;br /&gt;24:  &amp;gt;&amp;gt;&amp;gt; F5.trans_vel_in(O)  &lt;br /&gt;25:  (-P*t*cos(Q) - sin(Q))*F4.y + (-P*t*sin(Q) + cos(Q))*F4.z + 3*O.x + 4*O.y  &lt;br /&gt;&lt;/code&gt;&lt;/pre&gt;&lt;br /&gt;Line 3 means that frame F1 should have an initial position of O.x + O.y + O.z wrt O. Substituting t = 0 in the output at line 5 will confirm this. To put in the boundary conditions at some other value of time, user just has to enter the keyword arg 't'.&lt;br /&gt;Line 21 adequately shows how complicated things can get after a while.&lt;br /&gt;Line 19 is an example how a tuple argument can be used in the new framework to position/orient new frames wrt their parents. Line 19 essentially means that F5 will have a translational velocity of 1 * F5.z after being oriented as per the user's conditions.&lt;br /&gt;(All these things are adequately explained in the docs)&lt;br /&gt;&lt;br /&gt;This work with the old module convinced me that dynamicsymbols should also be a part of my own work, since it makes handling of time variables &lt;i&gt;considerably&lt;/i&gt; simpler. Hence, I added the function in my last commit to the PR.&lt;br /&gt;&lt;br /&gt;Last but not the least, I planned out some basic vector/scalar field functions for my E-M module. But more on that later.&lt;br /&gt;&lt;br /&gt;Now that I have my entire workspace up and running on my old laptop (temporarily), I will continue with the following work in the coming time-&lt;br /&gt;1) Enable users to enter initial orientation in the same way they enter the time-dependent orientation. As of now, they get to do so only by entering the initial rotation in terms of a vector. Awkward, I agree.&lt;br /&gt;2) Write tests for the MovingRefFrame and Particle classes as well as all the helper functions. Now that I have a system to test these things on, it will be much easier to do so.&lt;br /&gt;3) Start working on the last part of the new framework - dyadics.&lt;br /&gt;&lt;br /&gt;Thats all for now.&lt;br /&gt;Have a great week ahead :-)&lt;/div&gt;</description>
 	<pubDate>Sat, 13 Jul 2013 13:26:18 +0000</pubDate>
 	<author>noreply@blogger.com (Sachin Joglekar)</author>
-</item>
-<item>
-	<title>Chetna Gupta: Coupled Differential System</title>
-	<guid isPermaLink="false">http://geekiology.wordpress.com/?p=290</guid>
-	<link>http://geekiology.wordpress.com/2013/07/13/coupled-differential-system/</link>
-	<description>&lt;p&gt;Pseudo-Code for the coupled_differential_system in cds.py (Marked things differently to increase readability of the code snippets required in the method to solve coupled_differential_system)&lt;/p&gt;
-&lt;p&gt;   # taking the general case that is &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Calpha+%3D+-1+&amp;amp;bg=ffffff&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;\alpha = -1 &quot; class=&quot;latex&quot; title=&quot;\alpha = -1 &quot; /&gt;&lt;br /&gt;
-   # it &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Csqrt-1+does+not+%5Cin+K+&amp;amp;bg=ffffff&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;\sqrt-1 does not \in K &quot; class=&quot;latex&quot; title=&quot;\sqrt-1 does not \in K &quot; /&gt;&lt;br /&gt;
-   # &lt;img src=&quot;http://s0.wp.com/latex.php?latex=Dy1+%2B+b1%2Ay1+-+b2%2Ay2+%3D+c1+&amp;amp;bg=ffffff&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;Dy1 + b1*y1 - b2*y2 = c1 &quot; class=&quot;latex&quot; title=&quot;Dy1 + b1*y1 - b2*y2 = c1 &quot; /&gt;&lt;br /&gt;
-   # &lt;img src=&quot;http://s0.wp.com/latex.php?latex=Dy2+%2B+b2%2Ay1+%2B+b1%2Ay2+%3D+c2+&amp;amp;bg=ffffff&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;Dy2 + b2*y1 + b1*y2 = c2 &quot; class=&quot;latex&quot; title=&quot;Dy2 + b2*y1 + b1*y2 = c2 &quot; /&gt;&lt;br /&gt;
-   # so we have second order differential equations&lt;br /&gt;
-   # we are interested in finding s = s1 + &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Csqrt-1s2+&amp;amp;bg=ffffff&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;\sqrt-1s2 &quot; class=&quot;latex&quot; title=&quot;\sqrt-1s2 &quot; /&gt;&lt;/p&gt;
-&lt;pre class=&quot;brush: python; title: ; notranslate&quot;&gt;   fa = b1a*b2d + b1d*b2a*i
-   fd = b1d*b2d
-   ga = c1a*c2d + c1d*c2a*i
-   gd = c1d*c2d
-   _, (fa, fd) = weak_normalizer(fa, fd, DE)
-   a, (ba, bd), (ca, cd), hn = normal_denom(fa, fd, ga, gd, DE)
-   A, B, C, hs = special_denom(a, ba, bd, ca, cd, DE)
-   g = gcd(A, B)
-   A, B, G = A.quo(g), B.quo(g), [gia.cancel(gid*g, include=True) for
-    gia, gid in G]
-   Q, M = prde_linear_constraints(A, B, G, DE)
-   M, _ = constant_system(M, zeros(M.rows, 1), DE)
-   n = bound_degree(A, B, C, DE)
-   b, c, m, alpha, beta = spde(A, B, C, n, DE)
-   # either proved that there exists y such that
-   # y = (alpha*q + beta)/m &amp;amp;amp;&amp;amp;amp; Dq + bq = c
-   # else return &quot;No Solution&quot;
-   /non-cancellation cases
-   if deg(b) &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cle+&amp;amp;bg=ffffff&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;\le &quot; class=&quot;latex&quot; title=&quot;\le &quot; /&gt; DE.d.degree(DE.t) - 1 and (derivation(DE.t, DE)==1or DE.d.degree(DE.t) &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%26gt%3B%3D+2%29+&amp;amp;bg=ffffff&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;&amp;gt;= 2) &quot; class=&quot;latex&quot; title=&quot;&amp;gt;= 2) &quot; /&gt; :
-       H, A = prde_no_cancel_b_small(b, Q, n, DE)
-   else if b!=0 and (derivation(DE.t, DE)==1 or DE.d.degree(DE.t) &amp;amp;gt; max(0, derivation(DE.t, DE) - 1 )):
-       H, A = prde_no_cancel_b_large(b, Q, n, DE)
-
-    # A = (c1...cm, d1.. dr)T q = &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Csum+d_i%2Ah_i+&amp;amp;bg=ffffff&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;\sum d_i*h_i &quot; class=&quot;latex&quot; title=&quot;\sum d_i*h_i &quot; /&gt;
-    return y
-    /cancellation cases&amp;lt;/strong&amp;gt;&amp;lt;/code&amp;gt;
-
-    case = DE.case
-    else if case == 'primitive':
-       (q1, q2) = cds_cancel_prim(a, b1, b2, c1, c2, DE, n)
-    else if case == 'exp':
-       (q1, q2) = cds_cancel_exp(a, b1, b2, c1, c2, DE, n)
-    else if case == 'tan' :&amp;lt;/span&amp;gt;
-       (q1, q2) = cds_cancel_tan(b1, b2, c1, c2, DE, n)  
-    else if case == 'other non linear':
-       (q1, q2) = cds_cancel_non_linear(b1, b2, c1, c2, DE, n)
-    return y
-&lt;/pre&gt;
-&lt;p&gt;&lt;em&gt;&lt;strong&gt;Where Y = &lt;code&gt;(alpha*q + beta)/m&lt;/code&gt; &lt;/strong&gt;&lt;/em&gt;&lt;em&gt;&lt;strong&gt;q = q1 +  sqrt(-1)*q2&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;&lt;em&gt;&lt;strong&gt;
-&lt;p&gt;There have been a lot of changes in the above code (which shows how the files would integrate to get the cds working)&lt;/p&gt;
-&lt;p&gt;————So here is Version 1.1 for the above —————–&lt;/p&gt;
-&lt;pre class=&quot;brush: python; title: ; notranslate&quot;&gt;def coupled_DE_System()
-    from sympy.integrals.rde import (no_cancel_b_large,
-    no_cancel_b_small, no_cancel_equal)
-    b1a, b1d = frac_in(b1, DE.t)
-    b2a, b2d = frac_in(b2, DE.t)
-    c1a, c1d = frac_in(c1, DE.t)
-    c2a, c2d = frac_in(c2, DE.t)
-    fa = b1a*b2d + b1d*b2a*sqrt(-1) 
-    fd = b1d*b2d
-    ga = c1a*c2d + c1d*c2a*sqrt(-1)
-    gd = c1d*c2d
-    _, (fa, fd) = weak_normalizer(fa, fd, DE)
-    a, (ba, bd), (ca, cd), hn = normal_denom(fa, fd, ga, gd, DE)
-    A, B, C, hs = special_denom(a, ba, bd, ca, cd, DE)
-    n = bound_degree(A, B, C, DE)
-    b, c, m, alpha, beta = spde(A, B, C, n, DE)
-    # non cancellation cases solve for q
-    if not b.is_zero and (DE.case == 'base' or b.degree(DE.t) &amp;amp;gt; max(0, DE.d.degree(DE.t) - 1)):
-        try:
-           q = no_cancel_b_large(b, c, n, DE)
-           return Poly(cancel((alpha*q + beta)/m) , DE.t)
-        except NonElementaryIntegralException:
-           return None
-    elif (b.is_zero or b.degree(DE.t) &amp;amp;lt; DE.d.degree(DE.t) - 1) and (DE.case == 'base' or DE.d.degree(DE.t) &amp;amp;gt;= 2):
-        try:
-           q = no_cancel_b_small(b, c, n, DE)
-           return Poly(cancel((alpha*q + beta)/m) , DE.t)
-        except NonElementaryIntegralException:
-           return None
-    elif DE.d.degree(DE.t) &amp;amp;gt;= 2 and b.degree(DE.t) == DE.d.degree(DE.t) - 1 and n &amp;amp;gt; -b.as_poly(DE.t).LC()/DE.d.as_poly(DE.t).LC():
-        try:
-           q = no_cancel_equal(b, c, n, DE)
-           return Poly(cancel((alpha*q + beta)/m) , DE.t)
-        except NonElementaryIntegralException:
-           return None
-    # Does not fall in non cancellation
-    # Hence cancellation cases 
-    case = DE.case
-    a = Poly(sqrt(-1) , DE.t)
-    if case == 'primtive':
-       (q1, q2) = cds_cancel_prim(a, b1, b2, c1, c2, DE, n)
-    if case == 'exp':
-       (q1, q2) = cds_cancel_exp(a, b1, b2, c1, c2, DE, n)
-    if case == 'tan':
-       (q1, q2) = cds_cancel_tan(a, b1, b2, c1, c2, DE, n)
-    return Poly(cancel(((q1 + sqrt(-1)*q2)*alpha + beta)/m), DE.t)&amp;lt;/p&amp;gt;
-&lt;/pre&gt;
-&lt;p&gt;I have written this code here due to unavailability of pseudo code and not-working test-cases. So don’t want anything to be left as my guess work. Comments/Reviews about the code or the style of implementation are most welcome&lt;/p&gt;
-&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/geekiology.wordpress.com/290/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/geekiology.wordpress.com/290/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=geekiology.wordpress.com&amp;amp;blog=36553244&amp;amp;post=290&amp;amp;subd=geekiology&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;&lt;/strong&gt;&lt;/em&gt;</description>
-	<pubDate>Sat, 13 Jul 2013 08:16:37 +0000</pubDate>
 </item>
 
 </channel>
