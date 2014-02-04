@@ -1,122 +1,131 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 
-### Fancy Planet HTML template.
-### 
-### When combined with the stylesheet and images in the output/ directory
-### of the Planet source, this gives you a much prettier result than the
-### default examples template and demonstrates how to use the config file
-### to support things like faces
-### 
-### For documentation on the more boring template elements, see
-### examples/config.ini and examples/index.html.tmpl in the Planet source.
-
 <head>
-<title><TMPL_VAR name></title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<meta name="generator" content="<TMPL_VAR generator ESCAPE="HTML">">
-<link rel="stylesheet" href="planet.css" type="text/css">
-<TMPL_IF feedtype>
-<link rel="alternate" href="<TMPL_VAR feed ESCAPE="HTML">" title="<TMPL_VAR channel_title_plain ESCAPE="HTML">" type="application/<TMPL_VAR feedtype>+xml">
-</TMPL_IF>
+  <title><TMPL_VAR name></title>
+
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<link rel="shortcut icon" type="image/png" href="images/logo.png">
+	<link rel="alternate" type="application/atom+xml" title="<TMPL_VAR title ESCAPE="HTML"> Atom 1.0" href="<TMPL_VAR link ESCAPE="HTML">atom.xml">
+	<link rel="alternate" type="application/rss+xml" title="<TMPL_VAR title ESCAPE="HTML"> RSS 2.0" href="<TMPL_VAR link ESCAPE="HTML">rss20.xml">
+	<link rel="stylesheet" href="planet.css" type="text/css">
+
+
+
+
+	
 </head>
 
 <body>
-<h1><TMPL_VAR name></h1>
-<TMPL_VAR admin>
 
-<TMPL_LOOP Items>
-<TMPL_IF new_date>
-<TMPL_UNLESS __FIRST__>
-### End <div class="channelgroup">
-</div>
-### End <div class="daygroup">
-</div>
-</TMPL_UNLESS>
-<div class="daygroup">
-<h2><TMPL_VAR new_date></h2>
-</TMPL_IF>
+<div id="page">
+	<div class="topbar">
+		<div id="sympy-title">
+			<a href="http://www.sympy.org"><strong>Sympy</strong>.ORG</a>
+		</div>
 
-<TMPL_IF new_channel>
-<TMPL_UNLESS new_date>
-### End <div class="channelgroup">
-</div>
-</TMPL_UNLESS>
-<div class="channelgroup">
+		<div id="planet-banner">
+			<a href ="/#">
+			<img id="planet-logo" src="images/logo.png"  alt="Planet Sympy" title="Planet Sympy" style="vertical-align:middle"/>
+			Planet Sympy
+			</a>
 
-### Planet provides template variables for *all* configuration options for
-### the channel (and defaults), even if it doesn't know about them.  We
-### exploit this here to add hackergotchi faces to our channels.  Planet
-### doesn't know about the "face", "facewidth" and "faceheight" configuration
-### variables, but makes them available to us anyway.
-
-<h3><a href="<TMPL_VAR channel_link ESCAPE="HTML">" title="<TMPL_VAR channel_title_plain ESCAPE="HTML">"><TMPL_VAR channel_name></a></h3>
-<TMPL_IF channel_face>
-<img class="face" src="images/<TMPL_VAR channel_face ESCAPE="HTML">" width="<TMPL_VAR channel_facewidth ESCAPE="HTML">" height="<TMPL_VAR channel_faceheight ESCAPE="HTML">" alt="">
-</TMPL_IF>
-</TMPL_IF>
+		</div>
+	</div>
 
 
-<div class="entrygroup" id="<TMPL_VAR id>"<TMPL_IF channel_language> lang="<TMPL_VAR channel_language>"</TMPL_IF>>
-<TMPL_IF title>
-<h4<TMPL_IF title_language> lang="<TMPL_VAR title_language>"</TMPL_IF>><a href="<TMPL_VAR link ESCAPE="HTML">"><TMPL_VAR title></a></h4>
-</TMPL_IF>
-<div class="entry">
-<div class="content"<TMPL_IF content_language> lang="<TMPL_VAR content_language>"</TMPL_IF>>
-<TMPL_VAR content>
-</div>
-
-### Planet also makes available all of the information from the feed
-### that it can.  Use the 'planet-cache' tool on the cache file for
-### a particular feed to find out what additional keys it supports.
-### Comment extra fields are 'author' and 'category' which we
-### demonstrate below.
-
-<p class="date">
-<a href="<TMPL_VAR link ESCAPE="HTML">"><TMPL_IF author>by <TMPL_VAR author ESCAPE="HTML"> at </TMPL_IF><TMPL_VAR date><TMPL_IF category> under <TMPL_VAR category></TMPL_IF></a>
-</p>
-</div>
-</div>
-
-<TMPL_IF __LAST__>
-### End <div class="channelgroup">
-</div>
-### End <div class="daygroup">
-</div>
-</TMPL_IF>
-</TMPL_LOOP>
 
 
-<div class="sidebar">
-<img src="images/sympy-100px.png" width="100" height="84" alt="">
+	<div id="content">
 
-<h2>Subscriptions</h2>
-<ul>
-<TMPL_LOOP Channels>
-<li>
-<a href="<TMPL_VAR url ESCAPE="HTML">" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a <TMPL_IF link>href="<TMPL_VAR link ESCAPE="HTML">" </TMPL_IF><TMPL_IF message>class="message" title="<TMPL_VAR message ESCAPE="HTML">"</TMPL_IF><TMPL_UNLESS message>title="<TMPL_VAR title_plain ESCAPE="HTML">"</TMPL_UNLESS>><TMPL_VAR name></a>
-</li>
-</TMPL_LOOP>
-</ul>
+	<TMPL_IF banner_message>
+	<div class="banner"><TMPL_VAR banner_message></div>
+	</TMPL_IF>
 
-<p>
-<strong>Last updated:</strong><br>
-<TMPL_VAR date><br>
-<em>All times are UTC.</em><br>
-<br>
-Powered by:<br>
-<a href="http://www.planetplanet.org/"><img src="images/planet.png" width="80" height="15" alt="Planet" border="0"></a>
-</p>
+	<TMPL_LOOP Items>
 
-<p>
-<h2>Planetarium:</h2>
-<ul>
-<li><a href="http://planet.scipy.org/">Planet SciPy</a></li>
-<li><a href="http://planet.python.org/">Planet Python</a></li>
-<li><a href="http://planet.sagemath.org/">Planet Sage</a></li>
-</ul>
-</p>
-</div>
+		<TMPL_IF new_date>
+			<h2 class="date"><TMPL_VAR new_date></h2>
+		</TMPL_IF>
+
+		<div class="entry<TMPL_IF channel_nick> <TMPL_VAR channel_nick></TMPL_IF>">
+			 <div id="person-info">
+				<a href="<TMPL_VAR channel_link ESCAPE="HTML">" title="<TMPL_VAR channel_title ESCAPE="HTML">"><TMPL_VAR channel_name><TMPL_IF channel_real><br><TMPL_VAR channel_real></TMPL_IF><TMPL_IF channel_nick><br>(<TMPL_VAR channel_nick>)</TMPL_IF></a>
+			</div>				
+
+			<div class="post">
+				<div class="post-header">
+					<TMPL_IF title><h3 class="post-title"><a href="<TMPL_VAR link ESCAPE="HTML">"><TMPL_VAR title></a></h3></TMPL_IF>
+				</div> <!-- /post-header -->
+
+				<div class="post-contents <TMPL_IF channel_fixedwidth>post-fixedwidth</TMPL_IF>">
+					<TMPL_VAR content>
+				</div> <!-- /post-contents -->
+
+				<div class="post-footer">
+					<p><a href="<TMPL_VAR link ESCAPE="HTML">"><TMPL_VAR date></a></p>
+				</div> <!-- /post-footer -->
+
+				<b class="vt lt"></b><b class="vt rt"></b><b class="hz to"></b><b class="hz bo"></b>
+				<b class="cr tl"></b><b class="cr tr"></b><b class="cr bl"></b><b class="cr br"></b>
+			</div> <!-- /post -->
+	</div> <!-- /entry -->
+
+	</TMPL_LOOP>
+
+</div> <!-- /content -->
+
+	<div class="sidebar">
+	    <h2>Subscriptions:</h2>
+
+	      <ul>
+	      <TMPL_LOOP Channels>
+		<li>
+		<a href="<TMPL_VAR url ESCAPE="HTML">" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a <TMPL_IF link>href="<TMPL_VAR link ESCAPE="HTML">" </TMPL_IF><TMPL_IF message>class="message" title="<TMPL_VAR message ESCAPE="HTML">"</TMPL_IF><TMPL_UNLESS message>title="<TMPL_VAR title_plain ESCAPE="HTML">"</TMPL_UNLESS>><TMPL_VAR name></a>
+		</li>
+	      </TMPL_LOOP>
+	      </ul>
+
+	    <h2>
+	      <ul>
+	      <strong>Last updated:</strong><br>
+	      <TMPL_VAR date><br>
+	      <em>All times are UTC.</em><br>
+	      <br>
+	      Powered by:<br>
+	      <a href="http://www.planetplanet.org/"><img src="images/planet.png" width="80" height="15" alt="Planet" border="0"></a>
+	      </ul>
+	    </h2>
+
+	    <p>
+	      <h2>Planetarium:</h2>
+
+	      <ul>
+		<li><a href="http://www.planetapache.org/">Planet Apache</a></li>
+		<li><a href="http://planet.debian.net/">Planet Debian</a></li>
+		<li><a href="http://planet.freedesktop.org/">Planet freedesktop.org</a></li>
+		<li><a href="http://planet.gnome.org/">Planet GNOME</a></li>
+		<li><a href="http://planetsun.org/">Planet Sun</a></li>
+		<li><a href="http://fedora.linux.duke.edu/fedorapeople/">Fedora People</a></li>
+		<li><a href="http://www.planetplanet.org/">more...</a></li>
+	      </ul>
+	    </p>
+	</div><!-- / sidebar -->
+	<div id="footer">
+	      
+            <div class="block">
+              <p>Copyright © 2012 SymPy Development Team.
+                &nbsp;
+                &nbsp;
+                &nbsp;
+                This page is open source. Fork <a href="https://planet.sympy.org">the project on GitHub</a> to edit it.
+                &nbsp;
+                &nbsp;
+                &nbsp;
+              </p>
+            </div>
+        </div> <!-- /footer -->
+</div> <!-- /page -->
 </body>
 
 </html>
