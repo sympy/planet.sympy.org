@@ -33,7 +33,7 @@
 
 
 
-<h3><a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
+<h3><a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer (old)</a></h3>
 
 
 <div class="entrygroup" id="http://asmeurersympy.wordpress.com/?p=1413">
@@ -52,6 +52,193 @@
 
 <p class="date">
 <a href="http://asmeurersympy.wordpress.com/2014/04/05/this-blog-has-moved/">by Aaron Meurer at April 05, 2014 01:16 AM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
+<h2>February 09, 2014</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://asmeurer.github.io/" title="Aaron Meurer's Blog">Aaron Meurer</a></h3>
+
+
+<div class="entrygroup" id="http://asmeurer.github.io/posts/moving-to-github-pages-with-nikola/">
+<h4 lang="en"><a href="http://asmeurer.github.io/posts/moving-to-github-pages-with-nikola/">Moving to GitHub pages with Nikola</a></h4>
+<div class="entry">
+<div class="content">
+<div><p>So I've finally decided to move my blog from Wordpress to GitHub pages.  I
+highly recommend it if you are technically skilled enough to do it. I was
+getting pretty annoyed at Wordpress. It forces you to write your posts in
+html (or else using their WYSIWYG editor), the wordpress.com is locked down,
+so you can't add any Javascript, their math is stuck in the past rendering png
+instead of using MathJax. The list goes on.</p>
+<p>With GitHub pages, I can write my posts in Markdown, and I have full control
+over everything. And there is no lock in. If I decide I don't like the
+software that is generating the posts, I can easily move to something else,
+since the post content itself is all Markdown (or the occasional rst or
+IPython notebook if I want to do something that Markdown doesn't support). I
+can use MathJax for math (like \( e^{i\pi} + 1 = 0 \)). Wordpress.com
+doesn't let you install abtirary Javascript on your blog, so you can't do
+things like install MathJax or enable some cool sidebar thing (like a Twitter
+feed).</p>
+<h2>Setting up GitHub Pages</h2>
+<p>First, you need to set up GitHub pages. This is a bit confusing, because there
+are actually two kinds of GitHub pages, user pages and project pages. User
+pages are if you have a repo named <code>username.github.io</code> (or <code>.com</code>). The pages
+are served from the <code>master</code> branch.</p>
+<p>For project pages, you add a <code>gh-pages</code> branch to any one of your projects,
+and GitHub hosts the content automatically at
+<code>username.github.io/projectname</code>. I originally had my blog content at
+<code>asmeurer.github.io</code>, but I didn't like that I had to do everything in master,
+both the generated and original content. So instead I created a repo called
+<code>blog</code>. I have my content in the <code>master</code> branch and the generated pages in
+the <code>gh-pages</code> branch (more on this later). At my
+<a href="https://github.com/asmeurer/asmeurer.github.com"><code>asmeurer.github.com</code></a> repo,
+I just have for now a basic redirect to the blog. In the future, I may want to
+put additional, non-blog content on the website, and it would go there (or in
+a separate project repo with its own <code>gh-pages</code> branch).</p>
+<h2>Nikola</h2>
+<p>I had initially planned on using
+<a href="http://blog.getpelican.com/">Pelican</a>. However, I got stalled on the
+Wordpress import. I like that Pelican is written in Python, but I was not too
+keen on their abrasive
+<a href="https://github.com/getpelican/pelican/blob/master/LICENSE">license</a>. Frankly,
+I shouldn't say too many bad things about Pelican because I never really tried
+that hard with it.</p>
+<p>I have decided to try <a href="http://getnikola.com/">Nikola</a> instead. It's also
+written in Python. It has a very nice
+<a href="https://github.com/getnikola/nikola/blob/master/LICENSE.txt">license</a>. I like
+the philosophy of the <a href="http://getnikola.com/handbook.html">manual</a>:</p>
+<blockquote>
+<p>DON'T READ THIS MANUAL. IF YOU NEED TO READ IT I FAILED, JUST USE THE THING.</p>
+</blockquote>
+<p>I've also discovered that the
+<a href="https://groups.google.com/forum/#!forum/nikola-discuss">Nikola community</a> is
+<em>very</em> nice. And of course, even if Nikola ends up not being for me, it will
+be easy to switch, because my actual content is just some Markdown files that
+I own.</p>
+<h3>Getting started</h3>
+<p>Getting started with Nikola is pretty easy. First, you need to install it. It
+has a <em>ton</em> of dependencies (fortunately all Python, so it won't be that
+hard). In addition to the ones in the requirements.txt, you should also
+install <code>markdown</code> and <code>webassets</code>. While using <code>nikola</code>, it will tell you if
+you don't have something installed that you should, so if you see that, just
+install what it tells you to.  If you use <code>conda</code> and Mac OS X, I have
+uploaded all the dependencies to my <a href="https://binstar.org/asmeurer/">Binstar</a>,
+so you can just <code>conda install -c asmeurer nikola</code>. Oh and don't worry, Nikola
+and its dependencies fully support Python 3 (I wouldn't be using it if they
+didn't).</p>
+<p>Then you just run the commands from
+http://getnikola.com/handbook.html#all-you-need-to-know.</p>
+<p>One thing that doesn't tell you is that after you init the site, you should
+walk through <code>conf.py</code> and change the settings to your liking.</p>
+<p>Another trick not there is that you can add</p>
+<div class="codehilite"><pre><span class="nb">eval</span> <span class="s2">"`nikola tabcompletion`"</span>
+</pre></div>
+
+
+<p>to your Bash profile to get tab completion.</p>
+<h3>Tricks</h3>
+<p>Here are some useful tricks:</p>
+<ul>
+<li>
+<p>To enable MathJax, you have to type <code>mathjax</code> in a line by itself in the
+metadata file. There are some bugs right now, but ideally you could do inline
+math with <code>$math$</code> and display math with <code>$$math$$</code>. <code>$math$</code> doesn't work
+currently, but you can do <code>\\(math\\)</code> (both <code>\</code>s are required, although this
+is likely a bug). You can do <code>\\[math\\]</code> for display math.  Here are some
+examples. Inline: \( \sin ^2{x} + \cos^2{x} = 1\). Display: $$ e^{i\pi} + 1 = 0 .$$</p>
+</li>
+<li>
+<p>Your one-stop command when blogging is <code>nikola auto</code>. This requires
+  <code>livereload</code>. This will serve the blog on localhost, and automatically
+  rebuild it when any change is made (and I really mean <em>any</em> change: it can
+  even detect when you change Nikola itself).</p>
+</li>
+<li>
+<p>I have the following in my conf.py to deploy:</p>
+</li>
+</ul>
+<div class="codehilite"><pre><span class="n">DEPLOY_COMMANDS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s">"git checkout gh-pages"</span><span class="p">,</span>
+    <span class="s">"rsync -rPv --delete-after --exclude old_blog --exclude .git --exclude .gitignore --exclude cache/ --exclude .doit.db.db output/ ."</span><span class="p">,</span>
+    <span class="s">"git add -A"</span><span class="p">,</span>
+    <span class="s">"git commit -a -m 'Updating blog content'"</span><span class="p">,</span>
+    <span class="s">"git push"</span><span class="p">,</span>
+    <span class="s">"git checkout master"</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+
+
+<p>WARNING: These commands are dangerous. If you don't properly exclude things
+like <code>.git</code>, you will wipe your entire git history. I <em>highly</em> recommend
+committing everything and pushing to GitHub before deploying.</p>
+<ul>
+<li>Use</li>
+</ul>
+<div class="codehilite"><pre><span class="n">_site</span><span class="o">/</span>
+<span class="o">*</span><span class="p">.</span><span class="n">pyc</span>
+<span class="p">.</span><span class="n">DS_Store</span>
+<span class="p">.</span><span class="n">doit</span><span class="p">.</span><span class="n">db</span><span class="p">.</span><span class="n">db</span>
+<span class="n">cache</span><span class="o">/</span>
+<span class="n">output</span><span class="o">/</span>
+</pre></div>
+
+
+<p>for your <code>.gitignore</code>.</p>
+<ul>
+<li>Despite what it says on the Nikola page, be sure to read the docs, because
+there are a lot of cool features you won't know about unless you read about
+them. Also be sure to read through <code>conf.py</code>.</li>
+</ul>
+<h3>Wordpress import</h3>
+<p><strong>This is something that I am still figuring out. You can see the progress at
+  <a href="http://asmeurer.github.io/blog/old_blog">http://asmeurer.github.io/blog/old_blog</a></strong></p>
+<p>Importing from Wordpress is pretty easy actually (at least in theory). First
+you need to go to the Wordpress site dashboard and go to "Export" from the
+"Tools" menu. From here you can download an XML file with all your
+content. Then just do</p>
+<div class="codehilite"><pre><span class="n">nikola</span> <span class="n">import_wordpress</span> <span class="n">export_file</span><span class="p">.</span><span class="n">xml</span>
+</pre></div>
+
+
+<p>Note that the current version of Nikola as of this writing (6.3.0) doesn't do
+this right, so you'll need to use the
+<a href="https://github.com/getnikola/nikola">git master</a>. There are some issues with
+the import, since Wordpress has its own markup that it doesn't know everything
+about, so you may need to go in and fix things. Or report them as bugs to
+Nikola and reimport when they are fixed.</p>
+<p>You'll need to go through the posts and make sure that they are rendered
+correctly (this is one reason I haven't finished doing it yet).</p>
+<p>For comments, you first need to create a Disqus account, and enable it in your
+conf.py. You should then upload the xml file that you exported from Wordpress
+to Disqus. At this point, the comments should just work, because Nikola sets
+the Disqus url for the imported comments to the old Wordpress url (look at the
+Disqus section of one of the built pages).</p>
+<p>I don't know how to automatically backlink from Wordpress back to
+Nikola. Maybe I should just automatically generate some links and paste them
+in manually.</p></div></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://asmeurer.github.io/posts/moving-to-github-pages-with-nikola/">by Aaron Meurer at February 09, 2014 11:19 PM</a>
 </p>
 </div>
 </div>
@@ -1235,7 +1422,7 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
 
 
 
-<h3><a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
+<h3><a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer (old)</a></h3>
 
 
 <div class="entrygroup" id="http://asmeurersympy.wordpress.com/?p=1401">
@@ -1821,7 +2008,7 @@ Why? Well, without going too much into detail, the solution to this PDE, <img sr
 
 
 
-<h3><a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer</a></h3>
+<h3><a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer (old)</a></h3>
 
 
 <div class="entrygroup" id="http://asmeurersympy.wordpress.com/?p=1362">
@@ -2784,46 +2971,6 @@ Signing- off <img src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gi
 </div>
 
 
-
-</div>
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://sophiessympyblog.wordpress.com" title="sophie's sympy blog">Katja Sophie Hotz</a></h3>
-
-
-<div class="entrygroup" id="http://sophiessympyblog.wordpress.com/?p=197">
-<h4 lang="en"><a href="http://sophiessympyblog.wordpress.com/2013/07/21/fifth-week/">Fifth week</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p style="text-align: justify;">I began this week with tracking down two problems with the modular GCD algorithm for multivariate integer polynomials. The first one was fixed by choosing evaluation points randomly instead of in a fixed order. For example, this happened with the polynomials <img src="http://s0.wp.com/latex.php?latex=f+%3D+x+%2B+y&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="f = x + y" class="latex" title="f = x + y" /> and <img src="http://s0.wp.com/latex.php?latex=g+%3D+x+%2B+y+%2B+z&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="g = x + y + z" class="latex" title="g = x + y + z" /> because <img src="http://s0.wp.com/latex.php?latex=z+%3D+0&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="z = 0" class="latex" title="z = 0" /> is unlucky for every prime, but this was never detected.<br />
-The second problem occurred with polynomials in many variables. If one of the first variables was evaluated at an unlucky point, the algorithm would try out every combination of evaluation points for the remaining variables before the unlucky one was discarded. This was fixed by giving up an evaluation point if too many failures happen.<br />
-The good news is that now <code>bin/test</code> passes when <code>heugcd</code> is replaced by <code>modgcd_multivariate</code>.</p>
-<p style="text-align: justify;">After that, I started implementing the modular GCD algorithm for polynomials over (simple) algebraic function fields, as described in [1]. The setting is as follows. We consider the field of rational functions in the parameters <img src="http://s0.wp.com/latex.php?latex=t_1%2C+%5Cldots%2C+t_k&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="t_1, \ldots, t_k" class="latex" title="t_1, \ldots, t_k" />, i.e. <img src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Q%28t_1%2C+%5Cldots%2C+t_k%29&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\mathbb Q(t_1, \ldots, t_k)" class="latex" title="\mathbb Q(t_1, \ldots, t_k)" />. Since we also want to be able to work with expressions like <img src="http://s0.wp.com/latex.php?latex=%5Csqrt%7B2%7D%2C+%5C%2C+%5Csqrt%7Bt_1%7D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\sqrt{2}, \, \sqrt{t_1}" class="latex" title="\sqrt{2}, \, \sqrt{t_1}" /> etc., we construct a suitable algebraic extension <img src="http://s0.wp.com/latex.php?latex=L+%3D+%5Cmathbb+Q%28t_1%2C+%5Cldots%2C+t_k%29%5Bz%5D+%2F+%5Clangle+m%28z%29+%5Crangle&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="L = \mathbb Q(t_1, \ldots, t_k)[z] / \langle m(z) \rangle" class="latex" title="L = \mathbb Q(t_1, \ldots, t_k)[z] / \langle m(z) \rangle" />, where <img src="http://s0.wp.com/latex.php?latex=m%28z%29+%5Cin+%5Cmathbb+Q%28t_1%2C+%5Cldots%2C+t_k%29%5Bz%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="m(z) \in \mathbb Q(t_1, \ldots, t_k)[z]" class="latex" title="m(z) \in \mathbb Q(t_1, \ldots, t_k)[z]" /> is monic and irreducible. Our goal now is to calculate the GCD of two univariate polynomials <img src="http://s0.wp.com/latex.php?latex=f%28x%29%2C+g%28x%29+%5Cin+L%5Bx%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="f(x), g(x) \in L[x]" class="latex" title="f(x), g(x) \in L[x]" />.</p>
-<p style="text-align: justify;">First, the problem is reduced to polynomials over <img src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Z%5Bt_1%2C+%5Cldots%2C+t_k%5D%5Bz%5D+%2F+%5Clangle+m%28z%29+%5Crangle&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\mathbb Z[t_1, \ldots, t_k][z] / \langle m(z) \rangle" class="latex" title="\mathbb Z[t_1, \ldots, t_k][z] / \langle m(z) \rangle" /> by clearing fractions in <img src="http://s0.wp.com/latex.php?latex=f&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="f" class="latex" title="f" /> and <img src="http://s0.wp.com/latex.php?latex=g&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="g" class="latex" title="g" />. So basically, we are working with polynomials <img src="http://s0.wp.com/latex.php?latex=f%2C+g+%5Cin+%5Cmathbb+Z%5Bt_1%2C+%5Cldots%2C+t_k%5D%5Bz%2C+x%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="f, g \in \mathbb Z[t_1, \ldots, t_k][z, x]" class="latex" title="f, g \in \mathbb Z[t_1, \ldots, t_k][z, x]" />. As always, the main loop picks suitable prime numbers <img src="http://s0.wp.com/latex.php?latex=p&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="p" class="latex" title="p" />, calculates the GCD of <img src="http://s0.wp.com/latex.php?latex=f+%5C%3B+%5Cmathrm%7Bmod%7D+%5C%2C+p&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="f \; \mathrm{mod} \, p" class="latex" title="f \; \mathrm{mod} \, p" /> and <img src="http://s0.wp.com/latex.php?latex=g+%5C%3B+%5Cmathrm%7Bmod%7D+%5C%2C+p&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="g \; \mathrm{mod} \, p" class="latex" title="g \; \mathrm{mod} \, p" /> with algorithm P and combines the new result with previous ones (for different primes) using the Chinese Remainder Theorem. Here we only pick those prime numbers and GCDs, where the leading terms match the one of the new GCD and obtain <img src="http://s0.wp.com/latex.php?latex=c+%5C%3B+%5Cmathrm%7Bmod%7D%5C%2C+m_c&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="c \; \mathrm{mod}\, m_c" class="latex" title="c \; \mathrm{mod}\, m_c" />. Next we use integer rational reconstruction (see [2]) on the coefficients of <img src="http://s0.wp.com/latex.php?latex=c+%5C%3B+%5Cmathrm%7Bmod%7D%5C%2C+m_c&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="c \; \mathrm{mod}\, m_c" class="latex" title="c \; \mathrm{mod}\, m_c" />, which tries to calculate <img src="http://s0.wp.com/latex.php?latex=%5Cfrac+a+b+%5Cin+%5Cmathbb+Q&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\frac a b \in \mathbb Q" class="latex" title="\frac a b \in \mathbb Q" /> from <img src="http://s0.wp.com/latex.php?latex=a+b%5E%7B-1%7D+%5C%3B+%5Cmathrm%7Bmod%7D+%5C%2C+m_c&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="a b^{-1} \; \mathrm{mod} \, m_c" class="latex" title="a b^{-1} \; \mathrm{mod} \, m_c" />. This will only succeed if <img src="http://s0.wp.com/latex.php?latex=a&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="a" class="latex" title="a" /> and <img src="http://s0.wp.com/latex.php?latex=b&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="b" class="latex" title="b" /> are smaller than <img src="http://s0.wp.com/latex.php?latex=%5Csqrt%7B%5Cfrac+%7Bm_c%7D+2%7D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\sqrt{\frac {m_c} 2}" class="latex" title="\sqrt{\frac {m_c} 2}" />. Finally we check if we have found our GCD with trial division.</p>
-<p style="text-align: justify;">Algorithm P works by recursively evaluating the parameters <img src="http://s0.wp.com/latex.php?latex=t_1%2C+%5Cldots%2C+t_k&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="t_1, \ldots, t_k" class="latex" title="t_1, \ldots, t_k" /> for <img src="http://s0.wp.com/latex.php?latex=f%2C+g&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="f, g" class="latex" title="f, g" /> and <img src="http://s0.wp.com/latex.php?latex=m&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="m" class="latex" title="m" />. When there are no parameters left, we have two polynomials in <img src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Z_p%5Bz%5D+%2F+%5Clangle+m%28z%29+%5Crangle+%5Bx%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\mathbb Z_p[z] / \langle m(z) \rangle [x]" class="latex" title="\mathbb Z_p[z] / \langle m(z) \rangle [x]" />. Now we try to use the Euclidean Algorithm to compute their GCD. Because <img src="http://s0.wp.com/latex.php?latex=m%28z%29&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="m(z)" class="latex" title="m(z)" /> may not be irreducible anymore, <img src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Z_p%5Bz%5D+%2F+%5Clangle+m%28z%29+%5Crangle&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\mathbb Z_p[z] / \langle m(z) \rangle" class="latex" title="\mathbb Z_p[z] / \langle m(z) \rangle" /> is only a ring in general and we may encounter zero divisors. Therefore, it is possible that the Euclidean Algorithm fails. If a recursive call of algorithm P fails, then we have to choose a different evaluation point. Subresults are later combined with similar techniques as above. Again, we verify the result using trial division.</p>
-<p style="text-align: justify;">Next week I hope to finish a working version of this algorithm.</p>
-<p style="text-align: justify;">[1] <a href="http://www.cecm.sfu.ca/~mmonagan/papers/AFGCD.pdf" rel="nofollow">http://www.cecm.sfu.ca/~mmonagan/papers/AFGCD.pdf</a><br />
-[2] <a href="http://dl.acm.org/citation.cfm?id=806398" rel="nofollow">http://dl.acm.org/citation.cfm?id=806398</a></p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/197/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/197/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=197&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://sophiessympyblog.wordpress.com/2013/07/21/fifth-week/">by katjasophie at July 21, 2013 02:58 PM</a>
-</p>
-</div>
-</div>
-
-
 </div>
 
 </div>
@@ -2835,7 +2982,10 @@ The good news is that now <code>bin/test</code> passes when <code>heugcd</code> 
 <h2>Subscriptions</h2>
 <ul>
 <li>
-<a href="http://asmeurersympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://asmeurersympy.wordpress.com" class="message" title="no activity in 7 days">Aaron Meurer</a>
+<a href="http://asmeurer.github.io/blog/rss.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://asmeurer.github.io/" class="message" title="no activity in 7 days">Aaron Meurer</a>
+</li>
+<li>
+<a href="http://asmeurersympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://asmeurersympy.wordpress.com" class="message" title="no activity in 7 days">Aaron Meurer (old)</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/936818886435977143/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://addisoncugini.blogspot.com/" class="message" title="no activity in 7 days">Addison Cugini</a>
@@ -2973,7 +3123,7 @@ The good news is that now <code>bin/test</code> passes when <code>heugcd</code> 
 
 <p>
 <strong>Last updated:</strong><br>
-April 21, 2014 07:40 PM<br>
+April 21, 2014 08:12 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
