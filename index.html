@@ -24,6 +24,1763 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>May 24, 2014</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://jcrist.github.io/" title="Marginally Stable">Jim Crist</a></h3>
+
+
+<div class="entrygroup" id="tag:,2014-05-24:gsoc-week-1.html">
+<h4><a href="http://jcrist.github.io/gsoc-week-1.html">GSoC Week 1: Project Overview</a></h4>
+<div class="entry">
+<div class="content">
+<p>
+</p><div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This summer I got accepted into <a href="https://www.google-melange.com/gsoc/homepage/google/gsoc2014">Google Summer of Code</a> under <a href="http://sympy.org/en/index.html">Sympy</a>. For those that don't know, Sympy is a computer algebra system (CAS) written in Python. It can handle all sorts of mathematics, but what I use it most for is deriving and solving for the equations of motion for physical systems using the functionality found in <code>Sympy.physics.mechanics</code> (as seen in <a href="http://jcrist.github.io/differential-drive-part-1.html">this previous post</a>).</p>
+<p>My project this summer is adding a robust linearization routine to this package to linearize systems with constraints. The code provided in <code>sympy.physics.mechanics</code> currently makes it very easy to generate the equations of motion (EOM) for the dynamics of rigid, multibody systems. However, these EOM are typically nonlinear in nature, and can be quite lengthy. For analysis, linearizing the equations about equilibrium points, or trajectories is desired. Linearized equations are exceptionally useful because:</p>
+<ul>
+<li>They reduce the computational complexity of analysis and simulation</li>
+<li>They allow for traditional stability analysis via eigenvalue decomposition</li>
+<li>They are often used in control theory for controller design and analysis</li>
+</ul>
+<p>Nonlinear equations can typically be written in the following form:</p>
+<p><span class="math">\[\dot{x} = f(t, x, u)\]</span></p>
+<p>where <span class="math">\(t\)</span> is time, <span class="math">\(x\)</span> is the system state, and <span class="math">\(u\)</span> is the input to the system. For unconstrained systems (systems, where the states are only functions of time, and not of each other), linearization is as simple as taking the jacobian of <span class="math">\(f(t, x, u)\)</span> with respect to <span class="math">\(x\)</span> and <span class="math">\(u\)</span></p>
+<p><span class="math">\[\dot{\delta x} \approx \nabla_x f(t, x, u) |_{x^*, u^*} \delta x + \nabla_u f(t, x, u) |_{x^*, u^*} \delta u\]</span></p>
+<p>where <span class="math">\(x^*\)</span> and <span class="math">\(u^*\)</span> represent the trajectory or equilibrium point that linearization is occuring about, and <span class="math">\(\delta x\)</span> and <span class="math">\(\delta u\)</span> are the changes from this point (i.e. <span class="math">\(\delta x = x - x^*\)</span>).</p>
+<p>However, if there are constraints, then linearization becomes more complicated, due to the fact that some variables in <span class="math">\(x\)</span> are now functions of other variables, leading to the need to implement the chain rule. Simply taking the jacobian as you normally would leads to a linearization that doesn't accurately represent the system. This is demonstrated below with an example of a simple pendulum.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="example-single-pendulum-with-minimum-coordinates">Example: Single Pendulum with Minimum Coordinates</h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>To derive the equations of motion, well first use Kane's Method with no constraints. Kane's Method is something I hadn't seen before in my dynamic's classes (we focussed more on Lagrange), so I spent part of this week learning it. It differs from Lagrange's method in that instead of only choosing generalized coordinats, generalized speeds are choosen as well. This can make the equations simpler, as the speeds do not have to be the derivatives of the coordinates.</p>
+<p>While Sympy has functions to make the derivation using Kane's Method easier, I'm going to show each calculation step for a clearer description of the method.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [1]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">SVG</span>
+<span class="n">SVG</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s">'Pendulum_Min_Coord.svg'</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">
+    Out[1]:</div>
+
+<div class="output_svg output_subarea output_pyout">
+<svg width="372.53574" xmlns="http://www.w3.org/2000/svg" id="svg2" version="1.1" height="378.96869">
+  &lt;sodipodi:namedview bordercolor="#666666" borderopacity="1.0" fit-margin-bottom="5" fit-margin-left="5" fit-margin-right="5" fit-margin-top="5" id="base" inkscape:current-layer="layer1" inkscape:cx="115.27797" inkscape:cy="110.74674" inkscape:document-units="px" inkscape:pageopacity="0.0" inkscape:pageshadow="2" inkscape:window-height="693" inkscape:window-maximized="1" inkscape:window-width="1366" inkscape:window-x="0" inkscape:window-y="23" inkscape:zoom="1" pagecolor="#ffffff" showgrid="false"&gt;
+  <defs id="defs4">
+    &lt;pattern id="pattern6485" inkscape:collect="always" patterntransform="matrix(1.4782083,0,0,12.709288,204.03947,0)" xlink:href="#Strips1_4"&gt;
+    &lt;pattern height="1" id="Strips1_4" inkscape:collect="always" inkscape:stockid="Stripes 1:4" patterntransform="translate(0,0) scale(10,10)" patternunits="userSpaceOnUse" width="5"&gt;
+      <rect style="fill: black; stroke: none;" height="2" width="1" y="-0.5" x="0" id="rect5768">
+    &lt;/pattern&gt;
+    <marker style="overflow: visible;" id="Arrow2Lend" orient="auto">
+      <path style="fill-rule: evenodd; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path3812">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lstart" orient="auto">
+      <path style="fill-rule: evenodd; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(1.1,0,0,1.1,1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path3809">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow1Lstart" orient="auto">
+      <path style="fill-rule: evenodd; stroke: #000000; stroke-width: 1pt;" transform="matrix(0.8,0,0,0.8,10,0)" d="M 0,0 5,-5 -12.5,0 5,5 0,0 z" id="path3791">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lstart-8" orient="auto">
+      <path style="fill-rule: evenodd; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(1.1,0,0,1.1,1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path3809-7">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lend-7" orient="auto">
+      <path style="fill-rule: evenodd; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path3812-7">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lend-8" orient="auto">
+      <path style="fill-rule: evenodd; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path3812-74">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lend-3" orient="auto">
+      <path style="fill-rule: evenodd; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path3812-8">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lend-6" orient="auto">
+      <path style="fill-rule: evenodd; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path3812-4">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lend-5" orient="auto">
+      <path style="fill-rule: evenodd; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path3812-9">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lend-1" orient="auto">
+      <path style="fill-rule: evenodd; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path3812-90">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lend-1k" orient="auto">
+      <path style="fill: #ff0000; fill-rule: evenodd; stroke: #ff0000; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path7949">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lend4" orient="auto">
+      <path style="fill: #ff0000; fill-rule: evenodd; stroke: #ff0000; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path8071">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lend-1km" orient="auto">
+      <path style="fill: #0000ff; fill-rule: evenodd; stroke: #0000ff; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path8196">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lend4X" orient="auto">
+      <path style="fill: #0000ff; fill-rule: evenodd; stroke: #0000ff; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path8199">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lend4X-8" orient="auto">
+      <path style="fill: #0000ff; fill-rule: evenodd; stroke: #0000ff; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path8199-5">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lend-1km-9" orient="auto">
+      <path style="fill: #0000ff; fill-rule: evenodd; stroke: #0000ff; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path8196-3">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lend4Xq" orient="auto">
+      <path style="fill: #ff0000; fill-rule: evenodd; stroke: #ff0000; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path8390">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lend-1kmM" orient="auto">
+      <path style="fill: #ff0000; fill-rule: evenodd; stroke: #ff0000; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path8393">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lstart-2" orient="auto">
+      <path style="fill-rule: evenodd; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(1.1,0,0,1.1,1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path3809-6">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lstart-4" orient="auto">
+      <path style="fill-rule: evenodd; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(1.1,0,0,1.1,1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path3809-2">
+    </path></marker>
+  </rect></defs>
+  <metadata id="metadata7">
+    &lt;rdf:rdf&gt;
+      &lt;cc:work rdf:about=""&gt;
+        &lt;dc:format&gt;image/svg+xml&lt;/dc:format&gt;
+        &lt;dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"&gt;
+        &lt;dc:title&gt;&lt;/dc:title&gt;
+      &lt;/cc:work&gt;
+    &lt;/rdf:rdf&gt;
+  </metadata>
+  <g id="layer1" transform="translate(-184.9363,-178.42594)">
+    <path style="fill: #ff0000; fill-rule: evenodd; stroke: #000000; stroke-width: 1px; stroke-linecap: butt; stroke-linejoin: miter; stroke-opacity: 1;" transform="matrix(0.22219926,0,0,0.21267643,384.59418,428.325)" d="m 357.59401,430.10822 c 0,39.05242 -30.30147,70.71067 -67.68022,70.71067 -37.37876,0 -67.68022,-31.65825 -67.68022,-70.71067 0,-39.05243 30.30146,-70.71068 67.68022,-70.71068 37.37875,0 67.68022,31.65825 67.68022,70.71068 z" id="path2989">
+    <path style="fill: none; stroke: #000000; stroke-width: 3.51907468px; stroke-linecap: butt; stroke-linejoin: miter; stroke-opacity: 1;" d="m 202.92616,204.8442 c 262.86866,0 262.86866,0 262.86866,0" id="path2991">
+    <path style="fill: #ffff00; fill-rule: evenodd; stroke: #000000; stroke-width: 1px; stroke-linecap: butt; stroke-linejoin: miter; stroke-opacity: 1;" transform="matrix(-1,0,0,-1,555.58391,486.45996)" d="m 253.532,280.49304 -31.29843,0 -31.29844,0 15.64922,-27.10524 15.64922,-27.10523 15.64921,27.10523 z" id="path2993">
+    <path style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: butt; stroke-linejoin: miter; stroke-opacity: 1;" d="m 339.78704,249.0287 103.5984,256.81995" id="path2997">
+    <text y="413.79074" x="405.85715" style="font-size: 40px; font-style: normal; font-weight: normal; line-height: 125%; letter-spacing: 0px; fill: #000000; fill-opacity: 1; stroke: none; font-family: Sans;" xml:space="preserve" id="text4793"><tspan y="413.79074" x="405.85715" id="tspan4795">L</tspan></text>
+    <text y="531.36218" x="467.71429" style="font-size: 40px; font-style: normal; font-weight: normal; line-height: 125%; letter-spacing: 0px; fill: #000000; fill-opacity: 1; stroke: none; font-family: Sans;" xml:space="preserve" id="text4797"><tspan y="531.36218" x="467.71429" id="tspan4799">m</tspan></text>
+    <text y="302.36218" x="530.71423" style="font-size: 40px; font-style: normal; font-weight: normal; line-height: 125%; letter-spacing: 0px; fill: #000000; fill-opacity: 1; stroke: none; font-family: Sans;" xml:space="preserve" id="text5019"><tspan y="302.36218" x="530.71423" id="tspan5021">g</tspan></text>
+    <rect style="fill-opacity: 1; stroke: none;" transform="matrix(1,0,0.72381295,0.68999624,0,0)" rx="0" ry="0" height="29.007917" width="251.274" y="265.83615" x="-2.4793456" id="rect5023">
+    <text y="499.35422" x="361.93631" style="font-size: 40px; font-style: normal; font-weight: normal; line-height: 125%; letter-spacing: 0px; fill: #000000; fill-opacity: 1; stroke: none; font-family: Sans;" xml:space="preserve" id="text6597"><tspan y="499.35422" x="361.93631" id="tspan6599">q<tspan style="font-size: 65.00091553%;" id="tspan6601">1</tspan></tspan></text>
+    <path style="fill: none; stroke: #000000; stroke-width: 1.21877503; stroke-linecap: butt; stroke-linejoin: miter; stroke-opacity: 1;" d="m 520.9149,264.05894 0,92.49758" id="path4827-4">
+    <g id="g8297" transform="translate(-120,-14)">
+      <path style="fill: none; stroke: #0000ff; stroke-width: 1.53423667; stroke-linecap: butt; stroke-linejoin: miter; stroke-opacity: 1;" d="m 333.2704,243.61034 0,56.62207" id="path4827-70">
+      <path style="fill: none; stroke: #0000ff; stroke-width: 1.65040851; stroke-linecap: butt; stroke-linejoin: miter; stroke-opacity: 1;" d="m 333.2074,243.13275 56.19646,0" id="path4827-9-6">
+    </path></path></g>
+    <text y="299.35422" x="216.93629" style="font-size: 40px; font-style: normal; font-weight: normal; line-height: 125%; letter-spacing: 0px; fill: #000000; fill-opacity: 1; stroke: none; font-family: Sans;" xml:space="preserve" id="text8301"><tspan y="299.35422" x="216.93629" style="font-size: 24px;" id="tspan8303">N<tspan style="font-size: 65.00091553%;" id="tspan8571">x</tspan></tspan></text>
+    <text y="258.35422" x="247.93631" style="font-size: 40px; font-style: normal; font-weight: normal; line-height: 125%; letter-spacing: 0px; fill: #000000; fill-opacity: 1; stroke: none; font-family: Sans;" xml:space="preserve" id="text8307"><tspan y="258.35422" x="247.93631" style="font-size: 24px;" id="tspan8309">N<tspan style="font-size: 65.00091553%;" id="tspan8569">y</tspan></tspan></text>
+    <path style="fill: none; stroke: #ff0000; stroke-width: 1.53423667; stroke-linecap: butt; stroke-linejoin: miter; stroke-opacity: 1;" d="m 335.39519,236.31191 20.29154,52.86126" id="path4827-70-2">
+    <path style="fill: none; stroke: #ff0000; stroke-width: 1.65040851; stroke-linecap: butt; stroke-linejoin: miter; stroke-opacity: 1;" d="m 335.16523,235.88862 52.46391,-20.13901" id="path4827-9-6-9">
+    <text y="284.70227" x="361.07303" style="font-size: 40px; font-style: normal; font-weight: normal; line-height: 125%; letter-spacing: 0px; fill: #000000; fill-opacity: 1; stroke: none; font-family: Sans;" xml:space="preserve" id="text8301-7"><tspan y="284.70227" x="361.07303" style="font-size: 24px;" id="tspan8303-9">A<tspan style="font-size: 65.00091553%;" id="tspan8567">x</tspan></tspan></text>
+    <text y="235.20618" x="386.03787" style="font-size: 40px; font-style: normal; font-weight: normal; line-height: 125%; letter-spacing: 0px; fill: #000000; fill-opacity: 1; stroke: none; font-family: Sans;" xml:space="preserve" id="text8307-4"><tspan y="235.20618" x="386.03787" style="font-size: 24px;" id="tspan8309-7">A<tspan style="font-size: 65.00091553%;" id="tspan8565">y</tspan></tspan></text>
+    <path style="fill: none; stroke: #000000; stroke-width: 1.49994314; stroke-opacity: 1;" transform="matrix(1.5707216,0,0,1.6326654,-402.16738,-380.32792)" d="m 520.11084,512.98418 c -14.91916,5.78676 -30.7279,8.94566 -46.72524,9.33662" id="path3785">
+    <path style="fill: none; stroke: #000000; stroke-width: 2.57029223; stroke-opacity: 1;" transform="matrix(0.58676057,0,0,0.58043896,62.244133,29.528251)" d="m 577.53786,471.18439 c -23.97211,29.49767 -59.00862,47.85327 -96.90679,50.76937" id="path3785-5">
+    <path style="fill: none; stroke: #000000; stroke-width: 1.30337703; stroke-linecap: butt; stroke-linejoin: miter; stroke-opacity: 1;" d="m 333.10089,263.9655 -2.32918,287.77744" id="path3009">
+    <text y="328.55539" x="402.47037" style="font-size: 40px; font-style: normal; font-weight: normal; line-height: 125%; letter-spacing: 0px; fill: #000000; fill-opacity: 1; stroke: none; font-family: Sans;" xml:space="preserve" id="text4787"><tspan y="328.55539" x="402.47037" id="tspan4789">u<tspan style="font-size: 65.00091553%;" id="tspan4791">1</tspan></tspan></text>
+  </path></path></path></path></path></path></rect></path></path></path></path></g>
+</svg>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [2]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Import required functionality</span>
+<span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">symbols</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">atan</span><span class="p">,</span> <span class="n">simplify</span><span class="p">,</span> <span class="n">solve</span><span class="p">,</span> <span class="n">Matrix</span>
+<span class="kn">from</span> <span class="nn">sympy.physics.mechanics</span> <span class="kn">import</span> <span class="o">*</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>For a simple pendulum, the system has one degree of freedom, so only one generalized coordinate is needed. In this case, we'll choose the angle off vertical (<span class="math">\(q_1\)</span>). To make things simple, the generalized speed will be the angular velocity of the pendulum, which is just the derivative of this coordinate (<span class="math">\(u_1 = \dot{q_1}\)</span>).</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [3]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Create generalized coordinate and speed variables. The `dynamicsymbols` </span>
+<span class="c"># function creates each symbol as a function of time (i.e. q1 = q1(t))</span>
+
+<span class="n">q1</span> <span class="o">=</span> <span class="n">dynamicsymbols</span><span class="p">(</span><span class="s">'q1'</span><span class="p">)</span>                     <span class="c"># Generalized coordinate: angle of pendulum</span>
+<span class="n">q1d</span> <span class="o">=</span> <span class="n">dynamicsymbols</span><span class="p">(</span><span class="s">'q1'</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>                 <span class="c"># Derivative of generalized coordinate</span>
+<span class="n">u1</span> <span class="o">=</span> <span class="n">dynamicsymbols</span><span class="p">(</span><span class="s">'u1'</span><span class="p">)</span>                     <span class="c"># Generalized speed: angular velocity of pendulum</span>
+<span class="n">u1d</span> <span class="o">=</span> <span class="n">dynamicsymbols</span><span class="p">(</span><span class="s">'u1'</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>                 <span class="c"># Derivative of generalized speed</span>
+
+<span class="c"># `symbols` is used for things that are constant, not functions of other</span>
+<span class="c"># variables.</span>
+
+<span class="n">t</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="s">'t'</span><span class="p">)</span>                              <span class="c"># We need t later to take derivatives with respect to time</span>
+<span class="n">L</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="s">'L'</span><span class="p">)</span>                              <span class="c"># Length of the pendulum</span>
+<span class="n">m</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="s">'m'</span><span class="p">)</span>                              <span class="c"># Mass of the pendulum</span>
+<span class="n">g</span> <span class="o">=</span> <span class="mf">9.8</span><span class="p">;</span>                                      <span class="c"># Gravity</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>First we need to create the world reference frame <span class="math">\(N\)</span> and its origin <span class="math">\(N^*\)</span></p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [4]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="n">N</span> <span class="o">=</span> <span class="n">ReferenceFrame</span><span class="p">(</span><span class="s">'N'</span><span class="p">)</span>
+<span class="n">pN</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="s">'N*'</span><span class="p">)</span>
+<span class="c"># Set the velocity of the origin to 0, as it's not moving</span>
+<span class="n">pN</span><span class="o">.</span><span class="n">set_vel</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Next, a rotating reference frame <span class="math">\(A\)</span> is created, attached to the pendulum. The rotation of this frame is <span class="math">\(q_1\)</span> about the <span class="math">\(N_z\)</span> axis, with an angular velocity of <span class="math">\(\dot{q}_1 = u_1\)</span>. The location of the pendulum mass point <span class="math">\(P\)</span> can then be set as <span class="math">\(r^{P/N^*} = L \hat{a}_x\)</span>.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [5]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Create and orient reference frame A, and set its angular velocity</span>
+<span class="n">A</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">orientnew</span><span class="p">(</span><span class="s">'A'</span><span class="p">,</span> <span class="s">'axis'</span><span class="p">,</span> <span class="p">[</span><span class="n">q1</span><span class="p">,</span> <span class="n">N</span><span class="o">.</span><span class="n">z</span><span class="p">])</span>
+<span class="n">A</span><span class="o">.</span><span class="n">set_ang_vel</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">u1</span><span class="o">*</span><span class="n">N</span><span class="o">.</span><span class="n">z</span><span class="p">)</span>
+<span class="c"># Locate point P relative to the origin N*</span>
+<span class="n">P</span> <span class="o">=</span> <span class="n">pN</span><span class="o">.</span><span class="n">locatenew</span><span class="p">(</span><span class="s">'P'</span><span class="p">,</span> <span class="n">L</span><span class="o">*</span><span class="n">A</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The velocity of the point P can then be found:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [6]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Calculate velocity at the point</span>
+<span class="n">P</span><span class="o">.</span><span class="n">v2pt_theory</span><span class="p">(</span><span class="n">pN</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">A</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">
+    Out[6]:</div>
+
+
+<div class="output_text output_subarea output_pyout">
+<pre>
+L*u1*A.y
+</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Next we solve for the kinematic differential equations (KDE) for the system. These relate the derivatives of the generalized coordinates to the generalized velocities by</p>
+<p><span class="math">\[ kde(q, \dot{q}, u, t) = 0 \]</span></p>
+<p>For this system, since the generalized speed is just the derivative of the generalized coordinates, the KDEs are rather simple:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [7]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Create Kinematic Differential Equations</span>
+<span class="n">kde</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">([</span><span class="n">q1d</span> <span class="o">-</span> <span class="n">u1</span><span class="p">])</span>
+
+<span class="c"># Solve for d/dt q in terms of u. This will be used throughout to eliminate</span>
+<span class="c"># d/dt q from the equations</span>
+<span class="n">dq_dict</span> <span class="o">=</span> <span class="n">solve</span><span class="p">(</span><span class="n">kde</span><span class="p">,</span> <span class="p">[</span><span class="n">q1d</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Kane's method uses the partial derivative of the velocity of each point/body with respect to each generalized speed. In our case, with only one point and speed this is just a single value:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [8]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Calculate Partial velocity at the point</span>
+<span class="c"># This command chain in english is:</span>
+<span class="c"># "The velocity of P in frame N, with each d/dt q replaced by expression in terms of u,</span>
+<span class="c"># differentiated in terms of u_1 in frame N."</span>
+
+<span class="n">v1_p</span> <span class="o">=</span> <span class="n">P</span><span class="o">.</span><span class="n">vel</span><span class="p">(</span><span class="n">N</span><span class="p">)</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">dq_dict</span><span class="p">)</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">u1</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Next we input the resultant at each point of all forces acting on that point. For the pendulum, this is just gravity acting on the mass in the <span class="math">\(N_x\)</span> direction.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [9]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Input the force resultant at P</span>
+<span class="n">R</span> <span class="o">=</span> <span class="n">m</span><span class="o">*</span><span class="n">g</span><span class="o">*</span><span class="n">N</span><span class="o">.</span><span class="n">x</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The generalized active forces are then found by the following expression:</p>
+<p><span class="math">\[F_r = \sum_{i=1}^v v_r^{P_i} \cdot R_i \quad (r = 1, ..., n)\]</span></p>
+<p>These form the "<strong><em>F</em></strong>" part of Newton's second law (<strong><em>F = ma</em></strong>). In this case, n = 1, v = 1, so <span class="math">\(F_1\)</span> is then:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [10]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Solve for F1:</span>
+<span class="n">F1</span> <span class="o">=</span> <span class="n">v1_p</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Next we need to solve for the generalized inertial forces. This is the "<strong><em>ma</em></strong>" part in Newton's second law. To do this, we first need to find the acceleration of the pendulum point.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [11]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Solve for accelerations at the point</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">P</span><span class="o">.</span><span class="n">acc</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The inertial force <span class="math">\(R^*\)</span> for the point is then</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [12]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Solve for generalized inertial forces</span>
+<span class="n">R_star</span> <span class="o">=</span> <span class="o">-</span><span class="n">m</span><span class="o">*</span><span class="n">a</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The generalized inertial forces are then found by the following expression:</p>
+<p><span class="math">\[ F_r^* = \sum_{i=1}^v v_r^{P_i} \cdot R_i^* \quad (r = 1, ..., n)\]</span></p>
+<p>As before, n = 1, v = 1, so <span class="math">\(F_1^*\)</span> is then:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [13]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Solve for F1_star</span>
+<span class="n">F1_star</span> <span class="o">=</span> <span class="n">v1_p</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">R_star</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Kanes equations for the dynamic differential equations are then</p>
+<p><span class="math">\[ F_r + F_r^* = 0 \quad (r = 1, ... , n) \]</span></p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [14]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Solve for the dynamic differential equations</span>
+<span class="n">dyn_eqs</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">([</span><span class="n">F1_star</span> <span class="o">+</span> <span class="n">F1</span><span class="p">])</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">dq_dict</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Combining the kinematic differential equations with the dynamic differential equations yields a system with 2 unknowns (<span class="math">\(\dot{q}_1\)</span> and <span class="math">\(\dot{u}_1\)</span>), and 2 equations. Thus, it can be solved.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [15]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># The equations of motion are composed of the kinematic differential equations,</span>
+<span class="c"># and the dynamic differential equations.</span>
+<span class="n">eom</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">([</span><span class="n">kde</span><span class="p">,</span>
+              <span class="n">dyn_eqs</span><span class="p">])</span>
+<span class="n">mprint</span><span class="p">(</span><span class="n">eom</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+Matrix([
+[                    -u1 + q1&amp;apos],
+[-L**2*m*u1&amp;apos - 9.8*L*m*sin(q1)]])
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [16]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Solving the equations of motion for q1' and u1'</span>
+<span class="n">sols</span> <span class="o">=</span> <span class="n">solve</span><span class="p">(</span><span class="n">eom</span><span class="p">,</span> <span class="p">[</span><span class="n">q1d</span><span class="p">,</span> <span class="n">u1d</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [17]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Recomposing the system into a first order differential equation</span>
+<span class="n">qudots</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">([</span><span class="n">sols</span><span class="p">[</span><span class="n">q1d</span><span class="p">],</span>
+                 <span class="n">sols</span><span class="p">[</span><span class="n">u1d</span><span class="p">]])</span>
+<span class="n">qudots</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+<span class="n">mprint</span><span class="p">(</span><span class="n">qudots</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+Matrix([
+[            u1],
+[-9.8*sin(q1)/L]])
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Thus, the final form for the equations of motion is:</p>
+<p><span class="math">\[ \begin{bmatrix} \dot{q}_1 \\ \dot{u}_1 \end{bmatrix} = \begin{bmatrix} u_1 \\ \frac{-9.8}{L} sin(q_1) \end{bmatrix} \]</span></p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>As I'm still just learning Kane's method myself, the above derivation isn't very explanatory. I plan on making a post better explaining the procedure once I get the hang of it better. Luckily, Sympy contains a <code>KanesMethod</code> class that crunches all the above math for you.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="using-kanes-method-class">Using Kanes Method Class</h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Continuing with what was already derived above, all that needs to be done is create a <code>Particle</code> object for the pendulum mass, and then create a <code>KanesMethod</code> object with the forces and bodies derived above. I won't go too in depth on these steps, as we're just replicating what was done above using the easy functionality provided by <code>sympy.physics.mechanics</code>.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [18]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Create a particle object representing the pendulum mass</span>
+<span class="n">pP</span> <span class="o">=</span> <span class="n">Particle</span><span class="p">(</span><span class="s">'pP'</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+<span class="c"># Create a KanesMethod object. This takes the global reference frame N,</span>
+<span class="c"># the independent coordinates (q1), the independent velocities (q2), and</span>
+<span class="c"># the Kinematic equations derived above (kde)</span>
+<span class="n">KM</span> <span class="o">=</span> <span class="n">KanesMethod</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">q_ind</span><span class="o">=</span><span class="p">[</span><span class="n">q1</span><span class="p">],</span> <span class="n">u_ind</span><span class="o">=</span><span class="p">[</span><span class="n">u1</span><span class="p">],</span> <span class="n">kd_eqs</span><span class="o">=</span><span class="n">kde</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [19]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Make a list of tuples of the form (Particle/Body, Force on Particle/Body)</span>
+<span class="n">FL</span> <span class="o">=</span> <span class="p">[(</span><span class="n">P</span><span class="p">,</span> <span class="n">R</span><span class="p">)]</span>
+<span class="c"># Make a list of Particles/Bodies in the system</span>
+<span class="n">BL</span> <span class="o">=</span> <span class="p">[</span><span class="n">pP</span><span class="p">]</span>
+<span class="c"># Derive the generalized active forces, and the generalized inertial forces</span>
+<span class="p">(</span><span class="n">fr</span><span class="p">,</span> <span class="n">frstar</span><span class="p">)</span> <span class="o">=</span> <span class="n">KM</span><span class="o">.</span><span class="n">kanes_equations</span><span class="p">(</span><span class="n">FL</span><span class="p">,</span> <span class="n">BL</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [20]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Solve for the equations of motion in first order form.</span>
+<span class="c"># What's happening here is the mass matrix (M) and the forcing</span>
+<span class="c"># matrix (F) are being solved for. This results in a system of</span>
+<span class="c"># equations of the form M*[q', u']^T = F.</span>
+<span class="n">kdd</span> <span class="o">=</span> <span class="n">KM</span><span class="o">.</span><span class="n">kindiffdict</span><span class="p">()</span>
+<span class="n">mm</span> <span class="o">=</span> <span class="n">KM</span><span class="o">.</span><span class="n">mass_matrix_full</span>
+<span class="n">fo</span> <span class="o">=</span> <span class="n">KM</span><span class="o">.</span><span class="n">forcing_full</span>
+
+<span class="c"># The final first order form is then solved for as</span>
+<span class="c"># [q', u']^T = M^-1 * F.</span>
+<span class="n">qudots_km</span> <span class="o">=</span> <span class="n">mm</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">*</span> <span class="n">fo</span>
+<span class="n">qudots_km</span> <span class="o">=</span> <span class="n">qudots_km</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">kdd</span><span class="p">)</span>
+<span class="n">qudots_km</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+<span class="n">mprint</span><span class="p">(</span><span class="n">qudots_km</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+Matrix([
+[            u1],
+[-9.8*sin(q1)/L]])
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>As seen here, the results match what was solved for above by hand, but in a much easier manner using the methods provided in Sympy.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="non-minimal-set-of-coordinates">Non-minimal set of coordinates</h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The pendulum system demonstrated above is extremely simple, and a minimal set of coordinates and speeds readily found. But for more complicated systems it's often not that easy to find a such a minimal representation. In these cases additional coordinates and speeds are used, and an additional set of <em>constraint equations</em> are added relating the coordinates and speeds together.</p>
+<p>To demonstrate this, the pendulum system will be re-derived using the x and y coordinates of the mass as generalized coordinates, and their derivatives as the generalized speeds. While you would never do this in practice (it makes the problem much harder), it should be a good demonstration of both configuration and velocity constraints.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [21]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">SVG</span>
+<span class="n">SVG</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s">'Pendulum_NonMin_Coord.svg'</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">
+    Out[21]:</div>
+
+<div class="output_svg output_subarea output_pyout">
+<svg width="378.90466" xmlns="http://www.w3.org/2000/svg" id="svg2" version="1.1" height="456.13843">
+  &lt;sodipodi:namedview bordercolor="#666666" borderopacity="1.0" fit-margin-bottom="5" fit-margin-left="5" fit-margin-right="5" fit-margin-top="5" id="base" inkscape:current-layer="layer1" inkscape:cx="115.27797" inkscape:cy="187.91648" inkscape:document-units="px" inkscape:pageopacity="0.0" inkscape:pageshadow="2" inkscape:window-height="693" inkscape:window-maximized="1" inkscape:window-width="1366" inkscape:window-x="0" inkscape:window-y="23" inkscape:zoom="1" pagecolor="#ffffff" showgrid="false"&gt;
+  <defs id="defs4">
+    &lt;pattern id="pattern6485" inkscape:collect="always" patterntransform="matrix(1.4782083,0,0,12.709288,204.03947,0)" xlink:href="#Strips1_4"&gt;
+    &lt;pattern height="1" id="Strips1_4" inkscape:collect="always" inkscape:stockid="Stripes 1:4" patterntransform="translate(0,0) scale(10,10)" patternunits="userSpaceOnUse" width="5"&gt;
+      <rect style="fill: black; stroke: none;" height="2" width="1" y="-0.5" x="0" id="rect5768">
+    &lt;/pattern&gt;
+    <marker style="overflow: visible;" id="Arrow2Lend" orient="auto">
+      <path style="fill-rule: evenodd; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path3812">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lstart" orient="auto">
+      <path style="fill-rule: evenodd; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(1.1,0,0,1.1,1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path3809">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow1Lstart" orient="auto">
+      <path style="fill-rule: evenodd; stroke: #000000; stroke-width: 1pt;" transform="matrix(0.8,0,0,0.8,10,0)" d="M 0,0 5,-5 -12.5,0 5,5 0,0 z" id="path3791">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lstart-8" orient="auto">
+      <path style="fill-rule: evenodd; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(1.1,0,0,1.1,1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path3809-7">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lend-7" orient="auto">
+      <path style="fill-rule: evenodd; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path3812-7">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lend-8" orient="auto">
+      <path style="fill-rule: evenodd; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path3812-74">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lend-3" orient="auto">
+      <path style="fill-rule: evenodd; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path3812-8">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lend-6" orient="auto">
+      <path style="fill-rule: evenodd; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path3812-4">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lend-5" orient="auto">
+      <path style="fill-rule: evenodd; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path3812-9">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lend-1" orient="auto">
+      <path style="fill-rule: evenodd; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path3812-90">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lend-1k" orient="auto">
+      <path style="fill: #ff0000; fill-rule: evenodd; stroke: #ff0000; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path7949">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lend4" orient="auto">
+      <path style="fill: #ff0000; fill-rule: evenodd; stroke: #ff0000; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path8071">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lend-1km" orient="auto">
+      <path style="fill: #0000ff; fill-rule: evenodd; stroke: #0000ff; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path8196">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lend4X" orient="auto">
+      <path style="fill: #0000ff; fill-rule: evenodd; stroke: #0000ff; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path8199">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lend4X-8" orient="auto">
+      <path style="fill: #0000ff; fill-rule: evenodd; stroke: #0000ff; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path8199-5">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lend-1km-9" orient="auto">
+      <path style="fill: #0000ff; fill-rule: evenodd; stroke: #0000ff; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path8196-3">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lend4Xq" orient="auto">
+      <path style="fill: #ff0000; fill-rule: evenodd; stroke: #ff0000; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path8390">
+    </path></marker>
+    <marker style="overflow: visible;" id="Arrow2Lend-1kmM" orient="auto">
+      <path style="fill: #ff0000; fill-rule: evenodd; stroke: #ff0000; stroke-width: 0.625; stroke-linejoin: round;" transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" id="path8393">
+    </path></marker>
+  </rect></defs>
+  <metadata id="metadata7">
+    &lt;rdf:rdf&gt;
+      &lt;cc:work rdf:about=""&gt;
+        &lt;dc:format&gt;image/svg+xml&lt;/dc:format&gt;
+        &lt;dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"&gt;
+        &lt;dc:title&gt;&lt;/dc:title&gt;
+      &lt;/cc:work&gt;
+    &lt;/rdf:rdf&gt;
+  </metadata>
+  <g id="layer1" transform="translate(-184.9363,-178.42594)">
+    <path style="fill: #ff0000; fill-rule: evenodd; stroke: #000000; stroke-width: 1px; stroke-linecap: butt; stroke-linejoin: miter; stroke-opacity: 1;" transform="matrix(0.22219926,0,0,0.21267643,384.59418,428.325)" d="m 357.59401,430.10822 c 0,39.05242 -30.30147,70.71067 -67.68022,70.71067 -37.37876,0 -67.68022,-31.65825 -67.68022,-70.71067 0,-39.05243 30.30146,-70.71068 67.68022,-70.71068 37.37875,0 67.68022,31.65825 67.68022,70.71068 z" id="path2989">
+    <path style="fill: none; stroke: #000000; stroke-width: 3.51907468px; stroke-linecap: butt; stroke-linejoin: miter; stroke-opacity: 1;" d="m 202.92616,204.8442 c 262.86866,0 262.86866,0 262.86866,0" id="path2991">
+    <path style="fill: #ffff00; fill-rule: evenodd; stroke: #000000; stroke-width: 1px; stroke-linecap: butt; stroke-linejoin: miter; stroke-opacity: 1;" transform="matrix(-1,0,0,-1,555.58391,486.45996)" d="m 253.532,280.49304 -31.29843,0 -31.29844,0 15.64922,-27.10524 15.64922,-27.10523 15.64921,27.10523 z" id="path2993">
+    <path style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: butt; stroke-linejoin: miter; stroke-opacity: 1;" d="m 339.78704,249.0287 103.5984,256.81995" id="path2997">
+    <text y="383.79074" x="402.85715" style="font-size: 40px; font-style: normal; font-weight: normal; line-height: 125%; letter-spacing: 0px; fill: #000000; fill-opacity: 1; stroke: none; font-family: Sans;" xml:space="preserve" id="text4793"><tspan y="383.79074" x="402.85715" id="tspan4795">L</tspan></text>
+    <text y="559.36218" x="459.71429" style="font-size: 40px; font-style: normal; font-weight: normal; line-height: 125%; letter-spacing: 0px; fill: #000000; fill-opacity: 1; stroke: none; font-family: Sans;" xml:space="preserve" id="text4797"><tspan y="559.36218" x="459.71429" id="tspan4799">m</tspan></text>
+    <path style="fill: none; stroke: #000000; stroke-width: 1.21548557; stroke-linecap: butt; stroke-linejoin: miter; stroke-opacity: 1;" d="m 448.57079,536.36278 0,91.58741" id="path4827">
+    <text y="302.36218" x="530.71423" style="font-size: 40px; font-style: normal; font-weight: normal; line-height: 125%; letter-spacing: 0px; fill: #000000; fill-opacity: 1; stroke: none; font-family: Sans;" xml:space="preserve" id="text5019"><tspan y="302.36218" x="530.71423" id="tspan5021">g</tspan></text>
+    <rect style="fill-opacity: 1; stroke: none;" transform="matrix(1,0,0.72381295,0.68999624,0,0)" rx="0" ry="0" height="29.007917" width="251.274" y="265.83615" x="-2.4793456" id="rect5023">
+    <path style="fill: none; stroke: #000000; stroke-width: 1.99330068; stroke-linecap: butt; stroke-linejoin: miter; stroke-opacity: 1;" d="m 333.91099,256.55129 0,263.31654" id="path4827-1">
+    <path style="fill: none; stroke: #000000; stroke-width: 1.34446955; stroke-linecap: butt; stroke-linejoin: miter; stroke-opacity: 1;" d="m 335.80895,522.381 113.26991,0" id="path4827-7">
+    <text y="388.35422" x="287.93631" style="font-size: 40px; font-style: normal; font-weight: normal; line-height: 125%; letter-spacing: 0px; fill: #000000; fill-opacity: 1; stroke: none; font-family: Sans;" xml:space="preserve" id="text6597"><tspan y="388.35422" x="287.93631" id="tspan6599">q<tspan style="font-size: 65.00091553%;" id="tspan6601">1</tspan></tspan></text>
+    <text y="506.35422" x="366.93631" style="font-size: 40px; font-style: normal; font-weight: normal; line-height: 125%; letter-spacing: 0px; fill: #000000; fill-opacity: 1; stroke: none; font-family: Sans;" xml:space="preserve" id="text6603"><tspan y="506.35422" x="366.93631" id="tspan6605">q<tspan style="font-size: 65.00091553%;" id="tspan6607">2</tspan></tspan></text>
+    <path style="fill: none; stroke: #000000; stroke-width: 1.21548557; stroke-linecap: butt; stroke-linejoin: miter; stroke-opacity: 1;" d="m 465.63937,521.37564 91.58741,0" id="path4827-9">
+    <text y="582.35425" x="402.93631" style="font-size: 40px; font-style: normal; font-weight: normal; line-height: 125%; letter-spacing: 0px; fill: #000000; fill-opacity: 1; stroke: none; font-family: Sans;" xml:space="preserve" id="text6633"><tspan y="582.35425" x="402.93631" id="tspan6635">u<tspan style="font-size: 65.00091553%;" id="tspan6637">1</tspan></tspan></text>
+    <text y="508.35422" x="481.93631" style="font-size: 40px; font-style: normal; font-weight: normal; line-height: 125%; letter-spacing: 0px; fill: #000000; fill-opacity: 1; stroke: none; font-family: Sans;" xml:space="preserve" id="text6639"><tspan y="508.35422" x="481.93631" id="tspan6641">u<tspan style="font-size: 65.00091553%;" id="tspan6643">2</tspan></tspan></text>
+    <path style="fill: none; stroke: #000000; stroke-width: 1.21877503; stroke-linecap: butt; stroke-linejoin: miter; stroke-opacity: 1;" d="m 520.9149,264.05894 0,92.49758" id="path4827-4">
+    <g id="g8297" transform="translate(-120,-14)">
+      <path style="fill: none; stroke: #0000ff; stroke-width: 1.53423667; stroke-linecap: butt; stroke-linejoin: miter; stroke-opacity: 1;" d="m 333.2704,243.61034 0,56.62207" id="path4827-70">
+      <path style="fill: none; stroke: #0000ff; stroke-width: 1.65040851; stroke-linecap: butt; stroke-linejoin: miter; stroke-opacity: 1;" d="m 333.2074,243.13275 56.19646,0" id="path4827-9-6">
+    </path></path></g>
+    <text y="299.35422" x="216.93629" style="font-size: 40px; font-style: normal; font-weight: normal; line-height: 125%; letter-spacing: 0px; fill: #000000; fill-opacity: 1; stroke: none; font-family: Sans;" xml:space="preserve" id="text8301"><tspan y="299.35422" x="216.93629" style="font-size: 24px;" id="tspan8303">N<tspan style="font-size: 65.00091553%;" id="tspan8571">x</tspan></tspan></text>
+    <text y="258.35422" x="247.93631" style="font-size: 40px; font-style: normal; font-weight: normal; line-height: 125%; letter-spacing: 0px; fill: #000000; fill-opacity: 1; stroke: none; font-family: Sans;" xml:space="preserve" id="text8307"><tspan y="258.35422" x="247.93631" style="font-size: 24px;" id="tspan8309">N<tspan style="font-size: 65.00091553%;" id="tspan8569">y</tspan></tspan></text>
+    <path style="fill: none; stroke: #ff0000; stroke-width: 1.53423667; stroke-linecap: butt; stroke-linejoin: miter; stroke-opacity: 1;" d="m 335.39519,236.31191 20.29154,52.86126" id="path4827-70-2">
+    <path style="fill: none; stroke: #ff0000; stroke-width: 1.65040851; stroke-linecap: butt; stroke-linejoin: miter; stroke-opacity: 1;" d="m 335.16523,235.88862 52.46391,-20.13901" id="path4827-9-6-9">
+    <text y="284.70227" x="361.07303" style="font-size: 40px; font-style: normal; font-weight: normal; line-height: 125%; letter-spacing: 0px; fill: #000000; fill-opacity: 1; stroke: none; font-family: Sans;" xml:space="preserve" id="text8301-7"><tspan y="284.70227" x="361.07303" style="font-size: 24px;" id="tspan8303-9">A<tspan style="font-size: 65.00091553%;" id="tspan8567">x</tspan></tspan></text>
+    <text y="235.20618" x="386.03787" style="font-size: 40px; font-style: normal; font-weight: normal; line-height: 125%; letter-spacing: 0px; fill: #000000; fill-opacity: 1; stroke: none; font-family: Sans;" xml:space="preserve" id="text8307-4"><tspan y="235.20618" x="386.03787" style="font-size: 24px;" id="tspan8309-7">A<tspan style="font-size: 65.00091553%;" id="tspan8565">y</tspan></tspan></text>
+  </path></path></path></path></path></path></rect></path></path></path></path></path></g>
+</svg>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [22]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Create generalized coordinates and speeds for this non-minimal realization</span>
+<span class="n">q1</span><span class="p">,</span> <span class="n">q2</span> <span class="o">=</span> <span class="n">qs</span> <span class="o">=</span> <span class="n">dynamicsymbols</span><span class="p">(</span><span class="s">'q1:3'</span><span class="p">)</span>
+<span class="n">q1d</span><span class="p">,</span> <span class="n">q2d</span> <span class="o">=</span> <span class="n">qds</span> <span class="o">=</span> <span class="n">dynamicsymbols</span><span class="p">(</span><span class="s">'q1:3'</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">u1</span><span class="p">,</span> <span class="n">u2</span> <span class="o">=</span> <span class="n">us</span> <span class="o">=</span> <span class="n">dynamicsymbols</span><span class="p">(</span><span class="s">'u1:3'</span><span class="p">)</span>
+<span class="n">u1d</span><span class="p">,</span> <span class="n">u2d</span> <span class="o">=</span> <span class="n">uds</span> <span class="o">=</span> <span class="n">dynamicsymbols</span><span class="p">(</span><span class="s">'u1:3'</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>As before, the a rotating reference frame <span class="math">\(A\)</span> is attached to the pendulum. However, this time we don't have a generalized coordinate representing the rotation angle. This can be easily calculated though as</p>
+<p><span class="math">\[\theta = \arctan(q_2/q_1)\]</span></p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [23]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="n">theta1</span> <span class="o">=</span> <span class="n">atan</span><span class="p">(</span><span class="n">q2</span><span class="o">/</span><span class="n">q1</span><span class="p">)</span>
+<span class="n">A</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">orientnew</span><span class="p">(</span><span class="s">'A'</span><span class="p">,</span> <span class="s">'axis'</span><span class="p">,</span> <span class="p">[</span><span class="n">theta1</span><span class="p">,</span> <span class="n">N</span><span class="o">.</span><span class="n">z</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The pendulum mass can easily be located in the global reference frame <span class="math">\(N\)</span> using the generalized coordinates, as they're just the x and y coordinates of the mass.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [24]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="n">P</span> <span class="o">=</span> <span class="n">pN</span><span class="o">.</span><span class="n">locatenew</span><span class="p">(</span><span class="s">'P1'</span><span class="p">,</span> <span class="n">q1</span><span class="o">*</span><span class="n">N</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">q2</span><span class="o">*</span><span class="n">N</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+<span class="n">mprint</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">pos_from</span><span class="p">(</span><span class="n">pN</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+q1*N.x + q2*N.y
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Next, we calculate the kinematic differential equations as before</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [25]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="n">kde</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">([</span><span class="n">q1d</span> <span class="o">-</span> <span class="n">u1</span><span class="p">,</span>
+              <span class="n">q2d</span> <span class="o">-</span> <span class="n">u2</span><span class="p">])</span>
+<span class="n">dq_dict</span> <span class="o">=</span> <span class="n">solve</span><span class="p">(</span><span class="n">kde</span><span class="p">,</span> <span class="p">[</span><span class="n">q1d</span><span class="p">,</span> <span class="n">q2d</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The velocity of point P is just the time derivative of its position vector from the origin. Here we substitute all <span class="math">\(\dot{q}\)</span> terms for an equivalent expression using <span class="math">\(u\)</span>.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [26]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="n">P</span><span class="o">.</span><span class="n">set_vel</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">P</span><span class="o">.</span><span class="n">pos_from</span><span class="p">(</span><span class="n">pN</span><span class="p">)</span><span class="o">.</span><span class="n">dt</span><span class="p">(</span><span class="n">N</span><span class="p">)</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">dq_dict</span><span class="p">))</span>
+<span class="n">mprint</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">vel</span><span class="p">(</span><span class="n">N</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+u1*N.x + u2*N.y
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>As the system has only one degree of freedom, but two generalized coordinates, there needs to be a configuration consttraint relating the coordinates. The configuration constraint is expressed in the form</p>
+<p><span class="math">\[ f_c(q, t) = 0 \]</span></p>
+<p>In this case, the length of the pendulum must always be <strong><em>L</em></strong>, so <span class="math">\(f_c\)</span> can be expressed as</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [27]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="n">f_c</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">([</span><span class="n">P</span><span class="o">.</span><span class="n">pos_from</span><span class="p">(</span><span class="n">pN</span><span class="p">)</span><span class="o">.</span><span class="n">magnitude</span><span class="p">()</span> <span class="o">-</span> <span class="n">L</span><span class="p">])</span>
+<span class="n">mprint</span><span class="p">(</span><span class="n">f_c</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+Matrix([[-L + sqrt(q1**2 + q2**2)]])
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Similarly, there are two generalized speeds, making the use of a velocity constraint equation necessary. Velocity constraints are written as</p>
+<p><span class="math">\[ f_v(q, u, t) = 0 \]</span></p>
+<p>In this case, the velocity in the <span class="math">\(A_x\)</span> direction is always zero (the pendulum is never getting longer). This can be expressed by calculating the velocity of <strong><em>P</em></strong> in reference frame <strong><em>N</em></strong>, and setting the component in the <span class="math">\(A_x\)</span> direction to 0.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [28]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="n">f_v</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">([</span><span class="n">P</span><span class="o">.</span><span class="n">vel</span><span class="p">(</span><span class="n">N</span><span class="p">)</span><span class="o">.</span><span class="n">express</span><span class="p">(</span><span class="n">A</span><span class="p">)</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">x</span><span class="p">)])</span>
+<span class="n">f_v</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+<span class="n">mprint</span><span class="p">(</span><span class="n">f_v</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+Matrix([[sqrt((q1**2 + q2**2)/q1**2)*(q1*u1 + q2*u2)*q1/(q1**2 + q2**2)]])
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Acceleration constraints are then just the time derivative of the velocity constraint:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [29]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="n">f_a</span> <span class="o">=</span> <span class="n">f_v</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+<span class="n">f_a</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+<span class="n">mprint</span><span class="p">(</span><span class="n">f_a</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+Matrix([[sqrt((q1**2 + q2**2)/q1**2)*(q1**3*u1&amp;apos + q1**2*q2*u2&amp;apos + q1**2*u2*q2&amp;apos + q1*q2**2*u1&amp;apos - q1*q2*u1*q2&amp;apos - q1*q2*u2*q1&amp;apos + q2**3*u2&amp;apos + q2**2*u1*q1&amp;apos)*q1/(q1**4 + 2*q1**2*q2**2 + q2**4)]])
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>For this example, the remainder will be calculated using the <code>KanesMethod</code> class as above. Due to the presence of velocity constraints (nonholonomic), Kanes Method proceeds a little different than before, and this post is already long enough...</p>
+<p>All you really need to know is that before the EOM are derived, a subset of generalized coordinates and speeds needs to be choosen to be the "independent" variables, making the remaining "dependent". There are reasons to choose some variables over others, but here we'll just let <span class="math">\(q_1\)</span> and <span class="math">\(u_1\)</span> be independent, making <span class="math">\(q_2\)</span> and <span class="math">\(u_2\)</span> dependent.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [30]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Derive the equations of motion using the KanesMethod class. This proceeds much the</span>
+<span class="c"># same as it did in the previous section. The only difference is the addition</span>
+<span class="c"># of the dependent variable and constraint kwargs.</span>
+<span class="n">pP</span> <span class="o">=</span> <span class="n">Particle</span><span class="p">(</span><span class="s">'pP'</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+<span class="n">FL</span> <span class="o">=</span> <span class="p">[(</span><span class="n">P</span><span class="p">,</span> <span class="n">R</span><span class="p">)]</span>
+<span class="n">BL</span> <span class="o">=</span> <span class="p">[</span><span class="n">pP</span><span class="p">]</span>
+<span class="n">KM</span> <span class="o">=</span> <span class="n">KanesMethod</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">q_ind</span><span class="o">=</span><span class="p">[</span><span class="n">q1</span><span class="p">],</span> <span class="n">u_ind</span><span class="o">=</span><span class="p">[</span><span class="n">u1</span><span class="p">],</span> <span class="n">q_dependent</span><span class="o">=</span><span class="p">[</span><span class="n">q2</span><span class="p">],</span> <span class="n">u_dependent</span><span class="o">=</span><span class="p">[</span><span class="n">u2</span><span class="p">],</span>
+                 <span class="n">configuration_constraints</span><span class="o">=</span><span class="n">f_c</span><span class="p">,</span> <span class="n">velocity_constraints</span><span class="o">=</span><span class="n">f_v</span><span class="p">,</span> <span class="n">acceleration_constraints</span><span class="o">=</span><span class="n">f_a</span><span class="p">,</span> <span class="n">kd_eqs</span><span class="o">=</span><span class="n">kde</span><span class="p">)</span>
+<span class="p">(</span><span class="n">fr</span><span class="p">,</span> <span class="n">frstar</span><span class="p">)</span> <span class="o">=</span> <span class="n">KM</span><span class="o">.</span><span class="n">kanes_equations</span><span class="p">(</span><span class="n">FL</span><span class="p">,</span> <span class="n">BL</span><span class="p">)</span>
+<span class="n">kdd</span> <span class="o">=</span> <span class="n">KM</span><span class="o">.</span><span class="n">kindiffdict</span><span class="p">()</span>
+<span class="n">mm</span> <span class="o">=</span> <span class="n">KM</span><span class="o">.</span><span class="n">mass_matrix_full</span>
+<span class="n">fo</span> <span class="o">=</span> <span class="n">KM</span><span class="o">.</span><span class="n">forcing_full</span>
+<span class="n">mm</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+<span class="n">fo</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+<span class="c"># Solve for the first order form of the EOM</span>
+<span class="n">qudots_nm</span> <span class="o">=</span> <span class="n">mm</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">*</span> <span class="n">fo</span>
+<span class="n">qudots_nm</span> <span class="o">=</span> <span class="n">qudots_nm</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">kdd</span><span class="p">)</span>
+<span class="n">qudots_nm</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+<span class="n">mprint</span><span class="p">(</span><span class="n">qudots_nm</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+Matrix([
+[                                                                                                                                  u1],
+[                                                                                                                                  u2],
+[(-1.0*q1**3*u2**2 + 9.8*q1**2*q2**2 + 2.0*q1**2*q2*u1*u2 - 1.0*q1*q2**2*u1**2 + 9.8*q2**4)/(1.0*q1**4 + 2.0*q1**2*q2**2 + 1.0*q2**4)],
+[  -1.0*(9.8*q1**3 + 1.0*q1**2*u2**2 + 9.8*q1*q2**2 - 2.0*q1*q2*u1*u2 + 1.0*q2**2*u1**2)*q2/(1.0*q1**4 + 2.0*q1**2*q2**2 + 1.0*q2**4)]])
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Note that the right hand side is now a 4x1 matrix, rather than a 2x1 as before. This will be important later.</p>
+<p>To ensure that the derived equations are equivalent, a variable transformation could be done, and the minimal case trasnformed into the nonminimal equations. However, we're just going to simulate the system to show that they have the same response. Not rigorous at all, but it's good enough for now.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="simulation">Simulation</h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [31]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">lambdify</span>
+<span class="kn">from</span> <span class="nn">scipy.integrate</span> <span class="kn">import</span> <span class="n">odeint</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">linspace</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="o">%</span><span class="k">matplotlib</span> <span class="n">inline</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>First we need to substitute in numbers for the constants <strong><em>L</em></strong>, and <strong><em>m</em></strong></p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [32]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="n">val_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">L</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>                 <span class="c"># Length of 1 m</span>
+            <span class="n">m</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">}</span>               <span class="c"># Mass of 1/2 kg</span>
+
+<span class="c"># Substitute into the minimal and nonminimal EOM expressions:</span>
+<span class="n">qudots</span> <span class="o">=</span> <span class="n">qudots</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">val_dict</span><span class="p">)</span>
+<span class="n">qudots_nm</span> <span class="o">=</span> <span class="n">qudots_nm</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">val_dict</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Using <code>lambdify</code>, the equations of motion derived above can then be converted into equivalent <code>Numpy</code> expressions, allowing for fast computations. Then, a second lambda expression can be used to put the EOM into the needed for numerical integration with <code>odeint</code>.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [33]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="n">f_nonminimal</span> <span class="o">=</span> <span class="n">lambdify</span><span class="p">(</span><span class="n">Matrix</span><span class="p">([</span><span class="n">qs</span><span class="p">,</span> <span class="n">us</span><span class="p">]),</span><span class="n">qudots_nm</span><span class="p">)</span>
+<span class="n">f_minimal</span> <span class="o">=</span> <span class="n">lambdify</span><span class="p">(</span><span class="n">Matrix</span><span class="p">([</span><span class="n">q1</span><span class="p">,</span> <span class="n">u1</span><span class="p">]),</span> <span class="n">qudots</span><span class="p">)</span>
+<span class="c"># Lambda expressions for use with odeint</span>
+<span class="n">rhs_minimal</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="n">array</span><span class="p">(</span><span class="n">f_minimal</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">rhs_nonminimal</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="n">array</span><span class="p">(</span><span class="n">f_nonminimal</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Both systems can then be simulated with <code>odeint</code>. Let's define the initial condition to be horizontal to the right, with no initial velocity.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [34]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Define initial condition to be horizontal to the right, with no velocity</span>
+<span class="n">x_0_m</span> <span class="o">=</span> <span class="p">[</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">x_0_nm</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="c"># Create time vector, and run the simulation</span>
+<span class="n">ts</span> <span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+<span class="n">x_nm</span> <span class="o">=</span> <span class="n">odeint</span><span class="p">(</span><span class="n">rhs_nonminimal</span><span class="p">,</span> <span class="n">x_0_nm</span><span class="p">,</span> <span class="n">ts</span><span class="p">)</span>
+<span class="n">x_m</span> <span class="o">=</span> <span class="n">odeint</span><span class="p">(</span><span class="n">rhs_minimal</span><span class="p">,</span> <span class="n">x_0_m</span><span class="p">,</span> <span class="n">ts</span><span class="p">)</span>
+<span class="c"># Plot both simulations on top of each other</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">'Simulation Results'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">val_dict</span><span class="p">[</span><span class="n">L</span><span class="p">]</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">x_m</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]),</span> <span class="n">label</span><span class="o">=</span><span class="s">"Minimal"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">x_nm</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s">"Nonminimal"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'t (s)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'$N_y$ coordinate (m)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">val_dict</span><span class="p">[</span><span class="n">L</span><span class="p">]</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">x_m</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]),</span> <span class="n">ts</span><span class="p">,</span> <span class="n">x_nm</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'t (s)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'$N_x$ coordinate (m)'</span><span class="p">);</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+
+
+<div class="output_png output_subarea ">
+<img />
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>As can be seen by the above, the simulation results are identical. Thus, both the minimal and nonminimal sets of coordinates result in the same system equations.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="linearization">Linearization</h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>As mentioned at the beginning of this behemoth of a post, my project for the summer is on implementing functionality for linearizing systems of equations with and without constraints. While linearizing an unconstrained system is simple, some care must be taken for linearizing a system with constraints.</p>
+<p>In the above sections we derived two sets of equations of motion for a simple pendulum; one set without constraints, and one with. Now let's see what happens when we apply the naive linearization method of the simple jacobian to both systems:</p>
+<p>First, we need to determine the trim condition we wish to linearize about. This must be a valid position (satisfy the system of equations). For simplicity, lets choose the stable, straight down at rest configuration (<span class="math">\(\theta = 0\)</span>, <span class="math">\(\omega = 0\)</span>).</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [35]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Set the trim condition for the minimal approach</span>
+<span class="n">trim_cond_m</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="c"># Perform simple linearization by computing the jacobian of the rhs</span>
+<span class="n">min_lin</span> <span class="o">=</span> <span class="n">qudots</span><span class="o">.</span><span class="n">jacobian</span><span class="p">([</span><span class="n">q1</span><span class="p">,</span> <span class="n">u1</span><span class="p">])</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">([</span><span class="n">q1</span><span class="p">,</span> <span class="n">u1</span><span class="p">],</span> <span class="n">trim_cond_m</span><span class="p">)))</span>
+<span class="n">min_lin</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">
+    Out[35]:</div>
+
+
+<div class="output_text output_subarea output_pyout">
+<pre>
+Matrix([
+[   0, 1],
+[-9.8, 0]])
+</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [36]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Set the trim condition for the nonminimal approach</span>
+<span class="n">trim_cond_nm</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="n">val_dict</span><span class="p">[</span><span class="n">L</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="c"># Perform naive linearization by computing the jacobian of the rhs</span>
+<span class="n">nonmin_lin</span> <span class="o">=</span> <span class="n">qudots_nm</span><span class="o">.</span><span class="n">jacobian</span><span class="p">([</span><span class="n">q1</span><span class="p">,</span> <span class="n">q2</span><span class="p">,</span> <span class="n">u1</span><span class="p">,</span> <span class="n">u2</span><span class="p">])</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">([</span><span class="n">q1</span><span class="p">,</span> <span class="n">q2</span><span class="p">,</span> <span class="n">u1</span><span class="p">,</span> <span class="n">u2</span><span class="p">],</span> <span class="n">trim_cond_nm</span><span class="p">)))</span>
+<span class="n">nonmin_lin</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">
+    Out[36]:</div>
+
+
+<div class="output_text output_subarea output_pyout">
+<pre>
+Matrix([
+[0,    0, 1, 0],
+[0,    0, 0, 1],
+[0,    0, 0, 0],
+[0, -9.8, 0, 0]])
+</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>One use for a linearized system is for stability analysis at the point of linearization. This is done by computing the eigenvalues of the resulting system matrix.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [37]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="k">print</span><span class="p">(</span><span class="s">"Minimal Eigenvalues:</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">min_lin</span><span class="o">.</span><span class="n">eigenvals</span><span class="p">())</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"Nonminimal Eigenvalues:</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">nonmin_lin</span><span class="o">.</span><span class="n">eigenvals</span><span class="p">())</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+Minimal Eigenvalues:
+ {7*sqrt(5)*I/5: 1, -7*sqrt(5)*I/5: 1}
+Nonminimal Eigenvalues:
+ {0: 2, 7*sqrt(5)*I/5: 1, -7*sqrt(5)*I/5: 1}
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Looking at the eigenvalues of each matrix (as well as the <em>shape</em> of each matrix) you can already see something's not quite correct with the nonminimal linearization. With only one coordinate and one speed needed to set the state for the system, there should be only 2 eigenvalues, while the nonminimal linearization gives 4.</p>
+<p>To further the point, the linearized systems can be simulated and compared with the nonlinear system. For small angle deviations, the system responses should be similar. We'll use a deviation of 1 degree, which should be small enough that they match:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [38]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Create the initial conditions based on the trim a deviation of 1 degree</span>
+<span class="c"># from the trim condition, with no initial velocity</span>
+<span class="n">delta</span> <span class="o">=</span> <span class="mi">1</span><span class="o">*</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span>
+<span class="n">x0min</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="n">delta</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="n">trim_cond_m</span>
+<span class="n">x0nonmin</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="n">val_dict</span><span class="p">[</span><span class="n">L</span><span class="p">]</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">delta</span><span class="p">),</span> <span class="n">val_dict</span><span class="p">[</span><span class="n">L</span><span class="p">]</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">delta</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="n">trim_cond_nm</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [39]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Create the required functions for simulation with odeint</span>
+<span class="n">f_nonminimal_lin</span> <span class="o">=</span> <span class="n">lambdify</span><span class="p">(</span><span class="n">qs</span> <span class="o">+</span> <span class="n">us</span><span class="p">,</span> <span class="n">nonmin_lin</span><span class="o">*</span><span class="n">Matrix</span><span class="p">(</span><span class="n">qs</span> <span class="o">+</span> <span class="n">us</span><span class="p">))</span>
+<span class="n">f_minimal_lin</span> <span class="o">=</span> <span class="n">lambdify</span><span class="p">([</span><span class="n">q1</span><span class="p">,</span> <span class="n">u1</span><span class="p">],</span> <span class="n">min_lin</span><span class="o">*</span><span class="n">Matrix</span><span class="p">([</span><span class="n">q1</span><span class="p">,</span> <span class="n">u1</span><span class="p">]))</span>
+<span class="n">rhs_nonminimal_lin</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="n">array</span><span class="p">(</span><span class="n">f_nonminimal_lin</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">rhs_minimal_lin</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="n">array</span><span class="p">(</span><span class="n">f_minimal_lin</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [40]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Run the simulation</span>
+<span class="n">t</span> <span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+<span class="n">x_nm</span> <span class="o">=</span> <span class="n">odeint</span><span class="p">(</span><span class="n">rhs_nonminimal</span><span class="p">,</span> <span class="n">x0nonmin</span> <span class="o">+</span> <span class="n">trim_cond_nm</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+<span class="n">x_m</span> <span class="o">=</span> <span class="n">odeint</span><span class="p">(</span><span class="n">rhs_minimal</span><span class="p">,</span> <span class="n">x0min</span> <span class="o">+</span> <span class="n">trim_cond_m</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+<span class="n">x_nm_lin</span> <span class="o">=</span> <span class="n">odeint</span><span class="p">(</span><span class="n">rhs_nonminimal_lin</span><span class="p">,</span> <span class="n">x0nonmin</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">trim_cond_nm</span>
+<span class="n">x_m_lin</span> <span class="o">=</span> <span class="n">odeint</span><span class="p">(</span><span class="n">rhs_minimal_lin</span><span class="p">,</span> <span class="n">x0min</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">trim_cond_m</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [41]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Plot the results</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">val_dict</span><span class="p">[</span><span class="n">L</span><span class="p">]</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">x_m</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]),</span> <span class="n">t</span><span class="p">,</span> <span class="n">val_dict</span><span class="p">[</span><span class="n">L</span><span class="p">]</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">x_m_lin</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'t, (s)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'$N_y$ Coordinate (m)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">'Minimal Coordinates Simulation Results'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s">'Nonlinear'</span><span class="p">,</span> <span class="s">'Linear'</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">val_dict</span><span class="p">[</span><span class="n">L</span><span class="p">]</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">x_m</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]),</span> <span class="n">t</span><span class="p">,</span> <span class="n">val_dict</span><span class="p">[</span><span class="n">L</span><span class="p">]</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">x_m_lin</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'t, (s)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'$N_x$ Coordinate (m)'</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x_nm</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">t</span><span class="p">,</span> <span class="n">x_nm_lin</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'t, (s)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'$N_y$ Coordinate (m)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">'Nonminimal Coordinates Simulation Results'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s">'Nonlinear'</span><span class="p">,</span> <span class="s">'Linear'</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x_nm</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">t</span><span class="p">,</span> <span class="n">x_nm_lin</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'t, (s)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'$N_x$ Coordinate (m)'</span><span class="p">);</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+
+
+<div class="output_png output_subarea ">
+<img />
+</div>
+
+</div>
+
+<div class="output_area"><div class="prompt"></div>
+
+
+<div class="output_png output_subarea ">
+<img />
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>While the minimal coordinate linear and nonlinear simulation results line up nicely, the <span class="math">\(N_x\)</span> coordinate response of the linearized nonminimal system is significantly off. This is because for the nonminimal system, the generalized coordinates and speeds aren't independent but functions of other coordinates and speeds. Thus, when taking the jacobian the chain rule needs to be applied correctly, and the dependent states removed from the linearized expression.</p>
+<p>This is the basis for my GSoC project. The implementation of a robust way to linearize systems that <em>works</em>, regardless of constraints or nonminimal system realization. A method for doing this in a systematic manner was derived by one of my mentors, and I plan on starting with that. I think it can be generalized to Lagrange's equations, as well as other systems, but I need to think more on that.</p>
+<p>This week I spent some time teaching myself Kane's Method, and then the remainder working through a bunch of test cases to be used as unit tests for the linearization routines. Next week I'll begin work on the actual implementation.</p>
+<p><em>This ipython notebook can be found <a href="https://github.com/jcrist/ipython_notebooks/tree/master/Pendulum">here</a></em></p>
+</div>
+</div>
+</div><p></p></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://jcrist.github.io/gsoc-week-1.html">by Jim Crist at May 24, 2014 03:00 PM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>May 23, 2014</h2>
 
 <div class="channelgroup">
@@ -1209,7 +2966,8 @@ screen npm start
 <p>-A class WeylGroup, which is about the Weyl group of a given Lie algebra.  It gives the size and name of a given Weyl group as well as the matrix form of an element, and an element’s order.</p>
 <p>-Methods for displaying the Cartan matrix and Dynkin diagram of a Lie algebra.</p>
 <p> </p>
-<p>That’s pretty much it.  I had a great time working with SymPy this summer!</p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/172/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/172/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=172&amp;subd=meclark256&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+<p>That’s pretty much it.  I had a great time working with SymPy this summer!</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/172/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/172/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=172&amp;subd=meclark256&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -1330,7 +3088,8 @@ screen npm start
 <img src="http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+f_2+%3D+x%5E2+-+2+%5Calpha%5E2+x+%2B+%5Calpha%5E3+z%5E2+-+%28+%5Calpha%5E3+%2B+%5Calpha%5E2+%2B+%5Calpha+%2B+1%29+y+%2B+12+%5Calpha+&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\displaystyle f_2 = x^2 - 2 \alpha^2 x + \alpha^3 z^2 - ( \alpha^3 + \alpha^2 + \alpha + 1) y + 12 \alpha " class="latex" title="\displaystyle f_2 = x^2 - 2 \alpha^2 x + \alpha^3 z^2 - ( \alpha^3 + \alpha^2 + \alpha + 1) y + 12 \alpha " /><br />
 <img src="http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+f_3+%3D+x%5E2+-+2+%5Calpha%5E3+x+%2B+%5Calpha%5E2+z%5E2+%2B+%5Calpha+y+-+12+%28+%5Calpha%5E3+%2B+%5Calpha%5E2+%2B+%5Calpha+%2B+1%29+&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\displaystyle f_3 = x^2 - 2 \alpha^3 x + \alpha^2 z^2 + \alpha y - 12 ( \alpha^3 + \alpha^2 + \alpha + 1) " class="latex" title="\displaystyle f_3 = x^2 - 2 \alpha^3 x + \alpha^2 z^2 + \alpha y - 12 ( \alpha^3 + \alpha^2 + \alpha + 1) " /><br />
 <img src="http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+f_4+%3D+x%5E2+%2B+2+%28+%5Calpha%5E3+%2B+%5Calpha%5E2+%2B+%5Calpha+%2B+1%29+x+%2B+%5Calpha+z%5E2+%2B+%5Calpha%5E3+y+%2B+12+%5Calpha%5E2+.+&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\displaystyle f_4 = x^2 + 2 ( \alpha^3 + \alpha^2 + \alpha + 1) x + \alpha z^2 + \alpha^3 y + 12 \alpha^2 . " class="latex" title="\displaystyle f_4 = x^2 + 2 ( \alpha^3 + \alpha^2 + \alpha + 1) x + \alpha z^2 + \alpha^3 y + 12 \alpha^2 . " /></p>
-<p style="text-align: justify;">The current SymPy factorization algorithm needs 215 seconds, whereas the new one only takes 60.3 seconds. More than three times faster! <img src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif" alt=":)" class="wp-smiley" /> </p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/352/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/352/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=352&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+<p style="text-align: justify;">The current SymPy factorization algorithm needs 215 seconds, whereas the new one only takes 60.3 seconds. More than three times faster! <img src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif" alt=":)" class="wp-smiley" /> </p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/352/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/352/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=352&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -1556,7 +3315,8 @@ This is a computationally hard problem and method I implemented finds only one s
 <p>I also changed bits in in the root_system PR to utilise Rational(x, y) instead of using floating point numbers. </p>
 <p>I’m hoping to have most major coding done by the 13th, so I can spend the last 10 days of GSOC writing up more detailed docstrings and fixing other minor errors.</p>
 <p> </p>
-<p>Sorry for the short update, but I’m not feeling particularly verbose today.</p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/167/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/167/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=167&amp;subd=meclark256&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+<p>Sorry for the short update, but I’m not feeling particularly verbose today.</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/167/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/167/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=167&amp;subd=meclark256&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -1729,7 +3489,8 @@ where t2 = <img src="http://s0.wp.com/latex.php?latex=log%28x%5E2+%2B+1%29&amp;b
 I and Aaron solved the major difficulties incurred in the is_deriv part of the code.<br />
 <a href="http://geekiology.files.wordpress.com/2013/09/screenshot-from-2013-09-03-175154.png"><img src="http://geekiology.files.wordpress.com/2013/09/screenshot-from-2013-09-03-175154.png?w=300&amp;h=168" alt="Screenshot from 2013-09-03 17:51:54" width="300" class="alignnone size-medium wp-image-413" height="168" /></a><br />
 Cases like above where giving incorrect answers before, have a solution now.</p>
-<p>The only issues which is till unresolved from the precious week is the infinite loops for polynomial_reduce kt . While I see similar issues in the original code for case polynomial_reduce(Poly((-64*t**6 + 64*t**4 + 64*t**2 – 64, t)/(2048*t**4 – 4096*t**2 + 2048)), DE) I am not able to find the stopping-condition for the same in the book.</p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/geekiology.wordpress.com/410/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/geekiology.wordpress.com/410/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=geekiology.wordpress.com&amp;blog=36553244&amp;post=410&amp;subd=geekiology&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+<p>The only issues which is till unresolved from the precious week is the infinite loops for polynomial_reduce kt . While I see similar issues in the original code for case polynomial_reduce(Poly((-64*t**6 + 64*t**4 + 64*t**2 – 64, t)/(2048*t**4 – 4096*t**2 + 2048)), DE) I am not able to find the stopping-condition for the same in the book.</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/geekiology.wordpress.com/410/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/geekiology.wordpress.com/410/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=geekiology.wordpress.com&amp;blog=36553244&amp;post=410&amp;subd=geekiology&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -1800,7 +3561,8 @@ Cases like above where giving incorrect answers before, have a solution now.</p>
 <p style="text-align: justify;">Wow, time seems to be flying right now, it’s already been two weeks again! In order to keep things clear, I described the factorization algorithm I am currently working on in <a href="http://sophiessympyblog.wordpress.com/2013/09/01/factoring-polynomials-over-algebraic-number-fields/" title="Factoring polynomials over algebraic number fields">another post</a>. So here I want to talk about my progress and problems in the last two weeks.</p>
 <p style="text-align: justify;">Let’s start with good news. My first two PRs have been merged! So now the modular GCD algorithms I implemented for polynomials over the integers and algebraic number fields are part of SymPy. <img src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif" alt=":)" class="wp-smiley" /> </p>
 <p style="text-align: justify;">Progress on the factorization algorithm has not been as fast as I would have liked. I spent a lot of time with Hensel lifting, since the description of the algorithm is not very explicit in this part. I ended up adapting the already implemented Hensel lifting code to my use case. The last (big) part missing is the sparse <img src="http://s0.wp.com/latex.php?latex=p&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="p" class="latex" title="p" />-adic lifting algorithm. The problem here is that I would have to solve a cumbersome system of linear equations over <img src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Z_%7Bp%5Em%7D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\mathbb Z_{p^m}" class="latex" title="\mathbb Z_{p^m}" />. One possible way to work around this is to choose a large prime so that no lifting is necessary, which is the way it is currently done in the integer polynomial case. But of course, a lifting would be more efficient.</p>
-<p style="text-align: justify;">I already made successful factorizations (by using big enough primes) for certain polynomials, and next week I hope to get it to work for arbitrary ones.</p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/281/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/281/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=281&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+<p style="text-align: justify;">I already made successful factorizations (by using big enough primes) for certain polynomials, and next week I hope to get it to work for arbitrary ones.</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/281/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/281/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=281&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -1840,7 +3602,8 @@ We define the <em>denominator </em><img src="http://s0.wp.com/latex.php?latex=%5
 <p style="text-align: justify;">That means, we have the correct factorization modulo the prime <img src="http://s0.wp.com/latex.php?latex=p&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="p" class="latex" title="p" />. In order to get the desired factorization, we use a procedure that is also based on Hensel’s Lemma, called <img src="http://s0.wp.com/latex.php?latex=p&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="p" class="latex" title="p" />-adic lifting. We lift the factors <img src="http://s0.wp.com/latex.php?latex=%5Cbar+f_j&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\bar f_j" class="latex" title="\bar f_j" /> from <img src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Z_p%28%5Calpha%29%5Bx_o%2C+%5Cldots%2C+x_n%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\mathbb Z_p(\alpha)[x_o, \ldots, x_n]" class="latex" title="\mathbb Z_p(\alpha)[x_o, \ldots, x_n]" /> to <img src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Z_%7Bp%5Em%7D%28%5Calpha%29%5Bx_o%2C+%5Cldots%2C+x_n%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\mathbb Z_{p^m}(\alpha)[x_o, \ldots, x_n]" class="latex" title="\mathbb Z_{p^m}(\alpha)[x_o, \ldots, x_n]" />, where <img src="http://s0.wp.com/latex.php?latex=m&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="m" class="latex" title="m" /> is chosen big enough, such that</p>
 <p align="center"><img src="http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+%5Ctilde+f%28x_o%2C+%5Cldots%2C+x_n%29+%3D+l+%5Ccdot+%5Cprod_%7Bj+%3D+1%7D%5Es+f_j%28x_o%2C+%5Cldots%2C+x_n%29+&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\displaystyle \tilde f(x_o, \ldots, x_n) = l \cdot \prod_{j = 1}^s f_j(x_o, \ldots, x_n) " class="latex" title="\displaystyle \tilde f(x_o, \ldots, x_n) = l \cdot \prod_{j = 1}^s f_j(x_o, \ldots, x_n) " /></p>
 <p>also holds over <img src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Q%28%5Calpha%29&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\mathbb Q(\alpha)" class="latex" title="\mathbb Q(\alpha)" /> and we are done.</p>
-<p>[1] <a href="http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf" rel="nofollow">http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf</a></p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/283/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/283/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=283&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+<p>[1] <a href="http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf" rel="nofollow">http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf</a></p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/283/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/283/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=283&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -1937,7 +3700,8 @@ We define the <em>denominator </em><img src="http://s0.wp.com/latex.php?latex=%5
 <p>Lastly I am also trying to find more concrete information about the Weyl group of type D; I know that it is a subgroup of index 2, but I’m not sure what exact permutations and stuff that it corresponds to.  </p>
 <p>So yeah.  This coming week, my plan is to figure out how I want to write the permutations of the hyperoctahedral group as permutations on positive integers, and then to take input from the user in the form of products of simple reflections, and generate the corresponding permutation, at least for types A, B, and C.  </p>
 <p>For example, given A3, the Coxeter diagram is 0—0–0, and the generating reflections are r1, r2, r3, and the Weyl group is S4.   We can think of r1 as the permutation (1,2), r2 as (2,3), and r3 as (3,4).  So if the user gave the input r1r2 that would be the permutation (1,2)(2,3) = (1 3 2).  Oh, I also need to remember that the Permutation class starts with 0 instead of 1, so I need to remember to take that into account.</p>
-<p>This week I will also implement a method that gives the Coxeter diagram of a given Weyl group.  This should be very easy, given the Coxeter diagram is the undirected Dynkin diagram. </p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/137/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/137/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=137&amp;subd=meclark256&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+<p>This week I will also implement a method that gives the Coxeter diagram of a given Weyl group.  This should be very easy, given the Coxeter diagram is the undirected Dynkin diagram. </p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/137/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/137/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=137&amp;subd=meclark256&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -2125,7 +3889,8 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
 <p>So, for each semisimple Lie group, we have a Weyl group.  It is a subgroup of the isometry group of the root system.  Specifically, it’s the subgroup that is generated by reflections through the hyperplanes orthogonal to the roots.  Therefore, Weyl groups are reflection groups, and so a Weyl group is a finite Coxeter group. </p>
 <p>Now, if we take a Lie algebra’s Dynkin diagram and delete all arrows from it, we have its Coxeter diagram, which encodes information about the reflections which generate the Weyl group, as follows.  The vertices of the Coxeter diagram represent the generating reflections of the Weyl group, s_i.  An edge is drawn between s_i and s_j if the order m(i, j) of s_i*s_j is greater than two.  If there is one edge, the order m(i, j) is 3.  If there are two edges, the order m(i, j) is 4, and if there are three edges, the order m(i, j) is 5.  </p>
 <p>We note that the B series and the C series have the same Coxeter diagram, and hence have the same Weyl group, which is the hyperoctahedral group, which is the group of symmetries of a hypercube.  Considered as a permutation group, it is the signed symmetric group of permutations of the set  { −<i>n</i>, −<i>n</i> + 1, …, −1, 1, 2, …, <i>n</i> } such that <i>π</i>(<i>i</i>) = −<i>π</i>(−<i>i</i>) for all <i>i</i>.  The Weyl group of D_n is a subgroup of index two in the hyperoctahedral group.  The Weyl group of A_n is the symmetric group on n variables. </p>
-<p>So, I’m now looking at working on the class WeylGroup.  Obviously it’s easy enough to write out the generating reflections, but I’m not sure how exactly I want to proceed from there.  Perhaps a function where a user can specify a reflection as a product of the generating reflections (e.g. input s1s2s5 or something…) and then have the function output its order?  I’m also thinking about how to I want to represent a given reflection.  I’m leaning towards representing it at the product of the generating reflections.  We’ll see.  I also have included a function which returns the order of a given Weyl group.  So yeah, that’s where I’m at.  This week has been generally slow in terms of concrete output, but I’ve been spending a lot of time reading and researching (as Weyl groups aren’t my specialty) and generally contemplating where I want to go with this class.</p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/113/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/113/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=113&amp;subd=meclark256&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+<p>So, I’m now looking at working on the class WeylGroup.  Obviously it’s easy enough to write out the generating reflections, but I’m not sure how exactly I want to proceed from there.  Perhaps a function where a user can specify a reflection as a product of the generating reflections (e.g. input s1s2s5 or something…) and then have the function output its order?  I’m also thinking about how to I want to represent a given reflection.  I’m leaning towards representing it at the product of the generating reflections.  We’ll see.  I also have included a function which returns the order of a given Weyl group.  So yeah, that’s where I’m at.  This week has been generally slow in terms of concrete output, but I’ve been spending a lot of time reading and researching (as Weyl groups aren’t my specialty) and generally contemplating where I want to go with this class.</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/113/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/113/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=113&amp;subd=meclark256&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -2387,7 +4152,8 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
 <p>Then, I also implemented a function which takes two roots as input, and if their sum is a root, returns their sum as a new root.  To do this, I first needed to have all the roots of a given Lie algebra available.  That is why last week I implemented a method for generating all the positive roots for A, B, C, and D.  This week I also did that for E, F, and G.  This enabled me to implement a method in RootSystem that generates all the roots of a given Lie algebra, by first getting the positive roots, and then using the positive roots to generate the negative roots (by multiplying each positive root by -1). </p>
 <p> </p>
 <p>Then the method add_as_root works by checking the dictionary of all roots to see if the sum of the two input roots is also a root.  If it’s not, it returns a string saying “The sum of these two roots is not a root”.  Otherwise it returns the sum as a list, as usual.</p>
-<p>This week I also worked on documentation and the like for all my functions.  This weekend I’m going to make sure all the doctests pass.  Then, my plan for next week is to start work on the the WeylGroup class.</p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/98/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/98/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=98&amp;subd=meclark256&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+<p>This week I also worked on documentation and the like for all my functions.  This weekend I’m going to make sure all the doctests pass.  Then, my plan for next week is to start work on the the WeylGroup class.</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/98/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/98/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=98&amp;subd=meclark256&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -2423,7 +4189,8 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
 <p style="text-align: justify;">Another task was getting my <a href="https://github.com/sympy/sympy/pull/2281" title="modular GCD algorithm for integer polynomials">first PR</a> ready for merging. For this, I needed to cover more lines of the code, since every untested one is “a bug waiting to happen”. The difficulty here is the random choice of evaluation points in <code>_modgcd_multivariate_p</code>. So I searched for an example such that for one prime every evaluation point is unlucky. I am glad I found one, since the only other possibility would have been to add an optional argument to choose the evaluation points manually. Now almost every line is tested and the few ones that are not should be harmless. <img src="http://s1.wp.com/wp-includes/images/smilies/icon_wink.gif" alt=";)" class="wp-smiley" /> </p>
 <p style="text-align: justify;">After that, I thoroughly studied the article [1] on factorization of polynomials over algebraic domains. I also started with the implementation, but I did not get very far yet.</p>
 <p style="text-align: justify;">Sorry for this entry being so late but still so short, I hope that next week there will be more stuff to blog about!</p>
-<p style="text-align: justify;">[1] <a href="http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf" rel="nofollow">http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf</a></p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/254/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/254/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=254&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+<p style="text-align: justify;">[1] <a href="http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf" rel="nofollow">http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf</a></p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/254/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/254/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=254&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -2753,7 +4520,8 @@ Why? Well, without going too much into detail, the solution to this PDE, <img sr
 <p> </p>
 <p>At this point, in RootSystem I have so far implemented a method that generates all the simple roots,  a method for displaying the root space, and then methods which return the Cartan matrix and Dynkin diagram of the Lie algebra.  I am currently pondering on how I want to implement some root addition methods.</p>
 <p> </p>
-<p>So yeah, that’s been my week!  To be honest, I think it has been fairly productive, and I am quite pleased about that.</p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/82/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/82/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=82&amp;subd=meclark256&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+<p>So yeah, that’s been my week!  To be honest, I think it has been fairly productive, and I am quite pleased about that.</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/82/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/82/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=82&amp;subd=meclark256&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -2792,7 +4560,8 @@ Why? Well, without going too much into detail, the solution to this PDE, <img sr
 <p>I need to really gear-up now, so have planned to update the blog as well as PRs daily. There is a lot which I guess we all would like to see implemented for the Risch Algorithm. I would really like to have a meeting soon with Aaron to discuss if we could please have daily meet-ups.<br />
 PS  : Some Announcements<br />
 PS1 : YES !! i have passed the mid-term evaluation <img src="http://s0.wp.com/wp-includes/images/smilies/icon_biggrin.gif" alt=":D" class="wp-smiley" /><br />
-PS2 : I am finally 20 !! <img src="http://s0.wp.com/wp-includes/images/smilies/icon_biggrin.gif" alt=":D" class="wp-smiley" />  Adios teens !</p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/geekiology.wordpress.com/407/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/geekiology.wordpress.com/407/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=geekiology.wordpress.com&amp;blog=36553244&amp;post=407&amp;subd=geekiology&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+PS2 : I am finally 20 !! <img src="http://s0.wp.com/wp-includes/images/smilies/icon_biggrin.gif" alt=":D" class="wp-smiley" />  Adios teens !</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/geekiology.wordpress.com/407/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/geekiology.wordpress.com/407/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=geekiology.wordpress.com&amp;blog=36553244&amp;post=407&amp;subd=geekiology&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -2875,7 +4644,8 @@ PS2 : I am finally 20 !! <img src="http://s0.wp.com/wp-includes/images/smilies/i
 <p style="text-align: justify;">I am very happy to report that I passed midterm evaluations! <img src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif" alt=":)" class="wp-smiley" /> </p>
 <p style="text-align: justify;">So what happened this week? First, I implemented a (user facing) function to calculate a multivariate GCD of two polynomials over an algebraic field, building on the work of the previous two weeks. I also spent a considerable amount of time hunting bugs, but it seems I got everything in working order.</p>
 <p style="text-align: justify;">However, I realized that the polynomial ring I had been working with was not the best choice. So I went over the whole code again and rewrote everything to use polynomials in <img src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Z%5Bt_1%2C+%5Cldots%2C+t_k%5D%5Bx%2C+z%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\mathbb Z[t_1, \ldots, t_k][x, z]" class="latex" title="\mathbb Z[t_1, \ldots, t_k][x, z]" /> instead of <img src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Z%5Bx%2C+t_1%2C+%5Cldots%2C+t_k%2C+z%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\mathbb Z[x, t_1, \ldots, t_k, z]" class="latex" title="\mathbb Z[x, t_1, \ldots, t_k, z]" />. This made some parts easier and some parts more difficult, but overall it looks like the more natural choice. The parts that got more difficult now involve rings like <img src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Z%28t_k%29%5Bt_1%2C+%5Cldots+%2C+t_%7Bk-1%7D%5D%5Bx%2C+z%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\mathbb Z(t_k)[t_1, \ldots , t_{k-1}][x, z]" class="latex" title="\mathbb Z(t_k)[t_1, \ldots , t_{k-1}][x, z]" />, where I have to distinguish between the cases <img src="http://s0.wp.com/latex.php?latex=k+%3D+1&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="k = 1" class="latex" title="k = 1" /> and <img src="http://s0.wp.com/latex.php?latex=k+%3E+1&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="k &gt; 1" class="latex" title="k &gt; 1" />. Maybe I will find a better solution for that in time.</p>
-<p style="text-align: justify;">In the next few days I want to finish this part of my project so I can start with the factorization algorithm, which will be the biggest and final part of my project.</p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/246/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/246/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=246&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+<p style="text-align: justify;">In the next few days I want to finish this part of my project so I can start with the factorization algorithm, which will be the biggest and final part of my project.</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/246/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/246/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=246&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -3126,7 +4896,8 @@ i] chi (Finds a polynomial <img src="http://s0.wp.com/latex.php?latex=%5Cchi&amp
 <p>I’d also like to have an addition method for adding simple roots together, and as David suggests, a method which would only add roots if the sum was a root.   </p>
 <p>I’m still internally debating if I want to have the RootSystem class hold all the roots (well, hold all the positive roots, as a reflection would then generate the negative roots) or not.  I think it may make some of the above methods simpler, but then it might also just be overkill.  </p>
 <p>I’ll also have a method returns the root space of a given root system, which is just the span of all the simple roots.  </p>
-<p>So, yeah, that’s what I’m thinking and planning at the moment.  Hopefully I’ll be starting this stuff this weekend.</p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/77/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/77/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=77&amp;subd=meclark256&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+<p>So, yeah, that’s what I’m thinking and planning at the moment.  Hopefully I’ll be starting this stuff this weekend.</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/77/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/77/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=77&amp;subd=meclark256&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -3136,58 +4907,6 @@ i] chi (Finds a polynomial <img src="http://s0.wp.com/latex.php?latex=%5Cchi&amp
 
 <p class="date">
 <a href="http://meclark256.wordpress.com/2013/08/01/week-7/">by meclark256 at August 01, 2013 09:16 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
-<div class="daygroup">
-<h2>July 29, 2013</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://thilinaatsympy.wordpress.com" title="Thilina's SymPy Blog">Thilina Rathnayake</a></h3>
-
-
-<div class="entrygroup" id="http://thilinaatsympy.wordpress.com/?p=154">
-<h4 lang="en"><a href="http://thilinaatsympy.wordpress.com/2013/07/29/descent-method-with-gaussian-reduction/">Descent method with gaussian reduction.</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>Sorry for a very late blog post, I had a really busy week and finally I managed to find sometime to write about the progress I made in the last week. I implemented an improved version of the descent method which uses gaussian reduction. I found this algorithm in [1]. Here is a sketch of the algorithm.</p>
-<h4>descent(a, b)</h4>
-<p>1. If <img src="http://s0.wp.com/latex.php?latex=%7Ca%7C+%3E+%7Cb%7C&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="|a| &gt; |b|" class="latex" title="|a| &gt; |b|" /> then swap <img src="http://s0.wp.com/latex.php?latex=a&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="a" class="latex" title="a" /> and <img src="http://s0.wp.com/latex.php?latex=b&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="b" class="latex" title="b" />, solve the resulting equation, then swap <img src="http://s0.wp.com/latex.php?latex=y&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="y" class="latex" title="y" /> and <img src="http://s0.wp.com/latex.php?latex=z&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="z" class="latex" title="z" /> in the solution obtained.<br />
-2. If <img src="http://s0.wp.com/latex.php?latex=b+%3D+1&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="b = 1" class="latex" title="b = 1" /> then set <img src="http://s0.wp.com/latex.php?latex=%28x%2C+y%2C+z%29+%3D+%281%2C+1%2C+0%29&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="(x, y, z) = (1, 1, 0)" class="latex" title="(x, y, z) = (1, 1, 0)" /> and stop.<br />
-3. If <img src="http://s0.wp.com/latex.php?latex=a+%3D+1&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="a = 1" class="latex" title="a = 1" />  then set <img src="http://s0.wp.com/latex.php?latex=%28x%2C+y%2C+z%29+%3D+%281%2C+0%2C+1%29&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="(x, y, z) = (1, 0, 1)" class="latex" title="(x, y, z) = (1, 0, 1)" /> and stop.<br />
-4. If <img src="http://s0.wp.com/latex.php?latex=b+%3D+-1&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="b = -1" class="latex" title="b = -1" /> there is no solution (since <img src="http://s0.wp.com/latex.php?latex=a&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="a" class="latex" title="a" /> must be <img src="http://s0.wp.com/latex.php?latex=-1&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="-1" class="latex" title="-1" />).<br />
-5. If <img src="http://s0.wp.com/latex.php?latex=b+%3D+-a&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="b = -a" class="latex" title="b = -a" /> then set <img src="http://s0.wp.com/latex.php?latex=%28x%2C+y%2C+z%29+%3D+%280%2C+1%2C+1%29&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="(x, y, z) = (0, 1, 1)" class="latex" title="(x, y, z) = (0, 1, 1)" /> and stop.<br />
-6. If <img src="http://s0.wp.com/latex.php?latex=b+%3D+a&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="b = a" class="latex" title="b = a" /> then let <img src="http://s0.wp.com/latex.php?latex=%28x_%7B1%7D%2C+y_%7B1%7D%2C+z_%7B1%7D%29&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="(x_{1}, y_{1}, z_{1})" class="latex" title="(x_{1}, y_{1}, z_{1})" /> be a solution of <img src="http://s0.wp.com/latex.php?latex=X_%7B1%7D%5E2+%2B+Z_%7B1%7D%5E2+%3D+aY_%7B1%7D%5E2+&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="X_{1}^2 + Z_{1}^2 = aY_{1}^2 " class="latex" title="X_{1}^2 + Z_{1}^2 = aY_{1}^2 " />, set <img src="http://s0.wp.com/latex.php?latex=%28x%2C+y%2C+z%29+%3D+%28ay_%7B1%7D%2C+x_%7B1%7D%2C+z_%7B1%7D%29&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="(x, y, z) = (ay_{1}, x_{1}, z_{1})" class="latex" title="(x, y, z) = (ay_{1}, x_{1}, z_{1})" /> and stop.<br />
-7. Let <img src="http://s0.wp.com/latex.php?latex=w&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="w" class="latex" title="w" /> be a solution to <img src="http://s0.wp.com/latex.php?latex=x%5E2+%5Cequiv+a+%28mod+%5C+b%29&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="x^2 \equiv a (mod \ b)" class="latex" title="x^2 \equiv a (mod \ b)" />. with <img src="http://s0.wp.com/latex.php?latex=w+%5Cleq+%7Cb%7C%2F2&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="w \leq |b|/2" class="latex" title="w \leq |b|/2" />, and set <img src="http://s0.wp.com/latex.php?latex=%28x_%7B0%7D%2C+z_%7B0%7D%29+%3D+%28w%2C+1%29&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="(x_{0}, z_{0}) = (w, 1)" class="latex" title="(x_{0}, z_{0}) = (w, 1)" />, so that <img src="http://s0.wp.com/latex.php?latex=x_%7B0%7D%5E2+-+az_%7B0%7D%5E2+%5Cequiv+0+%28mod+%5C+b%29&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="x_{0}^2 - az_{0}^2 \equiv 0 (mod \ b)" class="latex" title="x_{0}^2 - az_{0}^2 \equiv 0 (mod \ b)" />.<br />
-8. Use<strong><em> lattice reduction</em></strong> to find a new nontrivial solution <img src="http://s0.wp.com/latex.php?latex=%28x_%7B0%7D%2C+z_%7B0%7D%29&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="(x_{0}, z_{0})" class="latex" title="(x_{0}, z_{0})" /> to the congruence <img src="http://s0.wp.com/latex.php?latex=X%5E2+-+aZ%5E2+%5Cequiv+0+%28mod+%5C+b%29&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="X^2 - aZ^2 \equiv 0 (mod \ b)" class="latex" title="X^2 - aZ^2 \equiv 0 (mod \ b)" /> with <img src="http://s0.wp.com/latex.php?latex=x_%7B0%7D%5E2+%2B+%7Ca%7Cz_%7B0%7D%5E2&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="x_{0}^2 + |a|z_{0}^2" class="latex" title="x_{0}^2 + |a|z_{0}^2" /> as small as possible.<br />
-9. Set <img src="http://s0.wp.com/latex.php?latex=t+%3D+%28x_%7B0%7D%5E2+-+az_%7B0%7D%5E2%29%2Fb+&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="t = (x_{0}^2 - az_{0}^2)/b " class="latex" title="t = (x_{0}^2 - az_{0}^2)/b " /> and write <img src="http://s0.wp.com/latex.php?latex=t+%3D+t_%7B1%7Dt_%7B2%7D%5E2&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="t = t_{1}t_{2}^2" class="latex" title="t = t_{1}t_{2}^2" /> with <img src="http://s0.wp.com/latex.php?latex=t_%7B1%7D&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="t_{1}" class="latex" title="t_{1}" /> square-free.<br />
-10. Let <img src="http://s0.wp.com/latex.php?latex=%28x_%7B1%7D%2C+y_%7B1%7D%2C+z_%7B1%7D%29&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="(x_{1}, y_{1}, z_{1})" class="latex" title="(x_{1}, y_{1}, z_{1})" /> be a solution to <img src="http://s0.wp.com/latex.php?latex=X%5E2+-+aZ%5E2+%3D+t_%7B1%7DY%5E2&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="X^2 - aZ^2 = t_{1}Y^2" class="latex" title="X^2 - aZ^2 = t_{1}Y^2" /> then<br />
-<img src="http://s0.wp.com/latex.php?latex=%28x%2C+y%2C+z%29+%3D+%28x_%7B0+%7Dx_%7B1%7D+%2B+az_%7B0%7Dz_%7B1%7D%2C+t_%7B1%7Dt_%7B2%7Dy_%7B1%7D%2C+z_%7B0%7Dx_%7B1%7D+%2B+x_%7B0%7Dz_%7B1%7D%29&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="(x, y, z) = (x_{0 }x_{1} + az_{0}z_{1}, t_{1}t_{2}y_{1}, z_{0}x_{1} + x_{0}z_{1})" class="latex" title="(x, y, z) = (x_{0 }x_{1} + az_{0}z_{1}, t_{1}t_{2}y_{1}, z_{0}x_{1} + x_{0}z_{1})" /></p>
-<p>I spent a lot of time finding an algorithm for lattice reduction. There were generalized algorithms but I looked for something which is faster because we are concerned with vectors with two bases. I found  gaussian reduction algorithm in [2] which uses a method specific to this case.</p>
-<h4>References</h4>
-<p>[1] .. Efficient Solution of Rational Conices, J. E. Cremona and D. Rusin, Mathematics of Computation, Volume 00, Number 0.<br />
-[2] .. Gaussian lattice Reduction [online]. Available: <a href="http://home.ie.cuhk.edu.hk/~wkshum/wordpress/?p=404" rel="nofollow">http://home.ie.cuhk.edu.hk/~wkshum/wordpress/?p=404</a></p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/thilinaatsympy.wordpress.com/154/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/thilinaatsympy.wordpress.com/154/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=thilinaatsympy.wordpress.com&amp;blog=52956410&amp;post=154&amp;subd=thilinaatsympy&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://thilinaatsympy.wordpress.com/2013/07/29/descent-method-with-gaussian-reduction/">by Thilina Rathnayake at July 29, 2013 05:59 AM</a>
 </p>
 </div>
 </div>
@@ -3271,6 +4990,9 @@ i] chi (Finds a polynomial <img src="http://s0.wp.com/latex.php?latex=%5Cchi&amp
 </li>
 <li>
 <a href="http://f1728.wordpress.com/category/SymPy/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://f1728.wordpress.com" class="message" title="no activity in 7 days">Jeremias Yehdegho</a>
+</li>
+<li>
+<a href="http://jcrist.github.io/feeds/gsoc.atom.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://jcrist.github.io/" title="Marginally Stable">Jim Crist</a>
 </li>
 <li>
 <a href="http://sophiessympyblog.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sophiessympyblog.wordpress.com" class="message" title="no activity in 7 days">Katja Sophie Hotz</a>
@@ -3357,7 +5079,7 @@ i] chi (Finds a polynomial <img src="http://s0.wp.com/latex.php?latex=%5Cchi&amp
 
 <p>
 <strong>Last updated:</strong><br>
-May 24, 2014 06:20 PM<br>
+May 24, 2014 07:01 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
