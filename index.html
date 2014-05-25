@@ -34,6 +34,53 @@
 
 
 
+<h3><a href="http://codesachin.wordpress.com" title="Dream. Think. Code. » Google Summer of Code 2014">Sachin Joglekar</a></h3>
+
+
+<div class="entrygroup" id="http://codesachin.wordpress.com/?p=6">
+<h4 lang="en"><a href="http://codesachin.wordpress.com/2014/05/25/gsoc-first-week-getting-priorities-straight/">GSoC First Week: Getting priorities straight</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p>Ok. My first week with the my second iteration of Google Summer of Code. Things have been different this time right from the word go. Mainly to do with software design, or rather the approach to it. Jason and I have had lengthy discussions about this, and we have been trying to work out a good plan to get things done in a structured way this summer. I am hoping that this will avoid the problems Prasoon and I encountered oh-so-frequently last summer. They were mainly because we had too many TODOs and objectives all at the same time, instead of doing things step-by-step, in an incremental manner.</p>
+<p>What I have been doing this week, is thinking and talking to people regarding what the use-cases of the new module will be. I had started out trying to design an overly generalized system, but talking to Jason and Stefan has made me realise that its better to get the set of objectives straight.</p>
+<p>Basically, I have been listing out as many micro-use-cases as I can. Something like – “I, as a SymPy developer, would like to use the new vector module to prove the integral forms of Maxwell’s equations.” This is where the talking to many people came into the picture. Things like these, though they may seem a lot to process, admittedly do help you focus on whats high-priority.</p>
+<p>Broadly, I have divided my objectives for the module into the following incremental development ‘steps’-</p>
+<p><b><i>i)Implementation of a basic Vector framework</i></b></p>
+<p><b><i>ii)Implementation of the Del operator</i></b></p>
+<p><b><i>iii)Conversion to and from coordinate systems other than Cartesian</i></b>.</p>
+<p><b><i>iv) Having an API for doing vector math in different coordinate systems.</i></b></p>
+<p><b><i>v)Implementation of Coordinate System class, along with a Point class</i></b></p>
+<p><b><i>vi)Implementation of time-dependent functionality</i></b></p>
+<p><b><i>vii)Implementation of LaTeX functionality </i></b></p>
+<p><b><i>viii) Implementation of vector-integral functionality<br />
+</i></b></p>
+<p>Each of these, as you can probably see, can be done one-at-a-time (ofcourse many of them have prerequisites, like vi requiring i and v). In any case, the incremental model of software design does seem to fit well to developing the new vector module – with something like the waterfall model being used for each of these objectives individually.</p>
+<p>On the coding front, I have pretty much done with objective i. I have a stable (with a few mods necessary) system of basic vector math in place on my <em>gsocvector</em> branch on github. I have avoided usage of coordinate systems, to ensure that the Vector class fits well with the SymPy core. Some things still need to be ironed out, like usage of functions like<em> trigsimp </em>on a given Vector instance – I’ll probably try my hand a little more, or ask the mailing list.</p>
+<p>Anyways, thats all for now <span class="wp-smiley emoji emoji-smile" title=":-)">:-)</span>. Hope to have a great summer coding a new SymPy module. *excited*</p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/codesachin.wordpress.com/6/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/codesachin.wordpress.com/6/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=codesachin.wordpress.com&amp;blog=67602166&amp;post=6&amp;subd=codesachin&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://codesachin.wordpress.com/2014/05/25/gsoc-first-week-getting-priorities-straight/">by srjoglekar246 at May 25, 2014 03:13 PM</a>
+</p>
+</div>
+</div>
+
+
+
+</div>
+<div class="channelgroup">
+
+
+
+
+
+
+
 <h3><a href="http://lifelesscode.blogspot.com/search/label/sympy" title="Sudhanshu Mishra">Sudhanshu Mishra</a></h3>
 
 
@@ -4931,145 +4978,6 @@ which I’m quite happy with. I though that I was going to have to use a loop, b
 </div>
 
 </div>
-<div class="daygroup">
-<h2>July 24, 2013</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://fa.bianp.net/blog/" title="I say things">Fabian Pedregosa</a></h3>
-
-
-<div class="entrygroup" id="tag:fa.bianp.net,2013-07-25:blog/2013/different-ways-to-get-memory-consumption-or-lessons-learned-from-memory_profiler/">
-<h4><a href="http://fa.bianp.net/blog/2013/different-ways-to-get-memory-consumption-or-lessons-learned-from-memory_profiler/">Different ways to get memory consumption or lessons learned from ``memory_profiler``</a></h4>
-<div class="entry">
-<div class="content">
-<p>As part of the development of
-<a href="https://pypi.python.org/pypi/memory_profiler">memory_profiler</a> I've tried
-several ways to get memory usage of a program from within Python. In this post
-I'll describe the different alternatives I've tested.</p>
-<h3>The psutil library</h3>
-<p><a href="https://code.google.com/p/psutil/">psutil</a> is a python library that provides
-an interface for retrieving information on running processes. It provides
-convenient, fast and cross-platform functions to access the memory usage of a
-Python module:</p>
-<div class="highlight"><pre><span class="k">def</span> <span class="nf">memory_usage_psutil</span><span class="p">():</span>
-    <span class="c"># return the memory usage in MB</span>
-    <span class="kn">import</span> <span class="nn">psutil</span>
-    <span class="n">process</span> <span class="o">=</span> <span class="n">psutil</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">())</span>
-    <span class="n">mem</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">get_memory_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="mi">20</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">mem</span>
-</pre></div>
-
-
-<p>The above function returns the memory usage of the current Python process in
-MiB. Depending on the platform it will choose the most accurate and fastest
-way to get this information. For example, in Windows it will use the C++ Win32
-API while in Linux it will read from <code>/proc</code>, hiding the implementation
-details and proving on each platform a fast and accurate measurement.</p>
-<p>If you are looking for an easy way to get the memory consumption within Python
-this in my opinion your best shot. </p>
-<h3>The resource module</h3>
-<p>The <a href="http://docs.python.org/2/library/resource.html">resource module</a> is part
-of the standard Python library. It's basically a wrapper around
-&lt;sys&gt;resource.h&gt; <a>getrusage</a>,
-which is a POSIX standard but some methods are <a href="http://linux.die.net/man/2/getrusage">still missing in
-Linux</a> . However, the ones we are
-interested seem to work fine in Ubuntu 10.04. You can get the memory usage
-with this function:</p>
-<div class="highlight"><pre><span class="k">def</span> <span class="nf">memory_usage_resource</span><span class="p">():</span>
-    <span class="kn">import</span> <span class="nn">resource</span>
-    <span class="n">rusage_denom</span> <span class="o">=</span> <span class="mf">1024.</span>
-    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s">'darwin'</span><span class="p">:</span>
-        <span class="c"># ... it seems that in OSX the output is different units ...</span>
-        <span class="n">rusage_denom</span> <span class="o">=</span> <span class="n">rusage_denom</span> <span class="o">*</span> <span class="n">rusage_denom</span>
-    <span class="n">mem</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span> <span class="o">/</span> <span class="n">rusage_denom</span>
-    <span class="k">return</span> <span class="n">mem</span>
-</pre></div>
-
-
-<p>In my experience this approach is several times faster than the one based in
-psutil as was the default way to get the memory usage that I used in
-<code>memory_profiler</code> from version 0.23 up to 0.26. I changed this behavior in
-0.27 after a bug report by <a href="https://github.com/pgervais">Philippe Gervais</a>.
-The problem with this approach is that it seems to report results that are
-slightly different in some cases. Notably it seems to differ when objects
-have been recently liberated from the python interpreter.</p>
-<p>In the following example, orphaned arrays are liberated by the python
-interpreter, which is correctly seen by <code>psutil</code> but not by <code>resource</code>:</p>
-<div class="highlight"><pre><span class="n">mem_resource</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="n">mem_psutil</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">21</span><span class="p">):</span>
-    <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1000</span> <span class="o">*</span> <span class="n">i</span><span class="p">,</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">i</span><span class="p">))</span>
-    <span class="n">mem_resource</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">memory_usage_resource</span><span class="p">())</span>
-    <span class="n">mem_psutil</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">memory_usage_psutil</span><span class="p">())</span>
-</pre></div>
-
-
-<p><img src="http://fa.bianp.net/blog/static/code/2013/resource_vs_psutil.png" alt="Memory plot" /></p>
-<p>By the way I would be delighted to be corrected if I'm doing something wrong
-or informed of a workaround if this exists (I've got the code to reproduce the
-figures <sup id="fnref:1"><a href="http://fa.bianp.net/blog/feed/#fn:1" class="footnote-ref" rel="footnote">1</a></sup>)</p>
-<h3>querying <code>ps</code> directly</h3>
-<p>The method based on <code>psutils</code> works great but is not available by default on all
-Python systems. Because of this in <code>memory_profiler</code> we use as last resort
-something that's pretty ugly but works reasonably well when all else fails:
-invoking the system's <code>ps</code> command and parsing the output. The code is
-something like::</p>
-<div class="highlight"><pre><span class="k">def</span> <span class="nf">memory_usage_ps</span><span class="p">():</span>
-    <span class="kn">import</span> <span class="nn">subprocess</span>
-    <span class="n">out</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="s">'ps'</span><span class="p">,</span> <span class="s">'v'</span><span class="p">,</span> <span class="s">'-p'</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">())],</span>
-    <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span><span class="o">.</span><span class="n">communicate</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">b</span><span class="s">'</span><span class="se">\n</span><span class="s">'</span><span class="p">)</span>
-    <span class="n">vsz_index</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">b</span><span class="s">'RSS'</span><span class="p">)</span>
-    <span class="n">mem</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="n">vsz_index</span><span class="p">])</span> <span class="o">/</span> <span class="mi">1024</span>
-    <span class="k">return</span> <span class="n">mem</span>
-</pre></div>
-
-
-<p>The main disadvantage of this approach is that it needs to fork a process for
-each measurement. For some tasks where you need to get memory usage very fast,
-like in line-by-line memory usage then this be a huge overhead on the code.
-For other tasks such as getting information of long-running processes, where
-the memory usage is anyway working on a separate process this is not too bad.</p>
-<h3>benchmarks</h3>
-<p>Here is a benchmark of the different alternatives presented above. I am
-plotting the time it takes the different approaches to make 100 measurements
-of the memory usage (lower is better). As can be seen the smallest one is
-resource (although it suffers from the issues described above) followed
-closely by <code>psutil</code> which is in my opinion the best option if you can count on
-it being installed on the host system and followed far away by <code>ps</code> which is
-roughly a hundred times slower than <code>psutil</code>.</p>
-<p><img src="http://fa.bianp.net/blog/static/code/2013/time_100_measurements.png" alt="Memory plot" /></p>
-<div class="footnote">
-<hr />
-<ol>
-<li id="fn:1">
-<p>IPython notebook to reproduce the figures: <a href="http://nbviewer.ipython.org/url/fa.bianp.net/blog/static/code/2013/memory_usage.ipynb">html</a> <a href="http://fa.bianp.net/blog/static/code/2013/memory_usage.ipynb">ipynb</a> <a href="http://fa.bianp.net/blog/feed/#fnref:1" rev="footnote" class="footnote-backref" title="Jump back to footnote 1 in the text">↩</a></p>
-</li>
-</ol>
-</div></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://fa.bianp.net/blog/2013/different-ways-to-get-memory-consumption-or-lessons-learned-from-memory_profiler/">by Fabian Pedregosa at July 24, 2013 10:00 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -5183,7 +5091,7 @@ roughly a hundred times slower than <code>psutil</code>.</p>
 <a href="http://www.blogger.com/feeds/436496352933562096/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://robert-code.blogspot.com/" class="message" title="no activity in 7 days">Robert Schwarz</a>
 </li>
 <li>
-<a href="http://codesachin.wordpress.com/category/google-summer-of-code-2014/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://codesachin.wordpress.com" class="message" title="no activity in 7 days">Sachin Joglekar</a>
+<a href="http://codesachin.wordpress.com/category/google-summer-of-code-2014/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://codesachin.wordpress.com" title="Dream. Think. Code. » Google Summer of Code 2014">Sachin Joglekar</a>
 </li>
 <li>
 <a href="http://saptman.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://saptman.wordpress.com" class="message" title="no activity in 7 days">Saptarshi Mandal</a>
@@ -5234,7 +5142,7 @@ roughly a hundred times slower than <code>psutil</code>.</p>
 
 <p>
 <strong>Last updated:</strong><br>
-May 25, 2014 03:00 PM<br>
+May 25, 2014 03:20 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
