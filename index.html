@@ -141,6 +141,69 @@ I started off working on converting to Normal Forms more efficiently. The origin
 
 
 
+<h3><a href="http://sushant-hiray.in" title="Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy">Sushant Hiray</a></h3>
+
+
+<div class="entrygroup" id="http://sushant-hiray.in/posts/gsoc/csympy-week2/">
+<h4><a href="http://sushant-hiray.in/posts/gsoc/csympy-week2/">This Week in CSymPy: #2</a></h4>
+<div class="entry">
+<div class="content">
+<p>Week 2 for GSoC just ended and I’ve managed to complete the plans for this week.</p>
+
+<h1 id="progress">Progress</h1>
+
+<p>I started off the week with analysing the inverse trignometric module in SymPy.
+In SymPy particularly when <code>eval</code> is called it generates a lookup table and then searches for the argument in the table.
+Since the table was made separately for each class it had the exact values needed. </p>
+
+<p><br /><br />
+To avoid creating a lookup table each time an object is created, I created 2 global lookup tables.
+<code>inverse_cst</code> (used by <code>asin</code>,<code>acos</code>,<code>asec</code>,<code>acsc</code>) and <code>inverse_tct</code> (used by <code>atan</code> and <code>acot</code>)
+Since a common lookup table was created I had to tweak the return value according to the class which called it.</p>
+
+<p><br /><br />
+All the progress is in <a href="https://github.com/sympy/csympy/pull/176">pull 176</a>. It is almost good to merge. Once the Travis build results show up we will merge this into master.</p>
+
+<p><br /><br />
+In the midst of this week, myself and Thilina almost together  got stuck on a <a href="https://github.com/sympy/csympy/issues/174">bug</a>. When I posted the bug, Thilina acknowledged it failed on his system too and he shipped a fix.
+Thankfully we have <code>CSYMPY_ASSERT()</code> written everywhere to catch such bugs!
+A couple of days back I figured out yet another <a href="https://github.com/sympy/csympy/issues/179">bug</a> because of which one of test cases was failing. We are yet to fix this one.</p>
+
+<h1 id="discussions">Discussions</h1>
+
+<p>Most of the discussions with Ondrej and Thilina happened over the pull requests and the issues itself. Myself and Thilina did confirm the bugs on gitter just to be sure, before reporting them.</p>
+
+<h1 id="the-week-ahead">The Week Ahead</h1>
+<p>Firstly merge the current PR into master. Fix <a href="https://github.com/sympy/csympy/issues/179">#179</a>.
+We will also try to implement the <code>Exponential Module</code>. After this module we shoule be able to do things like <code>rewrite__as_cos</code> for the exponential class.
+Also if Ondrej is free, he will be writing the python wrappers for <code>Trignometric Module</code> now that it is complete on the base level.</p>
+
+<p><br /><br />
+Thats all for now :) Will get back next week!</p></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://sushant-hiray.in/posts/gsoc/csympy-week2/">June 01, 2014 06:30 PM</a>
+</p>
+</div>
+</div>
+
+
+
+</div>
+<div class="channelgroup">
+
+
+
+
+
+
+
 <h3><a href="http://kundankumar185.wordpress.com" title="my experiments with life">Kundan Kumar</a></h3>
 
 
@@ -5179,49 +5242,6 @@ Why? Well, without going too much into detail, the solution to this PDE, <img sr
 </div>
 
 
-
-</div>
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://meclark256.wordpress.com" title="My GSOC Adventure with SymPy">Mary Clark</a></h3>
-
-
-<div class="entrygroup" id="http://meclark256.wordpress.com/?p=82">
-<h4 lang="en"><a href="http://meclark256.wordpress.com/2013/08/09/week-8/">Week 8</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>This week I have been working on the class RootSystem. </p>
-<p>The first major decision that I had to make about this class was how to encode the CartanType data, for lack of a better way of phrasing it.   There are numerous ways of doing this, but I think that my solution is somewhat elegant.  Effectively, when one calls an instance of the class RootSystem, it takes an argument, cartantype.  Then, the __new__ function takes the input and sets an attribute of RootSystem called cartan_type as CartanType(cartantype).  The code is:</p>
-<p>class RootSystem(Basic):</p>
-<p>    def __new__(cls, cartantype):<br />        “”"<br />        Creates a new RootSystem object.  This method assigns an attribute<br />        called cartan_type to each instance of a RootSystem object.  When<br />        an instance of RootSystem is called, it needs an argument, which <br />        should be an instance of a simple Lie algebra.  We then take the<br />        CartanType of this argument and set it as the cartan_type attribute<br />        of the RootSystem instance.  <br />        “”"<br />        obj = Basic.__new__(cls, cartantype)<br />        obj.cartan_type = CartanType(cartantype)<br />        return obj</p>
-<p>By doing this, it means that I don’t need to check the argument and see if it is “A” or “B” or “G” or whatever, and then importing the associated class.  I can just call self.cartan_type.rank() or self.cartan_type.simple_root(i), which I think is quite neat.  </p>
-<p> </p>
-<p>I’ve also decided to add a method to the base classes that generates all of their positive roots (and since the negative roots are just minus the positive roots, we effectively have the entire root system).  I think that this will facilitate some of the addition methods that I want to implement in RootSystem.  I have so far done this for types A, B, C, and D. </p>
-<p> </p>
-<p>At this point, in RootSystem I have so far implemented a method that generates all the simple roots,  a method for displaying the root space, and then methods which return the Cartan matrix and Dynkin diagram of the Lie algebra.  I am currently pondering on how I want to implement some root addition methods.</p>
-<p> </p>
-<p>So yeah, that’s been my week!  To be honest, I think it has been fairly productive, and I am quite pleased about that.</p>
-<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/82/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/82/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=82&amp;subd=meclark256&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://meclark256.wordpress.com/2013/08/09/week-8/">by meclark256 at August 09, 2013 07:55 PM</a>
-</p>
-</div>
-</div>
-
-
 </div>
 
 </div>
@@ -5371,7 +5391,7 @@ Why? Well, without going too much into detail, the solution to this PDE, <img sr
 <a href="http://www.blogger.com/feeds/8847459392628952171/posts/default/-/sympy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://lifelesscode.blogspot.com/search/label/sympy" title="Sudhanshu Mishra">Sudhanshu Mishra</a>
 </li>
 <li>
-<a href="http://sushant-hiray.in/feed.gsoc.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sushant-hiray.in" class="message" title="no activity in 7 days">Sushant Hiray</a>
+<a href="http://sushant-hiray.in/feed.gsoc.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sushant-hiray.in" title="Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy">Sushant Hiray</a>
 </li>
 <li>
 <a href="http://tarzzz.github.io/rss.gsoc.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://tarzzz.github.io/gsoc14" class="message" title="no activity in 7 days">Tarun Gaba</a>
@@ -5398,7 +5418,7 @@ Why? Well, without going too much into detail, the solution to this PDE, <img sr
 
 <p>
 <strong>Last updated:</strong><br>
-June 02, 2014 08:40 AM<br>
+June 02, 2014 09:20 AM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>

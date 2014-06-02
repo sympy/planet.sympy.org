@@ -15,6 +15,7 @@
 		<rdf:Seq>
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-8847459392628952171.post-2310284663571326967" />
 			<rdf:li rdf:resource="http://blog.s-d-b.com/?p=6" />
+			<rdf:li rdf:resource="http://sushant-hiray.in/posts/gsoc/csympy-week2/" />
 			<rdf:li rdf:resource="http://kundankumar185.wordpress.com/?p=11" />
 			<rdf:li rdf:resource="http://blog.s-d-b.com/?p=13" />
 			<rdf:li rdf:resource="tag:,2014-05-30:gsoc-week-2.html" />
@@ -72,7 +73,6 @@
 			<rdf:li rdf:resource="http://matthewrocklin.com/blog//work/2013/08/14/SymPy-Theano-part-4" />
 			<rdf:li rdf:resource="http://manojbits.wordpress.com/?p=705" />
 			<rdf:li rdf:resource="http://asmeurersympy.wordpress.com/?p=1362" />
-			<rdf:li rdf:resource="http://meclark256.wordpress.com/?p=82" />
 		</rdf:Seq>
 	</items>
 </channel>
@@ -129,6 +129,43 @@ I started off working on converting to Normal Forms more efficiently. The origin
 &lt;p&gt;Au Revoir!!!&lt;/p&gt;</content:encoded>
 	<dc:date>2014-06-01T21:15:13+00:00</dc:date>
 	<dc:creator>SD</dc:creator>
+</item>
+<item rdf:about="http://sushant-hiray.in/posts/gsoc/csympy-week2/">
+	<title>Sushant Hiray: This Week in CSymPy: #2</title>
+	<link>http://sushant-hiray.in/posts/gsoc/csympy-week2/</link>
+	<content:encoded>&lt;p&gt;Week 2 for GSoC just ended and I’ve managed to complete the plans for this week.&lt;/p&gt;
+
+&lt;h1 id=&quot;progress&quot;&gt;Progress&lt;/h1&gt;
+
+&lt;p&gt;I started off the week with analysing the inverse trignometric module in SymPy.
+In SymPy particularly when &lt;code&gt;eval&lt;/code&gt; is called it generates a lookup table and then searches for the argument in the table.
+Since the table was made separately for each class it had the exact values needed. &lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;br /&gt;
+To avoid creating a lookup table each time an object is created, I created 2 global lookup tables.
+&lt;code&gt;inverse_cst&lt;/code&gt; (used by &lt;code&gt;asin&lt;/code&gt;,&lt;code&gt;acos&lt;/code&gt;,&lt;code&gt;asec&lt;/code&gt;,&lt;code&gt;acsc&lt;/code&gt;) and &lt;code&gt;inverse_tct&lt;/code&gt; (used by &lt;code&gt;atan&lt;/code&gt; and &lt;code&gt;acot&lt;/code&gt;)
+Since a common lookup table was created I had to tweak the return value according to the class which called it.&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;br /&gt;
+All the progress is in &lt;a href=&quot;https://github.com/sympy/csympy/pull/176&quot;&gt;pull 176&lt;/a&gt;. It is almost good to merge. Once the Travis build results show up we will merge this into master.&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;br /&gt;
+In the midst of this week, myself and Thilina almost together  got stuck on a &lt;a href=&quot;https://github.com/sympy/csympy/issues/174&quot;&gt;bug&lt;/a&gt;. When I posted the bug, Thilina acknowledged it failed on his system too and he shipped a fix.
+Thankfully we have &lt;code&gt;CSYMPY_ASSERT()&lt;/code&gt; written everywhere to catch such bugs!
+A couple of days back I figured out yet another &lt;a href=&quot;https://github.com/sympy/csympy/issues/179&quot;&gt;bug&lt;/a&gt; because of which one of test cases was failing. We are yet to fix this one.&lt;/p&gt;
+
+&lt;h1 id=&quot;discussions&quot;&gt;Discussions&lt;/h1&gt;
+
+&lt;p&gt;Most of the discussions with Ondrej and Thilina happened over the pull requests and the issues itself. Myself and Thilina did confirm the bugs on gitter just to be sure, before reporting them.&lt;/p&gt;
+
+&lt;h1 id=&quot;the-week-ahead&quot;&gt;The Week Ahead&lt;/h1&gt;
+&lt;p&gt;Firstly merge the current PR into master. Fix &lt;a href=&quot;https://github.com/sympy/csympy/issues/179&quot;&gt;#179&lt;/a&gt;.
+We will also try to implement the &lt;code&gt;Exponential Module&lt;/code&gt;. After this module we shoule be able to do things like &lt;code&gt;rewrite__as_cos&lt;/code&gt; for the exponential class.
+Also if Ondrej is free, he will be writing the python wrappers for &lt;code&gt;Trignometric Module&lt;/code&gt; now that it is complete on the base level.&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;br /&gt;
+Thats all for now :) Will get back next week!&lt;/p&gt;</content:encoded>
+	<dc:date>2014-06-01T18:30:00+00:00</dc:date>
 </item>
 <item rdf:about="http://kundankumar185.wordpress.com/?p=11">
 	<title>Kundan Kumar: As Journey goes On</title>
@@ -3601,24 +3638,6 @@ Why? Well, without going too much into detail, the solution to this PDE, &lt;img
 &lt;p&gt;In all, so far, it’s nothing too bad. Conda makes switching back to Python 2 easy enough, and dealing with these issues are hardly the worst thing I have to deal with when developing with Python. And if anything, seeing Python 2-3 bugs and issues makes me more aware of the differences between the two versions of the language, which is a good things since I have to develop against code that has to support both. &lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/asmeurersympy.wordpress.com/1362/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/asmeurersympy.wordpress.com/1362/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;amp;blog=7467151&amp;amp;post=1362&amp;amp;subd=asmeurersympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
 	<dc:date>2013-08-09T21:59:55+00:00</dc:date>
 	<dc:creator>Aaron Meurer</dc:creator>
-</item>
-<item rdf:about="http://meclark256.wordpress.com/?p=82">
-	<title>Mary Clark: Week 8</title>
-	<link>http://meclark256.wordpress.com/2013/08/09/week-8/</link>
-	<content:encoded>&lt;p&gt;This week I have been working on the class RootSystem. &lt;/p&gt;
-&lt;p&gt;The first major decision that I had to make about this class was how to encode the CartanType data, for lack of a better way of phrasing it.   There are numerous ways of doing this, but I think that my solution is somewhat elegant.  Effectively, when one calls an instance of the class RootSystem, it takes an argument, cartantype.  Then, the __new__ function takes the input and sets an attribute of RootSystem called cartan_type as CartanType(cartantype).  The code is:&lt;/p&gt;
-&lt;p&gt;class RootSystem(Basic):&lt;/p&gt;
-&lt;p&gt;    def __new__(cls, cartantype):&lt;br /&gt;        “”&quot;&lt;br /&gt;        Creates a new RootSystem object.  This method assigns an attribute&lt;br /&gt;        called cartan_type to each instance of a RootSystem object.  When&lt;br /&gt;        an instance of RootSystem is called, it needs an argument, which &lt;br /&gt;        should be an instance of a simple Lie algebra.  We then take the&lt;br /&gt;        CartanType of this argument and set it as the cartan_type attribute&lt;br /&gt;        of the RootSystem instance.  &lt;br /&gt;        “”&quot;&lt;br /&gt;        obj = Basic.__new__(cls, cartantype)&lt;br /&gt;        obj.cartan_type = CartanType(cartantype)&lt;br /&gt;        return obj&lt;/p&gt;
-&lt;p&gt;By doing this, it means that I don’t need to check the argument and see if it is “A” or “B” or “G” or whatever, and then importing the associated class.  I can just call self.cartan_type.rank() or self.cartan_type.simple_root(i), which I think is quite neat.  &lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;
-&lt;p&gt;I’ve also decided to add a method to the base classes that generates all of their positive roots (and since the negative roots are just minus the positive roots, we effectively have the entire root system).  I think that this will facilitate some of the addition methods that I want to implement in RootSystem.  I have so far done this for types A, B, C, and D. &lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;
-&lt;p&gt;At this point, in RootSystem I have so far implemented a method that generates all the simple roots,  a method for displaying the root space, and then methods which return the Cartan matrix and Dynkin diagram of the Lie algebra.  I am currently pondering on how I want to implement some root addition methods.&lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;
-&lt;p&gt;So yeah, that’s been my week!  To be honest, I think it has been fairly productive, and I am quite pleased about that.&lt;/p&gt;
-&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/82/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/82/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;amp;blog=52875864&amp;amp;post=82&amp;amp;subd=meclark256&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
-	<dc:date>2013-08-09T19:55:18+00:00</dc:date>
-	<dc:creator>meclark256</dc:creator>
 </item>
 
 </rdf:RDF>
