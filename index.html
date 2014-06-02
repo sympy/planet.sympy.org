@@ -34,6 +34,38 @@
 
 
 
+<h3><a href="http://geekpy.blogspot.com/" title="Akshay Narasimha">Akshay Narasimha</a></h3>
+
+
+<div class="entrygroup" id="tag:blogger.com,1999:blog-54146973659574488.post-4568350345911213597">
+<h4><a href="http://geekpy.blogspot.com/2014/06/gsoc-week-2.html">Gsoc Week #2</a></h4>
+<div class="entry">
+<div class="content">
+<div style="text-align: left;" dir="ltr">The second week of Gsoc has come to an end and I made some good progress this last week. Firstly my <a href="https://github.com/sympy/sympy/pull/7522">PR</a> on Point3D has been merged and I started implementing the line class(contains lines, rays and segments) in 3D using the Point3D class.<br /><br />This is the class structure for the Line class in 3D:<br />* Base class(all the below classes inherit from this class)<br />* Line3D<br />* Ray3D<br />* Segment3D<br /><br />I have implemented a part of each of these classes and have submitted a PR <a href="https://github.com/sympy/sympy/pull/7554">here</a>. I intend to implement the remaining methods and tests this following week and will hopefully merge the PR.<br /><br />Regarding the interaction between the Lines in 2D and 3D , it would be similar to the interaction between Points in 2D and 3D as discussed in the previous post.<br /><br />For example to find the distance between a 2D and 3D line instead of solving their equations we could find the intersection of the 3D line in the plane(to be implemented) contained by the 2D line and find the distance between the resulting point and the 2D line.As a result we get to keep the Line and Line3D classes seperate.<br /><br />That's it for this week.<br />Cheers.</div></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://geekpy.blogspot.com/2014/06/gsoc-week-2.html">by Akshay Narasimha (noreply@blogger.com) at June 02, 2014 06:46 PM</a>
+</p>
+</div>
+</div>
+
+
+
+</div>
+<div class="channelgroup">
+
+
+
+
+
+
+
 <h3><a href="http://gsocblog.blogspot.com/" title="GSoC 2014 with SymPy">Avichal Dayal</a></h3>
 
 
@@ -5075,151 +5107,6 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
 </div>
 
 </div>
-<div class="daygroup">
-<h2>August 14, 2013</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://matthewrocklin.com/blog/" title="Working notes by Matthew Rocklin - SymPy">MRocklin</a></h3>
-
-
-<div class="entrygroup" id="http://matthewrocklin.com/blog//work/2013/08/14/SymPy-Theano-part-4">
-<h4><a href="http://matthewrocklin.com/blog//work/2013/08/14/SymPy-Theano-part-4">Using SymPy within Theano</a></h4>
-<div class="entry">
-<div class="content">
-<p>Several months ago I published a sequence of blogposts about using SymPy and Theano together to generate efficient mathematical codes.  Main points from the posts were as follows</p>
-
-<ul>
-  <li><a href="http://matthewrocklin.com/blog/work/2013/03/19/SymPy-Theano-part-1/">Code Generation</a>: We created a drop-in replacement for SymPy’s code generation with a thin layer to Theano.</li>
-  <li><a href="http://matthewrocklin.com/blog/work/2013/03/28/SymPy-Theano-part-2/">Scalar Simplificaiton</a>:  We used SymPy’s simplification routines to accelerate programs prior to code printing in Theano</li>
-  <li><a href="http://matthewrocklin.com/blog/work/2013/04/05/SymPy-Theano-part-3/">Matrix Expressions</a>:  We generate fast blocked numeric linear algebra programs from SymPy’s matrix expressions using Theano array operations.</li>
-</ul>
-
-<p>A week ago <a href="https://groups.google.com/d/topic/sympy/VtaxCRNO4sE/discussion">someone popped up on the SymPy mailing list</a> asking if a particular SymPy operation (<code>sympy.Piecewise</code>) could be supported in the SymPy-Theano translation.  Because Theano has a similar operation (<code>theano.tensor.switch</code>) it was simple to add this translation.  In general though this post raised some interesting questions:</p>
-
-<ul>
-  <li>Is there a way to avoid constantly making new translations for operations that exist both in SymPy and in Theano?</li>
-  <li>What do we do with SymPy’s more exotic operations for which no Theano analog exists?  E.g. how do we generate code for factorial or bessel functions?</li>
-</ul>
-
-<p>In an attempt to resolve these issues we recently merged a general <code>SymPyCCode</code> operation into the <code>Theano</code> project.  It enables the expression of a Theano scalar operation through SymPy expressions using SymPy’s original code generation capability.  For example we can create a simple addition operation like so</p>
-
-<div class="highlight"><pre><code class="python"><span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">Symbol</span><span class="p">,</span> <span class="n">symbols</span>
-<span class="kn">from</span> <span class="nn">theano.scalar.basic_sympy</span> <span class="kn">import</span> <span class="n">SymPyCCode</span>
-
-<span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="s">'x,y'</span><span class="p">)</span>            <span class="c"># SymPy Symbols</span>
-<span class="n">add</span> <span class="o">=</span> <span class="n">SymPyCCode</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">],</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span>  <span class="c"># A Theano addition operator</span>
-</code></pre></div>
-
-<p>Theano operators can be applied to Theano variables to make compound Theano expressions</p>
-
-<div class="highlight"><pre><code class="python"><span class="kn">from</span> <span class="nn">theano.scalar</span> <span class="kn">import</span> <span class="n">floats</span>
-
-<span class="n">xt</span><span class="p">,</span> <span class="n">yt</span> <span class="o">=</span> <span class="n">floats</span><span class="p">(</span><span class="s">'xy'</span><span class="p">)</span>
-<span class="n">zt</span> <span class="o">=</span> <span class="n">add</span><span class="p">(</span><span class="n">xt</span><span class="p">,</span> <span class="n">yt</span><span class="p">)</span>
-</code></pre></div>
-
-<p>Theano can then turn these expressions into functions</p>
-
-<div class="highlight"><pre><code class="python"><span class="kn">from</span> <span class="nn">theano</span> <span class="kn">import</span> <span class="n">function</span>
-
-<span class="n">f</span> <span class="o">=</span> <span class="n">function</span><span class="p">([</span><span class="n">xt</span><span class="p">,</span> <span class="n">yt</span><span class="p">],</span> <span class="n">zt</span><span class="p">)</span>
-<span class="n">f</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>  <span class="c"># prints 5.0</span>
-</code></pre></div>
-
-<p>So we can describe scalar operations in SymPy and use them directly in Theano without having to translate anything.  Of course, the <code>add</code> operation is already native in Theano.  This is more useful for complex scalar expressions, particularly if Theano does not already have such an operation</p>
-
-<div class="highlight"><pre><code class="python"><span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">gamma</span>
-<span class="n">theano_gamma</span> <span class="o">=</span> <span class="n">SymPyCCode</span><span class="p">([</span><span class="n">x</span><span class="p">],</span> <span class="n">gamma</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
-
-<span class="kn">from</span> <span class="nn">sympy.stats.crv_types</span> <span class="kn">import</span> <span class="n">NormalDistribution</span>
-<span class="n">mu</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'mu'</span><span class="p">,</span> <span class="n">bounded</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">sigma</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'sigma'</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">normal</span> <span class="o">=</span> <span class="n">SymPyCCode</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">],</span> <span class="n">NormalDistribution</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)(</span><span class="n">x</span><span class="p">))</span>
-</code></pre></div>
-
-<h2 id="under-the-hood">Under the Hood</h2>
-
-<p>Internally the <code>SymPyCCode</code> op calls SymPy’s C code printers to generate an implementation of the scalar operation.  For example the following SymPy code generates C code to compute the probability density function of a normal distribution.</p>
-
-<div class="highlight"><pre><code class="python"><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">sympy.printing</span> <span class="kn">import</span> <span class="n">ccode</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">ccode</span><span class="p">(</span><span class="n">NormalDistribution</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)(</span><span class="n">x</span><span class="p">))</span>
-<span class="p">(</span><span class="mf">1.0</span><span class="n">L</span><span class="o">/</span><span class="mf">2.0</span><span class="n">L</span><span class="p">)</span><span class="o">*</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="n">L</span><span class="o">/</span><span class="mf">2.0</span><span class="n">L</span><span class="o">*</span><span class="nb">pow</span><span class="p">(</span><span class="o">-</span><span class="n">mu</span> <span class="o">+</span> <span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="nb">pow</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span><span class="o">/</span><span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="n">M_PI</span><span class="p">)</span><span class="o">*</span><span class="n">sigma</span><span class="p">)</span>
-</code></pre></div>
-
-<p>Theano is then able to use this generated C code within its generated C program.  Theano still handles memory, common sub-expressions, arrays, etc. but is now able to leverage SymPy to generate low-level kernels for mathematical operations.</p>
-
-<h2 id="but-dont-use-this">But Don’t Use This</h2>
-
-<p>But you shouldn’t use this mechanism if you don’t have to.  Recall from the <a href="http://matthewrocklin.com/blog/work/2013/03/19/SymPy-Theano-part-1/">first post</a> that SymPy can translate many standard operations to Theano directly, without having to wrap the SymPy expressions up in a black box Theano operation.  Native translation enables Theano to  use many additional optimizations like the use of the GPU, automatic differentiation, and common sub-expression elimination across many expressions.  This approach is mainly for cases where your complex scalar expressions don’t translate well to Theano.  In some cases the SymPyCCode op may also provide better performance (maybe SymPy’s generated C code is a bit tighter?)</p>
-
-<h2 id="future-work">Future Work</h2>
-
-<p>We need to improve SymPy’s code printers.  While they support all the standard operators they neglect to cover the really interesting cases like bessel functions or factorial.  These are cases where the numerical analysis community can concisely describe the “right way” to compute many of these operations in isolation.   For example the factorial of <code>n</code> can be computed as <code>gamma(n+1)</code>, a fact rarely known by mainstream programmers.  </p>
-
-&lt;script type="math/tex; mode=display"&gt; n! = \Gamma(n+1) \;\; \forall n \in \mathbb{N} &lt;/script&gt;
-
-<p>I’ve been thinking about the right way to do this generally.  Right now my thought is that we should create a new <code>expand</code> hint for computation.  If you have thoughts I’d love to hear about them; please speak up in the comments.</p>
-
-<h2 id="example">Example</h2>
-
-<p>There are a number of ways to compute a SymPy expression numerically.  I’m going to explicily run throuh an example with a few of them below.  You should ignore this section if these are already familiar to you.</p>
-
-<p>We create a function to evaluate a normal distribution probability density function for a particular mean and standard deviation across a range of values for <code>x</code>.</p>
-
-<div class="highlight"><pre><code class="python"><span class="c"># The Target Expression</span>
-<span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">Symbol</span>
-<span class="kn">from</span> <span class="nn">sympy.stats.crv_types</span> <span class="kn">import</span> <span class="n">NormalDistribution</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'x'</span><span class="p">)</span>
-<span class="n">mu</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'mu'</span><span class="p">,</span> <span class="n">bounded</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">sigma</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'sigma'</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-
-<span class="n">result</span> <span class="o">=</span> <span class="n">NormalDistribution</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span>
-
-<span class="c"># Make a numpy `ufunc` with Pure SymPy</span>
-<span class="kn">from</span> <span class="nn">sympy.utilities.autowrap</span> <span class="kn">import</span> <span class="n">ufuncify</span>
-<span class="n">f_ufunc</span> <span class="o">=</span> <span class="n">ufuncify</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">],</span> <span class="n">result</span><span class="p">)</span>
-
-<span class="c"># Make a Theano function with SymPy</span>
-<span class="kn">from</span> <span class="nn">sympy.printing.theanocode</span> <span class="kn">import</span> <span class="n">theano_function</span>
-<span class="n">f_sym_theano</span> <span class="o">=</span> <span class="n">theano_function</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">],</span> <span class="p">[</span><span class="n">result</span><span class="p">],</span> <span class="n">dims</span><span class="o">=</span><span class="p">{</span><span class="n">x</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mu</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
-
-<span class="c"># Make a special Theano op using a SymPyCCode</span>
-<span class="kn">from</span> <span class="nn">theano.scalar.basic_sympy</span> <span class="kn">import</span> <span class="n">SymPyCCode</span>
-<span class="kn">from</span> <span class="nn">theano.tensor.elemwise</span> <span class="kn">import</span> <span class="n">Elemwise</span>
-<span class="n">normal_op</span> <span class="o">=</span> <span class="n">Elemwise</span><span class="p">(</span><span class="n">SymPyCCode</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">],</span> <span class="n">result</span><span class="p">))</span>
-
-<span class="c"># And then use that `op` in plain Theano code</span>
-<span class="kn">import</span> <span class="nn">theano</span>
-<span class="n">xt</span>     <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">tensor</span><span class="o">.</span><span class="n">vector</span><span class="p">(</span><span class="s">'x'</span><span class="p">)</span>
-<span class="n">mut</span>    <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">scalar</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="s">'mu'</span><span class="p">)</span>
-<span class="n">sigmat</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">scalar</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="s">'sigma'</span><span class="p">)</span>
-
-<span class="n">ft</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">function</span><span class="p">([</span><span class="n">xt</span><span class="p">,</span> <span class="n">mut</span><span class="p">,</span> <span class="n">sigmat</span><span class="p">],</span> <span class="n">normal_op</span><span class="p">(</span><span class="n">xt</span><span class="p">,</span> <span class="n">mut</span><span class="p">,</span> <span class="n">sigmat</span><span class="p">))</span>
-</code></pre></div></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://matthewrocklin.com/blog//work/2013/08/14/SymPy-Theano-part-4">August 14, 2013 07:00 AM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -5393,7 +5280,7 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
 
 <p>
 <strong>Last updated:</strong><br>
-June 02, 2014 06:01 PM<br>
+June 02, 2014 07:01 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
