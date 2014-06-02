@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2014-06-02T01:40:53Z</updated>
+  <updated>2014-06-02T02:00:53Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,64 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry>
+    <id>tag:blogger.com,1999:blog-8847459392628952171.post-2310284663571326967</id>
+    <link href="http://lifelesscode.blogspot.com/feeds/2310284663571326967/comments/default" rel="replies" type="application/atom+xml"/>
+    <link href="http://lifelesscode.blogspot.com/2014/06/gsoc14-progress-finishing-twave.html#comment-form" rel="replies" type="text/html"/>
+    <link href="http://www.blogger.com/feeds/8847459392628952171/posts/default/2310284663571326967" rel="edit" type="application/atom+xml"/>
+    <link href="http://www.blogger.com/feeds/8847459392628952171/posts/default/2310284663571326967" rel="self" type="application/atom+xml"/>
+    <link href="http://lifelesscode.blogspot.com/2014/06/gsoc14-progress-finishing-twave.html" rel="alternate" type="text/html"/>
+    <title>GSoC'14 Progress: Finishing TWave</title>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><div dir="ltr" style="text-align: left;"><div style="margin-bottom: 9px;"><div style="color: #444444; font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; margin-bottom: 9px;">This last week most of the coding I did was only related to transverse wave. It has already been merged into the master.</div><div style="color: #444444; font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; margin-bottom: 9px;"><a href="https://github.com/sympy/sympy/pull/7518" style="color: blue;">https://github.com/sympy/sympy/pull/7518</a></div><div style="color: #444444; font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; margin-bottom: 9px;">Here is the class structure of the <code style="background-color: #f7f7f9; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: 1px solid rgb(225, 225, 232); color: #dd1144; font-family: Consolas, 'Liberation Mono', Courier, monospace !important; font-size: 12px; padding: 3px 4px;">TWave</code>:</div><pre style=""><code style="background-color: transparent; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: 0px; color: inherit; font-family: Consolas, 'Liberation Mono', Courier, monospace !important; padding: 0px;"><span class="hljs-header" style="">Inherits<br/>========</span><br/><br/>Expr<br/><br/><span class="hljs-header" style="">Arguments<br/>=========</span><br/><br/>amplitude : Sympifyable<br/><span class="hljs-code" style="">    Amplitude of the wave.</span><br/>frequency : Sympifyable<br/><span class="hljs-code" style="">    Frequency of the wave.</span><br/>phase : Sympifyable<br/><span class="hljs-code" style="">    Phase angle of the wave.</span><br/>time<span class="hljs-emphasis" style="">_period : Sympifyable<br/>    Time period of the wave.<br/>n : Sympifyable<br/>    Refractive index of the medium.<br/><br/></span><span class="hljs-header" style="">Raises<br/>=======</span><br/><br/>ValueError : When niether frequency nor time period is provided.<br/><span class="hljs-code" style="">    or they are not consistent.</span><br/>TypeError : When anyting other than TWave objects is added.<br/><br/><span class="hljs-header" style="">Methods<br/>=======</span><br/><br/>frequency<br/>time<span class="hljs-emphasis" style="">_period<br/>wavelength<br/>amplitude<br/>phase<br/>speed<br/>angular_</span>velocity<br/>wavenumber<br/></code></pre><div style="color: #444444; font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; margin-bottom: 9px;">Till now it has been very easy to implement all these but these days I'm stuck on writing functions to rewrite an expression using different functions. This is supposed to work like this as I feel from the code:</div><div style="color: #444444; font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; margin-bottom: 9px;">When you call <code style="background-color: #f7f7f9; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: 1px solid rgb(225, 225, 232); color: #dd1144; font-family: Consolas, 'Liberation Mono', Courier, monospace !important; font-size: 12px; padding: 3px 4px;">expr.rewrite('sin')</code>, the following code written in <code style="background-color: #f7f7f9; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: 1px solid rgb(225, 225, 232); color: #dd1144; font-family: Consolas, 'Liberation Mono', Courier, monospace !important; font-size: 12px; padding: 3px 4px;">sympy.core.basic</code>should make a call to function <code style="background-color: #f7f7f9; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: 1px solid rgb(225, 225, 232); color: #dd1144; font-family: Consolas, 'Liberation Mono', Courier, monospace !important; font-size: 12px; padding: 3px 4px;">_eval_rewrite_as_sin(self, *args)</code> defined in the object class.</div><pre style=""><code style="background-color: transparent; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: 0px; color: inherit; font-family: Consolas, 'Liberation Mono', Courier, monospace !important; padding: 0px;"><span class="hljs-keyword" style="color: #333333; font-weight: bold;">if</span> not args:<br/>    <span class="hljs-keyword" style="color: #333333; font-weight: bold;">return</span> <span class="hljs-keyword" style="color: #333333; font-weight: bold;">self</span><br/><span class="hljs-keyword" style="color: #333333; font-weight: bold;">else</span>:<br/>    pattern = args[:-<span class="hljs-number" style="color: #009999;">1</span>]<br/>    <span class="hljs-keyword" style="color: #333333; font-weight: bold;">if</span> isinstance(args[-<span class="hljs-number" style="color: #009999;">1</span>], string_types):<br/>        rule = <span class="hljs-string" style="color: #dd1144;">'_eval_rewrite_as_'</span> + args[-<span class="hljs-number" style="color: #009999;">1</span>]<br/>    <span class="hljs-keyword" style="color: #333333; font-weight: bold;">else</span>:<br/>        rule = <span class="hljs-string" style="color: #dd1144;">'_eval_rewrite_as_'</span> + args[-<span class="hljs-number" style="color: #009999;">1</span>].__name__<br/><br/>    <span class="hljs-keyword" style="color: #333333; font-weight: bold;">if</span> not pattern:<br/>        <span class="hljs-keyword" style="color: #333333; font-weight: bold;">return</span> <span class="hljs-keyword" style="color: #333333; font-weight: bold;">self</span>._eval_rewrite(None, rule, **hints)<br/>    <span class="hljs-keyword" style="color: #333333; font-weight: bold;">else</span>:<br/>        <span class="hljs-keyword" style="color: #333333; font-weight: bold;">if</span> iterable(pattern[<span class="hljs-number" style="color: #009999;">0</span>]):<br/>            pattern = pattern[<span class="hljs-number" style="color: #009999;">0</span>]<br/><br/>        pattern = [ p.<span class="hljs-keyword" style="color: #333333; font-weight: bold;">__class__</span> <span class="hljs-keyword" style="color: #333333; font-weight: bold;">for</span> p in pattern <span class="hljs-keyword" style="color: #333333; font-weight: bold;">if</span> <span class="hljs-keyword" style="color: #333333; font-weight: bold;">self</span>.has(p) ]<br/><br/>        <span class="hljs-keyword" style="color: #333333; font-weight: bold;">if</span> pattern:<br/>            <span class="hljs-keyword" style="color: #333333; font-weight: bold;">return</span> <span class="hljs-keyword" style="color: #333333; font-weight: bold;">self</span>._eval_rewrite(tuple(pattern), rule, **hints)<br/>        <span class="hljs-keyword" style="color: #333333; font-weight: bold;">else</span>:<br/>            <span class="hljs-keyword" style="color: #333333; font-weight: bold;">return</span> <span class="hljs-keyword" style="color: #333333; font-weight: bold;">self</span><br/></code></pre><div style="color: #444444; font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; margin-bottom: 9px;">But this is not the case with me. It always ends up calling <code style="background-color: #f7f7f9; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: 1px solid rgb(225, 225, 232); color: #dd1144; font-family: Consolas, 'Liberation Mono', Courier, monospace !important; font-size: 12px; padding: 3px 4px;">__str__</code> method. This is the PR for the same.</div><div style="color: #444444; font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; margin-bottom: 9px;"><a href="https://github.com/sympy/sympy/pull/7546" style="color: blue;">https://github.com/sympy/sympy/pull/7546</a></div><div style="color: #444444; font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; margin-bottom: 9px;">By the way, I had never used any debugger for Python before and now I feel it makes your life much easier. <a href="http://winpdb.org/" style="color: blue;">Winpdb</a> is a great Python debugger which is platform independent.</div><div style="color: #444444; font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; margin-bottom: 9px;">I've also been working on SHM and will submit a PR soon for that. Besides my project, I also closed two issues this week related to printing in <code style="background-color: #f7f7f9; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: 1px solid rgb(225, 225, 232); color: #dd1144; font-family: Consolas, 'Liberation Mono', Courier, monospace !important; font-size: 12px; padding: 3px 4px;">sympy.logic</code> and helped to review few PRs.</div><ul style="color: #444444; font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; margin: 0px 0px 9px 25px; padding: 0px;"><li style=""><a href="https://github.com/sympy/sympy/issues/7179" style="color: blue;">https://github.com/sympy/sympy/issues/7179</a></li><li style=""><a href="https://github.com/sympy/sympy/issues/7180" style="color: blue;">https://github.com/sympy/sympy/issues/7180</a></li><li style="">PR: <a href="https://github.com/sympy/sympy/pull/7541" style="color: blue;">https://github.com/sympy/sympy/pull/7541</a></li></ul><div style="color: #444444; font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; margin-bottom: 9px;">We have a public channel(<a href="https://gitter.im/sympy/sympy/optics" style="color: blue;">https://gitter.im/sympy/sympy/optics</a>) to discuss about my project. You are welcome to join us, we would be more than happy to get feedback about the work. It'll help us refine it and cover a wider range of use cases.</div><h4 id="weeklog" style="color: #444444; font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 18px; margin: 0px;">Weeklog</h4><h6 id="merged" style="color: #999999; font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 11px; line-height: 18px; margin: 0px;">MERGED</h6><ul style="color: #444444; font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; margin: 0px 0px 9px 25px; padding: 0px;"><li style="">Add tests for pretty printer</li><li style="">Remove unnecessary if block</li><li style="">Add IPython Notebook Checkpoints to .gitignore</li><li style="">Remove double wrapping with u</li><li style="">Add tests for printing Equivalent. fixes #7180</li><li style="">Wrap unicode chars with u and fix a bug in latex printer</li><li style="">Fix a typo in manipulation.rst [skip ci]</li><li style="">Make equivalence symbol same for pretty printer and * latex printer and change not equivalent symbol to u+2262 [skip ci]</li><li style="">Fix latex printing for Not(Equivalent) and Not(Implies).</li><li style="">Fix pretty printing for Not(Equivalent) and Not(Implies). fixes #7179</li></ul><h6 id="pending" style="color: #999999; font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 11px; line-height: 18px; margin: 0px;">PENDING</h6><ul style="color: #444444; font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; margin: 0px 0px 9px 25px; padding: 0px;"><li style="">Change arg to *args [skip ci]</li><li style="">Add rewrite expression methods [skip ci]</li><li style="">Add wavenumber property</li></ul><div style="color: #444444; font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; margin-bottom: 9px;">This is all for now. Cheers!</div></div></div></div>
+    </content>
+    <updated>2014-06-02T01:54:44Z</updated>
+    <published>2014-06-02T01:54:00Z</published>
+    <category scheme="http://www.blogger.com/atom/ns#" term="gsoc"/>
+    <category scheme="http://www.blogger.com/atom/ns#" term="physics"/>
+    <category scheme="http://www.blogger.com/atom/ns#" term="sympy"/>
+    <author>
+      <name>Sudhanshu Mishra</name>
+      <email>noreply@blogger.com</email>
+      <uri>https://plus.google.com/104813076492254893400</uri>
+    </author>
+    <source>
+      <id>tag:blogger.com,1999:blog-8847459392628952171</id>
+      <category term="gsoc"/>
+      <category term="sympy"/>
+      <category term="Android"/>
+      <category term="BinPy"/>
+      <category term="Ubuntu"/>
+      <category term="physics"/>
+      <category term="BIOS"/>
+      <category term="CapaStr"/>
+      <category term="Circuit Design"/>
+      <category term="Cordova"/>
+      <category term="Electronics"/>
+      <category term="Google"/>
+      <category term="JQueryMobile"/>
+      <category term="Lenovo"/>
+      <category term="Lenovo G580"/>
+      <category term="Linux"/>
+      <category term="PhoneGap"/>
+      <category term="Server"/>
+      <category term="Tricks"/>
+      <category term="Web"/>
+      <category term="git"/>
+      <category term="github"/>
+      <category term="iOS"/>
+      <author>
+        <name>Sudhanshu Mishra</name>
+        <email>noreply@blogger.com</email>
+      </author>
+      <link href="http://lifelesscode.blogspot.com/feeds/posts/default" rel="http://schemas.google.com/g/2005#feed" type="application/atom+xml"/>
+      <link href="http://www.blogger.com/feeds/8847459392628952171/posts/default/-/sympy" rel="self" type="application/atom+xml"/>
+      <link href="http://lifelesscode.blogspot.com/search/label/sympy" rel="alternate" type="text/html"/>
+      <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
+      <title>Sudhanshu Mishra</title>
+      <updated>2014-06-02T01:56:32Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en-US">
     <id>http://blog.s-d-b.com/?p=6</id>
@@ -70,7 +128,7 @@ I started off working on converting to Normal Forms more efficiently. The origin
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-06-02T01:40:52Z</updated>
+      <updated>2014-06-02T02:00:53Z</updated>
     </source>
   </entry>
 
@@ -96,7 +154,7 @@ I started off working on converting to Normal Forms more efficiently. The origin
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-06-02T01:40:52Z</updated>
+      <updated>2014-06-02T02:00:52Z</updated>
     </source>
   </entry>
 
@@ -126,7 +184,7 @@ I started off working on converting to Normal Forms more efficiently. The origin
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-06-02T01:40:52Z</updated>
+      <updated>2014-06-02T02:00:53Z</updated>
     </source>
   </entry>
 
@@ -428,7 +486,7 @@ Most important thing about the `MatrixBase` class is that it is derived from the
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-02T01:40:40Z</updated>
+      <updated>2014-06-02T02:00:40Z</updated>
     </source>
   </entry>
 
@@ -475,7 +533,7 @@ I'm looking forward for a great summer with Sympy.</p></div></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="https://hargup.github.io/rss.xml" rel="self" type="application/atom+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-06-02T01:40:52Z</updated>
+      <updated>2014-06-02T02:00:52Z</updated>
     </source>
   </entry>
 
@@ -548,7 +606,7 @@ I'm looking forward for a great summer with Sympy.</p></div></div>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-06-02T01:40:41Z</updated>
+      <updated>2014-06-02T02:00:41Z</updated>
     </source>
   </entry>
 
@@ -575,7 +633,7 @@ I'm looking forward for a great summer with Sympy.</p></div></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-06-02T01:40:52Z</updated>
+      <updated>2014-06-02T02:00:52Z</updated>
     </source>
   </entry>
 
@@ -601,11 +659,12 @@ I'm looking forward for a great summer with Sympy.</p></div></div>
     </author>
     <source>
       <id>tag:blogger.com,1999:blog-8847459392628952171</id>
+      <category term="gsoc"/>
+      <category term="sympy"/>
       <category term="Android"/>
       <category term="BinPy"/>
       <category term="Ubuntu"/>
-      <category term="gsoc"/>
-      <category term="sympy"/>
+      <category term="physics"/>
       <category term="BIOS"/>
       <category term="CapaStr"/>
       <category term="Circuit Design"/>
@@ -623,7 +682,6 @@ I'm looking forward for a great summer with Sympy.</p></div></div>
       <category term="git"/>
       <category term="github"/>
       <category term="iOS"/>
-      <category term="physics"/>
       <author>
         <name>Sudhanshu Mishra</name>
         <email>noreply@blogger.com</email>
@@ -633,7 +691,7 @@ I'm looking forward for a great summer with Sympy.</p></div></div>
       <link href="http://lifelesscode.blogspot.com/search/label/sympy" rel="alternate" type="text/html"/>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>Sudhanshu Mishra</title>
-      <updated>2014-06-02T01:35:35Z</updated>
+      <updated>2014-06-02T01:56:32Z</updated>
     </source>
   </entry>
 
@@ -680,7 +738,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-06-02T01:40:47Z</updated>
+      <updated>2014-06-02T02:00:48Z</updated>
     </source>
   </entry>
 
@@ -2513,7 +2571,7 @@ Happy Coding!
       <link href="http://tarzzz.github.io/rss.gsoc.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts categorized under GSoC</subtitle>
       <title>Tarun Gaba's blog - GSoC</title>
-      <updated>2014-06-02T01:40:39Z</updated>
+      <updated>2014-06-02T02:00:40Z</updated>
     </source>
   </entry>
 
@@ -2604,7 +2662,7 @@ that we can keep the visualizations in the static format on the drive(or reposit
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-02T01:40:40Z</updated>
+      <updated>2014-06-02T02:00:41Z</updated>
     </source>
   </entry>
 
@@ -2699,7 +2757,7 @@ that we can keep the visualizations in the static format on the drive(or reposit
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-06-02T01:40:52Z</updated>
+      <updated>2014-06-02T02:00:52Z</updated>
     </source>
   </entry>
 
@@ -2724,11 +2782,12 @@ that we can keep the visualizations in the static format on the drive(or reposit
     </author>
     <source>
       <id>tag:blogger.com,1999:blog-8847459392628952171</id>
+      <category term="gsoc"/>
+      <category term="sympy"/>
       <category term="Android"/>
       <category term="BinPy"/>
       <category term="Ubuntu"/>
-      <category term="gsoc"/>
-      <category term="sympy"/>
+      <category term="physics"/>
       <category term="BIOS"/>
       <category term="CapaStr"/>
       <category term="Circuit Design"/>
@@ -2746,7 +2805,6 @@ that we can keep the visualizations in the static format on the drive(or reposit
       <category term="git"/>
       <category term="github"/>
       <category term="iOS"/>
-      <category term="physics"/>
       <author>
         <name>Sudhanshu Mishra</name>
         <email>noreply@blogger.com</email>
@@ -2756,7 +2814,7 @@ that we can keep the visualizations in the static format on the drive(or reposit
       <link href="http://lifelesscode.blogspot.com/search/label/sympy" rel="alternate" type="text/html"/>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>Sudhanshu Mishra</title>
-      <updated>2014-06-02T01:35:35Z</updated>
+      <updated>2014-06-02T01:56:32Z</updated>
     </source>
   </entry>
 
@@ -2820,7 +2878,7 @@ If you are free this summer and would love to contribute, feel free to catch us 
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-06-02T01:40:47Z</updated>
+      <updated>2014-06-02T02:00:48Z</updated>
     </source>
   </entry>
 
@@ -2848,7 +2906,7 @@ If you are free this summer and would love to contribute, feel free to catch us 
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2014-06-02T01:40:16Z</updated>
+      <updated>2014-06-02T02:00:18Z</updated>
     </source>
   </entry>
 
@@ -3061,7 +3119,7 @@ in manually.</p></div></div>
       <link href="http://asmeurer.github.io/blog/rss.xml" rel="self" type="application/rss+xml"/>
       <subtitle>My blog</subtitle>
       <title>Aaron Meurer's Blog</title>
-      <updated>2014-06-02T01:40:16Z</updated>
+      <updated>2014-06-02T02:00:18Z</updated>
     </source>
   </entry>
 
@@ -3442,7 +3500,7 @@ screen npm start
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>From a learner's perspective</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2014-06-02T01:40:39Z</updated>
+      <updated>2014-06-02T02:00:39Z</updated>
     </source>
   </entry>
 
@@ -3458,8 +3516,7 @@ screen npm start
 <p>-A class WeylGroup, which is about the Weyl group of a given Lie algebra.  It gives the size and name of a given Weyl group as well as the matrix form of an element, and an element’s order.</p>
 <p>-Methods for displaying the Cartan matrix and Dynkin diagram of a Lie algebra.</p>
 <p> </p>
-<p>That’s pretty much it.  I had a great time working with SymPy this summer!</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/172/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/172/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=172&amp;subd=meclark256&amp;ref=&amp;feed=1" width="1"/></div>
+<p>That’s pretty much it.  I had a great time working with SymPy this summer!</p><br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/172/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/172/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=172&amp;subd=meclark256&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
     <updated>2013-09-24T19:00:55Z</updated>
     <category term="Uncategorized"/>
@@ -3475,7 +3532,7 @@ screen npm start
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2014-06-02T01:40:42Z</updated>
+      <updated>2014-06-02T02:00:43Z</updated>
     </source>
   </entry>
 
@@ -3511,7 +3568,7 @@ screen npm start
       <link href="http://musingsofafriend.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>The greatest WordPress.com site in all the land!</subtitle>
       <title>musings of a friend - Prasoon Shukla » SymPy</title>
-      <updated>2014-06-02T01:40:42Z</updated>
+      <updated>2014-06-02T02:00:42Z</updated>
     </source>
   </entry>
 
@@ -3531,8 +3588,7 @@ screen npm start
 <img alt="\displaystyle f_2 = x^2 - 2 \alpha^2 x + \alpha^3 z^2 - ( \alpha^3 + \alpha^2 + \alpha + 1) y + 12 \alpha " class="latex" src="http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+f_2+%3D+x%5E2+-+2+%5Calpha%5E2+x+%2B+%5Calpha%5E3+z%5E2+-+%28+%5Calpha%5E3+%2B+%5Calpha%5E2+%2B+%5Calpha+%2B+1%29+y+%2B+12+%5Calpha+&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\displaystyle f_2 = x^2 - 2 \alpha^2 x + \alpha^3 z^2 - ( \alpha^3 + \alpha^2 + \alpha + 1) y + 12 \alpha "/><br/>
 <img alt="\displaystyle f_3 = x^2 - 2 \alpha^3 x + \alpha^2 z^2 + \alpha y - 12 ( \alpha^3 + \alpha^2 + \alpha + 1) " class="latex" src="http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+f_3+%3D+x%5E2+-+2+%5Calpha%5E3+x+%2B+%5Calpha%5E2+z%5E2+%2B+%5Calpha+y+-+12+%28+%5Calpha%5E3+%2B+%5Calpha%5E2+%2B+%5Calpha+%2B+1%29+&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\displaystyle f_3 = x^2 - 2 \alpha^3 x + \alpha^2 z^2 + \alpha y - 12 ( \alpha^3 + \alpha^2 + \alpha + 1) "/><br/>
 <img alt="\displaystyle f_4 = x^2 + 2 ( \alpha^3 + \alpha^2 + \alpha + 1) x + \alpha z^2 + \alpha^3 y + 12 \alpha^2 . " class="latex" src="http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+f_4+%3D+x%5E2+%2B+2+%28+%5Calpha%5E3+%2B+%5Calpha%5E2+%2B+%5Calpha+%2B+1%29+x+%2B+%5Calpha+z%5E2+%2B+%5Calpha%5E3+y+%2B+12+%5Calpha%5E2+.+&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\displaystyle f_4 = x^2 + 2 ( \alpha^3 + \alpha^2 + \alpha + 1) x + \alpha z^2 + \alpha^3 y + 12 \alpha^2 . "/></p>
-<p style="text-align: justify;">The current SymPy factorization algorithm needs 215 seconds, whereas the new one only takes 60.3 seconds. More than three times faster! <img alt=":)" class="wp-smiley" src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif"/> </p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/352/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/352/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=352&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" width="1"/></div>
+<p style="text-align: justify;">The current SymPy factorization algorithm needs 215 seconds, whereas the new one only takes 60.3 seconds. More than three times faster! <img alt=":)" class="wp-smiley" src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif"/> </p><br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/352/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/352/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=352&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
     <updated>2013-09-15T17:56:51Z</updated>
     <category term="Uncategorized"/>
@@ -3548,7 +3604,7 @@ screen npm start
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2014-06-02T01:40:43Z</updated>
+      <updated>2014-06-02T02:00:43Z</updated>
     </source>
   </entry>
 
@@ -3585,7 +3641,7 @@ This is a computationally hard problem and method I implemented finds only one s
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-02T01:40:40Z</updated>
+      <updated>2014-06-02T02:00:41Z</updated>
     </source>
   </entry>
 
@@ -3630,7 +3686,7 @@ This is a computationally hard problem and method I implemented finds only one s
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-02T01:40:40Z</updated>
+      <updated>2014-06-02T02:00:41Z</updated>
     </source>
   </entry>
 
@@ -3695,7 +3751,7 @@ This is a computationally hard problem and method I implemented finds only one s
       <link href="http://csousahome.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another blog</subtitle>
       <title>csousa home » sympy</title>
-      <updated>2014-06-02T01:40:47Z</updated>
+      <updated>2014-06-02T02:00:47Z</updated>
     </source>
   </entry>
 
@@ -3729,7 +3785,7 @@ This is a computationally hard problem and method I implemented finds only one s
       <link href="http://musingsofafriend.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>The greatest WordPress.com site in all the land!</subtitle>
       <title>musings of a friend - Prasoon Shukla » SymPy</title>
-      <updated>2014-06-02T01:40:42Z</updated>
+      <updated>2014-06-02T02:00:42Z</updated>
     </source>
   </entry>
 
@@ -3743,8 +3799,7 @@ This is a computationally hard problem and method I implemented finds only one s
 <p>I also changed bits in in the root_system PR to utilise Rational(x, y) instead of using floating point numbers. </p>
 <p>I’m hoping to have most major coding done by the 13th, so I can spend the last 10 days of GSOC writing up more detailed docstrings and fixing other minor errors.</p>
 <p> </p>
-<p>Sorry for the short update, but I’m not feeling particularly verbose today.</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/167/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/167/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=167&amp;subd=meclark256&amp;ref=&amp;feed=1" width="1"/></div>
+<p>Sorry for the short update, but I’m not feeling particularly verbose today.</p><br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/167/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/167/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=167&amp;subd=meclark256&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
     <updated>2013-09-09T01:26:04Z</updated>
     <category term="Uncategorized"/>
@@ -3760,7 +3815,7 @@ This is a computationally hard problem and method I implemented finds only one s
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2014-06-02T01:40:42Z</updated>
+      <updated>2014-06-02T02:00:42Z</updated>
     </source>
   </entry>
 
@@ -3879,7 +3934,7 @@ f(x) = C₁⋅x⋅⎜- ── + 1⎟ + C₀⋅⎜── - ── + 1⎟ + O⎝x 
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>From a learner's perspective</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2014-06-02T01:40:39Z</updated>
+      <updated>2014-06-02T02:00:39Z</updated>
     </source>
   </entry>
 
@@ -3906,8 +3961,7 @@ where t2 = <img alt="log(x^2 + 1)" class="latex" src="http://s0.wp.com/latex.php
 I and Aaron solved the major difficulties incurred in the is_deriv part of the code.<br/>
 <a href="http://geekiology.files.wordpress.com/2013/09/screenshot-from-2013-09-03-175154.png"><img alt="Screenshot from 2013-09-03 17:51:54" class="alignnone size-medium wp-image-413" height="168" src="http://geekiology.files.wordpress.com/2013/09/screenshot-from-2013-09-03-175154.png?w=300&amp;h=168" width="300"/></a><br/>
 Cases like above where giving incorrect answers before, have a solution now.</p>
-<p>The only issues which is till unresolved from the precious week is the infinite loops for polynomial_reduce kt . While I see similar issues in the original code for case polynomial_reduce(Poly((-64*t**6 + 64*t**4 + 64*t**2 – 64, t)/(2048*t**4 – 4096*t**2 + 2048)), DE) I am not able to find the stopping-condition for the same in the book.</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/geekiology.wordpress.com/410/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/geekiology.wordpress.com/410/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=geekiology.wordpress.com&amp;blog=36553244&amp;post=410&amp;subd=geekiology&amp;ref=&amp;feed=1" width="1"/></div>
+<p>The only issues which is till unresolved from the precious week is the infinite loops for polynomial_reduce kt . While I see similar issues in the original code for case polynomial_reduce(Poly((-64*t**6 + 64*t**4 + 64*t**2 – 64, t)/(2048*t**4 – 4096*t**2 + 2048)), DE) I am not able to find the stopping-condition for the same in the book.</p><br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/geekiology.wordpress.com/410/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/geekiology.wordpress.com/410/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=geekiology.wordpress.com&amp;blog=36553244&amp;post=410&amp;subd=geekiology&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
     <updated>2013-09-03T13:10:40Z</updated>
     <category term="Uncategorized"/>
@@ -3923,7 +3977,7 @@ Cases like above where giving incorrect answers before, have a solution now.</p>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2014-06-02T01:40:37Z</updated>
+      <updated>2014-06-02T02:00:38Z</updated>
     </source>
   </entry>
 
@@ -3936,8 +3990,7 @@ Cases like above where giving incorrect answers before, have a solution now.</p>
     <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p style="text-align: justify;">Wow, time seems to be flying right now, it’s already been two weeks again! In order to keep things clear, I described the factorization algorithm I am currently working on in <a href="http://sophiessympyblog.wordpress.com/2013/09/01/factoring-polynomials-over-algebraic-number-fields/" title="Factoring polynomials over algebraic number&#xA0;fields">another post</a>. So here I want to talk about my progress and problems in the last two weeks.</p>
 <p style="text-align: justify;">Let’s start with good news. My first two PRs have been merged! So now the modular GCD algorithms I implemented for polynomials over the integers and algebraic number fields are part of SymPy. <img alt=":)" class="wp-smiley" src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif"/> </p>
 <p style="text-align: justify;">Progress on the factorization algorithm has not been as fast as I would have liked. I spent a lot of time with Hensel lifting, since the description of the algorithm is not very explicit in this part. I ended up adapting the already implemented Hensel lifting code to my use case. The last (big) part missing is the sparse <img alt="p" class="latex" src="http://s0.wp.com/latex.php?latex=p&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="p"/>-adic lifting algorithm. The problem here is that I would have to solve a cumbersome system of linear equations over <img alt="\mathbb Z_{p^m}" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Z_%7Bp%5Em%7D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\mathbb Z_{p^m}"/>. One possible way to work around this is to choose a large prime so that no lifting is necessary, which is the way it is currently done in the integer polynomial case. But of course, a lifting would be more efficient.</p>
-<p style="text-align: justify;">I already made successful factorizations (by using big enough primes) for certain polynomials, and next week I hope to get it to work for arbitrary ones.</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/281/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/281/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=281&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" width="1"/></div>
+<p style="text-align: justify;">I already made successful factorizations (by using big enough primes) for certain polynomials, and next week I hope to get it to work for arbitrary ones.</p><br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/281/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/281/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=281&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
     <updated>2013-09-01T14:52:35Z</updated>
     <category term="Uncategorized"/>
@@ -3953,7 +4006,7 @@ Cases like above where giving incorrect answers before, have a solution now.</p>
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2014-06-02T01:40:43Z</updated>
+      <updated>2014-06-02T02:00:43Z</updated>
     </source>
   </entry>
 
@@ -3982,8 +4035,7 @@ We define the <em>denominator </em><img alt="\mathrm{den}(f)" class="latex" src=
 <p style="text-align: justify;">That means, we have the correct factorization modulo the prime <img alt="p" class="latex" src="http://s0.wp.com/latex.php?latex=p&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="p"/>. In order to get the desired factorization, we use a procedure that is also based on Hensel’s Lemma, called <img alt="p" class="latex" src="http://s0.wp.com/latex.php?latex=p&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="p"/>-adic lifting. We lift the factors <img alt="\bar f_j" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cbar+f_j&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\bar f_j"/> from <img alt="\mathbb Z_p(\alpha)[x_o, \ldots, x_n]" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Z_p%28%5Calpha%29%5Bx_o%2C+%5Cldots%2C+x_n%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\mathbb Z_p(\alpha)[x_o, \ldots, x_n]"/> to <img alt="\mathbb Z_{p^m}(\alpha)[x_o, \ldots, x_n]" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Z_%7Bp%5Em%7D%28%5Calpha%29%5Bx_o%2C+%5Cldots%2C+x_n%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\mathbb Z_{p^m}(\alpha)[x_o, \ldots, x_n]"/>, where <img alt="m" class="latex" src="http://s0.wp.com/latex.php?latex=m&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="m"/> is chosen big enough, such that</p>
 <p align="center"><img alt="\displaystyle \tilde f(x_o, \ldots, x_n) = l \cdot \prod_{j = 1}^s f_j(x_o, \ldots, x_n) " class="latex" src="http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+%5Ctilde+f%28x_o%2C+%5Cldots%2C+x_n%29+%3D+l+%5Ccdot+%5Cprod_%7Bj+%3D+1%7D%5Es+f_j%28x_o%2C+%5Cldots%2C+x_n%29+&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\displaystyle \tilde f(x_o, \ldots, x_n) = l \cdot \prod_{j = 1}^s f_j(x_o, \ldots, x_n) "/></p>
 <p>also holds over <img alt="\mathbb Q(\alpha)" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Q%28%5Calpha%29&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\mathbb Q(\alpha)"/> and we are done.</p>
-<p>[1] <a href="http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf" rel="nofollow">http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf</a></p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/283/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/283/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=283&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" width="1"/></div>
+<p>[1] <a href="http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf" rel="nofollow">http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf</a></p><br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/283/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/283/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=283&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
     <updated>2013-09-01T13:21:54Z</updated>
     <category term="Uncategorized"/>
@@ -3999,7 +4051,7 @@ We define the <em>denominator </em><img alt="\mathrm{den}(f)" class="latex" src=
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2014-06-02T01:40:43Z</updated>
+      <updated>2014-06-02T02:00:43Z</updated>
     </source>
   </entry>
 
@@ -4047,7 +4099,7 @@ We define the <em>denominator </em><img alt="\mathrm{den}(f)" class="latex" src=
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-02T01:40:40Z</updated>
+      <updated>2014-06-02T02:00:41Z</updated>
     </source>
   </entry>
 
@@ -4064,8 +4116,7 @@ We define the <em>denominator </em><img alt="\mathrm{den}(f)" class="latex" src=
 <p>Lastly I am also trying to find more concrete information about the Weyl group of type D; I know that it is a subgroup of index 2, but I’m not sure what exact permutations and stuff that it corresponds to.  </p>
 <p>So yeah.  This coming week, my plan is to figure out how I want to write the permutations of the hyperoctahedral group as permutations on positive integers, and then to take input from the user in the form of products of simple reflections, and generate the corresponding permutation, at least for types A, B, and C.  </p>
 <p>For example, given A3, the Coxeter diagram is 0—0–0, and the generating reflections are r1, r2, r3, and the Weyl group is S4.   We can think of r1 as the permutation (1,2), r2 as (2,3), and r3 as (3,4).  So if the user gave the input r1r2 that would be the permutation (1,2)(2,3) = (1 3 2).  Oh, I also need to remember that the Permutation class starts with 0 instead of 1, so I need to remember to take that into account.</p>
-<p>This week I will also implement a method that gives the Coxeter diagram of a given Weyl group.  This should be very easy, given the Coxeter diagram is the undirected Dynkin diagram. </p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/137/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/137/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=137&amp;subd=meclark256&amp;ref=&amp;feed=1" width="1"/></div>
+<p>This week I will also implement a method that gives the Coxeter diagram of a given Weyl group.  This should be very easy, given the Coxeter diagram is the undirected Dynkin diagram. </p><br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/137/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/137/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=137&amp;subd=meclark256&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
     <updated>2013-08-31T00:07:10Z</updated>
     <category term="Uncategorized"/>
@@ -4081,7 +4132,7 @@ We define the <em>denominator </em><img alt="\mathrm{den}(f)" class="latex" src=
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2014-06-02T01:40:42Z</updated>
+      <updated>2014-06-02T02:00:43Z</updated>
     </source>
   </entry>
 
@@ -4114,7 +4165,7 @@ We define the <em>denominator </em><img alt="\mathrm{den}(f)" class="latex" src=
       <link href="http://csousahome.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another blog</subtitle>
       <title>csousa home » sympy</title>
-      <updated>2014-06-02T01:40:47Z</updated>
+      <updated>2014-06-02T02:00:47Z</updated>
     </source>
   </entry>
 
@@ -4151,7 +4202,7 @@ We define the <em>denominator </em><img alt="\mathrm{den}(f)" class="latex" src=
       <link href="http://musingsofafriend.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>The greatest WordPress.com site in all the land!</subtitle>
       <title>musings of a friend - Prasoon Shukla » SymPy</title>
-      <updated>2014-06-02T01:40:42Z</updated>
+      <updated>2014-06-02T02:00:42Z</updated>
     </source>
   </entry>
 
@@ -4221,7 +4272,7 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>From a learner's perspective</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2014-06-02T01:40:39Z</updated>
+      <updated>2014-06-02T02:00:39Z</updated>
     </source>
   </entry>
 
@@ -4234,8 +4285,7 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
     <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>So, for each semisimple Lie group, we have a Weyl group.  It is a subgroup of the isometry group of the root system.  Specifically, it’s the subgroup that is generated by reflections through the hyperplanes orthogonal to the roots.  Therefore, Weyl groups are reflection groups, and so a Weyl group is a finite Coxeter group. </p>
 <p>Now, if we take a Lie algebra’s Dynkin diagram and delete all arrows from it, we have its Coxeter diagram, which encodes information about the reflections which generate the Weyl group, as follows.  The vertices of the Coxeter diagram represent the generating reflections of the Weyl group, s_i.  An edge is drawn between s_i and s_j if the order m(i, j) of s_i*s_j is greater than two.  If there is one edge, the order m(i, j) is 3.  If there are two edges, the order m(i, j) is 4, and if there are three edges, the order m(i, j) is 5.  </p>
 <p>We note that the B series and the C series have the same Coxeter diagram, and hence have the same Weyl group, which is the hyperoctahedral group, which is the group of symmetries of a hypercube.  Considered as a permutation group, it is the signed symmetric group of permutations of the set  { −<i>n</i>, −<i>n</i> + 1, …, −1, 1, 2, …, <i>n</i> } such that <i>π</i>(<i>i</i>) = −<i>π</i>(−<i>i</i>) for all <i>i</i>.  The Weyl group of D_n is a subgroup of index two in the hyperoctahedral group.  The Weyl group of A_n is the symmetric group on n variables. </p>
-<p>So, I’m now looking at working on the class WeylGroup.  Obviously it’s easy enough to write out the generating reflections, but I’m not sure how exactly I want to proceed from there.  Perhaps a function where a user can specify a reflection as a product of the generating reflections (e.g. input s1s2s5 or something…) and then have the function output its order?  I’m also thinking about how to I want to represent a given reflection.  I’m leaning towards representing it at the product of the generating reflections.  We’ll see.  I also have included a function which returns the order of a given Weyl group.  So yeah, that’s where I’m at.  This week has been generally slow in terms of concrete output, but I’ve been spending a lot of time reading and researching (as Weyl groups aren’t my specialty) and generally contemplating where I want to go with this class.</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/113/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/113/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=113&amp;subd=meclark256&amp;ref=&amp;feed=1" width="1"/></div>
+<p>So, I’m now looking at working on the class WeylGroup.  Obviously it’s easy enough to write out the generating reflections, but I’m not sure how exactly I want to proceed from there.  Perhaps a function where a user can specify a reflection as a product of the generating reflections (e.g. input s1s2s5 or something…) and then have the function output its order?  I’m also thinking about how to I want to represent a given reflection.  I’m leaning towards representing it at the product of the generating reflections.  We’ll see.  I also have included a function which returns the order of a given Weyl group.  So yeah, that’s where I’m at.  This week has been generally slow in terms of concrete output, but I’ve been spending a lot of time reading and researching (as Weyl groups aren’t my specialty) and generally contemplating where I want to go with this class.</p><br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/113/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/113/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=113&amp;subd=meclark256&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
     <updated>2013-08-23T20:00:56Z</updated>
     <category term="Uncategorized"/>
@@ -4251,7 +4301,7 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2014-06-02T01:40:42Z</updated>
+      <updated>2014-06-02T02:00:43Z</updated>
     </source>
   </entry>
 
@@ -4294,7 +4344,7 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2014-06-02T01:40:16Z</updated>
+      <updated>2014-06-02T02:00:18Z</updated>
     </source>
   </entry>
 
@@ -4329,7 +4379,7 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>From a learner's perspective</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2014-06-02T01:40:39Z</updated>
+      <updated>2014-06-02T02:00:39Z</updated>
     </source>
   </entry>
 
@@ -4367,7 +4417,7 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
       <link href="http://musingsofafriend.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>The greatest WordPress.com site in all the land!</subtitle>
       <title>musings of a friend - Prasoon Shukla » SymPy</title>
-      <updated>2014-06-02T01:40:42Z</updated>
+      <updated>2014-06-02T02:00:42Z</updated>
     </source>
   </entry>
 
@@ -4420,7 +4470,7 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-02T01:40:40Z</updated>
+      <updated>2014-06-02T02:00:41Z</updated>
     </source>
   </entry>
 
@@ -4436,8 +4486,7 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
 <p>Then, I also implemented a function which takes two roots as input, and if their sum is a root, returns their sum as a new root.  To do this, I first needed to have all the roots of a given Lie algebra available.  That is why last week I implemented a method for generating all the positive roots for A, B, C, and D.  This week I also did that for E, F, and G.  This enabled me to implement a method in RootSystem that generates all the roots of a given Lie algebra, by first getting the positive roots, and then using the positive roots to generate the negative roots (by multiplying each positive root by -1). </p>
 <p> </p>
 <p>Then the method add_as_root works by checking the dictionary of all roots to see if the sum of the two input roots is also a root.  If it’s not, it returns a string saying “The sum of these two roots is not a root”.  Otherwise it returns the sum as a list, as usual.</p>
-<p>This week I also worked on documentation and the like for all my functions.  This weekend I’m going to make sure all the doctests pass.  Then, my plan for next week is to start work on the the WeylGroup class.</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/98/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/98/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=98&amp;subd=meclark256&amp;ref=&amp;feed=1" width="1"/></div>
+<p>This week I also worked on documentation and the like for all my functions.  This weekend I’m going to make sure all the doctests pass.  Then, my plan for next week is to start work on the the WeylGroup class.</p><br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/98/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/98/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=98&amp;subd=meclark256&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
     <updated>2013-08-16T19:11:19Z</updated>
     <category term="Uncategorized"/>
@@ -4453,7 +4502,7 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2014-06-02T01:40:42Z</updated>
+      <updated>2014-06-02T02:00:43Z</updated>
     </source>
   </entry>
 
@@ -4467,8 +4516,7 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
 <p style="text-align: justify;">Another task was getting my <a href="https://github.com/sympy/sympy/pull/2281" title="modular GCD algorithm for integer polynomials">first PR</a> ready for merging. For this, I needed to cover more lines of the code, since every untested one is “a bug waiting to happen”. The difficulty here is the random choice of evaluation points in <code>_modgcd_multivariate_p</code>. So I searched for an example such that for one prime every evaluation point is unlucky. I am glad I found one, since the only other possibility would have been to add an optional argument to choose the evaluation points manually. Now almost every line is tested and the few ones that are not should be harmless. <img alt=";)" class="wp-smiley" src="http://s1.wp.com/wp-includes/images/smilies/icon_wink.gif"/> </p>
 <p style="text-align: justify;">After that, I thoroughly studied the article [1] on factorization of polynomials over algebraic domains. I also started with the implementation, but I did not get very far yet.</p>
 <p style="text-align: justify;">Sorry for this entry being so late but still so short, I hope that next week there will be more stuff to blog about!</p>
-<p style="text-align: justify;">[1] <a href="http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf" rel="nofollow">http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf</a></p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/254/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/254/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=254&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" width="1"/></div>
+<p style="text-align: justify;">[1] <a href="http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf" rel="nofollow">http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf</a></p><br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/254/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/254/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=254&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
     <updated>2013-08-16T13:29:50Z</updated>
     <category term="Uncategorized"/>
@@ -4484,7 +4532,7 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2014-06-02T01:40:43Z</updated>
+      <updated>2014-06-02T02:00:43Z</updated>
     </source>
   </entry>
 
@@ -4613,7 +4661,7 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
       <link href="http://matthewrocklin.com/blog//feed.sympy.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts tagged as 'SymPy'</subtitle>
       <title>Working notes by Matthew Rocklin - SymPy</title>
-      <updated>2014-06-02T01:40:29Z</updated>
+      <updated>2014-06-02T02:00:30Z</updated>
     </source>
   </entry>
 
@@ -4665,7 +4713,7 @@ Why? Well, without going too much into detail, the solution to this PDE, <img al
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>From a learner's perspective</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2014-06-02T01:40:39Z</updated>
+      <updated>2014-06-02T02:00:39Z</updated>
     </source>
   </entry>
 
@@ -4712,7 +4760,7 @@ Why? Well, without going too much into detail, the solution to this PDE, <img al
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2014-06-02T01:40:16Z</updated>
+      <updated>2014-06-02T02:00:18Z</updated>
     </source>
   </entry>
 
@@ -4732,8 +4780,7 @@ Why? Well, without going too much into detail, the solution to this PDE, <img al
 <p> </p>
 <p>At this point, in RootSystem I have so far implemented a method that generates all the simple roots,  a method for displaying the root space, and then methods which return the Cartan matrix and Dynkin diagram of the Lie algebra.  I am currently pondering on how I want to implement some root addition methods.</p>
 <p> </p>
-<p>So yeah, that’s been my week!  To be honest, I think it has been fairly productive, and I am quite pleased about that.</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/82/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/82/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=82&amp;subd=meclark256&amp;ref=&amp;feed=1" width="1"/></div>
+<p>So yeah, that’s been my week!  To be honest, I think it has been fairly productive, and I am quite pleased about that.</p><br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/82/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/82/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=82&amp;subd=meclark256&amp;ref=&amp;feed=1" width="1"/></div>
     </content>
     <updated>2013-08-09T19:55:18Z</updated>
     <category term="Uncategorized"/>
@@ -4749,41 +4796,7 @@ Why? Well, without going too much into detail, the solution to this PDE, <img al
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2014-06-02T01:40:42Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://geekiology.wordpress.com/?p=407</id>
-    <link href="http://geekiology.wordpress.com/2013/08/09/week-6-7-2/" rel="alternate" type="text/html"/>
-    <title>Week 6 &amp; 7</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Week 6, brought me back to my coding arena “YES COLLEGE”. Though it was a messed up week with tons and tons of administration work, course selections, juniors arrival but still I could manage re-going through the Manuel Bronstien to see what the “HELL” has been causing the recursion error in the code. Though the […]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=geekiology.wordpress.com&amp;blog=36553244&amp;post=407&amp;subd=geekiology&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Week 6, brought me back to my coding arena “YES COLLEGE”. Though it was a messed up week with tons and tons of administration work, course selections, juniors arrival but still I could manage re-going through the Manuel Bronstien to see what the “HELL” has been causing the recursion error in the code.</p>
-<p>Though the code has started picking up the pace, it works for some of the simple cases I have included in my previous post (Week-5) but it ended others in recursion errors. These cases are the ones where I have more than one monomial, here is an example to demonstrate the failure.</p>
-<p><a href="http://geekiology.files.wordpress.com/2013/07/screenshot-from-2013-07-30-214322.png"><img alt="Screenshot from 2013-07-30 21:43:22" class="alignnone size-medium wp-image-397" height="168" src="http://geekiology.files.wordpress.com/2013/07/screenshot-from-2013-07-30-214322.png?w=300&amp;h=168" width="300"/></a></p>
-<p>There have been a lot of delays in me working on the PR, thanks to my awesome immunity system, after having food poisoning.</p>
-<p>I need to really gear-up now, so have planned to update the blog as well as PRs daily. There is a lot which I guess we all would like to see implemented for the Risch Algorithm. I would really like to have a meeting soon with Aaron to discuss if we could please have daily meet-ups.<br/>
-PS  : Some Announcements<br/>
-PS1 : YES !! i have passed the mid-term evaluation <img alt=":D" class="wp-smiley" src="http://s0.wp.com/wp-includes/images/smilies/icon_biggrin.gif"/><br/>
-PS2 : I am finally 20 !! <img alt=":D" class="wp-smiley" src="http://s0.wp.com/wp-includes/images/smilies/icon_biggrin.gif"/>  Adios teens !</p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/geekiology.wordpress.com/407/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/geekiology.wordpress.com/407/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=geekiology.wordpress.com&amp;blog=36553244&amp;post=407&amp;subd=geekiology&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2013-08-09T00:02:16Z</updated>
-    <category term="Uncategorized"/>
-    <author>
-      <name>chetnagupta</name>
-    </author>
-    <source>
-      <id>http://geekiology.wordpress.com</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://geekiology.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://geekiology.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://geekiology.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>GSoC 2013 Blog</subtitle>
-      <title>Risch Algorithm</title>
-      <updated>2014-06-02T01:40:37Z</updated>
+      <updated>2014-06-02T02:00:43Z</updated>
     </source>
   </entry>
 </feed>
