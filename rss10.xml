@@ -13,6 +13,7 @@
 
 	<items>
 		<rdf:Seq>
+			<rdf:li rdf:resource="tag:,2014-06-06:gsoc-week-3.html" />
 			<rdf:li rdf:resource="http://thilinaatsympy.wordpress.com/?p=326" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-54146973659574488.post-4568350345911213597" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-283806077182880539.post-8460362206940299143" />
@@ -72,11 +73,203 @@
 			<rdf:li rdf:resource="http://manojbits.wordpress.com/?p=726" />
 			<rdf:li rdf:resource="http://musingsofafriend.wordpress.com/?p=199" />
 			<rdf:li rdf:resource="http://thilinaatsympy.wordpress.com/?p=186" />
-			<rdf:li rdf:resource="http://meclark256.wordpress.com/?p=98" />
 		</rdf:Seq>
 	</items>
 </channel>
 
+<item rdf:about="tag:,2014-06-06:gsoc-week-3.html">
+	<title>Jim Crist: GSoC Week 3: Generalized Linearizer Class</title>
+	<link>http://jcrist.github.io/gsoc-week-3.html</link>
+	<content:encoded>&lt;p&gt;
+&lt;/p&gt;&lt;div class=&quot;cell border-box-sizing text_cell rendered&quot;&gt;
+&lt;div class=&quot;prompt input_prompt&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;inner_cell&quot;&gt;
+&lt;div class=&quot;text_cell_render border-box-sizing rendered_html&quot;&gt;
+&lt;p&gt;This week I refactored the &lt;code&gt;Linearizer&lt;/code&gt; class to fit a general system of equations. This means that any of the following can be absent, and the linearization still is valid:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&quot;math&quot;&gt;\[
+\begin{array}[rl]
+\\f_{c}(q, t) &amp;amp;= 0_{lx1} \\
+f_{v}(q, u, t) &amp;amp;= 0_{mx1} \\
+f_{a}(q, \dot{q}, u, \dot{u}, t) &amp;amp;= 0_{mx1} \\
+f_{0}(q, \dot{q}, t) + f_{1}(q, u, t) &amp;amp;= 0_{nx1} \\
+f_{2}(q, \dot{u}, t) + f_{3}(q, \dot{q}, u, r, t) &amp;amp;= 0_{(o-m)x1} \\
+\end{array}
+\]&lt;/span&gt; with&lt;/p&gt;
+&lt;p&gt;&lt;span class=&quot;math&quot;&gt;\[
+\begin{array}[rl]
+\\q, \dot{q} &amp;amp; \in \mathbb{R}^n \\
+u, \dot{u} &amp;amp; \in \mathbb{R}^o \\
+r &amp;amp; \in \mathbb{R}^s 
+\end{array}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Note that vectors can be absent too. This means the system can be entirely &lt;span class=&quot;math&quot;&gt;\(q\)&lt;/span&gt; or &lt;span class=&quot;math&quot;&gt;\(u\)&lt;/span&gt; components. More on this later.&lt;/p&gt;
+&lt;p&gt;Much of the rest of the week was spent finishing up all methods related to the &lt;code&gt;KanesMethod&lt;/code&gt; class. This was mostly cleaning up the code base, and fixing all the tests in place for the previous &lt;code&gt;linearize&lt;/code&gt; method. As of this point, the linearization routines accomplish everything that was in place before, but in a more general and extensible way. This is all included in the &lt;code&gt;LinearizerClass&lt;/code&gt; branch on my GitHub repo. There is a pull request on my own master branch open right now for code review &lt;a href=&quot;https://github.com/jcrist/sympy/pull/1&quot;&gt;here&lt;/a&gt;. I'll leave this up for another day or two before closing it and making all pull request to &lt;code&gt;Sympy/master&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;I also started work on linearizing a system of equations presented in matrix form. This still needs lots of code improvements (it's inefficient), but it currently works. Below is a demo.&lt;/p&gt;
+&lt;p&gt;The system is the same system I use for my research - a dual solenoid actuator. There are two dependent variables: &lt;code&gt;lam1&lt;/code&gt; and &lt;code&gt;lam2&lt;/code&gt;. The dynamics are thus expressed by 3 dynamic differential equations, and two constraint equations.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;cell border-box-sizing code_cell rendered&quot;&gt;
+&lt;div class=&quot;input&quot;&gt;
+&lt;div class=&quot;prompt input_prompt&quot;&gt;
+In [1]:
+&lt;/div&gt;
+&lt;div class=&quot;inner_cell&quot;&gt;
+    &lt;div class=&quot;input_area&quot;&gt;
+&lt;div class=&quot;highlight-ipynb&quot;&gt;&lt;pre class=&quot;ipynb&quot;&gt;&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;sympy&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;symbols&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Matrix&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;sympy.physics.mechanics&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dynamicsymbols&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mprint&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;sympy.physics.mechanics.linearize&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Linearizer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;matrix_to_linearizer&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# Create constant symbols&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;B1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;B2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;symbols&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'B1, B2'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;d1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;D&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;symbols&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'d1, d2, D'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;R1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;R2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;symbols&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'R1, R2'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;m&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;symbols&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'m'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;t&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;symbols&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'t'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# Create dynamicsymbols&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;i1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dynamicsymbols&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'i1, i2'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;V1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;V2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dynamicsymbols&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'V1, V2'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dynamicsymbols&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'x'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;xdot&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;diff&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;lam1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lam2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dynamicsymbols&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'lam1, lam2'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;lam1dot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lam2dot&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dynamicsymbols&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'lam1, lam2'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# Define vectors. Because all speeds are derivatives of the coordinates,&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# the system is best represented as just a vector of u. The dependent&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# states are lam1 and lam2&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;u&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Matrix&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;xdot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lam1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lam2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;udep&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;u&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:]&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# Define system of equations&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;eom&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Matrix&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;B1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;d1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lam1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+              &lt;span class=&quot;n&quot;&gt;B2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;D&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lam2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+              &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lam1dot&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;R1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;V1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+              &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lam2dot&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;R2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;V2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+              &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xdot&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;diff&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;B2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;d2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;D&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;B1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;d1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;m&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# Perform the linearization&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;linearizer&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;matrix_to_linearizer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;eom&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;u&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;u&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;udep&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;udep&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;A&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;B&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;linearizer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;linearize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;A_and_B&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;/div&gt;
+&lt;div class=&quot;cell border-box-sizing code_cell rendered&quot;&gt;
+&lt;div class=&quot;input&quot;&gt;
+&lt;div class=&quot;prompt input_prompt&quot;&gt;
+In [2]:
+&lt;/div&gt;
+&lt;div class=&quot;inner_cell&quot;&gt;
+    &lt;div class=&quot;input_area&quot;&gt;
+&lt;div class=&quot;highlight-ipynb&quot;&gt;&lt;pre class=&quot;ipynb&quot;&gt;&lt;span class=&quot;n&quot;&gt;mprint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;A&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class=&quot;output_wrapper&quot;&gt;
+&lt;div class=&quot;output&quot;&gt;
+
+
+&lt;div class=&quot;output_area&quot;&gt;&lt;div class=&quot;prompt&quot;&gt;&lt;/div&gt;
+&lt;div class=&quot;output_subarea output_stream output_stdout output_text&quot;&gt;
+&lt;pre&gt;Matrix([
+[(B1*x&amp;amp;apos - R1*(d1 + x)**2)/(B1*(d1 + x)),                                               0,                        ((d1 + x)*i1&amp;amp;apos - 2*i1*x&amp;amp;apos)/(d1 + x)**2,      2*i1/(d1 + x)],
+[                                     0, -(B2*x&amp;amp;apos + R2*(D + d2 - x)**2)/(B2*(D + d2 - x)),               -((D + d2 - x)*i2&amp;amp;apos + 2*i2*x&amp;amp;apos)/(D + d2 - x)**2, -2*i2/(D + d2 - x)],
+[                                     0,                                               0,                                                           0,                  1],
+[              -2*B1*i1/(m*(d1 + x)**2),                     2*B2*i2/(m*(D + d2 - x)**2), 2*B1*i1**2/(m*(d1 + x)**3) + 2*B2*i2**2/(m*(D + d2 - x)**3),                  0]])
+
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;/div&gt;
+&lt;div class=&quot;cell border-box-sizing code_cell rendered&quot;&gt;
+&lt;div class=&quot;input&quot;&gt;
+&lt;div class=&quot;prompt input_prompt&quot;&gt;
+In [3]:
+&lt;/div&gt;
+&lt;div class=&quot;inner_cell&quot;&gt;
+    &lt;div class=&quot;input_area&quot;&gt;
+&lt;div class=&quot;highlight-ipynb&quot;&gt;&lt;pre class=&quot;ipynb&quot;&gt;&lt;span class=&quot;n&quot;&gt;mprint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;B&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class=&quot;output_wrapper&quot;&gt;
+&lt;div class=&quot;output&quot;&gt;
+
+
+&lt;div class=&quot;output_area&quot;&gt;&lt;div class=&quot;prompt&quot;&gt;&lt;/div&gt;
+&lt;div class=&quot;output_subarea output_stream output_stdout output_text&quot;&gt;
+&lt;pre&gt;Matrix([
+[(d1 + x)/B1,               0],
+[          0, (D + d2 - x)/B2],
+[          0,               0],
+[          0,               0]])
+
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;/div&gt;
+&lt;div class=&quot;cell border-box-sizing text_cell rendered&quot;&gt;
+&lt;div class=&quot;prompt input_prompt&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;inner_cell&quot;&gt;
+&lt;div class=&quot;text_cell_render border-box-sizing rendered_html&quot;&gt;
+&lt;p&gt;You'll have to trust me that the above representations are the same ones that I derived for my research project. This is really exciting progress! If everything works out (and it looks like it will), it will be possible to derive a system of dynamic equations anywhere in sympy, and then linearize it using the functionality I implement in the &lt;code&gt;linearize&lt;/code&gt; function.&lt;/p&gt;
+&lt;p&gt;Currently the system of equations is must formed as a matrix, and then passed to &lt;code&gt;matrix_to_linearizer&lt;/code&gt; to return a &lt;code&gt;Linearizer&lt;/code&gt; object. Once this code is cleaned up, it will be used internally by the general &lt;code&gt;linearize&lt;/code&gt; function to convert the system to a &lt;code&gt;Linearizer&lt;/code&gt;, perform the linearization, and return the results. I plan on implementing this functionality next week.&lt;/p&gt;
+&lt;p&gt;The code used above is found in my &lt;code&gt;matrix2linearizer&lt;/code&gt; branch on GitHub &lt;a href=&quot;https://github.com/jcrist/sympy/tree/matrix2linearizer&quot;&gt;here&lt;/a&gt;. As before, I made a pull request on my own rep, so people may review the code before i submit it to Sympy proper. The PR is &lt;a href=&quot;https://github.com/jcrist/sympy/pull/2&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;/p&gt;&amp;lt;script type=&quot;text/javascript&quot;&amp;gt;
+    if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+        var mathjaxscript = document.createElement('script');
+        mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+        mathjaxscript.type = 'text/javascript';
+        mathjaxscript.src = 'https:' == document.location.protocol
+                ? 'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
+                : 'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+        mathjaxscript[(window.opera ? &quot;innerHTML&quot; : &quot;text&quot;)] =
+            &quot;MathJax.Hub.Config({&quot; +
+            &quot;    config: ['MMLorHTML.js'],&quot; +
+            &quot;    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },&quot; +
+            &quot;    jax: ['input/TeX','input/MathML','output/HTML-CSS'],&quot; +
+            &quot;    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js'],&quot; +
+            &quot;    displayAlign: 'center',&quot; +
+            &quot;    displayIndent: '0em',&quot; +
+            &quot;    showMathMenu: true,&quot; +
+            &quot;    tex2jax: { &quot; +
+            &quot;        inlineMath: [ ['$','$'] ], &quot; +
+            &quot;        displayMath: [ ['$$','$$'] ],&quot; +
+            &quot;        processEscapes: true,&quot; +
+            &quot;        preview: 'TeX',&quot; +
+            &quot;    }, &quot; +
+            &quot;    'HTML-CSS': { &quot; +
+            &quot;        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'black ! important'} }&quot; +
+            &quot;    } &quot; +
+            &quot;}); &quot;;
+        (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+    }
+&amp;lt;/script&amp;gt;</content:encoded>
+	<dc:date>2014-06-07T01:00:00+00:00</dc:date>
+	<dc:creator>Jim Crist</dc:creator>
+</item>
 <item rdf:about="http://thilinaatsympy.wordpress.com/?p=326">
 	<title>Thilina Rathnayake: Gaussian Elimination</title>
 	<link>http://thilinaatsympy.wordpress.com/2014/06/03/gaussian-elimination/</link>
@@ -3013,7 +3206,8 @@ screen npm start
 &lt;p&gt;-A class WeylGroup, which is about the Weyl group of a given Lie algebra.  It gives the size and name of a given Weyl group as well as the matrix form of an element, and an element’s order.&lt;/p&gt;
 &lt;p&gt;-Methods for displaying the Cartan matrix and Dynkin diagram of a Lie algebra.&lt;/p&gt;
 &lt;p&gt; &lt;/p&gt;
-&lt;p&gt;That’s pretty much it.  I had a great time working with SymPy this summer!&lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/172/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/172/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;amp;blog=52875864&amp;amp;post=172&amp;amp;subd=meclark256&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
+&lt;p&gt;That’s pretty much it.  I had a great time working with SymPy this summer!&lt;/p&gt;
+&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/172/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/172/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;amp;blog=52875864&amp;amp;post=172&amp;amp;subd=meclark256&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
 	<dc:date>2013-09-24T19:00:55+00:00</dc:date>
 	<dc:creator>meclark256</dc:creator>
 </item>
@@ -3044,7 +3238,8 @@ screen npm start
 &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+f_2+%3D+x%5E2+-+2+%5Calpha%5E2+x+%2B+%5Calpha%5E3+z%5E2+-+%28+%5Calpha%5E3+%2B+%5Calpha%5E2+%2B+%5Calpha+%2B+1%29+y+%2B+12+%5Calpha+&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\displaystyle f_2 = x^2 - 2 \alpha^2 x + \alpha^3 z^2 - ( \alpha^3 + \alpha^2 + \alpha + 1) y + 12 \alpha &quot; class=&quot;latex&quot; title=&quot;\displaystyle f_2 = x^2 - 2 \alpha^2 x + \alpha^3 z^2 - ( \alpha^3 + \alpha^2 + \alpha + 1) y + 12 \alpha &quot; /&gt;&lt;br /&gt;
 &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+f_3+%3D+x%5E2+-+2+%5Calpha%5E3+x+%2B+%5Calpha%5E2+z%5E2+%2B+%5Calpha+y+-+12+%28+%5Calpha%5E3+%2B+%5Calpha%5E2+%2B+%5Calpha+%2B+1%29+&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\displaystyle f_3 = x^2 - 2 \alpha^3 x + \alpha^2 z^2 + \alpha y - 12 ( \alpha^3 + \alpha^2 + \alpha + 1) &quot; class=&quot;latex&quot; title=&quot;\displaystyle f_3 = x^2 - 2 \alpha^3 x + \alpha^2 z^2 + \alpha y - 12 ( \alpha^3 + \alpha^2 + \alpha + 1) &quot; /&gt;&lt;br /&gt;
 &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+f_4+%3D+x%5E2+%2B+2+%28+%5Calpha%5E3+%2B+%5Calpha%5E2+%2B+%5Calpha+%2B+1%29+x+%2B+%5Calpha+z%5E2+%2B+%5Calpha%5E3+y+%2B+12+%5Calpha%5E2+.+&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\displaystyle f_4 = x^2 + 2 ( \alpha^3 + \alpha^2 + \alpha + 1) x + \alpha z^2 + \alpha^3 y + 12 \alpha^2 . &quot; class=&quot;latex&quot; title=&quot;\displaystyle f_4 = x^2 + 2 ( \alpha^3 + \alpha^2 + \alpha + 1) x + \alpha z^2 + \alpha^3 y + 12 \alpha^2 . &quot; /&gt;&lt;/p&gt;
-&lt;p style=&quot;text-align: justify;&quot;&gt;The current SymPy factorization algorithm needs 215 seconds, whereas the new one only takes 60.3 seconds. More than three times faster! &lt;img src=&quot;http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif&quot; alt=&quot;:)&quot; class=&quot;wp-smiley&quot; /&gt; &lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/352/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/352/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;amp;blog=53034828&amp;amp;post=352&amp;amp;subd=sophiessympyblog&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
+&lt;p style=&quot;text-align: justify;&quot;&gt;The current SymPy factorization algorithm needs 215 seconds, whereas the new one only takes 60.3 seconds. More than three times faster! &lt;img src=&quot;http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif&quot; alt=&quot;:)&quot; class=&quot;wp-smiley&quot; /&gt; &lt;/p&gt;
+&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/352/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/352/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;amp;blog=53034828&amp;amp;post=352&amp;amp;subd=sophiessympyblog&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
 	<dc:date>2013-09-15T17:56:51+00:00</dc:date>
 	<dc:creator>katjasophie</dc:creator>
 </item>
@@ -3148,7 +3343,8 @@ This is a computationally hard problem and method I implemented finds only one s
 &lt;p&gt;I also changed bits in in the root_system PR to utilise Rational(x, y) instead of using floating point numbers. &lt;/p&gt;
 &lt;p&gt;I’m hoping to have most major coding done by the 13th, so I can spend the last 10 days of GSOC writing up more detailed docstrings and fixing other minor errors.&lt;/p&gt;
 &lt;p&gt; &lt;/p&gt;
-&lt;p&gt;Sorry for the short update, but I’m not feeling particularly verbose today.&lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/167/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/167/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;amp;blog=52875864&amp;amp;post=167&amp;amp;subd=meclark256&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
+&lt;p&gt;Sorry for the short update, but I’m not feeling particularly verbose today.&lt;/p&gt;
+&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/167/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/167/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;amp;blog=52875864&amp;amp;post=167&amp;amp;subd=meclark256&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
 	<dc:date>2013-09-09T01:26:04+00:00</dc:date>
 	<dc:creator>meclark256</dc:creator>
 </item>
@@ -3263,7 +3459,8 @@ where t2 = &lt;img src=&quot;http://s0.wp.com/latex.php?latex=log%28x%5E2+%2B+1%
 I and Aaron solved the major difficulties incurred in the is_deriv part of the code.&lt;br /&gt;
 &lt;a href=&quot;http://geekiology.files.wordpress.com/2013/09/screenshot-from-2013-09-03-175154.png&quot;&gt;&lt;img src=&quot;http://geekiology.files.wordpress.com/2013/09/screenshot-from-2013-09-03-175154.png?w=300&amp;amp;h=168&quot; alt=&quot;Screenshot from 2013-09-03 17:51:54&quot; width=&quot;300&quot; class=&quot;alignnone size-medium wp-image-413&quot; height=&quot;168&quot; /&gt;&lt;/a&gt;&lt;br /&gt;
 Cases like above where giving incorrect answers before, have a solution now.&lt;/p&gt;
-&lt;p&gt;The only issues which is till unresolved from the precious week is the infinite loops for polynomial_reduce kt . While I see similar issues in the original code for case polynomial_reduce(Poly((-64*t**6 + 64*t**4 + 64*t**2 – 64, t)/(2048*t**4 – 4096*t**2 + 2048)), DE) I am not able to find the stopping-condition for the same in the book.&lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/geekiology.wordpress.com/410/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/geekiology.wordpress.com/410/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=geekiology.wordpress.com&amp;amp;blog=36553244&amp;amp;post=410&amp;amp;subd=geekiology&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
+&lt;p&gt;The only issues which is till unresolved from the precious week is the infinite loops for polynomial_reduce kt . While I see similar issues in the original code for case polynomial_reduce(Poly((-64*t**6 + 64*t**4 + 64*t**2 – 64, t)/(2048*t**4 – 4096*t**2 + 2048)), DE) I am not able to find the stopping-condition for the same in the book.&lt;/p&gt;
+&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/geekiology.wordpress.com/410/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/geekiology.wordpress.com/410/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=geekiology.wordpress.com&amp;amp;blog=36553244&amp;amp;post=410&amp;amp;subd=geekiology&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
 	<dc:date>2013-09-03T13:10:40+00:00</dc:date>
 	<dc:creator>chetnagupta</dc:creator>
 </item>
@@ -3273,7 +3470,8 @@ Cases like above where giving incorrect answers before, have a solution now.&lt;
 	<content:encoded>&lt;p style=&quot;text-align: justify;&quot;&gt;Wow, time seems to be flying right now, it’s already been two weeks again! In order to keep things clear, I described the factorization algorithm I am currently working on in &lt;a href=&quot;http://sophiessympyblog.wordpress.com/2013/09/01/factoring-polynomials-over-algebraic-number-fields/&quot; title=&quot;Factoring polynomials over algebraic number fields&quot;&gt;another post&lt;/a&gt;. So here I want to talk about my progress and problems in the last two weeks.&lt;/p&gt;
 &lt;p style=&quot;text-align: justify;&quot;&gt;Let’s start with good news. My first two PRs have been merged! So now the modular GCD algorithms I implemented for polynomials over the integers and algebraic number fields are part of SymPy. &lt;img src=&quot;http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif&quot; alt=&quot;:)&quot; class=&quot;wp-smiley&quot; /&gt; &lt;/p&gt;
 &lt;p style=&quot;text-align: justify;&quot;&gt;Progress on the factorization algorithm has not been as fast as I would have liked. I spent a lot of time with Hensel lifting, since the description of the algorithm is not very explicit in this part. I ended up adapting the already implemented Hensel lifting code to my use case. The last (big) part missing is the sparse &lt;img src=&quot;http://s0.wp.com/latex.php?latex=p&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;p&quot; class=&quot;latex&quot; title=&quot;p&quot; /&gt;-adic lifting algorithm. The problem here is that I would have to solve a cumbersome system of linear equations over &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cmathbb+Z_%7Bp%5Em%7D&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\mathbb Z_{p^m}&quot; class=&quot;latex&quot; title=&quot;\mathbb Z_{p^m}&quot; /&gt;. One possible way to work around this is to choose a large prime so that no lifting is necessary, which is the way it is currently done in the integer polynomial case. But of course, a lifting would be more efficient.&lt;/p&gt;
-&lt;p style=&quot;text-align: justify;&quot;&gt;I already made successful factorizations (by using big enough primes) for certain polynomials, and next week I hope to get it to work for arbitrary ones.&lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/281/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/281/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;amp;blog=53034828&amp;amp;post=281&amp;amp;subd=sophiessympyblog&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
+&lt;p style=&quot;text-align: justify;&quot;&gt;I already made successful factorizations (by using big enough primes) for certain polynomials, and next week I hope to get it to work for arbitrary ones.&lt;/p&gt;
+&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/281/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/281/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;amp;blog=53034828&amp;amp;post=281&amp;amp;subd=sophiessympyblog&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
 	<dc:date>2013-09-01T14:52:35+00:00</dc:date>
 	<dc:creator>katjasophie</dc:creator>
 </item>
@@ -3299,7 +3497,8 @@ We define the &lt;em&gt;denominator &lt;/em&gt;&lt;img src=&quot;http://s0.wp.co
 &lt;p style=&quot;text-align: justify;&quot;&gt;That means, we have the correct factorization modulo the prime &lt;img src=&quot;http://s0.wp.com/latex.php?latex=p&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;p&quot; class=&quot;latex&quot; title=&quot;p&quot; /&gt;. In order to get the desired factorization, we use a procedure that is also based on Hensel’s Lemma, called &lt;img src=&quot;http://s0.wp.com/latex.php?latex=p&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;p&quot; class=&quot;latex&quot; title=&quot;p&quot; /&gt;-adic lifting. We lift the factors &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cbar+f_j&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\bar f_j&quot; class=&quot;latex&quot; title=&quot;\bar f_j&quot; /&gt; from &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cmathbb+Z_p%28%5Calpha%29%5Bx_o%2C+%5Cldots%2C+x_n%5D&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\mathbb Z_p(\alpha)[x_o, \ldots, x_n]&quot; class=&quot;latex&quot; title=&quot;\mathbb Z_p(\alpha)[x_o, \ldots, x_n]&quot; /&gt; to &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cmathbb+Z_%7Bp%5Em%7D%28%5Calpha%29%5Bx_o%2C+%5Cldots%2C+x_n%5D&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\mathbb Z_{p^m}(\alpha)[x_o, \ldots, x_n]&quot; class=&quot;latex&quot; title=&quot;\mathbb Z_{p^m}(\alpha)[x_o, \ldots, x_n]&quot; /&gt;, where &lt;img src=&quot;http://s0.wp.com/latex.php?latex=m&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;m&quot; class=&quot;latex&quot; title=&quot;m&quot; /&gt; is chosen big enough, such that&lt;/p&gt;
 &lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+%5Ctilde+f%28x_o%2C+%5Cldots%2C+x_n%29+%3D+l+%5Ccdot+%5Cprod_%7Bj+%3D+1%7D%5Es+f_j%28x_o%2C+%5Cldots%2C+x_n%29+&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\displaystyle \tilde f(x_o, \ldots, x_n) = l \cdot \prod_{j = 1}^s f_j(x_o, \ldots, x_n) &quot; class=&quot;latex&quot; title=&quot;\displaystyle \tilde f(x_o, \ldots, x_n) = l \cdot \prod_{j = 1}^s f_j(x_o, \ldots, x_n) &quot; /&gt;&lt;/p&gt;
 &lt;p&gt;also holds over &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cmathbb+Q%28%5Calpha%29&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\mathbb Q(\alpha)&quot; class=&quot;latex&quot; title=&quot;\mathbb Q(\alpha)&quot; /&gt; and we are done.&lt;/p&gt;
-&lt;p&gt;[1] &lt;a href=&quot;http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf&quot; rel=&quot;nofollow&quot;&gt;http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf&lt;/a&gt;&lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/283/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/283/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;amp;blog=53034828&amp;amp;post=283&amp;amp;subd=sophiessympyblog&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
+&lt;p&gt;[1] &lt;a href=&quot;http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf&quot; rel=&quot;nofollow&quot;&gt;http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf&lt;/a&gt;&lt;/p&gt;
+&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/283/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/283/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;amp;blog=53034828&amp;amp;post=283&amp;amp;subd=sophiessympyblog&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
 	<dc:date>2013-09-01T13:21:54+00:00</dc:date>
 	<dc:creator>katjasophie</dc:creator>
 </item>
@@ -3342,7 +3541,8 @@ We define the &lt;em&gt;denominator &lt;/em&gt;&lt;img src=&quot;http://s0.wp.co
 &lt;p&gt;Lastly I am also trying to find more concrete information about the Weyl group of type D; I know that it is a subgroup of index 2, but I’m not sure what exact permutations and stuff that it corresponds to.  &lt;/p&gt;
 &lt;p&gt;So yeah.  This coming week, my plan is to figure out how I want to write the permutations of the hyperoctahedral group as permutations on positive integers, and then to take input from the user in the form of products of simple reflections, and generate the corresponding permutation, at least for types A, B, and C.  &lt;/p&gt;
 &lt;p&gt;For example, given A3, the Coxeter diagram is 0—0–0, and the generating reflections are r1, r2, r3, and the Weyl group is S4.   We can think of r1 as the permutation (1,2), r2 as (2,3), and r3 as (3,4).  So if the user gave the input r1r2 that would be the permutation (1,2)(2,3) = (1 3 2).  Oh, I also need to remember that the Permutation class starts with 0 instead of 1, so I need to remember to take that into account.&lt;/p&gt;
-&lt;p&gt;This week I will also implement a method that gives the Coxeter diagram of a given Weyl group.  This should be very easy, given the Coxeter diagram is the undirected Dynkin diagram. &lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/137/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/137/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;amp;blog=52875864&amp;amp;post=137&amp;amp;subd=meclark256&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
+&lt;p&gt;This week I will also implement a method that gives the Coxeter diagram of a given Weyl group.  This should be very easy, given the Coxeter diagram is the undirected Dynkin diagram. &lt;/p&gt;
+&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/137/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/137/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;amp;blog=52875864&amp;amp;post=137&amp;amp;subd=meclark256&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
 	<dc:date>2013-08-31T00:07:10+00:00</dc:date>
 	<dc:creator>meclark256</dc:creator>
 </item>
@@ -3418,7 +3618,8 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
 	<content:encoded>&lt;p&gt;So, for each semisimple Lie group, we have a Weyl group.  It is a subgroup of the isometry group of the root system.  Specifically, it’s the subgroup that is generated by reflections through the hyperplanes orthogonal to the roots.  Therefore, Weyl groups are reflection groups, and so a Weyl group is a finite Coxeter group. &lt;/p&gt;
 &lt;p&gt;Now, if we take a Lie algebra’s Dynkin diagram and delete all arrows from it, we have its Coxeter diagram, which encodes information about the reflections which generate the Weyl group, as follows.  The vertices of the Coxeter diagram represent the generating reflections of the Weyl group, s_i.  An edge is drawn between s_i and s_j if the order m(i, j) of s_i*s_j is greater than two.  If there is one edge, the order m(i, j) is 3.  If there are two edges, the order m(i, j) is 4, and if there are three edges, the order m(i, j) is 5.  &lt;/p&gt;
 &lt;p&gt;We note that the B series and the C series have the same Coxeter diagram, and hence have the same Weyl group, which is the hyperoctahedral group, which is the group of symmetries of a hypercube.  Considered as a permutation group, it is the signed symmetric group of permutations of the set  { −&lt;i&gt;n&lt;/i&gt;, −&lt;i&gt;n&lt;/i&gt; + 1, …, −1, 1, 2, …, &lt;i&gt;n&lt;/i&gt; } such that &lt;i&gt;π&lt;/i&gt;(&lt;i&gt;i&lt;/i&gt;) = −&lt;i&gt;π&lt;/i&gt;(−&lt;i&gt;i&lt;/i&gt;) for all &lt;i&gt;i&lt;/i&gt;.  The Weyl group of D_n is a subgroup of index two in the hyperoctahedral group.  The Weyl group of A_n is the symmetric group on n variables. &lt;/p&gt;
-&lt;p&gt;So, I’m now looking at working on the class WeylGroup.  Obviously it’s easy enough to write out the generating reflections, but I’m not sure how exactly I want to proceed from there.  Perhaps a function where a user can specify a reflection as a product of the generating reflections (e.g. input s1s2s5 or something…) and then have the function output its order?  I’m also thinking about how to I want to represent a given reflection.  I’m leaning towards representing it at the product of the generating reflections.  We’ll see.  I also have included a function which returns the order of a given Weyl group.  So yeah, that’s where I’m at.  This week has been generally slow in terms of concrete output, but I’ve been spending a lot of time reading and researching (as Weyl groups aren’t my specialty) and generally contemplating where I want to go with this class.&lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/113/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/113/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;amp;blog=52875864&amp;amp;post=113&amp;amp;subd=meclark256&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
+&lt;p&gt;So, I’m now looking at working on the class WeylGroup.  Obviously it’s easy enough to write out the generating reflections, but I’m not sure how exactly I want to proceed from there.  Perhaps a function where a user can specify a reflection as a product of the generating reflections (e.g. input s1s2s5 or something…) and then have the function output its order?  I’m also thinking about how to I want to represent a given reflection.  I’m leaning towards representing it at the product of the generating reflections.  We’ll see.  I also have included a function which returns the order of a given Weyl group.  So yeah, that’s where I’m at.  This week has been generally slow in terms of concrete output, but I’ve been spending a lot of time reading and researching (as Weyl groups aren’t my specialty) and generally contemplating where I want to go with this class.&lt;/p&gt;
+&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/113/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/113/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;amp;blog=52875864&amp;amp;post=113&amp;amp;subd=meclark256&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
 	<dc:date>2013-08-23T20:00:56+00:00</dc:date>
 	<dc:creator>meclark256</dc:creator>
 </item>
@@ -3501,19 +3702,6 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
 [3] A. Nitaj, &lt;em&gt;L’algorithme de Cornacchia&lt;/em&gt;, Expositiones Mathematicae 13 (1995), 358-365&lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/thilinaatsympy.wordpress.com/186/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/thilinaatsympy.wordpress.com/186/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=thilinaatsympy.wordpress.com&amp;amp;blog=52956410&amp;amp;post=186&amp;amp;subd=thilinaatsympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
 	<dc:date>2013-08-18T04:25:25+00:00</dc:date>
 	<dc:creator>Thilina Rathnayake</dc:creator>
-</item>
-<item rdf:about="http://meclark256.wordpress.com/?p=98">
-	<title>Mary Clark: Week 9</title>
-	<link>http://meclark256.wordpress.com/2013/08/16/week-9/</link>
-	<content:encoded>&lt;p&gt;This week I have been doing more work with the RootSystem class.   I created a PR (&lt;a href=&quot;https://github.com/sympy/sympy/pull/2382&quot; rel=&quot;nofollow&quot;&gt;https://github.com/sympy/sympy/pull/2382&lt;/a&gt;) with everything that I accomplished on it last week, just so that it’s up there and people can comment on it. &lt;/p&gt;
-&lt;p&gt;This week, I implemented the root adding functions.  One function just takes any two simple roots and adds them together, and returns the new root.  It functions by having the user input two integers (which must be less than the rank of the lie algebra) and takes these integers to be the keys in the dictionary of positive roots, and retrieves the corresponding simple root.  Then it just add adds the lists corresponding to the roots (by adding together the two first elements, the two second elements, etc) and returns a new list, which is the new root.  &lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;
-&lt;p&gt;Then, I also implemented a function which takes two roots as input, and if their sum is a root, returns their sum as a new root.  To do this, I first needed to have all the roots of a given Lie algebra available.  That is why last week I implemented a method for generating all the positive roots for A, B, C, and D.  This week I also did that for E, F, and G.  This enabled me to implement a method in RootSystem that generates all the roots of a given Lie algebra, by first getting the positive roots, and then using the positive roots to generate the negative roots (by multiplying each positive root by -1). &lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;
-&lt;p&gt;Then the method add_as_root works by checking the dictionary of all roots to see if the sum of the two input roots is also a root.  If it’s not, it returns a string saying “The sum of these two roots is not a root”.  Otherwise it returns the sum as a list, as usual.&lt;/p&gt;
-&lt;p&gt;This week I also worked on documentation and the like for all my functions.  This weekend I’m going to make sure all the doctests pass.  Then, my plan for next week is to start work on the the WeylGroup class.&lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/98/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/98/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;amp;blog=52875864&amp;amp;post=98&amp;amp;subd=meclark256&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
-	<dc:date>2013-08-16T19:11:19+00:00</dc:date>
-	<dc:creator>meclark256</dc:creator>
 </item>
 
 </rdf:RDF>

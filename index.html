@@ -24,6 +24,228 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>June 07, 2014</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://jcrist.github.io/" title="Marginally Stable">Jim Crist</a></h3>
+
+
+<div class="entrygroup" id="tag:,2014-06-06:gsoc-week-3.html">
+<h4><a href="http://jcrist.github.io/gsoc-week-3.html">GSoC Week 3: Generalized Linearizer Class</a></h4>
+<div class="entry">
+<div class="content">
+<p>
+</p><div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This week I refactored the <code>Linearizer</code> class to fit a general system of equations. This means that any of the following can be absent, and the linearization still is valid:</p>
+<p><span class="math">\[
+\begin{array}[rl]
+\\f_{c}(q, t) &amp;= 0_{lx1} \\
+f_{v}(q, u, t) &amp;= 0_{mx1} \\
+f_{a}(q, \dot{q}, u, \dot{u}, t) &amp;= 0_{mx1} \\
+f_{0}(q, \dot{q}, t) + f_{1}(q, u, t) &amp;= 0_{nx1} \\
+f_{2}(q, \dot{u}, t) + f_{3}(q, \dot{q}, u, r, t) &amp;= 0_{(o-m)x1} \\
+\end{array}
+\]</span> with</p>
+<p><span class="math">\[
+\begin{array}[rl]
+\\q, \dot{q} &amp; \in \mathbb{R}^n \\
+u, \dot{u} &amp; \in \mathbb{R}^o \\
+r &amp; \in \mathbb{R}^s 
+\end{array}
+\]</span></p>
+<p>Note that vectors can be absent too. This means the system can be entirely <span class="math">\(q\)</span> or <span class="math">\(u\)</span> components. More on this later.</p>
+<p>Much of the rest of the week was spent finishing up all methods related to the <code>KanesMethod</code> class. This was mostly cleaning up the code base, and fixing all the tests in place for the previous <code>linearize</code> method. As of this point, the linearization routines accomplish everything that was in place before, but in a more general and extensible way. This is all included in the <code>LinearizerClass</code> branch on my GitHub repo. There is a pull request on my own master branch open right now for code review <a href="https://github.com/jcrist/sympy/pull/1">here</a>. I'll leave this up for another day or two before closing it and making all pull request to <code>Sympy/master</code>.</p>
+<p>I also started work on linearizing a system of equations presented in matrix form. This still needs lots of code improvements (it's inefficient), but it currently works. Below is a demo.</p>
+<p>The system is the same system I use for my research - a dual solenoid actuator. There are two dependent variables: <code>lam1</code> and <code>lam2</code>. The dynamics are thus expressed by 3 dynamic differential equations, and two constraint equations.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [1]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">symbols</span><span class="p">,</span> <span class="n">Matrix</span>
+<span class="kn">from</span> <span class="nn">sympy.physics.mechanics</span> <span class="kn">import</span> <span class="n">dynamicsymbols</span><span class="p">,</span> <span class="n">mprint</span>
+<span class="kn">from</span> <span class="nn">sympy.physics.mechanics.linearize</span> <span class="kn">import</span> <span class="n">Linearizer</span><span class="p">,</span> <span class="n">matrix_to_linearizer</span>
+
+<span class="c"># Create constant symbols</span>
+<span class="n">B1</span><span class="p">,</span> <span class="n">B2</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="s">'B1, B2'</span><span class="p">)</span>
+<span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="n">D</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="s">'d1, d2, D'</span><span class="p">)</span>
+<span class="n">R1</span><span class="p">,</span> <span class="n">R2</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="s">'R1, R2'</span><span class="p">)</span>
+<span class="n">m</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="s">'m'</span><span class="p">)</span>
+<span class="n">t</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="s">'t'</span><span class="p">)</span>
+
+<span class="c"># Create dynamicsymbols</span>
+<span class="n">i1</span><span class="p">,</span> <span class="n">i2</span> <span class="o">=</span> <span class="n">dynamicsymbols</span><span class="p">(</span><span class="s">'i1, i2'</span><span class="p">)</span>
+<span class="n">V1</span><span class="p">,</span> <span class="n">V2</span> <span class="o">=</span> <span class="n">dynamicsymbols</span><span class="p">(</span><span class="s">'V1, V2'</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">dynamicsymbols</span><span class="p">(</span><span class="s">'x'</span><span class="p">)</span>
+<span class="n">xdot</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span>
+<span class="n">lam1</span><span class="p">,</span> <span class="n">lam2</span> <span class="o">=</span> <span class="n">dynamicsymbols</span><span class="p">(</span><span class="s">'lam1, lam2'</span><span class="p">)</span>
+<span class="n">lam1dot</span><span class="p">,</span> <span class="n">lam2dot</span> <span class="o">=</span> <span class="n">dynamicsymbols</span><span class="p">(</span><span class="s">'lam1, lam2'</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="c"># Define vectors. Because all speeds are derivatives of the coordinates,</span>
+<span class="c"># the system is best represented as just a vector of u. The dependent</span>
+<span class="c"># states are lam1 and lam2</span>
+<span class="n">u</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">([</span><span class="n">i1</span><span class="p">,</span> <span class="n">i2</span><span class="p">,</span> <span class="n">xdot</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">lam1</span><span class="p">,</span> <span class="n">lam2</span><span class="p">])</span>
+<span class="n">udep</span> <span class="o">=</span> <span class="n">u</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
+
+<span class="c"># Define system of equations</span>
+<span class="n">eom</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">([</span><span class="n">B1</span><span class="o">/</span><span class="p">(</span><span class="n">d1</span> <span class="o">+</span> <span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">i1</span> <span class="o">-</span> <span class="n">lam1</span><span class="p">,</span>
+              <span class="n">B2</span><span class="o">/</span><span class="p">(</span><span class="n">D</span> <span class="o">+</span> <span class="n">d2</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">i2</span> <span class="o">-</span> <span class="n">lam2</span><span class="p">,</span>
+              <span class="o">-</span><span class="n">lam1dot</span> <span class="o">-</span> <span class="n">R1</span><span class="o">*</span><span class="n">i1</span> <span class="o">+</span> <span class="n">V1</span><span class="p">,</span>
+              <span class="o">-</span><span class="n">lam2dot</span> <span class="o">-</span> <span class="n">R2</span><span class="o">*</span><span class="n">i2</span> <span class="o">+</span> <span class="n">V2</span><span class="p">,</span>
+              <span class="o">-</span><span class="n">xdot</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span> <span class="o">+</span> <span class="p">(</span><span class="n">B2</span><span class="o">/</span><span class="p">(</span><span class="n">d2</span> <span class="o">+</span> <span class="n">D</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">i2</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">B1</span><span class="o">/</span><span class="p">(</span><span class="n">d1</span> <span class="o">+</span> <span class="n">x</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">i1</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">m</span><span class="p">])</span>
+
+<span class="c"># Perform the linearization</span>
+<span class="n">linearizer</span> <span class="o">=</span> <span class="n">matrix_to_linearizer</span><span class="p">(</span><span class="n">eom</span><span class="p">,</span> <span class="n">u</span><span class="o">=</span><span class="n">u</span><span class="p">,</span> <span class="n">udep</span><span class="o">=</span><span class="n">udep</span><span class="p">)</span>
+<span class="n">A</span><span class="p">,</span> <span class="n">B</span> <span class="o">=</span> <span class="n">linearizer</span><span class="o">.</span><span class="n">linearize</span><span class="p">(</span><span class="n">A_and_B</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [2]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="n">mprint</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Matrix([
+[(B1*x&amp;apos - R1*(d1 + x)**2)/(B1*(d1 + x)),                                               0,                        ((d1 + x)*i1&amp;apos - 2*i1*x&amp;apos)/(d1 + x)**2,      2*i1/(d1 + x)],
+[                                     0, -(B2*x&amp;apos + R2*(D + d2 - x)**2)/(B2*(D + d2 - x)),               -((D + d2 - x)*i2&amp;apos + 2*i2*x&amp;apos)/(D + d2 - x)**2, -2*i2/(D + d2 - x)],
+[                                     0,                                               0,                                                           0,                  1],
+[              -2*B1*i1/(m*(d1 + x)**2),                     2*B2*i2/(m*(D + d2 - x)**2), 2*B1*i1**2/(m*(d1 + x)**3) + 2*B2*i2**2/(m*(D + d2 - x)**3),                  0]])
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [3]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="n">mprint</span><span class="p">(</span><span class="n">B</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Matrix([
+[(d1 + x)/B1,               0],
+[          0, (D + d2 - x)/B2],
+[          0,               0],
+[          0,               0]])
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>You'll have to trust me that the above representations are the same ones that I derived for my research project. This is really exciting progress! If everything works out (and it looks like it will), it will be possible to derive a system of dynamic equations anywhere in sympy, and then linearize it using the functionality I implement in the <code>linearize</code> function.</p>
+<p>Currently the system of equations is must formed as a matrix, and then passed to <code>matrix_to_linearizer</code> to return a <code>Linearizer</code> object. Once this code is cleaned up, it will be used internally by the general <code>linearize</code> function to convert the system to a <code>Linearizer</code>, perform the linearization, and return the results. I plan on implementing this functionality next week.</p>
+<p>The code used above is found in my <code>matrix2linearizer</code> branch on GitHub <a href="https://github.com/jcrist/sympy/tree/matrix2linearizer">here</a>. As before, I made a pull request on my own rep, so people may review the code before i submit it to Sympy proper. The PR is <a href="https://github.com/jcrist/sympy/pull/2">here</a>.</p>
+</div>
+</div>
+</div><p></p>&lt;script type="text/javascript"&gt;
+    if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+        var mathjaxscript = document.createElement('script');
+        mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+        mathjaxscript.type = 'text/javascript';
+        mathjaxscript.src = 'https:' == document.location.protocol
+                ? 'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
+                : 'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+        mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+            "MathJax.Hub.Config({" +
+            "    config: ['MMLorHTML.js']," +
+            "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+            "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+            "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+            "    displayAlign: 'center'," +
+            "    displayIndent: '0em'," +
+            "    showMathMenu: true," +
+            "    tex2jax: { " +
+            "        inlineMath: [ ['$','$'] ], " +
+            "        displayMath: [ ['$$','$$'] ]," +
+            "        processEscapes: true," +
+            "        preview: 'TeX'," +
+            "    }, " +
+            "    'HTML-CSS': { " +
+            "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'black ! important'} }" +
+            "    } " +
+            "}); ";
+        (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+    }
+&lt;/script&gt;</div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://jcrist.github.io/gsoc-week-3.html">by Jim Crist at June 07, 2014 01:00 AM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>June 03, 2014</h2>
 
 <div class="channelgroup">
@@ -4008,7 +4230,8 @@ screen npm start
 <p>-A class WeylGroup, which is about the Weyl group of a given Lie algebra.  It gives the size and name of a given Weyl group as well as the matrix form of an element, and an element’s order.</p>
 <p>-Methods for displaying the Cartan matrix and Dynkin diagram of a Lie algebra.</p>
 <p> </p>
-<p>That’s pretty much it.  I had a great time working with SymPy this summer!</p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/172/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/172/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=172&amp;subd=meclark256&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+<p>That’s pretty much it.  I had a great time working with SymPy this summer!</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/172/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/172/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=172&amp;subd=meclark256&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -4097,7 +4320,8 @@ screen npm start
 <img src="http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+f_2+%3D+x%5E2+-+2+%5Calpha%5E2+x+%2B+%5Calpha%5E3+z%5E2+-+%28+%5Calpha%5E3+%2B+%5Calpha%5E2+%2B+%5Calpha+%2B+1%29+y+%2B+12+%5Calpha+&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\displaystyle f_2 = x^2 - 2 \alpha^2 x + \alpha^3 z^2 - ( \alpha^3 + \alpha^2 + \alpha + 1) y + 12 \alpha " class="latex" title="\displaystyle f_2 = x^2 - 2 \alpha^2 x + \alpha^3 z^2 - ( \alpha^3 + \alpha^2 + \alpha + 1) y + 12 \alpha " /><br />
 <img src="http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+f_3+%3D+x%5E2+-+2+%5Calpha%5E3+x+%2B+%5Calpha%5E2+z%5E2+%2B+%5Calpha+y+-+12+%28+%5Calpha%5E3+%2B+%5Calpha%5E2+%2B+%5Calpha+%2B+1%29+&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\displaystyle f_3 = x^2 - 2 \alpha^3 x + \alpha^2 z^2 + \alpha y - 12 ( \alpha^3 + \alpha^2 + \alpha + 1) " class="latex" title="\displaystyle f_3 = x^2 - 2 \alpha^3 x + \alpha^2 z^2 + \alpha y - 12 ( \alpha^3 + \alpha^2 + \alpha + 1) " /><br />
 <img src="http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+f_4+%3D+x%5E2+%2B+2+%28+%5Calpha%5E3+%2B+%5Calpha%5E2+%2B+%5Calpha+%2B+1%29+x+%2B+%5Calpha+z%5E2+%2B+%5Calpha%5E3+y+%2B+12+%5Calpha%5E2+.+&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\displaystyle f_4 = x^2 + 2 ( \alpha^3 + \alpha^2 + \alpha + 1) x + \alpha z^2 + \alpha^3 y + 12 \alpha^2 . " class="latex" title="\displaystyle f_4 = x^2 + 2 ( \alpha^3 + \alpha^2 + \alpha + 1) x + \alpha z^2 + \alpha^3 y + 12 \alpha^2 . " /></p>
-<p style="text-align: justify;">The current SymPy factorization algorithm needs 215 seconds, whereas the new one only takes 60.3 seconds. More than three times faster! <img src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif" alt=":)" class="wp-smiley" /> </p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/352/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/352/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=352&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+<p style="text-align: justify;">The current SymPy factorization algorithm needs 215 seconds, whereas the new one only takes 60.3 seconds. More than three times faster! <img src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif" alt=":)" class="wp-smiley" /> </p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/352/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/352/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=352&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -4323,7 +4547,8 @@ This is a computationally hard problem and method I implemented finds only one s
 <p>I also changed bits in in the root_system PR to utilise Rational(x, y) instead of using floating point numbers. </p>
 <p>I’m hoping to have most major coding done by the 13th, so I can spend the last 10 days of GSOC writing up more detailed docstrings and fixing other minor errors.</p>
 <p> </p>
-<p>Sorry for the short update, but I’m not feeling particularly verbose today.</p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/167/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/167/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=167&amp;subd=meclark256&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+<p>Sorry for the short update, but I’m not feeling particularly verbose today.</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/167/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/167/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=167&amp;subd=meclark256&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -4496,7 +4721,8 @@ where t2 = <img src="http://s0.wp.com/latex.php?latex=log%28x%5E2+%2B+1%29&amp;b
 I and Aaron solved the major difficulties incurred in the is_deriv part of the code.<br />
 <a href="http://geekiology.files.wordpress.com/2013/09/screenshot-from-2013-09-03-175154.png"><img src="http://geekiology.files.wordpress.com/2013/09/screenshot-from-2013-09-03-175154.png?w=300&amp;h=168" alt="Screenshot from 2013-09-03 17:51:54" width="300" class="alignnone size-medium wp-image-413" height="168" /></a><br />
 Cases like above where giving incorrect answers before, have a solution now.</p>
-<p>The only issues which is till unresolved from the precious week is the infinite loops for polynomial_reduce kt . While I see similar issues in the original code for case polynomial_reduce(Poly((-64*t**6 + 64*t**4 + 64*t**2 – 64, t)/(2048*t**4 – 4096*t**2 + 2048)), DE) I am not able to find the stopping-condition for the same in the book.</p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/geekiology.wordpress.com/410/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/geekiology.wordpress.com/410/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=geekiology.wordpress.com&amp;blog=36553244&amp;post=410&amp;subd=geekiology&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+<p>The only issues which is till unresolved from the precious week is the infinite loops for polynomial_reduce kt . While I see similar issues in the original code for case polynomial_reduce(Poly((-64*t**6 + 64*t**4 + 64*t**2 – 64, t)/(2048*t**4 – 4096*t**2 + 2048)), DE) I am not able to find the stopping-condition for the same in the book.</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/geekiology.wordpress.com/410/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/geekiology.wordpress.com/410/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=geekiology.wordpress.com&amp;blog=36553244&amp;post=410&amp;subd=geekiology&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -4535,7 +4761,8 @@ Cases like above where giving incorrect answers before, have a solution now.</p>
 <p style="text-align: justify;">Wow, time seems to be flying right now, it’s already been two weeks again! In order to keep things clear, I described the factorization algorithm I am currently working on in <a href="http://sophiessympyblog.wordpress.com/2013/09/01/factoring-polynomials-over-algebraic-number-fields/" title="Factoring polynomials over algebraic number fields">another post</a>. So here I want to talk about my progress and problems in the last two weeks.</p>
 <p style="text-align: justify;">Let’s start with good news. My first two PRs have been merged! So now the modular GCD algorithms I implemented for polynomials over the integers and algebraic number fields are part of SymPy. <img src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif" alt=":)" class="wp-smiley" /> </p>
 <p style="text-align: justify;">Progress on the factorization algorithm has not been as fast as I would have liked. I spent a lot of time with Hensel lifting, since the description of the algorithm is not very explicit in this part. I ended up adapting the already implemented Hensel lifting code to my use case. The last (big) part missing is the sparse <img src="http://s0.wp.com/latex.php?latex=p&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="p" class="latex" title="p" />-adic lifting algorithm. The problem here is that I would have to solve a cumbersome system of linear equations over <img src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Z_%7Bp%5Em%7D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\mathbb Z_{p^m}" class="latex" title="\mathbb Z_{p^m}" />. One possible way to work around this is to choose a large prime so that no lifting is necessary, which is the way it is currently done in the integer polynomial case. But of course, a lifting would be more efficient.</p>
-<p style="text-align: justify;">I already made successful factorizations (by using big enough primes) for certain polynomials, and next week I hope to get it to work for arbitrary ones.</p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/281/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/281/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=281&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+<p style="text-align: justify;">I already made successful factorizations (by using big enough primes) for certain polynomials, and next week I hope to get it to work for arbitrary ones.</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/281/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/281/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=281&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -4575,7 +4802,8 @@ We define the <em>denominator </em><img src="http://s0.wp.com/latex.php?latex=%5
 <p style="text-align: justify;">That means, we have the correct factorization modulo the prime <img src="http://s0.wp.com/latex.php?latex=p&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="p" class="latex" title="p" />. In order to get the desired factorization, we use a procedure that is also based on Hensel’s Lemma, called <img src="http://s0.wp.com/latex.php?latex=p&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="p" class="latex" title="p" />-adic lifting. We lift the factors <img src="http://s0.wp.com/latex.php?latex=%5Cbar+f_j&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\bar f_j" class="latex" title="\bar f_j" /> from <img src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Z_p%28%5Calpha%29%5Bx_o%2C+%5Cldots%2C+x_n%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\mathbb Z_p(\alpha)[x_o, \ldots, x_n]" class="latex" title="\mathbb Z_p(\alpha)[x_o, \ldots, x_n]" /> to <img src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Z_%7Bp%5Em%7D%28%5Calpha%29%5Bx_o%2C+%5Cldots%2C+x_n%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\mathbb Z_{p^m}(\alpha)[x_o, \ldots, x_n]" class="latex" title="\mathbb Z_{p^m}(\alpha)[x_o, \ldots, x_n]" />, where <img src="http://s0.wp.com/latex.php?latex=m&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="m" class="latex" title="m" /> is chosen big enough, such that</p>
 <p align="center"><img src="http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+%5Ctilde+f%28x_o%2C+%5Cldots%2C+x_n%29+%3D+l+%5Ccdot+%5Cprod_%7Bj+%3D+1%7D%5Es+f_j%28x_o%2C+%5Cldots%2C+x_n%29+&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\displaystyle \tilde f(x_o, \ldots, x_n) = l \cdot \prod_{j = 1}^s f_j(x_o, \ldots, x_n) " class="latex" title="\displaystyle \tilde f(x_o, \ldots, x_n) = l \cdot \prod_{j = 1}^s f_j(x_o, \ldots, x_n) " /></p>
 <p>also holds over <img src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Q%28%5Calpha%29&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\mathbb Q(\alpha)" class="latex" title="\mathbb Q(\alpha)" /> and we are done.</p>
-<p>[1] <a href="http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf" rel="nofollow">http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf</a></p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/283/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/283/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=283&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+<p>[1] <a href="http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf" rel="nofollow">http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf</a></p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/283/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/283/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=283&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -4672,7 +4900,8 @@ We define the <em>denominator </em><img src="http://s0.wp.com/latex.php?latex=%5
 <p>Lastly I am also trying to find more concrete information about the Weyl group of type D; I know that it is a subgroup of index 2, but I’m not sure what exact permutations and stuff that it corresponds to.  </p>
 <p>So yeah.  This coming week, my plan is to figure out how I want to write the permutations of the hyperoctahedral group as permutations on positive integers, and then to take input from the user in the form of products of simple reflections, and generate the corresponding permutation, at least for types A, B, and C.  </p>
 <p>For example, given A3, the Coxeter diagram is 0—0–0, and the generating reflections are r1, r2, r3, and the Weyl group is S4.   We can think of r1 as the permutation (1,2), r2 as (2,3), and r3 as (3,4).  So if the user gave the input r1r2 that would be the permutation (1,2)(2,3) = (1 3 2).  Oh, I also need to remember that the Permutation class starts with 0 instead of 1, so I need to remember to take that into account.</p>
-<p>This week I will also implement a method that gives the Coxeter diagram of a given Weyl group.  This should be very easy, given the Coxeter diagram is the undirected Dynkin diagram. </p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/137/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/137/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=137&amp;subd=meclark256&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+<p>This week I will also implement a method that gives the Coxeter diagram of a given Weyl group.  This should be very easy, given the Coxeter diagram is the undirected Dynkin diagram. </p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/137/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/137/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=137&amp;subd=meclark256&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -4860,7 +5089,8 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
 <p>So, for each semisimple Lie group, we have a Weyl group.  It is a subgroup of the isometry group of the root system.  Specifically, it’s the subgroup that is generated by reflections through the hyperplanes orthogonal to the roots.  Therefore, Weyl groups are reflection groups, and so a Weyl group is a finite Coxeter group. </p>
 <p>Now, if we take a Lie algebra’s Dynkin diagram and delete all arrows from it, we have its Coxeter diagram, which encodes information about the reflections which generate the Weyl group, as follows.  The vertices of the Coxeter diagram represent the generating reflections of the Weyl group, s_i.  An edge is drawn between s_i and s_j if the order m(i, j) of s_i*s_j is greater than two.  If there is one edge, the order m(i, j) is 3.  If there are two edges, the order m(i, j) is 4, and if there are three edges, the order m(i, j) is 5.  </p>
 <p>We note that the B series and the C series have the same Coxeter diagram, and hence have the same Weyl group, which is the hyperoctahedral group, which is the group of symmetries of a hypercube.  Considered as a permutation group, it is the signed symmetric group of permutations of the set  { −<i>n</i>, −<i>n</i> + 1, …, −1, 1, 2, …, <i>n</i> } such that <i>π</i>(<i>i</i>) = −<i>π</i>(−<i>i</i>) for all <i>i</i>.  The Weyl group of D_n is a subgroup of index two in the hyperoctahedral group.  The Weyl group of A_n is the symmetric group on n variables. </p>
-<p>So, I’m now looking at working on the class WeylGroup.  Obviously it’s easy enough to write out the generating reflections, but I’m not sure how exactly I want to proceed from there.  Perhaps a function where a user can specify a reflection as a product of the generating reflections (e.g. input s1s2s5 or something…) and then have the function output its order?  I’m also thinking about how to I want to represent a given reflection.  I’m leaning towards representing it at the product of the generating reflections.  We’ll see.  I also have included a function which returns the order of a given Weyl group.  So yeah, that’s where I’m at.  This week has been generally slow in terms of concrete output, but I’ve been spending a lot of time reading and researching (as Weyl groups aren’t my specialty) and generally contemplating where I want to go with this class.</p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/113/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/113/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=113&amp;subd=meclark256&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+<p>So, I’m now looking at working on the class WeylGroup.  Obviously it’s easy enough to write out the generating reflections, but I’m not sure how exactly I want to proceed from there.  Perhaps a function where a user can specify a reflection as a product of the generating reflections (e.g. input s1s2s5 or something…) and then have the function output its order?  I’m also thinking about how to I want to represent a given reflection.  I’m leaning towards representing it at the product of the generating reflections.  We’ll see.  I also have included a function which returns the order of a given Weyl group.  So yeah, that’s where I’m at.  This week has been generally slow in terms of concrete output, but I’ve been spending a lot of time reading and researching (as Weyl groups aren’t my specialty) and generally contemplating where I want to go with this class.</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/113/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/113/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=113&amp;subd=meclark256&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -5066,48 +5296,6 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
 </div>
 
 </div>
-<div class="daygroup">
-<h2>August 16, 2013</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://meclark256.wordpress.com" title="My GSOC Adventure with SymPy">Mary Clark</a></h3>
-
-
-<div class="entrygroup" id="http://meclark256.wordpress.com/?p=98">
-<h4 lang="en"><a href="http://meclark256.wordpress.com/2013/08/16/week-9/">Week 9</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>This week I have been doing more work with the RootSystem class.   I created a PR (<a href="https://github.com/sympy/sympy/pull/2382" rel="nofollow">https://github.com/sympy/sympy/pull/2382</a>) with everything that I accomplished on it last week, just so that it’s up there and people can comment on it. </p>
-<p>This week, I implemented the root adding functions.  One function just takes any two simple roots and adds them together, and returns the new root.  It functions by having the user input two integers (which must be less than the rank of the lie algebra) and takes these integers to be the keys in the dictionary of positive roots, and retrieves the corresponding simple root.  Then it just add adds the lists corresponding to the roots (by adding together the two first elements, the two second elements, etc) and returns a new list, which is the new root.  </p>
-<p> </p>
-<p>Then, I also implemented a function which takes two roots as input, and if their sum is a root, returns their sum as a new root.  To do this, I first needed to have all the roots of a given Lie algebra available.  That is why last week I implemented a method for generating all the positive roots for A, B, C, and D.  This week I also did that for E, F, and G.  This enabled me to implement a method in RootSystem that generates all the roots of a given Lie algebra, by first getting the positive roots, and then using the positive roots to generate the negative roots (by multiplying each positive root by -1). </p>
-<p> </p>
-<p>Then the method add_as_root works by checking the dictionary of all roots to see if the sum of the two input roots is also a root.  If it’s not, it returns a string saying “The sum of these two roots is not a root”.  Otherwise it returns the sum as a list, as usual.</p>
-<p>This week I also worked on documentation and the like for all my functions.  This weekend I’m going to make sure all the doctests pass.  Then, my plan for next week is to start work on the the WeylGroup class.</p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/98/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/98/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=98&amp;subd=meclark256&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://meclark256.wordpress.com/2013/08/16/week-9/">by meclark256 at August 16, 2013 07:11 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -5188,7 +5376,7 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
 <a href="http://f1728.wordpress.com/category/SymPy/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://f1728.wordpress.com" class="message" title="no activity in 7 days">Jeremias Yehdegho</a>
 </li>
 <li>
-<a href="http://jcrist.github.io/feeds/gsoc.atom.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://jcrist.github.io/" class="message" title="no activity in 7 days">Jim Crist</a>
+<a href="http://jcrist.github.io/feeds/gsoc.atom.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://jcrist.github.io/" title="Marginally Stable">Jim Crist</a>
 </li>
 <li>
 <a href="http://sophiessympyblog.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sophiessympyblog.wordpress.com" class="message" title="no activity in 7 days">Katja Sophie Hotz</a>
@@ -5281,7 +5469,7 @@ f(x) = C₀ + ───── + ───── + O⎝x ⎠
 
 <p>
 <strong>Last updated:</strong><br>
-June 07, 2014 02:01 AM<br>
+June 07, 2014 02:20 AM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
