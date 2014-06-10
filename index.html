@@ -34,6 +34,38 @@
 
 
 
+<h3><a href="http://geekpy.blogspot.com/" title="Akshay Narasimha">Akshay Narasimha</a></h3>
+
+
+<div class="entrygroup" id="tag:blogger.com,1999:blog-54146973659574488.post-8362916681945518929">
+<h4><a href="http://geekpy.blogspot.com/2014/06/gsoc14-week-3.html">Gsoc14 Week-3</a></h4>
+<div class="entry">
+<div class="content">
+<div style="text-align: left;" dir="ltr">Time is actually flying as the third week of Gsoc has come to an end. This week I have completed the implementation of the line class in 3D which includes geometric entities like Line, Ray and Segment. The link to the PR is <a href="https://github.com/sympy/sympy/pull/7554">Here</a>.<br />It hasn't been merged yet but  I will get it merged soon.<br /><br />Implementation:<br /><br />Line3D:<br /> &lt;style type="text/css"&gt;p, li { white-space: pre-wrap; } &lt;/style&gt;<div style="">&gt;&gt;&gt; L = Line3D(Point3D(2, 3, 4), Point3D(3, 5, 1))</div><div style="">&gt;&gt;&gt; L</div><div style="">Line3D(Point3D(2, 3, 4), Point3D(3, 5, 1))</div><div style="">&gt;&gt;&gt; L.points</div><div style="">(Point3D(2, 3, 4), Point3D(3, 5, 1))</div><div style="">&gt;&gt;&gt; l = Line3D(Point3D(1, 2, 3), direction_ratio=[1, 2, 3]) </div><div style="">&gt;&gt;&gt; l</div><div style="">Line3D(Point3D(1, 2, 3), Point3D(2, 4, 6))</div><div style=""><br /></div><div style="">Ray3D:</div><div style="">&lt;style type="text/css"&gt;p, li { white-space: pre-wrap;&lt;/style&gt;&gt;&gt;&gt; r = Ray3D(Point3D(2, 3, 4), Point3D(3, 5, 0))</div><div style="">&gt;&gt;&gt; r</div><div style="">Ray3D(Point3D(2, 3, 4), Point3D(3, 5, 0))</div><div style="">&gt;&gt;&gt; r.points</div><div style="">(Point3D(2, 3, 4), Point3D(3, 5, 0))</div><div style="">&gt;&gt;&gt; r.source</div><div style="">Point3D(2, 3, 4)</div><div style="">&gt;&gt;&gt; r.xdirection</div><div style="">oo</div><div style="">&gt;&gt;&gt; r.ydirection</div><div style="">oo</div><div style="">&gt;&gt;&gt; r.zdirection</div><div style=""> -oo</div><div style="">&gt;&gt;&gt; r.direction_ratio</div><div style="">[1, 2, -4]</div><div style=""><br /></div><div style="">Segment3D:</div><div style="">&gt;&gt;&gt; s = Segment3D(Point3D(4, 3, 9), Point3D(1, 1, 7))</div>&gt;&gt;&gt; s<br />Segment3D(Point3D(1, 1, 7), Point3D(4, 3, 9)) <br /><div style="">&gt;&gt;&gt; s.points</div><div style="">(Point3D(1, 1, 7), Point3D(4, 3, 9))</div><div style="">&gt;&gt;&gt; s.length</div><div style="">sqrt(17)</div><div style="">&gt;&gt;&gt; s.midpoint</div><div style="">Point3D(5/2, 2, 8)</div><div style=""><br /></div><div style=""><br /></div><div style="">Each of the above classes inherit methods from the LinearEntity3D class(Base class).These include:</div><div style=""><br /></div><ul class="task-list"><li>is_concurrent</li><li>is_parallel</li><li>is_perpendicular</li><li>angle_between</li><li>parallel_line</li><li>perpendicular_line</li><li>projection</li><li>intersection</li><li>arbitrary_point </li></ul><div style=""><br /></div><br />This week I will start working on the Plane class which as mentioned in the previous post will bridge the gap for the interactions between 2D and 3D entities. Until then cheers!<br /><br /></div></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://geekpy.blogspot.com/2014/06/gsoc14-week-3.html">by Akshay Narasimha (noreply@blogger.com) at June 10, 2014 09:20 AM</a>
+</p>
+</div>
+</div>
+
+
+
+</div>
+<div class="channelgroup">
+
+
+
+
+
+
+
 <h3><a href="http://lifelesscode.blogspot.com/search/label/sympy" title="Shortlog">Sudhanshu Mishra</a></h3>
 
 
@@ -5273,50 +5305,6 @@ We define the <em>denominator </em><img src="http://s0.wp.com/latex.php?latex=%5
 </div>
 
 </div>
-<div class="daygroup">
-<h2>August 26, 2013</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://musingsofafriend.wordpress.com" title="musings of a friend - Prasoon Shukla » SymPy">Prasoon Shukla</a></h3>
-
-
-<div class="entrygroup" id="http://musingsofafriend.wordpress.com/?p=202">
-<h4 lang="en"><a href="http://musingsofafriend.wordpress.com/2013/08/26/gsoc-week-10-on-to-the-testing/">GSoC Week 10: On to the testing</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>One of the things that I didn’t like about the way the development of code went was that I really couldn’t test most of the code until a certain amount of code was already written. This problem has raised its head many times. So, when I had finally written the code for integration methods, I was finally able to put the pieces together for testing.</p>
-<p>The tests were performed in the order of increasing complexity of procedures. So, the first thing that was tested was proper initialization of coordinate systems, base scalars, base vectors, VectMuls, and, VectAdds and while the initialization of coordinate systems, base scalars and base vectors could be done smoothly, the VectMul and the VectAdd objects raised errors. While debugging these errors, at first I thought that this might be another cache issues (here’s the first one <a href="https://github.com/sympy/sympy/pull/1746">#1746</a>) but fortunately, the error still showed with SYMPY_USE_CACHE=no. Upon further inspection, the error was due to args attribute of BaseScalar and BaseVector. That was fixed.</p>
-<p>Once initialization problems were cured, then, I moved on to printing. Just setting the _sympystr function corrected that.</p>
-<p>After that, I started initializing complex (as in long and nested) vector expressions. That pointed out some more errors in various helpers and some public methods too. Those were fixed as well – though it did take some time.</p>
-<p>Next, I moved on to the operations on vectors. By now, the basic addition, multiplication operators etc. were working fine. The methods that I tested now were some other methods of low complexity (including helpers). Those included, for example, the express and the factor methods and the is_const_vect function. Problems were corrected as they appeared. Also, initialization of coordinate systems with their origins at any given point in space is also now possible.</p>
-<p>The next piece of the puzzle was the express method. As I have repeatedly mentioned, this method is like the spine of the entire structure. In order for the testing to proceed any further, I need the express method to work flawlessly. So, the next order of business was to fix the express method. That is what I am doing now. Once the express method works, I’ll move on to  the other methods which have the express method as a dependency.</p>
-<p>When the testing is finished, the project won’t in any way be finished. There’s a sprinkling of TODO comments throughout the code. But any work that will be done from there will be much easier.</p>
-<p>On a side note, my mid semester exams are approaching, and fast. I think that I will be able to devote my full attention to the project till 5th September, I speculate. After that, I’ll be lucky to be able to contribute 3-4 hours daily. This shall go on till 13th September, when the exams will end. On a brighter note though, I just noticed that the final date of submission is 23rd September (and not 16th September, as I had been assuming until now). That will give me 10 days after my exams to get everything in order (perhaps also discussions on Github).</p>
-<p>Back to testing!</p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/musingsofafriend.wordpress.com/202/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/musingsofafriend.wordpress.com/202/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=musingsofafriend.wordpress.com&amp;blog=36409097&amp;post=202&amp;subd=musingsofafriend&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://musingsofafriend.wordpress.com/2013/08/26/gsoc-week-10-on-to-the-testing/">by musingsofafriend at August 26, 2013 12:24 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -5334,7 +5322,7 @@ We define the <em>denominator </em><img src="http://s0.wp.com/latex.php?latex=%5
 <a href="http://www.blogger.com/feeds/936818886435977143/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://addisoncugini.blogspot.com/" class="message" title="no activity in 7 days">Addison Cugini</a>
 </li>
 <li>
-<a href="http://www.blogger.com/feeds/54146973659574488/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://geekpy.blogspot.com/" class="message" title="no activity in 7 days">Akshay Narasimha</a>
+<a href="http://www.blogger.com/feeds/54146973659574488/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://geekpy.blogspot.com/" title="Akshay Narasimha">Akshay Narasimha</a>
 </li>
 <li>
 <a href="http://amakelov.wordpress.com/category/google-summer-of-code-2012/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://amakelov.wordpress.com" class="message" title="no activity in 7 days">Aleksandar Makelov</a>
@@ -5454,7 +5442,7 @@ We define the <em>denominator </em><img src="http://s0.wp.com/latex.php?latex=%5
 <a href="http://sherjilozair.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sherjilozair.wordpress.com" class="message" title="no activity in 7 days">Sherjil Ozair</a>
 </li>
 <li>
-<a href="http://blog.s-d-b.com/category/sympy/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://blog.s-d-b.com" title="SDB's Blog » SymPy">Soumya Dipta Biswas</a>
+<a href="http://blog.s-d-b.com/category/sympy/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://blog.s-d-b.com" class="message" title="internal server error">Soumya Dipta Biswas</a>
 </li>
 <li>
 <a href="http://krastanov.wordpress.com/category/sympy-2/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://krastanov.wordpress.com" class="message" title="no activity in 7 days">Stefan Krastanov</a>
@@ -5490,7 +5478,7 @@ We define the <em>denominator </em><img src="http://s0.wp.com/latex.php?latex=%5
 
 <p>
 <strong>Last updated:</strong><br>
-June 10, 2014 08:40 AM<br>
+June 10, 2014 09:41 AM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
