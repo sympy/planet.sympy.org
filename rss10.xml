@@ -13,6 +13,7 @@
 
 	<items>
 		<rdf:Seq>
+			<rdf:li rdf:resource="tag:blogger.com,1999:blog-283806077182880539.post-4292104463720196708" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-8847459392628952171.post-1453505657920387618" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-54146973659574488.post-8362916681945518929" />
 			<rdf:li rdf:resource="https://hargup.github.io/posts/week-3.html" />
@@ -72,11 +73,17 @@
 			<rdf:li rdf:resource="http://sophiessympyblog.wordpress.com/?p=281" />
 			<rdf:li rdf:resource="http://sophiessympyblog.wordpress.com/?p=283" />
 			<rdf:li rdf:resource="http://thilinaatsympy.wordpress.com/?p=237" />
-			<rdf:li rdf:resource="http://meclark256.wordpress.com/?p=137" />
 		</rdf:Seq>
 	</items>
 </channel>
 
+<item rdf:about="tag:blogger.com,1999:blog-283806077182880539.post-4292104463720196708">
+	<title>Avichal Dayal</title>
+	<link>http://gsocblog.blogspot.com/2014/06/in-third-week-i-started-with-second.html</link>
+	<content:encoded>&lt;div style=&quot;text-align: left;&quot; dir=&quot;ltr&quot;&gt;In the third week I started with the second phase of my project which is to implement formal power series. I spent some time in designing the class structure. Another important part is to figure out a way to represent infinite power series.&lt;br /&gt;Literature mentions two ways to represent infinite series - one is to have function to compute the kth coefficient while other is lazy evaluation. Many series operations seem to have very simple on-line algorithms if we use lazy evaluation, &lt;br /&gt;&lt;br /&gt;To work with lazy evaluation, FPS(formal power series) will be represented as a stream object consisting of head and tail. Head will be the first term of the series while tail is the rest of the series but in an unevaluated form. &lt;br /&gt;So FPS of exp(x) will have its generator as x**n/n!. Head will be 1 and tail will be FPS with generator as 1/(n+1)!. Tail will remain unevaluated. This way any number of terms can be found.&lt;br /&gt;&lt;br /&gt;To find generator of any function, Gruntz and Koepf give an algorithm.&lt;br /&gt;It consists of three steps:-&lt;br /&gt;- Finding a simple differential equation for the given function whose coefficients are rational functions.&lt;br /&gt;- Converting the differential equation to a recurrence relation.&lt;br /&gt;- Solving the recurrence relation to get a closed form.&lt;br /&gt;If the original function was a rational fraction, it can split using partial fraction decomposition (already implemented in SymPy as apart) and apply the binomial series to get closed form.&lt;br /&gt;For e.g.:- 1/(1-x) can be expanded as 1 + x + x**2 + x**3 + ... So the generator in this case is x**n.&lt;br /&gt;&lt;br /&gt;Some initial results are:-&lt;br /&gt;&lt;br /&gt;&lt;div style=&quot;clear: both; text-align: center;&quot; class=&quot;separator&quot;&gt;&lt;a style=&quot;margin-left: 1em; margin-right: 1em;&quot; href=&quot;http://2.bp.blogspot.com/-Jy1g1QYVVYQ/U5dHvo3VuII/AAAAAAAAAco/LxOUVFI7wJI/s1600/FPS.png&quot;&gt;&lt;img width=&quot;400&quot; src=&quot;http://2.bp.blogspot.com/-Jy1g1QYVVYQ/U5dHvo3VuII/AAAAAAAAAco/LxOUVFI7wJI/s1600/FPS.png&quot; border=&quot;0&quot; height=&quot;223&quot; /&gt;&lt;/a&gt;&lt;/div&gt;&lt;br /&gt;After completing the algorithm to compute generating function, next step will be to implement series operations like multiplication (cauchy product), inversion, convolution etc.&lt;/div&gt;</content:encoded>
+	<dc:date>2014-06-10T18:03:32+00:00</dc:date>
+	<dc:creator>Avichal Dayal</dc:creator>
+</item>
 <item rdf:about="tag:blogger.com,1999:blog-8847459392628952171.post-1453505657920387618">
 	<title>Sudhanshu Mishra: GSoC'14: Third week</title>
 	<link>http://lifelesscode.blogspot.com/2014/06/gsoc14-third-week.html</link>
@@ -3739,21 +3746,6 @@ We define the &lt;em&gt;denominator &lt;/em&gt;&lt;img src=&quot;http://s0.wp.co
 [5] &lt;a href=&quot;http://www.schorn.ch/howto.html&quot; rel=&quot;nofollow&quot;&gt;http://www.schorn.ch/howto.html&lt;/a&gt;&lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/thilinaatsympy.wordpress.com/237/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/thilinaatsympy.wordpress.com/237/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=thilinaatsympy.wordpress.com&amp;amp;blog=52956410&amp;amp;post=237&amp;amp;subd=thilinaatsympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
 	<dc:date>2013-08-31T13:07:12+00:00</dc:date>
 	<dc:creator>Thilina Rathnayake</dc:creator>
-</item>
-<item rdf:about="http://meclark256.wordpress.com/?p=137">
-	<title>Mary Clark: More thoughts on the Weyl group module</title>
-	<link>http://meclark256.wordpress.com/2013/08/31/more-thoughts-on-the-weyl-group-module/</link>
-	<content:encoded>&lt;p&gt;So this week has been a lot more thinking about the Weyl group module.  I feel as though I didn’t accomplish much, but I have spent a fair amount of time researching and thinking.  I should note that I also did some fixes on the RootSystem module (fixing some doctests and whatnot).  &lt;/p&gt;
-&lt;p&gt;After conferring with David, I’ve concluded that I want to implement a method that displays the Coxeter diagram corresponding to a Weyl group (i.e. the undirected Dynkin diagram), and that the best way to proceed with the Weyl group module is to implement all the Weyl groups as permutation groups.  This makes sense, because as I noted in my last post, the Weyl group for type A is the symmetric group, and the Weyl group for B&amp;amp;C is the hyperoctahedral groups, which canb e thought of as permutations on the set [-n, ..., -1, 1, ... n].  The Weyl group for type D is is a subgroup of the hyperoctahedral group.  &lt;/p&gt;
-&lt;p&gt;This would make things like computing the order of an element of the Weyl group quite easy, as I could take input from the user and then get the permutation associated with it, and then use methods from the Permutation class to do what I want.  Now, the obvious challenge with this is that the Permutation class only allows permutations on positive integers like [0, ... , n].  So this presents problems with the hyperoctahedral group, since it include permutations on negative integers.  I reckon that I do not have the time to rewrite the entire Permutation class to allow it to act on an arbitrary set.  So, I am going to map the set [-n, ...., -1, 1, .... n] to a set of positive integers.  So I’m still thinking about how I want to do that.  &lt;/p&gt;
-&lt;p&gt;Furthermore, upon the suggestion of David, I think that I will try to include information about the hyperoctahedral group in the named groups module. &lt;/p&gt;
-&lt;p&gt;Lastly I am also trying to find more concrete information about the Weyl group of type D; I know that it is a subgroup of index 2, but I’m not sure what exact permutations and stuff that it corresponds to.  &lt;/p&gt;
-&lt;p&gt;So yeah.  This coming week, my plan is to figure out how I want to write the permutations of the hyperoctahedral group as permutations on positive integers, and then to take input from the user in the form of products of simple reflections, and generate the corresponding permutation, at least for types A, B, and C.  &lt;/p&gt;
-&lt;p&gt;For example, given A3, the Coxeter diagram is 0—0–0, and the generating reflections are r1, r2, r3, and the Weyl group is S4.   We can think of r1 as the permutation (1,2), r2 as (2,3), and r3 as (3,4).  So if the user gave the input r1r2 that would be the permutation (1,2)(2,3) = (1 3 2).  Oh, I also need to remember that the Permutation class starts with 0 instead of 1, so I need to remember to take that into account.&lt;/p&gt;
-&lt;p&gt;This week I will also implement a method that gives the Coxeter diagram of a given Weyl group.  This should be very easy, given the Coxeter diagram is the undirected Dynkin diagram. &lt;/p&gt;
-&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/137/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/137/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;amp;blog=52875864&amp;amp;post=137&amp;amp;subd=meclark256&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
-	<dc:date>2013-08-31T00:07:10+00:00</dc:date>
-	<dc:creator>meclark256</dc:creator>
 </item>
 
 </rdf:RDF>
