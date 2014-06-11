@@ -24,6 +24,69 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>June 11, 2014</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://sushant-hiray.in" title="Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy">Sushant Hiray</a></h3>
+
+
+<div class="entrygroup" id="http://sushant-hiray.in/posts/gsoc/csympy-week3/">
+<h4><a href="http://sushant-hiray.in/posts/gsoc/csympy-week3/">This Week in CSymPy: #3</a></h4>
+<div class="entry">
+<div class="content">
+<p>Week 3 for GSoC just ended and we decided to work on fixing bugs which were high priority.</p>
+
+<h1 id="progress">Progress</h1>
+
+<p>I started off the week and decided that I’ll work on the exponential module. 
+<br /><br />
+However last week we had discovered a <a href="https://github.com/sympy/csympy/issues/179">bug</a> in the way CSymPy was handling powers, so we decided to fix it first before moving on to the exponential Module.
+<br /><br />
+The main issue in the bug was the way we were handling the <code>dict</code>. There was no uniformity so we needed up inserting <code>2</code> as well as <code>1/2</code> into the <code>dict</code>. We discussed with Aaron and the way SymPy handled the issue of powers was to make sure that the power was always positive. If not the 
+reciprocal was added in the dict.
+<br /><br />
+I used the convention SymPy was using and sent a <a href="https://github.com/sympy/csympy/pull/182">pull request</a>. However, there wasn’t much of help usin this convention as we were ending up with both <code>2</code> and <code>1/2</code> in some corner cases. To avoid this, I searched the dict first if the reciprocal existed, if it existed, then I added the reciprocal or else added the number to the dict.
+<br /><br />
+However as was expected using a <code>find</code> operation degraded the benchmarks heavily. So after a lot of discussion with Ondrej over the PR as well as on gitter, we figured out a way to solve the problem. The convention was to always enter the number in the form <code>num/den</code> such that <code>num &gt;= den</code>. We updated the PR according to this convention and the issue was fixed. Consuming almost a weeks time!</p>
+
+<h1 id="discussions">Discussions</h1>
+
+<p>Most of the discussions with Ondrej and Thilina happened over the pull requests and the issues itself. We finalized the convention over gitter.</p>
+
+<h1 id="the-week-ahead">The Week Ahead</h1>
+
+<ul>
+  <li>Add the <code>ATan2</code> class.</li>
+  <li>Implement the <code>Exponential Module</code>. After this module we shoule be able to do things like <code>rewrite__as_cos</code> for the exponential class.</li>
+</ul>
+
+<p><br /><br />
+Thats all for now :) Will get back next week!</p></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://sushant-hiray.in/posts/gsoc/csympy-week3/">June 11, 2014 07:30 AM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>June 10, 2014</h2>
 
 <div class="channelgroup">
@@ -5258,64 +5321,6 @@ We define the <em>denominator </em><img src="http://s0.wp.com/latex.php?latex=%5
 </div>
 
 </div>
-<div class="daygroup">
-<h2>August 31, 2013</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://thilinaatsympy.wordpress.com" title="Thilina's SymPy Blog">Thilina Rathnayake</a></h3>
-
-
-<div class="entrygroup" id="http://thilinaatsympy.wordpress.com/?p=237">
-<h4 lang="en"><a href="http://thilinaatsympy.wordpress.com/2013/08/31/status-of-the-diophantine-module/">Status of the Diophantine Module</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>Hi All,</p>
-<p>I am really pleased to say that my work (proposed) with Diophantine equation is coming to an end. I have implemented all the deliverables in my project report. When the current <a href="https://github.com/sympy/sympy/pull/2303">PR</a> gets merged into the master, I can start pushing the rest of my work. I also hope to improve the documentation during the weekend and get them in quickly. Ondrej is currently reviewing the PR. I invite all of you to go through the work and give your feedback. I am really thankful to Aaron, Pernici, Stephen and Julien for the support given so far. First of all let me give you a rough idea about the work currently not in Github.</p>
-<h4>General Pythagorean equation</h4>
-<p>A general Pythagorean equation is an equation of the form <img src="http://s0.wp.com/latex.php?latex=x_%7B1%7D%5E2+%2B+x_%7B2%7D%5E2+%2B+.+.+.+%2B+x_%7Bk%7D%5E2+%3D+x_%7Bk%2B1%7D%5E2&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="x_{1}^2 + x_{2}^2 + . . . + x_{k}^2 = x_{k+1}^2" class="latex" title="x_{1}^2 + x_{2}^2 + . . . + x_{k}^2 = x_{k+1}^2" />. The solutions for the equation can be given by using <img src="http://s0.wp.com/latex.php?latex=k&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="k" class="latex" title="k" /> parameters like below,</p>
-<p><img src="http://s0.wp.com/latex.php?latex=x_%7B1%7D+%3D+m_%7B1%7D%5E2+%2B+m_%7B2%7D%5E2+%2B+.+.+.+%2B+m_%7Bk-1%7D%5E2+-+m_%7Bk%7D%5E2&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="x_{1} = m_{1}^2 + m_{2}^2 + . . . + m_{k-1}^2 - m_{k}^2" class="latex" title="x_{1} = m_{1}^2 + m_{2}^2 + . . . + m_{k-1}^2 - m_{k}^2" /><br />
-<img src="http://s0.wp.com/latex.php?latex=x_%7B2%7D+%3D+2m_%7B1%7Dm_%7Bk%7D&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="x_{2} = 2m_{1}m_{k}" class="latex" title="x_{2} = 2m_{1}m_{k}" /><br />
-.<br />
-.<br />
-<img src="http://s0.wp.com/latex.php?latex=x_%7Bk%7D+%3D+2m_%7Bk-1%7Dm_%7Bk%7D&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="x_{k} = 2m_{k-1}m_{k}" class="latex" title="x_{k} = 2m_{k-1}m_{k}" /><img src="http://s0.wp.com/latex.php?latex=x_%7Bk+%2B1%7D+%3D+m_%7B1%7D%5E2+%2B+m_%7B2%7D%5E2+%2B+.+.+.+%2B+m_%7Bk-1%7D%5E2+%2B+m_%7Bk%7D%5E2&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="x_{k +1} = m_{1}^2 + m_{2}^2 + . . . + m_{k-1}^2 + m_{k}^2" class="latex" title="x_{k +1} = m_{1}^2 + m_{2}^2 + . . . + m_{k-1}^2 + m_{k}^2" /></p>
-<p>I implemented solutions for slightly more  general equation <img src="http://s0.wp.com/latex.php?latex=a_%7B1%7D%5E2x_%7B1%7D%5E2+%2B+a_%7B2%7D%5E2x_%7B2%7D%5E2+%2B+.+.+.+%2B+a_%7Bk%7D%5E2x_%7Bk%7D%5E2+%3D+a_%7Bk%2B1%7D%5E2x_%7Bk%2B1%7D%5E2&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="a_{1}^2x_{1}^2 + a_{2}^2x_{2}^2 + . . . + a_{k}^2x_{k}^2 = a_{k+1}^2x_{k+1}^2" class="latex" title="a_{1}^2x_{1}^2 + a_{2}^2x_{2}^2 + . . . + a_{k}^2x_{k}^2 = a_{k+1}^2x_{k+1}^2" />. Solutions for this equation can be constructed from the solutions of the former equation, multiplying each solution <img src="http://s0.wp.com/latex.php?latex=x_%7Bi%7D&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="x_{i}" class="latex" title="x_{i}" /> of it by <img src="http://s0.wp.com/latex.php?latex=%5Cfrac%7Blcm%28a_%7B1%7D%2C+a_%7B2%7D%2C+.+.+.+a_%7Bn%7D%29%7D%7Ba_%7Bi%7D%7D&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="\frac{lcm(a_{1}, a_{2}, . . . a_{n})}{a_{i}}" class="latex" title="\frac{lcm(a_{1}, a_{2}, . . . a_{n})}{a_{i}}" />.</p>
-<h4>General sum of n squares</h4>
-<p>I also implemented solutions for <img src="http://s0.wp.com/latex.php?latex=x_%7Bi%7D%5E2+%2B+x_%7B2%7D%5E2+%2B+.+.+.+%2B+x_%7Bn%7D%5E2+%3D+k&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="x_{i}^2 + x_{2}^2 + . . . + x_{n}^2 = k" class="latex" title="x_{i}^2 + x_{2}^2 + . . . + x_{n}^2 = k" /> where <img src="http://s0.wp.com/latex.php?latex=k&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="k" class="latex" title="k" /> is an integer. It is obvious that equation is solvable only when <img src="http://s0.wp.com/latex.php?latex=k+%5Cgeq+0&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="k \geq 0" class="latex" title="k \geq 0" />.</p>
-<p>Lagrange’s four square theorem states<img src="http://s0.wp.com/latex.php?latex=%5Ctextsuperscript%7B%5B1%5D%7D&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="\textsuperscript{[1]}" class="latex" title="\textsuperscript{[1]}" /> that every non-negative number can be expressed as a sum of four squares. It is also known that every integer not in the the form <img src="http://s0.wp.com/latex.php?latex=4%5Ek%288m+%2B+7%29&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="4^k(8m + 7)" class="latex" title="4^k(8m + 7)" /> can be expressed as a sum of three squares<img src="http://s0.wp.com/latex.php?latex=%5Ctextsuperscript%7B%5B2%5D%7D&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="\textsuperscript{[2]}" class="latex" title="\textsuperscript{[2]}" /> where <img src="http://s0.wp.com/latex.php?latex=m%2C+n&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="m, n" class="latex" title="m, n" /> are non-negative integers.  Also any integer which doesn’t contain, in it’s canonical representation, odd powers of a prime of the form <img src="http://s0.wp.com/latex.php?latex=4m+%2B+3&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="4m + 3" class="latex" title="4m + 3" /> can be expressed as a sum of two squares<img src="http://s0.wp.com/latex.php?latex=%5Ctextsuperscript%7B%5B3%5D%7D&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="\textsuperscript{[3]}" class="latex" title="\textsuperscript{[3]}" />. For example, <img src="http://s0.wp.com/latex.php?latex=N+%3D+2%5E2.5%5E3.11%5E2.3%5E3&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="N = 2^2.5^3.11^2.3^3" class="latex" title="N = 2^2.5^3.11^2.3^3" /> can’t be expressed as a sum of two squares since it contains and odd power of <img src="http://s0.wp.com/latex.php?latex=3&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="3" class="latex" title="3" />, which is a prime of the form <img src="http://s0.wp.com/latex.php?latex=4m%2B3&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="4m+3" class="latex" title="4m+3" />. But we can express <img src="http://s0.wp.com/latex.php?latex=N+%3D+2%5E2.5%5E3.+11%5E2.3%5E4&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="N = 2^2.5^3. 11^2.3^4" class="latex" title="N = 2^2.5^3. 11^2.3^4" /> as a sum of two squares.</p>
-<p>Also, there is an interesting identity, found by Euler, known as Euler’s four square identity which can be stated as,</p>
-<p><img src="http://s0.wp.com/latex.php?latex=%28a_1%5E2%2Ba_2%5E2%2Ba_3%5E2%2Ba_4%5E2%29%28b_1%5E2%2Bb_2%5E2%2Bb_3%5E2%2Bb_4%5E2%29+%3D+%28a_1+b_1+-+a_2+b_2+-+a_3+b_3+-+a_4+b_4%29%5E2+%2B+%28a_1+b_2+%2B+a_2+b_1+%2B+a_3+b_4+-+a_4+b_3%29%5E2+%2B+%28a_1+b_3+-+a_2+b_4+%2B+a_3+b_1+%2B+a_4+b_2%29%5E2+%2B+%28a_1+b_4+%2B+a_2+b_3+-+a_3+b_2+%2B+a_4+b_1%29%5E2&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="(a_1^2+a_2^2+a_3^2+a_4^2)(b_1^2+b_2^2+b_3^2+b_4^2) = (a_1 b_1 - a_2 b_2 - a_3 b_3 - a_4 b_4)^2 + (a_1 b_2 + a_2 b_1 + a_3 b_4 - a_4 b_3)^2 + (a_1 b_3 - a_2 b_4 + a_3 b_1 + a_4 b_2)^2 + (a_1 b_4 + a_2 b_3 - a_3 b_2 + a_4 b_1)^2" class="latex" title="(a_1^2+a_2^2+a_3^2+a_4^2)(b_1^2+b_2^2+b_3^2+b_4^2) = (a_1 b_1 - a_2 b_2 - a_3 b_3 - a_4 b_4)^2 + (a_1 b_2 + a_2 b_1 + a_3 b_4 - a_4 b_3)^2 + (a_1 b_3 - a_2 b_4 + a_3 b_1 + a_4 b_2)^2 + (a_1 b_4 + a_2 b_3 - a_3 b_2 + a_4 b_1)^2" />.</p>
-<p>So, if we can represent each prime divisor of a number <img src="http://s0.wp.com/latex.php?latex=N&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="N" class="latex" title="N" /> as a sum of four squares, we can then use this identity to construct such a representation for<img src="http://s0.wp.com/latex.php?latex=n&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="n" class="latex" title="n" />. This is the idea behind my implementation of representing number as a sum of four squares. When we know how to do this, we have several approaches for representing a given non-negative integer <img src="http://s0.wp.com/latex.php?latex=k&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="k" class="latex" title="k" /> as a sum of <img src="http://s0.wp.com/latex.php?latex=n&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="n" class="latex" title="n" /> squares. Most obvious thing to do is, represent <img src="http://s0.wp.com/latex.php?latex=k&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="k" class="latex" title="k" /> as a sum of four squares and set other <img src="http://s0.wp.com/latex.php?latex=n+-4&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="n -4" class="latex" title="n -4" /> variables to zero. We can also partition <img src="http://s0.wp.com/latex.php?latex=k&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="k" class="latex" title="k" /> into approximately <img src="http://s0.wp.com/latex.php?latex=n%2F4&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="n/4" class="latex" title="n/4" /> groups and represent each as a sum of four squares and later combine those results. I still haven’t decided on how to do this, I would like to know the ideas of the community.  I used a slightly modified version of  the algorithm found in<img src="http://s0.wp.com/latex.php?latex=%5Ctextsuperscript%7B%5B5%5D%7D&amp;bg=eff1f5&amp;fg=444444&amp;s=0" alt="\textsuperscript{[5]}" class="latex" title="\textsuperscript{[5]}" />.  I’ll describe the algorithm in my next blog post.</p>
-<p>Apart from that, I did a lot of bug fixing and reviewed Pernici’s Pull request. My tests are now 2x faster after using his functions. A huge thank should go to Pernici for doing a great Job with solving quadratic congruences.</p>
-<h4>References</h4>
-<p>[1] Lagrange’s four square theorem, [online], Available: <a href="http://en.wikipedia.org/wiki/Lagrange%27s_four-square_theorem" rel="nofollow">http://en.wikipedia.org/wiki/Lagrange%27s_four-square_theorem</a><br />
-[2] Integer as a sum of three squares, [online], Available: <a href="http://www.proofwiki.org/wiki/Integer_as_Sum_of_Three_Squares" rel="nofollow">http://www.proofwiki.org/wiki/Integer_as_Sum_of_Three_Squares</a><br />
-[3] Sum of Squares, [online], Available: <a href="http://mathworld.wolfram.com/SumofSquaresFunction.html" rel="nofollow">http://mathworld.wolfram.com/SumofSquaresFunction.html</a><br />
-[4] Euler’s four square identity, [online], Available: <a href="http://en.wikipedia.org/wiki/Euler%27s_four-square_identity" rel="nofollow">http://en.wikipedia.org/wiki/Euler%27s_four-square_identity</a><br />
-[5] <a href="http://www.schorn.ch/howto.html" rel="nofollow">http://www.schorn.ch/howto.html</a></p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/thilinaatsympy.wordpress.com/237/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/thilinaatsympy.wordpress.com/237/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=thilinaatsympy.wordpress.com&amp;blog=52956410&amp;post=237&amp;subd=thilinaatsympy&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://thilinaatsympy.wordpress.com/2013/08/31/status-of-the-diophantine-module/">by Thilina Rathnayake at August 31, 2013 01:07 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -5453,7 +5458,7 @@ We define the <em>denominator </em><img src="http://s0.wp.com/latex.php?latex=%5
 <a href="http://sherjilozair.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sherjilozair.wordpress.com" class="message" title="no activity in 7 days">Sherjil Ozair</a>
 </li>
 <li>
-<a href="http://blog.s-d-b.com/category/sympy/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://blog.s-d-b.com" class="message" title="404: not found">Soumya Dipta Biswas</a>
+<a href="http://blog.s-d-b.com/category/sympy/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://blog.s-d-b.com" title="SDB's Blog » SymPy">Soumya Dipta Biswas</a>
 </li>
 <li>
 <a href="http://krastanov.wordpress.com/category/sympy-2/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://krastanov.wordpress.com" class="message" title="no activity in 7 days">Stefan Krastanov</a>
@@ -5462,7 +5467,7 @@ We define the <em>denominator </em><img src="http://s0.wp.com/latex.php?latex=%5
 <a href="http://www.blogger.com/feeds/8847459392628952171/posts/default/-/sympy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://lifelesscode.blogspot.com/search/label/sympy" title="Shortlog">Sudhanshu Mishra</a>
 </li>
 <li>
-<a href="http://sushant-hiray.in/feed.gsoc.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sushant-hiray.in" class="message" title="no activity in 7 days">Sushant Hiray</a>
+<a href="http://sushant-hiray.in/feed.gsoc.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sushant-hiray.in" title="Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy">Sushant Hiray</a>
 </li>
 <li>
 <a href="http://tarzzz.github.io/rss.gsoc.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://tarzzz.github.io/gsoc14" class="message" title="no activity in 7 days">Tarun Gaba</a>
@@ -5489,7 +5494,7 @@ We define the <em>denominator </em><img src="http://s0.wp.com/latex.php?latex=%5
 
 <p>
 <strong>Last updated:</strong><br>
-June 11, 2014 05:00 AM<br>
+June 11, 2014 07:00 AM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
