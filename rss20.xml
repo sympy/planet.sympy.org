@@ -8,6 +8,224 @@
 	<description>Planet SymPy - http://planet.sympy.org/</description>
 
 <item>
+	<title>Jim Crist: GSoC Week 4: Linearizing Lagranges Equations</title>
+	<guid isPermaLink="false">tag:,2014-06-13:gsoc-week-4.html</guid>
+	<link>http://jcrist.github.io/gsoc-week-4.html</link>
+	<description>&lt;p&gt;As of last week the &lt;code&gt;Linearizer&lt;/code&gt; class implementing the general form discussed
+in Luke and Gilbert's paper was completed. The methods contained for
+linearization work for any system that can be expressed by any combination of
+the following:&lt;/p&gt;
+&lt;p&gt;\begin{aligned}
+f_{c}(q, t) &amp;amp;= 0_{l \times 1} \\
+f_{v}(q, u, t) &amp;amp;= 0_{m \times 1} \\
+f_{a}(q, \dot{q}, u, \dot{u}, t) &amp;amp;= 0_{m \times 1} \\
+f_{0}(q, \dot{q}, t) + f_{1}(q, u, t) &amp;amp;= 0_{n \times 1} \\
+f_{2}(q, \dot{u}, t) + f_{3}(q, \dot{q}, u, r, t) &amp;amp;= 0_{(o-m) \times 1}
+\end{aligned}&lt;/p&gt;
+&lt;p&gt;with&lt;/p&gt;
+&lt;p&gt;\begin{aligned}
+q, \dot{q} &amp;amp; \in \mathbb{R}^n \\
+u, \dot{u} &amp;amp; \in \mathbb{R}^o \\
+r &amp;amp; \in \mathbb{R}^s 
+\end{aligned}&lt;/p&gt;
+&lt;p&gt;this works for most systems (it was derived with kanes method in mind
+specifically). however, systems expressed using lagranges method can't
+be brought into this form.&lt;/p&gt;
+&lt;p&gt;this week i spent some time rederiving the general form to make it fit
+lagranges method, as well as kanes method. i plan to write up a formal
+paper expressing the derivation as a reference and documentation of the
+class; here I'll just give a brief overview.&lt;/p&gt;
+&lt;p&gt;In general, Lagrange's Method expresses the system using 3 equations:&lt;/p&gt;
+&lt;p&gt;\begin{aligned}
+m_{c}(q, t) \dot{q} + f_{c}(q, t) &amp;amp;= 0_{m \times 1}\\
+m_{dc}(\dot{q}, q, t) \ddot{q} + f_{dc}(\dot{q}, q, t) &amp;amp;= 0_{m \times 1}\\
+m_{d}(\dot{q}, q, t) \ddot{q} + \Lambda_c(q, t)
+\lambda + f_{d}(\dot{q}, q, r, t) &amp;amp;= 0_{n \times 1}\\
+\end{aligned}&lt;/p&gt;
+&lt;p&gt;with&lt;/p&gt;
+&lt;p&gt;\begin{aligned}
+q, \dot{q}, \ddot{q} &amp;amp; \in \mathbb{R}^n \\
+r &amp;amp; \in \mathbb{R}^s \\
+\lambda &amp;amp; \in \mathbb{R}^m
+\end{aligned}&lt;/p&gt;
+&lt;p&gt;In this case, the first equation encompass the time differentiated holonomic
+constraints, as well as the nonholonomic constraints. The second equation
+is then the time derivative of the first equation. The third equation
+represents the dynamics of the system, as formed by the lagrangian. The
+lagrange multipliers ($\lambda$) enforce these constraints.&lt;/p&gt;
+&lt;p&gt;With some rearranging of the above, they can be merged with the previous
+general form for Kane's Method, forming a set of equations that &lt;em&gt;should&lt;/em&gt; be
+able to contain most equations of motion:&lt;/p&gt;
+&lt;p&gt;\begin{aligned}
+f_{c}(q, t) &amp;amp;= 0_{l \times 1} \\
+f_{v}(q, u, t) &amp;amp;= 0_{m \times 1} \\
+f_{a}(q, \dot{q}, u, \dot{u}, t) &amp;amp;= 0_{m \times 1} \\
+f_{0}(q, \dot{q}, t) + f_{1}(q, u, t) &amp;amp;= 0_{n \times 1} \\
+f_{2}(q, u, \dot{u}, t) + f_{3}(q, \dot{q}, u, r, t) + 
+f_{4}(q, \lambda, t) &amp;amp;= 0_{(o-m+k) \times 1}
+\end{aligned}&lt;/p&gt;
+&lt;p&gt;with&lt;/p&gt;
+&lt;p&gt;\begin{aligned}
+q, \dot{q} &amp;amp; \in \mathbb{R}^n \\
+u, \dot{u} &amp;amp; \in \mathbb{R}^o \\
+r &amp;amp; \in \mathbb{R}^s \\
+\lambda &amp;amp; \in \mathbb{R}^k
+\end{aligned}&lt;/p&gt;
+&lt;p&gt;Note that the only changes are the addition of a $u$ term in $f_2$, and the
+$f_{4}$ term holding the lagrange multipliers. For Lagrange's method,
+$\dot{q} = u$, and $k = m$; for Kanes method $k = 0$, and everything
+looks the same as it did before.&lt;/p&gt;
+&lt;p&gt;The returned $M$, $A$, and $B$ linearized form then is:&lt;/p&gt;
+&lt;p&gt;$$
+M \begin{bmatrix} \dot{q} \\ \dot{u} \\ \lambda \end{bmatrix} =
+A \begin{bmatrix} q \\ u \end{bmatrix} + B \begin{bmatrix} r \end{bmatrix}
+$$&lt;/p&gt;
+&lt;p&gt;where&lt;/p&gt;
+&lt;p&gt;\begin{aligned}
+M &amp;amp;\in \mathbb{R}^{(n+o+k) \times (n+o+k)} \\
+A &amp;amp;\in \mathbb{R}^{(n+o+k) \times (n-l+o-m)} \\
+B &amp;amp;\in \mathbb{R}^{(n+o+k) \times s}
+\end{aligned}&lt;/p&gt;
+&lt;p&gt;As before, the $M$ matrix can be inverted, and the square state space matrices
+$A$ and $B$ calculated.&lt;/p&gt;
+&lt;p&gt;The functionality described above has been implemented in the
+&lt;a href=&quot;https://github.com/jcrist/sympy/tree/LinearizeLagrange&quot;&gt;LinearizeLagrange branch&lt;/a&gt;
+of sympy on my github. As this is a superset of the functionality I implemented
+last week, I'm going to hold off on submitting this to master until my 
+&lt;a href=&quot;https://github.com/sympy/sympy/pull/7581&quot;&gt;current pull request&lt;/a&gt; is merged. For
+now I made a local PR &lt;a href=&quot;https://github.com/jcrist/sympy/pull/3&quot;&gt;here&lt;/a&gt;. Please
+take a look through, I need all the code review I can get.&lt;/p&gt;
+&lt;p&gt;Two tests have been implemented linearizing a system generated with Lagrange's
+Method. I plan on adding more next week, as well as improving the documentation.&lt;/p&gt;
+&lt;h2&gt;Linearizing a Non-minimal Pendulum with Lagrange's Method&lt;/h2&gt;
+&lt;p&gt;A demonstration of the current functionality for a non-minimal realization
+of a pendulum is below. The pendulum has two generalized coordinates, $q1$ and
+$q2$. As this is Lagrange's method, the generalized speeds are just the time
+derivatives of the coordinates (i.e. $u = \dot{q}$).&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://jcrist.github.io/feeds/images/Pendulum_NonMin_Coord.svg&quot; alt=&quot;Pendulum system&quot; title=&quot;Pendulum System&quot; /&gt;&lt;/p&gt;
+&lt;div style=&quot;background: #272822;&quot; class=&quot;codehilite&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span style=&quot;color: #75715e;&quot;&gt;# Create the required symbols&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;q1,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;q2&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;dynamicsymbols(&lt;/span&gt;&lt;span style=&quot;color: #e6db74;&quot;&gt;'q1:3'&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;)&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;q1d,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;q2d&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;dynamicsymbols(&lt;/span&gt;&lt;span style=&quot;color: #e6db74;&quot;&gt;'q1:3'&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;level&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt;&lt;span style=&quot;color: #ae81ff;&quot;&gt;1&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;)&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;L,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;m,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;t&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;symbols(&lt;/span&gt;&lt;span style=&quot;color: #e6db74;&quot;&gt;'L, m, t'&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;)&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;g&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #ae81ff;&quot;&gt;9.8&lt;/span&gt;
+
+&lt;span style=&quot;color: #75715e;&quot;&gt;# Compose World Frame&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;N&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;ReferenceFrame(&lt;/span&gt;&lt;span style=&quot;color: #e6db74;&quot;&gt;'N'&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;)&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;pN&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;Point(&lt;/span&gt;&lt;span style=&quot;color: #e6db74;&quot;&gt;'N*'&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;)&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;pN&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;set_vel(N,&lt;/span&gt; &lt;span style=&quot;color: #ae81ff;&quot;&gt;0&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;)&lt;/span&gt;
+
+&lt;span style=&quot;color: #75715e;&quot;&gt;# A.x is along the pendulum&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;theta1&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;atan(q2&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;/&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;q1)&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;A&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;N&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;orientnew(&lt;/span&gt;&lt;span style=&quot;color: #e6db74;&quot;&gt;'A'&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;,&lt;/span&gt; &lt;span style=&quot;color: #e6db74;&quot;&gt;'axis'&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;[theta1,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;N&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;z])&lt;/span&gt;
+
+&lt;span style=&quot;color: #75715e;&quot;&gt;# Create point P, the pendulum mass&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;P&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;pN&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;locatenew(&lt;/span&gt;&lt;span style=&quot;color: #e6db74;&quot;&gt;'P1'&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;q1&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;*&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;N&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;x&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;+&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;q2&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;*&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;N&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;y)&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;P&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;set_vel(N,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;P&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;pos_from(pN)&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;dt(N))&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;pP&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;Particle(&lt;/span&gt;&lt;span style=&quot;color: #e6db74;&quot;&gt;'pP'&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;P,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;m)&lt;/span&gt;
+
+&lt;span style=&quot;color: #75715e;&quot;&gt;# Constraint Equations&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;f_c&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;Matrix([q1&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;**&lt;/span&gt;&lt;span style=&quot;color: #ae81ff;&quot;&gt;2&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;+&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;q2&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;**&lt;/span&gt;&lt;span style=&quot;color: #ae81ff;&quot;&gt;2&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;-&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;L&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;**&lt;/span&gt;&lt;span style=&quot;color: #ae81ff;&quot;&gt;2&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;])&lt;/span&gt;
+
+&lt;span style=&quot;color: #75715e;&quot;&gt;# Calculate the lagrangian, and form the equations of motion&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;Lag&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;Lagrangian(N,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;pP)&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;LM&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;LagrangesMethod(Lag,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;[q1,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;q2],&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;hol_coneqs&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;f_c,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;forcelist&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;[(P,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;m&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;*&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;g&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;*&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;N&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;x)],&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;frame&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;N)&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;LM&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;form_lagranges_equations()&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;At this point the equations of motion have been formed, but not linearized.
+Linearization requires that dependent and independent coordinates be chosen. In
+this case we'll chose $q2$ as independent, and $q1$ as dependent.&lt;/p&gt;
+&lt;div style=&quot;background: #272822;&quot; class=&quot;codehilite&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span style=&quot;color: #75715e;&quot;&gt;# Choose the independent and dependent coordinates&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;q_i&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;Matrix([q2])&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;q_d&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;Matrix([q1])&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;u_i&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;Matrix([q2d])&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;u_d&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;Matrix([q1d])&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;linearizer&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;LM&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;to_linearizer(q_i,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;u_i,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;q_d,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;u_d)&lt;/span&gt;
+
+&lt;span style=&quot;color: #75715e;&quot;&gt;# Compose operating point&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;q_op&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;{q1:&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;L,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;q2:&lt;/span&gt; &lt;span style=&quot;color: #ae81ff;&quot;&gt;0&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;}&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;u_op&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;{q1d:&lt;/span&gt; &lt;span style=&quot;color: #ae81ff;&quot;&gt;0&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;q2d:&lt;/span&gt; &lt;span style=&quot;color: #ae81ff;&quot;&gt;0&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;}&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;ud_op&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;{q1d&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;diff(t):&lt;/span&gt; &lt;span style=&quot;color: #ae81ff;&quot;&gt;0&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;q2d&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;diff(t):&lt;/span&gt; &lt;span style=&quot;color: #ae81ff;&quot;&gt;0&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;}&lt;/span&gt;
+
+&lt;span style=&quot;color: #75715e;&quot;&gt;# Perform the linearization&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;A,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;B&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;linearizer&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;linearize(q_op&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;q_op,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;u_op&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;u_op,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;ud_op&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;ud_op,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;A_and_B&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;True)&lt;/span&gt;
+&lt;span style=&quot;color: #66d9ef;&quot;&gt;print&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;(A)&lt;/span&gt;
+&lt;span style=&quot;color: #66d9ef;&quot;&gt;print&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;(B)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Output:  &lt;/p&gt;
+&lt;div style=&quot;background: #272822;&quot; class=&quot;codehilite&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;Matrix([&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;[&lt;/span&gt;           &lt;span style=&quot;color: #ae81ff;&quot;&gt;0&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;,&lt;/span&gt; &lt;span style=&quot;color: #ae81ff;&quot;&gt;1&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;],&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;[&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;-&lt;/span&gt;&lt;span style=&quot;color: #ae81ff;&quot;&gt;2&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;*&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;lam1(t)&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;/&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;m,&lt;/span&gt; &lt;span style=&quot;color: #ae81ff;&quot;&gt;0&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;]])&lt;/span&gt;
+
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;Matrix(&lt;/span&gt;&lt;span style=&quot;color: #ae81ff;&quot;&gt;0&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;,&lt;/span&gt; &lt;span style=&quot;color: #ae81ff;&quot;&gt;0&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;[])&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Note that the lagrange multiplier apppears in the linearization. However, for 
+a given operating point, each multiplier has a specific value (i.e. they're
+not free choices). Using the structure of the system of equations, the values
+can be solved for, and substituted in:&lt;/p&gt;
+&lt;div style=&quot;background: #272822;&quot; class=&quot;codehilite&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span style=&quot;color: #75715e;&quot;&gt;# Take advantage of problem structure to solve for lams&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;mass_matrix&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;LM&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;mass_matrix&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;col_join((&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;-&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;LM&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;lam_coeffs&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;row_join(zeros(&lt;/span&gt;&lt;span style=&quot;color: #ae81ff;&quot;&gt;1&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;,&lt;/span&gt; &lt;span style=&quot;color: #ae81ff;&quot;&gt;1&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;))))&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;force_matrix&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;LM&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;forcing&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;col_join(LM&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;_f_cd)&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;lam_op_vec&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;Matrix((mass_matrix&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;inv()&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;*&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;-&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;force_matrix))[&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;-&lt;/span&gt;&lt;span style=&quot;color: #ae81ff;&quot;&gt;1&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;:])&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;lam_op_vec&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;lam_op_vec&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;subs(ud_op)&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;subs(u_op)&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;subs(q_op)&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;lam_op&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;dict(zip(LM&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;lam_vec,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;lam_op_vec))&lt;/span&gt;
+
+&lt;span style=&quot;color: #75715e;&quot;&gt;# Substitute the value for the multipliers at this operating point&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;A&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;A&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;subs(lam_op)&lt;/span&gt;
+&lt;span style=&quot;color: #66d9ef;&quot;&gt;print&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;(A)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Output:&lt;/p&gt;
+&lt;div style=&quot;background: #272822;&quot; class=&quot;codehilite&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;Matrix([&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;[&lt;/span&gt;     &lt;span style=&quot;color: #ae81ff;&quot;&gt;0&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;,&lt;/span&gt; &lt;span style=&quot;color: #ae81ff;&quot;&gt;1&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;],&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;[&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;-&lt;/span&gt;&lt;span style=&quot;color: #ae81ff;&quot;&gt;9.8&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;/&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;L,&lt;/span&gt; &lt;span style=&quot;color: #ae81ff;&quot;&gt;0&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;]])&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This is the correct linearization for a pendulum linearized about hanging
+at rest operating point. You can try out the added functionality demonstrated
+above by cloning my &lt;code&gt;LinearizeLagrange&lt;/code&gt; branch of sympy
+&lt;a href=&quot;https://github.com/jcrist/sympy/tree/LinearizeLagrange&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;While functional, it still isn't finished. I still need to add documentation,
+more tests, and finalize the interface. I plan on working on this next week.&lt;/p&gt;&amp;lt;script type=&quot;text/javascript&quot;&amp;gt;
+    if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+        var mathjaxscript = document.createElement('script');
+        mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+        mathjaxscript.type = 'text/javascript';
+        mathjaxscript.src = 'https:' == document.location.protocol
+                ? 'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
+                : 'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+        mathjaxscript[(window.opera ? &quot;innerHTML&quot; : &quot;text&quot;)] =
+            &quot;MathJax.Hub.Config({&quot; +
+            &quot;    config: ['MMLorHTML.js'],&quot; +
+            &quot;    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },&quot; +
+            &quot;    jax: ['input/TeX','input/MathML','output/HTML-CSS'],&quot; +
+            &quot;    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js'],&quot; +
+            &quot;    displayAlign: 'center',&quot; +
+            &quot;    displayIndent: '0em',&quot; +
+            &quot;    showMathMenu: true,&quot; +
+            &quot;    tex2jax: { &quot; +
+            &quot;        inlineMath: [ ['$','$'] ], &quot; +
+            &quot;        displayMath: [ ['$$','$$'] ],&quot; +
+            &quot;        processEscapes: true,&quot; +
+            &quot;        preview: 'TeX',&quot; +
+            &quot;    }, &quot; +
+            &quot;    'HTML-CSS': { &quot; +
+            &quot;        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'black ! important'} }&quot; +
+            &quot;    } &quot; +
+            &quot;}); &quot;;
+        (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+    }
+&amp;lt;/script&amp;gt;</description>
+	<pubDate>Fri, 13 Jun 2014 23:00:00 +0000</pubDate>
+</item>
+<item>
 	<title>Sushant Hiray: This Week in CSymPy: #3</title>
 	<guid isPermaLink="true">http://sushant-hiray.in/posts/gsoc/csympy-week3/</guid>
 	<link>http://sushant-hiray.in/posts/gsoc/csympy-week3/</link>
@@ -652,16 +870,16 @@ finishing up the remaining control paths for just motion, just
 configuration, and no constraint systems next week. For testing this
 functionality, I used the rolling disk example used in Luke and Gilbert's paper.
 With the current functionality, linearization works as:&lt;/p&gt;
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;span class=&quot;c&quot;&gt;# Equations for the disk are derived above, KM is a KanesMethod object&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;linearizer&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;KM&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;to_linearizer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;A&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;B&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;linearizer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;linearize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;eq_q&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;eq_u&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;eq_qd&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;eq_ud&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;A_and_B&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;div style=&quot;background: #272822;&quot; class=&quot;codehilite&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span style=&quot;color: #75715e;&quot;&gt;# Equations for the disk are derived above, KM is a KanesMethod object&lt;/span&gt;
+&lt;span style=&quot;color: #f92672;&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;linearizer&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;KM&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;to_linearizer()&lt;/span&gt;
+&lt;span style=&quot;color: #f92672;&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;A,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;B&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;linearizer&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;linearize(eq_q,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;eq_u,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;eq_qd,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;eq_ud,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;A_and_B&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;True)&lt;/span&gt;
 
-&lt;span class=&quot;c&quot;&gt;# Evaluating in an upright configuration at critical speed:&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;upright_critical_speed&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;q1d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;q2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;q3d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sqrt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;m&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span style=&quot;color: #75715e;&quot;&gt;# Evaluating in an upright configuration at critical speed:&lt;/span&gt;
+&lt;span style=&quot;color: #f92672;&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;upright_critical_speed&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;{q1d:&lt;/span&gt; &lt;span style=&quot;color: #ae81ff;&quot;&gt;0&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;q2:&lt;/span&gt; &lt;span style=&quot;color: #ae81ff;&quot;&gt;0&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;q3d:&lt;/span&gt; &lt;span style=&quot;color: #ae81ff;&quot;&gt;1&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;/&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;sqrt(&lt;/span&gt;&lt;span style=&quot;color: #ae81ff;&quot;&gt;3&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;),&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;m:&lt;/span&gt; &lt;span style=&quot;color: #ae81ff;&quot;&gt;1&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;r:&lt;/span&gt; &lt;span style=&quot;color: #ae81ff;&quot;&gt;1&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;g:&lt;/span&gt; &lt;span style=&quot;color: #ae81ff;&quot;&gt;1&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;}&lt;/span&gt;
 
-&lt;span class=&quot;c&quot;&gt;#Calculating the critical speed eigenvalues, they should all be zero&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;A&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;subs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;upright_critical_speed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;eigenvals&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span style=&quot;color: #75715e;&quot;&gt;#Calculating the critical speed eigenvalues, they should all be zero&lt;/span&gt;
+&lt;span style=&quot;color: #f92672;&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;A&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;subs(upright_critical_speed)&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;eigenvals()&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;{&lt;/span&gt;&lt;span style=&quot;color: #ae81ff;&quot;&gt;0&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;:&lt;/span&gt; &lt;span style=&quot;color: #ae81ff;&quot;&gt;8&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
@@ -3683,33 +3901,6 @@ Cases like above where giving incorrect answers before, have a solution now.&lt;
 &lt;p style=&quot;text-align: justify;&quot;&gt;I already made successful factorizations (by using big enough primes) for certain polynomials, and next week I hope to get it to work for arbitrary ones.&lt;/p&gt;
 &lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/281/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/281/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;amp;blog=53034828&amp;amp;post=281&amp;amp;subd=sophiessympyblog&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
 	<pubDate>Sun, 01 Sep 2013 14:52:35 +0000</pubDate>
-</item>
-<item>
-	<title>Katja Sophie Hotz: Factoring polynomials over algebraic number fields</title>
-	<guid isPermaLink="false">http://sophiessympyblog.wordpress.com/?p=283</guid>
-	<link>http://sophiessympyblog.wordpress.com/2013/09/01/factoring-polynomials-over-algebraic-number-fields/</link>
-	<description>&lt;p style=&quot;text-align: justify;&quot;&gt;In this post I will describe the factorization algorithm given in [1] for polynomials over simple algebraic extensions of &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cmathbb+Q&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\mathbb Q&quot; class=&quot;latex&quot; title=&quot;\mathbb Q&quot; /&gt;.&lt;/p&gt;
-&lt;p style=&quot;text-align: justify;&quot;&gt;First, I have to introduce some definitions and notations.&lt;br /&gt;
-We define the &lt;em&gt;denominator &lt;/em&gt;&lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cmathrm%7Bden%7D%28f%29&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\mathrm{den}(f)&quot; class=&quot;latex&quot; title=&quot;\mathrm{den}(f)&quot; /&gt; of a polynomial &lt;img src=&quot;http://s0.wp.com/latex.php?latex=f+%5Cin+%5Cmathbb+Q%28%5Calpha%29%5Bx_o%2C+%5Cldots%2C+x_n%5D&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;f \in \mathbb Q(\alpha)[x_o, \ldots, x_n]&quot; class=&quot;latex&quot; title=&quot;f \in \mathbb Q(\alpha)[x_o, \ldots, x_n]&quot; /&gt; as the smallest integer, such that &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cmathrm%7Bden%7D%28f%29+f+%5Cin+%5Cmathbb+Z%5Bx_o%2C+%5Cldots%2C+x_n%2C+z%5D&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\mathrm{den}(f) f \in \mathbb Z[x_o, \ldots, x_n, z]&quot; class=&quot;latex&quot; title=&quot;\mathrm{den}(f) f \in \mathbb Z[x_o, \ldots, x_n, z]&quot; /&gt;. Most of the time we will work with the &lt;em&gt;monic associate &lt;/em&gt;&lt;em&gt; &lt;/em&gt;&lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Ctilde+f+%5Cin+%5Cmathbb+Z%5Bx_o%2C+%5Cldots%2C+x_n%2C+z%5D&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\tilde f \in \mathbb Z[x_o, \ldots, x_n, z]&quot; class=&quot;latex&quot; title=&quot;\tilde f \in \mathbb Z[x_o, \ldots, x_n, z]&quot; /&gt; instead of &lt;img src=&quot;http://s0.wp.com/latex.php?latex=f&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;f&quot; class=&quot;latex&quot; title=&quot;f&quot; /&gt;. It is defined as the associate of &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cmathrm%7Bden%7D%5Cleft%28%5Cfrac+1+%7B%5Cmathrm%7Blc%7D%28f%29%7D+f+%5Cright%29+%5Cfrac+1+%7B%5Cmathrm%7Blc%7D%28f%29%7D+f&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\mathrm{den}\left(\frac 1 {\mathrm{lc}(f)} f \right) \frac 1 {\mathrm{lc}(f)} f&quot; class=&quot;latex&quot; title=&quot;\mathrm{den}\left(\frac 1 {\mathrm{lc}(f)} f \right) \frac 1 {\mathrm{lc}(f)} f&quot; /&gt; which is primitive in &lt;img src=&quot;http://s0.wp.com/latex.php?latex=x_o%2C+%5Cldots%2C+x_n%2C+z&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;x_o, \ldots, x_n, z&quot; class=&quot;latex&quot; title=&quot;x_o, \ldots, x_n, z&quot; /&gt;.&lt;/p&gt;
-&lt;p style=&quot;text-align: justify;&quot;&gt;We will assume that the input polynomial &lt;img src=&quot;http://s0.wp.com/latex.php?latex=f&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;f&quot; class=&quot;latex&quot; title=&quot;f&quot; /&gt; is square-free and primitive in &lt;img src=&quot;http://s0.wp.com/latex.php?latex=x_o&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;x_o&quot; class=&quot;latex&quot; title=&quot;x_o&quot; /&gt;, because if this is not the case, &lt;img src=&quot;http://s0.wp.com/latex.php?latex=f&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;f&quot; class=&quot;latex&quot; title=&quot;f&quot; /&gt; can be easily factored into square-free parts and its content in &lt;img src=&quot;http://s0.wp.com/latex.php?latex=x_o&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;x_o&quot; class=&quot;latex&quot; title=&quot;x_o&quot; /&gt;. This can be done using only GCD computations.&lt;/p&gt;
-&lt;p style=&quot;text-align: justify;&quot;&gt;First, we compute &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Ctilde+f&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\tilde f&quot; class=&quot;latex&quot; title=&quot;\tilde f&quot; /&gt; and recursively call our algorithm to factor its leading coefficient in &lt;img src=&quot;http://s0.wp.com/latex.php?latex=x_0&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;x_0&quot; class=&quot;latex&quot; title=&quot;x_0&quot; /&gt; and obtain&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+%5Cmathrm%7Blc%7D_%7Bx_o%7D+%28%5Ctilde+f%29+%3D+%5Cgamma+%5Ccdot+%5Cprod_%7Bi+%3D+1%7D%5Er+l_i%5E%7Be_i%7D&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\displaystyle \mathrm{lc}_{x_o} (\tilde f) = \gamma \cdot \prod_{i = 1}^r l_i^{e_i}&quot; class=&quot;latex&quot; title=&quot;\displaystyle \mathrm{lc}_{x_o} (\tilde f) = \gamma \cdot \prod_{i = 1}^r l_i^{e_i}&quot; /&gt;&lt;/p&gt;
-&lt;p style=&quot;text-align: justify;&quot;&gt;in &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cmathbb+Q%28%5Calpha%29%5Bx_1%2C+%5Cldots%2C+x_n%5D&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\mathbb Q(\alpha)[x_1, \ldots, x_n]&quot; class=&quot;latex&quot; title=&quot;\mathbb Q(\alpha)[x_1, \ldots, x_n]&quot; /&gt;. If we get to the univariate case, we use the existing factoring algorithm by Trager.&lt;/p&gt;
-&lt;p style=&quot;text-align: justify;&quot;&gt;Now we enter the main loop. We choose a new evaluation point &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cmathbf+a+%3D+%28a_1%2C+%5Cldots%2C+a_n%29+%5Cin+%5Cmathbb+Z%5E%7Bn%7D&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\mathbf a = (a_1, \ldots, a_n) \in \mathbb Z^{n}&quot; class=&quot;latex&quot; title=&quot;\mathbf a = (a_1, \ldots, a_n) \in \mathbb Z^{n}&quot; /&gt;, which has to satisfy certain conditions, e. g. &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Ctilde+f%28x_o%2C+%5Cmathbf+a%29&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\tilde f(x_o, \mathbf a)&quot; class=&quot;latex&quot; title=&quot;\tilde f(x_o, \mathbf a)&quot; /&gt; has to stay square-free.&lt;/p&gt;
-&lt;p style=&quot;text-align: justify;&quot;&gt;Again we use Trager’s algorithm, this time to factor &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Ctilde+f%28x_o%2C+%5Cmathbf+a%29&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\tilde f(x_o, \mathbf a)&quot; class=&quot;latex&quot; title=&quot;\tilde f(x_o, \mathbf a)&quot; /&gt; in &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cmathbb+Q%28%5Calpha%29%5Bx_o%5D&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\mathbb Q(\alpha)[x_o]&quot; class=&quot;latex&quot; title=&quot;\mathbb Q(\alpha)[x_o]&quot; /&gt; and obtain&lt;/p&gt;
-&lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+%5Ctilde+f%28x_o%2C+%5Cmathbf+a%29+%3D+%5COmega%27+%5Ccdot+%5Cprod_%7Bj+%3D+1%7D%5Es+u_j%2C&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\displaystyle \tilde f(x_o, \mathbf a) = \Omega' \cdot \prod_{j = 1}^s u_j,&quot; class=&quot;latex&quot; title=&quot;\displaystyle \tilde f(x_o, \mathbf a) = \Omega' \cdot \prod_{j = 1}^s u_j,&quot; /&gt;&lt;/p&gt;
-&lt;p style=&quot;text-align: justify;&quot;&gt;where &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5COmega%27+%3D+%5Cmathrm%7Blc%7D_%7Bx_o%7D%28f%28x_o%2C+%5Cmathbf+a%29%29+%5Cin+%5Cmathbb+Q%28%5Calpha%29&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\Omega' = \mathrm{lc}_{x_o}(f(x_o, \mathbf a)) \in \mathbb Q(\alpha)&quot; class=&quot;latex&quot; title=&quot;\Omega' = \mathrm{lc}_{x_o}(f(x_o, \mathbf a)) \in \mathbb Q(\alpha)&quot; /&gt;. Note that if &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Ctilde+f%28x_o%2C+%5Cmathbf+a%29&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\tilde f(x_o, \mathbf a)&quot; class=&quot;latex&quot; title=&quot;\tilde f(x_o, \mathbf a)&quot; /&gt; is irreducible, we know that &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Ctilde+f&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\tilde f&quot; class=&quot;latex&quot; title=&quot;\tilde f&quot; /&gt; is irreducible and hence &lt;img src=&quot;http://s0.wp.com/latex.php?latex=f&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;f&quot; class=&quot;latex&quot; title=&quot;f&quot; /&gt;, so in this case we are done.&lt;/p&gt;
-&lt;p style=&quot;text-align: justify;&quot;&gt;In order to use Hensel lifting, we need to compute the true leading coefficients &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cbar+l_1%2C+%5Cldots%2C+%5Cbar+l_r+%5Cin+%5Cmathbb+Q%28%5Calpha%29%5Bx_1%2C+%5Cldots%2C+x_n%5D&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\bar l_1, \ldots, \bar l_r \in \mathbb Q(\alpha)[x_1, \ldots, x_n]&quot; class=&quot;latex&quot; title=&quot;\bar l_1, \ldots, \bar l_r \in \mathbb Q(\alpha)[x_1, \ldots, x_n]&quot; /&gt; of the irreducible factors of &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Ctilde+f&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\tilde f&quot; class=&quot;latex&quot; title=&quot;\tilde f&quot; /&gt;. This can be done with simple GCD computations.&lt;/p&gt;
-&lt;p style=&quot;text-align: justify;&quot;&gt;Now we choose a new prime &lt;img src=&quot;http://s0.wp.com/latex.php?latex=p&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;p&quot; class=&quot;latex&quot; title=&quot;p&quot; /&gt;, which also has to satisfy certain requirements, e.g. &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Ctilde+f%28x_o%2C+%5Cmathbf+a%29+%5C%3B+%5Cmathrm%7Bmod%7D+%5C%2C+p&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\tilde f(x_o, \mathbf a) \; \mathrm{mod} \, p&quot; class=&quot;latex&quot; title=&quot;\tilde f(x_o, \mathbf a) \; \mathrm{mod} \, p&quot; /&gt; is still square-free and the minimal polynomial &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cmu%28z%29&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\mu(z)&quot; class=&quot;latex&quot; title=&quot;\mu(z)&quot; /&gt; of &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Calpha&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\alpha&quot; class=&quot;latex&quot; title=&quot;\alpha&quot; /&gt; is still irreducible modulo &lt;img src=&quot;http://s0.wp.com/latex.php?latex=p&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;p&quot; class=&quot;latex&quot; title=&quot;p&quot; /&gt;.&lt;/p&gt;
-&lt;p style=&quot;text-align: justify;&quot;&gt;Since evaluating at &lt;img src=&quot;http://s0.wp.com/latex.php?latex=x_1+%3D+a_1%2C+%5Cldots%2C+x_n+%3D+a_n&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;x_1 = a_1, \ldots, x_n = a_n&quot; class=&quot;latex&quot; title=&quot;x_1 = a_1, \ldots, x_n = a_n&quot; /&gt; is the same as factoring modulo the ideal &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cmathcal+I&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\mathcal I&quot; class=&quot;latex&quot; title=&quot;\mathcal I&quot; /&gt; generated by &lt;img src=&quot;http://s0.wp.com/latex.php?latex=x_1+-+a_1%2C+%5Cldots%2C+x_n+-+a_n&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;x_1 - a_1, \ldots, x_n - a_n&quot; class=&quot;latex&quot; title=&quot;x_1 - a_1, \ldots, x_n - a_n&quot; /&gt;, we can use Hensel lifting to lift the univariate factors &lt;img src=&quot;http://s0.wp.com/latex.php?latex=u_1%2C+%5Cldots%2C+u_s&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;u_1, \ldots, u_s&quot; class=&quot;latex&quot; title=&quot;u_1, \ldots, u_s&quot; /&gt; and obtain&lt;/p&gt;
-&lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+%5Ctilde+f%28x_o%2C+%5Cldots%2C+x_n%29+%3D+l+%5Ccdot+%5Cprod_%7Bj+%3D+1%7D%5Es+%5Cbar+f_j%28x_o%2C+%5Cldots%2C+x_n%29+%5C%3B+%5Cmathrm%7Bmod%7D+%5C%2C+%5Cleft%5Clangle+p%2C+%5Cmathcal+I%5ET%5Cright%5Crangle%2C&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\displaystyle \tilde f(x_o, \ldots, x_n) = l \cdot \prod_{j = 1}^s \bar f_j(x_o, \ldots, x_n) \; \mathrm{mod} \, \left\langle p, \mathcal I^T\right\rangle,&quot; class=&quot;latex&quot; title=&quot;\displaystyle \tilde f(x_o, \ldots, x_n) = l \cdot \prod_{j = 1}^s \bar f_j(x_o, \ldots, x_n) \; \mathrm{mod} \, \left\langle p, \mathcal I^T\right\rangle,&quot; /&gt;&lt;/p&gt;
-&lt;p style=&quot;text-align: justify;&quot;&gt;where &lt;img src=&quot;http://s0.wp.com/latex.php?latex=T+%5Cin+%5Cmathbb+N&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;T \in \mathbb N&quot; class=&quot;latex&quot; title=&quot;T \in \mathbb N&quot; /&gt; is chosen large enough.&lt;/p&gt;
-&lt;p style=&quot;text-align: justify;&quot;&gt;That means, we have the correct factorization modulo the prime &lt;img src=&quot;http://s0.wp.com/latex.php?latex=p&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;p&quot; class=&quot;latex&quot; title=&quot;p&quot; /&gt;. In order to get the desired factorization, we use a procedure that is also based on Hensel’s Lemma, called &lt;img src=&quot;http://s0.wp.com/latex.php?latex=p&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;p&quot; class=&quot;latex&quot; title=&quot;p&quot; /&gt;-adic lifting. We lift the factors &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cbar+f_j&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\bar f_j&quot; class=&quot;latex&quot; title=&quot;\bar f_j&quot; /&gt; from &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cmathbb+Z_p%28%5Calpha%29%5Bx_o%2C+%5Cldots%2C+x_n%5D&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\mathbb Z_p(\alpha)[x_o, \ldots, x_n]&quot; class=&quot;latex&quot; title=&quot;\mathbb Z_p(\alpha)[x_o, \ldots, x_n]&quot; /&gt; to &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cmathbb+Z_%7Bp%5Em%7D%28%5Calpha%29%5Bx_o%2C+%5Cldots%2C+x_n%5D&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\mathbb Z_{p^m}(\alpha)[x_o, \ldots, x_n]&quot; class=&quot;latex&quot; title=&quot;\mathbb Z_{p^m}(\alpha)[x_o, \ldots, x_n]&quot; /&gt;, where &lt;img src=&quot;http://s0.wp.com/latex.php?latex=m&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;m&quot; class=&quot;latex&quot; title=&quot;m&quot; /&gt; is chosen big enough, such that&lt;/p&gt;
-&lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+%5Ctilde+f%28x_o%2C+%5Cldots%2C+x_n%29+%3D+l+%5Ccdot+%5Cprod_%7Bj+%3D+1%7D%5Es+f_j%28x_o%2C+%5Cldots%2C+x_n%29+&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\displaystyle \tilde f(x_o, \ldots, x_n) = l \cdot \prod_{j = 1}^s f_j(x_o, \ldots, x_n) &quot; class=&quot;latex&quot; title=&quot;\displaystyle \tilde f(x_o, \ldots, x_n) = l \cdot \prod_{j = 1}^s f_j(x_o, \ldots, x_n) &quot; /&gt;&lt;/p&gt;
-&lt;p&gt;also holds over &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cmathbb+Q%28%5Calpha%29&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\mathbb Q(\alpha)&quot; class=&quot;latex&quot; title=&quot;\mathbb Q(\alpha)&quot; /&gt; and we are done.&lt;/p&gt;
-&lt;p&gt;[1] &lt;a href=&quot;http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf&quot; rel=&quot;nofollow&quot;&gt;http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf&lt;/a&gt;&lt;/p&gt;
-&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/283/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/283/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;amp;blog=53034828&amp;amp;post=283&amp;amp;subd=sophiessympyblog&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
-	<pubDate>Sun, 01 Sep 2013 13:21:54 +0000</pubDate>
 </item>
 
 </channel>

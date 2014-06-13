@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2014-06-13T21:20:56Z</updated>
+  <updated>2014-06-13T21:40:56Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,240 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry>
+    <id>tag:,2014-06-13:gsoc-week-4.html</id>
+    <link href="http://jcrist.github.io/gsoc-week-4.html" rel="alternate" type="text/html"/>
+    <title>GSoC Week 4: Linearizing Lagranges Equations</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>As of last week the <code>Linearizer</code> class implementing the general form discussed
+in Luke and Gilbert's paper was completed. The methods contained for
+linearization work for any system that can be expressed by any combination of
+the following:</p>
+<p>\begin{aligned}
+f_{c}(q, t) &amp;= 0_{l \times 1} \\
+f_{v}(q, u, t) &amp;= 0_{m \times 1} \\
+f_{a}(q, \dot{q}, u, \dot{u}, t) &amp;= 0_{m \times 1} \\
+f_{0}(q, \dot{q}, t) + f_{1}(q, u, t) &amp;= 0_{n \times 1} \\
+f_{2}(q, \dot{u}, t) + f_{3}(q, \dot{q}, u, r, t) &amp;= 0_{(o-m) \times 1}
+\end{aligned}</p>
+<p>with</p>
+<p>\begin{aligned}
+q, \dot{q} &amp; \in \mathbb{R}^n \\
+u, \dot{u} &amp; \in \mathbb{R}^o \\
+r &amp; \in \mathbb{R}^s 
+\end{aligned}</p>
+<p>this works for most systems (it was derived with kanes method in mind
+specifically). however, systems expressed using lagranges method can't
+be brought into this form.</p>
+<p>this week i spent some time rederiving the general form to make it fit
+lagranges method, as well as kanes method. i plan to write up a formal
+paper expressing the derivation as a reference and documentation of the
+class; here I'll just give a brief overview.</p>
+<p>In general, Lagrange's Method expresses the system using 3 equations:</p>
+<p>\begin{aligned}
+m_{c}(q, t) \dot{q} + f_{c}(q, t) &amp;= 0_{m \times 1}\\
+m_{dc}(\dot{q}, q, t) \ddot{q} + f_{dc}(\dot{q}, q, t) &amp;= 0_{m \times 1}\\
+m_{d}(\dot{q}, q, t) \ddot{q} + \Lambda_c(q, t)
+\lambda + f_{d}(\dot{q}, q, r, t) &amp;= 0_{n \times 1}\\
+\end{aligned}</p>
+<p>with</p>
+<p>\begin{aligned}
+q, \dot{q}, \ddot{q} &amp; \in \mathbb{R}^n \\
+r &amp; \in \mathbb{R}^s \\
+\lambda &amp; \in \mathbb{R}^m
+\end{aligned}</p>
+<p>In this case, the first equation encompass the time differentiated holonomic
+constraints, as well as the nonholonomic constraints. The second equation
+is then the time derivative of the first equation. The third equation
+represents the dynamics of the system, as formed by the lagrangian. The
+lagrange multipliers ($\lambda$) enforce these constraints.</p>
+<p>With some rearranging of the above, they can be merged with the previous
+general form for Kane's Method, forming a set of equations that <em>should</em> be
+able to contain most equations of motion:</p>
+<p>\begin{aligned}
+f_{c}(q, t) &amp;= 0_{l \times 1} \\
+f_{v}(q, u, t) &amp;= 0_{m \times 1} \\
+f_{a}(q, \dot{q}, u, \dot{u}, t) &amp;= 0_{m \times 1} \\
+f_{0}(q, \dot{q}, t) + f_{1}(q, u, t) &amp;= 0_{n \times 1} \\
+f_{2}(q, u, \dot{u}, t) + f_{3}(q, \dot{q}, u, r, t) + 
+f_{4}(q, \lambda, t) &amp;= 0_{(o-m+k) \times 1}
+\end{aligned}</p>
+<p>with</p>
+<p>\begin{aligned}
+q, \dot{q} &amp; \in \mathbb{R}^n \\
+u, \dot{u} &amp; \in \mathbb{R}^o \\
+r &amp; \in \mathbb{R}^s \\
+\lambda &amp; \in \mathbb{R}^k
+\end{aligned}</p>
+<p>Note that the only changes are the addition of a $u$ term in $f_2$, and the
+$f_{4}$ term holding the lagrange multipliers. For Lagrange's method,
+$\dot{q} = u$, and $k = m$; for Kanes method $k = 0$, and everything
+looks the same as it did before.</p>
+<p>The returned $M$, $A$, and $B$ linearized form then is:</p>
+<p>$$
+M \begin{bmatrix} \dot{q} \\ \dot{u} \\ \lambda \end{bmatrix} =
+A \begin{bmatrix} q \\ u \end{bmatrix} + B \begin{bmatrix} r \end{bmatrix}
+$$</p>
+<p>where</p>
+<p>\begin{aligned}
+M &amp;\in \mathbb{R}^{(n+o+k) \times (n+o+k)} \\
+A &amp;\in \mathbb{R}^{(n+o+k) \times (n-l+o-m)} \\
+B &amp;\in \mathbb{R}^{(n+o+k) \times s}
+\end{aligned}</p>
+<p>As before, the $M$ matrix can be inverted, and the square state space matrices
+$A$ and $B$ calculated.</p>
+<p>The functionality described above has been implemented in the
+<a href="https://github.com/jcrist/sympy/tree/LinearizeLagrange">LinearizeLagrange branch</a>
+of sympy on my github. As this is a superset of the functionality I implemented
+last week, I'm going to hold off on submitting this to master until my 
+<a href="https://github.com/sympy/sympy/pull/7581">current pull request</a> is merged. For
+now I made a local PR <a href="https://github.com/jcrist/sympy/pull/3">here</a>. Please
+take a look through, I need all the code review I can get.</p>
+<p>Two tests have been implemented linearizing a system generated with Lagrange's
+Method. I plan on adding more next week, as well as improving the documentation.</p>
+<h2>Linearizing a Non-minimal Pendulum with Lagrange's Method</h2>
+<p>A demonstration of the current functionality for a non-minimal realization
+of a pendulum is below. The pendulum has two generalized coordinates, $q1$ and
+$q2$. As this is Lagrange's method, the generalized speeds are just the time
+derivatives of the coordinates (i.e. $u = \dot{q}$).</p>
+<p><img alt="Pendulum system" src="http://jcrist.github.io/feeds/images/Pendulum_NonMin_Coord.svg" title="Pendulum System"/></p>
+<div class="codehilite" style="background: #272822;"><pre style="line-height: 125%;"><span style="color: #75715e;"># Create the required symbols</span>
+<span style="color: #f8f8f2;">q1,</span> <span style="color: #f8f8f2;">q2</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">dynamicsymbols(</span><span style="color: #e6db74;">'q1:3'</span><span style="color: #f8f8f2;">)</span>
+<span style="color: #f8f8f2;">q1d,</span> <span style="color: #f8f8f2;">q2d</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">dynamicsymbols(</span><span style="color: #e6db74;">'q1:3'</span><span style="color: #f8f8f2;">,</span> <span style="color: #f8f8f2;">level</span><span style="color: #f92672;">=</span><span style="color: #ae81ff;">1</span><span style="color: #f8f8f2;">)</span>
+<span style="color: #f8f8f2;">L,</span> <span style="color: #f8f8f2;">m,</span> <span style="color: #f8f8f2;">t</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">symbols(</span><span style="color: #e6db74;">'L, m, t'</span><span style="color: #f8f8f2;">)</span>
+<span style="color: #f8f8f2;">g</span> <span style="color: #f92672;">=</span> <span style="color: #ae81ff;">9.8</span>
+
+<span style="color: #75715e;"># Compose World Frame</span>
+<span style="color: #f8f8f2;">N</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">ReferenceFrame(</span><span style="color: #e6db74;">'N'</span><span style="color: #f8f8f2;">)</span>
+<span style="color: #f8f8f2;">pN</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">Point(</span><span style="color: #e6db74;">'N*'</span><span style="color: #f8f8f2;">)</span>
+<span style="color: #f8f8f2;">pN</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">set_vel(N,</span> <span style="color: #ae81ff;">0</span><span style="color: #f8f8f2;">)</span>
+
+<span style="color: #75715e;"># A.x is along the pendulum</span>
+<span style="color: #f8f8f2;">theta1</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">atan(q2</span><span style="color: #f92672;">/</span><span style="color: #f8f8f2;">q1)</span>
+<span style="color: #f8f8f2;">A</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">N</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">orientnew(</span><span style="color: #e6db74;">'A'</span><span style="color: #f8f8f2;">,</span> <span style="color: #e6db74;">'axis'</span><span style="color: #f8f8f2;">,</span> <span style="color: #f8f8f2;">[theta1,</span> <span style="color: #f8f8f2;">N</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">z])</span>
+
+<span style="color: #75715e;"># Create point P, the pendulum mass</span>
+<span style="color: #f8f8f2;">P</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">pN</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">locatenew(</span><span style="color: #e6db74;">'P1'</span><span style="color: #f8f8f2;">,</span> <span style="color: #f8f8f2;">q1</span><span style="color: #f92672;">*</span><span style="color: #f8f8f2;">N</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">x</span> <span style="color: #f92672;">+</span> <span style="color: #f8f8f2;">q2</span><span style="color: #f92672;">*</span><span style="color: #f8f8f2;">N</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">y)</span>
+<span style="color: #f8f8f2;">P</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">set_vel(N,</span> <span style="color: #f8f8f2;">P</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">pos_from(pN)</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">dt(N))</span>
+<span style="color: #f8f8f2;">pP</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">Particle(</span><span style="color: #e6db74;">'pP'</span><span style="color: #f8f8f2;">,</span> <span style="color: #f8f8f2;">P,</span> <span style="color: #f8f8f2;">m)</span>
+
+<span style="color: #75715e;"># Constraint Equations</span>
+<span style="color: #f8f8f2;">f_c</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">Matrix([q1</span><span style="color: #f92672;">**</span><span style="color: #ae81ff;">2</span> <span style="color: #f92672;">+</span> <span style="color: #f8f8f2;">q2</span><span style="color: #f92672;">**</span><span style="color: #ae81ff;">2</span> <span style="color: #f92672;">-</span> <span style="color: #f8f8f2;">L</span><span style="color: #f92672;">**</span><span style="color: #ae81ff;">2</span><span style="color: #f8f8f2;">])</span>
+
+<span style="color: #75715e;"># Calculate the lagrangian, and form the equations of motion</span>
+<span style="color: #f8f8f2;">Lag</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">Lagrangian(N,</span> <span style="color: #f8f8f2;">pP)</span>
+<span style="color: #f8f8f2;">LM</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">LagrangesMethod(Lag,</span> <span style="color: #f8f8f2;">[q1,</span> <span style="color: #f8f8f2;">q2],</span> <span style="color: #f8f8f2;">hol_coneqs</span><span style="color: #f92672;">=</span><span style="color: #f8f8f2;">f_c,</span> <span style="color: #f8f8f2;">forcelist</span><span style="color: #f92672;">=</span><span style="color: #f8f8f2;">[(P,</span> <span style="color: #f8f8f2;">m</span><span style="color: #f92672;">*</span><span style="color: #f8f8f2;">g</span><span style="color: #f92672;">*</span><span style="color: #f8f8f2;">N</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">x)],</span> <span style="color: #f8f8f2;">frame</span><span style="color: #f92672;">=</span><span style="color: #f8f8f2;">N)</span>
+<span style="color: #f8f8f2;">LM</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">form_lagranges_equations()</span>
+</pre></div>
+
+
+<p>At this point the equations of motion have been formed, but not linearized.
+Linearization requires that dependent and independent coordinates be chosen. In
+this case we'll chose $q2$ as independent, and $q1$ as dependent.</p>
+<div class="codehilite" style="background: #272822;"><pre style="line-height: 125%;"><span style="color: #75715e;"># Choose the independent and dependent coordinates</span>
+<span style="color: #f8f8f2;">q_i</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">Matrix([q2])</span>
+<span style="color: #f8f8f2;">q_d</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">Matrix([q1])</span>
+<span style="color: #f8f8f2;">u_i</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">Matrix([q2d])</span>
+<span style="color: #f8f8f2;">u_d</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">Matrix([q1d])</span>
+<span style="color: #f8f8f2;">linearizer</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">LM</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">to_linearizer(q_i,</span> <span style="color: #f8f8f2;">u_i,</span> <span style="color: #f8f8f2;">q_d,</span> <span style="color: #f8f8f2;">u_d)</span>
+
+<span style="color: #75715e;"># Compose operating point</span>
+<span style="color: #f8f8f2;">q_op</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">{q1:</span> <span style="color: #f8f8f2;">L,</span> <span style="color: #f8f8f2;">q2:</span> <span style="color: #ae81ff;">0</span><span style="color: #f8f8f2;">}</span>
+<span style="color: #f8f8f2;">u_op</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">{q1d:</span> <span style="color: #ae81ff;">0</span><span style="color: #f8f8f2;">,</span> <span style="color: #f8f8f2;">q2d:</span> <span style="color: #ae81ff;">0</span><span style="color: #f8f8f2;">}</span>
+<span style="color: #f8f8f2;">ud_op</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">{q1d</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">diff(t):</span> <span style="color: #ae81ff;">0</span><span style="color: #f8f8f2;">,</span> <span style="color: #f8f8f2;">q2d</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">diff(t):</span> <span style="color: #ae81ff;">0</span><span style="color: #f8f8f2;">}</span>
+
+<span style="color: #75715e;"># Perform the linearization</span>
+<span style="color: #f8f8f2;">A,</span> <span style="color: #f8f8f2;">B</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">linearizer</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">linearize(q_op</span><span style="color: #f92672;">=</span><span style="color: #f8f8f2;">q_op,</span> <span style="color: #f8f8f2;">u_op</span><span style="color: #f92672;">=</span><span style="color: #f8f8f2;">u_op,</span> <span style="color: #f8f8f2;">ud_op</span><span style="color: #f92672;">=</span><span style="color: #f8f8f2;">ud_op,</span> <span style="color: #f8f8f2;">A_and_B</span><span style="color: #f92672;">=</span><span style="color: #f8f8f2;">True)</span>
+<span style="color: #66d9ef;">print</span><span style="color: #f8f8f2;">(A)</span>
+<span style="color: #66d9ef;">print</span><span style="color: #f8f8f2;">(B)</span>
+</pre></div>
+
+
+<p>Output:  </p>
+<div class="codehilite" style="background: #272822;"><pre style="line-height: 125%;"><span style="color: #f8f8f2;">Matrix([</span>
+<span style="color: #f8f8f2;">[</span>           <span style="color: #ae81ff;">0</span><span style="color: #f8f8f2;">,</span> <span style="color: #ae81ff;">1</span><span style="color: #f8f8f2;">],</span>
+<span style="color: #f8f8f2;">[</span><span style="color: #f92672;">-</span><span style="color: #ae81ff;">2</span><span style="color: #f92672;">*</span><span style="color: #f8f8f2;">lam1(t)</span><span style="color: #f92672;">/</span><span style="color: #f8f8f2;">m,</span> <span style="color: #ae81ff;">0</span><span style="color: #f8f8f2;">]])</span>
+
+<span style="color: #f8f8f2;">Matrix(</span><span style="color: #ae81ff;">0</span><span style="color: #f8f8f2;">,</span> <span style="color: #ae81ff;">0</span><span style="color: #f8f8f2;">,</span> <span style="color: #f8f8f2;">[])</span>
+</pre></div>
+
+
+<p>Note that the lagrange multiplier apppears in the linearization. However, for 
+a given operating point, each multiplier has a specific value (i.e. they're
+not free choices). Using the structure of the system of equations, the values
+can be solved for, and substituted in:</p>
+<div class="codehilite" style="background: #272822;"><pre style="line-height: 125%;"><span style="color: #75715e;"># Take advantage of problem structure to solve for lams</span>
+<span style="color: #f8f8f2;">mass_matrix</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">LM</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">mass_matrix</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">col_join((</span><span style="color: #f92672;">-</span><span style="color: #f8f8f2;">LM</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">lam_coeffs</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">row_join(zeros(</span><span style="color: #ae81ff;">1</span><span style="color: #f8f8f2;">,</span> <span style="color: #ae81ff;">1</span><span style="color: #f8f8f2;">))))</span>
+<span style="color: #f8f8f2;">force_matrix</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">LM</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">forcing</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">col_join(LM</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">_f_cd)</span>
+<span style="color: #f8f8f2;">lam_op_vec</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">Matrix((mass_matrix</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">inv()</span><span style="color: #f92672;">*</span><span style="color: #f8f8f2;">(</span><span style="color: #f92672;">-</span><span style="color: #f8f8f2;">force_matrix))[</span><span style="color: #f92672;">-</span><span style="color: #ae81ff;">1</span><span style="color: #f8f8f2;">:])</span>
+<span style="color: #f8f8f2;">lam_op_vec</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">lam_op_vec</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">subs(ud_op)</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">subs(u_op)</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">subs(q_op)</span>
+<span style="color: #f8f8f2;">lam_op</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">dict(zip(LM</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">lam_vec,</span> <span style="color: #f8f8f2;">lam_op_vec))</span>
+
+<span style="color: #75715e;"># Substitute the value for the multipliers at this operating point</span>
+<span style="color: #f8f8f2;">A</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">A</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">subs(lam_op)</span>
+<span style="color: #66d9ef;">print</span><span style="color: #f8f8f2;">(A)</span>
+</pre></div>
+
+
+<p>Output:</p>
+<div class="codehilite" style="background: #272822;"><pre style="line-height: 125%;"><span style="color: #f8f8f2;">Matrix([</span>
+<span style="color: #f8f8f2;">[</span>     <span style="color: #ae81ff;">0</span><span style="color: #f8f8f2;">,</span> <span style="color: #ae81ff;">1</span><span style="color: #f8f8f2;">],</span>
+<span style="color: #f8f8f2;">[</span><span style="color: #f92672;">-</span><span style="color: #ae81ff;">9.8</span><span style="color: #f92672;">/</span><span style="color: #f8f8f2;">L,</span> <span style="color: #ae81ff;">0</span><span style="color: #f8f8f2;">]])</span>
+</pre></div>
+
+
+<p>This is the correct linearization for a pendulum linearized about hanging
+at rest operating point. You can try out the added functionality demonstrated
+above by cloning my <code>LinearizeLagrange</code> branch of sympy
+<a href="https://github.com/jcrist/sympy/tree/LinearizeLagrange">here</a>.</p>
+<p>While functional, it still isn't finished. I still need to add documentation,
+more tests, and finalize the interface. I plan on working on this next week.</p>&lt;script type="text/javascript"&gt;
+    if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+        var mathjaxscript = document.createElement('script');
+        mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+        mathjaxscript.type = 'text/javascript';
+        mathjaxscript.src = 'https:' == document.location.protocol
+                ? 'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
+                : 'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+        mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+            "MathJax.Hub.Config({" +
+            "    config: ['MMLorHTML.js']," +
+            "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+            "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+            "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+            "    displayAlign: 'center'," +
+            "    displayIndent: '0em'," +
+            "    showMathMenu: true," +
+            "    tex2jax: { " +
+            "        inlineMath: [ ['$','$'] ], " +
+            "        displayMath: [ ['$$','$$'] ]," +
+            "        processEscapes: true," +
+            "        preview: 'TeX'," +
+            "    }, " +
+            "    'HTML-CSS': { " +
+            "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'black ! important'} }" +
+            "    } " +
+            "}); ";
+        (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+    }
+&lt;/script&gt;</div>
+    </summary>
+    <updated>2014-06-13T23:00:00Z</updated>
+    <category term="GSoC"/>
+    <category term="sympy"/>
+    <category term="pydy"/>
+    <category term="dynamics"/>
+    <author>
+      <name>Jim Crist</name>
+    </author>
+    <source>
+      <id>http://jcrist.github.io/</id>
+      <link href="http://jcrist.github.io/" rel="alternate" type="text/html"/>
+      <link href="http://jcrist.github.io/feeds/gsoc.atom.xml" rel="self" type="application/atom+xml"/>
+      <title>Marginally Stable</title>
+      <updated>2014-06-13T23:00:00Z</updated>
+    </source>
+  </entry>
 
   <entry>
     <id>http://sushant-hiray.in/posts/gsoc/csympy-week3/</id>
@@ -53,7 +287,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-06-13T21:20:50Z</updated>
+      <updated>2014-06-13T21:40:49Z</updated>
     </source>
   </entry>
 
@@ -220,7 +454,7 @@ extent.</p></div></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="https://hargup.github.io/rss.xml" rel="self" type="application/atom+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-06-13T21:20:55Z</updated>
+      <updated>2014-06-13T21:40:54Z</updated>
     </source>
   </entry>
 
@@ -247,7 +481,7 @@ extent.</p></div></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-06-13T21:20:55Z</updated>
+      <updated>2014-06-13T21:40:54Z</updated>
     </source>
   </entry>
 
@@ -311,7 +545,7 @@ Xor creates one of the most complex NNF formula after simplification. Let look a
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-06-13T21:20:56Z</updated>
+      <updated>2014-06-13T21:40:56Z</updated>
     </source>
   </entry>
 
@@ -520,7 +754,7 @@ In [3]:
       <link href="http://jcrist.github.io/" rel="alternate" type="text/html"/>
       <link href="http://jcrist.github.io/feeds/gsoc.atom.xml" rel="self" type="application/atom+xml"/>
       <title>Marginally Stable</title>
-      <updated>2014-06-07T01:00:00Z</updated>
+      <updated>2014-06-13T23:00:00Z</updated>
     </source>
   </entry>
 
@@ -560,7 +794,7 @@ In [3]:
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-13T21:20:43Z</updated>
+      <updated>2014-06-13T21:40:42Z</updated>
     </source>
   </entry>
 
@@ -672,7 +906,7 @@ week will be.</p>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="https://hargup.github.io/rss.xml" rel="self" type="application/atom+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-06-13T21:20:55Z</updated>
+      <updated>2014-06-13T21:40:55Z</updated>
     </source>
   </entry>
 
@@ -876,7 +1110,7 @@ Similar to Xor above, even ITE had no independant class and all expressions were
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-06-13T21:20:56Z</updated>
+      <updated>2014-06-13T21:40:56Z</updated>
     </source>
   </entry>
 
@@ -926,7 +1160,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-06-13T21:20:50Z</updated>
+      <updated>2014-06-13T21:40:49Z</updated>
     </source>
   </entry>
 
@@ -952,7 +1186,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-06-13T21:20:55Z</updated>
+      <updated>2014-06-13T21:40:54Z</updated>
     </source>
   </entry>
 
@@ -982,7 +1216,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-06-13T21:20:56Z</updated>
+      <updated>2014-06-13T21:40:56Z</updated>
     </source>
   </entry>
 
@@ -1043,16 +1277,16 @@ finishing up the remaining control paths for just motion, just
 configuration, and no constraint systems next week. For testing this
 functionality, I used the rolling disk example used in Luke and Gilbert's paper.
 With the current functionality, linearization works as:</p>
-<div class="highlight"><pre><span class="c"># Equations for the disk are derived above, KM is a KanesMethod object</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">linearizer</span> <span class="o">=</span> <span class="n">KM</span><span class="o">.</span><span class="n">to_linearizer</span><span class="p">()</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">A</span><span class="p">,</span> <span class="n">B</span> <span class="o">=</span> <span class="n">linearizer</span><span class="o">.</span><span class="n">linearize</span><span class="p">(</span><span class="n">eq_q</span><span class="p">,</span> <span class="n">eq_u</span><span class="p">,</span> <span class="n">eq_qd</span><span class="p">,</span> <span class="n">eq_ud</span><span class="p">,</span> <span class="n">A_and_B</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<div class="codehilite" style="background: #272822;"><pre style="line-height: 125%;"><span style="color: #75715e;"># Equations for the disk are derived above, KM is a KanesMethod object</span>
+<span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">linearizer</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">KM</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">to_linearizer()</span>
+<span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">A,</span> <span style="color: #f8f8f2;">B</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">linearizer</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">linearize(eq_q,</span> <span style="color: #f8f8f2;">eq_u,</span> <span style="color: #f8f8f2;">eq_qd,</span> <span style="color: #f8f8f2;">eq_ud,</span> <span style="color: #f8f8f2;">A_and_B</span><span style="color: #f92672;">=</span><span style="color: #f8f8f2;">True)</span>
 
-<span class="c"># Evaluating in an upright configuration at critical speed:</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">upright_critical_speed</span> <span class="o">=</span> <span class="p">{</span><span class="n">q1d</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="n">q2</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="n">q3d</span><span class="p">:</span> <span class="mi">1</span><span class="o">/</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">m</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="n">r</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="n">g</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+<span style="color: #75715e;"># Evaluating in an upright configuration at critical speed:</span>
+<span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">upright_critical_speed</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">{q1d:</span> <span style="color: #ae81ff;">0</span><span style="color: #f8f8f2;">,</span> <span style="color: #f8f8f2;">q2:</span> <span style="color: #ae81ff;">0</span><span style="color: #f8f8f2;">,</span> <span style="color: #f8f8f2;">q3d:</span> <span style="color: #ae81ff;">1</span><span style="color: #f92672;">/</span><span style="color: #f8f8f2;">sqrt(</span><span style="color: #ae81ff;">3</span><span style="color: #f8f8f2;">),</span> <span style="color: #f8f8f2;">m:</span> <span style="color: #ae81ff;">1</span><span style="color: #f8f8f2;">,</span> <span style="color: #f8f8f2;">r:</span> <span style="color: #ae81ff;">1</span><span style="color: #f8f8f2;">,</span> <span style="color: #f8f8f2;">g:</span> <span style="color: #ae81ff;">1</span><span style="color: #f8f8f2;">}</span>
 
-<span class="c">#Calculating the critical speed eigenvalues, they should all be zero</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">A</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">upright_critical_speed</span><span class="p">)</span><span class="o">.</span><span class="n">eigenvals</span><span class="p">()</span>
-<span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="mi">8</span><span class="p">}</span>
+<span style="color: #75715e;">#Calculating the critical speed eigenvalues, they should all be zero</span>
+<span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">A</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">subs(upright_critical_speed)</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">eigenvals()</span>
+<span style="color: #f8f8f2;">{</span><span style="color: #ae81ff;">0</span><span style="color: #f8f8f2;">:</span> <span style="color: #ae81ff;">8</span><span style="color: #f8f8f2;">}</span>
 </pre></div>
 
 
@@ -1114,7 +1348,7 @@ so that others can review it before I submit it to Sympy proper.</p>&lt;script t
       <link href="http://jcrist.github.io/" rel="alternate" type="text/html"/>
       <link href="http://jcrist.github.io/feeds/gsoc.atom.xml" rel="self" type="application/atom+xml"/>
       <title>Marginally Stable</title>
-      <updated>2014-06-07T01:00:00Z</updated>
+      <updated>2014-06-13T23:00:00Z</updated>
     </source>
   </entry>
 
@@ -1284,7 +1518,7 @@ Most important thing about the `MatrixBase` class is that it is derived from the
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-13T21:20:43Z</updated>
+      <updated>2014-06-13T21:40:42Z</updated>
     </source>
   </entry>
 
@@ -1363,7 +1597,7 @@ I'm looking forward for a great summer with Sympy.</p></div></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="https://hargup.github.io/rss.xml" rel="self" type="application/atom+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-06-13T21:20:55Z</updated>
+      <updated>2014-06-13T21:40:54Z</updated>
     </source>
   </entry>
 
@@ -1451,7 +1685,7 @@ I'm looking forward for a great summer with Sympy.</p></div></div>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-06-13T21:20:44Z</updated>
+      <updated>2014-06-13T21:40:42Z</updated>
     </source>
   </entry>
 
@@ -1478,7 +1712,7 @@ I'm looking forward for a great summer with Sympy.</p></div></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-06-13T21:20:55Z</updated>
+      <updated>2014-06-13T21:40:54Z</updated>
     </source>
   </entry>
 
@@ -1584,7 +1818,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-06-13T21:20:50Z</updated>
+      <updated>2014-06-13T21:40:49Z</updated>
     </source>
   </entry>
 
@@ -3358,7 +3592,7 @@ In [41]:
       <link href="http://jcrist.github.io/" rel="alternate" type="text/html"/>
       <link href="http://jcrist.github.io/feeds/gsoc.atom.xml" rel="self" type="application/atom+xml"/>
       <title>Marginally Stable</title>
-      <updated>2014-06-07T01:00:00Z</updated>
+      <updated>2014-06-13T23:00:00Z</updated>
     </source>
   </entry>
 
@@ -3417,7 +3651,7 @@ Happy Coding!
       <link href="http://tarzzz.github.io/rss.gsoc.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts categorized under GSoC</subtitle>
       <title>Tarun Gaba's blog - GSoC</title>
-      <updated>2014-06-13T21:20:42Z</updated>
+      <updated>2014-06-13T21:40:41Z</updated>
     </source>
   </entry>
 
@@ -3508,7 +3742,7 @@ that we can keep the visualizations in the static format on the drive(or reposit
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-13T21:20:43Z</updated>
+      <updated>2014-06-13T21:40:42Z</updated>
     </source>
   </entry>
 
@@ -3622,7 +3856,7 @@ that we can keep the visualizations in the static format on the drive(or reposit
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-06-13T21:20:55Z</updated>
+      <updated>2014-06-13T21:40:54Z</updated>
     </source>
   </entry>
 
@@ -3744,7 +3978,7 @@ If you are free this summer and would love to contribute, feel free to catch us 
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-06-13T21:20:50Z</updated>
+      <updated>2014-06-13T21:40:49Z</updated>
     </source>
   </entry>
 
@@ -3772,7 +4006,7 @@ If you are free this summer and would love to contribute, feel free to catch us 
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2014-06-13T21:20:22Z</updated>
+      <updated>2014-06-13T21:40:18Z</updated>
     </source>
   </entry>
 
@@ -3985,7 +4219,7 @@ in manually.</p></div></div>
       <link href="http://asmeurer.github.io/blog/rss.xml" rel="self" type="application/rss+xml"/>
       <subtitle>My blog</subtitle>
       <title>Aaron Meurer's Blog</title>
-      <updated>2014-06-13T21:20:22Z</updated>
+      <updated>2014-06-13T21:40:18Z</updated>
     </source>
   </entry>
 
@@ -4366,7 +4600,7 @@ screen npm start
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>From a learner's perspective</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2014-06-13T21:20:42Z</updated>
+      <updated>2014-06-13T21:40:40Z</updated>
     </source>
   </entry>
 
@@ -4399,7 +4633,7 @@ screen npm start
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2014-06-13T21:20:45Z</updated>
+      <updated>2014-06-13T21:40:44Z</updated>
     </source>
   </entry>
 
@@ -4435,7 +4669,7 @@ screen npm start
       <link href="http://musingsofafriend.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>The greatest WordPress.com site in all the land!</subtitle>
       <title>musings of a friend - Prasoon Shukla » SymPy</title>
-      <updated>2014-06-13T21:20:45Z</updated>
+      <updated>2014-06-13T21:40:43Z</updated>
     </source>
   </entry>
 
@@ -4472,7 +4706,7 @@ screen npm start
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2014-06-13T21:20:46Z</updated>
+      <updated>2014-06-13T21:40:44Z</updated>
     </source>
   </entry>
 
@@ -4509,7 +4743,7 @@ This is a computationally hard problem and method I implemented finds only one s
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-13T21:20:43Z</updated>
+      <updated>2014-06-13T21:40:42Z</updated>
     </source>
   </entry>
 
@@ -4554,7 +4788,7 @@ This is a computationally hard problem and method I implemented finds only one s
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-13T21:20:43Z</updated>
+      <updated>2014-06-13T21:40:42Z</updated>
     </source>
   </entry>
 
@@ -4619,7 +4853,7 @@ This is a computationally hard problem and method I implemented finds only one s
       <link href="http://csousahome.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Just another blog</subtitle>
       <title>csousa home » sympy</title>
-      <updated>2014-06-13T21:20:50Z</updated>
+      <updated>2014-06-13T21:40:49Z</updated>
     </source>
   </entry>
 
@@ -4653,7 +4887,7 @@ This is a computationally hard problem and method I implemented finds only one s
       <link href="http://musingsofafriend.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>The greatest WordPress.com site in all the land!</subtitle>
       <title>musings of a friend - Prasoon Shukla » SymPy</title>
-      <updated>2014-06-13T21:20:45Z</updated>
+      <updated>2014-06-13T21:40:43Z</updated>
     </source>
   </entry>
 
@@ -4684,7 +4918,7 @@ This is a computationally hard problem and method I implemented finds only one s
       <link href="http://meclark256.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>Smile! You’re at the best WordPress.com site ever</subtitle>
       <title>My GSOC Adventure with SymPy</title>
-      <updated>2014-06-13T21:20:45Z</updated>
+      <updated>2014-06-13T21:40:44Z</updated>
     </source>
   </entry>
 
@@ -4803,7 +5037,7 @@ f(x) = C₁⋅x⋅⎜- ── + 1⎟ + C₀⋅⎜── - ── + 1⎟ + O⎝x 
       <link href="http://manojbits.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>From a learner's perspective</subtitle>
       <title>Perspective » SymPy</title>
-      <updated>2014-06-13T21:20:42Z</updated>
+      <updated>2014-06-13T21:40:40Z</updated>
     </source>
   </entry>
 
@@ -4847,7 +5081,7 @@ Cases like above where giving incorrect answers before, have a solution now.</p>
       <link href="http://geekiology.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>GSoC 2013 Blog</subtitle>
       <title>Risch Algorithm</title>
-      <updated>2014-06-13T21:20:41Z</updated>
+      <updated>2014-06-13T21:40:38Z</updated>
     </source>
   </entry>
 
@@ -4877,53 +5111,7 @@ Cases like above where giving incorrect answers before, have a solution now.</p>
       <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>my gsoc 2013 project</subtitle>
       <title>sophie's sympy blog</title>
-      <updated>2014-06-13T21:20:46Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://sophiessympyblog.wordpress.com/?p=283</id>
-    <link href="http://sophiessympyblog.wordpress.com/2013/09/01/factoring-polynomials-over-algebraic-number-fields/" rel="alternate" type="text/html"/>
-    <title>Factoring polynomials over algebraic number fields</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">In this post I will describe the factorization algorithm given in [1] for polynomials over simple algebraic extensions of . First, I have to introduce some definitions and notations. We define the denominator of a polynomial as the smallest integer, such that . Most of the time we will work with the monic associate instead of […]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=283&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p style="text-align: justify;">In this post I will describe the factorization algorithm given in [1] for polynomials over simple algebraic extensions of <img alt="\mathbb Q" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Q&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\mathbb Q"/>.</p>
-<p style="text-align: justify;">First, I have to introduce some definitions and notations.<br/>
-We define the <em>denominator </em><img alt="\mathrm{den}(f)" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cmathrm%7Bden%7D%28f%29&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\mathrm{den}(f)"/> of a polynomial <img alt="f \in \mathbb Q(\alpha)[x_o, \ldots, x_n]" class="latex" src="http://s0.wp.com/latex.php?latex=f+%5Cin+%5Cmathbb+Q%28%5Calpha%29%5Bx_o%2C+%5Cldots%2C+x_n%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="f \in \mathbb Q(\alpha)[x_o, \ldots, x_n]"/> as the smallest integer, such that <img alt="\mathrm{den}(f) f \in \mathbb Z[x_o, \ldots, x_n, z]" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cmathrm%7Bden%7D%28f%29+f+%5Cin+%5Cmathbb+Z%5Bx_o%2C+%5Cldots%2C+x_n%2C+z%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\mathrm{den}(f) f \in \mathbb Z[x_o, \ldots, x_n, z]"/>. Most of the time we will work with the <em>monic associate </em><em> </em><img alt="\tilde f \in \mathbb Z[x_o, \ldots, x_n, z]" class="latex" src="http://s0.wp.com/latex.php?latex=%5Ctilde+f+%5Cin+%5Cmathbb+Z%5Bx_o%2C+%5Cldots%2C+x_n%2C+z%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\tilde f \in \mathbb Z[x_o, \ldots, x_n, z]"/> instead of <img alt="f" class="latex" src="http://s0.wp.com/latex.php?latex=f&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="f"/>. It is defined as the associate of <img alt="\mathrm{den}\left(\frac 1 {\mathrm{lc}(f)} f \right) \frac 1 {\mathrm{lc}(f)} f" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cmathrm%7Bden%7D%5Cleft%28%5Cfrac+1+%7B%5Cmathrm%7Blc%7D%28f%29%7D+f+%5Cright%29+%5Cfrac+1+%7B%5Cmathrm%7Blc%7D%28f%29%7D+f&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\mathrm{den}\left(\frac 1 {\mathrm{lc}(f)} f \right) \frac 1 {\mathrm{lc}(f)} f"/> which is primitive in <img alt="x_o, \ldots, x_n, z" class="latex" src="http://s0.wp.com/latex.php?latex=x_o%2C+%5Cldots%2C+x_n%2C+z&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="x_o, \ldots, x_n, z"/>.</p>
-<p style="text-align: justify;">We will assume that the input polynomial <img alt="f" class="latex" src="http://s0.wp.com/latex.php?latex=f&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="f"/> is square-free and primitive in <img alt="x_o" class="latex" src="http://s0.wp.com/latex.php?latex=x_o&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="x_o"/>, because if this is not the case, <img alt="f" class="latex" src="http://s0.wp.com/latex.php?latex=f&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="f"/> can be easily factored into square-free parts and its content in <img alt="x_o" class="latex" src="http://s0.wp.com/latex.php?latex=x_o&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="x_o"/>. This can be done using only GCD computations.</p>
-<p style="text-align: justify;">First, we compute <img alt="\tilde f" class="latex" src="http://s0.wp.com/latex.php?latex=%5Ctilde+f&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\tilde f"/> and recursively call our algorithm to factor its leading coefficient in <img alt="x_0" class="latex" src="http://s0.wp.com/latex.php?latex=x_0&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="x_0"/> and obtain</p>
-<p align="center" style="text-align: center;"><img alt="\displaystyle \mathrm{lc}_{x_o} (\tilde f) = \gamma \cdot \prod_{i = 1}^r l_i^{e_i}" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+%5Cmathrm%7Blc%7D_%7Bx_o%7D+%28%5Ctilde+f%29+%3D+%5Cgamma+%5Ccdot+%5Cprod_%7Bi+%3D+1%7D%5Er+l_i%5E%7Be_i%7D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\displaystyle \mathrm{lc}_{x_o} (\tilde f) = \gamma \cdot \prod_{i = 1}^r l_i^{e_i}"/></p>
-<p style="text-align: justify;">in <img alt="\mathbb Q(\alpha)[x_1, \ldots, x_n]" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Q%28%5Calpha%29%5Bx_1%2C+%5Cldots%2C+x_n%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\mathbb Q(\alpha)[x_1, \ldots, x_n]"/>. If we get to the univariate case, we use the existing factoring algorithm by Trager.</p>
-<p style="text-align: justify;">Now we enter the main loop. We choose a new evaluation point <img alt="\mathbf a = (a_1, \ldots, a_n) \in \mathbb Z^{n}" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cmathbf+a+%3D+%28a_1%2C+%5Cldots%2C+a_n%29+%5Cin+%5Cmathbb+Z%5E%7Bn%7D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\mathbf a = (a_1, \ldots, a_n) \in \mathbb Z^{n}"/>, which has to satisfy certain conditions, e. g. <img alt="\tilde f(x_o, \mathbf a)" class="latex" src="http://s0.wp.com/latex.php?latex=%5Ctilde+f%28x_o%2C+%5Cmathbf+a%29&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\tilde f(x_o, \mathbf a)"/> has to stay square-free.</p>
-<p style="text-align: justify;">Again we use Trager’s algorithm, this time to factor <img alt="\tilde f(x_o, \mathbf a)" class="latex" src="http://s0.wp.com/latex.php?latex=%5Ctilde+f%28x_o%2C+%5Cmathbf+a%29&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\tilde f(x_o, \mathbf a)"/> in <img alt="\mathbb Q(\alpha)[x_o]" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Q%28%5Calpha%29%5Bx_o%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\mathbb Q(\alpha)[x_o]"/> and obtain</p>
-<p align="center"><img alt="\displaystyle \tilde f(x_o, \mathbf a) = \Omega' \cdot \prod_{j = 1}^s u_j," class="latex" src="http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+%5Ctilde+f%28x_o%2C+%5Cmathbf+a%29+%3D+%5COmega%27+%5Ccdot+%5Cprod_%7Bj+%3D+1%7D%5Es+u_j%2C&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\displaystyle \tilde f(x_o, \mathbf a) = \Omega' \cdot \prod_{j = 1}^s u_j,"/></p>
-<p style="text-align: justify;">where <img alt="\Omega' = \mathrm{lc}_{x_o}(f(x_o, \mathbf a)) \in \mathbb Q(\alpha)" class="latex" src="http://s0.wp.com/latex.php?latex=%5COmega%27+%3D+%5Cmathrm%7Blc%7D_%7Bx_o%7D%28f%28x_o%2C+%5Cmathbf+a%29%29+%5Cin+%5Cmathbb+Q%28%5Calpha%29&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\Omega' = \mathrm{lc}_{x_o}(f(x_o, \mathbf a)) \in \mathbb Q(\alpha)"/>. Note that if <img alt="\tilde f(x_o, \mathbf a)" class="latex" src="http://s0.wp.com/latex.php?latex=%5Ctilde+f%28x_o%2C+%5Cmathbf+a%29&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\tilde f(x_o, \mathbf a)"/> is irreducible, we know that <img alt="\tilde f" class="latex" src="http://s0.wp.com/latex.php?latex=%5Ctilde+f&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\tilde f"/> is irreducible and hence <img alt="f" class="latex" src="http://s0.wp.com/latex.php?latex=f&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="f"/>, so in this case we are done.</p>
-<p style="text-align: justify;">In order to use Hensel lifting, we need to compute the true leading coefficients <img alt="\bar l_1, \ldots, \bar l_r \in \mathbb Q(\alpha)[x_1, \ldots, x_n]" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cbar+l_1%2C+%5Cldots%2C+%5Cbar+l_r+%5Cin+%5Cmathbb+Q%28%5Calpha%29%5Bx_1%2C+%5Cldots%2C+x_n%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\bar l_1, \ldots, \bar l_r \in \mathbb Q(\alpha)[x_1, \ldots, x_n]"/> of the irreducible factors of <img alt="\tilde f" class="latex" src="http://s0.wp.com/latex.php?latex=%5Ctilde+f&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\tilde f"/>. This can be done with simple GCD computations.</p>
-<p style="text-align: justify;">Now we choose a new prime <img alt="p" class="latex" src="http://s0.wp.com/latex.php?latex=p&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="p"/>, which also has to satisfy certain requirements, e.g. <img alt="\tilde f(x_o, \mathbf a) \; \mathrm{mod} \, p" class="latex" src="http://s0.wp.com/latex.php?latex=%5Ctilde+f%28x_o%2C+%5Cmathbf+a%29+%5C%3B+%5Cmathrm%7Bmod%7D+%5C%2C+p&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\tilde f(x_o, \mathbf a) \; \mathrm{mod} \, p"/> is still square-free and the minimal polynomial <img alt="\mu(z)" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cmu%28z%29&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\mu(z)"/> of <img alt="\alpha" class="latex" src="http://s0.wp.com/latex.php?latex=%5Calpha&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\alpha"/> is still irreducible modulo <img alt="p" class="latex" src="http://s0.wp.com/latex.php?latex=p&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="p"/>.</p>
-<p style="text-align: justify;">Since evaluating at <img alt="x_1 = a_1, \ldots, x_n = a_n" class="latex" src="http://s0.wp.com/latex.php?latex=x_1+%3D+a_1%2C+%5Cldots%2C+x_n+%3D+a_n&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="x_1 = a_1, \ldots, x_n = a_n"/> is the same as factoring modulo the ideal <img alt="\mathcal I" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cmathcal+I&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\mathcal I"/> generated by <img alt="x_1 - a_1, \ldots, x_n - a_n" class="latex" src="http://s0.wp.com/latex.php?latex=x_1+-+a_1%2C+%5Cldots%2C+x_n+-+a_n&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="x_1 - a_1, \ldots, x_n - a_n"/>, we can use Hensel lifting to lift the univariate factors <img alt="u_1, \ldots, u_s" class="latex" src="http://s0.wp.com/latex.php?latex=u_1%2C+%5Cldots%2C+u_s&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="u_1, \ldots, u_s"/> and obtain</p>
-<p align="center"><img alt="\displaystyle \tilde f(x_o, \ldots, x_n) = l \cdot \prod_{j = 1}^s \bar f_j(x_o, \ldots, x_n) \; \mathrm{mod} \, \left\langle p, \mathcal I^T\right\rangle," class="latex" src="http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+%5Ctilde+f%28x_o%2C+%5Cldots%2C+x_n%29+%3D+l+%5Ccdot+%5Cprod_%7Bj+%3D+1%7D%5Es+%5Cbar+f_j%28x_o%2C+%5Cldots%2C+x_n%29+%5C%3B+%5Cmathrm%7Bmod%7D+%5C%2C+%5Cleft%5Clangle+p%2C+%5Cmathcal+I%5ET%5Cright%5Crangle%2C&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\displaystyle \tilde f(x_o, \ldots, x_n) = l \cdot \prod_{j = 1}^s \bar f_j(x_o, \ldots, x_n) \; \mathrm{mod} \, \left\langle p, \mathcal I^T\right\rangle,"/></p>
-<p style="text-align: justify;">where <img alt="T \in \mathbb N" class="latex" src="http://s0.wp.com/latex.php?latex=T+%5Cin+%5Cmathbb+N&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="T \in \mathbb N"/> is chosen large enough.</p>
-<p style="text-align: justify;">That means, we have the correct factorization modulo the prime <img alt="p" class="latex" src="http://s0.wp.com/latex.php?latex=p&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="p"/>. In order to get the desired factorization, we use a procedure that is also based on Hensel’s Lemma, called <img alt="p" class="latex" src="http://s0.wp.com/latex.php?latex=p&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="p"/>-adic lifting. We lift the factors <img alt="\bar f_j" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cbar+f_j&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\bar f_j"/> from <img alt="\mathbb Z_p(\alpha)[x_o, \ldots, x_n]" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Z_p%28%5Calpha%29%5Bx_o%2C+%5Cldots%2C+x_n%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\mathbb Z_p(\alpha)[x_o, \ldots, x_n]"/> to <img alt="\mathbb Z_{p^m}(\alpha)[x_o, \ldots, x_n]" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Z_%7Bp%5Em%7D%28%5Calpha%29%5Bx_o%2C+%5Cldots%2C+x_n%5D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\mathbb Z_{p^m}(\alpha)[x_o, \ldots, x_n]"/>, where <img alt="m" class="latex" src="http://s0.wp.com/latex.php?latex=m&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="m"/> is chosen big enough, such that</p>
-<p align="center"><img alt="\displaystyle \tilde f(x_o, \ldots, x_n) = l \cdot \prod_{j = 1}^s f_j(x_o, \ldots, x_n) " class="latex" src="http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+%5Ctilde+f%28x_o%2C+%5Cldots%2C+x_n%29+%3D+l+%5Ccdot+%5Cprod_%7Bj+%3D+1%7D%5Es+f_j%28x_o%2C+%5Cldots%2C+x_n%29+&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\displaystyle \tilde f(x_o, \ldots, x_n) = l \cdot \prod_{j = 1}^s f_j(x_o, \ldots, x_n) "/></p>
-<p>also holds over <img alt="\mathbb Q(\alpha)" class="latex" src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Q%28%5Calpha%29&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" title="\mathbb Q(\alpha)"/> and we are done.</p>
-<p>[1] <a href="http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf" rel="nofollow">http://www.cecm.sfu.ca/~monaganm/papers/mahdiFactor.pdf</a></p>
-<br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/283/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/283/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=283&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2013-09-01T13:21:54Z</updated>
-    <category term="Uncategorized"/>
-    <author>
-      <name>katjasophie</name>
-    </author>
-    <source>
-      <id>http://sophiessympyblog.wordpress.com</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://sophiessympyblog.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://sophiessympyblog.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://sophiessympyblog.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://sophiessympyblog.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>my gsoc 2013 project</subtitle>
-      <title>sophie's sympy blog</title>
-      <updated>2014-06-13T21:20:46Z</updated>
+      <updated>2014-06-13T21:40:44Z</updated>
     </source>
   </entry>
 </feed>
