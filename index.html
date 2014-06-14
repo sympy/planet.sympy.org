@@ -24,6 +24,59 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>June 14, 2014</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://codesachin.wordpress.com" title="Dream. Think. Code. » Google Summer of Code 2014">Sachin Joglekar</a></h3>
+
+
+<div class="entrygroup" id="http://codesachin.wordpress.com/?p=15">
+<h4 lang="en"><a href="http://codesachin.wordpress.com/2014/06/15/gsoc-week-4-vector-framework-done/">GSoC Week 4: Vector framework done</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p>This has been a tricky week. Not hectic, but rather tricky. Most of it was spent fixing the innumerable bugs that I encountered while polishing and ‘packaging’ the basic version of the new vector module – it’s in a PR <a href="https://github.com/sympy/sympy/pull/7566">here</a>.</p>
+<p>I cannot stress how helpful the pre-written unit and example tests were, in making things clearer and pointing out the many bugs in the first version of my code. In some cases, I spent quite some (read: <em>a lot</em>) of time fixing the issues, while in some, I just redid the code/API to work around the intricacies of the SymPy core. Its quite easy to get lost in there.</p>
+<p>Currently, the following functionalities are supported <em>stably</em> by my code(with appropriate error handling wherever required)-</p>
+<p>1. All basic vector operations-</p>
+<p>a) Addition/Subtraction</p>
+<p>b) Multiplication/Division by scalars</p>
+<p>c) Dot/Cross product</p>
+<p>2. Including coordinate variables (spatial variables) in vectorial expressions.</p>
+<p>3. All basic use cases of the Del operator in vector/scalar expressions, including-</p>
+<p>a) Gradient</p>
+<p>b) Divergence</p>
+<p>c) Curl</p>
+<p>d) Directional derivative</p>
+<p>I know it seems a little low for something that’s based on code which is already a part of SymPy, but the whole point was to base it directly upon the SymPy core – for users not acquainted with the physics module. Moreover, with some rudimentary timing techniques, I found that on an average, the new module was able to do a set of most-basic vector operations (add, sub, dot, cross) approximately 3-4 times <em>faster </em>than sympy.physics.vector. But I guess it’s too early to judge now, since the new module has no overhead of coordinate systems.</p>
+<p>I can say I am successful (hopefully all the tests on the PR should pass soon) in supporting all the functionality mentioned above, in a stable implementation – though I am still waiting for Jason and the SymPy people to review the PR. I hope it gets in soon.</p>
+<p>The next step would be to start working on a new branch that would include the classes for coordinate systems and stationary points in 3D space (cartesian system). This is going to be tricky – the code for these classes in <em>sympy.physics.vector</em> is enough to prove that. As usual, the first step would be to write out the ‘expected-to-succeed’ unit and example tests. Hopefully, by that time, I would get sufficient feedback on the current PR too. But since the underlying vector framework is working well, I wouldn’t have to worry about bugs in that area – I can focus purely on the one-level-up code for multiple coordinate systems.</p>
+<p>Cheers to a fun week! Hopefully I will be reporting just as much of progress next week too. Have a great week ahead <span class="wp-smiley emoji emoji-smile" title=":-)">:-)</span>.</p>
+<p> </p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/codesachin.wordpress.com/15/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/codesachin.wordpress.com/15/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=codesachin.wordpress.com&amp;blog=67602166&amp;post=15&amp;subd=codesachin&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://codesachin.wordpress.com/2014/06/15/gsoc-week-4-vector-framework-done/">by srjoglekar246 at June 14, 2014 08:15 PM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>June 13, 2014</h2>
 
 <div class="channelgroup">
@@ -5406,126 +5459,6 @@ This is a computationally hard problem and method I implemented finds only one s
 </div>
 
 </div>
-<div class="daygroup">
-<h2>September 06, 2013</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://manojbits.wordpress.com" title="Perspective » SymPy">Manoj Kumar</a></h3>
-
-
-<div class="entrygroup" id="http://manojbits.wordpress.com/?p=746">
-<h4 lang="en"><a href="http://manojbits.wordpress.com/2013/09/06/towards-the-end/">Towards the end</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>Hi, I finally managed to do some amount of work for the past ten days, and I’m happy to day that all that I had wanted to do this GSoC has been pushed in and I’m waiting for comments on my final Pull Request. These were the changes that I had made.</p>
-<p><strong>1. Making stuff similar to the series function </strong><br />
-While playing around with the code, I found out that, doing <strong>series(eq, n=terms)</strong>, gives the series expansion upto <img src="http://s0.wp.com/latex.php?latex=O%28x%5En%29&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="O(x^n)" class="latex" title="O(x^n)" /> rather than the nth term. This makes the code look a lot neater too. Also the default power is 6, so I changes that too. For instance, take this sample SymPy session</p>
-<pre class="brush: python; title: ; notranslate">from sympy import dsolve, series
-from sympy.abc import x, y
-f = Function("f")
-pprint(series(exp(x))
-         2    3    4     5        
-        x    x    x     x     ⎛ 6⎞
-1 + x + ── + ── + ── + ─── + O⎝x ⎠
-        2    6    24   120       
-eq = f(x).diff(x) - x*f(x)
-pprint(dsolve(eq, hint='1st_power_series'))
-                2       4        
-            C₀⋅x    C₀⋅x     ⎛ 6⎞
-f(x) = C₀ + ───── + ───── + O⎝x ⎠
-              2       8       
-</pre>
-<p>I also added support for power series solutions of homogeneous differential equations at ordinary points, and regular singular points. A homogeneous second differential equation is of the form <img src="http://s0.wp.com/latex.php?latex=P%28x%29%5Cfrac%7Bd%5E2f%7D%7Bdx%5E2%7D+%2B+Q%28x%29%5Cfrac%7Bdf%7D%7Bdx%7D+%2B+R%28x%29&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="P(x)\frac{d^2f}{dx^2} + Q(x)\frac{df}{dx} + R(x)" class="latex" title="P(x)\frac{d^2f}{dx^2} + Q(x)\frac{df}{dx} + R(x)" />. (Any DE mentioned below is homogeneous second order unless otherwise specified, because typing DE is easier than typing a homogeneous second order differential equation).<br />
-a] A point <img src="http://s0.wp.com/latex.php?latex=x0&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="x0" class="latex" title="x0" /> is said to be ordinary, if <img src="http://s0.wp.com/latex.php?latex=%5Cfrac%7BQ%28x%29%7D%7BP%28x%29%7D&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="\frac{Q(x)}{P(x)}" class="latex" title="\frac{Q(x)}{P(x)}" /> and <img src="http://s0.wp.com/latex.php?latex=%5Cfrac%7BR%28x%29%7D%7BP%28x%29%7D&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="\frac{R(x)}{P(x)}" class="latex" title="\frac{R(x)}{P(x)}" /> are analytic at the point.<br />
-b] It is said to be regular singular, if <img src="http://s0.wp.com/latex.php?latex=%28x+-+x0%29%5Cfrac%7BQ%28x%29%7D%7BP%28x%29%7D&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="(x - x0)\frac{Q(x)}{P(x)}" class="latex" title="(x - x0)\frac{Q(x)}{P(x)}" /> and <img src="http://s0.wp.com/latex.php?latex=%28x+-+x0%29%5E2%5Cfrac%7BQ%28x%29%7D%7BP%28x%29%7D&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="(x - x0)^2\frac{Q(x)}{P(x)}" class="latex" title="(x - x0)^2\frac{Q(x)}{P(x)}" /> are analytic. For simplicity in the series expansions, assumptions are made such that <img src="http://s0.wp.com/latex.php?latex=P%28x%29&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="P(x)" class="latex" title="P(x)" />, <img src="http://s0.wp.com/latex.php?latex=Q%28x%29&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="Q(x)" class="latex" title="Q(x)" /> and <img src="http://s0.wp.com/latex.php?latex=R%28x%29&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="R(x)" class="latex" title="R(x)" /> are polynomials. Okay, now for a bit more detail</p>
-<p>1. <strong>Ordinary points</strong> : A DE has a power series solution, at <img src="http://s0.wp.com/latex.php?latex=x0&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="x0" class="latex" title="x0" />. This can be found by substituting <img src="http://s0.wp.com/latex.php?latex=%5Csum_%7Bk%3D0%7D%5En+a_%7Bn%7Dx%5En&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="\sum_{k=0}^n a_{n}x^n" class="latex" title="\sum_{k=0}^n a_{n}x^n" /> in the DE, and equating the nth coefficient in order to obtain a recurrence relation. However this is not as trivial as it sounds and was one of the more tougher things I had to do.</p>
-<p>Take the general case of <img src="http://s0.wp.com/latex.php?latex=P%28x%29%5Cfrac%7Bd%5E2f%7D%7Bdx%5E2%7D+%2B+Q%28x%29%5Cfrac%7Bdf%7D%7Bdx%7D+%2B+R%28x%29&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="P(x)\frac{d^2f}{dx^2} + Q(x)\frac{df}{dx} + R(x)" class="latex" title="P(x)\frac{d^2f}{dx^2} + Q(x)\frac{df}{dx} + R(x)" />. Substituting <img src="http://s0.wp.com/latex.php?latex=y&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="y" class="latex" title="y" /> as <img src="http://s0.wp.com/latex.php?latex=%5Csum_%7Bn+%3D+0%7D%5E%5Cinfty+a_%7Bn%7Dx%5En&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="\sum_{n = 0}^\infty a_{n}x^n" class="latex" title="\sum_{n = 0}^\infty a_{n}x^n" /> in the DE. (One has to expand each of the terms <img src="http://s0.wp.com/latex.php?latex=P%28x%29&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="P(x)" class="latex" title="P(x)" />, <img src="http://s0.wp.com/latex.php?latex=Q%28x%29&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="Q(x)" class="latex" title="Q(x)" /> and <img src="http://s0.wp.com/latex.php?latex=R%28x%29&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="R(x)" class="latex" title="R(x)" />), make transformations such that for each term the power of <img src="http://s0.wp.com/latex.php?latex=x&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="x" class="latex" title="x" /> is <img src="http://s0.wp.com/latex.php?latex=n&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="n" class="latex" title="n" />. The catch here is that the starting point of the summation also changes, so the necessary terms shouls be stripped off such that the starting point is same. This is better explained in one of these tutorials, <a href="http://tutorial.math.lamar.edu/Classes/DE/SeriesSolutions.aspx" rel="nofollow">http://tutorial.math.lamar.edu/Classes/DE/SeriesSolutions.aspx</a> , so you could read that after you’ve read the rest of the blogpost.</p>
-<p>A small sample session.</p>
-<pre class="brush: python; title: ; notranslate">from sympy import *
-from sympy.abc import x, y
-eq = (1 + x**2)*(f(x).diff(x, 2)) + 2*x*(f(x).diff(x)) -2*f(x)
-pprint(eq)
-                          2               
-    d          ⎛ 2    ⎞  d                
-2⋅x⋅──(f(x)) + ⎝x  + 1⎠⋅───(f(x)) - 2⋅f(x)
-    dx                    2               
-                        dx
-pprint(dsolve(eq))
-                 ⎛   4         ⎞        
-                 ⎜  x     2    ⎟    ⎛ 6⎞
-f(x) = C₁⋅x + C₀⋅⎜- ── + x  + 1⎟ + O⎝x ⎠
-                 ⎝  3          ⎠
-eq = f(x).diff(x, 2) + x*(f(x).diff(x)) + f(x)
-pprint(eq)
-                      2      
-  d                  d       
-x⋅──(f(x)) + f(x) + ───(f(x))
-  dx                  2      
-                    dx
-pprint(dsolve(eq))
-            ⎛   2    ⎞      ⎛ 4    2    ⎞        
-            ⎜  x     ⎟      ⎜x    x     ⎟    ⎛ 6⎞
-f(x) = C₁⋅x⋅⎜- ── + 1⎟ + C₀⋅⎜── - ── + 1⎟ + O⎝x ⎠
-            ⎝  3     ⎠      ⎝8    2     ⎠  
-</pre>
-<p>2. <strong>Regular singular points</strong> :<br />
-    1.  Try expressing <img src="http://s0.wp.com/latex.php?latex=%28x+-+x0%29P%28x%29&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="(x - x0)P(x)" class="latex" title="(x - x0)P(x)" /> and <img src="http://s0.wp.com/latex.php?latex=%28%28x+-+x0%29%5E%7B2%7D%29Q%28x%29&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="((x - x0)^{2})Q(x)" class="latex" title="((x - x0)^{2})Q(x)" /> as power series<br />
-        solutions about <img src="http://s0.wp.com/latex.php?latex=x0&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="x0" class="latex" title="x0" />. Find <img src="http://s0.wp.com/latex.php?latex=p0&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="p0" class="latex" title="p0" /> and <img src="http://s0.wp.com/latex.php?latex=q0&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="q0" class="latex" title="q0" /> which are the constants of the<br />
-        power series expansions.<br />
-    2.  Solve the indicial equation <img src="http://s0.wp.com/latex.php?latex=f%28m%29+%3D+m%28m+-+1%29+%2B+m%2Ap0+%2B+q0&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="f(m) = m(m - 1) + m*p0 + q0" class="latex" title="f(m) = m(m - 1) + m*p0 + q0" />, to obtain the<br />
-        roots <img src="http://s0.wp.com/latex.php?latex=m1&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="m1" class="latex" title="m1" /> and <img src="http://s0.wp.com/latex.php?latex=m2&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="m2" class="latex" title="m2" /> of the indicial equation.<br />
-    3.  If <img src="http://s0.wp.com/latex.php?latex=m1+-+m2&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="m1 - m2" class="latex" title="m1 - m2" /> is a non integer there exists two series solutions. If<br />
-        <img src="http://s0.wp.com/latex.php?latex=m1+%3D+m2&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="m1 = m2" class="latex" title="m1 = m2" />, there exists only one solution. If <img src="http://s0.wp.com/latex.php?latex=m1+-+m2&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="m1 - m2" class="latex" title="m1 - m2" /> is an integer,<br />
-        then the existence of one solution is confirmed. The other solution may<br />
-        or may not exist.</p>
-<p>    The power series solution is of the form <img src="http://s0.wp.com/latex.php?latex=x%5E%7Bm%7D%5Csum_%7Bn%3D0%7D%5E%5Cinfty+a_%7Bn%7Dx%5En&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="x^{m}\sum_{n=0}^\infty a_{n}x^n" class="latex" title="x^{m}\sum_{n=0}^\infty a_{n}x^n" />. The<br />
-    coefficients are determined by the following recurrence relation.<br />
-    <img src="http://s0.wp.com/latex.php?latex=a_%7Bn%7D+%3D+-%5Cfrac%7B%5Csum_%7Bk%3D0%7D%5E%7Bn-1%7D+q_%7Bn-k%7D+%2B+%28m+%2B+k%29p_%7Bn-k%7D%7D%7Bf%28m+%2B+n%29%7D&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="a_{n} = -\frac{\sum_{k=0}^{n-1} q_{n-k} + (m + k)p_{n-k}}{f(m + n)}" class="latex" title="a_{n} = -\frac{\sum_{k=0}^{n-1} q_{n-k} + (m + k)p_{n-k}}{f(m + n)}" />. For the case<br />
-    in which <img src="http://s0.wp.com/latex.php?latex=m1+-+m2&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="m1 - m2" class="latex" title="m1 - m2" /> is an integer, it can be seen from the recurrence relation<br />
-    that for the lower root <img src="http://s0.wp.com/latex.php?latex=m&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="m" class="latex" title="m" />, when <img src="http://s0.wp.com/latex.php?latex=n&amp;bg=ffffff&amp;fg=000000&amp;s=0" alt="n" class="latex" title="n" /> equals the difference of both the<br />
-    roots, the denominator becomes zero. So if the numerator is not equal to zero,<br />
-    a second series solution exists. (Oh and by the way I just copy – pasted the docstring for the<br />
-    last part, because I was lazy to write the whole thing again :P)</p>
-<pre class="brush: python; title: ; notranslate">    eq = x**2*(f(x).diff(x, 2)) - 3*x*(f(x).diff(x)) + (4*x + 4)*f(x)  # One solution
-    pprint(dsolve(eq))
-                ⎛      3                 ⎞        
-              2 ⎜  16⋅x       2          ⎟    ⎛ 6⎞
-   f(x) = C₀⋅x ⋅⎜- ───── + 4⋅x  - 4⋅x + 1⎟ + O⎝x ⎠
-                ⎝    9                   ⎠  
-    eq = x**2*(f(x).diff(x, 2)) - x**2*(f(x).diff(x)) + (
-        x**2 - 2)*f(x)  # Two solutions
-             ⎛    6      5    4    2        ⎞                                    
-             ⎜   x    3⋅x    x    x    x    ⎟                                    
-          C₁⋅⎜- ─── - ──── - ── + ── + ─ + 1⎟         ⎛   3    2        ⎞        
-             ⎝  720    80    8    2    2    ⎠       2 ⎜  x    x    x    ⎟    ⎛ 6⎞
-   f(x) = ─────────────────────────────────── + C₀⋅x ⋅⎜- ── + ── + ─ + 1⎟ + O⎝x ⎠
-                           x                          ⎝  60   20   2    ⎠  
-    </pre>
-<p>Anyway, that sums up my official GSoC work. Now that I just need to address comments made on my PR which is at, <a href="https://github.com/sympy/sympy/pull/2395" rel="nofollow">https://github.com/sympy/sympy/pull/2395</a> . And I just realised that I have my exams coming up the next week, and its been a while since I touched my books (and gone to classes), and thats not a good thing. So have to catch up there. Seems like my whole life is about catching up.</p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/manojbits.wordpress.com/746/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/manojbits.wordpress.com/746/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=manojbits.wordpress.com&amp;blog=31971756&amp;post=746&amp;subd=manojbits&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://manojbits.wordpress.com/2013/09/06/towards-the-end/">by Manoj Kumar at September 06, 2013 05:13 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -5645,7 +5578,7 @@ f(x) = C₁⋅x⋅⎜- ── + 1⎟ + C₀⋅⎜── - ── + 1⎟ + O⎝x 
 <a href="http://www.blogger.com/feeds/436496352933562096/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://robert-code.blogspot.com/" class="message" title="no activity in 7 days">Robert Schwarz</a>
 </li>
 <li>
-<a href="http://codesachin.wordpress.com/category/google-summer-of-code-2014/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://codesachin.wordpress.com" class="message" title="no activity in 7 days">Sachin Joglekar</a>
+<a href="http://codesachin.wordpress.com/category/google-summer-of-code-2014/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://codesachin.wordpress.com" title="Dream. Think. Code. » Google Summer of Code 2014">Sachin Joglekar</a>
 </li>
 <li>
 <a href="http://saptman.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://saptman.wordpress.com" class="message" title="no activity in 7 days">Saptarshi Mandal</a>
@@ -5699,7 +5632,7 @@ f(x) = C₁⋅x⋅⎜- ── + 1⎟ + C₀⋅⎜── - ── + 1⎟ + O⎝x 
 
 <p>
 <strong>Last updated:</strong><br>
-June 14, 2014 07:01 PM<br>
+June 14, 2014 08:21 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
