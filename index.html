@@ -826,6 +826,49 @@ In [3]:
 
 </div>
 <div class="daygroup">
+<h2>June 06, 2014</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://codesachin.wordpress.com" title="Dream. Think. Code. » Google Summer of Code 2014">Sachin Joglekar</a></h3>
+
+
+<div class="entrygroup" id="http://codesachin.wordpress.com/?p=13">
+<h4 lang="en"><a href="http://codesachin.wordpress.com/2014/06/07/gsoc-week-3-formalizing-design-polishing-code/">GSoC Week 3: Formalizing design, polishing code</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p>This week was mostly spent in polishing the design, writing mock sessions and adding tests to the code I wrote last week. Thanks to Jason’s constant encouragement towards objective- and test- driven code development, I now have a good idea of what I need to do in the coming week. If the meeting with Jason goes well and we are on the same page, I will soon complete the current WIP PR that is at <a href="https://github.com/sympy/sympy/pull/7566">this link</a>, and then move on to implementing CoordSysRect class (just written the API for now).</p>
+<p>What I learnt this week-</p>
+<p>Before coding,</p>
+<p>1. First write out as many example use cases of the software, as possible. In this case, the quality is more important than the quantity. The use cases should sufficiently touch upon all aspects of working required from the software that you are about to code. The interactions, on a conceptual and UI-level, should be as crytal-clear as needed.</p>
+<p>2. Draw out the high-level API -&gt; user-visible attributes(or better, ‘property’s in Python) and methods/functions. These will help you in defining all the ‘internal’ matter and algorithms succinctly.</p>
+<p>3. While you are finalizing the API design, start drawing up a set of incremental objectives you would need to complete for building the overall software. Make sure that the objectives make sense chronologically, and reflect the priority and complexity level of the objectives correctly. This is basically to acknowledge that it is not possible to build and entire software together, but rather its better to code it module-by-module – with sufficuent testing at regular intervals, ofcourse.</p>
+<p>The follow the timeline you have decided, and start coding.</p>
+<p>Respecting this, I will start working on the code full-time next week onwards, so hope to give more detailed reports then. Have a great week <span class="wp-smiley emoji emoji-smile" title=":-)">:-)</span>.</p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/codesachin.wordpress.com/13/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/codesachin.wordpress.com/13/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=codesachin.wordpress.com&amp;blog=67602166&amp;post=13&amp;subd=codesachin&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://codesachin.wordpress.com/2014/06/07/gsoc-week-3-formalizing-design-polishing-code/">by srjoglekar246 at June 06, 2014 11:46 PM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>June 03, 2014</h2>
 
 <div class="channelgroup">
@@ -1313,6 +1356,56 @@ Thats all for now :) Will get back next week!</p></div>
 
 <p class="date">
 <a href="http://blog.s-d-b.com/gsoc-2014-introduction/">by SD at June 01, 2014 02:24 PM</a>
+</p>
+</div>
+</div>
+
+
+
+</div>
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://codesachin.wordpress.com" title="Dream. Think. Code. » Google Summer of Code 2014">Sachin Joglekar</a></h3>
+
+
+<div class="entrygroup" id="http://codesachin.wordpress.com/?p=11">
+<h4 lang="en"><a href="http://codesachin.wordpress.com/2014/06/01/gsoc-2014-second-week-basics-of-vector-and-del-operator/">GSoC 2014 Second Week: Basics of Vector, and Del operator</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p>In my previous blog post, I had mentioned that I had begun working somewhat on a new branch for the vector module. This week was spent in polishing that work. But more importantly, I spent time confirming that my last week’s idea – of implementing the Vector framework, BaseScalar class, and the Del operator <em>before</em> implementing coordinate systems – does make sense. What this essentially means is that all the operations will occur in one frame <strong>only </strong>(for now).</p>
+<p>I have implemented the Vector framework to a great extent by now, the BaseScalar class is done, and so is the Del operator. I have tried keeping the API of the Del class as ‘easy’ as possible, mainly so that the expressions typed out in code, would be very simple to read even for a non-fluent programmer.</p>
+<p>To confirm that the one-system-framework does work, I tried proving all of the product rules of vector differential calculus (using the constructed API).</p>
+<p>Here  is a snippet of (actual) Python-Shell session proving the last product rule-</p>
+<p>Rule says :</p>
+<dl>
+<dd><img src="http://upload.wikimedia.org/math/d/5/b/d5b8119de472d7a6d75c1672e93ccd34.png" alt="\nabla \times (\vec u \times \vec v) = \vec u \, (\nabla \cdot \vec v) - \vec v \, (\nabla \cdot \vec u) + (\vec v \cdot \nabla) \, \vec u - (\vec u \cdot \nabla) \, \vec v" class="mwe-math-fallback-png-inline tex" /></dd>
+<dd></dd>
+</dl>
+<p><code>Shell session (i, j and k denote base vectors, while x, y and z denote base scalars)-</code></p>
+<p><code><br />
+&gt;&gt;&gt; u = x**2 * i + 4 * j - y**2*z * k<br />
+&gt;&gt;&gt; v = 4 * i + x*y*z * k<br />
+&gt;&gt;&gt; lhs = delop ^ (u ^ v)<br />
+&gt;&gt; rhs = u * (delop &amp; v) - v * (delop &amp; u) + (v &amp; delop) * u - (u &amp; delop) * v<br />
+&gt;&gt;&gt; simplify(lhs) == simplify(rhs)<br />
+True<br />
+</code></p>
+<p>I guess intensive coding will begin this week onwards. The first priority would be to ensure that the Vector framework is foolproof, by writing unit tests and some long ones. I would also like SymPy functions like the <em>solve </em>one, to work with vector too (To solve problems like – given 3 vectors, prove that they can be used as a valid basis for 3D space). Then, I will most likely send a PR  with the work done till now. On a different branch, I’ll start working on the CoordSys class. Thats all for now! Have a great wek!</p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/codesachin.wordpress.com/11/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/codesachin.wordpress.com/11/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=codesachin.wordpress.com&amp;blog=67602166&amp;post=11&amp;subd=codesachin&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://codesachin.wordpress.com/2014/06/01/gsoc-2014-second-week-basics-of-vector-and-del-operator/">by srjoglekar246 at June 01, 2014 09:46 AM</a>
 </p>
 </div>
 </div>
@@ -4977,7 +5070,8 @@ screen npm start
 <p>-A class WeylGroup, which is about the Weyl group of a given Lie algebra.  It gives the size and name of a given Weyl group as well as the matrix form of an element, and an element’s order.</p>
 <p>-Methods for displaying the Cartan matrix and Dynkin diagram of a Lie algebra.</p>
 <p> </p>
-<p>That’s pretty much it.  I had a great time working with SymPy this summer!</p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/172/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/172/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=172&amp;subd=meclark256&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+<p>That’s pretty much it.  I had a great time working with SymPy this summer!</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/172/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/172/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=172&amp;subd=meclark256&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -5066,7 +5160,8 @@ screen npm start
 <img src="http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+f_2+%3D+x%5E2+-+2+%5Calpha%5E2+x+%2B+%5Calpha%5E3+z%5E2+-+%28+%5Calpha%5E3+%2B+%5Calpha%5E2+%2B+%5Calpha+%2B+1%29+y+%2B+12+%5Calpha+&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\displaystyle f_2 = x^2 - 2 \alpha^2 x + \alpha^3 z^2 - ( \alpha^3 + \alpha^2 + \alpha + 1) y + 12 \alpha " class="latex" title="\displaystyle f_2 = x^2 - 2 \alpha^2 x + \alpha^3 z^2 - ( \alpha^3 + \alpha^2 + \alpha + 1) y + 12 \alpha " /><br />
 <img src="http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+f_3+%3D+x%5E2+-+2+%5Calpha%5E3+x+%2B+%5Calpha%5E2+z%5E2+%2B+%5Calpha+y+-+12+%28+%5Calpha%5E3+%2B+%5Calpha%5E2+%2B+%5Calpha+%2B+1%29+&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\displaystyle f_3 = x^2 - 2 \alpha^3 x + \alpha^2 z^2 + \alpha y - 12 ( \alpha^3 + \alpha^2 + \alpha + 1) " class="latex" title="\displaystyle f_3 = x^2 - 2 \alpha^3 x + \alpha^2 z^2 + \alpha y - 12 ( \alpha^3 + \alpha^2 + \alpha + 1) " /><br />
 <img src="http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+f_4+%3D+x%5E2+%2B+2+%28+%5Calpha%5E3+%2B+%5Calpha%5E2+%2B+%5Calpha+%2B+1%29+x+%2B+%5Calpha+z%5E2+%2B+%5Calpha%5E3+y+%2B+12+%5Calpha%5E2+.+&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\displaystyle f_4 = x^2 + 2 ( \alpha^3 + \alpha^2 + \alpha + 1) x + \alpha z^2 + \alpha^3 y + 12 \alpha^2 . " class="latex" title="\displaystyle f_4 = x^2 + 2 ( \alpha^3 + \alpha^2 + \alpha + 1) x + \alpha z^2 + \alpha^3 y + 12 \alpha^2 . " /></p>
-<p style="text-align: justify;">The current SymPy factorization algorithm needs 215 seconds, whereas the new one only takes 60.3 seconds. More than three times faster! <img src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif" alt=":)" class="wp-smiley" /> </p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/352/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/352/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=352&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+<p style="text-align: justify;">The current SymPy factorization algorithm needs 215 seconds, whereas the new one only takes 60.3 seconds. More than three times faster! <img src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif" alt=":)" class="wp-smiley" /> </p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/352/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/352/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=352&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -5292,7 +5387,8 @@ This is a computationally hard problem and method I implemented finds only one s
 <p>I also changed bits in in the root_system PR to utilise Rational(x, y) instead of using floating point numbers. </p>
 <p>I’m hoping to have most major coding done by the 13th, so I can spend the last 10 days of GSOC writing up more detailed docstrings and fixing other minor errors.</p>
 <p> </p>
-<p>Sorry for the short update, but I’m not feeling particularly verbose today.</p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/167/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/167/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=167&amp;subd=meclark256&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+<p>Sorry for the short update, but I’m not feeling particularly verbose today.</p>
+<br />  <a href="http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/167/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/167/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;blog=52875864&amp;post=167&amp;subd=meclark256&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -5430,98 +5526,6 @@ f(x) = C₁⋅x⋅⎜- ── + 1⎟ + C₀⋅⎜── - ── + 1⎟ + O⎝x 
 </div>
 
 </div>
-<div class="daygroup">
-<h2>September 03, 2013</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://geekiology.wordpress.com" title="Risch Algorithm">Chetna Gupta</a></h3>
-
-
-<div class="entrygroup" id="http://geekiology.wordpress.com/?p=410">
-<h4 lang="en"><a href="http://geekiology.wordpress.com/2013/09/03/testing-of-cds-and-is_deriv-branches/">Testing of cds and is_deriv branches</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p>Currently we have merged cds and is_deriv branch to test and make the code working. We have been working to find the possible test errors to debug the every-bit of any condition added to the code</p>
-<p>This week I have worked on the issue of solving infinite loop in cds.py<br />
-Cases Like:</p>
-<pre class="brush: python; title: ; notranslate">cds_cancel_primitive(Poly(sqrt(-1), t2), Poly(x, t2), Poly(2*x, t2),
- Poly(2*x/(x**2 + 1) - x*t2), Poly(2*x/(x**2 + 1) + 3*x*t2), DE, 5)
-</pre>
-<p>I am happy to announce that after having a brainstorming week, trying to look for every parameter missing, I did finally resolve the error of the infinite loop.<br />
-This would mean that integrate_hypertangent would start working for complicated tests etc and hence we would be able to get answers for rich_integrate for some of the hypertangent cases now.</p>
-<p>Ouptut for the test</p>
-<p>Above case translates as follows:<br />
-<img src="http://s0.wp.com/latex.php?latex=%5Cbegin%7Bpmatrix%7D2%2Ax%2F%28x%5E2+%2B+1%29%5C%5C+2%2Ax%2F%28x%5E2+%2B+1%29+%5Cend%7Bpmatrix%7D+%2B+%5Cbegin%7Bpmatrix%7Dx+%26+-2x%5C%5C+2x+%26+x%5Cend%7Bpmatrix%7D%5Cbegin%7Bpmatrix%7Dt2%5C%5C+t2%5Cend%7Bpmatrix%7D&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="\begin{pmatrix}2*x/(x^2 + 1)\\ 2*x/(x^2 + 1) \end{pmatrix} + \begin{pmatrix}x &amp; -2x\\ 2x &amp; x\end{pmatrix}\begin{pmatrix}t2\\ t2\end{pmatrix}" class="latex" title="\begin{pmatrix}2*x/(x^2 + 1)\\ 2*x/(x^2 + 1) \end{pmatrix} + \begin{pmatrix}x &amp; -2x\\ 2x &amp; x\end{pmatrix}\begin{pmatrix}t2\\ t2\end{pmatrix}" /> = <img src="http://s0.wp.com/latex.php?latex=%5Cbegin%7Bpmatrix%7D2%2Ax%2F%28x%5E2+%2B+1%29+-+x%2At2%5C%5C+2%2Ax%2F%28x%5E2+%2B+1%29+%2B+3x+t2+%5Cend%7Bpmatrix%7D&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="\begin{pmatrix}2*x/(x^2 + 1) - x*t2\\ 2*x/(x^2 + 1) + 3x t2 \end{pmatrix}" class="latex" title="\begin{pmatrix}2*x/(x^2 + 1) - x*t2\\ 2*x/(x^2 + 1) + 3x t2 \end{pmatrix}" /><br />
-where t2 = <img src="http://s0.wp.com/latex.php?latex=log%28x%5E2+%2B+1%29&amp;bg=ffffff&amp;fg=444444&amp;s=0" alt="log(x^2 + 1)" class="latex" title="log(x^2 + 1)" /></p>
-<p><a href="http://geekiology.files.wordpress.com/2013/09/screenshot-from-2013-09-03-180938.png"><img src="http://geekiology.files.wordpress.com/2013/09/screenshot-from-2013-09-03-180938.png?w=300&amp;h=168" alt="Screenshot from 2013-09-03 18:09:38" width="300" class="alignnone size-medium wp-image-417" height="168" /></a></p>
-<p>Previous week<br />
-I and Aaron solved the major difficulties incurred in the is_deriv part of the code.<br />
-<a href="http://geekiology.files.wordpress.com/2013/09/screenshot-from-2013-09-03-175154.png"><img src="http://geekiology.files.wordpress.com/2013/09/screenshot-from-2013-09-03-175154.png?w=300&amp;h=168" alt="Screenshot from 2013-09-03 17:51:54" width="300" class="alignnone size-medium wp-image-413" height="168" /></a><br />
-Cases like above where giving incorrect answers before, have a solution now.</p>
-<p>The only issues which is till unresolved from the precious week is the infinite loops for polynomial_reduce kt . While I see similar issues in the original code for case polynomial_reduce(Poly((-64*t**6 + 64*t**4 + 64*t**2 – 64, t)/(2048*t**4 – 4096*t**2 + 2048)), DE) I am not able to find the stopping-condition for the same in the book.</p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/geekiology.wordpress.com/410/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/geekiology.wordpress.com/410/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=geekiology.wordpress.com&amp;blog=36553244&amp;post=410&amp;subd=geekiology&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://geekiology.wordpress.com/2013/09/03/testing-of-cds-and-is_deriv-branches/">by chetnagupta at September 03, 2013 01:10 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
-<div class="daygroup">
-<h2>September 01, 2013</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://sophiessympyblog.wordpress.com" title="sophie's sympy blog">Katja Sophie Hotz</a></h3>
-
-
-<div class="entrygroup" id="http://sophiessympyblog.wordpress.com/?p=281">
-<h4 lang="en"><a href="http://sophiessympyblog.wordpress.com/2013/09/01/10th-and-11th-week/">10th and 11th week</a></h4>
-<div class="entry">
-<div class="content" lang="en">
-<p style="text-align: justify;">Wow, time seems to be flying right now, it’s already been two weeks again! In order to keep things clear, I described the factorization algorithm I am currently working on in <a href="http://sophiessympyblog.wordpress.com/2013/09/01/factoring-polynomials-over-algebraic-number-fields/" title="Factoring polynomials over algebraic number fields">another post</a>. So here I want to talk about my progress and problems in the last two weeks.</p>
-<p style="text-align: justify;">Let’s start with good news. My first two PRs have been merged! So now the modular GCD algorithms I implemented for polynomials over the integers and algebraic number fields are part of SymPy. <img src="http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif" alt=":)" class="wp-smiley" /> </p>
-<p style="text-align: justify;">Progress on the factorization algorithm has not been as fast as I would have liked. I spent a lot of time with Hensel lifting, since the description of the algorithm is not very explicit in this part. I ended up adapting the already implemented Hensel lifting code to my use case. The last (big) part missing is the sparse <img src="http://s0.wp.com/latex.php?latex=p&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="p" class="latex" title="p" />-adic lifting algorithm. The problem here is that I would have to solve a cumbersome system of linear equations over <img src="http://s0.wp.com/latex.php?latex=%5Cmathbb+Z_%7Bp%5Em%7D&amp;bg=f7f3ee&amp;fg=333333&amp;s=0" alt="\mathbb Z_{p^m}" class="latex" title="\mathbb Z_{p^m}" />. One possible way to work around this is to choose a large prime so that no lifting is necessary, which is the way it is currently done in the integer polynomial case. But of course, a lifting would be more efficient.</p>
-<p style="text-align: justify;">I already made successful factorizations (by using big enough primes) for certain polynomials, and next week I hope to get it to work for arbitrary ones.</p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/281/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/281/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;blog=53034828&amp;post=281&amp;subd=sophiessympyblog&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://sophiessympyblog.wordpress.com/2013/09/01/10th-and-11th-week/">by katjasophie at September 01, 2013 02:52 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -5554,7 +5558,7 @@ Cases like above where giving incorrect answers before, have a solution now.</p>
 <a href="http://www.catchmrbharath.in/programming.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a class="message" title="404: not found">Bharath M R</a>
 </li>
 <li>
-<a href="http://brianegranger.com/?feed=rss2" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://brianegranger.com" class="message" title="internal server error">Brian Granger</a>
+<a href="http://brianegranger.com/?feed=rss2" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://brianegranger.com" class="message" title="no activity in 7 days">Brian Granger</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/267967203861801529/posts/default/-/SymPy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://straightupcoding.blogspot.com/search/label/SymPy" class="message" title="no activity in 7 days">Brian Jorgensen</a>
@@ -5695,7 +5699,7 @@ Cases like above where giving incorrect answers before, have a solution now.</p>
 
 <p>
 <strong>Last updated:</strong><br>
-June 14, 2014 01:40 PM<br>
+June 14, 2014 02:01 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
