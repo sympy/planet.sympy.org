@@ -13,6 +13,7 @@
 
 	<items>
 		<rdf:Seq>
+			<rdf:li rdf:resource="http://sushant-hiray.in/posts/gsoc/csympy-week4/" />
 			<rdf:li rdf:resource="http://kundankumar185.wordpress.com/?p=57" />
 			<rdf:li rdf:resource="http://codesachin.wordpress.com/?p=15" />
 			<rdf:li rdf:resource="tag:,2014-06-13:gsoc-week-4.html" />
@@ -72,11 +73,60 @@
 			<rdf:li rdf:resource="http://thilinaatsympy.wordpress.com/?p=264" />
 			<rdf:li rdf:resource="http://thilinaatsympy.wordpress.com/?p=261" />
 			<rdf:li rdf:resource="http://csousahome.wordpress.com/?p=120" />
-			<rdf:li rdf:resource="http://musingsofafriend.wordpress.com/?p=206" />
 		</rdf:Seq>
 	</items>
 </channel>
 
+<item rdf:about="http://sushant-hiray.in/posts/gsoc/csympy-week4/">
+	<title>Sushant Hiray: This Week in CSymPy: #4</title>
+	<link>http://sushant-hiray.in/posts/gsoc/csympy-week4/</link>
+	<content:encoded>&lt;p&gt;Week 4 for GSoC just ended and this week I completed implementing the Exponential Module.&lt;/p&gt;
+
+&lt;h1 id=&quot;progress&quot;&gt;Progress&lt;/h1&gt;
+
+&lt;p&gt;I started the week by implementing &lt;code&gt;ATan2&lt;/code&gt; which was not implemented in the PR of Trignometric Module.
+&lt;br /&gt;&lt;br /&gt;
+&lt;a href=&quot;https://github.com/sympy/csympy/pull/189&quot;&gt;Pull 189&lt;/a&gt; looked into implementing the &lt;code&gt;ATan2&lt;/code&gt; functionality. Since to implement &lt;code&gt;ATan2&lt;/code&gt; we needed to find whether the signs of numerator and denominators. In case of complex symbolic expressions, we are yet to implement &lt;code&gt;numeric-eval&lt;/code&gt; in CSymPy, so in those cases we just
+return the object, in cases where we find the &lt;code&gt;arg&lt;/code&gt; in lookup table we simplify and give out the result.
+&lt;br /&gt;
+A more detailed version of the assumptions can be found in this &lt;a href=&quot;https://github.com/sympy/csympy/pull/189#issuecomment-45625322&quot;&gt;comment&lt;/a&gt; in PR. It is also documented in the code.
+&lt;br /&gt;&lt;br /&gt;
+After implementing &lt;code&gt;ATan2&lt;/code&gt;, I worked on the Exponential module. &lt;a href=&quot;https://github.com/asmeurer&quot;&gt;Aaron&lt;/a&gt; gave some insights regarding the implementation of the exponential module, specifically he mentioned the fact that &lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;pre&gt;&lt;code&gt;It's better to special case E in one place `(pow)` 
+than to special case exp everywhere in the code 
+that tries to deal with pow objects 
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;So discussing this with &lt;a href=&quot;https://github.com/certik&quot;&gt;Ondrej&lt;/a&gt; we decided to keep &lt;code&gt;exp&lt;/code&gt; only as a function which just calls &lt;code&gt;pow(E, x)&lt;/code&gt; underneath.
+&lt;br /&gt;&lt;br /&gt;
+The logarithm class was similar to the current implementation of SymPy barring the part involving complex numbers. The exponential module as a whole was implemented in &lt;a href=&quot;https://github.com/sympy/csympy/pull/194&quot;&gt;pull request&lt;/a&gt; which has been merged into master.
+&lt;br /&gt;&lt;br /&gt;
+I have also decided to implement the LambertW function. It wasn’t a part of my original proposal but it seems pretty trivial to implement! Once this is merged into master, the exponential module will cover all major functions implemented by SymPy.&lt;/p&gt;
+
+&lt;h1 id=&quot;discussions&quot;&gt;Discussions&lt;/h1&gt;
+
+&lt;p&gt;As usual most of the actual discussions happened on PR, Aaron also gave some insights on gitter! So its good to hangout there as well.&lt;/p&gt;
+
+&lt;h1 id=&quot;week-highlights&quot;&gt;Week Highlights!&lt;/h1&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;This week &lt;a href=&quot;https://github.com/isuruf&quot;&gt;@isuruf&lt;/a&gt; started helping us out in the Number Theory module which was originally added by Thilina.&lt;/li&gt;
+  &lt;li&gt;Also I’ve noticed extra traffic in &lt;a href=&quot;https://gitter.im/sympy/csympy&quot;&gt;CSymPy gitter&lt;/a&gt;. A lot of people have started following the conversations there! That is good to see :)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;the-week-ahead&quot;&gt;The Week Ahead&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;Add the &lt;code&gt;LambertW&lt;/code&gt; class.&lt;/li&gt;
+  &lt;li&gt;Implement the &lt;code&gt;Hyperbolic Module&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;br /&gt;
+Thats all for now :) Will get back next week!&lt;/p&gt;</content:encoded>
+	<dc:date>2014-06-15T18:20:00+00:00</dc:date>
+</item>
 <item rdf:about="http://kundankumar185.wordpress.com/?p=57">
 	<title>Kundan Kumar: GSoC week 4: Implemented system of three linear equation of first order</title>
 	<link>http://kundankumar185.wordpress.com/2014/06/15/gsoc-week-4-implemented-system-of-three-linear-equation-of-first-order/</link>
@@ -3749,7 +3799,8 @@ screen npm start
 &lt;p&gt;-A class WeylGroup, which is about the Weyl group of a given Lie algebra.  It gives the size and name of a given Weyl group as well as the matrix form of an element, and an element’s order.&lt;/p&gt;
 &lt;p&gt;-Methods for displaying the Cartan matrix and Dynkin diagram of a Lie algebra.&lt;/p&gt;
 &lt;p&gt; &lt;/p&gt;
-&lt;p&gt;That’s pretty much it.  I had a great time working with SymPy this summer!&lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/172/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/172/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;amp;blog=52875864&amp;amp;post=172&amp;amp;subd=meclark256&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
+&lt;p&gt;That’s pretty much it.  I had a great time working with SymPy this summer!&lt;/p&gt;
+&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/172/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/172/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;amp;blog=52875864&amp;amp;post=172&amp;amp;subd=meclark256&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
 	<dc:date>2013-09-24T19:00:55+00:00</dc:date>
 	<dc:creator>meclark256</dc:creator>
 </item>
@@ -3780,7 +3831,8 @@ screen npm start
 &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+f_2+%3D+x%5E2+-+2+%5Calpha%5E2+x+%2B+%5Calpha%5E3+z%5E2+-+%28+%5Calpha%5E3+%2B+%5Calpha%5E2+%2B+%5Calpha+%2B+1%29+y+%2B+12+%5Calpha+&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\displaystyle f_2 = x^2 - 2 \alpha^2 x + \alpha^3 z^2 - ( \alpha^3 + \alpha^2 + \alpha + 1) y + 12 \alpha &quot; class=&quot;latex&quot; title=&quot;\displaystyle f_2 = x^2 - 2 \alpha^2 x + \alpha^3 z^2 - ( \alpha^3 + \alpha^2 + \alpha + 1) y + 12 \alpha &quot; /&gt;&lt;br /&gt;
 &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+f_3+%3D+x%5E2+-+2+%5Calpha%5E3+x+%2B+%5Calpha%5E2+z%5E2+%2B+%5Calpha+y+-+12+%28+%5Calpha%5E3+%2B+%5Calpha%5E2+%2B+%5Calpha+%2B+1%29+&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\displaystyle f_3 = x^2 - 2 \alpha^3 x + \alpha^2 z^2 + \alpha y - 12 ( \alpha^3 + \alpha^2 + \alpha + 1) &quot; class=&quot;latex&quot; title=&quot;\displaystyle f_3 = x^2 - 2 \alpha^3 x + \alpha^2 z^2 + \alpha y - 12 ( \alpha^3 + \alpha^2 + \alpha + 1) &quot; /&gt;&lt;br /&gt;
 &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+f_4+%3D+x%5E2+%2B+2+%28+%5Calpha%5E3+%2B+%5Calpha%5E2+%2B+%5Calpha+%2B+1%29+x+%2B+%5Calpha+z%5E2+%2B+%5Calpha%5E3+y+%2B+12+%5Calpha%5E2+.+&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\displaystyle f_4 = x^2 + 2 ( \alpha^3 + \alpha^2 + \alpha + 1) x + \alpha z^2 + \alpha^3 y + 12 \alpha^2 . &quot; class=&quot;latex&quot; title=&quot;\displaystyle f_4 = x^2 + 2 ( \alpha^3 + \alpha^2 + \alpha + 1) x + \alpha z^2 + \alpha^3 y + 12 \alpha^2 . &quot; /&gt;&lt;/p&gt;
-&lt;p style=&quot;text-align: justify;&quot;&gt;The current SymPy factorization algorithm needs 215 seconds, whereas the new one only takes 60.3 seconds. More than three times faster! &lt;img src=&quot;http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif&quot; alt=&quot;:)&quot; class=&quot;wp-smiley&quot; /&gt; &lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/352/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/352/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;amp;blog=53034828&amp;amp;post=352&amp;amp;subd=sophiessympyblog&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
+&lt;p style=&quot;text-align: justify;&quot;&gt;The current SymPy factorization algorithm needs 215 seconds, whereas the new one only takes 60.3 seconds. More than three times faster! &lt;img src=&quot;http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif&quot; alt=&quot;:)&quot; class=&quot;wp-smiley&quot; /&gt; &lt;/p&gt;
+&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/352/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/352/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;amp;blog=53034828&amp;amp;post=352&amp;amp;subd=sophiessympyblog&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
 	<dc:date>2013-09-15T17:56:51+00:00</dc:date>
 	<dc:creator>katjasophie</dc:creator>
 </item>
@@ -3865,17 +3917,6 @@ This is a computationally hard problem and method I implemented finds only one s
 &lt;/ol&gt;&lt;br /&gt;Filed under: &lt;a href=&quot;http://csousahome.wordpress.com/category/phd/&quot;&gt;PhD&lt;/a&gt;, &lt;a href=&quot;http://csousahome.wordpress.com/category/sympybotics-2/&quot;&gt;SymPyBotics&lt;/a&gt;, &lt;a href=&quot;http://csousahome.wordpress.com/category/work/&quot;&gt;Work&lt;/a&gt; Tagged: &lt;a href=&quot;http://csousahome.wordpress.com/tag/python/&quot;&gt;python&lt;/a&gt;, &lt;a href=&quot;http://csousahome.wordpress.com/tag/subexpression-elimination/&quot;&gt;subexpression elimination&lt;/a&gt;, &lt;a href=&quot;http://csousahome.wordpress.com/tag/sympy/&quot;&gt;sympy&lt;/a&gt; &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/csousahome.wordpress.com/120/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/csousahome.wordpress.com/120/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=csousahome.wordpress.com&amp;amp;blog=24437078&amp;amp;post=120&amp;amp;subd=csousahome&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
 	<dc:date>2013-09-09T11:59:37+00:00</dc:date>
 	<dc:creator>Cristóvão Duarte Sousa</dc:creator>
-</item>
-<item rdf:about="http://musingsofafriend.wordpress.com/?p=206">
-	<title>Prasoon Shukla: GSoC Week 12: Things are finally looking up!</title>
-	<link>http://musingsofafriend.wordpress.com/2013/09/09/gsoc-week-12-things-are-finally-looking-up/</link>
-	<content:encoded>&lt;p&gt;This week, finally, I was able to get the express method working completely. I knew that once the express method starts working, everything else will fall into place. And, as you might deduce from the title of the post, things finally seem to be working.&lt;/p&gt;
-&lt;p&gt;First, a bit of background. I am developing a framework that can be used to represent vectors in Python and operate on them. There is this method called &lt;em&gt;express&lt;/em&gt; that one can call on a vector and have it expressed in another coordinate systems. This vector calculus module was designed to with a very general approach – the vectors can be constructed from a variety of coordinate systems – the coordinate systems can be positioned, oriented and can also be in any orthogonal coordinate system (that are currently supported; new coordinate systems can be easily added). Also, and I won’t go into the details, the classes that represent vectors need to inherit from a SymPy class, &lt;em&gt;Basic&lt;/em&gt;. This essentially means there’s a tree like structure of components so that objects can be decomposed into their forming components. All of this means decreased complexity for the user, but, increased complexity of the code. Anyway, as I was saying, the express method can be used to convert the vectors into different coordinate systems so that they can be operated on. I simply cannot overemphasize the importance of this one method. It took me a 3 weeks to finally be able to write this method and another 2 to test and make it work but finally, it got done this week.&lt;/p&gt;
-&lt;p&gt;Now that this method is working, I moved on the orientation methods. The majority of the work in this area was just the proper initialization of matrices when coordinate system objects are created. That was dealt with and as a result, the DCM methods (the methods that give the direction cosine matrices between two coordinate systems) are finally working as well.&lt;/p&gt;
-&lt;p&gt;Then, I wanted the operations on vectors to be working. Already, the basic operations of addition, subtraction, multiplication, division, expansion, factorization etc. were working. The next step was to get the dot and cross methods to work. That is what I did next. So, the dot and cross methods are now working.&lt;/p&gt;
-&lt;p&gt;Well, that was a bit of a long post. Anyway, I’d like to say that I did all this even though the next week (9-Sep-13 to 13-Sep-13) is the exam week. I didn’t study much in the last month. Usually, I would study really hard one week before the exams and hope for the best. But, I couldn’t follow my general practice this time. God knows what’ll happen this coming week! Anyway, just so that I don’t completely screw up my grades, I’ll try to study as much as humanly possible during the exam week and so, I won’t work at all during this week (till the weekend). That will give me from 13th evening to 16th night to get as much done as possible before the soft deadline. Then, there’d be about a week more before the hard deadline. Hopefully, I’ll be able to get most of the promised goals done by then including the documentation. Fingers crossed!&lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/musingsofafriend.wordpress.com/206/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/musingsofafriend.wordpress.com/206/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=musingsofafriend.wordpress.com&amp;amp;blog=36409097&amp;amp;post=206&amp;amp;subd=musingsofafriend&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
-	<dc:date>2013-09-09T11:51:59+00:00</dc:date>
-	<dc:creator>musingsofafriend</dc:creator>
 </item>
 
 </rdf:RDF>
