@@ -13,6 +13,7 @@
 
 	<items>
 		<rdf:Seq>
+			<rdf:li rdf:resource="http://blog.s-d-b.com/?p=67" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-54146973659574488.post-857251037734880412" />
 			<rdf:li rdf:resource="http://tarzzz.github.io/gsoc14/fourth-week.html" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-8847459392628952171.post-2737301790391464158" />
@@ -72,11 +73,96 @@
 			<rdf:li rdf:resource="http://manojbits.wordpress.com/?p=760" />
 			<rdf:li rdf:resource="http://meclark256.wordpress.com/?p=172" />
 			<rdf:li rdf:resource="http://musingsofafriend.wordpress.com/?p=209" />
-			<rdf:li rdf:resource="http://sophiessympyblog.wordpress.com/?p=352" />
 		</rdf:Seq>
 	</items>
 </channel>
 
+<item rdf:about="http://blog.s-d-b.com/?p=67">
+	<title>Soumya Dipta Biswas: GSoC 2014: Week 4</title>
+	<link>http://blog.s-d-b.com/gsoc-2014-week-4/</link>
+	<content:encoded>&lt;p&gt;Hello Everyone,&lt;/p&gt;
+&lt;p&gt;The majority of work this week was finishing up my previous work and creating the architecture for the First Order Logic module. Consequently, this post is concerned with First Order Logic (FoL) and is intended mostly for those who are not familiar with the concepts. If you find yourself comfortable with writing formulas in FoL then you can safely skip this post.&lt;/p&gt;
+&lt;p&gt;Before we go on to the discussion about First Order Logic, one very interesting topic that came up this week was the idea of an Atom. What is an atom for propositional logic? The classic answer amounts to anything that cannot be broken down further to yield simpler terms. Analogously, let us define a &lt;code&gt;literal&lt;/code&gt; to mean any atom or its negation. So, &lt;code&gt;A&lt;/code&gt; is a literal (and so is &lt;code&gt;~A&lt;/code&gt;). How about &lt;code&gt;A &amp;gt; B&lt;/code&gt;. Without bordering on any ideas of higher order logic, let us tweak the definition of atom to mean anything that cannot be broken down &lt;em&gt;using propositional logic&lt;/em&gt; to yield simpler terms. So, how does this definition change things? It means we can treat any expression that propositional logic can’t break down as a black box with the assumption that it will yield a boolean value once evaluated. Analogously, a literal is now any expression which cannot be simplified (in propositional logic) or its negation. This definition gives a lot more freedom and power to the idea of formulas. Ofcourse, one needs to keep in mind that it is compulsory for these &lt;em&gt;literals&lt;/em&gt; to yield a boolean once evaluated (typically before propositional formula evaluation methods are called on the formula).&lt;/p&gt;
+&lt;p&gt;Ok, with that, we finish the first part our Propositional Logic post series. The future posts will be associated with First Order Logic before coming back to SAT (in propositional formula). For the remainder of the series the words First Order Logic and Predicate Logic will be used interchangeably (while there is some &lt;a href=&quot;http://http://en.wikipedia.org/wiki/Predicate_logic&quot; title=&quot;Predicate Logic&quot;&gt;difference&lt;/a&gt; between the two, we will ignore them. Finally beginning the actual discussion about FoL, let us start with some definitions.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Constant:&lt;/strong&gt; Any object of the universe whose value remains the same throughout the expression. e.g. john, 1, computer, socrates&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Variable:&lt;/strong&gt; An object which can take up any value from the domain. e.g. X, Y&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Function:&lt;/strong&gt; A mapping of n-ary terms (see below) to a term. e.g. F(X, G(a, Y)), teacher(teacher(aristotle))&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Term:&lt;/strong&gt; Any Constant, Variable or Function is called a Term.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Predicate:&lt;/strong&gt; A mapping of n-ary terms to a boolean value. e.g. IsTeacher(Socrates, plato)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Quantifier:&lt;/strong&gt; Quantifiers assert a particular property with respect to a bound variable. Q(X, IsTeacher(X, alexander)) Here Q is some quantifier (see below) and X is the bound variable.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;ForAll (∀)&lt;/strong&gt;: Also known as Universal Quantifier, this asserts that for each value of the bound variable the expression holds True&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Exists (∃)&lt;/strong&gt;: Also known as Existential Quantifier, this asserts that for atleast one of the values of the bound variable the expression holds True&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The above description is far from complete. Below are some more examples. For these examples assume that the program is intelligent enough to know the answer.&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;crayon-plain-tag&quot;&gt;# All constants are in lowercase
+# All variables are in uppercase
+# All functions starts with a lowercase but subsequent words start with an uppercase
+# All predicates follow camel casing
+
+# teacher(person) is a function which maps a person to his teacher
+&amp;gt;&amp;gt;&amp;gt; teacher(alexander)
+aristotle
+&amp;gt;&amp;gt;&amp;gt; teacher(teacher(aristotle))
+'Socrates'
+
+# f(X) = 2X + 3y + 1
+&amp;gt;&amp;gt;&amp;gt; f(X, Y)
+Add(Mul(2, X), Mul(3, Y), 1)
+
+# IsTeacher(a, b) is a predicate which returns if a is the teacher of b
+&amp;gt;&amp;gt;&amp;gt; IsTeacher(alexander, plato)
+False
+
+# Assume that the following properties hold for the relationship teacher
+# If A is the teacher of B, and B is the teacher of C, then A is the teacher of C (Transitivity)
+# A is always the teacher of A (Identity)
+&amp;gt;&amp;gt;&amp;gt; domain = [socrates, plato, aristotle, alexander]
+&amp;gt;&amp;gt;&amp;gt; ForAll(X, IsTeacher(X, alexander))
+True
+&amp;gt;&amp;gt;&amp;gt; Exists(X, IsWarrior(X))
+True
+&amp;gt;&amp;gt;&amp;gt; ForAll(X, IsWarrior(X))
+False
+&amp;gt;&amp;gt;&amp;gt; Exists(X, InventedCalculus(X))
+False
+
+# f(x, y) = x + 2y
+# g(x, y) = 2x + y
+&amp;gt;&amp;gt;&amp;gt; ForAll(X, ForAll(Y, Greater(f(X, Y), g(X, Y)))
+False
+&amp;gt;&amp;gt;&amp;gt; Exists(X, Exists(Y, Greater(f(X, Y), g(X, Y)))
+True&lt;/pre&gt;&lt;p&gt; &lt;/p&gt;
+&lt;p&gt;I hope the above examples make the definitions clearer. However SymPy is a symbolic library (rather than a numeric one). The implication of the same is that we are much less concerned about the value of the expression than the expression itself. For example, we will be predominantly dealing with functions, variables and predicates without being bothered by their (real life) values. What follows next are examples of conversion of natural language sentences to First Order Logic and their representation in SymPy. One would notice that we have only dealt with the new FoL concepts in the examples above and completely ignored the traditional propositional operators. Using the idea of Atom described at the beginning of this post, if we think of every Predicate (and Quantifier) as an Atom, then we can use every idea of propositional logic here. The examples below describe the complete idea.&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;crayon-plain-tag&quot;&gt;# All dolphins all mammals
+&amp;gt;&amp;gt;&amp;gt; X = symbols('X')
+&amp;gt;&amp;gt;&amp;gt; Dolphin = Predicate('Dolphin')
+&amp;gt;&amp;gt;&amp;gt; Mammal = Predicate('Mammal')
+&amp;gt;&amp;gt;&amp;gt; ForAll(X, Dolphin(X) &amp;gt;&amp;gt; Mammal(X))
+ForAll((X), Implies(Dolphin(X), Mammal(X)))
+
+
+&amp;gt;&amp;gt;&amp;gt; X, T = symbols('X T')
+&amp;gt;&amp;gt;&amp;gt; Person = Predicate('Person')
+&amp;gt;&amp;gt;&amp;gt; Time = Predicate('Time')
+&amp;gt;&amp;gt;&amp;gt; CanFool = Predicate('CanFool')
+
+# You can fool some of the people all of the time
+&amp;gt;&amp;gt;&amp;gt; Exists(X, ForAll(T, (Person(X) &amp;amp; Time(T)) &amp;gt;&amp;gt; CanFool(X, T)))
+Exists((X), ForAll(T, Implies(And(Person(X), Time(T)), CanFool(X, T))))
+
+# You can fool all of the people some of the time
+&amp;gt;&amp;gt;&amp;gt; ForAll(X, Exists(T, (Person(X) &amp;amp; Time(T)) &amp;gt;&amp;gt; CanFool(X, T)))
+ForAll((X), Exists(T, Implies(And(Person(X), Time(T)), CanFool(X, T))))
+
+# You cannot fool all of the people all of the time
+&amp;gt;&amp;gt;&amp;gt; ~ForAll(X, ForAll(T, (Person(X) &amp;amp; Time(T)) &amp;gt;&amp;gt; CanFool(X, T)))
+Not(ForAll((X,T), Implies(And(Person(X), Time(T)), CanFool(X, T))))&lt;/pre&gt;&lt;p&gt; &lt;/p&gt;
+&lt;p&gt;I hope this should provide you with some basic idea about First Order Logic. I will be updating this post with ideas related to Interpretation/Model. Stay tuned.&lt;/p&gt;
+&lt;p&gt;Aloha!!!&lt;/p&gt;</content:encoded>
+	<dc:date>2014-06-17T20:54:50+00:00</dc:date>
+	<dc:creator>SD</dc:creator>
+</item>
 <item rdf:about="tag:blogger.com,1999:blog-54146973659574488.post-857251037734880412">
 	<title>Akshay Narasimha: Gsoc Week-4</title>
 	<link>http://geekpy.blogspot.com/2014/06/gsoc-week-4.html</link>
@@ -3874,7 +3960,8 @@ screen npm start
 &lt;p&gt;-A class WeylGroup, which is about the Weyl group of a given Lie algebra.  It gives the size and name of a given Weyl group as well as the matrix form of an element, and an element’s order.&lt;/p&gt;
 &lt;p&gt;-Methods for displaying the Cartan matrix and Dynkin diagram of a Lie algebra.&lt;/p&gt;
 &lt;p&gt; &lt;/p&gt;
-&lt;p&gt;That’s pretty much it.  I had a great time working with SymPy this summer!&lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/172/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/172/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;amp;blog=52875864&amp;amp;post=172&amp;amp;subd=meclark256&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
+&lt;p&gt;That’s pretty much it.  I had a great time working with SymPy this summer!&lt;/p&gt;
+&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/172/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/172/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;amp;blog=52875864&amp;amp;post=172&amp;amp;subd=meclark256&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
 	<dc:date>2013-09-24T19:00:55+00:00</dc:date>
 	<dc:creator>meclark256</dc:creator>
 </item>
@@ -3891,23 +3978,6 @@ screen npm start
 &lt;p&gt;Now that those things are out-of-the-way, let me mention some of my current work. I am currently working to get the position of the coordinate systems work with the express method. That would work nicely except for the fact that I am having some trouble dealing with constant position dependent vectors. I am thinking of creating a new class for it. Anyway, that was a long post. There will be of course follow-up posts on my plans but for the time being, I would like to continue working.&lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/musingsofafriend.wordpress.com/209/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/musingsofafriend.wordpress.com/209/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=musingsofafriend.wordpress.com&amp;amp;blog=36409097&amp;amp;post=209&amp;amp;subd=musingsofafriend&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
 	<dc:date>2013-09-16T17:38:49+00:00</dc:date>
 	<dc:creator>musingsofafriend</dc:creator>
-</item>
-<item rdf:about="http://sophiessympyblog.wordpress.com/?p=352">
-	<title>Katja Sophie Hotz: 12th and 13th week</title>
-	<link>http://sophiessympyblog.wordpress.com/2013/09/15/12th-and-13th-week/</link>
-	<content:encoded>&lt;p style=&quot;text-align: justify;&quot;&gt;Here is my status update on the factorization algorithm.&lt;/p&gt;
-&lt;p style=&quot;text-align: justify;&quot;&gt;I was able to close all remaining gaps in the code and the algorithm is working smoothly now. In particular, I implemented the &lt;img src=&quot;http://s0.wp.com/latex.php?latex=p&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;p&quot; class=&quot;latex&quot; title=&quot;p&quot; /&gt;-adic lifting I was taking about last time, which should improve performance for polynomials with large coefficients. First, I had to make the Gaussian elimination code in matrices.py a little more flexible. For example, now one can pass a custom elimination function in addition to a custom iszero function. To solve linear systems over the ring &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cmathbb+Z_%7Bp%5El%7D&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\mathbb Z_{p^l}&quot; class=&quot;latex&quot; title=&quot;\mathbb Z_{p^l}&quot; /&gt;, I then call it in a slightly strange way. Namely, I make calculations modulo &lt;img src=&quot;http://s0.wp.com/latex.php?latex=p%5El&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;p^l&quot; class=&quot;latex&quot; title=&quot;p^l&quot; /&gt;, but being zero is checked modulo &lt;img src=&quot;http://s0.wp.com/latex.php?latex=p&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;p&quot; class=&quot;latex&quot; title=&quot;p&quot; /&gt;. The only drawback of this approach is that rows that contain only multiples of &lt;img src=&quot;http://s0.wp.com/latex.php?latex=p&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;p&quot; class=&quot;latex&quot; title=&quot;p&quot; /&gt; will be treated as zero rows, thus the set of solutions might get bigger. However, in my use case this should happen only rarely and if it does, it will be detected later in the code.&lt;/p&gt;
-&lt;p style=&quot;text-align: justify;&quot;&gt;In the last week of my GSoC I will keep fine tuning the code and issue a PR for the factorization algorithm.&lt;/p&gt;
-&lt;p style=&quot;text-align: justify;&quot;&gt;Finally, here are some comparisons with &lt;code&gt;%timeit&lt;/code&gt;.&lt;/p&gt;
-&lt;p style=&quot;text-align: justify;&quot;&gt;First, a small example. Let &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Calpha&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\alpha&quot; class=&quot;latex&quot; title=&quot;\alpha&quot; /&gt; be a root of &lt;img src=&quot;http://s0.wp.com/latex.php?latex=t%5E4+%2B+1&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;t^4 + 1&quot; class=&quot;latex&quot; title=&quot;t^4 + 1&quot; /&gt; and &lt;img src=&quot;http://s0.wp.com/latex.php?latex=f+%3D+x%5E4+%2B+y%5E4+%5Cin+%5Cmathbb+Q%28%5Calpha%29%5Bx%2C+y%5D&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;f = x^4 + y^4 \in \mathbb Q(\alpha)[x, y]&quot; class=&quot;latex&quot; title=&quot;f = x^4 + y^4 \in \mathbb Q(\alpha)[x, y]&quot; /&gt;. The current SymPy factorization algorithm needs 166 ms on my laptop, whereas the new one only takes 69.1 ms.&lt;/p&gt;
-&lt;p style=&quot;text-align: justify;&quot;&gt;Now a bigger one. Let &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Calpha&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\alpha&quot; class=&quot;latex&quot; title=&quot;\alpha&quot; /&gt; be a root of &lt;img src=&quot;http://s0.wp.com/latex.php?latex=t%5E4+%2B+t%5E3+%2B+t%5E2+%2B+t+%2B+1&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;t^4 + t^3 + t^2 + t + 1&quot; class=&quot;latex&quot; title=&quot;t^4 + t^3 + t^2 + t + 1&quot; /&gt; and &lt;img src=&quot;http://s0.wp.com/latex.php?latex=f+%3D+f_1+%5Ccdot+f_2+%5Ccdot+f_3+%5Ccdot+f_4+%5Cin+%5Cmathbb+Q%28%5Calpha%29%5Bx%2C+y%2C+z%5D&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;f = f_1 \cdot f_2 \cdot f_3 \cdot f_4 \in \mathbb Q(\alpha)[x, y, z]&quot; class=&quot;latex&quot; title=&quot;f = f_1 \cdot f_2 \cdot f_3 \cdot f_4 \in \mathbb Q(\alpha)[x, y, z]&quot; /&gt;, where&lt;/p&gt;
-&lt;p style=&quot;text-align: center;&quot;&gt;&lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+f_1+%3D+x%5E2+-+2+%5Calpha+x+-+%28+%5Calpha%5E3+%2B+%5Calpha%5E2+%2B+%5Calpha+%2B+1%29+z%5E2+%2B+%5Calpha%5E2+y+%2B+12+%5Calpha%5E3+&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\displaystyle f_1 = x^2 - 2 \alpha x - ( \alpha^3 + \alpha^2 + \alpha + 1) z^2 + \alpha^2 y + 12 \alpha^3 &quot; class=&quot;latex&quot; title=&quot;\displaystyle f_1 = x^2 - 2 \alpha x - ( \alpha^3 + \alpha^2 + \alpha + 1) z^2 + \alpha^2 y + 12 \alpha^3 &quot; /&gt;&lt;br /&gt;
-&lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+f_2+%3D+x%5E2+-+2+%5Calpha%5E2+x+%2B+%5Calpha%5E3+z%5E2+-+%28+%5Calpha%5E3+%2B+%5Calpha%5E2+%2B+%5Calpha+%2B+1%29+y+%2B+12+%5Calpha+&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\displaystyle f_2 = x^2 - 2 \alpha^2 x + \alpha^3 z^2 - ( \alpha^3 + \alpha^2 + \alpha + 1) y + 12 \alpha &quot; class=&quot;latex&quot; title=&quot;\displaystyle f_2 = x^2 - 2 \alpha^2 x + \alpha^3 z^2 - ( \alpha^3 + \alpha^2 + \alpha + 1) y + 12 \alpha &quot; /&gt;&lt;br /&gt;
-&lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+f_3+%3D+x%5E2+-+2+%5Calpha%5E3+x+%2B+%5Calpha%5E2+z%5E2+%2B+%5Calpha+y+-+12+%28+%5Calpha%5E3+%2B+%5Calpha%5E2+%2B+%5Calpha+%2B+1%29+&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\displaystyle f_3 = x^2 - 2 \alpha^3 x + \alpha^2 z^2 + \alpha y - 12 ( \alpha^3 + \alpha^2 + \alpha + 1) &quot; class=&quot;latex&quot; title=&quot;\displaystyle f_3 = x^2 - 2 \alpha^3 x + \alpha^2 z^2 + \alpha y - 12 ( \alpha^3 + \alpha^2 + \alpha + 1) &quot; /&gt;&lt;br /&gt;
-&lt;img src=&quot;http://s0.wp.com/latex.php?latex=%5Cdisplaystyle+f_4+%3D+x%5E2+%2B+2+%28+%5Calpha%5E3+%2B+%5Calpha%5E2+%2B+%5Calpha+%2B+1%29+x+%2B+%5Calpha+z%5E2+%2B+%5Calpha%5E3+y+%2B+12+%5Calpha%5E2+.+&amp;amp;bg=f7f3ee&amp;amp;fg=333333&amp;amp;s=0&quot; alt=&quot;\displaystyle f_4 = x^2 + 2 ( \alpha^3 + \alpha^2 + \alpha + 1) x + \alpha z^2 + \alpha^3 y + 12 \alpha^2 . &quot; class=&quot;latex&quot; title=&quot;\displaystyle f_4 = x^2 + 2 ( \alpha^3 + \alpha^2 + \alpha + 1) x + \alpha z^2 + \alpha^3 y + 12 \alpha^2 . &quot; /&gt;&lt;/p&gt;
-&lt;p style=&quot;text-align: justify;&quot;&gt;The current SymPy factorization algorithm needs 215 seconds, whereas the new one only takes 60.3 seconds. More than three times faster! &lt;img src=&quot;http://s0.wp.com/wp-includes/images/smilies/icon_smile.gif&quot; alt=&quot;:)&quot; class=&quot;wp-smiley&quot; /&gt; &lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/sophiessympyblog.wordpress.com/352/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/sophiessympyblog.wordpress.com/352/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=sophiessympyblog.wordpress.com&amp;amp;blog=53034828&amp;amp;post=352&amp;amp;subd=sophiessympyblog&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
-	<dc:date>2013-09-15T17:56:51+00:00</dc:date>
-	<dc:creator>katjasophie</dc:creator>
 </item>
 
 </rdf:RDF>
