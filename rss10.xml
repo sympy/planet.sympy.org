@@ -13,6 +13,7 @@
 
 	<items>
 		<rdf:Seq>
+			<rdf:li rdf:resource="https://hargup.github.io/posts/week-4.html" />
 			<rdf:li rdf:resource="http://blog.s-d-b.com/?p=67" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-54146973659574488.post-857251037734880412" />
 			<rdf:li rdf:resource="http://tarzzz.github.io/gsoc14/fourth-week.html" />
@@ -72,11 +73,59 @@
 			<rdf:li rdf:resource="http://sushant-hiray.in/posts/setting-up-ghost" />
 			<rdf:li rdf:resource="http://manojbits.wordpress.com/?p=760" />
 			<rdf:li rdf:resource="http://meclark256.wordpress.com/?p=172" />
-			<rdf:li rdf:resource="http://musingsofafriend.wordpress.com/?p=209" />
 		</rdf:Seq>
 	</items>
 </channel>
 
+<item rdf:about="https://hargup.github.io/posts/week-4.html">
+	<title>Harsh Gupta: week 4</title>
+	<link>https://hargup.github.io/posts/week-4.html</link>
+	<content:encoded>&lt;div&gt;&lt;h3&gt;Intersections of Infinitely indexed sets&lt;/h3&gt;
+&lt;p&gt;This week I implemented a method to do intersection of imagesets using the
+solutions of Diophantine equations at &lt;a href=&quot;https://github.com/sympy/sympy/pull/7587&quot;&gt;PR&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Say you have
+to find the intersection of sets &lt;code&gt;2*n| n in Integers&lt;/code&gt; and &lt;code&gt;3*m| m in Integers&lt;/code&gt;.
+The intersection of these sets is the set of the common values in the two sets,
+which in this case is equivalent to the values of &lt;code&gt;n&lt;/code&gt; for which the equation &lt;code&gt;2*n - 3*m&lt;/code&gt; has
+some integral solution in &lt;code&gt;m&lt;/code&gt;. Or the values of &lt;code&gt;m&lt;/code&gt; for which the &lt;code&gt;2*n - 3*m&lt;/code&gt;
+has some integral solution in &lt;code&gt;n&lt;/code&gt;. Diophantine equations are equations for
+which only integral solutions are searched for.
+The Diophantine module was written by
+&lt;a href=&quot;https://github.com/thilinarmtb&quot;&gt;Thilina&lt;/a&gt; as his GSoC project last year.
+It gives the parametric solution for such equation.&lt;/p&gt;
+&lt;div class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;n&quot;&gt;In&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;17&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;diophantine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;m&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;17&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The Solution is sorted according to alphabetic order of the variables involved.
+So the value of LHS (&lt;code&gt;2*n&lt;/code&gt;) for which the equation is &lt;code&gt;2*(-3*t)&lt;/code&gt; that is &lt;code&gt;-6*t&lt;/code&gt;
+and it is the intersection of the sets described above &lt;code&gt;-6*t| t in Integers&lt;/code&gt;.
+Since &lt;code&gt;-6*t| t in Integers&lt;/code&gt; is same as &lt;code&gt;6*t| t in Integers&lt;/code&gt; I also wrote some
+simplification rules for the imagesets with Integers as baseset.&lt;/p&gt;
+&lt;h3&gt;Sets for Invert Function&lt;/h3&gt;
+&lt;p&gt;The sets module turned out to be better than I expected. I had a perception
+that substitutions doesn't work properly with sets and I have even opened an
+&lt;a href=&quot;https://github.com/sympy/sympy/issues/7483&quot;&gt;issue&lt;/a&gt; for that but it turned out
+I hadn't looked closely enough. It worked well for the free variables and it
+didn't worked for the things it shouldn't work i.e., the bound variables in the
+imagesets.&lt;/p&gt;
+&lt;p&gt;Using sets simplified the code. All the list comprehensions like this
+&lt;code&gt;[i.subs(symbol, symbol/g) for i in _invert(h, symbol)]&lt;/code&gt; were converted to
+simple substitutions for sets and other sets operations.  &lt;code&gt;_invert(h,
+symbol).subs(symbol, symbol/g)&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Just by changing the output of invert to sets, then by adding the inverse of
+trigonometric function and writing the code to rewrite then as tan I was able
+to return all the solutions of the equations like &lt;code&gt;cos(x) + sin(x) == 0&lt;/code&gt; it
+turned to out to easier than I thought. Using sets as output makes thinking
+about the mathematics of the solvers much more easier and the code comes
+out to be pretty natural. Now when we can see the results I can surely say
+there can be no better output for solvers than sets.&lt;/p&gt;
+&lt;p&gt;This week I'll study LambertW function and then code additional techniques to
+solve real equations. I'll also try to figure out techniques to perform Union
+on infinitely indexed sets.&lt;/p&gt;&lt;/div&gt;</content:encoded>
+	<dc:date>2014-06-18T05:59:01+00:00</dc:date>
+</item>
 <item rdf:about="http://blog.s-d-b.com/?p=67">
 	<title>Soumya Dipta Biswas: GSoC 2014: Week 4</title>
 	<link>http://blog.s-d-b.com/gsoc-2014-week-4/</link>
@@ -3964,20 +4013,6 @@ screen npm start
 &lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/172/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/172/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;amp;blog=52875864&amp;amp;post=172&amp;amp;subd=meclark256&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
 	<dc:date>2013-09-24T19:00:55+00:00</dc:date>
 	<dc:creator>meclark256</dc:creator>
-</item>
-<item rdf:about="http://musingsofafriend.wordpress.com/?p=209">
-	<title>Prasoon Shukla: GSoC Week 13: Plans for the future</title>
-	<link>http://musingsofafriend.wordpress.com/2013/09/16/gsoc-week-13-plans-for-the-future/</link>
-	<content:encoded>&lt;p&gt;Today is the official soft pencils down date for GSoC 2013.  Any my work isn’t finished. This post, with the benefit of hindsight, seems eventful.&lt;/p&gt;
-&lt;p&gt;So, as I was quite worried about for the last two weeks, the exam week finally passed me by – and I can’t say I was unscathed. Nevertheless, I think I’ll get through without too bad a grade in most of my courses. Needless to say, I was unable to do any work this past week – exams had me occupied.&lt;/p&gt;
-&lt;p&gt;Getting to the topic of this post. Well, I saw that I wouldn’t be able to get the work done in time – at least not before 16th. So, I wrote to my mentors and the organisation admin hoping to continue working after the GSoC period on my project. Thankfully, my mentors and the org admins were accommodating. So, here’s a post mentioning what is the final goal of this project is and how things should look like once finished. Of course, this isn’t a complete post – I’ll do follow-up posts on this one in the coming weeks.&lt;/p&gt;
-&lt;p&gt;Right now, we are at a point where we have a foundation for the module – we can represent vectors in any orthogonal coordinate system (currently there are only three – although it is completely extensible with addition of classes for different coordinate systems) and do fundamental operations on it. In addition to the fundamental manipulations on the vectors, we can also do some other operations – dot and cross products, namely, for the time being. I should also point out the generic nature of our design – everything is generalized. That is how things stand now. In the near future – that is in the next one or two weeks, I believe that we should have implemented the differentiation methods on vectors – the simple differentiation, the grad (of scalars), the div and the curl. That much I am quite certain will work. The way ahead of that, I’m afraid, isn’t without its perils (okay, I exaggerate; :s/perils/challenges/g). The next thing to do is to implement the integration methods. I have already created a class for holding integrals – it is a base class. Then, there are two classes for two different type of integrals – one for line integrals and one for line integrals and one for surface integrals. I have also written methods that would reduce the integral to an internal in one variable for each of these classes. But, it remains to see if these will work.&lt;/p&gt;
-&lt;p&gt;Once I have these integration classes working, then, I should like to proceed with other integration classes – for example integrating vector over simple limits. I am fairly confident that &lt;em&gt;if&lt;/em&gt; I can get the previous two classes working, then this class will work, too. The next order of business will be to implement numerical evaluation of these integration methods, which, given that I can reduce the integral to a normal scalar integration, shouldn’t be too difficult.&lt;/p&gt;
-&lt;p&gt;That would finish quite a few of the methods required for vector calculus. Then, I would like to work on the part that deal with reference frames. Currently, we have only three coordinate systems – I’d like to add two more; parabolic and elliptical coordinate systems seem like a good way to begin. Also, I’d like to implement more rotation methods – like adding quaternions, for example. Also, Stefan and I had a chat where her mentioned that I should remove the string based interface for these orientation method (and elsewhere as well). So, to take it one step further, I’d like to do some general refactoring – keeping coordinate systems in their own file, keeping vector classes separate, keeping integration classes separate and perhaps more separation based on helper methods.&lt;/p&gt;
-&lt;p&gt;One of the things that is quite important to do of course is profiling the code and optimizing the bottlenecks. Currently, I have identified several places in the code which can be easily optimized. But, I’m not beginning the optimization just yet; I should like to have a sense of completion before I begin optimizing the code. Currently, there is the &lt;em&gt;express&lt;/em&gt; method that appears slow and that is because of the dcm  method – which is slow. So, I have a fairly good idea of how to go ahead with the optimizations – it is just that I will do it towards the end.&lt;/p&gt;
-&lt;p&gt;Now that those things are out-of-the-way, let me mention some of my current work. I am currently working to get the position of the coordinate systems work with the express method. That would work nicely except for the fact that I am having some trouble dealing with constant position dependent vectors. I am thinking of creating a new class for it. Anyway, that was a long post. There will be of course follow-up posts on my plans but for the time being, I would like to continue working.&lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/musingsofafriend.wordpress.com/209/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/musingsofafriend.wordpress.com/209/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=musingsofafriend.wordpress.com&amp;amp;blog=36409097&amp;amp;post=209&amp;amp;subd=musingsofafriend&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
-	<dc:date>2013-09-16T17:38:49+00:00</dc:date>
-	<dc:creator>musingsofafriend</dc:creator>
 </item>
 
 </rdf:RDF>
