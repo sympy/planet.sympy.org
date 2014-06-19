@@ -62,6 +62,7 @@
 			<rdf:li rdf:resource="http://kundankumar185.wordpress.com/?p=3" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-8847459392628952171.post-581868626457110552" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-54146973659574488.post-8832200362911847122" />
+			<rdf:li rdf:resource="tag:fa.bianp.net,2014-04-21:blog/2014/surrogate-loss-functions-in-machine-learning/" />
 			<rdf:li rdf:resource="http://sushant-hiray.in/posts/gsoc/selected-gsoc/" />
 			<rdf:li rdf:resource="http://asmeurersympy.wordpress.com/?p=1413" />
 			<rdf:li rdf:resource="http://sushant-hiray.in/posts/getting-started-with-open-source" />
@@ -72,7 +73,6 @@
 			<rdf:li rdf:resource="http://sushant-hiray.in/posts/push-it-good-to-git" />
 			<rdf:li rdf:resource="http://sushant-hiray.in/posts/setting-up-ghost" />
 			<rdf:li rdf:resource="http://manojbits.wordpress.com/?p=760" />
-			<rdf:li rdf:resource="http://meclark256.wordpress.com/?p=172" />
 		</rdf:Seq>
 	</items>
 </channel>
@@ -3500,6 +3500,45 @@ that we can keep the visualizations in the static format on the drive(or reposit
 	<dc:date>2014-04-24T20:27:00+00:00</dc:date>
 	<dc:creator>Akshay Narasimha</dc:creator>
 </item>
+<item rdf:about="tag:fa.bianp.net,2014-04-21:blog/2014/surrogate-loss-functions-in-machine-learning/">
+	<title>Fabian Pedregosa: Surrogate Loss Functions in Machine Learning</title>
+	<link>http://fa.bianp.net/blog/2014/surrogate-loss-functions-in-machine-learning/</link>
+	<content:encoded>&lt;p&gt;&lt;span class=&quot;bold&quot;&gt;This is a summary of some papers I've read on calibration of surrogate loss functions in the context of machine learning. But mostly it is an excuse to post some nice images I made.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;In the binary-class classification setting we are given $n$ training samples $\{(X_1, Y_1), \ldots, (X_n, Y_n)\}$, where $X_i$ belongs to some sample space $\mathcal{X}$, usually $\mathbb{R}^p$ but for the purpose of this post we can keep i abstract, and $y_i \in \{-1, 1\}$ is an integer representing the class label. &lt;/p&gt;
+&lt;p&gt;We are also given a loss function $\ell: \{-1, 1\} \times \{-1, 1\} \to \mathbb{R}$ that measures the error of a given prediction. The value of the loss function $\ell$ at an arbitrary point $(y, \hat{y})$ is interpreted as the cost incurred by predicting $\hat{y}$ when the true label is $y$. In classification this function is often the zero-one loss, that is, $\ell(y, \hat{y})$ is zero when $y = \hat{y}$  and one otherwise.&lt;/p&gt;
+&lt;p&gt;The goal is to find a function $h: \mathcal{X} \to [k]$, the classifier, with the smallest expected loss on a new sample. In other words, we seek to find a function $h$ that minimizes the expected $\ell$-risk, given by 
+$$
+\mathcal{R}_{\ell}(h) = \mathbb{E}_{XY}[\ell(Y, h(X))]
+$$&lt;/p&gt;
+&lt;p&gt;In theory, we could directly minimize the $\ell$-risk and we would have the optimal classifier, also known as &lt;em&gt;Bayes predictor&lt;/em&gt;. However, there are several problems associated with this approach. One is that the probability distribution of $XY$ is unknown, thus computing the exact expected value is not feasible. It must be approximated by the empirical risk. Another issue is that this quantity is difficult to optimize because the function $\ell$ is discontinuous. Take for example a problem in which $\mathcal{X} = \mathbb{R}^2, k=2$, and we seek to find the linear function $f(X) = \text{sign}(X w), w \in \mathbb{R}^2$  and that minimizes the $\ell$-risk. As a function of the parameter $w$ this function looks something like&lt;/p&gt;
+&lt;div style=&quot;text-align: center;&quot;&gt;
+&lt;img width=&quot;350px&quot; alt=&quot;loss as function of w&quot; style=&quot;margin-top: 0px;&quot; src=&quot;http://fa.bianp.net/blog/images/2014/loss_01.png&quot; /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;This function is discontinuous with large, flat regions and is thus extremely hard to optimize using gradient-based methods. For this reason it is usual to consider a proxy to the loss called a &lt;em&gt;surrogate loss function&lt;/em&gt;. For computational reasons this is usually convex function $\Psi: \mathbb{R}  \to \mathbb{R}_+$. An example of such surrogate loss functions is the &lt;em&gt;hinge loss&lt;/em&gt;, $\Psi(t) = \max(1-t, 0)$, which is the loss used by Support Vector Machines (SVMs). Another example is the logistic loss, $\Psi(t) = 1/(1 + \exp(-t))$, used by the logistic regression model. If we consider the logistic loss, minimizing the $\Psi$-risk, given by $\mathbb{E}_{XY}[\Psi(Y, f(X))]$, of the function $f(X) = X w$ becomes a much more more tractable optimization problem:&lt;/p&gt;
+&lt;div style=&quot;text-align: center;&quot;&gt;
+&lt;img src=&quot;http://fa.bianp.net/blog/images/2014/loss_log.png&quot; style=&quot;margin-top: 0px;&quot; width=&quot;350px&quot; /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;In short, we have replaced the $\ell$-risk which is computationally difficult to optimize with the $\Psi$-risk which has more advantageous properties. A natural questions to ask is how much have we lost by this change. The property of whether minimizing the $\Psi$-risk leads to a function that also minimizes the $\ell$-risk is often referred to as &lt;em&gt;consistency&lt;/em&gt; or &lt;em&gt;calibration&lt;/em&gt;. For a more formal definition see [&lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;http://fa.bianp.net/blog/feed/#fn:1&quot; class=&quot;footnote-ref&quot; rel=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;] and [&lt;sup id=&quot;fnref:2&quot;&gt;&lt;a href=&quot;http://fa.bianp.net/blog/feed/#fn:2&quot; class=&quot;footnote-ref&quot; rel=&quot;footnote&quot;&gt;2&lt;/a&gt;&lt;/sup&gt;]. This property will depend on the surrogate function $\Psi$: for some functions $\Psi$ it will be verified the consistency property and for some not. One of the most useful characterizations was given in [&lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;http://fa.bianp.net/blog/feed/#fn:1&quot; class=&quot;footnote-ref&quot; rel=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;] and states that if $\Psi$ is convex then it is consistent if and only if it is differentiable at zero and $\Psi'(0) &amp;lt; 0$. This includes most of the commonly used surrogate loss functions, including hinge, logistic regression and Huber loss functions.&lt;/p&gt;
+&lt;div style=&quot;text-align: center;&quot;&gt;
+&lt;img src=&quot;http://fa.bianp.net/blog/images/2014/loss_functions.png&quot; style=&quot;margin-top: 0px;&quot; width=&quot;550px&quot; /&gt;
+&lt;/div&gt;
+
+&lt;div class=&quot;footnote&quot;&gt;
+&lt;hr /&gt;
+&lt;ol&gt;
+&lt;li id=&quot;fn:1&quot;&gt;
+&lt;p&gt;P. L. Bartlett, M. I. Jordan, and J. D. McAuliffe, “Convexity , Classification , and Risk Bounds,” J. Am. Stat. Assoc., pp. 1–36, 2003. &lt;a href=&quot;http://fa.bianp.net/blog/feed/#fnref:1&quot; rev=&quot;footnote&quot; class=&quot;footnote-backref&quot; title=&quot;Jump back to footnote 1 in the text&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&quot;fn:2&quot;&gt;
+&lt;p&gt;A. Tewari and P. L. Bartlett, “On the Consistency of Multiclass Classification Methods,” J. Mach. Learn. Res., vol. 8, pp. 1007–1025, 2007. &lt;a href=&quot;http://fa.bianp.net/blog/feed/#fnref:2&quot; rev=&quot;footnote&quot; class=&quot;footnote-backref&quot; title=&quot;Jump back to footnote 2 in the text&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;</content:encoded>
+	<dc:date>2014-04-20T22:00:00+00:00</dc:date>
+	<dc:creator>Fabian Pedregosa</dc:creator>
+</item>
 <item rdf:about="http://sushant-hiray.in/posts/gsoc/selected-gsoc/">
 	<title>Sushant Hiray: GSoC in Project CSymPy</title>
 	<link>http://sushant-hiray.in/posts/gsoc/selected-gsoc/</link>
@@ -3999,19 +4038,6 @@ screen npm start
 &lt;p&gt;On a personal note, the way ahead is as undecided as before. I obviously will contribute to SymPy in my free time. Frankly speaking, I don’t consider myself as a programmer still, and I know plenty of people in my own college who are much better than me and I still have to improve on my skillset. Lets see where life takes me from here.&lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/manojbits.wordpress.com/760/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/manojbits.wordpress.com/760/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=manojbits.wordpress.com&amp;amp;blog=31971756&amp;amp;post=760&amp;amp;subd=manojbits&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
 	<dc:date>2013-09-27T21:11:18+00:00</dc:date>
 	<dc:creator>Manoj Kumar</dc:creator>
-</item>
-<item rdf:about="http://meclark256.wordpress.com/?p=172">
-	<title>Mary Clark: GSOC Wrapup</title>
-	<link>http://meclark256.wordpress.com/2013/09/24/gsoc-wrapup/</link>
-	<content:encoded>&lt;p&gt;Well, GSOC 2013 is officially over.  I thought I’d write up a summary of what I accomplished over the last 14 weeks.&lt;/p&gt;
-&lt;p&gt;-Classes for types A, B, C, D, E, F, and G which stores information about their Dynkin diagrams, Cartan matrices, roots, and size&lt;/p&gt;
-&lt;p&gt;-A class, RootSystem, which allows users to work with the root system of a given Lie algebra.  It can generate all the roots of a Lie algebra, and has methods for adding roots together.&lt;/p&gt;
-&lt;p&gt;-A class WeylGroup, which is about the Weyl group of a given Lie algebra.  It gives the size and name of a given Weyl group as well as the matrix form of an element, and an element’s order.&lt;/p&gt;
-&lt;p&gt;-Methods for displaying the Cartan matrix and Dynkin diagram of a Lie algebra.&lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;
-&lt;p&gt;That’s pretty much it.  I had a great time working with SymPy this summer!&lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/meclark256.wordpress.com/172/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/meclark256.wordpress.com/172/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=meclark256.wordpress.com&amp;amp;blog=52875864&amp;amp;post=172&amp;amp;subd=meclark256&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
-	<dc:date>2013-09-24T19:00:55+00:00</dc:date>
-	<dc:creator>meclark256</dc:creator>
 </item>
 
 </rdf:RDF>
