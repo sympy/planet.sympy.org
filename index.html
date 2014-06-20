@@ -24,6 +24,865 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>June 20, 2014</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://jcrist.github.io/" title="Marginally Stable">Jim Crist</a></h3>
+
+
+<div class="entrygroup" id="tag:,2014-06-20:gsoc-week-5.html">
+<h4><a href="http://jcrist.github.io/gsoc-week-5.html">GSoC Week 5: Adventures in Profiling</a></h4>
+<div class="entry">
+<div class="content">
+<p>
+</p><div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This week I've been working on little fixes. Improving the docstrings, a couple interface improvements, finalizing some design decisions. The plan is to finish up this work next week, and then move on to the code generation portion of the project. In it's current state, the linearizer can handle <code>KanesMethod</code> and <code>LagrangesMethod</code> with ease. I'll probably spend some time hacking away at the <code>matrix_to_linearizer</code> function as well, but that's not priority.</p>
+<p>The rest of the week was spent profiling and doing some basic optimizations. Being a mechanical engineer, I haven't spent much time learning about numerical methods (although, I am taking this <a href="http://ocw.mit.edu/courses/mathematics/18-085-computational-science-and-engineering-i-fall-2008/index.htm">MIT OCW course this summer</a>). As such, my natural way of solving the system</p>
+<p><span class="math">\[
+A x = B
+\]</span></p>
+<p>where <span class="math">\(A\)</span>, <span class="math">\(B\)</span>, and <span class="math">\(x\)</span> are matrices, is to take the inverse of <span class="math">\(A\)</span>, and multiply it by <span class="math">\(B\)</span>:</p>
+<p><span class="math">\[ x = A^{-1} B \]</span></p>
+<p>Turns out, this is horribly inefficient. But what is the best way? I had to do some profiling.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="creating-benchmark-matrices">Creating Benchmark Matrices</h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>For most systems of the form <span class="math">\(A x = B\)</span> in <code>sympy.physics.mechanics</code>, <span class="math">\(A\)</span> is a symmetric matrix, and <span class="math">\(B\)</span> is a column vector. To do proper benchmarks, I'd need to create random matrices of this form. Looking at some example equations of motion, it can be seen that these mostly consisted of products and sums of terms composed of symbols, trigonometric functions, power functions, <code>sqrt</code>, and <code>inv</code>. After some time, I was able to create a couple functions to create these matrices in a composable way:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [1]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Below are some functions to create random matrices of varying sizes.</span>
+<span class="c"># These will be used in the benchmarks.</span>
+
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">sample</span><span class="p">,</span> <span class="n">randint</span>
+<span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">Matrix</span><span class="p">,</span> <span class="n">symbols</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">tan</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">zeros</span><span class="p">,</span> \
+    <span class="n">Symbol</span><span class="p">,</span> <span class="n">diag</span><span class="p">,</span> <span class="n">prod</span>
+
+<span class="c"># Define some operations</span>
+<span class="n">pow2</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">pow3</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">pow4</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="n">inv</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mi">1</span><span class="o">/</span><span class="n">x</span>
+
+<span class="c"># Defaults</span>
+<span class="c"># OPS is a list of common operations in sympy.physics.mechanics</span>
+<span class="n">OPS</span> <span class="o">=</span> <span class="p">[</span><span class="n">sin</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">tan</span><span class="p">,</span> <span class="n">pow2</span><span class="p">,</span> <span class="n">pow3</span><span class="p">,</span> <span class="n">pow4</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">inv</span><span class="p">]</span>
+<span class="c"># SYMS is a list of symbols that could be found in a matrix</span>
+<span class="n">SYMS</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="s">'a, b, c, d, e, f, g, h, i, j'</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">sum_or_prod</span><span class="p">(</span><span class="n">vec</span><span class="p">):</span>
+    <span class="sd">""" Return either the sum or product of a vector """</span>
+    <span class="n">func</span> <span class="o">=</span> <span class="n">sample</span><span class="p">([</span><span class="nb">sum</span><span class="p">,</span> <span class="n">prod</span><span class="p">],</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">randterms</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">max_terms</span><span class="p">,</span> <span class="n">ops</span><span class="o">=</span><span class="n">OPS</span><span class="p">,</span> <span class="n">syms</span><span class="o">=</span><span class="n">SYMS</span><span class="p">):</span>
+    <span class="sd">""" Creates a list of random terms of size n. Each cell is composed of</span>
+<span class="sd">    0 to max_terms, composed of randomly sampled functions from ops, and</span>
+<span class="sd">    symbols from syms """</span>
+    <span class="n">ntermlist</span> <span class="o">=</span> <span class="p">[</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_terms</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span>
+    <span class="n">pick</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">vec</span><span class="p">,</span> <span class="n">nlist</span><span class="p">:</span> <span class="p">[[</span><span class="n">vec</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> 
+            <span class="n">sample</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vec</span><span class="p">)),</span> <span class="n">n</span><span class="p">)]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nlist</span><span class="p">]</span>
+    <span class="n">rops</span> <span class="o">=</span> <span class="n">pick</span><span class="p">(</span><span class="n">ops</span><span class="p">,</span> <span class="n">ntermlist</span><span class="p">)</span>
+    <span class="n">rsyms</span> <span class="o">=</span> <span class="n">pick</span><span class="p">(</span><span class="n">syms</span><span class="p">,</span> <span class="n">ntermlist</span><span class="p">)</span>
+    <span class="n">terms</span> <span class="o">=</span> <span class="p">[</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">opsym</span><span class="p">)</span> <span class="k">for</span> <span class="n">opsym</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">rops</span><span class="p">,</span> <span class="n">rsyms</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">sum_or_prod</span><span class="p">(</span><span class="n">op</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="ow">in</span> <span class="n">term</span><span class="p">)</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">randmat</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">max_terms</span><span class="p">,</span> <span class="n">ops</span><span class="o">=</span><span class="n">OPS</span><span class="p">,</span> <span class="n">syms</span><span class="o">=</span><span class="n">SYMS</span><span class="p">):</span>
+    <span class="sd">""" Creates a random matrix of size (m,n). Each cell is composed of</span>
+<span class="sd">    1 to max_terms, composed of randomly sampled functions from ops, and</span>
+<span class="sd">    symbols from syms """</span>
+    <span class="k">return</span> <span class="n">Matrix</span><span class="p">(</span><span class="n">randterms</span><span class="p">(</span><span class="n">m</span><span class="o">*</span><span class="n">n</span><span class="p">,</span> <span class="n">max_terms</span><span class="p">,</span> <span class="n">ops</span><span class="p">,</span> <span class="n">syms</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">randuppertriag</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">max_terms</span><span class="p">,</span> <span class="n">ops</span><span class="o">=</span><span class="n">OPS</span><span class="p">,</span> <span class="n">syms</span><span class="o">=</span><span class="n">SYMS</span><span class="p">):</span>
+    <span class="sd">""" Creates a random upper triangular matrix of size (n, n). Each cell is</span>
+<span class="sd">    composed of 1 to max_terms, composed of randomly sampled functions from</span>
+<span class="sd">    ops, and symbols from syms """</span>
+    <span class="n">nupper</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+    <span class="n">terms</span> <span class="o">=</span> <span class="n">randterms</span><span class="p">(</span><span class="n">nupper</span><span class="p">,</span> <span class="n">max_terms</span><span class="p">,</span> <span class="n">ops</span><span class="p">,</span> <span class="n">syms</span><span class="p">)</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">row_join</span><span class="p">(</span><span class="n">Matrix</span><span class="p">(</span><span class="n">terms</span><span class="p">[</span><span class="n">t</span><span class="p">:</span><span class="n">t</span><span class="o">+</span><span class="n">n</span><span class="o">-</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
+        <span class="n">t</span> <span class="o">+=</span> <span class="n">n</span><span class="o">-</span><span class="n">i</span>
+    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">Matrix</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">symrandmat</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">max_terms</span><span class="p">,</span> <span class="n">ops</span><span class="o">=</span><span class="n">OPS</span><span class="p">,</span> <span class="n">syms</span><span class="o">=</span><span class="n">SYMS</span><span class="p">):</span>
+    <span class="sd">""" Creates a random symmetric matrix of size (n, n). Each cell is</span>
+<span class="sd">    composed of 1 to max_terms, composed of randomly sampled functions from</span>
+<span class="sd">    ops, and symbols from syms """</span>
+    <span class="n">upper</span> <span class="o">=</span> <span class="n">randuppertriag</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">max_terms</span><span class="p">,</span> <span class="n">ops</span><span class="p">,</span> <span class="n">syms</span><span class="p">)</span>
+    <span class="n">lower</span> <span class="o">=</span> <span class="n">upper</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="n">diag</span><span class="p">(</span><span class="o">*</span><span class="n">randterms</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">max_terms</span><span class="p">,</span> <span class="n">ops</span><span class="p">,</span> <span class="n">syms</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">upper</span> <span class="o">+</span> <span class="n">D</span> <span class="o">+</span> <span class="n">lower</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [2]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># 3x3 Random Upper Triangular Matrix with max number of terms 2</span>
+<span class="n">randuppertriag</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">
+    Out[2]:</div>
+
+
+<div class="output_text output_subarea output_pyout">
+<pre>Matrix([
+[0, cos(e),      tan(g)],
+[0,      0, f**4*cos(j)],
+[0,      0,           0]])
+</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [3]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># 3x3 Random Matrix with max number of terms 2</span>
+<span class="n">randmat</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">
+    Out[3]:</div>
+
+
+<div class="output_text output_subarea output_pyout">
+<pre>Matrix([
+[   b**4, j**2 + tan(c),           d**4],
+[    1/d,        cos(f), c**2 + sqrt(d)],
+[sqrt(a),        cos(g),           j**4]])
+</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [4]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># 3x3 Symmetric matrix with max number of terms 2</span>
+<span class="n">symrandmat</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">
+    Out[4]:</div>
+
+
+<div class="output_text output_subarea output_pyout">
+<pre>Matrix([
+[          cos(a), sqrt(g) + sin(b),        tan(f)],
+[sqrt(g) + sin(b),   sqrt(i)*cos(j),           1/b],
+[          tan(f),              1/b, cos(f)*tan(c)]])
+</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="solution-methods">Solution Methods</h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>There are 4 different methods we'll be testing:</p>
+<ol style="">
+<li><strong><code>LUsolve</code>:</strong> Solve the problem with LU decomposition</li>
+<li><strong><code>LDLsolve</code>:</strong> For symmetric matrices, solve with LDL decomposition</li>
+<li><strong><code>cholesky_solve</code>:</strong> For symmetric matrices, solve with cholesky decomposition</li>
+<li><strong><code>_mat_inv_mul</code>:</strong> Solve using LDL decomposition, and an intermediate substitution dictionary. This is what <code>mechanics</code> is currently using.</li>
+</ol>
+<p>After doing some reading up on these, <code>LDLsolve</code> and <code>cholesky_solve</code> <a href="http://en.wikipedia.org/wiki/Cholesky_decomposition#Computation">should be the fastest</a>, as the <span class="math">\(A\)</span> matrix is symmetric. <code>_mat_inv_mul</code> also uses LDL decomposition, but it has the overhead of substitution. However, for larger matrices this may yield benefits, as the LDL decomposition is performed only on a matrix of single symbols.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [5]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># This is what sympy.physics.mechanics is currently using.</span>
+<span class="c"># Copied into this file, to show what it's doing.</span>
+<span class="k">def</span> <span class="nf">_mat_inv_mul</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    Computes A^-1 * B symbolically w/ substitution, where B is not</span>
+<span class="sd">    necessarily a vector, but can be a matrix.</span>
+
+<span class="sd">    """</span>
+
+    <span class="n">r1</span><span class="p">,</span> <span class="n">c1</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">r2</span><span class="p">,</span> <span class="n">c2</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">temp1</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span> <span class="n">c1</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'x'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">r1</span> <span class="o">*</span> <span class="n">i</span><span class="p">)))</span>
+    <span class="n">temp2</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">(</span><span class="n">r2</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'y'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">r2</span> <span class="o">*</span> <span class="n">i</span><span class="p">)))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">temp1</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">temp1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">temp2</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">B</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">temp2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">temp3</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">c2</span><span class="p">):</span>
+        <span class="n">temp3</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp1</span><span class="o">.</span><span class="n">LDLsolve</span><span class="p">(</span><span class="n">temp2</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]))</span>
+    <span class="n">temp3</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">([</span><span class="n">i</span><span class="o">.</span><span class="n">T</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">temp3</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+    <span class="k">return</span> <span class="n">temp3</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">temp1</span><span class="p">,</span> <span class="n">A</span><span class="p">))))</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">temp2</span><span class="p">,</span> <span class="n">B</span><span class="p">))))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="benchmark-constant-matrix-complexity-varying-n">Benchmark: Constant Matrix Complexity, Varying <em>n</em></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Here we check increasing matrix dimensions, with a constant complexity of each cell (<code>max_terms = 3</code>). Only running up to n=6, as computation got excessive after that.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [6]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="kn">from</span> <span class="nn">timeit</span> <span class="kn">import</span> <span class="n">repeat</span>
+
+<span class="c"># Run the benchmark for varying values of n, with max_terms = 3</span>
+<span class="n">timestmt</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">stmt</span><span class="p">,</span> <span class="n">setup</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">r</span><span class="p">:</span> <span class="nb">min</span><span class="p">(</span><span class="n">repeat</span><span class="p">(</span><span class="n">stmt</span><span class="p">,</span> <span class="n">setup</span><span class="o">=</span><span class="n">setup</span><span class="p">,</span> <span class="n">repeat</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="n">n</span><span class="p">))</span><span class="o">/</span><span class="n">n</span>
+<span class="n">ns</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+<span class="n">lu_t</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">ldl_t</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">chol_t</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">matinv_t</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">ns</span><span class="p">:</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">symrandmat</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="n">randmat</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">lu_t</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">timestmt</span><span class="p">(</span><span class="s">'A.LUsolve(B)'</span><span class="p">,</span> <span class="s">'from __main__ import A, B'</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">ldl_t</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">timestmt</span><span class="p">(</span><span class="s">'A.LDLsolve(B)'</span><span class="p">,</span> <span class="s">'from __main__ import A, B'</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">chol_t</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">timestmt</span><span class="p">(</span><span class="s">'A.cholesky_solve(B)'</span><span class="p">,</span> <span class="s">'from __main__ import A, B'</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">matinv_t</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">timestmt</span><span class="p">(</span><span class="s">'_mat_inv_mul(A, B)'</span><span class="p">,</span>
+        <span class="s">'from __main__ import A, B, _mat_inv_mul'</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [7]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Plot the results</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="o">%</span> <span class="n">matplotlib</span> <span class="n">inline</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ns</span><span class="p">,</span> <span class="n">lu_t</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'A.LUsolve(B)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ns</span><span class="p">,</span> <span class="n">ldl_t</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'A.LDLsolve(B)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ns</span><span class="p">,</span> <span class="n">chol_t</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'A.cholesky_solve(B)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ns</span><span class="p">,</span> <span class="n">matinv_t</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'mat_inv_mul(A, B)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'Matrix Dimension'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'Time (s)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">'Timings for Solution to A*x = b, Varying Dimensions'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ns</span><span class="p">,</span> <span class="n">lu_t</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'A.LUsolve(B)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ns</span><span class="p">,</span> <span class="n">ldl_t</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'A.LDLsolve(B)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ns</span><span class="p">,</span> <span class="n">chol_t</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'A.cholesky_solve(B)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'Matrix Dimension'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'Time (s)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">'Timings for Solution to A*x = b,  Varying Dimensions'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+
+
+<div class="output_png output_subarea ">
+<img />
+</div>
+
+</div>
+
+<div class="output_area"><div class="prompt"></div>
+
+
+<div class="output_png output_subarea ">
+<img />
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Observing the above plots it can be seen that <code>_mat_inv_mul</code> is several orders of magnitude slower than the other three methods, and increases in time at a faster rate. As the underlying algorithm is the same as <code>LDLsolve</code>, this indicates that the <code>subs</code> operations are slow, and of larger complexity than <code>LDLsolve</code>. While the other three methods are all close, <code>LUsolve</code> is the fastest. This is interesting, because for purely numeric computation (i.e. floating point only), <code>LDLsolve</code> and <code>cholesky_solve</code> should be faster for symmetric matrices.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="benchmark-varying-matrix-complexity-constant-n">Benchmark: Varying Matrix Complexity, Constant <em>n</em></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Here we vary the complexity of the matrix (how many terms in each cell), but keep the matrix size constant. I picked <em>n</em> = 4, because it was big enough to take some time, but not too big to take forever. I'd expect to see the computation time increase with complexity, but not as rapidly as it did with matrix dimension.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [8]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Run the benchmark for varying values of max_terms, with n = 4</span>
+<span class="n">ms</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span>
+<span class="n">lu_t</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">ldl_t</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">chol_t</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">matinv_t</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">ms</span><span class="p">:</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">symrandmat</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="n">randmat</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+    <span class="n">lu_t</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">timestmt</span><span class="p">(</span><span class="s">'A.LUsolve(B)'</span><span class="p">,</span> <span class="s">'from __main__ import A, B'</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">ldl_t</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">timestmt</span><span class="p">(</span><span class="s">'A.LDLsolve(B)'</span><span class="p">,</span> <span class="s">'from __main__ import A, B'</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">chol_t</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">timestmt</span><span class="p">(</span><span class="s">'A.cholesky_solve(B)'</span><span class="p">,</span> <span class="s">'from __main__ import A, B'</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">matinv_t</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">timestmt</span><span class="p">(</span><span class="s">'_mat_inv_mul(A, B)'</span><span class="p">,</span>
+        <span class="s">'from __main__ import A, B, _mat_inv_mul'</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [9]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Plot the results</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ms</span><span class="p">,</span> <span class="n">lu_t</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'A.LUsolve(B)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ms</span><span class="p">,</span> <span class="n">ldl_t</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'A.LDLsolve(B)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ms</span><span class="p">,</span> <span class="n">chol_t</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'A.cholesky_solve(B)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ms</span><span class="p">,</span> <span class="n">matinv_t</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'mat_inv_mul(A, B)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'Matrix Complexity'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'Time (s)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">'Timings for Solution to A*x = b, Varying Complexity'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ms</span><span class="p">,</span> <span class="n">lu_t</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'A.LUsolve(B)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ms</span><span class="p">,</span> <span class="n">ldl_t</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'A.LDLsolve(B)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ms</span><span class="p">,</span> <span class="n">chol_t</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'A.cholesky_solve(B)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'Matrix Complexity'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'Time (s)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">'Timings for Solution to A*x = b, Varying Complexity'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+
+
+<div class="output_png output_subarea ">
+<img />
+</div>
+
+</div>
+
+<div class="output_area"><div class="prompt"></div>
+
+
+<div class="output_png output_subarea ">
+<img />
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Interestingly, it seems that <code>LUsolve</code>, <code>LDLsolve</code>, and <code>cholesky_solve</code> don't increase in time with complexity, while <code>_mat_inv_mul</code> does. This must be due to the intermediate substitution step.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="benchmark-turning-matrix-term-complexity-up-to-11">Benchmark: Turning Matrix Term Complexity up to 11</h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Using the matrices composed by the above methods, all cells are either a sum of terms, or a product. This is close to how the matrices we need to solve look, but it's not a perfect representation. Let's try with a really ugly matrix. We can use the fact that for any matrix <span class="math">\(A\)</span>, <span class="math">\(A A^T\)</span> is a symmetric matrix.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [10]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="n">temp</span> <span class="o">=</span> <span class="n">prod</span><span class="p">([</span><span class="n">randmat</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">)])</span>
+<span class="n">A</span> <span class="o">=</span> <span class="n">temp</span><span class="o">*</span><span class="n">temp</span><span class="o">.</span><span class="n">T</span>
+<span class="n">B</span> <span class="o">=</span> <span class="n">randmat</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [11]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="n">A</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">
+    Out[11]:</div>
+
+
+<div class="output_text output_subarea output_pyout">
+<pre>Matrix([
+[                                                                                                                                                                                                                                                                                                   (h**(9/2) + (sqrt(a) + cos(i))*(c**4 + tan(f)) + sin(i)*cos(c) + sin(f)*sin(g)/c)**2 + (c*sin(g) + (sqrt(a) + cos(i))*tan(g) + sin(i)*cos(c) + sqrt(h)*tan(a)/e)**2 + (sqrt(h)*(b**4 + sqrt(h)) + sqrt(i)*(sqrt(a) + cos(i)) + sin(a)*cos(c) + i**2*sin(g)*sin(j)/c)**2 + (b**2*e**4*cos(c) + d**3*(sqrt(a) + cos(i)) + g**2*sqrt(h) + (g**4 + cos(f))*sin(g)/c)**2, (h**(9/2) + (sqrt(a) + cos(i))*(c**4 + tan(f)) + sin(i)*cos(c) + sin(f)*sin(g)/c)*(d**3*sin(i) + j**3*sin(f) + h**4/f + h**2*(c**4 + tan(f))/f) + (c*sin(g) + (sqrt(a) + cos(i))*tan(g) + sin(i)*cos(c) + sqrt(h)*tan(a)/e)*(c**2*j**3 + d**3*sin(i) + h**2*tan(g)/f + tan(a)/(e*f)) + (d**3*sin(a) + i**2*j**3*sin(j) + h**2*sqrt(i)/f + (b**4 + sqrt(h))/f)*(sqrt(h)*(b**4 + sqrt(h)) + sqrt(i)*(sqrt(a) + cos(i)) + sin(a)*cos(c) + i**2*sin(g)*sin(j)/c) + (b**2*d**3*e**4 + d**3*h**2/f + j**3*(g**4 + cos(f)) + g**2/f)*(b**2*e**4*cos(c) + d**3*(sqrt(a) + cos(i)) + g**2*sqrt(h) + (g**4 + cos(f))*sin(g)/c), (h**(9/2) + (sqrt(a) + cos(i))*(c**4 + tan(f)) + sin(i)*cos(c) + sin(f)*sin(g)/c)*(c**2*sin(f)/h + h**4*(sin(a) + cos(b)) + (c**4 + tan(f))/c + sin(i)/c) + (c*sin(g) + (sqrt(a) + cos(i))*tan(g) + sin(i)*cos(c) + sqrt(h)*tan(a)/e)*(c**4/h + (sin(a) + cos(b))*tan(a)/e + sin(i)/c + tan(g)/c) + (sqrt(h)*(b**4 + sqrt(h)) + sqrt(i)*(sqrt(a) + cos(i)) + sin(a)*cos(c) + i**2*sin(g)*sin(j)/c)*(c**2*i**2*sin(j)/h + (b**4 + sqrt(h))*(sin(a) + cos(b)) + sqrt(i)/c + sin(a)/c) + (b**2*e**4/c + c**2*(g**4 + cos(f))/h + g**2*(sin(a) + cos(b)) + d**3/c)*(b**2*e**4*cos(c) + d**3*(sqrt(a) + cos(i)) + g**2*sqrt(h) + (g**4 + cos(f))*sin(g)/c), (h**(9/2) + (sqrt(a) + cos(i))*(c**4 + tan(f)) + sin(i)*cos(c) + sin(f)*sin(g)/c)*(sqrt(b)*g**2*sin(f) + sqrt(e)*sin(i) + f**2*h**4 + (c**4 + tan(f))*tan(i)) + (c*sin(g) + (sqrt(a) + cos(i))*tan(g) + sin(i)*cos(c) + sqrt(h)*tan(a)/e)*(sqrt(b)*c**2*g**2 + sqrt(e)*sin(i) + tan(g)*tan(i) + f**2*tan(a)/e) + (sqrt(h)*(b**4 + sqrt(h)) + sqrt(i)*(sqrt(a) + cos(i)) + sin(a)*cos(c) + i**2*sin(g)*sin(j)/c)*(sqrt(b)*g**2*i**2*sin(j) + sqrt(e)*sin(a) + f**2*(b**4 + sqrt(h)) + sqrt(i)*tan(i)) + (sqrt(b)*g**2*(g**4 + cos(f)) + b**2*e**(9/2) + d**3*tan(i) + f**2*g**2)*(b**2*e**4*cos(c) + d**3*(sqrt(a) + cos(i)) + g**2*sqrt(h) + (g**4 + cos(f))*sin(g)/c)],
+[                                                  (h**(9/2) + (sqrt(a) + cos(i))*(c**4 + tan(f)) + sin(i)*cos(c) + sin(f)*sin(g)/c)*(d**3*sin(i) + j**3*sin(f) + h**4/f + h**2*(c**4 + tan(f))/f) + (c*sin(g) + (sqrt(a) + cos(i))*tan(g) + sin(i)*cos(c) + sqrt(h)*tan(a)/e)*(c**2*j**3 + d**3*sin(i) + h**2*tan(g)/f + tan(a)/(e*f)) + (d**3*sin(a) + i**2*j**3*sin(j) + h**2*sqrt(i)/f + (b**4 + sqrt(h))/f)*(sqrt(h)*(b**4 + sqrt(h)) + sqrt(i)*(sqrt(a) + cos(i)) + sin(a)*cos(c) + i**2*sin(g)*sin(j)/c) + (b**2*d**3*e**4 + d**3*h**2/f + j**3*(g**4 + cos(f)) + g**2/f)*(b**2*e**4*cos(c) + d**3*(sqrt(a) + cos(i)) + g**2*sqrt(h) + (g**4 + cos(f))*sin(g)/c),                                                                                                                                                                                                                                                                                                                                       (c**2*j**3 + d**3*sin(i) + h**2*tan(g)/f + tan(a)/(e*f))**2 + (d**3*sin(a) + i**2*j**3*sin(j) + h**2*sqrt(i)/f + (b**4 + sqrt(h))/f)**2 + (d**3*sin(i) + j**3*sin(f) + h**4/f + h**2*(c**4 + tan(f))/f)**2 + (b**2*d**3*e**4 + d**3*h**2/f + j**3*(g**4 + cos(f)) + g**2/f)**2,                                                                                      (c**2*j**3 + d**3*sin(i) + h**2*tan(g)/f + tan(a)/(e*f))*(c**4/h + (sin(a) + cos(b))*tan(a)/e + sin(i)/c + tan(g)/c) + (d**3*sin(a) + i**2*j**3*sin(j) + h**2*sqrt(i)/f + (b**4 + sqrt(h))/f)*(c**2*i**2*sin(j)/h + (b**4 + sqrt(h))*(sin(a) + cos(b)) + sqrt(i)/c + sin(a)/c) + (d**3*sin(i) + j**3*sin(f) + h**4/f + h**2*(c**4 + tan(f))/f)*(c**2*sin(f)/h + h**4*(sin(a) + cos(b)) + (c**4 + tan(f))/c + sin(i)/c) + (b**2*e**4/c + c**2*(g**4 + cos(f))/h + g**2*(sin(a) + cos(b)) + d**3/c)*(b**2*d**3*e**4 + d**3*h**2/f + j**3*(g**4 + cos(f)) + g**2/f),                                                                                      (c**2*j**3 + d**3*sin(i) + h**2*tan(g)/f + tan(a)/(e*f))*(sqrt(b)*c**2*g**2 + sqrt(e)*sin(i) + tan(g)*tan(i) + f**2*tan(a)/e) + (d**3*sin(a) + i**2*j**3*sin(j) + h**2*sqrt(i)/f + (b**4 + sqrt(h))/f)*(sqrt(b)*g**2*i**2*sin(j) + sqrt(e)*sin(a) + f**2*(b**4 + sqrt(h)) + sqrt(i)*tan(i)) + (d**3*sin(i) + j**3*sin(f) + h**4/f + h**2*(c**4 + tan(f))/f)*(sqrt(b)*g**2*sin(f) + sqrt(e)*sin(i) + f**2*h**4 + (c**4 + tan(f))*tan(i)) + (sqrt(b)*g**2*(g**4 + cos(f)) + b**2*e**(9/2) + d**3*tan(i) + f**2*g**2)*(b**2*d**3*e**4 + d**3*h**2/f + j**3*(g**4 + cos(f)) + g**2/f)],
+[                 (h**(9/2) + (sqrt(a) + cos(i))*(c**4 + tan(f)) + sin(i)*cos(c) + sin(f)*sin(g)/c)*(c**2*sin(f)/h + h**4*(sin(a) + cos(b)) + (c**4 + tan(f))/c + sin(i)/c) + (c*sin(g) + (sqrt(a) + cos(i))*tan(g) + sin(i)*cos(c) + sqrt(h)*tan(a)/e)*(c**4/h + (sin(a) + cos(b))*tan(a)/e + sin(i)/c + tan(g)/c) + (sqrt(h)*(b**4 + sqrt(h)) + sqrt(i)*(sqrt(a) + cos(i)) + sin(a)*cos(c) + i**2*sin(g)*sin(j)/c)*(c**2*i**2*sin(j)/h + (b**4 + sqrt(h))*(sin(a) + cos(b)) + sqrt(i)/c + sin(a)/c) + (b**2*e**4/c + c**2*(g**4 + cos(f))/h + g**2*(sin(a) + cos(b)) + d**3/c)*(b**2*e**4*cos(c) + d**3*(sqrt(a) + cos(i)) + g**2*sqrt(h) + (g**4 + cos(f))*sin(g)/c),                                                     (c**2*j**3 + d**3*sin(i) + h**2*tan(g)/f + tan(a)/(e*f))*(c**4/h + (sin(a) + cos(b))*tan(a)/e + sin(i)/c + tan(g)/c) + (d**3*sin(a) + i**2*j**3*sin(j) + h**2*sqrt(i)/f + (b**4 + sqrt(h))/f)*(c**2*i**2*sin(j)/h + (b**4 + sqrt(h))*(sin(a) + cos(b)) + sqrt(i)/c + sin(a)/c) + (d**3*sin(i) + j**3*sin(f) + h**4/f + h**2*(c**4 + tan(f))/f)*(c**2*sin(f)/h + h**4*(sin(a) + cos(b)) + (c**4 + tan(f))/c + sin(i)/c) + (b**2*e**4/c + c**2*(g**4 + cos(f))/h + g**2*(sin(a) + cos(b)) + d**3/c)*(b**2*d**3*e**4 + d**3*h**2/f + j**3*(g**4 + cos(f)) + g**2/f),                                                                                                                                                                                                                                                                                                                                       (c**4/h + (sin(a) + cos(b))*tan(a)/e + sin(i)/c + tan(g)/c)**2 + (b**2*e**4/c + c**2*(g**4 + cos(f))/h + g**2*(sin(a) + cos(b)) + d**3/c)**2 + (c**2*sin(f)/h + h**4*(sin(a) + cos(b)) + (c**4 + tan(f))/c + sin(i)/c)**2 + (c**2*i**2*sin(j)/h + (b**4 + sqrt(h))*(sin(a) + cos(b)) + sqrt(i)/c + sin(a)/c)**2,                                                     (c**4/h + (sin(a) + cos(b))*tan(a)/e + sin(i)/c + tan(g)/c)*(sqrt(b)*c**2*g**2 + sqrt(e)*sin(i) + tan(g)*tan(i) + f**2*tan(a)/e) + (sqrt(b)*g**2*(g**4 + cos(f)) + b**2*e**(9/2) + d**3*tan(i) + f**2*g**2)*(b**2*e**4/c + c**2*(g**4 + cos(f))/h + g**2*(sin(a) + cos(b)) + d**3/c) + (sqrt(b)*g**2*sin(f) + sqrt(e)*sin(i) + f**2*h**4 + (c**4 + tan(f))*tan(i))*(c**2*sin(f)/h + h**4*(sin(a) + cos(b)) + (c**4 + tan(f))/c + sin(i)/c) + (sqrt(b)*g**2*i**2*sin(j) + sqrt(e)*sin(a) + f**2*(b**4 + sqrt(h)) + sqrt(i)*tan(i))*(c**2*i**2*sin(j)/h + (b**4 + sqrt(h))*(sin(a) + cos(b)) + sqrt(i)/c + sin(a)/c)],
+[(h**(9/2) + (sqrt(a) + cos(i))*(c**4 + tan(f)) + sin(i)*cos(c) + sin(f)*sin(g)/c)*(sqrt(b)*g**2*sin(f) + sqrt(e)*sin(i) + f**2*h**4 + (c**4 + tan(f))*tan(i)) + (c*sin(g) + (sqrt(a) + cos(i))*tan(g) + sin(i)*cos(c) + sqrt(h)*tan(a)/e)*(sqrt(b)*c**2*g**2 + sqrt(e)*sin(i) + tan(g)*tan(i) + f**2*tan(a)/e) + (sqrt(h)*(b**4 + sqrt(h)) + sqrt(i)*(sqrt(a) + cos(i)) + sin(a)*cos(c) + i**2*sin(g)*sin(j)/c)*(sqrt(b)*g**2*i**2*sin(j) + sqrt(e)*sin(a) + f**2*(b**4 + sqrt(h)) + sqrt(i)*tan(i)) + (sqrt(b)*g**2*(g**4 + cos(f)) + b**2*e**(9/2) + d**3*tan(i) + f**2*g**2)*(b**2*e**4*cos(c) + d**3*(sqrt(a) + cos(i)) + g**2*sqrt(h) + (g**4 + cos(f))*sin(g)/c),                                    (c**2*j**3 + d**3*sin(i) + h**2*tan(g)/f + tan(a)/(e*f))*(sqrt(b)*c**2*g**2 + sqrt(e)*sin(i) + tan(g)*tan(i) + f**2*tan(a)/e) + (d**3*sin(a) + i**2*j**3*sin(j) + h**2*sqrt(i)/f + (b**4 + sqrt(h))/f)*(sqrt(b)*g**2*i**2*sin(j) + sqrt(e)*sin(a) + f**2*(b**4 + sqrt(h)) + sqrt(i)*tan(i)) + (d**3*sin(i) + j**3*sin(f) + h**4/f + h**2*(c**4 + tan(f))/f)*(sqrt(b)*g**2*sin(f) + sqrt(e)*sin(i) + f**2*h**4 + (c**4 + tan(f))*tan(i)) + (sqrt(b)*g**2*(g**4 + cos(f)) + b**2*e**(9/2) + d**3*tan(i) + f**2*g**2)*(b**2*d**3*e**4 + d**3*h**2/f + j**3*(g**4 + cos(f)) + g**2/f),                                    (c**4/h + (sin(a) + cos(b))*tan(a)/e + sin(i)/c + tan(g)/c)*(sqrt(b)*c**2*g**2 + sqrt(e)*sin(i) + tan(g)*tan(i) + f**2*tan(a)/e) + (sqrt(b)*g**2*(g**4 + cos(f)) + b**2*e**(9/2) + d**3*tan(i) + f**2*g**2)*(b**2*e**4/c + c**2*(g**4 + cos(f))/h + g**2*(sin(a) + cos(b)) + d**3/c) + (sqrt(b)*g**2*sin(f) + sqrt(e)*sin(i) + f**2*h**4 + (c**4 + tan(f))*tan(i))*(c**2*sin(f)/h + h**4*(sin(a) + cos(b)) + (c**4 + tan(f))/c + sin(i)/c) + (sqrt(b)*g**2*i**2*sin(j) + sqrt(e)*sin(a) + f**2*(b**4 + sqrt(h)) + sqrt(i)*tan(i))*(c**2*i**2*sin(j)/h + (b**4 + sqrt(h))*(sin(a) + cos(b)) + sqrt(i)/c + sin(a)/c),                                                                                                                                                                                                                                                                                                                                       (sqrt(b)*c**2*g**2 + sqrt(e)*sin(i) + tan(g)*tan(i) + f**2*tan(a)/e)**2 + (sqrt(b)*g**2*(g**4 + cos(f)) + b**2*e**(9/2) + d**3*tan(i) + f**2*g**2)**2 + (sqrt(b)*g**2*sin(f) + sqrt(e)*sin(i) + f**2*h**4 + (c**4 + tan(f))*tan(i))**2 + (sqrt(b)*g**2*i**2*sin(j) + sqrt(e)*sin(a) + f**2*(b**4 + sqrt(h)) + sqrt(i)*tan(i))**2]])
+</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [12]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="n">B</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">
+    Out[12]:</div>
+
+
+<div class="output_text output_subarea output_pyout">
+<pre>Matrix([
+[                 a**3 + d**4 + g**2],
+[a**4 + f**2 + sin(g) + tan(e) + 1/d],
+[                         f**2 + 1/g],
+[                             sin(d)]])
+</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Yikes, that's some ugly stuff. Let's see how the various methods fair against that:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [13]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Run the benchmarks</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"Time for LUsolve: "</span><span class="p">,</span> <span class="n">timestmt</span><span class="p">(</span><span class="s">'A.LUsolve(B)'</span><span class="p">,</span> <span class="s">'from __main__ import A, B'</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"Time for LDLsolve: "</span><span class="p">,</span> <span class="n">timestmt</span><span class="p">(</span><span class="s">'A.LDLsolve(B)'</span><span class="p">,</span> <span class="s">'from __main__ import A, B'</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"Time for cholesky_solve: "</span><span class="p">,</span> <span class="n">timestmt</span><span class="p">(</span><span class="s">'A.cholesky_solve(B)'</span><span class="p">,</span> <span class="s">'from __main__ import A, B'</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"Time for _mat_inv_mul: "</span><span class="p">,</span> <span class="n">timestmt</span><span class="p">(</span><span class="s">'_mat_inv_mul(A, B)'</span><span class="p">,</span> <span class="s">'from __main__ import A, B, _mat_inv_mul'</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Time for LUsolve:  0.0034651060013857204
+Time for LDLsolve:  0.009068403000128455
+Time for cholesky_solve:  0.006806592999055283
+Time for _mat_inv_mul:  144.967967898001
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>From this it can be seen that <code>_mat_inv_mul</code> is <em>far</em> slower than the other three methods, even for extremely complex matrices. There doesn't seem to be any benefit to the intermediate <code>subs</code> step.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="benchmark-expression-size">Benchmark: Expression Size</h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This isn't a time benchmark. Rather, it's a measurment of the resulting expression's readability. If <code>LUsolve</code> is faster, but results in a less compact expression than <code>LDLsolve</code>, then it may be more beneficial to go with the latter. To test this we'll measure the number of operations using the <code>count_ops</code> method. This is a rough metric of the compactness of the solution.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [14]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">count_ops</span>
+<span class="c"># Run the benchmark for varying values of n, with max_terms = 2</span>
+<span class="n">ns</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+<span class="n">lu_nops</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">ldl_nops</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">chol_nops</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">matinv_nops</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">ns</span><span class="p">:</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">symrandmat</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="n">randmat</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="c"># Solve the system</span>
+    <span class="n">sol_LU</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">LUsolve</span><span class="p">(</span><span class="n">B</span><span class="p">)</span>
+    <span class="n">sol_LDL</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">LDLsolve</span><span class="p">(</span><span class="n">B</span><span class="p">)</span>
+    <span class="n">sol_chol</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">cholesky_solve</span><span class="p">(</span><span class="n">B</span><span class="p">)</span>
+    <span class="n">sol_matinv</span> <span class="o">=</span> <span class="n">_mat_inv_mul</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>
+    <span class="c"># Count the number of ops</span>
+    <span class="n">lu_nops</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">count_ops</span><span class="p">(</span><span class="n">sol_LU</span><span class="p">))</span>
+    <span class="n">ldl_nops</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">count_ops</span><span class="p">(</span><span class="n">sol_LDL</span><span class="p">))</span>
+    <span class="n">chol_nops</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">count_ops</span><span class="p">(</span><span class="n">sol_chol</span><span class="p">))</span>
+    <span class="n">matinv_nops</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">count_ops</span><span class="p">(</span><span class="n">sol_matinv</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [15]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Plot the results</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ns</span><span class="p">,</span> <span class="n">lu_nops</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'A.LUsolve(B)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ns</span><span class="p">,</span> <span class="n">ldl_nops</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'A.LDLsolve(B)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ns</span><span class="p">,</span> <span class="n">chol_nops</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'A.cholesky_solve(B)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ns</span><span class="p">,</span> <span class="n">matinv_nops</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'mat_inv_mul(A, B)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'Matrix Dimensions'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'Number of Operations'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">'Expression Size for Solution to A*x = b'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ns</span><span class="p">,</span> <span class="n">lu_nops</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'A.LUsolve(B)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ns</span><span class="p">,</span> <span class="n">ldl_nops</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'A.LDLsolve(B)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ns</span><span class="p">,</span> <span class="n">chol_nops</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'A.cholesky_solve(B)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'Matrix Dimensions'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'Number of Operations'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">'Expression Size for Solution to A*x = b'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+
+
+<div class="output_png output_subarea ">
+<img />
+</div>
+
+</div>
+
+<div class="output_area"><div class="prompt"></div>
+
+
+<div class="output_png output_subarea ">
+<img />
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Observing the above plots, once again <code>_mat_inv_mul</code> comes out as the worst (by far). The remaining three barely differ, but <code>LUsolve</code> results in the most compact expression.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="discussion-of-results">Discussion of Results</h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Overall, <code>_mat_inv_mul</code> comes out the worst for every benchmark, and <code>LUsolve</code> comes out the best. Unless I did something wrong with my benchmarks <code>LUsolve</code> should replace every call to <code>_mat_inv_mul</code> in <code>mechanics</code>. It results in a more compact form, and has several order of magnitude faster running speed.</p>
+<p>This surprised me. I would have thought that a more complicated expression would take longer to solve, but as seen in the second benchmark matrix complexity had no effect on running speed for the three solution algorithms (although it did affect the substitution speed for <code>_mat_inv_mul</code>). I suppose that's why you're always told to profile <em>before</em> you optimize. Often your intuition is wrong.</p>
+<p>Something else that surprised me was that <code>LDLsolve</code> and <code>cholesky_solve</code> had a slower running time than <code>LUsolve</code>. For numerical symmetric matrices, this shouldn't be the case. I wasn't able to find anything about symbolic calculation of these decompositions, but I assume it should be about the same. Either way, the more general LU decomposition seems to be the fastest.</p>
+<hr />
+<p><em>Did I do something wrong? Disagree with these benchmarks? Let me know in the comments below!</em></p>
+</div>
+</div>
+</div><p></p></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://jcrist.github.io/gsoc-week-5.html">by Jim Crist at June 20, 2014 07:00 PM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>June 19, 2014</h2>
 
 <div class="channelgroup">
@@ -677,11 +1536,11 @@ q, \dot{q} &amp; \in \mathbb{R}^n \\
 u, \dot{u} &amp; \in \mathbb{R}^o \\
 r &amp; \in \mathbb{R}^s 
 \end{aligned}</p>
-<p>this works for most systems (it was derived with kanes method in mind
-specifically). however, systems expressed using lagranges method can't
+<p>This works for most systems (it was derived with kanes method in mind
+specifically). However, systems expressed using lagranges method can't
 be brought into this form.</p>
-<p>this week i spent some time rederiving the general form to make it fit
-lagranges method, as well as kanes method. i plan to write up a formal
+<p>This week I spent some time rederiving the general form to make it fit
+lagranges method, as well as kanes method. I plan to write up a formal
 paper expressing the derivation as a reference and documentation of the
 class; here I'll just give a brief overview.</p>
 <p>In general, Lagrange's Method expresses the system using 3 equations:</p>
@@ -4992,16 +5851,16 @@ If you are free this summer and would love to contribute, feel free to catch us 
 
 
 
-<h3><a href="https://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer (old)</a></h3>
+<h3><a href="http://asmeurersympy.wordpress.com" title="Aaron Meurer's SymPy Blog">Aaron Meurer (old)</a></h3>
 
 
-<div class="entrygroup" id="https://asmeurersympy.wordpress.com/?p=1413">
-<h4 lang="en"><a href="https://asmeurersympy.wordpress.com/2014/04/05/this-blog-has-moved/">This blog has moved</a></h4>
+<div class="entrygroup" id="http://asmeurersympy.wordpress.com/?p=1413">
+<h4 lang="en"><a href="http://asmeurersympy.wordpress.com/2014/04/05/this-blog-has-moved/">This blog has moved</a></h4>
 <div class="entry">
 <div class="content" lang="en">
 <p>This blog has moved to <a href="http://asmeurer.github.io">http://asmeurer.github.io/</a></p>
 <p> </p>
-<p>See <a href="http://asmeurer.github.io/blog/posts/moving-to-github-pages-with-nikola/">http://asmeurer.github.io/blog/posts/moving-to-github-pages-with-nikola/</a> for more details on why I have moved. For now, all posts on this blog have not been migrated. </p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/asmeurersympy.wordpress.com/1413/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/asmeurersympy.wordpress.com/1413/" alt="" border="0" /></a> <img src="https://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1413&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+<p>See <a href="http://asmeurer.github.io/blog/posts/moving-to-github-pages-with-nikola/">http://asmeurer.github.io/blog/posts/moving-to-github-pages-with-nikola/</a> for more details on why I have moved. For now, all posts on this blog have not been migrated. </p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/asmeurersympy.wordpress.com/1413/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/asmeurersympy.wordpress.com/1413/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=asmeurersympy.wordpress.com&amp;blog=7467151&amp;post=1413&amp;subd=asmeurersympy&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
 
 
 
@@ -5010,7 +5869,7 @@ If you are free this summer and would love to contribute, feel free to catch us 
 
 
 <p class="date">
-<a href="https://asmeurersympy.wordpress.com/2014/04/05/this-blog-has-moved/">by Aaron Meurer at April 05, 2014 01:16 AM</a>
+<a href="http://asmeurersympy.wordpress.com/2014/04/05/this-blog-has-moved/">by Aaron Meurer at April 05, 2014 01:16 AM</a>
 </p>
 </div>
 </div>
@@ -5534,76 +6393,6 @@ laptops$ git push origin master
 </div>
 
 </div>
-<div class="daygroup">
-<h2>December 21, 2013</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://sushant-hiray.in" title="Sushant Hiray's Web Space">Sushant Hiray</a></h3>
-
-
-<div class="entrygroup" id="http://sushant-hiray.in/posts/push-it-good-to-git">
-<h4><a href="http://sushant-hiray.in/posts/push-it-good-to-git">How to “Push It Good” to Git</a></h4>
-<div class="entry">
-<div class="content">
-<p>A couple of days back I saw a tweet regarding <a href="http://valeriecoffman.com/git-push-it-good-salt-n-pepa/">Push it to Good to Git in MAC</a>. It was interesting so I built up a quick hack to emulate the same on linux.</p>
-
-<p>I was initially looking to use Sound Cloud API coz well spotify doesn’t work in India yet! Just then yesterday <a href="https://plus.google.com/u/0/+DilawarSingh/">Dilawar</a> wrote an interesting post on <a href="https://groups.google.com/forum/#!topic/wncc_iitb/UEodzMhLBVE">configuring Music Player Daemon</a> on <a href="https://groups.google.com/forum/#!forum/wncc_iitb">WnCC Google Group</a>
-So I just wrote a mini bash to emulate the push it to good to git for MAC!</p>
-
-<h3>What does this do?</h3>
-
-<p>Everytime you push to your repository via <code>pushit</code>, it’ll play the <a href="http://www.youtube.com/watch?v=vCadcBR95oUhttp://www.youtube.com/watch?v=vCadcBR95oU">Push it By Salt N Pepa</a> song! Oh ofcourse you can change the song to your own favorite version by tweaking the bash file!</p>
-
-<h3>Instructions</h3>
-
-<div class="highlight"><pre><code class="bash"><span class="lineno">1</span>       Configure MPC and download all the dependencies from gist!
-<span class="lineno">2</span>       chmod +rx pushit
-<span class="lineno">3</span>       sudo mv pushit /usr/bin/
-</code></pre></div>
-
-
-<h3>Usage</h3>
-
-<p>Use <code>pushit {branch-name}</code> instead of <code>git push origin {branch-name}</code></p>
-
-<h3>Credits</h3>
-
-<ul>
-<li>Inspired by <a href="http://valeriecoffman.com/git-push-it-good-salt-n-pepa/">Push it to Good to Git in MAC</a></li>
-<li>Credits to configure mpc <a href="https://plus.google.com/u/0/+DilawarSingh/">Dilawar</a></li>
-<li><a href="http://www.youtube.com/watch?v=vCadcBR95oUhttp://www.youtube.com/watch?v=vCadcBR95oU">Push it By Salt N Pepa</a> Youtube link!</li>
-</ul>
-
-
-<h3>Code</h3>
-
-<p>The entire code with dependencies is up on <a href="https://gist.github.com/sushant-hiray/8065556">gist</a></p>
-
-&lt;script src="https://gist.github.com/8065556.js?file=pushit"&gt; &lt;/script&gt;</div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://sushant-hiray.in/posts/push-it-good-to-git">December 21, 2013 08:00 AM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -5615,7 +6404,7 @@ So I just wrote a mini bash to emulate the push it to good to git for MAC!</p>
 <a href="http://asmeurer.github.io/blog/rss.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://asmeurer.github.io/" class="message" title="no activity in 7 days">Aaron Meurer</a>
 </li>
 <li>
-<a href="https://asmeurersympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="https://asmeurersympy.wordpress.com" class="message" title="no activity in 7 days">Aaron Meurer (old)</a>
+<a href="http://asmeurersympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://asmeurersympy.wordpress.com" class="message" title="no activity in 7 days">Aaron Meurer (old)</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/936818886435977143/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://addisoncugini.blogspot.com/" class="message" title="no activity in 7 days">Addison Cugini</a>
@@ -5777,7 +6566,7 @@ So I just wrote a mini bash to emulate the push it to good to git for MAC!</p>
 
 <p>
 <strong>Last updated:</strong><br>
-June 20, 2014 06:21 PM<br>
+June 20, 2014 06:41 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
