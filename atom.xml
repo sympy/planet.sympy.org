@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2014-06-21T06:00:57Z</updated>
+  <updated>2014-06-21T06:40:54Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,58 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry xml:lang="en">
+    <id>http://thilinaatsympy.wordpress.com/?p=348</id>
+    <link href="http://thilinaatsympy.wordpress.com/2014/06/21/gsoc-week-5-matrix-decompositions/" rel="alternate" type="text/html"/>
+    <title>[GSoC] Week 5: Matrix Decompositions</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Hi All, Week 5 of the GSoC is over and I have made some progress in Matrix factorizations. I implemented LU factorization and QR factorization. Still I have to implement Cholesky factorization. I hope to do it during the Weekend. LU factorization LU factorization was invented by Alan Turing and this is very important when …<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=thilinaatsympy.wordpress.com&amp;blog=52956410&amp;post=348&amp;subd=thilinaatsympy&amp;ref=&amp;feed=1" width="1"/></div>
+    </summary>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Hi All,</p>
+<p>Week 5 of the GSoC is over and I have made some progress in Matrix factorizations. I implemented LU factorization and QR factorization. Still I have to implement Cholesky factorization. I hope to do it during the Weekend.</p>
+<h2>LU factorization</h2>
+<p>LU factorization was invented by Alan Turing and this is very important when solving a system of equations. In <strong>LU</strong> decomposition we try to factorize a given square matrix into a product of two matrices, <strong>L</strong> and <strong>U</strong> where <strong>L</strong> is a lower triangular matrix and <strong>U</strong> is a upper triangular matrix. The factorization can be a true factorization i.e. <strong>A = LU</strong> or it may be the process of finding two matrices <strong>L</strong>, <strong>U</strong> which can be used in solving the system <strong>Ax = B</strong>. In the latter case we don’t have <strong>A = LU.</strong> I implemented three different algorithms for <strong>LU</strong> decomposition.</p>
+<h4>Fraction Free LU decomposition in [1]</h4>
+<p>Fraction free version described in [1] results in two matrices, a lower triangular matrix <strong>L </strong>and a upper triangular matrix <strong>U</strong>. But this is not a true factorization i.e. <strong>A != LU</strong> in this case. The algorithm is more focused in a factorization that helps to solve a system <strong>Ax = B</strong>. So we are only interested in finding two matrices which can be used in backward / forward substitution to solve the system.</p>
+<h4>Normal and Fraction Free version in SymPy</h4>
+<p>I also implemented the normal and fraction free version of the algorithm in SymPy which gives an exact factorization <strong>A = LU</strong>. Normal algorithm results in fractions and not good for numerical calculations if you are not using arbitrary precision arithmetic. In contrast fraction free versions do not generate these kinds of fraction as a result of the decomposition. These algorithms can be found in [2] and [3] respectively.</p>
+<h2>QR decomposition</h2>
+<p>In <strong>QR </strong>decomposition we find two matrices, an [orthogonal matrix](<a href="http://en.wikipedia.org/wiki/Orthogonal_matrix" rel="nofollow">http://en.wikipedia.org/wiki/Orthogonal_matrix</a>)  <strong>Q </strong>and  a upper triangular matrix <strong>R</strong> such that <strong>A = QR</strong>. Here <strong>A </strong>doesn’t have to be a square matrix.There are several method to calculate <strong>QR</strong> factorization but <strong>SymPy</strong> uses <strong><span class="mw-headline" id="Using_the_Gram.E2.80.93Schmidt_process">Gram–Schmidt </span></strong><span class="mw-headline" id="Using_the_Gram.E2.80.93Schmidt_process">process. The Algorithm can be found in [4].<br/>
+</span></p>
+<h2>Issues</h2>
+<p><strong>QR</strong> decomposition is not a `symbolic friendly` algorithm as it involves finding square root. I searched thoroughly for an algorithm that is suited for symbolic entries but couldn’t find one.</p>
+<h2>References</h2>
+<div class="line" id="LC175"><span class="c1">[1] Algorithm 3, page 14, Nakos, G. C., Turner, P. R., Williams, R. M. (1997). Fraction-free algorithms for linear and polynomial equations. ACM SIGSAM Bulletin, 31(3), 11–19. doi:10.1145/271130.271133.</span></div>
+<div class="line"/>
+<div class="line">[2] <a href="http://docs.sympy.org/latest/modules/matrices/matrices.html#sympy.matrices.matrices.MatrixBase.LUdecomposition" rel="nofollow">http://docs.sympy.org/latest/modules/matrices/matrices.html#sympy.matrices.matrices.MatrixBase.LUdecomposition</a></div>
+<div class="line"/>
+<div class="line">[3] <a href="http://docs.sympy.org/latest/modules/matrices/matrices.html#sympy.matrices.matrices.MatrixBase.LUdecompositionFF" rel="nofollow">http://docs.sympy.org/latest/modules/matrices/matrices.html#sympy.matrices.matrices.MatrixBase.LUdecompositionFF</a></div>
+<div class="line"/>
+<div class="line">[4] <a href="http://docs.sympy.org/latest/modules/matrices/matrices.html#sympy.matrices.matrices.MatrixBase.QRdecomposition" rel="nofollow">http://docs.sympy.org/latest/modules/matrices/matrices.html#sympy.matrices.matrices.MatrixBase.QRdecomposition</a></div><br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/thilinaatsympy.wordpress.com/348/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/thilinaatsympy.wordpress.com/348/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=thilinaatsympy.wordpress.com&amp;blog=52956410&amp;post=348&amp;subd=thilinaatsympy&amp;ref=&amp;feed=1" width="1"/></div>
+    </content>
+    <updated>2014-06-21T06:20:41Z</updated>
+    <category term="GSoC-2014-CSymPy"/>
+    <category term="CSymPy"/>
+    <category term="Linear Algebra"/>
+    <category term="LU factorization"/>
+    <category term="Matrix factorization"/>
+    <category term="QR factorization"/>
+    <category term="SymPy"/>
+    <author>
+      <name>Thilina Rathnayake</name>
+    </author>
+    <source>
+      <id>http://thilinaatsympy.wordpress.com</id>
+      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
+      <link href="http://thilinaatsympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://thilinaatsympy.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://thilinaatsympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <subtitle>My Work related to sympy</subtitle>
+      <title>Thilina's SymPy Blog</title>
+      <updated>2014-06-21T06:40:38Z</updated>
+    </source>
+  </entry>
 
   <entry>
     <id>tag:,2014-06-20:gsoc-week-5.html</id>
@@ -1005,7 +1057,7 @@ on infinitely indexed sets.</p></div></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="https://hargup.github.io/rss.xml" rel="self" type="application/atom+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-06-21T06:00:56Z</updated>
+      <updated>2014-06-21T06:40:52Z</updated>
     </source>
   </entry>
 
@@ -1108,7 +1160,7 @@ Not(ForAll((X,T), Implies(And(Person(X), Time(T)), CanFool(X, T))))</pre><p> </p
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-06-21T06:00:57Z</updated>
+      <updated>2014-06-21T06:40:54Z</updated>
     </source>
   </entry>
 
@@ -1337,7 +1389,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-06-21T06:00:48Z</updated>
+      <updated>2014-06-21T06:40:45Z</updated>
     </source>
   </entry>
 
@@ -1368,7 +1420,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-06-21T06:00:56Z</updated>
+      <updated>2014-06-21T06:40:52Z</updated>
     </source>
   </entry>
 
@@ -1411,7 +1463,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-06-21T06:00:41Z</updated>
+      <updated>2014-06-21T06:40:39Z</updated>
     </source>
   </entry>
 
@@ -1691,7 +1743,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-06-21T06:00:48Z</updated>
+      <updated>2014-06-21T06:40:45Z</updated>
     </source>
   </entry>
 
@@ -1863,7 +1915,7 @@ extent.</p></div></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="https://hargup.github.io/rss.xml" rel="self" type="application/atom+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-06-21T06:00:56Z</updated>
+      <updated>2014-06-21T06:40:52Z</updated>
     </source>
   </entry>
 
@@ -1890,7 +1942,7 @@ extent.</p></div></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-06-21T06:00:56Z</updated>
+      <updated>2014-06-21T06:40:52Z</updated>
     </source>
   </entry>
 
@@ -1954,7 +2006,7 @@ Xor creates one of the most complex NNF formula after simplification. Let look a
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-06-21T06:00:57Z</updated>
+      <updated>2014-06-21T06:40:54Z</updated>
     </source>
   </entry>
 
@@ -2196,7 +2248,7 @@ In [3]:
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-06-21T06:00:41Z</updated>
+      <updated>2014-06-21T06:40:39Z</updated>
     </source>
   </entry>
 
@@ -2259,7 +2311,7 @@ rationals, not Integers.</p><br/>  <a href="http://feeds.wordpress.com/1.0/gocom
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-21T06:00:41Z</updated>
+      <updated>2014-06-21T06:40:38Z</updated>
     </source>
   </entry>
 
@@ -2371,7 +2423,7 @@ week will be.</p>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="https://hargup.github.io/rss.xml" rel="self" type="application/atom+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-06-21T06:00:56Z</updated>
+      <updated>2014-06-21T06:40:52Z</updated>
     </source>
   </entry>
 
@@ -2575,7 +2627,7 @@ Similar to Xor above, even ITE had no independant class and all expressions were
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-06-21T06:00:57Z</updated>
+      <updated>2014-06-21T06:40:54Z</updated>
     </source>
   </entry>
 
@@ -2625,7 +2677,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-06-21T06:00:48Z</updated>
+      <updated>2014-06-21T06:40:45Z</updated>
     </source>
   </entry>
 
@@ -2651,7 +2703,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-06-21T06:00:56Z</updated>
+      <updated>2014-06-21T06:40:52Z</updated>
     </source>
   </entry>
 
@@ -2681,7 +2733,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-06-21T06:00:57Z</updated>
+      <updated>2014-06-21T06:40:54Z</updated>
     </source>
   </entry>
 
@@ -2725,7 +2777,7 @@ True<br/>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-06-21T06:00:41Z</updated>
+      <updated>2014-06-21T06:40:39Z</updated>
     </source>
   </entry>
 
@@ -3023,7 +3075,7 @@ Most important thing about the `MatrixBase` class is that it is derived from the
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-21T06:00:41Z</updated>
+      <updated>2014-06-21T06:40:38Z</updated>
     </source>
   </entry>
 
@@ -3102,7 +3154,7 @@ I'm looking forward for a great summer with Sympy.</p></div></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="https://hargup.github.io/rss.xml" rel="self" type="application/atom+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-06-21T06:00:56Z</updated>
+      <updated>2014-06-21T06:40:52Z</updated>
     </source>
   </entry>
 
@@ -3190,7 +3242,7 @@ I'm looking forward for a great summer with Sympy.</p></div></div>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-06-21T06:00:41Z</updated>
+      <updated>2014-06-21T06:40:39Z</updated>
     </source>
   </entry>
 
@@ -3217,7 +3269,7 @@ I'm looking forward for a great summer with Sympy.</p></div></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-06-21T06:00:56Z</updated>
+      <updated>2014-06-21T06:40:52Z</updated>
     </source>
   </entry>
 
@@ -3323,7 +3375,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-06-21T06:00:48Z</updated>
+      <updated>2014-06-21T06:40:45Z</updated>
     </source>
   </entry>
 
@@ -5156,7 +5208,7 @@ Happy Coding!
       <link href="http://tarzzz.github.io/rss.gsoc.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts categorized under GSoC</subtitle>
       <title>Tarun Gaba's blog - GSoC</title>
-      <updated>2014-06-21T06:00:38Z</updated>
+      <updated>2014-06-21T06:40:36Z</updated>
     </source>
   </entry>
 
@@ -5247,7 +5299,7 @@ that we can keep the visualizations in the static format on the drive(or reposit
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-21T06:00:41Z</updated>
+      <updated>2014-06-21T06:40:38Z</updated>
     </source>
   </entry>
 
@@ -5361,7 +5413,7 @@ that we can keep the visualizations in the static format on the drive(or reposit
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-06-21T06:00:56Z</updated>
+      <updated>2014-06-21T06:40:52Z</updated>
     </source>
   </entry>
 
@@ -5539,7 +5591,7 @@ If you are free this summer and would love to contribute, feel free to catch us 
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-06-21T06:00:48Z</updated>
+      <updated>2014-06-21T06:40:45Z</updated>
     </source>
   </entry>
 
@@ -5567,7 +5619,7 @@ If you are free this summer and would love to contribute, feel free to catch us 
       <link href="http://asmeurersympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My blog on my work on SymPy and other fun stuff.</subtitle>
       <title>Aaron Meurer's SymPy Blog</title>
-      <updated>2014-06-21T06:00:18Z</updated>
+      <updated>2014-06-21T06:40:17Z</updated>
     </source>
   </entry>
 
@@ -5780,7 +5832,7 @@ in manually.</p></div></div>
       <link href="http://asmeurer.github.io/blog/rss.xml" rel="self" type="application/rss+xml"/>
       <subtitle>My blog</subtitle>
       <title>Aaron Meurer's Blog</title>
-      <updated>2014-06-21T06:00:19Z</updated>
+      <updated>2014-06-21T06:40:17Z</updated>
     </source>
   </entry>
 
@@ -5921,79 +5973,6 @@ Happy Streaking!
 <br/></div>
     </summary>
     <updated>2014-01-12T08:00:00Z</updated>
-    <source>
-      <id>http://sushant-hiray.in</id>
-      <author>
-        <name>Sushant Hiray</name>
-      </author>
-      <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
-      <link href="http://sushant-hiray.in/feed.xml" rel="self" type="application/atom+xml"/>
-      <subtitle>My rants on coding</subtitle>
-      <title>Sushant Hiray's Web Space</title>
-      <updated>2014-04-23T08:20:49Z</updated>
-    </source>
-  </entry>
-
-  <entry>
-    <id>http://sushant-hiray.in/posts/setting-up-post-receive-hook</id>
-    <link href="http://sushant-hiray.in/posts/setting-up-post-receive-hook" rel="alternate" type="text/html"/>
-    <title>Setting up post-receive hook</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Recently, we switched to using <a href="http://jekyllrb.com/">Jekyll</a> for our <a href="http://wncc-iitb.org/">WnCC</a> website.
-This post will essentially help to configure <code>post-receive hooks</code> on your local repository.</p>
-
-<p>Using git hooks you no longer need to manually deploy the website on your server. Everytime you push to git, a remote server handles the deployment.</p>
-
-<p>Setting up the post-receive hook is done as follows:</p>
-
-<pre><code>laptop$ ssh deployer@example.com
-server$ mkdir myrepo.git
-server$ cd myrepo.git
-server$ git --bare init
-server$ cp hooks/post-receive.sample hooks/post-receive
-server$ mkdir /var/www/myrepo
-</code></pre>
-
-<p>Next, add the following lines to <code>hooks/post-receive</code> and be sure <code>Jekyll</code> is installed on the server:</p>
-
-<pre><code>GIT_REPO=$HOME/myrepo.git
-TMP_GIT_CLONE=$HOME/tmp/myrepo
-PUBLIC_WWW=/var/www/myrepo
-JEKYLL = /path/to/jekyll
-git clone $GIT_REPO $TMP_GIT_CLONE
-$JEKYLL build -s $TMP_GIT_CLONE -d $PUBLIC_WWW
-rm -Rf $TMP_GIT_CLONE
-exit
-</code></pre>
-
-<p>Finally, run the following command on any users laptop that needs to be able to deploy using this hook:</p>
-
-<pre><code>laptops$ git remote add deploy deployer@example.com:~/myrepo.git
-</code></pre>
-
-<p>Everytime you push, make sure you push it to remote server as well</p>
-
-<pre><code>laptops$ git push deploy master
-</code></pre>
-
-<p>In case, you wish multiple users to be able to deploy
-You need to run the following command on the other laptops:</p>
-
-<pre><code>laptops$ git remote add deploy deployer@example.com:~/myrepo.git
-</code></pre>
-
-<p>Ofcourse goes without saying, each user should deploy to remote server using:</p>
-
-<pre><code>laptops$ git push deploy master
-</code></pre>
-
-<p>In case you are maintaining the repository on github as well, make sure to sync the repositories.
-So, your <code>git push</code> could look as follows:</p>
-
-<pre><code>laptops$ git push deploy master
-laptops$ git push origin master
-</code></pre></div>
-    </summary>
-    <updated>2014-01-10T08:00:00Z</updated>
     <source>
       <id>http://sushant-hiray.in</id>
       <author>

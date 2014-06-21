@@ -8,6 +8,33 @@
 	<description>Planet SymPy - http://planet.sympy.org/</description>
 
 <item>
+	<title>Thilina Rathnayake: [GSoC] Week 5: Matrix Decompositions</title>
+	<guid isPermaLink="false">http://thilinaatsympy.wordpress.com/?p=348</guid>
+	<link>http://thilinaatsympy.wordpress.com/2014/06/21/gsoc-week-5-matrix-decompositions/</link>
+	<description>&lt;p&gt;Hi All,&lt;/p&gt;
+&lt;p&gt;Week 5 of the GSoC is over and I have made some progress in Matrix factorizations. I implemented LU factorization and QR factorization. Still I have to implement Cholesky factorization. I hope to do it during the Weekend.&lt;/p&gt;
+&lt;h2&gt;LU factorization&lt;/h2&gt;
+&lt;p&gt;LU factorization was invented by Alan Turing and this is very important when solving a system of equations. In &lt;strong&gt;LU&lt;/strong&gt; decomposition we try to factorize a given square matrix into a product of two matrices, &lt;strong&gt;L&lt;/strong&gt; and &lt;strong&gt;U&lt;/strong&gt; where &lt;strong&gt;L&lt;/strong&gt; is a lower triangular matrix and &lt;strong&gt;U&lt;/strong&gt; is a upper triangular matrix. The factorization can be a true factorization i.e. &lt;strong&gt;A = LU&lt;/strong&gt; or it may be the process of finding two matrices &lt;strong&gt;L&lt;/strong&gt;, &lt;strong&gt;U&lt;/strong&gt; which can be used in solving the system &lt;strong&gt;Ax = B&lt;/strong&gt;. In the latter case we don’t have &lt;strong&gt;A = LU.&lt;/strong&gt; I implemented three different algorithms for &lt;strong&gt;LU&lt;/strong&gt; decomposition.&lt;/p&gt;
+&lt;h4&gt;Fraction Free LU decomposition in [1]&lt;/h4&gt;
+&lt;p&gt;Fraction free version described in [1] results in two matrices, a lower triangular matrix &lt;strong&gt;L &lt;/strong&gt;and a upper triangular matrix &lt;strong&gt;U&lt;/strong&gt;. But this is not a true factorization i.e. &lt;strong&gt;A != LU&lt;/strong&gt; in this case. The algorithm is more focused in a factorization that helps to solve a system &lt;strong&gt;Ax = B&lt;/strong&gt;. So we are only interested in finding two matrices which can be used in backward / forward substitution to solve the system.&lt;/p&gt;
+&lt;h4&gt;Normal and Fraction Free version in SymPy&lt;/h4&gt;
+&lt;p&gt;I also implemented the normal and fraction free version of the algorithm in SymPy which gives an exact factorization &lt;strong&gt;A = LU&lt;/strong&gt;. Normal algorithm results in fractions and not good for numerical calculations if you are not using arbitrary precision arithmetic. In contrast fraction free versions do not generate these kinds of fraction as a result of the decomposition. These algorithms can be found in [2] and [3] respectively.&lt;/p&gt;
+&lt;h2&gt;QR decomposition&lt;/h2&gt;
+&lt;p&gt;In &lt;strong&gt;QR &lt;/strong&gt;decomposition we find two matrices, an [orthogonal matrix](&lt;a href=&quot;http://en.wikipedia.org/wiki/Orthogonal_matrix&quot; rel=&quot;nofollow&quot;&gt;http://en.wikipedia.org/wiki/Orthogonal_matrix&lt;/a&gt;)  &lt;strong&gt;Q &lt;/strong&gt;and  a upper triangular matrix &lt;strong&gt;R&lt;/strong&gt; such that &lt;strong&gt;A = QR&lt;/strong&gt;. Here &lt;strong&gt;A &lt;/strong&gt;doesn’t have to be a square matrix.There are several method to calculate &lt;strong&gt;QR&lt;/strong&gt; factorization but &lt;strong&gt;SymPy&lt;/strong&gt; uses &lt;strong&gt;&lt;span class=&quot;mw-headline&quot; id=&quot;Using_the_Gram.E2.80.93Schmidt_process&quot;&gt;Gram–Schmidt &lt;/span&gt;&lt;/strong&gt;&lt;span class=&quot;mw-headline&quot; id=&quot;Using_the_Gram.E2.80.93Schmidt_process&quot;&gt;process. The Algorithm can be found in [4].&lt;br /&gt;
+&lt;/span&gt;&lt;/p&gt;
+&lt;h2&gt;Issues&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;QR&lt;/strong&gt; decomposition is not a `symbolic friendly` algorithm as it involves finding square root. I searched thoroughly for an algorithm that is suited for symbolic entries but couldn’t find one.&lt;/p&gt;
+&lt;h2&gt;References&lt;/h2&gt;
+&lt;div class=&quot;line&quot; id=&quot;LC175&quot;&gt;&lt;span class=&quot;c1&quot;&gt;[1] Algorithm 3, page 14, Nakos, G. C., Turner, P. R., Williams, R. M. (1997). Fraction-free algorithms for linear and polynomial equations. ACM SIGSAM Bulletin, 31(3), 11–19. doi:10.1145/271130.271133.&lt;/span&gt;&lt;/div&gt;
+&lt;div class=&quot;line&quot;&gt;&lt;/div&gt;
+&lt;div class=&quot;line&quot;&gt;[2] &lt;a href=&quot;http://docs.sympy.org/latest/modules/matrices/matrices.html#sympy.matrices.matrices.MatrixBase.LUdecomposition&quot; rel=&quot;nofollow&quot;&gt;http://docs.sympy.org/latest/modules/matrices/matrices.html#sympy.matrices.matrices.MatrixBase.LUdecomposition&lt;/a&gt;&lt;/div&gt;
+&lt;div class=&quot;line&quot;&gt;&lt;/div&gt;
+&lt;div class=&quot;line&quot;&gt;[3] &lt;a href=&quot;http://docs.sympy.org/latest/modules/matrices/matrices.html#sympy.matrices.matrices.MatrixBase.LUdecompositionFF&quot; rel=&quot;nofollow&quot;&gt;http://docs.sympy.org/latest/modules/matrices/matrices.html#sympy.matrices.matrices.MatrixBase.LUdecompositionFF&lt;/a&gt;&lt;/div&gt;
+&lt;div class=&quot;line&quot;&gt;&lt;/div&gt;
+&lt;div class=&quot;line&quot;&gt;[4] &lt;a href=&quot;http://docs.sympy.org/latest/modules/matrices/matrices.html#sympy.matrices.matrices.MatrixBase.QRdecomposition&quot; rel=&quot;nofollow&quot;&gt;http://docs.sympy.org/latest/modules/matrices/matrices.html#sympy.matrices.matrices.MatrixBase.QRdecomposition&lt;/a&gt;&lt;/div&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/thilinaatsympy.wordpress.com/348/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/thilinaatsympy.wordpress.com/348/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=thilinaatsympy.wordpress.com&amp;amp;blog=52956410&amp;amp;post=348&amp;amp;subd=thilinaatsympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
+	<pubDate>Sat, 21 Jun 2014 06:20:41 +0000</pubDate>
+</item>
+<item>
 	<title>Jim Crist: GSoC Week 5: Adventures in Profiling</title>
 	<guid isPermaLink="false">tag:,2014-06-20:gsoc-week-5.html</guid>
 	<link>http://jcrist.github.io/gsoc-week-5.html</link>
@@ -4731,66 +4758,6 @@ All in all it has been a git streak winter! I'm not sure how much more I can pos
 Happy Streaking! 
 &lt;br /&gt;</description>
 	<pubDate>Sun, 12 Jan 2014 08:00:00 +0000</pubDate>
-</item>
-<item>
-	<title>Sushant Hiray: Setting up post-receive hook</title>
-	<guid isPermaLink="true">http://sushant-hiray.in/posts/setting-up-post-receive-hook</guid>
-	<link>http://sushant-hiray.in/posts/setting-up-post-receive-hook</link>
-	<description>&lt;p&gt;Recently, we switched to using &lt;a href=&quot;http://jekyllrb.com/&quot;&gt;Jekyll&lt;/a&gt; for our &lt;a href=&quot;http://wncc-iitb.org/&quot;&gt;WnCC&lt;/a&gt; website.
-This post will essentially help to configure &lt;code&gt;post-receive hooks&lt;/code&gt; on your local repository.&lt;/p&gt;
-
-&lt;p&gt;Using git hooks you no longer need to manually deploy the website on your server. Everytime you push to git, a remote server handles the deployment.&lt;/p&gt;
-
-&lt;p&gt;Setting up the post-receive hook is done as follows:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;laptop$ ssh deployer@example.com
-server$ mkdir myrepo.git
-server$ cd myrepo.git
-server$ git --bare init
-server$ cp hooks/post-receive.sample hooks/post-receive
-server$ mkdir /var/www/myrepo
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, add the following lines to &lt;code&gt;hooks/post-receive&lt;/code&gt; and be sure &lt;code&gt;Jekyll&lt;/code&gt; is installed on the server:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;GIT_REPO=$HOME/myrepo.git
-TMP_GIT_CLONE=$HOME/tmp/myrepo
-PUBLIC_WWW=/var/www/myrepo
-JEKYLL = /path/to/jekyll
-git clone $GIT_REPO $TMP_GIT_CLONE
-$JEKYLL build -s $TMP_GIT_CLONE -d $PUBLIC_WWW
-rm -Rf $TMP_GIT_CLONE
-exit
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Finally, run the following command on any users laptop that needs to be able to deploy using this hook:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;laptops$ git remote add deploy deployer@example.com:~/myrepo.git
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Everytime you push, make sure you push it to remote server as well&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;laptops$ git push deploy master
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In case, you wish multiple users to be able to deploy
-You need to run the following command on the other laptops:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;laptops$ git remote add deploy deployer@example.com:~/myrepo.git
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Ofcourse goes without saying, each user should deploy to remote server using:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;laptops$ git push deploy master
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In case you are maintaining the repository on github as well, make sure to sync the repositories.
-So, your &lt;code&gt;git push&lt;/code&gt; could look as follows:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;laptops$ git push deploy master
-laptops$ git push origin master
-&lt;/code&gt;&lt;/pre&gt;</description>
-	<pubDate>Fri, 10 Jan 2014 08:00:00 +0000</pubDate>
 </item>
 
 </channel>
