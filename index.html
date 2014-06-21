@@ -34,6 +34,45 @@
 
 
 
+<h3><a href="http://codesachin.wordpress.com" title="Dream. Think. Code. » Google Summer of Code 2014">Sachin Joglekar</a></h3>
+
+
+<div class="entrygroup" id="http://codesachin.wordpress.com/?p=17">
+<h4 lang="en"><a href="http://codesachin.wordpress.com/2014/06/21/gsoc-week-5-pr-reviews-and-starting-coordsysrect/">GSoC Week 5: PR reviews and starting CoordSysRect</a></h4>
+<div class="entry">
+<div class="content" lang="en">
+<p>This week had the dual focus of -</p>
+<p>1. Polishing off the Vector framework based on PR reviews</p>
+<p>2. Starting the implementation of CoordSysRect+Point</p>
+<p>I had thought last week, that the vector classes I implemented in the first PR <em>were</em> the polished version. However, with the reviews given, I have come to realise that a lot of improvements had/have to be made. Francesco Bonazzi, one of the SymPy contributors, was a huge help in improving the code and making it more efficient than what it initially was.</p>
+<p>The biggest suggestion for improvement that was provided was to not implement custom hashing and equality checking methods for the Vector classes. Initially, I had overridden the inherited versions of these methods in the new classes, based on tuples generated with respect to the vectorial components of any Vector instance. However, SymPy already has a strong framework for these functionalities, based on the <em>args</em> of a Basic object. Moreover, the SymPy core is apparently being re-written in C++. This would make the SymPy-core versions of the aforementioned methods much, much more efficient than my Python versions.</p>
+<p>Luckily, I had implemented the ‘__new__’ methods of the Vector classes in such a way that ‘equivalent’ Vector instances had exactly the same args. This made the usage of the inherited methods much, much easier – the only thing that remained to do was to pass the appropriate args to the superclass __new__ methods. Hence, all Vector classes rely on the SymPy core now, for as much as they can. Phew. Still a problem is the BaseScalar class, whose superclass is Dummy. The __new__ method for Dummy makes it not-possible to pass coordinate-system and index-related information to it – making the appropriate hashing impossible. If I instead inherit from AtomicExpr, I will have to rewrite many methods – not sure if its a good idea. Lets see what the community has to say about this.</p>
+<p>About the implementation of the new stuff, I have already finished implementing the Point class. Now I am currently working on implementing CoordSysRect – I am still writing the HUGE __new__ method for this class. For now, I am referring to the tests of sympy.physics.vector while doing the coding. Hope I am successful in writing the classes soon, and integrating it with a polishing and ‘perfected’ version of the vector core.</p>
+<p>Thats all for this week. Have a great week!</p><br />  <a href="http://feeds.wordpress.com/1.0/gocomments/codesachin.wordpress.com/17/" rel="nofollow"><img src="http://feeds.wordpress.com/1.0/comments/codesachin.wordpress.com/17/" alt="" border="0" /></a> <img src="http://stats.wordpress.com/b.gif?host=codesachin.wordpress.com&amp;blog=67602166&amp;post=17&amp;subd=codesachin&amp;ref=&amp;feed=1" alt="" border="0" width="1" height="1" /></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://codesachin.wordpress.com/2014/06/21/gsoc-week-5-pr-reviews-and-starting-coordsysrect/">by srjoglekar246 at June 21, 2014 11:45 AM</a>
+</p>
+</div>
+</div>
+
+
+
+</div>
+<div class="channelgroup">
+
+
+
+
+
+
+
 <h3><a href="http://thilinaatsympy.wordpress.com" title="Thilina's SymPy Blog">Thilina Rathnayake</a></h3>
 
 
@@ -6242,114 +6281,6 @@ in manually.</p></div></div>
 </div>
 
 </div>
-<div class="daygroup">
-<h2>January 27, 2014</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://sushant-hiray.in" title="Sushant Hiray's Web Space">Sushant Hiray</a></h3>
-
-
-<div class="entrygroup" id="http://sushant-hiray.in/posts/y-u-no-use-screen">
-<h4><a href="http://sushant-hiray.in/posts/y-u-no-use-screen">Y U NO USE screen</a></h4>
-<div class="entry">
-<div class="content">
-<p>Imagine a fairly common situation — you are ssh'ed to a remote server, doing stuff and then all of a sudden your internet connection drops and the console has frozen. And even after the connection is back, console won’t respond, because the pipe between your computer and remote one has broken.</p>
-
-<p>We’ve all been there, it sucks. And it sucks even more if there was a long running process executed from that console say for example <code>scp</code>ing a huge file.</p>
-
-<p>Well I faced this situation quite some times while working for our compiler’s lab assignment this weekend and it pissed me enough to search for a solution!</p>
-
-<p>There is a very old and simple tool, that can help you to prevent this from happening. It is called — <code>GNU Screen</code>. I had a faint remembrance of seeing <a href="https://www.facebook.com/manish.goregaokar">Manish</a> use it, so I decided to explore it a bit more. Basically, screen allows you to create a virtual session inside your ssh session(or any console session), that isn’t bound to your connection. Meaning that if your connection drops, you will be able to connect to this virtual session afterwards. Hopefully, you already see the benefits you can get from using it, so let’s get to how you actually use it.</p>
-
-<h2>1. Installing screen</h2>
-
-<p>Usually screen won’t be installed your system, so you would:</p>
-
-<pre><code>sudo apt-get install screen
-</code></pre>
-
-<p>or</p>
-
-<pre><code>yum install screen
-</code></pre>
-
-<p>or</p>
-
-<pre><code>brew install screen
-</code></pre>
-
-<p>or do whatever you do to install stuff on your machine.</p>
-
-<h2>2. Starting a new screen session</h2>
-
-<p>To start and new virtual session simply type <code>screen</code> into your console. Normally it would greet you with a copyright notice. Press return to skip it and you’re set — now you are inside the virtual console. Feels pretty much the same, right? Except now you can go ahead and disconnect from the internet and you will be able to connect to the session once you are back online.</p>
-
-<h2>3. Communicating with screen</h2>
-
-<p>Inside a virtual session you can initiate communication with the screen tool by pressing <code>Ctrl + A</code>, followed by a single letter command:</p>
-
-<p><code>D</code> — ‘detach’. It detaches you from current session, leaving it running in background.</p>
-
-<p><code>K</code> — ‘kill’. This would terminate the screen session. It would probably ask you to confirm this, so press y if you are sure about it. Logging out from a virtual console also terminates it.</p>
-
-<p>These are two commands that you would need for basic understanding of screen, but ofcourse, as most of the UNIX tools, <code>screen</code> has much more power underneath the bonet.</p>
-
-<h2>4. Connecting to an existings virtual session</h2>
-
-<p>In case of a lost connection or to resume a previously started session, you need to type</p>
-
-<pre><code>screen -r
-</code></pre>
-
-<p>This command will attach you to a screen session. In case there are more then one active session, you’ll see a list of them. To connect to a particular screen, simply add it’s identifier as an argument:</p>
-
-<pre><code>screen -r 12345.pts-0.yourserver
-</code></pre>
-
-<p>That way you can have multiple sessions running, allowing you to switch between them and not having to keep multiple ssh connections alive. To see a list of active screens, just type in:</p>
-
-<pre><code>screen -ls
-</code></pre>
-
-<h2>5. Naming your screens</h2>
-
-<p>You can also give your screen a name, that you can use later on as a connection identifier:</p>
-
-<pre><code>screen -S something
-</code></pre>
-
-<p>and to restore that session:</p>
-
-<pre><code>screen -r something
-</code></pre>
-
-<p>And that’s basically it. With these few simple commands in mind you won’t be afraid of a frozen consoles and “Broken pipe” error messages, because your session is safe and sound with screen. So go ahead try it and get used to it, because it will help you a lot.</p>
-
-<p>ps: The title is motivated by a blogpost I recently saw being shared on <a href="http://news.ycombinator.com">Hacker News</a></p></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://sushant-hiray.in/posts/y-u-no-use-screen">January 27, 2014 08:00 AM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -6382,7 +6313,7 @@ in manually.</p></div></div>
 <a href="http://www.catchmrbharath.in/programming.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a class="message" title="404: not found">Bharath M R</a>
 </li>
 <li>
-<a href="http://brianegranger.com/?feed=rss2" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://brianegranger.com" class="message" title="internal server error">Brian Granger</a>
+<a href="http://brianegranger.com/?feed=rss2" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://brianegranger.com" class="message" title="no activity in 7 days">Brian Granger</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/267967203861801529/posts/default/-/SymPy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://straightupcoding.blogspot.com/search/label/SymPy" class="message" title="no activity in 7 days">Brian Jorgensen</a>
@@ -6523,7 +6454,7 @@ in manually.</p></div></div>
 
 <p>
 <strong>Last updated:</strong><br>
-June 21, 2014 11:41 AM<br>
+June 21, 2014 12:01 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
