@@ -8,6 +8,61 @@
 	<description>Planet SymPy - http://planet.sympy.org/</description>
 
 <item>
+	<title>Sushant Hiray: This Week in CSymPy: #5</title>
+	<guid isPermaLink="true">http://sushant-hiray.in/posts/gsoc/csympy-week5/</guid>
+	<link>http://sushant-hiray.in/posts/gsoc/csympy-week5/</link>
+	<description>&lt;p&gt;Week 5 for GSoC just ended and this week I completed implementing the Exponential Module.&lt;/p&gt;
+
+&lt;h1 id=&quot;progress&quot;&gt;Progress&lt;/h1&gt;
+
+&lt;p&gt;I started the week by implementing &lt;code&gt;LambertW&lt;/code&gt; function. It wasn’t a part of the original proposal but it is a nice addition to have so I implemented it.
+&lt;br /&gt;&lt;br /&gt;
+If you’re unaware, LambertW function is defined as the inverse function of x*exp(x). This function represents the principal branch  of this inverse function, which is multivalued. For more information, see:
+&lt;a href=&quot;http://en.wikipedia.org/wiki/Lambert_W_function&quot;&gt;wiki&lt;/a&gt;. &lt;a href=&quot;https://github.com/sympy/csympy/pull/200&quot;&gt;Pull 200&lt;/a&gt; implemented the LambertW class!
+&lt;br /&gt;&lt;br /&gt;
+After this, I worked on Hyperbolic module, which was the main target for this week. &lt;a href=&quot;https://github.com/sympy/csympy/pull/203&quot;&gt;Pull 203&lt;/a&gt; implemented the hyperbolic module. 
+In addition to the normal functions which were implemented as a part of the TrigFunction API, we implemented &lt;code&gt;expand_as_exp&lt;/code&gt; in the Hyperbolic Module.
+&lt;br /&gt;&lt;br /&gt;
+With this in place, we can now do things like &lt;code&gt;sinh(x)-&amp;gt;expand_as_exp()&lt;/code&gt; and it will return the exponential form: &lt;code&gt;(e^x - e^{-x})/2&lt;/code&gt; using a combination of exp, adds and divs!
+&lt;br /&gt;&lt;br /&gt;
+Follow up to this PR we have openened a couple of issues:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;a href=&quot;https://github.com/sympy/csympy/issues/207&quot;&gt;#207&lt;/a&gt; is a bug which I encountered while writing test cases. Essentially same symbolic expressions written in form of add and mul are not equated as equal.
+This is a crucial issue and we are yet to see how to proceed further on this. SymPy also faced the same issue &lt;a href=&quot;https://github.com/sympy/sympy/issues/4596&quot;&gt;sympy/sympy#4596&lt;/a&gt; where it was decided to remove
+such automatic redistribution. As &lt;a href=&quot;https://github.com/certik&quot;&gt;@certik&lt;/a&gt; suggested, it is perhaps the best to compare underneath via expand.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;a href=&quot;https://github.com/sympy/csympy/issues/210&quot;&gt;#210&lt;/a&gt; is basically a more generic way to cleanup the existing Trignometric and Hyperbolic Module. This for instance can be used to define the &lt;code&gt;subs&lt;/code&gt; method in the base class rather than writing almost the same code in each subsequent inherited class.
+The only reason why this was being defined in all the classes was that we needed to access the method to create the class via canonicalization. I’ve proposed a couple of methods in which we can approach the problem.
+Once decided we can fix this issue.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;discussions&quot;&gt;Discussions&lt;/h1&gt;
+
+&lt;p&gt;As usual most of the actual discussions happened on PR, we were supposed to have a meetup on gitter but it was postponed.&lt;/p&gt;
+
+&lt;h1 id=&quot;week-highlights&quot;&gt;Week Highlights!&lt;/h1&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;CSymPy just crossed the 1000 commits mark! Yay! It is &lt;a href=&quot;https://github.com/sympy/csympy&quot;&gt;1036&lt;/a&gt; at the time of writing.&lt;/li&gt;
+  &lt;li&gt;The issue serial number has crossed the 200 mark!&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Quite an interesting week this has been as far as milestones are concerned!&lt;/p&gt;
+
+&lt;h1 id=&quot;the-week-ahead&quot;&gt;The Week Ahead&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;Implement the long awaited &lt;code&gt;Complex&lt;/code&gt; Module.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;br /&gt;
+Thats all for now :) Will get back next week!&lt;/p&gt;</description>
+	<pubDate>Tue, 24 Jun 2014 13:45:00 +0000</pubDate>
+</item>
+<item>
 	<title>Akshay Narasimha: Gsoc14 Week-5</title>
 	<guid isPermaLink="false">tag:blogger.com,1999:blog-54146973659574488.post-384394288691782141</guid>
 	<link>http://geekpy.blogspot.com/2014/06/gsoc14-week-5.html</link>
@@ -4506,45 +4561,6 @@ that we can keep the visualizations in the static format on the drive(or reposit
 	<description>&lt;div style=&quot;text-align: left;&quot; dir=&quot;ltr&quot;&gt;This summer is really going to be productive as I will be writing code for SymPy as a part of Google Summer of Code-14 (Gsoc). For more details regarding the programme visit this &lt;a href=&quot;https://www.google-melange.com/&quot;&gt;site&lt;/a&gt;.&lt;br /&gt;&lt;br /&gt;For those of you who are not familiar with SymPy, well it is a Computational algebraic system(CAS) library written in pure python.The project is currently headed by Aaron Meurer and Ondrej Certik.&lt;br /&gt;&lt;br /&gt; My project &quot;Improvements to the Geometry library&quot; got accepted under SymPy organisation. My mentor for this project will be Stefan Krastanov and I am really excited to work with him. There are three other guys from my university who got selected for SymPy Sudhanshu Mishra, Sachin Joglekar, Soumya Dipta Biswas ,and I would like to wish them luck for their projects.&lt;br /&gt;&lt;br /&gt; Coming to my project I would be extending the geometry module of SymPy to include 3-D entities and also implementing some new classes along the way. For more details about my project you could check my &lt;a href=&quot;https://github.com/sympy/sympy/wiki/GSoC-2014-Application--Akshay--Geometry-Module&quot;&gt;proposal&lt;/a&gt;.&lt;br /&gt;&lt;br /&gt; This is my first time participating in Gsoc and I am looking forward to a great summer.&lt;/div&gt;</description>
 	<pubDate>Thu, 24 Apr 2014 20:27:00 +0000</pubDate>
 	<author>noreply@blogger.com (Akshay Narasimha)</author>
-</item>
-<item>
-	<title>Fabian Pedregosa: Surrogate Loss Functions in Machine Learning</title>
-	<guid isPermaLink="false">tag:fa.bianp.net,2014-04-21:blog/2014/surrogate-loss-functions-in-machine-learning/</guid>
-	<link>http://fa.bianp.net/blog/2014/surrogate-loss-functions-in-machine-learning/</link>
-	<description>&lt;p&gt;&lt;span class=&quot;bold&quot;&gt;TL; DR&lt;/span&gt; These are some notes on calibration of surrogate loss functions in the context of machine learning. But mostly it is an excuse to post some images I made.&lt;/p&gt;
-&lt;p&gt;In the binary-class classification setting we are given $n$ training samples $\{(X_1, Y_1), \ldots, (X_n, Y_n)\}$, where $X_i$ belongs to some sample space $\mathcal{X}$, usually $\mathbb{R}^p$ but for the purpose of this post we can keep i abstract, and $y_i \in \{-1, 1\}$ is an integer representing the class label. &lt;/p&gt;
-&lt;p&gt;We are also given a loss function $\ell: \{-1, 1\} \times \{-1, 1\} \to \mathbb{R}$ that measures the error of a given prediction. The value of the loss function $\ell$ at an arbitrary point $(y, \hat{y})$ is interpreted as the cost incurred by predicting $\hat{y}$ when the true label is $y$. In classification this function is often the zero-one loss, that is, $\ell(y, \hat{y})$ is zero when $y = \hat{y}$  and one otherwise.&lt;/p&gt;
-&lt;p&gt;The goal is to find a function $h: \mathcal{X} \to [k]$, the classifier, with the smallest expected loss on a new sample. In other words, we seek to find a function $h$ that minimizes the expected $\ell$-risk, given by 
-$$
-\mathcal{R}_{\ell}(h) = \mathbb{E}_{XY}[\ell(Y, h(X))]
-$$&lt;/p&gt;
-&lt;p&gt;In theory, we could directly minimize the $\ell$-risk and we would have the optimal classifier, also known as &lt;em&gt;Bayes predictor&lt;/em&gt;. However, there are several problems associated with this approach. One is that the probability distribution of $XY$ is unknown, thus computing the exact expected value is not feasible. It must be approximated by the empirical risk. Another issue is that this quantity is difficult to optimize because the function $\ell$ is discontinuous. Take for example a problem in which $\mathcal{X} = \mathbb{R}^2, k=2$, and we seek to find the linear function $f(X) = \text{sign}(X w), w \in \mathbb{R}^2$  and that minimizes the $\ell$-risk. As a function of the parameter $w$ this function looks something like&lt;/p&gt;
-&lt;div style=&quot;text-align: center;&quot;&gt;
-&lt;img width=&quot;350px&quot; alt=&quot;loss as function of w&quot; style=&quot;margin-top: 0px;&quot; src=&quot;http://fa.bianp.net/blog/images/2014/loss_01.png&quot; /&gt;
-&lt;/div&gt;
-
-&lt;p&gt;This function is discontinuous with large, flat regions and is thus extremely hard to optimize using gradient-based methods. For this reason it is usual to consider a proxy to the loss called a &lt;em&gt;surrogate loss function&lt;/em&gt;. For computational reasons this is usually convex function $\Psi: \mathbb{R}  \to \mathbb{R}_+$. An example of such surrogate loss functions is the &lt;em&gt;hinge loss&lt;/em&gt;, $\Psi(t) = \max(1-t, 0)$, which is the loss used by Support Vector Machines (SVMs). Another example is the logistic loss, $\Psi(t) = 1/(1 + \exp(-t))$, used by the logistic regression model. If we consider the logistic loss, minimizing the $\Psi$-risk, given by $\mathbb{E}_{XY}[\Psi(Y, f(X))]$, of the function $f(X) = X w$ becomes a much more more tractable optimization problem:&lt;/p&gt;
-&lt;div style=&quot;text-align: center;&quot;&gt;
-&lt;img src=&quot;http://fa.bianp.net/blog/images/2014/loss_log.png&quot; style=&quot;margin-top: 0px;&quot; width=&quot;350px&quot; /&gt;
-&lt;/div&gt;
-
-&lt;p&gt;In short, we have replaced the $\ell$-risk which is computationally difficult to optimize with the $\Psi$-risk which has more advantageous properties. A natural questions to ask is how much have we lost by this change. The property of whether minimizing the $\Psi$-risk leads to a function that also minimizes the $\ell$-risk is often referred to as &lt;em&gt;consistency&lt;/em&gt; or &lt;em&gt;calibration&lt;/em&gt;. For a more formal definition see [&lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;http://fa.bianp.net/blog/feed/#fn:1&quot; class=&quot;footnote-ref&quot; rel=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;] and [&lt;sup id=&quot;fnref:2&quot;&gt;&lt;a href=&quot;http://fa.bianp.net/blog/feed/#fn:2&quot; class=&quot;footnote-ref&quot; rel=&quot;footnote&quot;&gt;2&lt;/a&gt;&lt;/sup&gt;]. This property will depend on the surrogate function $\Psi$: for some functions $\Psi$ it will be verified the consistency property and for some not. One of the most useful characterizations was given in [&lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;http://fa.bianp.net/blog/feed/#fn:1&quot; class=&quot;footnote-ref&quot; rel=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;] and states that if $\Psi$ is convex then it is consistent if and only if it is differentiable at zero and $\Psi'(0) &amp;lt; 0$. This includes most of the commonly used surrogate loss functions, including hinge, logistic regression and Huber loss functions.&lt;/p&gt;
-&lt;div style=&quot;text-align: center;&quot;&gt;
-&lt;img src=&quot;http://fa.bianp.net/blog/images/2014/loss_functions.png&quot; style=&quot;margin-top: 0px;&quot; width=&quot;550px&quot; /&gt;
-&lt;/div&gt;
-
-&lt;div class=&quot;footnote&quot;&gt;
-&lt;hr /&gt;
-&lt;ol&gt;
-&lt;li id=&quot;fn:1&quot;&gt;
-&lt;p&gt;P. L. Bartlett, M. I. Jordan, and J. D. McAuliffe, “Convexity , Classification , and Risk Bounds,” J. Am. Stat. Assoc., pp. 1–36, 2003. &lt;a href=&quot;http://fa.bianp.net/blog/feed/#fnref:1&quot; rev=&quot;footnote&quot; class=&quot;footnote-backref&quot; title=&quot;Jump back to footnote 1 in the text&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li id=&quot;fn:2&quot;&gt;
-&lt;p&gt;A. Tewari and P. L. Bartlett, “On the Consistency of Multiclass Classification Methods,” J. Mach. Learn. Res., vol. 8, pp. 1007–1025, 2007. &lt;a href=&quot;http://fa.bianp.net/blog/feed/#fnref:2&quot; rev=&quot;footnote&quot; class=&quot;footnote-backref&quot; title=&quot;Jump back to footnote 2 in the text&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/div&gt;</description>
-	<pubDate>Sun, 20 Apr 2014 22:00:00 +0000</pubDate>
 </item>
 
 </channel>
