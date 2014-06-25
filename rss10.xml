@@ -13,6 +13,7 @@
 
 	<items>
 		<rdf:Seq>
+			<rdf:li rdf:resource="http://blog.s-d-b.com/?p=86" />
 			<rdf:li rdf:resource="http://sushant-hiray.in/posts/gsoc/csympy-week5/" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-54146973659574488.post-384394288691782141" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-8847459392628952171.post-8191047412644166823" />
@@ -72,11 +73,56 @@
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-283806077182880539.post-3114660856880190348" />
 			<rdf:li rdf:resource="http://kundankumar185.wordpress.com/?p=3" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-8847459392628952171.post-581868626457110552" />
-			<rdf:li rdf:resource="tag:blogger.com,1999:blog-54146973659574488.post-8832200362911847122" />
 		</rdf:Seq>
 	</items>
 </channel>
 
+<item rdf:about="http://blog.s-d-b.com/?p=86">
+	<title>Soumya Dipta Biswas: GSoC 2014: Week 5</title>
+	<link>http://blog.s-d-b.com/gsoc-2014-week-5/</link>
+	<content:encoded>&lt;p&gt;Hello Folks,&lt;/p&gt;
+&lt;p&gt;This week was probably not as productive as I would have liked it to be. Firstly, it seems like the algorithm for faster conversion to CNF/DNF I talked about &lt;a href=&quot;http://blog.s-d-b.com/gsoc-2014-week-1-and-2/&quot; target=&quot;_blank&quot; title=&quot;Faster_NF&quot;&gt;before&lt;/a&gt; works fast conditionally. If a particular formula is already quite near to a particular normal form, then the conversion takes a longer time than the recursive algorithm. The overhead incurred for the conversion in this case starts to dominate the actual conversion. So, I am now parallelly working on fixing this problem and the FOL module (as scheduled). Hence, I majorly managed to do only 2 things this week namely Interpretation and conversion to Prenex Normal Form.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Interpretation&lt;/strong&gt;&lt;br /&gt;
+Akin to &lt;code&gt;pl_true(expr, model)&lt;/code&gt; present in the propositional logic module, I have implemented a &lt;code&gt;fol_true(expr, model)&lt;/code&gt; for the FOL module. Before jumping into the concept of interpretation for First Order Logic, let us see what it means for Propositional Logic. If you are already familiar with the same, feel free to jump to the next paragraph. Now, the interpretation of an expression is the value of expression under an assignment. So given the formula &lt;code&gt;A | B&lt;/code&gt; such that &lt;code&gt;{A: True, B: False}&lt;/code&gt; the formula is True. So, this is essentially the evaluated &lt;em&gt;result&lt;/em&gt; of a formula given an assignment. This is quite similar to &lt;code&gt;a + b &amp;gt; 0&lt;/code&gt; which has no value inherently, but if a = 1 and b = 0, then the expression has a value (True). In some cases only a partial assignment is sufficient to determine the value of the expr. For e.g. &lt;code&gt;A &amp;amp; B&lt;/code&gt; with &lt;code&gt;A = False&lt;/code&gt; is clearly False without any regard for the value of B.&lt;/p&gt;
+&lt;p&gt;In Propositional Logic, the most basic elements are symbols which can have one of True or False as its value. FOL on the other hand has many elements which can take on any value in the domain. While the concept of interpretation remains the same there, the number of things to be evaluated change. Interpretation in FOL is a rather complex job which will become quite apparent very soon. Let us set about to find the value of each of the basic elements.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Constants are the easiest to evaluate, well because they stand for themselves.&lt;/li&gt;
+&lt;li&gt;Variables are similar to variables in any mathematical expression and it is sufficient to simply give them a value. However, one may also give a variable a domain. This domain is the set of all values that the corresponding variable may assume.&lt;/li&gt;
+&lt;li&gt;Next come the functions. For functions, one needs to provide a mapping of every possible set of arguments to its corresponding value. For e.g. for &lt;code&gt;f(X, Y)&lt;/code&gt; such that &lt;code&gt;X = {1, 2, 3}&lt;/code&gt; and &lt;code&gt;Y = {10, 20, 30}&lt;/code&gt;, one needs to provide a value for every feasible possible combination of X and Y.&lt;/li&gt;
+&lt;li&gt;Predicates are almost the same as functions with the exception that the values they yield must be boolean. The examples below will probably make things much clearer.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Let’s look at an example that will give better perspective to the idea of Interpretation.&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;crayon-plain-tag&quot;&gt;&amp;gt;&amp;gt;&amp;gt; from sympy.abc import X, T
+&amp;gt;&amp;gt;&amp;gt; from sympy.logic.FOL import Predicate, ForAll, Exists, fol_true
+&amp;gt;&amp;gt;&amp;gt; Person = Predicate('Person')
+&amp;gt;&amp;gt;&amp;gt; Time = Predicate('Time')
+&amp;gt;&amp;gt;&amp;gt; CanFool = Predicate('CanFool')
+&amp;gt;&amp;gt;&amp;gt; X_domain = ['John', 'Jack']
+&amp;gt;&amp;gt;&amp;gt; T_domain = [1, 2, 3]
+&amp;gt;&amp;gt;&amp;gt; def person(X): return X in X_domain
+&amp;gt;&amp;gt;&amp;gt; def time(T): return T in T_domain
+&amp;gt;&amp;gt;&amp;gt; CanFoolMap = {('John',2):False, ('John',3):False, 'default':True}
+&amp;gt;&amp;gt;&amp;gt; model = {X:X_domain, T:T_domain, Person:person, Time:time, CanFool:CanFoolMap}
+
+# You can fool some of the people all of the time
+&amp;gt;&amp;gt;&amp;gt; expr = Exists(X, ForAll(T, (Person(X) &amp;amp; Time(T)) &amp;gt;&amp;gt; CanFool(X, T)))
+&amp;gt;&amp;gt;&amp;gt; fol_true(expr, model)
+True
+
+# You can fool all of the people some of the time
+&amp;gt;&amp;gt;&amp;gt; expr = ForAll(X, Exists(T, (Person(X) &amp;amp; Time(T)) &amp;gt;&amp;gt; CanFool(X, T)))
+&amp;gt;&amp;gt;&amp;gt; fol_true(expr, model)
+True
+
+# You can fool all of the people all of the time
+&amp;gt;&amp;gt;&amp;gt; expr = ForAll(X, ForAll(T, (Person(X) &amp;amp; Time(T)) &amp;gt;&amp;gt; CanFool(X, T)))
+&amp;gt;&amp;gt;&amp;gt; fol_true(expr, model)
+False&lt;/pre&gt;&lt;p&gt; &lt;/p&gt;
+&lt;p&gt;I hope that makes the idea of interpreation in general and how to use them in SymPy a little clearer. I will update the post giving more examples soon.&lt;/p&gt;
+&lt;p&gt;Adios!!!&lt;/p&gt;</content:encoded>
+	<dc:date>2014-06-25T20:44:05+00:00</dc:date>
+	<dc:creator>SD</dc:creator>
+</item>
 <item rdf:about="http://sushant-hiray.in/posts/gsoc/csympy-week5/">
 	<title>Sushant Hiray: This Week in CSymPy: #5</title>
 	<link>http://sushant-hiray.in/posts/gsoc/csympy-week5/</link>
@@ -4594,13 +4640,6 @@ that we can keep the visualizations in the static format on the drive(or reposit
 	<content:encoded>&lt;div style=&quot;text-align: left;&quot; dir=&quot;ltr&quot;&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;br /&gt;My proposal is intended to add more to optics in SymPy. Till now it can only do computations related to Gaussian optics and a bit of geometrical optics. &lt;a href=&quot;https://github.com/certik&quot; target=&quot;_blank&quot;&gt;Ondřej Čertík&lt;/a&gt; and &lt;a href=&quot;https://github.com/flacjacket&quot; target=&quot;_blank&quot;&gt;Sean Vig&lt;/a&gt; are my mentors for the project.&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;br /&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;For those who don't know what is SymPy, SymPy is a Python library for symbolic computation. It provides computer algebra capabilities either as a standalone application, as a library to other applications, or live on the web as SymPy Live. SymPy is trivial to install and to inspect because is written entirely in Python and because it does not depend on any additional libraries. This ease of access combined with a simple and extensible code base in a well known language make SymPy a computer algebra system with a relatively low barrier to entry. SymPy is free software and is licensed under New BSD license. The lead developers are Ondřej Čertík and Aaron Meurer.&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;br /&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;Three more people other than me got selected for SymPy from my college, namely, Akshay, Sachin Joglekar and Soumya Dipta Biswas.&lt;br /&gt;&lt;br /&gt;&lt;/div&gt;During this &lt;i&gt;Community Bonding Period &lt;/i&gt;I'll try to get familiar with the huge code base of SymPy and its community of developers. I'm also working on few old pull requests that are dead for so long.&lt;br /&gt;&lt;br /&gt;Looking forward to work with such a great organization! Thanks to Google and SymPy for this opportunity!&lt;/div&gt;</content:encoded>
 	<dc:date>2014-04-25T18:00:29+00:00</dc:date>
 	<dc:creator>Sudhanshu Mishra</dc:creator>
-</item>
-<item rdf:about="tag:blogger.com,1999:blog-54146973659574488.post-8832200362911847122">
-	<title>Akshay Narasimha: Gsoc-14 with SymPy</title>
-	<link>http://geekpy.blogspot.com/2014/04/gsoc-14-with-sympy.html</link>
-	<content:encoded>&lt;div style=&quot;text-align: left;&quot; dir=&quot;ltr&quot;&gt;This summer is really going to be productive as I will be writing code for SymPy as a part of Google Summer of Code-14 (Gsoc). For more details regarding the programme visit this &lt;a href=&quot;https://www.google-melange.com/&quot;&gt;site&lt;/a&gt;.&lt;br /&gt;&lt;br /&gt;For those of you who are not familiar with SymPy, well it is a Computational algebraic system(CAS) library written in pure python.The project is currently headed by Aaron Meurer and Ondrej Certik.&lt;br /&gt;&lt;br /&gt; My project &quot;Improvements to the Geometry library&quot; got accepted under SymPy organisation. My mentor for this project will be Stefan Krastanov and I am really excited to work with him. There are three other guys from my university who got selected for SymPy Sudhanshu Mishra, Sachin Joglekar, Soumya Dipta Biswas ,and I would like to wish them luck for their projects.&lt;br /&gt;&lt;br /&gt; Coming to my project I would be extending the geometry module of SymPy to include 3-D entities and also implementing some new classes along the way. For more details about my project you could check my &lt;a href=&quot;https://github.com/sympy/sympy/wiki/GSoC-2014-Application--Akshay--Geometry-Module&quot;&gt;proposal&lt;/a&gt;.&lt;br /&gt;&lt;br /&gt; This is my first time participating in Gsoc and I am looking forward to a great summer.&lt;/div&gt;</content:encoded>
-	<dc:date>2014-04-24T20:27:00+00:00</dc:date>
-	<dc:creator>Akshay Narasimha</dc:creator>
 </item>
 
 </rdf:RDF>
