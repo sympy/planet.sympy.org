@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2014-06-26T14:20:56Z</updated>
+  <updated>2014-06-26T14:41:00Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -15,35 +15,35 @@
     <id>https://hargup.github.io/posts/week-5.html</id>
     <link href="https://hargup.github.io/posts/week-5.html" rel="alternate" type="text/html"/>
     <title>week 5</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><div><h2>GSoC Week 5</h2>
-<h3>Solving Trigonometric Function</h3>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><div><h3>Solving Trigonometric Function (part I)</h3>
 <p>This week I spend time on making trigonometric solvers work.
 Every trigonometric function can be written in terms of tan.</p>
-<p>$$ sin(x) == \frac{2*tan(x/2)}{tan^{2}(x/2)} $$</p>
-<p>$$ cos(x) == \frac{-tan^{2}(x/2) + 1}{tan^{2}(x/2) + 1} $$</p>
-<p>$$ cot(x) == \frac{1}{tan(x)} $$</p>
-<p>A basic technique can be rewrite the equation in terms of tan. And if the
-equation is made by addition, multiplication or quotient of trigonometric
-functions then the equation is a equivalent to a rational function in tan.
-Then that equation can be solved by the usual polynomial solving techniques.</p>
-<p>Taking the example from the doc 
+<p>$$ sin(x) = \frac{2*tan(x/2)}{tan^{2}(x/2)} $$</p>
+<p>$$ cos(x) = \frac{-tan^{2}(x/2) + 1}{tan^{2}(x/2) + 1} $$</p>
+<p>$$ cot(x) = \frac{1}{tan(x)} $$</p>
+<p>A basic technique to solve trigonometric equations can be rewriting the equation in terms of tan.
+And if the equation is made by addition, multiplication or quotient of
+trigonometric functions then the transformed equation is a equivalent to a rational
+function in tan. That equation can be solved by the usual polynomial
+solving techniques.</p>
+<p>Taking the example from the <a href="https://github.com/sympy/sympy/wiki/solvers">doc</a>
 \( cos(x) + sin(x) \) gets converted to
 \( \frac{-tan^{2}(x/2) + 2*tan(x/2) + 1}{tan^{2}(x/2) + 1} \)</p>
-<p>The
-solution of this equations is \( tan(x/2) = 1 +- sqrt(2) \).
-Since the inverse of tan is \( \left\{2 \pi n + \operatorname{atan}{\left (y \right )}\; |\; n \in \mathbb{Z}\right\} \)
-the solution of the
-given equation is
+<p>The solution of this equations is \( tan(x/2) = 1 +- sqrt(2) \).
+Since the inverse of tan is
+\( \left\{2 \pi n + \operatorname{atan}{\left (y \right )}\; |\; n \in \mathbb{Z}\right\} \)
+the solution of the given equation is
 $$ \left\{2 \pi n - \frac{\pi}{8}\; |\; n \in \mathbb{Z}\right\} \cup \left\{2 \pi n + \frac{3 \pi}{8}\; |\; n \in \mathbb{Z}\right\} $$</p>
 <p>Though it appears this technique should work universally for trigonometric
 equation it fails for even \( sin(x) = 0 \). From the table above
-\( sin(x) == \frac{2*tan(x/2)}{tan^{2}(x/2)} \)
+\( sin(x) = \frac{2*tan(x/2)}{tan^{2}(x/2)} \)
 So, the \( sin(x) = 0 \) occurs at \( tan(x/2) = 0 \) which has solution
 \( \left\{2 \pi n\; |\; n \in \mathbb{Z}\right\} \)
 But the solution is \( \left\{ \pi n\; |\; n \in \mathbb{Z}\right\} \)
 . Why are we missing some solutions? The
-reason is \( sin(x) = 0 \) also occurs when denominator tends to infinity, i.e.,
-the values where \( tan^{2}(x/2) + 1 \) tends to infinity.
+reason is \( sin(x) = 0 \) also occurs when denominator tends to \( \infty \),
+i.e.,
+the values where \( tan^{2}(x/2) + 1 \) tends to \( \infty \).
 We had encountered a similar problem for the solution of
 $$ \frac{1}{\left(\frac{x}{x + 1} + 3\right)^{2}} $$</p>
 <p>here \( x = -1 \) is not a point in the domain of the of the equation. The solver
@@ -55,7 +55,7 @@ solution to the transformed equation. There we wrote a sub procedure
 original equation. The problem here is slightly different in the sense that
 transforming the equation decreases the domain of the solutions and not increase
 it.</p>
-<p>To find such solution we have allow Infinity to be solution to equations, we
+<p>To find such solution we have allow \( \infty \) to be solution to equations, we
 will be working on extended reals instead of just reals.  I think this change
 will simplify a lot of things.</p>
 <p>Another thing which should be taken care off is that we cannot naively search
@@ -75,7 +75,7 @@ conceder the limiting value of the equation.</p>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="https://hargup.github.io/rss.xml" rel="self" type="application/atom+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-06-26T14:20:54Z</updated>
+      <updated>2014-06-26T14:40:58Z</updated>
     </source>
   </entry>
 
@@ -138,7 +138,7 @@ False</pre><p> </p>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-06-26T14:20:56Z</updated>
+      <updated>2014-06-26T14:41:00Z</updated>
     </source>
   </entry>
 
@@ -205,7 +205,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-06-26T14:20:47Z</updated>
+      <updated>2014-06-26T14:40:50Z</updated>
     </source>
   </entry>
 
@@ -366,7 +366,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://tarzzz.github.io/rss.gsoc.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts categorized under GSoC</subtitle>
       <title>Tarun Gaba's blog - GSoC</title>
-      <updated>2014-06-26T14:20:38Z</updated>
+      <updated>2014-06-26T14:40:41Z</updated>
     </source>
   </entry>
 
@@ -406,7 +406,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-06-26T14:20:54Z</updated>
+      <updated>2014-06-26T14:40:58Z</updated>
     </source>
   </entry>
 
@@ -439,7 +439,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-06-26T14:20:40Z</updated>
+      <updated>2014-06-26T14:40:43Z</updated>
     </source>
   </entry>
 
@@ -491,7 +491,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-26T14:20:39Z</updated>
+      <updated>2014-06-26T14:40:42Z</updated>
     </source>
   </entry>
 
@@ -1489,7 +1489,7 @@ on infinitely indexed sets.</p></div></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="https://hargup.github.io/rss.xml" rel="self" type="application/atom+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-06-26T14:20:54Z</updated>
+      <updated>2014-06-26T14:40:58Z</updated>
     </source>
   </entry>
 
@@ -1592,7 +1592,7 @@ Not(ForAll((X,T), Implies(And(Person(X), Time(T)), CanFool(X, T))))</pre><p> </p
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-06-26T14:20:56Z</updated>
+      <updated>2014-06-26T14:41:00Z</updated>
     </source>
   </entry>
 
@@ -1821,7 +1821,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-06-26T14:20:46Z</updated>
+      <updated>2014-06-26T14:40:50Z</updated>
     </source>
   </entry>
 
@@ -1852,7 +1852,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-06-26T14:20:54Z</updated>
+      <updated>2014-06-26T14:40:58Z</updated>
     </source>
   </entry>
 
@@ -1896,7 +1896,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-26T14:20:39Z</updated>
+      <updated>2014-06-26T14:40:42Z</updated>
     </source>
   </entry>
 
@@ -1939,7 +1939,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-06-26T14:20:40Z</updated>
+      <updated>2014-06-26T14:40:43Z</updated>
     </source>
   </entry>
 
@@ -2219,7 +2219,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-06-26T14:20:46Z</updated>
+      <updated>2014-06-26T14:40:50Z</updated>
     </source>
   </entry>
 
@@ -2391,7 +2391,7 @@ extent.</p></div></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="https://hargup.github.io/rss.xml" rel="self" type="application/atom+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-06-26T14:20:54Z</updated>
+      <updated>2014-06-26T14:40:58Z</updated>
     </source>
   </entry>
 
@@ -2418,7 +2418,7 @@ extent.</p></div></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-06-26T14:20:54Z</updated>
+      <updated>2014-06-26T14:40:58Z</updated>
     </source>
   </entry>
 
@@ -2482,7 +2482,7 @@ Xor creates one of the most complex NNF formula after simplification. Let look a
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-06-26T14:20:56Z</updated>
+      <updated>2014-06-26T14:41:00Z</updated>
     </source>
   </entry>
 
@@ -2724,7 +2724,7 @@ In [3]:
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-06-26T14:20:40Z</updated>
+      <updated>2014-06-26T14:40:43Z</updated>
     </source>
   </entry>
 
@@ -2787,7 +2787,7 @@ rationals, not Integers.</p><br/>  <a href="http://feeds.wordpress.com/1.0/gocom
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-26T14:20:39Z</updated>
+      <updated>2014-06-26T14:40:42Z</updated>
     </source>
   </entry>
 
@@ -2899,7 +2899,7 @@ week will be.</p>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="https://hargup.github.io/rss.xml" rel="self" type="application/atom+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-06-26T14:20:55Z</updated>
+      <updated>2014-06-26T14:40:58Z</updated>
     </source>
   </entry>
 
@@ -3103,7 +3103,7 @@ Similar to Xor above, even ITE had no independant class and all expressions were
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-06-26T14:20:56Z</updated>
+      <updated>2014-06-26T14:41:00Z</updated>
     </source>
   </entry>
 
@@ -3153,7 +3153,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-06-26T14:20:46Z</updated>
+      <updated>2014-06-26T14:40:50Z</updated>
     </source>
   </entry>
 
@@ -3179,7 +3179,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-06-26T14:20:54Z</updated>
+      <updated>2014-06-26T14:40:58Z</updated>
     </source>
   </entry>
 
@@ -3209,7 +3209,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-06-26T14:20:56Z</updated>
+      <updated>2014-06-26T14:41:00Z</updated>
     </source>
   </entry>
 
@@ -3253,7 +3253,7 @@ True<br/>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-06-26T14:20:40Z</updated>
+      <updated>2014-06-26T14:40:43Z</updated>
     </source>
   </entry>
 
@@ -3551,7 +3551,7 @@ Most important thing about the `MatrixBase` class is that it is derived from the
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-26T14:20:39Z</updated>
+      <updated>2014-06-26T14:40:42Z</updated>
     </source>
   </entry>
 
@@ -3630,7 +3630,7 @@ I'm looking forward for a great summer with Sympy.</p></div></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="https://hargup.github.io/rss.xml" rel="self" type="application/atom+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-06-26T14:20:54Z</updated>
+      <updated>2014-06-26T14:40:58Z</updated>
     </source>
   </entry>
 
@@ -3718,7 +3718,7 @@ I'm looking forward for a great summer with Sympy.</p></div></div>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-06-26T14:20:40Z</updated>
+      <updated>2014-06-26T14:40:43Z</updated>
     </source>
   </entry>
 
@@ -3745,7 +3745,7 @@ I'm looking forward for a great summer with Sympy.</p></div></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-06-26T14:20:54Z</updated>
+      <updated>2014-06-26T14:40:58Z</updated>
     </source>
   </entry>
 
@@ -3851,7 +3851,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-06-26T14:20:46Z</updated>
+      <updated>2014-06-26T14:40:50Z</updated>
     </source>
   </entry>
 
@@ -5775,7 +5775,7 @@ that we can keep the visualizations in the static format on the drive(or reposit
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-26T14:20:39Z</updated>
+      <updated>2014-06-26T14:40:42Z</updated>
     </source>
   </entry>
 
@@ -5889,7 +5889,7 @@ that we can keep the visualizations in the static format on the drive(or reposit
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-06-26T14:20:54Z</updated>
+      <updated>2014-06-26T14:40:58Z</updated>
     </source>
   </entry>
 </feed>
