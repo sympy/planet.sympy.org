@@ -13,6 +13,7 @@
 
 	<items>
 		<rdf:Seq>
+			<rdf:li rdf:resource="https://hargup.github.io/posts/week-5.html" />
 			<rdf:li rdf:resource="http://blog.s-d-b.com/?p=86" />
 			<rdf:li rdf:resource="http://sushant-hiray.in/posts/gsoc/csympy-week5/" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-54146973659574488.post-384394288691782141" />
@@ -72,11 +73,63 @@
 			<rdf:li rdf:resource="https://hargup.github.io/blog/blah.html" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-283806077182880539.post-3114660856880190348" />
 			<rdf:li rdf:resource="http://kundankumar185.wordpress.com/?p=3" />
-			<rdf:li rdf:resource="tag:blogger.com,1999:blog-8847459392628952171.post-581868626457110552" />
 		</rdf:Seq>
 	</items>
 </channel>
 
+<item rdf:about="https://hargup.github.io/posts/week-5.html">
+	<title>Harsh Gupta: week 5</title>
+	<link>https://hargup.github.io/posts/week-5.html</link>
+	<content:encoded>&lt;div&gt;&lt;h2&gt;GSoC Week 5&lt;/h2&gt;
+&lt;h3&gt;Solving Trigonometric Function&lt;/h3&gt;
+&lt;p&gt;This week I spend time on making trigonometric solvers work.
+Every trigonometric function can be written in terms of tan.&lt;/p&gt;
+&lt;p&gt;$$ sin(x) == \frac{2*tan(x/2)}{tan^{2}(x/2)} $$&lt;/p&gt;
+&lt;p&gt;$$ cos(x) == \frac{-tan^{2}(x/2) + 1}{tan^{2}(x/2) + 1} $$&lt;/p&gt;
+&lt;p&gt;$$ cot(x) == \frac{1}{tan(x)} $$&lt;/p&gt;
+&lt;p&gt;A basic technique can be rewrite the equation in terms of tan. And if the
+equation is made by addition, multiplication or quotient of trigonometric
+functions then the equation is a equivalent to a rational function in tan.
+Then that equation can be solved by the usual polynomial solving techniques.&lt;/p&gt;
+&lt;p&gt;Taking the example from the doc 
+\( cos(x) + sin(x) \) gets converted to
+\( \frac{-tan^{2}(x/2) + 2*tan(x/2) + 1}{tan^{2}(x/2) + 1} \)&lt;/p&gt;
+&lt;p&gt;The
+solution of this equations is \( tan(x/2) = 1 +- sqrt(2) \).
+Since the inverse of tan is \( \left\{2 \pi n + \operatorname{atan}{\left (y \right )}\; |\; n \in \mathbb{Z}\right\} \)
+the solution of the
+given equation is
+$$ \left\{2 \pi n - \frac{\pi}{8}\; |\; n \in \mathbb{Z}\right\} \cup \left\{2 \pi n + \frac{3 \pi}{8}\; |\; n \in \mathbb{Z}\right\} $$&lt;/p&gt;
+&lt;p&gt;Though it appears this technique should work universally for trigonometric
+equation it fails for even \( sin(x) = 0 \). From the table above
+\( sin(x) == \frac{2*tan(x/2)}{tan^{2}(x/2)} \)
+So, the \( sin(x) = 0 \) occurs at \( tan(x/2) = 0 \) which has solution
+\( \left\{2 \pi n\; |\; n \in \mathbb{Z}\right\} \)
+But the solution is \( \left\{ \pi n\; |\; n \in \mathbb{Z}\right\} \)
+. Why are we missing some solutions? The
+reason is \( sin(x) = 0 \) also occurs when denominator tends to infinity, i.e.,
+the values where \( tan^{2}(x/2) + 1 \) tends to infinity.
+We had encountered a similar problem for the solution of
+$$ \frac{1}{\left(\frac{x}{x + 1} + 3\right)^{2}} $$&lt;/p&gt;
+&lt;p&gt;here \( x = -1 \) is not a point in the domain of the of the equation. The solver
+simplifies the equation to&lt;/p&gt;
+&lt;p&gt;$$ \frac{\left(x + 1\right)^{2}}{\left(4 x + 3\right)^{2}} $$&lt;/p&gt;
+&lt;p&gt;which extends the domain to include the point \( x = -1 \) which is also the
+solution to the transformed equation. There we wrote a sub procedure
+&lt;code&gt;domain_check&lt;/code&gt; to verify if the returned solution is part of the domain of the
+original equation. The problem here is slightly different in the sense that
+transforming the equation decreases the domain of the solutions and not increase
+it.&lt;/p&gt;
+&lt;p&gt;To find such solution we have allow Infinity to be solution to equations, we
+will be working on extended reals instead of just reals.  I think this change
+will simplify a lot of things.&lt;/p&gt;
+&lt;p&gt;Another thing which should be taken care off is that we cannot naively search
+for the values for which the denominator tends to infinity as for the same
+value numerator might also attain infinitely large value, we will have to
+conceder the limiting value of the equation.&lt;/p&gt;
+&lt;/div&gt;</content:encoded>
+	<dc:date>2014-06-26T11:43:01+00:00</dc:date>
+</item>
 <item rdf:about="http://blog.s-d-b.com/?p=86">
 	<title>Soumya Dipta Biswas: GSoC 2014: Week 5</title>
 	<link>http://blog.s-d-b.com/gsoc-2014-week-5/</link>
@@ -4633,13 +4686,6 @@ that we can keep the visualizations in the static format on the drive(or reposit
 &lt;p align=&quot;justify&quot;&gt;That’s it for now I think for my first post on first blog. I have a lot to say but they are for next time. There is a long journey I have to travel, being started with Google Summer of Code.&lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/kundankumar185.wordpress.com/3/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/kundankumar185.wordpress.com/3/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://stats.wordpress.com/b.gif?host=kundankumar185.wordpress.com&amp;amp;blog=68025302&amp;amp;post=3&amp;amp;subd=kundankumar185&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
 	<dc:date>2014-05-04T23:40:25+00:00</dc:date>
 	<dc:creator>Kundan</dc:creator>
-</item>
-<item rdf:about="tag:blogger.com,1999:blog-8847459392628952171.post-581868626457110552">
-	<title>Sudhanshu Mishra: GSoC 2014 with SymPy</title>
-	<link>http://lifelesscode.blogspot.com/2014/04/gsoc-2014-with-sympy.html</link>
-	<content:encoded>&lt;div style=&quot;text-align: left;&quot; dir=&quot;ltr&quot;&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;br /&gt;My proposal is intended to add more to optics in SymPy. Till now it can only do computations related to Gaussian optics and a bit of geometrical optics. &lt;a href=&quot;https://github.com/certik&quot; target=&quot;_blank&quot;&gt;Ondřej Čertík&lt;/a&gt; and &lt;a href=&quot;https://github.com/flacjacket&quot; target=&quot;_blank&quot;&gt;Sean Vig&lt;/a&gt; are my mentors for the project.&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;br /&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;For those who don't know what is SymPy, SymPy is a Python library for symbolic computation. It provides computer algebra capabilities either as a standalone application, as a library to other applications, or live on the web as SymPy Live. SymPy is trivial to install and to inspect because is written entirely in Python and because it does not depend on any additional libraries. This ease of access combined with a simple and extensible code base in a well known language make SymPy a computer algebra system with a relatively low barrier to entry. SymPy is free software and is licensed under New BSD license. The lead developers are Ondřej Čertík and Aaron Meurer.&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;br /&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;Three more people other than me got selected for SymPy from my college, namely, Akshay, Sachin Joglekar and Soumya Dipta Biswas.&lt;br /&gt;&lt;br /&gt;&lt;/div&gt;During this &lt;i&gt;Community Bonding Period &lt;/i&gt;I'll try to get familiar with the huge code base of SymPy and its community of developers. I'm also working on few old pull requests that are dead for so long.&lt;br /&gt;&lt;br /&gt;Looking forward to work with such a great organization! Thanks to Google and SymPy for this opportunity!&lt;/div&gt;</content:encoded>
-	<dc:date>2014-04-25T18:00:29+00:00</dc:date>
-	<dc:creator>Sudhanshu Mishra</dc:creator>
 </item>
 
 </rdf:RDF>
