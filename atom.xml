@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2014-06-26T14:41:00Z</updated>
+  <updated>2014-06-27T16:01:03Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,47 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry xml:lang="en">
+    <id>http://thilinaatsympy.wordpress.com/?p=360</id>
+    <link href="http://thilinaatsympy.wordpress.com/2014/06/27/gsoc-week-6-cholesky-and-ldl-algorithms/" rel="alternate" type="text/html"/>
+    <title>[GSoC] Week 6: Cholesky and LDL Algorithms</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">This week I implemented Cholesky decomposition and LDL decomposition. In addition to that I fixed two errors In CSymPy. I was also bale to finish work with LU decomposition and merge it to master. Also, I could solve the system using fraction free LU factorization. Cholesky Decomposition Cholesky decomposition can be applied to a Hermitian …<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=thilinaatsympy.wordpress.com&amp;blog=52956410&amp;post=360&amp;subd=thilinaatsympy&amp;ref=&amp;feed=1" width="1"/></div>
+    </summary>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>This week I implemented Cholesky decomposition and LDL decomposition. In addition to that I fixed two errors In CSymPy. I was also bale to finish work with LU decomposition and merge it to master. Also, I could solve the system <img alt="Ax = b" class="latex" src="http://s0.wp.com/latex.php?latex=Ax+%3D+b&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="Ax = b"/> using fraction free <strong>LU</strong> factorization.</p>
+<h2>Cholesky Decomposition</h2>
+<p>Cholesky decomposition can be applied to a <strong>Hermitian positive definite matrix</strong>. <strong>Hermitian</strong> matrix is a matrix with complex entries that is equal to it’s conjugate transpose <strong>[1]</strong>. Hence a symmetric matrix with real entries can be considered as a <strong>Hermitian</strong> matrix and can be decomposed using <strong>Cholesky</strong> decomposition if it’s positive definite. A Symmetric matrix <img alt="A" class="latex" src="http://s0.wp.com/latex.php?latex=A&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="A"/> is positive definite if <img alt="z^TAz" class="latex" src="http://s0.wp.com/latex.php?latex=z%5ETAz&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="z^TAz"/> is greater than zero for every non zero column matrix <img alt="z" class="latex" src="http://s0.wp.com/latex.php?latex=z&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="z"/><strong> [2]</strong>. If the above conditions are satisfied, Cholesky decomposition for a matrix <img alt="A" class="latex" src="http://s0.wp.com/latex.php?latex=A&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="A"/> can be written as <img alt="A = LL^*" class="latex" src="http://s0.wp.com/latex.php?latex=A+%3D+LL%5E%2A&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="A = LL^*"/> where <img alt="L" class="latex" src="http://s0.wp.com/latex.php?latex=L&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="L"/> is an lower triangular Matrix. This is equal to <img alt="A = LL^T" class="latex" src="http://s0.wp.com/latex.php?latex=A+%3D+LL%5ET&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="A = LL^T"/> when <img alt="L" class="latex" src="http://s0.wp.com/latex.php?latex=L&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="L"/> is a real matrix. This factorization can be used for fast solution of the system <img alt="Ax = b" class="latex" src="http://s0.wp.com/latex.php?latex=Ax+%3D+b&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="Ax = b"/>. I am yet to use this decomposition in solving above mentioned system.</p>
+<h2>LDL Factorization</h2>
+<p>LDL decomposition is closely related to Cholesky decomposition. As the name implies, in LDL decomposition of a matrix <img alt="A" class="latex" src="http://s0.wp.com/latex.php?latex=A&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="A"/> can be written as <img alt="A = LDL^*" class="latex" src="http://s0.wp.com/latex.php?latex=A+%3D+LDL%5E%2A&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="A = LDL^*"/> where <img alt="L" class="latex" src="http://s0.wp.com/latex.php?latex=L&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="L"/> is a lower triangular matrix and <img alt="D" class="latex" src="http://s0.wp.com/latex.php?latex=D&amp;bg=eff1f5&amp;fg=444444&amp;s=0" title="D"/> is a diagonal matrix <strong>[3]</strong>. This decomposition can be used for some matrices which don’t have a Cholesky decomposition.</p>
+<h2>CSymPy printing error and simplification errror</h2>
+<p>I also worked on a printing error of CSymPy and a simplification error in <strong>Mul</strong> class which is used to represent multiplication types in CSymPy. There is still some work to be done to fix simplification error completely. The most important thing was that we were able to introduce a fix which doesn’t create a considerable slow down in speed after being applied.</p>
+<h2>References</h2>
+<p>[1] Hermitian Matrix, Wikipedia Article: <a href="http://en.wikipedia.org/wiki/Hermitian_matrix" rel="nofollow">http://en.wikipedia.org/wiki/Hermitian_matrix</a></p>
+<p>[2] Positive definite Matrix, Wikipedia Article: <a href="http://en.wikipedia.org/wiki/Positive-definite_matrix" rel="nofollow">http://en.wikipedia.org/wiki/Positive-definite_matrix</a></p>
+<p>[3] LDL Decomposition, Wikipedia Article: <a href="http://en.wikipedia.org/wiki/Cholesky_decomposition#LDL_decomposition" rel="nofollow">http://en.wikipedia.org/wiki/Cholesky_decomposition#LDL_decomposition</a></p><br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/thilinaatsympy.wordpress.com/360/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/thilinaatsympy.wordpress.com/360/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=thilinaatsympy.wordpress.com&amp;blog=52956410&amp;post=360&amp;subd=thilinaatsympy&amp;ref=&amp;feed=1" width="1"/></div>
+    </content>
+    <updated>2014-06-27T15:58:54Z</updated>
+    <category term="GSoC-2014-CSymPy"/>
+    <category term="Cholesky decomposition"/>
+    <category term="CSymPy"/>
+    <category term="LDL decomposition"/>
+    <category term="Linear Algebra"/>
+    <category term="SymPy"/>
+    <author>
+      <name>Thilina Rathnayake</name>
+    </author>
+    <source>
+      <id>http://thilinaatsympy.wordpress.com</id>
+      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
+      <link href="http://thilinaatsympy.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://thilinaatsympy.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://thilinaatsympy.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <subtitle>My Work related to sympy</subtitle>
+      <title>Thilina's SymPy Blog</title>
+      <updated>2014-06-27T16:00:45Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en">
     <id>https://hargup.github.io/posts/week-5.html</id>
@@ -75,7 +116,7 @@ conceder the limiting value of the equation.</p>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="https://hargup.github.io/rss.xml" rel="self" type="application/atom+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-06-26T14:40:58Z</updated>
+      <updated>2014-06-27T16:01:01Z</updated>
     </source>
   </entry>
 
@@ -138,7 +179,7 @@ False</pre><p> </p>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-06-26T14:41:00Z</updated>
+      <updated>2014-06-27T16:01:03Z</updated>
     </source>
   </entry>
 
@@ -205,7 +246,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-06-26T14:40:50Z</updated>
+      <updated>2014-06-27T16:00:53Z</updated>
     </source>
   </entry>
 
@@ -366,7 +407,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://tarzzz.github.io/rss.gsoc.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts categorized under GSoC</subtitle>
       <title>Tarun Gaba's blog - GSoC</title>
-      <updated>2014-06-26T14:40:41Z</updated>
+      <updated>2014-06-27T16:00:44Z</updated>
     </source>
   </entry>
 
@@ -406,7 +447,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-06-26T14:40:58Z</updated>
+      <updated>2014-06-27T16:01:01Z</updated>
     </source>
   </entry>
 
@@ -439,7 +480,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-06-26T14:40:43Z</updated>
+      <updated>2014-06-27T16:00:46Z</updated>
     </source>
   </entry>
 
@@ -491,7 +532,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-26T14:40:42Z</updated>
+      <updated>2014-06-27T16:00:45Z</updated>
     </source>
   </entry>
 
@@ -1489,7 +1530,7 @@ on infinitely indexed sets.</p></div></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="https://hargup.github.io/rss.xml" rel="self" type="application/atom+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-06-26T14:40:58Z</updated>
+      <updated>2014-06-27T16:01:01Z</updated>
     </source>
   </entry>
 
@@ -1592,7 +1633,7 @@ Not(ForAll((X,T), Implies(And(Person(X), Time(T)), CanFool(X, T))))</pre><p> </p
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-06-26T14:41:00Z</updated>
+      <updated>2014-06-27T16:01:03Z</updated>
     </source>
   </entry>
 
@@ -1821,7 +1862,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-06-26T14:40:50Z</updated>
+      <updated>2014-06-27T16:00:53Z</updated>
     </source>
   </entry>
 
@@ -1852,7 +1893,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-06-26T14:40:58Z</updated>
+      <updated>2014-06-27T16:01:01Z</updated>
     </source>
   </entry>
 
@@ -1896,7 +1937,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-26T14:40:42Z</updated>
+      <updated>2014-06-27T16:00:45Z</updated>
     </source>
   </entry>
 
@@ -1939,7 +1980,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-06-26T14:40:43Z</updated>
+      <updated>2014-06-27T16:00:46Z</updated>
     </source>
   </entry>
 
@@ -2219,7 +2260,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-06-26T14:40:50Z</updated>
+      <updated>2014-06-27T16:00:53Z</updated>
     </source>
   </entry>
 
@@ -2391,7 +2432,7 @@ extent.</p></div></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="https://hargup.github.io/rss.xml" rel="self" type="application/atom+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-06-26T14:40:58Z</updated>
+      <updated>2014-06-27T16:01:01Z</updated>
     </source>
   </entry>
 
@@ -2418,7 +2459,7 @@ extent.</p></div></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-06-26T14:40:58Z</updated>
+      <updated>2014-06-27T16:01:01Z</updated>
     </source>
   </entry>
 
@@ -2482,7 +2523,7 @@ Xor creates one of the most complex NNF formula after simplification. Let look a
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-06-26T14:41:00Z</updated>
+      <updated>2014-06-27T16:01:03Z</updated>
     </source>
   </entry>
 
@@ -2724,7 +2765,7 @@ In [3]:
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-06-26T14:40:43Z</updated>
+      <updated>2014-06-27T16:00:46Z</updated>
     </source>
   </entry>
 
@@ -2787,7 +2828,7 @@ rationals, not Integers.</p><br/>  <a href="http://feeds.wordpress.com/1.0/gocom
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-26T14:40:42Z</updated>
+      <updated>2014-06-27T16:00:45Z</updated>
     </source>
   </entry>
 
@@ -2899,7 +2940,7 @@ week will be.</p>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="https://hargup.github.io/rss.xml" rel="self" type="application/atom+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-06-26T14:40:58Z</updated>
+      <updated>2014-06-27T16:01:01Z</updated>
     </source>
   </entry>
 
@@ -3103,7 +3144,7 @@ Similar to Xor above, even ITE had no independant class and all expressions were
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-06-26T14:41:00Z</updated>
+      <updated>2014-06-27T16:01:03Z</updated>
     </source>
   </entry>
 
@@ -3153,7 +3194,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-06-26T14:40:50Z</updated>
+      <updated>2014-06-27T16:00:53Z</updated>
     </source>
   </entry>
 
@@ -3179,7 +3220,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-06-26T14:40:58Z</updated>
+      <updated>2014-06-27T16:01:01Z</updated>
     </source>
   </entry>
 
@@ -3209,7 +3250,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-06-26T14:41:00Z</updated>
+      <updated>2014-06-27T16:01:03Z</updated>
     </source>
   </entry>
 
@@ -3253,7 +3294,7 @@ True<br/>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-06-26T14:40:43Z</updated>
+      <updated>2014-06-27T16:00:46Z</updated>
     </source>
   </entry>
 
@@ -3551,7 +3592,7 @@ Most important thing about the `MatrixBase` class is that it is derived from the
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-26T14:40:42Z</updated>
+      <updated>2014-06-27T16:00:45Z</updated>
     </source>
   </entry>
 
@@ -3630,7 +3671,7 @@ I'm looking forward for a great summer with Sympy.</p></div></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="https://hargup.github.io/rss.xml" rel="self" type="application/atom+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-06-26T14:40:58Z</updated>
+      <updated>2014-06-27T16:01:01Z</updated>
     </source>
   </entry>
 
@@ -3718,7 +3759,7 @@ I'm looking forward for a great summer with Sympy.</p></div></div>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-06-26T14:40:43Z</updated>
+      <updated>2014-06-27T16:00:46Z</updated>
     </source>
   </entry>
 
@@ -3745,7 +3786,7 @@ I'm looking forward for a great summer with Sympy.</p></div></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-06-26T14:40:58Z</updated>
+      <updated>2014-06-27T16:01:01Z</updated>
     </source>
   </entry>
 
@@ -3851,7 +3892,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-06-26T14:40:50Z</updated>
+      <updated>2014-06-27T16:00:53Z</updated>
     </source>
   </entry>
 
@@ -5775,7 +5816,7 @@ that we can keep the visualizations in the static format on the drive(or reposit
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-26T14:40:42Z</updated>
+      <updated>2014-06-27T16:00:45Z</updated>
     </source>
   </entry>
 
@@ -5859,37 +5900,6 @@ that we can keep the visualizations in the static format on the drive(or reposit
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>GSoC 2014 with SymPy</title>
       <updated>2014-06-19T16:40:24Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://kundankumar185.wordpress.com/?p=3</id>
-    <link href="http://kundankumar185.wordpress.com/2014/05/04/beginning-of-a-journey/" rel="alternate" type="text/html"/>
-    <title>Beginning of a journey</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Its matter of great happiness for me, I got selected in GSOC. Well not only that three of us (friends), out of four, who together were preparing for GSOC got selected. At the same time, it feels bad when someone is giving same input as you but does not get same output. Same happened with…<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=kundankumar185.wordpress.com&amp;blog=68025302&amp;post=3&amp;subd=kundankumar185&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p align="justify">Its matter of great happiness for me, I got selected in GSOC. Well not only that three of us (friends), out of four, who together were preparing for GSOC got selected. At the same time, it feels bad when someone is giving same input as you but does not get same output. Same happened with one of us, but nevertheless it gives an inspiration to work harder to achieve what we opt for.</p>
-<p align="justify">The sacrifice of holidays and mid-exams turned out in fruitful manner and here we are preparing ourselves to work with our respective organizations in GSOC’14. We gave what we had to our fullest during last 2 months with no knowledge of day and night.</p>
-<p align="justify">It’s my first time I am contributing to an open source organization. Sympy is the first open source organization with which I am engaging with and also got selected in GSOC under this organization. From the last two month I am playing with the sympy code on differential equation solving engine. Till now I have fixed two bugs and added a method to solve a type of ODE.</p>
-<p align="justify">After working in open source organization, particularly sympy, I got to learn many things. The thing I liked the most is that people contributing selflessly to build software which will be available to everyone, especially those who find it very difficult to buy a software because of its high cost. It has connected people across the globe to work together and know each other, being rare for those who can’t go abroad. It feels really great to know others and make friends from all over the world. In this matter, Google has done a great job by promoting open source through Google Summer of Code, thats a thing for which I would really like to praise Google among many others. It has provided a force to every coders to contribute to open source.</p>
-<p align="justify">Well about how I started working in sympy is a long story of hard work and patience. I started working from 27 Feb, just 22 days before proposal submission and it took a lot of time to understand things, how sympy works. Initially I was even unable to understand its issues completely and didn’t know how to solve so I just kept reading the issues over and over. Well it was hard but sympy mentors helped a lot. That time I learned “time teaches everything what we need is dedication to work”.</p>
-<p align="justify">That’s it for now I think for my first post on first blog. I have a lot to say but they are for next time. There is a long journey I have to travel, being started with Google Summer of Code.</p><br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/kundankumar185.wordpress.com/3/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/kundankumar185.wordpress.com/3/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=kundankumar185.wordpress.com&amp;blog=68025302&amp;post=3&amp;subd=kundankumar185&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2014-05-04T23:40:25Z</updated>
-    <category term="Thoughts"/>
-    <category term="GSoC"/>
-    <author>
-      <name>Kundan</name>
-    </author>
-    <source>
-      <id>http://kundankumar185.wordpress.com</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://kundankumar185.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://kundankumar185.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <title>my experiments with life</title>
-      <updated>2014-06-26T14:40:58Z</updated>
     </source>
   </entry>
 </feed>
