@@ -8,6 +8,143 @@
 	<description>Planet SymPy - http://planet.sympy.org/</description>
 
 <item>
+	<title>Jim Crist: GSoC Week 6: Just the little things</title>
+	<guid isPermaLink="false">tag:,2014-06-27:gsoc-week-6.html</guid>
+	<link>http://jcrist.github.io/gsoc-week-6.html</link>
+	<description>&lt;p&gt;I was rather busy with my research this week, so no time for a long-winded
+post like &lt;a href=&quot;http://jcrist.github.io/gsoc-week-1.html&quot;&gt;some of my&lt;/a&gt; 
+&lt;a href=&quot;http://jcrist.github.io/gsoc-week-4.html&quot;&gt;previous&lt;/a&gt; 
+&lt;a href=&quot;http://jcrist.github.io/gsoc-week-5.html&quot;&gt;updates&lt;/a&gt;. There's not
+much interesting to say anyway. This week was mostly spent on little fixes to
+get my current &lt;a href=&quot;https://github.com/sympy/sympy/pull/7581&quot;&gt;pull request&lt;/a&gt; merged.&lt;/p&gt;
+&lt;p&gt;Topping the list of things that are better than they were last week is speed.
+The profiling I did &lt;a href=&quot;http://jcrist.github.io/gsoc-week-5.html&quot;&gt;last week&lt;/a&gt;
+showed that the current function &lt;code&gt;sympy.physics.mechanics&lt;/code&gt; uses to solve a
+system of linear equations (&lt;code&gt;_mat_inv_mul&lt;/code&gt;) is &lt;em&gt;sloooooooooow&lt;/em&gt;. The underlying 
+reason is because &lt;code&gt;subs&lt;/code&gt; is slow - more on that later. I spent some time
+swapping out all forms of solving ($A x = B$) for &lt;code&gt;LUsolve&lt;/code&gt;, the clear winner
+of last weeks benchmarks. This resulted in a 10x speedup of the formulation of
+equations for the &lt;a href=&quot;http://docs.sympy.org/dev/modules/ physics/mechanics/bicycle_example.html&quot;&gt;bicycle model example&lt;/a&gt;. &lt;/p&gt;
+&lt;p&gt;This bicycle example has become the bane of my existence for the last couple
+weeks. It's a super slow test that I'd never actual gotten to run before. But
+with the speed improvements made, it actual finishes in a reasonable time.
+Except it still doesn't work. I'm able to run all the way up to&lt;/p&gt;
+&lt;div style=&quot;background: #272822;&quot; class=&quot;codehilite&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;M,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;A,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;B&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;KM&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;linearize()&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;But when I go to sub in values for symbols in these matrices, things get hairy.
+There are two issues:&lt;/p&gt;
+&lt;h3&gt;Issue 1: Get &lt;code&gt;nan&lt;/code&gt; when not simplified&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;M.subs(val_dict)&lt;/code&gt; results in &lt;code&gt;nan&lt;/code&gt; and &lt;code&gt;oo&lt;/code&gt; upon after &lt;code&gt;subs&lt;/code&gt;. But doesn't
+if it's simplified before the subs. An example of this behavior would be:&lt;/p&gt;
+&lt;div style=&quot;background: #272822;&quot; class=&quot;codehilite&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;M&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;sin(q1)&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;/&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;tan(q1)&lt;/span&gt;
+&lt;span style=&quot;color: #f92672;&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;M&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;subs({q1:&lt;/span&gt; &lt;span style=&quot;color: #ae81ff;&quot;&gt;0&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;}&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;nan&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Note that if this is simplified, this results in something completely different:&lt;/p&gt;
+&lt;div style=&quot;background: #272822;&quot; class=&quot;codehilite&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;M&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;sin(q1)&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;/&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;tan(q1)&lt;/span&gt;
+&lt;span style=&quot;color: #f92672;&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;M&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;M&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;trigsimp()&lt;/span&gt;
+&lt;span style=&quot;color: #f92672;&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;M&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;cos(q1)&lt;/span&gt;
+&lt;span style=&quot;color: #f92672;&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;M&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;subs({q1:&lt;/span&gt; &lt;span style=&quot;color: #ae81ff;&quot;&gt;0&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;})&lt;/span&gt;
+&lt;span style=&quot;color: #ae81ff;&quot;&gt;1&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;However, for the bicycle case M has &lt;em&gt;over 19 thousand operations&lt;/em&gt;. This doesn't
+simplify quickly. Also, by default we don't simplify before &lt;code&gt;subs&lt;/code&gt; in
+&lt;code&gt;Linearizer&lt;/code&gt; (you can opt in to simplify, but it's done right before the return,
+so it won't affect the subbed result at all). Right now I'm looking through
+ways to make the resulting expressions smaller after the formulation, as this 
+will result in speedups for &lt;em&gt;all&lt;/em&gt; operations. This could be extremely helpful
+for issue 2...&lt;/p&gt;
+&lt;h3&gt;Issue 2: &lt;code&gt;subs&lt;/code&gt; is slow&lt;/h3&gt;
+&lt;p&gt;because &lt;code&gt;A&lt;/code&gt; has &lt;em&gt;over 38 million operations&lt;/em&gt;!!! In this case &lt;code&gt;subs&lt;/code&gt; doesn't even
+return. Ever. I left it running on my computer for 4 hours and came back and it
+was still whirring along, fans on high, eating up all my ram. No idea how to
+solve this. One possible solution is &lt;a href=&quot;https://github.com/sympy/csympy&quot;&gt;csympy&lt;/a&gt;,
+a fast core written in C++. Once this matures, &lt;code&gt;subs&lt;/code&gt;, &lt;code&gt;trigsimp&lt;/code&gt;, and other
+time consuming operations used heavily in &lt;code&gt;sympy.physics.mechanics&lt;/code&gt; could rely
+on the equivalent, faster, C++ versions. I filed an issue with an example
+expression generated from the bicycle example (this one only had 147,841
+operations, not nearly as bad). Hopefully Ondrej and the team can use this
+as a benchmark problem to help improve &lt;code&gt;subs&lt;/code&gt; in csympy.&lt;/p&gt;
+&lt;p&gt;If you have thoughts on how to overcome these issues, &lt;strong&gt;please let me know&lt;/strong&gt;.
+I'm kind of stumped right now.&lt;/p&gt;
+&lt;h2&gt;The Good News&lt;/h2&gt;
+&lt;p&gt;I didn't want to end this post on a bad note, so I'll close with the remainder
+of the things I did last week that actually worked:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Improved documentation! Docstrings that are worth reading, and a start on the
+sphinx documentation.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Added a deprecation warning for &lt;code&gt;KanesMethod.linearize&lt;/code&gt; to warn people about
+the method change.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Major interface changes. Now all operating points are specified as a single
+dictionary, or an iterable of dictionaries. This is to aid in consistency across
+different system implementations. Referring to a dictionary as &lt;code&gt;u_op&lt;/code&gt; in 
+&lt;code&gt;LagrangesMethod&lt;/code&gt; doesn't really make any sense, as Lagrange's method only uses
+$q$, $\dot{q}$, and $\ddot{q}$. Also added a kwarg to make simplification of the
+results optional.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Added a method to the &lt;code&gt;LagrangesMethod&lt;/code&gt; class to calculate the value of the
+multipliers at different points. This is useful for multiple reasons. The
+multipliers have meaning, so knowing what the solution is symbolically is nice
+for calculating the constraint forces. Also, when linearizing with Lagrange's
+method, the multipliers have operating points as well, and these need to be
+calculated based on the operating point for the other states ($q$, $\dot{q}$,
+etc...). Now a user can go:&lt;/p&gt;
+&lt;div style=&quot;background: #272822;&quot; class=&quot;codehilite&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;op_point&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;dict_or_iterable_of_dicts&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;lam_op&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;LM&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;solve_multipliers(op_point)&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;op_point&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;append(lam_op)&lt;/span&gt;     &lt;span style=&quot;color: #75715e;&quot;&gt;# Or op_point.update if op_point is a dict, not a list of dicts&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;M,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;A,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;B&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;LM&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;linearize(q_ind&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;q_ind,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;qd_ind&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;qd_ind,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;op_point&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;op_point)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Hopefully in the next week I can get my PR merged, so the Lagrange stuff can
+finally be submitted.&lt;/p&gt;&amp;lt;script type=&quot;text/javascript&quot;&amp;gt;
+    if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+        var mathjaxscript = document.createElement('script');
+        mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+        mathjaxscript.type = 'text/javascript';
+        mathjaxscript.src = 'https:' == document.location.protocol
+                ? 'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
+                : 'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+        mathjaxscript[(window.opera ? &quot;innerHTML&quot; : &quot;text&quot;)] =
+            &quot;MathJax.Hub.Config({&quot; +
+            &quot;    config: ['MMLorHTML.js'],&quot; +
+            &quot;    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },&quot; +
+            &quot;    jax: ['input/TeX','input/MathML','output/HTML-CSS'],&quot; +
+            &quot;    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js'],&quot; +
+            &quot;    displayAlign: 'center',&quot; +
+            &quot;    displayIndent: '0em',&quot; +
+            &quot;    showMathMenu: true,&quot; +
+            &quot;    tex2jax: { &quot; +
+            &quot;        inlineMath: [ ['$','$'] ], &quot; +
+            &quot;        displayMath: [ ['$$','$$'] ],&quot; +
+            &quot;        processEscapes: true,&quot; +
+            &quot;        preview: 'TeX',&quot; +
+            &quot;    }, &quot; +
+            &quot;    'HTML-CSS': { &quot; +
+            &quot;        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'black ! important'} }&quot; +
+            &quot;    } &quot; +
+            &quot;}); &quot;;
+        (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+    }
+&amp;lt;/script&amp;gt;</description>
+	<pubDate>Sat, 28 Jun 2014 02:21:00 +0000</pubDate>
+</item>
+<item>
 	<title>Thilina Rathnayake: [GSoC] Week 6: Cholesky and LDL Algorithms</title>
 	<guid isPermaLink="false">http://thilinaatsympy.wordpress.com/?p=360</guid>
 	<link>http://thilinaatsympy.wordpress.com/2014/06/27/gsoc-week-6-cholesky-and-ldl-algorithms/</link>
@@ -4645,14 +4782,6 @@ that we can keep the visualizations in the static format on the drive(or reposit
 	<link>https://hargup.github.io/blog/blah.html</link>
 	<description>&lt;p&gt;Write your post here.&lt;/p&gt;</description>
 	<pubDate>Tue, 13 May 2014 20:25:35 +0000</pubDate>
-</item>
-<item>
-	<title>Avichal Dayal</title>
-	<guid isPermaLink="false">tag:blogger.com,1999:blog-283806077182880539.post-3114660856880190348</guid>
-	<link>http://gsocblog.blogspot.com/2014/05/this-summer-ill-be-coding-for-sympy-as.html</link>
-	<description>&lt;div style=&quot;text-align: left;&quot; dir=&quot;ltr&quot;&gt;This summer I'll be coding for SymPy as part of Google Summer Of Code 2014 program. SymPy is a computer algebra system written in pure python. &lt;a href=&quot;http://sympy.org/en/index.html&quot;&gt;Here&lt;/a&gt; is its official homepage. &lt;br /&gt;&lt;br /&gt;My project is &quot;Series expansion&quot;. I aim to improve asymptotic expansion and implement formal power series. My mentors for this project are Stefan Krastanov and Sergey B Kirpichev. I am really excited to get started with the project.&lt;br /&gt;&lt;br /&gt;During the community bonding period, I'll try to get started with my work and get a head start.&lt;br /&gt;&lt;br /&gt;Hope to have a great summer and thank you to Google and SymPy for the opportunity!&lt;/div&gt;</description>
-	<pubDate>Mon, 12 May 2014 10:54:59 +0000</pubDate>
-	<author>noreply@blogger.com (Avichal Dayal)</author>
 </item>
 
 </channel>

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2014-06-27T16:01:03Z</updated>
+  <updated>2014-06-28T02:40:57Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,159 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry>
+    <id>tag:,2014-06-27:gsoc-week-6.html</id>
+    <link href="http://jcrist.github.io/gsoc-week-6.html" rel="alternate" type="text/html"/>
+    <title>GSoC Week 6: Just the little things</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>I was rather busy with my research this week, so no time for a long-winded
+post like <a href="http://jcrist.github.io/gsoc-week-1.html">some of my</a> 
+<a href="http://jcrist.github.io/gsoc-week-4.html">previous</a> 
+<a href="http://jcrist.github.io/gsoc-week-5.html">updates</a>. There's not
+much interesting to say anyway. This week was mostly spent on little fixes to
+get my current <a href="https://github.com/sympy/sympy/pull/7581">pull request</a> merged.</p>
+<p>Topping the list of things that are better than they were last week is speed.
+The profiling I did <a href="http://jcrist.github.io/gsoc-week-5.html">last week</a>
+showed that the current function <code>sympy.physics.mechanics</code> uses to solve a
+system of linear equations (<code>_mat_inv_mul</code>) is <em>sloooooooooow</em>. The underlying 
+reason is because <code>subs</code> is slow - more on that later. I spent some time
+swapping out all forms of solving ($A x = B$) for <code>LUsolve</code>, the clear winner
+of last weeks benchmarks. This resulted in a 10x speedup of the formulation of
+equations for the <a href="http://docs.sympy.org/dev/modules/ physics/mechanics/bicycle_example.html">bicycle model example</a>. </p>
+<p>This bicycle example has become the bane of my existence for the last couple
+weeks. It's a super slow test that I'd never actual gotten to run before. But
+with the speed improvements made, it actual finishes in a reasonable time.
+Except it still doesn't work. I'm able to run all the way up to</p>
+<div class="codehilite" style="background: #272822;"><pre style="line-height: 125%;"><span style="color: #f8f8f2;">M,</span> <span style="color: #f8f8f2;">A,</span> <span style="color: #f8f8f2;">B</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">KM</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">linearize()</span>
+</pre></div>
+
+
+<p>But when I go to sub in values for symbols in these matrices, things get hairy.
+There are two issues:</p>
+<h3>Issue 1: Get <code>nan</code> when not simplified</h3>
+<p><code>M.subs(val_dict)</code> results in <code>nan</code> and <code>oo</code> upon after <code>subs</code>. But doesn't
+if it's simplified before the subs. An example of this behavior would be:</p>
+<div class="codehilite" style="background: #272822;"><pre style="line-height: 125%;"><span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">M</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">sin(q1)</span><span style="color: #f92672;">/</span><span style="color: #f8f8f2;">tan(q1)</span>
+<span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">M</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">subs({q1:</span> <span style="color: #ae81ff;">0</span><span style="color: #f8f8f2;">}</span>
+<span style="color: #f8f8f2;">nan</span>
+</pre></div>
+
+
+<p>Note that if this is simplified, this results in something completely different:</p>
+<div class="codehilite" style="background: #272822;"><pre style="line-height: 125%;"><span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">M</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">sin(q1)</span><span style="color: #f92672;">/</span><span style="color: #f8f8f2;">tan(q1)</span>
+<span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">M</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">M</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">trigsimp()</span>
+<span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">M</span>
+<span style="color: #f8f8f2;">cos(q1)</span>
+<span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">M</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">subs({q1:</span> <span style="color: #ae81ff;">0</span><span style="color: #f8f8f2;">})</span>
+<span style="color: #ae81ff;">1</span>
+</pre></div>
+
+
+<p>However, for the bicycle case M has <em>over 19 thousand operations</em>. This doesn't
+simplify quickly. Also, by default we don't simplify before <code>subs</code> in
+<code>Linearizer</code> (you can opt in to simplify, but it's done right before the return,
+so it won't affect the subbed result at all). Right now I'm looking through
+ways to make the resulting expressions smaller after the formulation, as this 
+will result in speedups for <em>all</em> operations. This could be extremely helpful
+for issue 2...</p>
+<h3>Issue 2: <code>subs</code> is slow</h3>
+<p>because <code>A</code> has <em>over 38 million operations</em>!!! In this case <code>subs</code> doesn't even
+return. Ever. I left it running on my computer for 4 hours and came back and it
+was still whirring along, fans on high, eating up all my ram. No idea how to
+solve this. One possible solution is <a href="https://github.com/sympy/csympy">csympy</a>,
+a fast core written in C++. Once this matures, <code>subs</code>, <code>trigsimp</code>, and other
+time consuming operations used heavily in <code>sympy.physics.mechanics</code> could rely
+on the equivalent, faster, C++ versions. I filed an issue with an example
+expression generated from the bicycle example (this one only had 147,841
+operations, not nearly as bad). Hopefully Ondrej and the team can use this
+as a benchmark problem to help improve <code>subs</code> in csympy.</p>
+<p>If you have thoughts on how to overcome these issues, <strong>please let me know</strong>.
+I'm kind of stumped right now.</p>
+<h2>The Good News</h2>
+<p>I didn't want to end this post on a bad note, so I'll close with the remainder
+of the things I did last week that actually worked:</p>
+<ol>
+<li>
+<p>Improved documentation! Docstrings that are worth reading, and a start on the
+sphinx documentation.</p>
+</li>
+<li>
+<p>Added a deprecation warning for <code>KanesMethod.linearize</code> to warn people about
+the method change.</p>
+</li>
+<li>
+<p>Major interface changes. Now all operating points are specified as a single
+dictionary, or an iterable of dictionaries. This is to aid in consistency across
+different system implementations. Referring to a dictionary as <code>u_op</code> in 
+<code>LagrangesMethod</code> doesn't really make any sense, as Lagrange's method only uses
+$q$, $\dot{q}$, and $\ddot{q}$. Also added a kwarg to make simplification of the
+results optional.</p>
+</li>
+<li>
+<p>Added a method to the <code>LagrangesMethod</code> class to calculate the value of the
+multipliers at different points. This is useful for multiple reasons. The
+multipliers have meaning, so knowing what the solution is symbolically is nice
+for calculating the constraint forces. Also, when linearizing with Lagrange's
+method, the multipliers have operating points as well, and these need to be
+calculated based on the operating point for the other states ($q$, $\dot{q}$,
+etc...). Now a user can go:</p>
+<div class="codehilite" style="background: #272822;"><pre style="line-height: 125%;"><span style="color: #f8f8f2;">op_point</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">dict_or_iterable_of_dicts</span>
+<span style="color: #f8f8f2;">lam_op</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">LM</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">solve_multipliers(op_point)</span>
+<span style="color: #f8f8f2;">op_point</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">append(lam_op)</span>     <span style="color: #75715e;"># Or op_point.update if op_point is a dict, not a list of dicts</span>
+<span style="color: #f8f8f2;">M,</span> <span style="color: #f8f8f2;">A,</span> <span style="color: #f8f8f2;">B</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">LM</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">linearize(q_ind</span><span style="color: #f92672;">=</span><span style="color: #f8f8f2;">q_ind,</span> <span style="color: #f8f8f2;">qd_ind</span><span style="color: #f92672;">=</span><span style="color: #f8f8f2;">qd_ind,</span> <span style="color: #f8f8f2;">op_point</span><span style="color: #f92672;">=</span><span style="color: #f8f8f2;">op_point)</span>
+</pre></div>
+
+
+</li>
+</ol>
+<p>Hopefully in the next week I can get my PR merged, so the Lagrange stuff can
+finally be submitted.</p>&lt;script type="text/javascript"&gt;
+    if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+        var mathjaxscript = document.createElement('script');
+        mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+        mathjaxscript.type = 'text/javascript';
+        mathjaxscript.src = 'https:' == document.location.protocol
+                ? 'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
+                : 'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+        mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+            "MathJax.Hub.Config({" +
+            "    config: ['MMLorHTML.js']," +
+            "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+            "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+            "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+            "    displayAlign: 'center'," +
+            "    displayIndent: '0em'," +
+            "    showMathMenu: true," +
+            "    tex2jax: { " +
+            "        inlineMath: [ ['$','$'] ], " +
+            "        displayMath: [ ['$$','$$'] ]," +
+            "        processEscapes: true," +
+            "        preview: 'TeX'," +
+            "    }, " +
+            "    'HTML-CSS': { " +
+            "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'black ! important'} }" +
+            "    } " +
+            "}); ";
+        (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+    }
+&lt;/script&gt;</div>
+    </summary>
+    <updated>2014-06-28T02:21:00Z</updated>
+    <category term="GSoC"/>
+    <category term="sympy"/>
+    <category term="pydy"/>
+    <category term="dynamics"/>
+    <author>
+      <name>Jim Crist</name>
+    </author>
+    <source>
+      <id>http://jcrist.github.io/</id>
+      <link href="http://jcrist.github.io/" rel="alternate" type="text/html"/>
+      <link href="http://jcrist.github.io/feeds/gsoc.atom.xml" rel="self" type="application/atom+xml"/>
+      <title>Marginally Stable</title>
+      <updated>2014-06-28T02:21:00Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en">
     <id>http://thilinaatsympy.wordpress.com/?p=360</id>
@@ -48,7 +201,7 @@
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-27T16:00:45Z</updated>
+      <updated>2014-06-28T02:40:39Z</updated>
     </source>
   </entry>
 
@@ -116,7 +269,7 @@ conceder the limiting value of the equation.</p>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="https://hargup.github.io/rss.xml" rel="self" type="application/atom+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-06-27T16:01:01Z</updated>
+      <updated>2014-06-28T02:40:55Z</updated>
     </source>
   </entry>
 
@@ -179,7 +332,7 @@ False</pre><p> </p>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-06-27T16:01:03Z</updated>
+      <updated>2014-06-28T02:40:57Z</updated>
     </source>
   </entry>
 
@@ -246,7 +399,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-06-27T16:00:53Z</updated>
+      <updated>2014-06-28T02:40:47Z</updated>
     </source>
   </entry>
 
@@ -407,7 +560,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://tarzzz.github.io/rss.gsoc.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts categorized under GSoC</subtitle>
       <title>Tarun Gaba's blog - GSoC</title>
-      <updated>2014-06-27T16:00:44Z</updated>
+      <updated>2014-06-27T19:20:40Z</updated>
     </source>
   </entry>
 
@@ -447,7 +600,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-06-27T16:01:01Z</updated>
+      <updated>2014-06-28T02:40:55Z</updated>
     </source>
   </entry>
 
@@ -480,7 +633,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-06-27T16:00:46Z</updated>
+      <updated>2014-06-28T02:40:40Z</updated>
     </source>
   </entry>
 
@@ -532,7 +685,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-27T16:00:45Z</updated>
+      <updated>2014-06-28T02:40:39Z</updated>
     </source>
   </entry>
 
@@ -1378,7 +1531,7 @@ In [15]:
       <link href="http://jcrist.github.io/" rel="alternate" type="text/html"/>
       <link href="http://jcrist.github.io/feeds/gsoc.atom.xml" rel="self" type="application/atom+xml"/>
       <title>Marginally Stable</title>
-      <updated>2014-06-20T19:00:00Z</updated>
+      <updated>2014-06-28T02:21:00Z</updated>
     </source>
   </entry>
 
@@ -1530,7 +1683,7 @@ on infinitely indexed sets.</p></div></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="https://hargup.github.io/rss.xml" rel="self" type="application/atom+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-06-27T16:01:01Z</updated>
+      <updated>2014-06-28T02:40:55Z</updated>
     </source>
   </entry>
 
@@ -1633,7 +1786,7 @@ Not(ForAll((X,T), Implies(And(Person(X), Time(T)), CanFool(X, T))))</pre><p> </p
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-06-27T16:01:03Z</updated>
+      <updated>2014-06-28T02:40:57Z</updated>
     </source>
   </entry>
 
@@ -1740,7 +1893,7 @@ the evaluations, so that I can merge a stable visualizer with the PyDy repositor
       <link href="http://tarzzz.github.io/rss.gsoc.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts categorized under GSoC</subtitle>
       <title>Tarun Gaba's blog - GSoC</title>
-      <updated>2014-06-21T04:40:43Z</updated>
+      <updated>2014-06-28T02:40:38Z</updated>
     </source>
   </entry>
 
@@ -1862,7 +2015,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-06-27T16:00:53Z</updated>
+      <updated>2014-06-28T02:40:47Z</updated>
     </source>
   </entry>
 
@@ -1893,7 +2046,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-06-27T16:01:01Z</updated>
+      <updated>2014-06-28T02:40:55Z</updated>
     </source>
   </entry>
 
@@ -1937,7 +2090,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-27T16:00:45Z</updated>
+      <updated>2014-06-28T02:40:39Z</updated>
     </source>
   </entry>
 
@@ -1980,7 +2133,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-06-27T16:00:46Z</updated>
+      <updated>2014-06-28T02:40:40Z</updated>
     </source>
   </entry>
 
@@ -2214,7 +2367,7 @@ more tests, and finalize the interface. I plan on working on this next week.</p>
       <link href="http://jcrist.github.io/" rel="alternate" type="text/html"/>
       <link href="http://jcrist.github.io/feeds/gsoc.atom.xml" rel="self" type="application/atom+xml"/>
       <title>Marginally Stable</title>
-      <updated>2014-06-20T19:00:00Z</updated>
+      <updated>2014-06-28T02:21:00Z</updated>
     </source>
   </entry>
 
@@ -2260,7 +2413,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-06-27T16:00:53Z</updated>
+      <updated>2014-06-28T02:40:47Z</updated>
     </source>
   </entry>
 
@@ -2432,7 +2585,7 @@ extent.</p></div></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="https://hargup.github.io/rss.xml" rel="self" type="application/atom+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-06-27T16:01:01Z</updated>
+      <updated>2014-06-28T02:40:55Z</updated>
     </source>
   </entry>
 
@@ -2459,7 +2612,7 @@ extent.</p></div></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-06-27T16:01:01Z</updated>
+      <updated>2014-06-28T02:40:55Z</updated>
     </source>
   </entry>
 
@@ -2523,7 +2676,7 @@ Xor creates one of the most complex NNF formula after simplification. Let look a
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-06-27T16:01:03Z</updated>
+      <updated>2014-06-28T02:40:57Z</updated>
     </source>
   </entry>
 
@@ -2732,7 +2885,7 @@ In [3]:
       <link href="http://jcrist.github.io/" rel="alternate" type="text/html"/>
       <link href="http://jcrist.github.io/feeds/gsoc.atom.xml" rel="self" type="application/atom+xml"/>
       <title>Marginally Stable</title>
-      <updated>2014-06-20T19:00:00Z</updated>
+      <updated>2014-06-28T02:21:00Z</updated>
     </source>
   </entry>
 
@@ -2765,7 +2918,7 @@ In [3]:
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-06-27T16:00:46Z</updated>
+      <updated>2014-06-28T02:40:40Z</updated>
     </source>
   </entry>
 
@@ -2828,7 +2981,7 @@ rationals, not Integers.</p><br/>  <a href="http://feeds.wordpress.com/1.0/gocom
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-27T16:00:45Z</updated>
+      <updated>2014-06-28T02:40:39Z</updated>
     </source>
   </entry>
 
@@ -2940,7 +3093,7 @@ week will be.</p>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="https://hargup.github.io/rss.xml" rel="self" type="application/atom+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-06-27T16:01:01Z</updated>
+      <updated>2014-06-28T02:40:55Z</updated>
     </source>
   </entry>
 
@@ -3144,7 +3297,7 @@ Similar to Xor above, even ITE had no independant class and all expressions were
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-06-27T16:01:03Z</updated>
+      <updated>2014-06-28T02:40:57Z</updated>
     </source>
   </entry>
 
@@ -3194,7 +3347,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-06-27T16:00:53Z</updated>
+      <updated>2014-06-28T02:40:47Z</updated>
     </source>
   </entry>
 
@@ -3220,7 +3373,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-06-27T16:01:01Z</updated>
+      <updated>2014-06-28T02:40:55Z</updated>
     </source>
   </entry>
 
@@ -3250,7 +3403,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-06-27T16:01:03Z</updated>
+      <updated>2014-06-28T02:40:57Z</updated>
     </source>
   </entry>
 
@@ -3294,7 +3447,7 @@ True<br/>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-06-27T16:00:46Z</updated>
+      <updated>2014-06-28T02:40:40Z</updated>
     </source>
   </entry>
 
@@ -3426,7 +3579,7 @@ so that others can review it before I submit it to Sympy proper.</p>&lt;script t
       <link href="http://jcrist.github.io/" rel="alternate" type="text/html"/>
       <link href="http://jcrist.github.io/feeds/gsoc.atom.xml" rel="self" type="application/atom+xml"/>
       <title>Marginally Stable</title>
-      <updated>2014-06-20T19:00:00Z</updated>
+      <updated>2014-06-28T02:21:00Z</updated>
     </source>
   </entry>
 
@@ -3592,7 +3745,7 @@ Most important thing about the `MatrixBase` class is that it is derived from the
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-27T16:00:45Z</updated>
+      <updated>2014-06-28T02:40:39Z</updated>
     </source>
   </entry>
 
@@ -3671,7 +3824,7 @@ I'm looking forward for a great summer with Sympy.</p></div></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="https://hargup.github.io/rss.xml" rel="self" type="application/atom+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-06-27T16:01:01Z</updated>
+      <updated>2014-06-28T02:40:55Z</updated>
     </source>
   </entry>
 
@@ -3759,7 +3912,7 @@ I'm looking forward for a great summer with Sympy.</p></div></div>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-06-27T16:00:46Z</updated>
+      <updated>2014-06-28T02:40:40Z</updated>
     </source>
   </entry>
 
@@ -3786,7 +3939,7 @@ I'm looking forward for a great summer with Sympy.</p></div></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-06-27T16:01:01Z</updated>
+      <updated>2014-06-28T02:40:55Z</updated>
     </source>
   </entry>
 
@@ -3892,7 +4045,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-06-27T16:00:53Z</updated>
+      <updated>2014-06-28T02:40:47Z</updated>
     </source>
   </entry>
 
@@ -5666,7 +5819,7 @@ In [41]:
       <link href="http://jcrist.github.io/" rel="alternate" type="text/html"/>
       <link href="http://jcrist.github.io/feeds/gsoc.atom.xml" rel="self" type="application/atom+xml"/>
       <title>Marginally Stable</title>
-      <updated>2014-06-20T19:00:00Z</updated>
+      <updated>2014-06-28T02:21:00Z</updated>
     </source>
   </entry>
 
@@ -5816,7 +5969,7 @@ that we can keep the visualizations in the static format on the drive(or reposit
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-06-27T16:00:45Z</updated>
+      <updated>2014-06-28T02:40:39Z</updated>
     </source>
   </entry>
 
@@ -5868,38 +6021,6 @@ that we can keep the visualizations in the static format on the drive(or reposit
       <link href="https://hargup.github.io/rss.xml" rel="self" type="application/atom+xml"/>
       <title>Harsh's blog</title>
       <updated>2014-06-10T11:20:51Z</updated>
-    </source>
-  </entry>
-
-  <entry>
-    <id>tag:blogger.com,1999:blog-283806077182880539.post-3114660856880190348</id>
-    <link href="http://gsocblog.blogspot.com/feeds/3114660856880190348/comments/default" rel="replies" type="application/atom+xml"/>
-    <link href="http://gsocblog.blogspot.com/2014/05/this-summer-ill-be-coding-for-sympy-as.html#comment-form" rel="replies" type="text/html"/>
-    <link href="http://www.blogger.com/feeds/283806077182880539/posts/default/3114660856880190348" rel="edit" type="application/atom+xml"/>
-    <link href="http://www.blogger.com/feeds/283806077182880539/posts/default/3114660856880190348" rel="self" type="application/atom+xml"/>
-    <link href="http://gsocblog.blogspot.com/2014/05/this-summer-ill-be-coding-for-sympy-as.html" rel="alternate" type="text/html"/>
-    <title/>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><div dir="ltr" style="text-align: left;">This summer I'll be coding for SymPy as part of Google Summer Of Code 2014 program. SymPy is a computer algebra system written in pure python. <a href="http://sympy.org/en/index.html">Here</a> is its official homepage. <br/><br/>My project is "Series expansion". I aim to improve asymptotic expansion and implement formal power series. My mentors for this project are Stefan Krastanov and Sergey B Kirpichev. I am really excited to get started with the project.<br/><br/>During the community bonding period, I'll try to get started with my work and get a head start.<br/><br/>Hope to have a great summer and thank you to Google and SymPy for the opportunity!</div></div>
-    </content>
-    <updated>2014-05-12T10:54:59Z</updated>
-    <published>2014-05-12T10:54:00Z</published>
-    <author>
-      <name>Avichal Dayal</name>
-      <email>noreply@blogger.com</email>
-      <uri>https://plus.google.com/107026571968093758973</uri>
-    </author>
-    <source>
-      <id>tag:blogger.com,1999:blog-283806077182880539</id>
-      <author>
-        <name>Avichal Dayal</name>
-        <email>noreply@blogger.com</email>
-      </author>
-      <link href="http://gsocblog.blogspot.com/feeds/posts/default" rel="http://schemas.google.com/g/2005#feed" type="application/atom+xml"/>
-      <link href="http://www.blogger.com/feeds/283806077182880539/posts/default" rel="self" type="application/atom+xml"/>
-      <link href="http://gsocblog.blogspot.com/" rel="alternate" type="text/html"/>
-      <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
-      <title>GSoC 2014 with SymPy</title>
-      <updated>2014-06-19T16:40:24Z</updated>
     </source>
   </entry>
 </feed>
