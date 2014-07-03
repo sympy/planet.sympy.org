@@ -24,6 +24,45 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>July 03, 2014</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://blog.s-d-b.com" title="SDB's Blog » SymPy">Soumya Dipta Biswas</a></h3>
+
+
+<div class="entrygroup" id="http://blog.s-d-b.com/?p=91">
+<h4 lang="en-US"><a href="http://blog.s-d-b.com/gsoc-2014-week-6/">GSoC 2014: Week 6</a></h4>
+<div class="entry">
+<div class="content" lang="en-US">
+<p>Welcome back everyone,</p>
+<p>This week I set about to fix one of my long pending PR associated with Propositional Logic. Following that I worked on conversion to Prenex Normal Form and Skolem Normal Form. Firstly, let me talk about the PR associated with Propositional Logic. It basically involved adding small functions like validity, entailment and some small modifications to the Propositional Knowledge Base. I assume most of the readers would be familiar with the concept of <a href="http://en.wikipedia.org/wiki/Validity" target="_blank" title="Validity">validity</a> and <a href="http://en.wikipedia.org/wiki/Logical_consequence" target="_blank" title="Entailment">entailment</a> but I will briefly mention the algorithm to compute this and the intuition behind the same. Validity is given by <code>not satisfiable(Not(expr))&lt;/expr&gt;</code>. Why does this work? If an expr is valid then it is True under all interpretations. Therefore <code>Not(expr)</code> is always False i.e. it cannot be satisfied by any model. Hence if the negation of the expr is unsatisfiable then the original formula is valid. Moving on to entailment, the conventional definition stands that a set of formulas formula_set entails a formula expr iff expr is True whenever formula_set is True. That basically boils down to <code>And(*formula_set) &gt;&gt; expr</code>. However there is another method, to accomplish the same, namely <code>not satisfiable(And(~expr, *formula_set))</code>. Ok, firstly why does this non-intuitive expression even work? Well whenever formula set is True, expr must be True (for the entailment to hold) hence ~expr must be False thereby making the entire conjunction False. If the formula_set is False then the conjunction is clearly False. So if the entailment is to hold then the conjunction must be unsatisfiable, which is exactly what was implied earlier. Let us look at one special case before moving on. What if the formula_set is empty. While the solution is a matter of convention to a good extent, SymPy uses ideas from the second formula to resolve the ambiguity which yields <code>not satisfiable(And(~expr))</code> which is exactly the same as validity of expr. Theoretically entailment means “Given <em>this</em> what can we infer”. So, given nothing we can only infer that, which is always the truth. Except for these changes I also made changes to PropKB which is probably best not discussed at the moment.</p>
+<p>Coming now to the major interest of the post. The major time was spent in the functionality for conversion to <a href="http://en.wikipedia.org/wiki/Prenex_normal_form" target="_blank" title="PNF">Prenex Normal Form</a> and <a href="http://en.wikipedia.org/wiki/Skolem_normal_form" target="_blank" title="SNF">Skolem Normal Form</a>. Without going into a lot of details let me introduce these to you. A formula in PNF consists of a sequence of Quantifiers (containing both Universal and Existential quantifiers) followed by a Quatifier-less expression. The series of Quantifiers is called a <em>prefix</em> while the expression is called the matrix. Now, every formula in FOL can be converted to an <em>equivalent</em> formula in PNF. The matrix can be compared to a formula in propositional logic (if we think of the predicates as literals of PL) and most of the operations of PL become relevant. However we cannot completely ignore the prefix and hence we try to perform some operations such that we can look at the matrix without any regard to the prefix. This brings us to the Skolem Normal Form. A formula is converted to SNF by first converting it to PNF then dropping the Existential quantifiers (according to some rule). Now the prefix contains only Universal quantifiers, which are assumed to be implicitly implied and hence simply ignored while looking at the matrix. I will be updating the various rules for conversion and examples soon. Till then stay tuned.</p>
+<p>Arrivederci</p></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://blog.s-d-b.com/gsoc-2014-week-6/">by SD at July 03, 2014 06:13 PM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>July 02, 2014</h2>
 
 <div class="channelgroup">
@@ -4514,70 +4553,6 @@ I'm looking forward for a great summer with Sympy.</p></div></div>
 </div>
 
 </div>
-<div class="daygroup">
-<h2>May 24, 2014</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://sushant-hiray.in" title="Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy">Sushant Hiray</a></h3>
-
-
-<div class="entrygroup" id="http://sushant-hiray.in/posts/gsoc/csympy-week1/">
-<h4><a href="http://sushant-hiray.in/posts/gsoc/csympy-week1/">Community Bonding and Week 1 in CSymPy</a></h4>
-<div class="entry">
-<div class="content">
-<p>Week 1 for GSoC is almost about to end and I’m pretty much excited about the progress I’ve made.
-For those who are unaware I’m working on extending elementary functions in CSymPy. You can look over
-the proposal <a href="https://github.com/sympy/sympy/wiki/GSoC-2014-Application-Sushant-Hiray:-Extending-Elementary-Functions-CSymPy">here</a> to get a better idea regarding the project!
-<br /><br />
-The last few weeks have been fairly intensive. I shipped in a fair amount of code and we made a decent progress with the target. I’m quite ahead of my proposal now, so it gives quite a decent amount of buffer to improvise things as we keep on making progress.</p>
-
-<h1 id="progress">Progress</h1>
-
-<p>The community bonding period started off with closing some trivial issues such as adding a gitignore ( <a href="https://github.com/sympy/csympy/pull/165">pull 165</a>). This was needed big time considering the number of untracked files we had!
-<br /><br />
-Next I started working on improving the trignometric module for CSymPy. It started with <a href="https://github.com/sympy/csympy/pull/168">pull 168</a> which added all the remaining trignometric classes.
-<br /><br />
-After adding the trignometric classes we started working on implementing <code>eval</code> for trignometric classes. This was based on Ondrej’s version of <a href="https://github.com/certik/sympy/blob/trig/t.py">eval</a> which he had written for SymPy.
-This PR took quite over a week to complete and get merged into master.
-Now with this PR being merged we can directly evaluate arguments of type <code>theta + k*pi/12</code> for all the trignometric classes.
-<br /><br />
-A couple of PR’s were added to improve the code quality. <a href="https://github.com/sympy/csympy/pull/170">PR 170</a> looked into updating the constructors with C++11 standard and <a href="https://github.com/sympy/csympy/pull/171">pull 171</a> made the argument a private member for the base class. 
-<br /><br />
-The code looks quite noeat now, later on we will try to reduce the code length. But its good for now.</p>
-
-<h1 id="discussions">Discussions</h1>
-
-<p>Most of the discussions with Ondrej happened over the pull requests. Myself, Thilina and Ondrej had an online meetup on gitter this Thursday(IST). You can follow up on the details <a href="https://gitter.im/sympy/csympy">here</a>
-We discussed mostly regarding our progress, we also discussed a bit about possibility of compile-time hashing.</p>
-
-<h1 id="the-week-ahead">The Week Ahead</h1>
-<p>So for the next we have planned to get the basic implementation of inverse trignometric functions.
-<br /><br />
-Thats all for now :) Will get back next week!</p></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://sushant-hiray.in/posts/gsoc/csympy-week1/">May 24, 2014 06:30 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -4715,7 +4690,7 @@ Thats all for now :) Will get back next week!</p></div>
 <a href="http://sherjilozair.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sherjilozair.wordpress.com" class="message" title="no activity in 7 days">Sherjil Ozair</a>
 </li>
 <li>
-<a href="http://blog.s-d-b.com/category/sympy/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://blog.s-d-b.com" class="message" title="no activity in 7 days">Soumya Dipta Biswas</a>
+<a href="http://blog.s-d-b.com/category/sympy/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://blog.s-d-b.com" title="SDB's Blog » SymPy">Soumya Dipta Biswas</a>
 </li>
 <li>
 <a href="http://krastanov.wordpress.com/category/sympy-2/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://krastanov.wordpress.com" class="message" title="no activity in 7 days">Stefan Krastanov</a>
@@ -4751,7 +4726,7 @@ Thats all for now :) Will get back next week!</p></div>
 
 <p>
 <strong>Last updated:</strong><br>
-July 03, 2014 03:01 PM<br>
+July 03, 2014 06:21 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>

@@ -8,6 +8,16 @@
 	<description>Planet SymPy - http://planet.sympy.org/</description>
 
 <item>
+	<title>Soumya Dipta Biswas: GSoC 2014: Week 6</title>
+	<guid isPermaLink="false">http://blog.s-d-b.com/?p=91</guid>
+	<link>http://blog.s-d-b.com/gsoc-2014-week-6/</link>
+	<description>&lt;p&gt;Welcome back everyone,&lt;/p&gt;
+&lt;p&gt;This week I set about to fix one of my long pending PR associated with Propositional Logic. Following that I worked on conversion to Prenex Normal Form and Skolem Normal Form. Firstly, let me talk about the PR associated with Propositional Logic. It basically involved adding small functions like validity, entailment and some small modifications to the Propositional Knowledge Base. I assume most of the readers would be familiar with the concept of &lt;a href=&quot;http://en.wikipedia.org/wiki/Validity&quot; target=&quot;_blank&quot; title=&quot;Validity&quot;&gt;validity&lt;/a&gt; and &lt;a href=&quot;http://en.wikipedia.org/wiki/Logical_consequence&quot; target=&quot;_blank&quot; title=&quot;Entailment&quot;&gt;entailment&lt;/a&gt; but I will briefly mention the algorithm to compute this and the intuition behind the same. Validity is given by &lt;code&gt;not satisfiable(Not(expr))&amp;lt;/expr&amp;gt;&lt;/code&gt;. Why does this work? If an expr is valid then it is True under all interpretations. Therefore &lt;code&gt;Not(expr)&lt;/code&gt; is always False i.e. it cannot be satisfied by any model. Hence if the negation of the expr is unsatisfiable then the original formula is valid. Moving on to entailment, the conventional definition stands that a set of formulas formula_set entails a formula expr iff expr is True whenever formula_set is True. That basically boils down to &lt;code&gt;And(*formula_set) &amp;gt;&amp;gt; expr&lt;/code&gt;. However there is another method, to accomplish the same, namely &lt;code&gt;not satisfiable(And(~expr, *formula_set))&lt;/code&gt;. Ok, firstly why does this non-intuitive expression even work? Well whenever formula set is True, expr must be True (for the entailment to hold) hence ~expr must be False thereby making the entire conjunction False. If the formula_set is False then the conjunction is clearly False. So if the entailment is to hold then the conjunction must be unsatisfiable, which is exactly what was implied earlier. Let us look at one special case before moving on. What if the formula_set is empty. While the solution is a matter of convention to a good extent, SymPy uses ideas from the second formula to resolve the ambiguity which yields &lt;code&gt;not satisfiable(And(~expr))&lt;/code&gt; which is exactly the same as validity of expr. Theoretically entailment means “Given &lt;em&gt;this&lt;/em&gt; what can we infer”. So, given nothing we can only infer that, which is always the truth. Except for these changes I also made changes to PropKB which is probably best not discussed at the moment.&lt;/p&gt;
+&lt;p&gt;Coming now to the major interest of the post. The major time was spent in the functionality for conversion to &lt;a href=&quot;http://en.wikipedia.org/wiki/Prenex_normal_form&quot; target=&quot;_blank&quot; title=&quot;PNF&quot;&gt;Prenex Normal Form&lt;/a&gt; and &lt;a href=&quot;http://en.wikipedia.org/wiki/Skolem_normal_form&quot; target=&quot;_blank&quot; title=&quot;SNF&quot;&gt;Skolem Normal Form&lt;/a&gt;. Without going into a lot of details let me introduce these to you. A formula in PNF consists of a sequence of Quantifiers (containing both Universal and Existential quantifiers) followed by a Quatifier-less expression. The series of Quantifiers is called a &lt;em&gt;prefix&lt;/em&gt; while the expression is called the matrix. Now, every formula in FOL can be converted to an &lt;em&gt;equivalent&lt;/em&gt; formula in PNF. The matrix can be compared to a formula in propositional logic (if we think of the predicates as literals of PL) and most of the operations of PL become relevant. However we cannot completely ignore the prefix and hence we try to perform some operations such that we can look at the matrix without any regard to the prefix. This brings us to the Skolem Normal Form. A formula is converted to SNF by first converting it to PNF then dropping the Existential quantifiers (according to some rule). Now the prefix contains only Universal quantifiers, which are assumed to be implicitly implied and hence simply ignored while looking at the matrix. I will be updating the various rules for conversion and examples soon. Till then stay tuned.&lt;/p&gt;
+&lt;p&gt;Arrivederci&lt;/p&gt;</description>
+	<pubDate>Thu, 03 Jul 2014 18:13:06 +0000</pubDate>
+</item>
+<item>
 	<title>Harsh Gupta: week 6</title>
 	<guid isPermaLink="true">https://hargup.github.io/posts/week-6.html</guid>
 	<link>https://hargup.github.io/posts/week-6.html</link>
@@ -2938,41 +2948,6 @@ I'm looking forward for a great summer with Sympy.&lt;/p&gt;&lt;/div&gt;</descri
 	<description>&lt;div style=&quot;text-align: left;&quot; dir=&quot;ltr&quot;&gt;&lt;div style=&quot;color: #333333; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.3em; margin-bottom: 1.2em;&quot;&gt;The first week of GSoC is going to end very soon. I started working very late this week because of some issues. I spent most of my time in reading books on optics.&lt;/div&gt;&lt;div style=&quot;color: #333333; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.3em; margin-bottom: 1.2em;&quot;&gt;Due to a dependency for 3D geometry, which will take some more time, I changed my timeline from what I had proposed. Besides starting with geometrical optics(3 weeks), I have started working on wave optics.&lt;/div&gt;&lt;div style=&quot;color: #333333; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.3em; margin-bottom: 1.2em;&quot;&gt;This is what my proposal says:&lt;/div&gt;&lt;blockquote style=&quot;border-left-color: rgb(245, 245, 245); border-left-style: solid; border-left-width: 5px; color: #333333; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 18px; margin: 0px 0px 18px; padding: 0px 0px 0px 15px;&quot;&gt;&lt;ul style=&quot;margin: 0px 0px 9px 25px; padding: 0px;&quot;&gt;&lt;li&gt;During this week I'll write code for classical wave equation and simple harmonic motion.&lt;/li&gt;&lt;li&gt;Introduction of properties like phase angles, phase velocity, wave velocity, amplitude, intensity, frequency and wavelength. &lt;/li&gt;&lt;/ul&gt;&lt;/blockquote&gt;&lt;div style=&quot;color: #333333; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.3em; margin-bottom: 1.2em;&quot;&gt;&lt;a style=&quot;color: #4183c4; text-decoration: none;&quot; href=&quot;https://github.com/sympy/sympy/pull/7518&quot;&gt;This&lt;/a&gt; is my first pull request regarding my project (Thanks to Sean for the quick review). Till now I've only added a transverse wave class and will add more to it in the next 2 days.&lt;/div&gt;&lt;div style=&quot;color: #333333; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.3em; margin-bottom: 1.2em;&quot;&gt;There were no hiccups yet!&lt;/div&gt;&lt;div style=&quot;color: #333333; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.3em; margin-bottom: 1.2em;&quot;&gt;&lt;span style=&quot;line-height: 1.3em;&quot;&gt;Cheers!&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;</description>
 	<pubDate>Sun, 25 May 2014 00:14:11 +0000</pubDate>
 	<author>noreply@blogger.com (Sudhanshu Mishra)</author>
-</item>
-<item>
-	<title>Sushant Hiray: Community Bonding and Week 1 in CSymPy</title>
-	<guid isPermaLink="true">http://sushant-hiray.in/posts/gsoc/csympy-week1/</guid>
-	<link>http://sushant-hiray.in/posts/gsoc/csympy-week1/</link>
-	<description>&lt;p&gt;Week 1 for GSoC is almost about to end and I’m pretty much excited about the progress I’ve made.
-For those who are unaware I’m working on extending elementary functions in CSymPy. You can look over
-the proposal &lt;a href=&quot;https://github.com/sympy/sympy/wiki/GSoC-2014-Application-Sushant-Hiray:-Extending-Elementary-Functions-CSymPy&quot;&gt;here&lt;/a&gt; to get a better idea regarding the project!
-&lt;br /&gt;&lt;br /&gt;
-The last few weeks have been fairly intensive. I shipped in a fair amount of code and we made a decent progress with the target. I’m quite ahead of my proposal now, so it gives quite a decent amount of buffer to improvise things as we keep on making progress.&lt;/p&gt;
-
-&lt;h1 id=&quot;progress&quot;&gt;Progress&lt;/h1&gt;
-
-&lt;p&gt;The community bonding period started off with closing some trivial issues such as adding a gitignore ( &lt;a href=&quot;https://github.com/sympy/csympy/pull/165&quot;&gt;pull 165&lt;/a&gt;). This was needed big time considering the number of untracked files we had!
-&lt;br /&gt;&lt;br /&gt;
-Next I started working on improving the trignometric module for CSymPy. It started with &lt;a href=&quot;https://github.com/sympy/csympy/pull/168&quot;&gt;pull 168&lt;/a&gt; which added all the remaining trignometric classes.
-&lt;br /&gt;&lt;br /&gt;
-After adding the trignometric classes we started working on implementing &lt;code&gt;eval&lt;/code&gt; for trignometric classes. This was based on Ondrej’s version of &lt;a href=&quot;https://github.com/certik/sympy/blob/trig/t.py&quot;&gt;eval&lt;/a&gt; which he had written for SymPy.
-This PR took quite over a week to complete and get merged into master.
-Now with this PR being merged we can directly evaluate arguments of type &lt;code&gt;theta + k*pi/12&lt;/code&gt; for all the trignometric classes.
-&lt;br /&gt;&lt;br /&gt;
-A couple of PR’s were added to improve the code quality. &lt;a href=&quot;https://github.com/sympy/csympy/pull/170&quot;&gt;PR 170&lt;/a&gt; looked into updating the constructors with C++11 standard and &lt;a href=&quot;https://github.com/sympy/csympy/pull/171&quot;&gt;pull 171&lt;/a&gt; made the argument a private member for the base class. 
-&lt;br /&gt;&lt;br /&gt;
-The code looks quite noeat now, later on we will try to reduce the code length. But its good for now.&lt;/p&gt;
-
-&lt;h1 id=&quot;discussions&quot;&gt;Discussions&lt;/h1&gt;
-
-&lt;p&gt;Most of the discussions with Ondrej happened over the pull requests. Myself, Thilina and Ondrej had an online meetup on gitter this Thursday(IST). You can follow up on the details &lt;a href=&quot;https://gitter.im/sympy/csympy&quot;&gt;here&lt;/a&gt;
-We discussed mostly regarding our progress, we also discussed a bit about possibility of compile-time hashing.&lt;/p&gt;
-
-&lt;h1 id=&quot;the-week-ahead&quot;&gt;The Week Ahead&lt;/h1&gt;
-&lt;p&gt;So for the next we have planned to get the basic implementation of inverse trignometric functions.
-&lt;br /&gt;&lt;br /&gt;
-Thats all for now :) Will get back next week!&lt;/p&gt;</description>
-	<pubDate>Sat, 24 May 2014 18:30:00 +0000</pubDate>
 </item>
 
 </channel>
