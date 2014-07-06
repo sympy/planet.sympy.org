@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2014-07-05T09:00:57Z</updated>
+  <updated>2014-07-06T22:41:00Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,1131 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry>
+    <id>tag:,2014-07-06:gsoc-week-7.html</id>
+    <link href="http://jcrist.github.io/gsoc-week-7.html" rel="alternate" type="text/html"/>
+    <title>GSoC Week 7: Expression Trees and Substitution</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>
+</p><div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Late post this week due to the <a href="http://en.wikipedia.org/wiki/Independence_Day_%28United_States%29">celebration of everything that is American</a>. This week I finally got my first PR merged. The general linearization code is now part of the Sympy codebase. I currently have a <a href="https://github.com/sympy/sympy/pull/7681">PR for Lagrange support</a> waiting to be reviewed. After that I just need to write the ReST docs and the first part of the project is "complete". The rest of the week was spent on more optimization work. I'm getting closer to being able to solve the <a href="http://docs.sympy.org/dev/modules/physics/mechanics/bicycle_example.html">bicycle example</a> in a reasonable amount of time!</p>
+<p><a href="http://jcrist.github.io/gsoc-week-6.html">Last week's post</a> showed the issues with the large expression size and <code>subs</code> (it takes forever to run). I took some time this week to look into how expressions work in sympy, and wrote a specialized subs function for use in <code>sympy.physics.mechanics</code>. The rest of this post will show give an overview and some benchmarks of this code.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="expression-trees">Expression Trees</h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In sympy, expressions are stored as <a href="http://en.wikipedia.org/wiki/Tree_%28data_structure%29">trees</a>. Each node is an object that has an attribute <code>args</code> that contains a list of it's child nodes. This is best shown by an example:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [1]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">sympy.printing.dot</span> <span class="kn">import</span> <span class="n">dotprint</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [2]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="s">'a, b, c'</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [3]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="n">test</span> <span class="o">=</span> <span class="n">a</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span> <span class="o">+</span> <span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">b</span>
+<span class="n">test</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">
+    Out[3]:</div>
+
+
+<div class="output_text output_subarea output_pyout">
+<pre>a**2/b + a*cos(a + b)
+</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [4]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">'test.dot'</span><span class="p">,</span> <span class="s">'w'</span><span class="p">)</span> <span class="k">as</span> <span class="n">fil</span><span class="p">:</span>
+    <span class="n">fil</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">dotprint</span><span class="p">(</span><span class="n">test</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [5]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="o">%%</span><span class="k">bash</span>
+<span class="n">dot</span> <span class="o">-</span><span class="n">Tpng</span> <span class="n">test</span><span class="o">.</span><span class="n">dot</span> <span class="o">-</span><span class="n">o</span> <span class="n">test</span><span class="o">.</span><span class="n">png</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [6]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="kn">from</span> <span class="nn">IPython.core.display</span> <span class="kn">import</span> <span class="n">Image</span> 
+<span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s">'test.png'</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">
+    Out[6]:</div>
+
+
+<div class="output_png output_subarea output_pyout">
+<img/>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The root node of this tree is an <code>Add</code> object, as the outermost operation is adding two smaller expressions together. Going down the left side first, we see that <span class="math">\(a^2/b\)</span> is stored as multiplying <span class="math">\(a^2\)</span> times <span class="math">\(b^-1\)</span>. Sympy doesn't have <code>Div</code> objects, fractions are all expressed using <code>Mul</code>, with the denominator wrapped in a <code>Pow(den, -1)</code>. Traversing the right side <span class="math">\(a \cos(a + b)\)</span> is stored as multiplying <code>a</code> and a <code>cos</code> object together. The <code>cos</code> object itself contains one child node - an <code>Add</code> - which holds <code>a</code> and <code>b</code>.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="crawling-the-tree">Crawling the Tree</h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The design of sympy expression objects uses two key features: <code>args</code>, and <code>func</code>. As mentioned above, <code>object.args</code> holds a tuple of all the child nodes for that object. Likewise, <code>object.func</code> is a class method that takes in arguments, and returns an instance of that class. For <em>most</em> objects in sympy, running</p>
+<pre><code>object.func(*object.args) == object</code></pre>
+<p>will be a true expression. I say most because not all objects adhere to this (leaf nodes). There has been a lot of discussion about this <a href="https://github.com/sympy/sympy/wiki/Args-Invariant">here</a>, if you're interested.</p>
+<p>One of the great things about this design is that it makes it very easy to write operations that modify these trees using recursion. Normally, recursion in python is frowned upon because the function calls add overhead that could be removed if rewritten as a loop. There is also a maximum recursion depth (default of 1000) to prevent stackoverflow conditions. However, a sympy expression that has 1000 nested nodes is highly unlikely (even in <code>mechanics</code>), and the recursion makes the code <em>much</em> more readable. As the <a href="http://legacy.python.org/dev/peps/pep-0020/">zen of python</a> says, "Readability counts".</p>
+<p>A simple crawler to print every node is written below. It consists of two functions.</p>
+<p>The first one is a generic function <code>crawl</code>, that crawls the expression tree, calls <code>func</code> on each node, and returns the result if there is one. Otherwise it recurses down a level into the child nodes, forming a list of <code>new_args</code>, and then calls <code>expr.func</code> to rebuild the expression from those args.</p>
+<p>The second one is a printer function. As we don't want to modify the expression at all, we'll just print the node, and then return the expression if it doesn't have args (it's a leaf node). Note that there are more efficient ways to traverse the tree and print all the nodes - this is mostly to demonstrate <code>crawl</code>, as it will be used later.</p>
+<p>Using these two functions a function that crawls the tree, prints every node, and returns the original expression can be composed using a simple lambda statement.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [7]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="k">def</span> <span class="nf">crawl</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">"""Crawl the expression tree, and apply func to every node."""</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">val</span>
+    <span class="n">new_args</span> <span class="o">=</span> <span class="p">(</span><span class="n">crawl</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">expr</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">expr</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">new_args</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">printer</span><span class="p">(</span><span class="n">expr</span><span class="p">):</span>
+    <span class="sd">"""Print out every node"""</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">expr</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">expr</span>
+
+<span class="n">print_expr</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">expr</span><span class="p">:</span> <span class="n">crawl</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">printer</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let's test this function on our expression from above:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [8]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="n">temp</span> <span class="o">=</span> <span class="n">print_expr</span><span class="p">(</span><span class="n">test</span><span class="p">)</span>
+<span class="c"># Checking that the expression was unchanged (temp == test)</span>
+<span class="k">assert</span> <span class="n">temp</span> <span class="o">==</span> <span class="n">test</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"/>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>a**2/b + a*cos(a + b)
+a**2/b
+a**2
+a
+2
+1/b
+b
+-1
+a*cos(a + b)
+a
+cos(a + b)
+a + b
+b
+a
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Comparing the printed results with the tree diagram from before, one can see how each big expression can be decomposed into smaller expressions. Further, the rebuilt expression after traversing was identical to the input expression. In the next section we'll write another function that changes the expression tree using <code>crawl</code>.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="a-custom-subs-function">A Custom <code>subs</code> Function</h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In <code>sympy.physics.mechanics</code>, we deal with symbols, dynamic symbols (which are of type <code>AppliedUndef</code>), and derivatives of these dynamicsymbols. Unfortunately, the provided <code>subs</code> function traverses inside the <code>Derivative</code> terms, giving underdesired results:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [9]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="kn">from</span> <span class="nn">sympy.physics.mechanics</span> <span class="kn">import</span> <span class="n">dynamicsymbols</span>
+<span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">dynamicsymbols</span><span class="p">(</span><span class="s">'x, y'</span><span class="p">)</span>
+<span class="n">test</span> <span class="o">=</span> <span class="n">a</span><span class="o">*</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">x</span><span class="o">.</span><span class="n">diff</span><span class="p">())</span>
+<span class="n">test</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">
+    Out[9]:</div>
+
+
+<div class="output_text output_subarea output_pyout">
+<pre>a*(x(t) + Derivative(x(t), t))
+</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [10]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Subbing in b for x. Desired result is a*(b + x.diff())</span>
+<span class="n">test</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">x</span><span class="p">:</span> <span class="n">b</span><span class="p">})</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">
+    Out[10]:</div>
+
+
+<div class="output_text output_subarea output_pyout">
+<pre>a*(b + Derivative(b, t))
+</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>To get around this problem, we've been using a custom function <code>_subs_keep_derivs</code>. This function creates two substitution dictionaries - one with <code>Derivative</code>, and one without. Four substitutions then take place:</p>
+<ol style="">
+<li>Perform subs with the terms in the derivative dictionary</li>
+<li>Substitute in <code>Dummy</code> symbols for all <code>Derivative</code> terms in the resulting expression</li>
+<li>Perform subs with the terms in the non-derivative dictionary</li>
+<li>Substitute back the original <code>Derivative</code> terms from the <code>Dummy</code> symbols</li>
+</ol>
+<p>This is slow due to the need for <em>four calls to expr.subs</em>. Also, <code>subs</code> applies substitutions sequentially (i.e. each term in the substitution dict requires its own tree traversal). For our purposes in <code>mechanics</code>, this is unecessary. Using the already written <code>crawl</code> function, we can compose our own <code>subs</code> that ignores terms inside derivative objects fairly easily:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [11]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="k">def</span> <span class="nf">sub_func</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">sub_dict</span><span class="p">):</span>
+    <span class="sd">"""Perform expression subsitution, ignoring derivatives."""</span>
+    <span class="k">if</span> <span class="n">expr</span> <span class="ow">in</span> <span class="n">sub_dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">sub_dict</span><span class="p">[</span><span class="n">expr</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">expr</span><span class="o">.</span><span class="n">args</span> <span class="ow">or</span> <span class="n">expr</span><span class="o">.</span><span class="n">is_Derivative</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">expr</span>
+    
+<span class="n">new_subs</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">expr</span><span class="p">,</span> <span class="n">sub_dict</span><span class="p">:</span> <span class="n">crawl</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">sub_func</span><span class="p">,</span> <span class="n">sub_dict</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>That's it. Due to the composable nature of <code>crawl</code>, the code needed to perform this operation is incredibly simple. Let's test it to make sure it on our previous expression:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [12]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Simple example</span>
+<span class="n">new_subs</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="p">{</span><span class="n">x</span><span class="p">:</span> <span class="n">b</span><span class="p">})</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">
+    Out[12]:</div>
+
+
+<div class="output_text output_subarea output_pyout">
+<pre>a*(b + Derivative(x(t), t))
+</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>So it leaves terms inside derivaties alone, exactly as desired. We can see how this compares to the previous implementation:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [13]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Old way of doing things, taken from sympy.physics.mechanics.functions</span>
+<span class="k">def</span> <span class="nf">_subs_keep_derivs</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">sub_dict</span><span class="p">):</span>
+    <span class="sd">"""Performs subs exactly as subs normally would be,</span>
+<span class="sd">    but doesn't sub in expressions inside Derivatives."""</span>
+
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">atoms</span><span class="p">(</span><span class="n">Derivative</span><span class="p">)</span>
+    <span class="n">gs</span> <span class="o">=</span> <span class="p">[</span><span class="n">Dummy</span><span class="p">()</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">ds</span><span class="p">]</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="n">sub_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="n">deriv_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="ow">in</span> <span class="n">items</span> <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">is_Derivative</span><span class="p">)</span>
+    <span class="n">sub_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="ow">in</span> <span class="n">items</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">i</span><span class="o">.</span><span class="n">is_Derivative</span><span class="p">)</span>
+    <span class="n">dict_to</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">gs</span><span class="p">))</span>
+    <span class="n">dict_from</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">gs</span><span class="p">,</span> <span class="n">ds</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">expr</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">deriv_dict</span><span class="p">)</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">dict_to</span><span class="p">)</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">sub_dict</span><span class="p">)</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">dict_from</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [14]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># Benchmark substitution</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"Using _subs_keep_derivs"</span><span class="p">)</span>
+<span class="o">%</span><span class="k">timeit</span> <span class="n">_subs_keep_derivs</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="p">{</span><span class="n">x</span><span class="p">:</span> <span class="n">b</span><span class="p">})</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"Using new_subs"</span><span class="p">)</span>
+<span class="o">%</span><span class="k">timeit</span> <span class="n">new_subs</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="p">{</span><span class="n">x</span><span class="p">:</span> <span class="n">b</span><span class="p">})</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"/>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Using _subs_keep_derivs
+100 loops, best of 3: 3 ms per loop
+Using new_subs
+10000 loops, best of 3: 39.9 µs per loop
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>So it's significantly faster. For this small benchmark, approximately 75x faster. Also, as it works in only one traversal of the tree it has a smaller computational complexity - meaning that for larger expressions this speed increase will be even higher. For kicks, let's see how it compares to normal subs for an expression without derivatives:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [15]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c"># For kicks, see how it compares to subs for expr without derivative:</span>
+<span class="n">test</span> <span class="o">=</span> <span class="n">a</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"Using subs"</span><span class="p">)</span>
+<span class="o">%</span><span class="k">timeit</span> <span class="n">test</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="p">{</span><span class="n">a</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="mi">2</span><span class="p">})</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"Using new subs"</span><span class="p">)</span>
+<span class="o">%</span><span class="k">timeit</span> <span class="n">new_subs</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="p">{</span><span class="n">a</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="mi">2</span><span class="p">})</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"/>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Using subs
+1000 loops, best of 3: 676 µs per loop
+Using new subs
+1000 loops, best of 3: 247 µs per loop
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>So our implementation of <code>subs</code> is faster than sympy's. However, this micro benchmark isn't all that meaningful. Normal <code>subs</code> works in multiple passes so that expressions inside the <code>sub_dict</code> are also affected. <code>subs</code> also incorporates math knowledge about the expressions, while ours just does a naive direct match and replace. For our purposes though, this is sufficient. Also, as with all micro-benchmarks, this should be taken with a grain of salt. The main point is that our custom subs function is <em>significantly faster</em> than the old method of <code>_subs_keep_derivs</code>.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="custom-simplification">Custom Simplification</h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The other major issue I discussed <a href="http://jcrist.github.io/gsoc-week-6.html">last week</a> was that some expressions result in <code>nan</code> or <code>oo</code> (infinity) when not simplified, but after simplification result in a realizable expression. For example:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [16]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="n">test</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">/</span><span class="n">tan</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"Before simplification:"</span><span class="p">,</span> <span class="n">test</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"After simplification:"</span><span class="p">,</span> <span class="n">simplify</span><span class="p">(</span><span class="n">test</span><span class="p">)</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"/>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Before simplification: nan
+After simplification: 1
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>For small expressions, doing <code>simplify</code> before evaluation is acceptable, but for larger ones simplification is way too slow. However, these divide by zero errors are caused by subexpressions, not the whole expression. Using some knowledge of the types of expressions present in the mechanics module, we can come up with some simple heuristics for what can result in <code>nan</code>, <code>oo</code> and <code>zoo</code>:</p>
+<ol style="">
+<li>tan(pi/2)</li>
+<li>Fractions with 0 in the denominator</li>
+</ol>
+<p>In reality, these are the same thing, because</p>
+<p><span class="math">\[ \tan(\pi/2) = \frac{\sin(\pi/2)}{\cos(\pi/2)} = \frac{1}{0} \]</span></p>
+<p>Using this knowledge, we can come up with a simple algorithm for performing subs and catching these issues at the same time:</p>
+<ol style="">
+<li>Replace all <code>tan(*)</code> with <code>sin(*)/cos(*)</code>. This will allow us to only have to check for denominator = 0 conditions.</li>
+<li>For nodes that are fractions, check if the denominator evaluates to 0. If so, apply <code>simplify</code> to the fraction, and then carry on as normal.</li>
+</ol>
+<p>This may not catch every instance that results in would result in a <code>nan</code> without simplification, but it should catch most of them. Also, the algorithm is so simple, that it can be implemented in only a few lines. First, the <code>tan</code> replacement. This requires almost no new code, as it can be composed using the already written <code>crawl</code> function:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [17]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="k">def</span> <span class="nf">tan_repl_func</span><span class="p">(</span><span class="n">expr</span><span class="p">):</span>
+    <span class="sd">"""Replace tan with sin/cos"""</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">tan</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">sin</span><span class="p">(</span><span class="o">*</span><span class="n">expr</span><span class="o">.</span><span class="n">args</span><span class="p">)</span><span class="o">/</span><span class="n">cos</span><span class="p">(</span><span class="o">*</span><span class="n">expr</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">expr</span><span class="o">.</span><span class="n">args</span> <span class="ow">or</span> <span class="n">expr</span><span class="o">.</span><span class="n">is_Derivative</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">expr</span>
+
+<span class="n">tan_repl</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">expr</span><span class="p">:</span> <span class="n">crawl</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">tan_repl_func</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Testing it:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [18]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="n">tan_repl</span><span class="p">(</span><span class="n">tan</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">+</span> <span class="n">tan</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">/</span><span class="n">tan</span><span class="p">(</span><span class="n">b</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">
+    Out[18]:</div>
+
+
+<div class="output_text output_subarea output_pyout">
+<pre>sin(a)/cos(a) + sin(a)*cos(b)/(sin(b)*cos(a))
+</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>So that works as expected. Now for the second pass; the subs with denominator checking and selective simplification. This takes a little bit more code than before, but I've heavily commented it so you should be able to see what's going on:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [19]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="k">def</span> <span class="nf">smart_subs_func</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">sub_dict</span><span class="p">):</span>
+        <span class="c"># Decompose the expression into num, den</span>
+        <span class="n">num</span><span class="p">,</span> <span class="n">den</span> <span class="o">=</span> <span class="n">fraction_decomp</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">den</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c"># If there is a non trivial denominator, we need to handle it</span>
+            <span class="n">denom_subbed</span> <span class="o">=</span> <span class="n">smart_subs_func</span><span class="p">(</span><span class="n">den</span><span class="p">,</span> <span class="n">sub_dict</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">denom_subbed</span><span class="o">.</span><span class="n">evalf</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c"># If denom is 0 after this, attempt to simplify the bad expr</span>
+                <span class="n">expr</span> <span class="o">=</span> <span class="n">simplify</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># Expression won't result in nan, find numerator</span>
+                <span class="n">num_subbed</span> <span class="o">=</span> <span class="n">smart_subs_func</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">sub_dict</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">num_subbed</span><span class="o">/</span><span class="n">denom_subbed</span>
+        <span class="c"># We have to crawl the tree manually, because `expr` may have been</span>
+        <span class="c"># modified in the simplify step. First, perform subs as normal:</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">sub_func</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">sub_dict</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">val</span>
+        <span class="n">new_args</span> <span class="o">=</span> <span class="p">(</span><span class="n">smart_subs_func</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">sub_dict</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">expr</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">expr</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">new_args</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">fraction_decomp</span><span class="p">(</span><span class="n">expr</span><span class="p">):</span>
+    <span class="sd">"""Return num, den such that expr = num/den"""</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">Mul</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">expr</span><span class="p">,</span> <span class="mi">1</span>
+    <span class="n">num</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">den</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">expr</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">is_Pow</span> <span class="ow">and</span> <span class="n">a</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">den</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">a</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">num</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">den</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">expr</span><span class="p">,</span> <span class="mi">1</span>
+    <span class="n">num</span> <span class="o">=</span> <span class="n">Mul</span><span class="p">(</span><span class="o">*</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">den</span> <span class="o">=</span> <span class="n">Mul</span><span class="p">(</span><span class="o">*</span><span class="n">den</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">num</span><span class="p">,</span> <span class="n">den</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Finally, we can put everything from above inside a nice wrapper function:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [20]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="k">def</span> <span class="nf">smart_subs</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">sub_dict</span><span class="p">):</span>
+    <span class="sd">"""Performs subs, checking for conditions that may result in `nan` or </span>
+<span class="sd">    `oo`, and attempts to simplify them out.</span>
+
+<span class="sd">    The expression tree is traversed twice, and the following steps are</span>
+<span class="sd">    performed on each expression node:</span>
+<span class="sd">    - First traverse: </span>
+<span class="sd">        Replace all `tan` with `sin/cos`.</span>
+<span class="sd">    - Second traverse:</span>
+<span class="sd">        If node is a fraction, check if the denominator evaluates to 0.</span>
+<span class="sd">        If so, attempt to simplify it out. Then if node is in sub_dict,</span>
+<span class="sd">        sub in the corresponding value."""</span>
+    <span class="n">expr</span> <span class="o">=</span> <span class="n">crawl</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">tan_repl_func</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">smart_subs_func</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">sub_dict</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let's see if it works as expected. Using a simple test case:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [21]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="n">test</span> <span class="o">=</span> <span class="n">tan</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="n">sub_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">a</span><span class="p">:</span> <span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">}</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"Without `smart_subs`:"</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">new_subs</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">sub_dict</span><span class="p">))</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"With `smart_subs`:"</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">smart_subs</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">sub_dict</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"/>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Without `smart_subs`:
+nan
+With `smart_subs`:
+1
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>And some timings:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [22]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="k">print</span><span class="p">(</span><span class="s">"Using `smart_subs`:"</span><span class="p">)</span>
+<span class="o">%</span><span class="k">timeit</span> <span class="n">smart_subs</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">sub_dict</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"Using simplification, then normal subs"</span><span class="p">)</span>
+<span class="o">%</span><span class="k">timeit</span> <span class="n">simplify</span><span class="p">(</span><span class="n">test</span><span class="p">)</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">sub_dict</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"Using trigsimp, then normal subs"</span><span class="p">)</span>
+<span class="o">%</span><span class="k">timeit</span> <span class="n">trigsimp</span><span class="p">(</span><span class="n">test</span><span class="p">)</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">sub_dict</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"/>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Using `smart_subs`:
+10000 loops, best of 3: 92 µs per loop
+Using simplification, then normal subs
+10 loops, best of 3: 42.9 ms per loop
+Using trigsimp, then normal subs
+10 loops, best of 3: 30.8 ms per loop
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Using selective simplification, the same results can be obtained for a fraction of the cost. 360 times faster for this small test.</p>
+<p>Let's see what the overhead of <code>smart_subs</code> is for an expression that doesn't need it:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [23]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="n">test</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span><span class="o">/</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span><span class="o">*</span> <span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span> <span class="o">+</span> <span class="n">a</span><span class="o">/</span><span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">x</span><span class="p">)</span>
+<span class="n">sub_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="p">:</span> <span class="n">a</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"new_subs"</span><span class="p">)</span>
+<span class="o">%</span><span class="k">timeit</span> <span class="n">new_subs</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">sub_dict</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"smart_subs"</span><span class="p">)</span>
+<span class="o">%</span><span class="k">timeit</span> <span class="n">smart_subs</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">sub_dict</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"Using simplification, then normal subs"</span><span class="p">)</span>
+<span class="o">%</span><span class="k">timeit</span> <span class="n">simplify</span><span class="p">(</span><span class="n">test</span><span class="p">)</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">sub_dict</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"Using trigsimp, then normal subs"</span><span class="p">)</span>
+<span class="o">%</span><span class="k">timeit</span> <span class="n">trigsimp</span><span class="p">(</span><span class="n">test</span><span class="p">)</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">sub_dict</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"/>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>new_subs
+1000 loops, best of 3: 222 µs per loop
+smart_subs
+1000 loops, best of 3: 2.34 ms per loop
+Using simplification, then normal subs
+1 loops, best of 3: 1.11 s per loop
+Using trigsimp, then normal subs
+1 loops, best of 3: 815 ms per loop
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>So there's considerable overhead, which was expected. Still, it's much faster than using simplify first, and then running <code>subs</code>.</p>
+<p>The best use method would be to first try it with <code>new_subs</code>, and if you get a <code>nan</code> or <code>oo</code>, then try using <code>smart_subs</code>. To aid in this, we can write a nice wrapper function <code>msubs</code> that contains both methods:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [24]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="k">def</span> <span class="nf">msubs</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">sub_dict</span><span class="p">,</span> <span class="n">smart</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">"""A custom subs for use on expressions derived in physics.mechanics.</span>
+
+<span class="sd">    Traverses the expression tree once, performing the subs found in sub_dict.</span>
+<span class="sd">    Terms inside `Derivative` expressions are ignored:</span>
+
+<span class="sd">    &gt;&gt;&gt; x = dynamicsymbols('x')</span>
+<span class="sd">    &gt;&gt;&gt; msubs(x.diff() + x, {x: 1})</span>
+<span class="sd">    Derivative(x, t) + 1</span>
+
+<span class="sd">    If smart=True, also checks for conditions that may result in `nan`, but</span>
+<span class="sd">    if simplified would yield a valid expression. For example:</span>
+
+<span class="sd">    &gt;&gt;&gt; (sin(a)/tan(a)).subs(a, 0)</span>
+<span class="sd">    nan</span>
+<span class="sd">    &gt;&gt;&gt; msubs(sin(a)/tan(a), {a: 0}, smart=True)</span>
+<span class="sd">    1</span>
+
+<span class="sd">    It does this by first replacing all `tan` with `sin/cos`. Then each node</span>
+<span class="sd">    is traversed. If the node is a fraction, subs is first evaluated on the</span>
+<span class="sd">    denominator. If this results in 0, simplification of the entire fraction</span>
+<span class="sd">    is attempted. Using this selective simplification, only subexpressions</span>
+<span class="sd">    that result in 1/0 are targeted, resulting in faster performance."""</span>
+
+    <span class="k">if</span> <span class="n">smart</span><span class="p">:</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">smart_subs</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">new_subs</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">Matrix</span><span class="p">):</span>
+        <span class="c"># For matrices, func is applied to each element using `applyfunc`</span>
+        <span class="k">return</span> <span class="n">expr</span><span class="o">.</span><span class="n">applyfunc</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">sub_dict</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">sub_dict</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In [25]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight-ipynb"><pre class="ipynb"><span class="c">#Check that the results are the same:</span>
+<span class="n">msubs</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">sub_dict</span><span class="p">)</span> <span class="o">==</span> <span class="n">new_subs</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">sub_dict</span><span class="p">)</span>
+<span class="n">msubs</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">sub_dict</span><span class="p">,</span> <span class="n">smart</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="o">==</span> <span class="n">smart_subs</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">sub_dict</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">
+    Out[25]:</div>
+
+
+<div class="output_text output_subarea output_pyout">
+<pre>True
+</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This code has been included in my optimization branch, and is performing admirably against all the included tests (so much speed up!!!). The big test though is the bicycle example.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="the-big-test">The Big Test</h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>To really put this new code to the test I applied it to the <a href="http://docs.sympy.org/dev/modules/physics/mechanics/bicycle_example.html">bicycle example</a>, which has operation counts ranging from 400,000 to several million depending on which expression you're working with. How did it fair? Mixed results...</p>
+<p>Using <code>msubs</code> with <code>smart=False</code> in the formation of the linearizer object resulted in a huge speed increase. Previously using <code>_subs_keep_derivs</code> there resulted in a run time of several hours. Now it runs in 14 seconds!</p>
+<p>The second test is in the application of the operating point to the M, A, and B matrices. Previously evaluating these had resulted in <code>nan</code> and <code>oo</code>, and with operation counts exceeding 400,000 for M pre-simplification is out of the question. I tried using <code>msubs</code> with <code>smart=True</code> on this M, and let it run for 6 hours. It ended up consuming 98% of my RAM (4 GB worth), and it still wasn't done :( So for reasonable sized expressions the smart_subs we've implemented is acceptable, but it still doesn't work for the huge expressions. I'll have to keep working on optimizations to make this faster/reduce the initial expression size.</p>
+<p>Still, all is not lost. Going from formulation to M, A, and B without the operating point substitution now only takes 20 minutes - down from the several hours before. This is actually faster than the previous linearize method, but unforunately results in expressions that evaluate to <code>nan</code>.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="future-work">Future Work</h2>
+<p>Per my <a href="https://github.com/pydy/pydy/wiki/GSoC-2014-Application:-Jim-Crist-%28Linearization-Routines-for-Equations-of-Motion%29#timeline">original timeline</a> I was supposed to be working on "pre-linearization" routines for generating the equations of motion directly in linearized form. I think this will be dropped in favor of cleaning up and speeding up the existing codebase. There's some dead code that needs removing, and I have some other ideas for speed-ups that I'd like to try.</p>
+<p>After that, I hope to get to the original part 3 of the project, which is adding support for matrices to the code-generation code. Not sure if this would live in sympy or pydy, but it would be extremely useful to myself and others. For now I plan on taking it week-by-week.</p>
+<hr/>
+<p><em>If you have thoughts on how to deal with the <code>nan</code> and <code>oo</code> issue, please let me know in the comments. Thanks!</em></p>
+</div>
+</div>
+</div><p/></div>
+    </summary>
+    <updated>2014-07-06T22:25:00Z</updated>
+    <category term="GSoC"/>
+    <category term="sympy"/>
+    <category term="pydy"/>
+    <category term="dynamics"/>
+    <author>
+      <name>Jim Crist</name>
+    </author>
+    <source>
+      <id>http://jcrist.github.io/</id>
+      <link href="http://jcrist.github.io/" rel="alternate" type="text/html"/>
+      <link href="http://jcrist.github.io/feeds/gsoc.atom.xml" rel="self" type="application/atom+xml"/>
+      <title>Marginally Stable</title>
+      <updated>2014-07-06T22:25:00Z</updated>
+    </source>
+  </entry>
 
   <entry>
     <id>tag:blogger.com,1999:blog-283806077182880539.post-7888716637890298695</id>
@@ -92,7 +1217,7 @@ implementing new stuff!).</p>
       <link href="http://tarzzz.github.io/rss.gsoc.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts categorized under GSoC</subtitle>
       <title>Tarun Gaba's blog - GSoC</title>
-      <updated>2014-07-05T09:00:39Z</updated>
+      <updated>2014-07-06T22:40:39Z</updated>
     </source>
   </entry>
 
@@ -119,7 +1244,7 @@ implementing new stuff!).</p>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-05T09:00:57Z</updated>
+      <updated>2014-07-06T22:41:00Z</updated>
     </source>
   </entry>
 
@@ -152,7 +1277,7 @@ when solved for \( x \).</p></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-07-05T09:00:55Z</updated>
+      <updated>2014-07-06T22:40:58Z</updated>
     </source>
   </entry>
 
@@ -269,7 +1394,7 @@ when solved for \( x \).</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-07-05T09:00:55Z</updated>
+      <updated>2014-07-06T22:40:58Z</updated>
     </source>
   </entry>
 
@@ -302,7 +1427,7 @@ when solved for \( x \).</p></div>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-07-05T09:00:40Z</updated>
+      <updated>2014-07-06T22:40:41Z</updated>
     </source>
   </entry>
 
@@ -487,7 +1612,7 @@ finally be submitted.</p>&lt;script type="text/javascript"&gt;
       <link href="http://jcrist.github.io/" rel="alternate" type="text/html"/>
       <link href="http://jcrist.github.io/feeds/gsoc.atom.xml" rel="self" type="application/atom+xml"/>
       <title>Marginally Stable</title>
-      <updated>2014-06-28T02:21:00Z</updated>
+      <updated>2014-07-06T22:25:00Z</updated>
     </source>
   </entry>
 
@@ -528,7 +1653,7 @@ finally be submitted.</p>&lt;script type="text/javascript"&gt;
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-07-05T09:00:40Z</updated>
+      <updated>2014-07-06T22:40:40Z</updated>
     </source>
   </entry>
 
@@ -596,7 +1721,7 @@ conceder the limiting value of the equation.</p>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-07-05T09:00:55Z</updated>
+      <updated>2014-07-06T22:40:58Z</updated>
     </source>
   </entry>
 
@@ -659,7 +1784,7 @@ False</pre>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-05T09:00:57Z</updated>
+      <updated>2014-07-06T22:41:00Z</updated>
     </source>
   </entry>
 
@@ -726,7 +1851,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-07-05T09:00:47Z</updated>
+      <updated>2014-07-06T22:40:48Z</updated>
     </source>
   </entry>
 
@@ -927,7 +2052,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-07-05T09:00:55Z</updated>
+      <updated>2014-07-06T22:40:58Z</updated>
     </source>
   </entry>
 
@@ -960,7 +2085,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-07-05T09:00:40Z</updated>
+      <updated>2014-07-06T22:40:41Z</updated>
     </source>
   </entry>
 
@@ -1012,7 +2137,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-07-05T09:00:40Z</updated>
+      <updated>2014-07-06T22:40:40Z</updated>
     </source>
   </entry>
 
@@ -1858,7 +2983,7 @@ In [15]:
       <link href="http://jcrist.github.io/" rel="alternate" type="text/html"/>
       <link href="http://jcrist.github.io/feeds/gsoc.atom.xml" rel="self" type="application/atom+xml"/>
       <title>Marginally Stable</title>
-      <updated>2014-06-28T02:21:00Z</updated>
+      <updated>2014-07-06T22:25:00Z</updated>
     </source>
   </entry>
 
@@ -2010,7 +3135,7 @@ on infinitely indexed sets.</p></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-07-05T09:00:55Z</updated>
+      <updated>2014-07-06T22:40:58Z</updated>
     </source>
   </entry>
 
@@ -2113,7 +3238,7 @@ Not(ForAll((X,T), Implies(And(Person(X), Time(T)), CanFool(X, T))))</pre>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-05T09:00:57Z</updated>
+      <updated>2014-07-06T22:41:00Z</updated>
     </source>
   </entry>
 
@@ -2342,7 +3467,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-07-05T09:00:47Z</updated>
+      <updated>2014-07-06T22:40:48Z</updated>
     </source>
   </entry>
 
@@ -2373,7 +3498,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-07-05T09:00:55Z</updated>
+      <updated>2014-07-06T22:40:58Z</updated>
     </source>
   </entry>
 
@@ -2417,7 +3542,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-07-05T09:00:40Z</updated>
+      <updated>2014-07-06T22:40:40Z</updated>
     </source>
   </entry>
 
@@ -2460,7 +3585,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-07-05T09:00:40Z</updated>
+      <updated>2014-07-06T22:40:41Z</updated>
     </source>
   </entry>
 
@@ -2694,7 +3819,7 @@ more tests, and finalize the interface. I plan on working on this next week.</p>
       <link href="http://jcrist.github.io/" rel="alternate" type="text/html"/>
       <link href="http://jcrist.github.io/feeds/gsoc.atom.xml" rel="self" type="application/atom+xml"/>
       <title>Marginally Stable</title>
-      <updated>2014-06-28T02:21:00Z</updated>
+      <updated>2014-07-06T22:25:00Z</updated>
     </source>
   </entry>
 
@@ -2740,7 +3865,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-07-05T09:00:47Z</updated>
+      <updated>2014-07-06T22:40:48Z</updated>
     </source>
   </entry>
 
@@ -2909,7 +4034,7 @@ extent.</p></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-07-05T09:00:55Z</updated>
+      <updated>2014-07-06T22:40:58Z</updated>
     </source>
   </entry>
 
@@ -2936,7 +4061,7 @@ extent.</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-07-05T09:00:55Z</updated>
+      <updated>2014-07-06T22:40:58Z</updated>
     </source>
   </entry>
 
@@ -3000,7 +4125,7 @@ Xor creates one of the most complex NNF formula after simplification. Let look a
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-05T09:00:57Z</updated>
+      <updated>2014-07-06T22:41:00Z</updated>
     </source>
   </entry>
 
@@ -3209,7 +4334,7 @@ In [3]:
       <link href="http://jcrist.github.io/" rel="alternate" type="text/html"/>
       <link href="http://jcrist.github.io/feeds/gsoc.atom.xml" rel="self" type="application/atom+xml"/>
       <title>Marginally Stable</title>
-      <updated>2014-06-28T02:21:00Z</updated>
+      <updated>2014-07-06T22:25:00Z</updated>
     </source>
   </entry>
 
@@ -3242,7 +4367,7 @@ In [3]:
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-07-05T09:00:40Z</updated>
+      <updated>2014-07-06T22:40:41Z</updated>
     </source>
   </entry>
 
@@ -3305,7 +4430,7 @@ rationals, not Integers.</p><br/>  <a href="http://feeds.wordpress.com/1.0/gocom
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-07-05T09:00:40Z</updated>
+      <updated>2014-07-06T22:40:40Z</updated>
     </source>
   </entry>
 
@@ -3420,7 +4545,7 @@ week will be.</p>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-07-05T09:00:55Z</updated>
+      <updated>2014-07-06T22:40:58Z</updated>
     </source>
   </entry>
 
@@ -3624,7 +4749,7 @@ Similar to Xor above, even ITE had no independant class and all expressions were
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-05T09:00:57Z</updated>
+      <updated>2014-07-06T22:41:00Z</updated>
     </source>
   </entry>
 
@@ -3674,7 +4799,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-07-05T09:00:47Z</updated>
+      <updated>2014-07-06T22:40:48Z</updated>
     </source>
   </entry>
 
@@ -3700,7 +4825,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-07-05T09:00:55Z</updated>
+      <updated>2014-07-06T22:40:58Z</updated>
     </source>
   </entry>
 
@@ -3730,7 +4855,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-05T09:00:57Z</updated>
+      <updated>2014-07-06T22:41:00Z</updated>
     </source>
   </entry>
 
@@ -3774,7 +4899,7 @@ True<br/>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-07-05T09:00:40Z</updated>
+      <updated>2014-07-06T22:40:41Z</updated>
     </source>
   </entry>
 
@@ -3906,7 +5031,7 @@ so that others can review it before I submit it to Sympy proper.</p>&lt;script t
       <link href="http://jcrist.github.io/" rel="alternate" type="text/html"/>
       <link href="http://jcrist.github.io/feeds/gsoc.atom.xml" rel="self" type="application/atom+xml"/>
       <title>Marginally Stable</title>
-      <updated>2014-06-28T02:21:00Z</updated>
+      <updated>2014-07-06T22:25:00Z</updated>
     </source>
   </entry>
 
@@ -4072,7 +5197,7 @@ Most important thing about the `MatrixBase` class is that it is derived from the
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-07-05T09:00:40Z</updated>
+      <updated>2014-07-06T22:40:40Z</updated>
     </source>
   </entry>
 
@@ -4151,7 +5276,7 @@ I'm looking forward for a great summer with Sympy.</p></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-07-05T09:00:55Z</updated>
+      <updated>2014-07-06T22:40:58Z</updated>
     </source>
   </entry>
 
@@ -4199,47 +5324,6 @@ I'm looking forward for a great summer with Sympy.</p></div></div>
       <link href="https://hargup.github.io/rss.xml" rel="self" type="application/atom+xml"/>
       <title>Harsh's blog</title>
       <updated>2014-06-10T11:20:51Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://codesachin.wordpress.com/?p=6</id>
-    <link href="http://codesachin.wordpress.com/2014/05/25/gsoc-first-week-getting-priorities-straight/" rel="alternate" type="text/html"/>
-    <title>GSoC First Week: Getting priorities straight</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Ok. My first week with the my second iteration of Google Summer of Code. Things have been different this time right from the word go. Mainly to do with software design, or rather the approach to it. Jason and I have had lengthy discussions about this, and we have been trying to work out a […]<img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=codesachin.wordpress.com&amp;blog=67602166&amp;post=6&amp;subd=codesachin&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Ok. My first week with the my second iteration of Google Summer of Code. Things have been different this time right from the word go. Mainly to do with software design, or rather the approach to it. Jason and I have had lengthy discussions about this, and we have been trying to work out a good plan to get things done in a structured way this summer. I am hoping that this will avoid the problems Prasoon and I encountered oh-so-frequently last summer. They were mainly because we had too many TODOs and objectives all at the same time, instead of doing things step-by-step, in an incremental manner.</p>
-<p>What I have been doing this week, is thinking and talking to people regarding what the use-cases of the new module will be. I had started out trying to design an overly generalized system, but talking to Jason and Stefan has made me realise that its better to get the set of objectives straight.</p>
-<p>Basically, I have been listing out as many micro-use-cases as I can. Something like – “I, as a SymPy developer, would like to use the new vector module to prove the integral forms of Maxwell’s equations.” This is where the talking to many people came into the picture. Things like these, though they may seem a lot to process, admittedly do help you focus on whats high-priority.</p>
-<p>Broadly, I have divided my objectives for the module into the following incremental development ‘steps’-</p>
-<p><b><i>i)Implementation of a basic Vector framework</i></b></p>
-<p><b><i>ii)Implementation of the Del operator</i></b></p>
-<p><b><i>iii)Conversion to and from coordinate systems other than Cartesian</i></b>.</p>
-<p><b><i>iv) Having an API for doing vector math in different coordinate systems.</i></b></p>
-<p><b><i>v)Implementation of Coordinate System class, along with a Point class</i></b></p>
-<p><b><i>vi)Implementation of time-dependent functionality</i></b></p>
-<p><b><i>vii)Implementation of LaTeX functionality </i></b></p>
-<p><b><i>viii) Implementation of vector-integral functionality<br/>
-</i></b></p>
-<p>Each of these, as you can probably see, can be done one-at-a-time (ofcourse many of them have prerequisites, like vi requiring i and v). In any case, the incremental model of software design does seem to fit well to developing the new vector module – with something like the waterfall model being used for each of these objectives individually.</p>
-<p>On the coding front, I have pretty much done with objective i. I have a stable (with a few mods necessary) system of basic vector math in place on my <em>gsocvect</em> branch on github. I have avoided usage of coordinate systems, to ensure that the Vector class fits well with the SymPy core. Some things still need to be ironed out, like usage of functions like<em> trigsimp </em>on a given Vector instance – I’ll probably try my hand a little more, or ask the mailing list.</p>
-<p>Anyways, thats all for now <span class="wp-smiley emoji emoji-smile" title=":-)">:-)</span>. Hope to have a great summer coding a new SymPy module. *excited*</p><br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/codesachin.wordpress.com/6/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/codesachin.wordpress.com/6/"/></a> <img alt="" border="0" height="1" src="http://stats.wordpress.com/b.gif?host=codesachin.wordpress.com&amp;blog=67602166&amp;post=6&amp;subd=codesachin&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2014-05-25T15:13:10Z</updated>
-    <category term="Google Summer of Code 2014"/>
-    <author>
-      <name>srjoglekar246</name>
-    </author>
-    <source>
-      <id>http://codesachin.wordpress.com</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://codesachin.wordpress.com/category/google-summer-of-code-2014/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://codesachin.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://codesachin.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>- Blog by Sachin Joglekar</subtitle>
-      <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-07-05T09:00:40Z</updated>
     </source>
   </entry>
 </feed>
