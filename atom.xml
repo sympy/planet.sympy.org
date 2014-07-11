@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2014-07-11T16:01:07Z</updated>
+  <updated>2014-07-11T22:21:09Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,115 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry>
+    <id>tag:,2014-07-11:gsoc-week-8.html</id>
+    <link href="http://jcrist.github.io/gsoc-week-8.html" rel="alternate" type="text/html"/>
+    <title>GSoC Week 8: Try, try, try again...</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>I'm still struggling to solve the <code>nan</code> and <code>oo</code> issue I've discussed in my
+post <a href="http://jcrist.github.io/gsoc-week-6.html">a couple weeks ago</a>.
+<a href="http://jcrist.github.io/gsoc-week-7.html">Last week</a> I showed off a custom
+written subs function for use inside <code>sympy.physics.mechanics</code> that helped with
+speed considerably, and <em>attempted</em> to solve the <code>nan</code> problem. This worked
+great for small-medium expressions, but failed on large ones. Or did it? I'm not
+sure anymore.</p>
+<p><a href="https://github.com/sympy/sympy/pull/7464">This pull request</a> brought up something
+that I had witnessed, but never really thought about as a potential source of my
+issues. To summarize, Sympy's current (hopefully soon to be old) caching system
+never clears. Ever. For interactive work, or short running sessions this is fine.
+However, for the huge expressions generated in <code>mechanics</code>, this can be a source
+of memory issues, as the cache grows to hold all sub-expressions that were cached.</p>
+<p>It turns out that <code>simplify</code> is one of those functions that is cached. This may
+explain why when I tried to use <code>msubs</code> with <code>smart_subs=True</code> (which crawls the
+expression tree and does selective simplification) this resulted in <em>all</em> of my
+RAM being used up (4 GB!!!). I haven't had a chance to pull in this PR into my
+repo and test it out, but it sounds like it should fix the problem. Instead of
+growing infinitely, the cache uses a <a href="http://jcrist.github.io/feeds/ //en.wikipedia.org/wiki/Cache_algorithms#Least_Recently_Used">least recently used (LRU)</a> algorithm to
+determine what stays and what is removed. The cache size can be set by the user,
+so those that prefer speed over memory use can still cache everything. Per his
+benchmarks it seems to be only 10% slower, which shouldn't be much of a problem.
+Overall, I'm really psyched to start using this. Perhaps with this the <code>smart_subs</code>
+I wrote up will work, even if it takes a while. If not, I'm kind-of out of ideas.</p>
+<p>I spent some time this week trying out a few other ways of solving this problem.
+So far none of them have worked.</p>
+<h3>1. Using <code>cse</code>, and applying simplify selectively to the sub-expressions.</h3>
+<p>The basic idea here was to apply <code>cse</code> on the expression, and then evaluate
+each sub-expression. If it evaluated to <code>nan</code>, simplify it, then evaluate it
+again.</p>
+<p>This seemed like a good idea at first, but upon closer examination it
+falls apart. The issue is that the expressions that could cancel/simplify out
+are often broken into <em>separate sub-expressions</em>. This means that they are
+evaluated numerically separately, and only once combined will they result in
+a <code>nan</code>, at which point they can't be simplified anyway.</p>
+<h3>2. Taking the limit of the bad sub-expressions.</h3>
+<p>This was another idea that seemed good until I tried it. Similar to the <code>smart_subs</code>
+I talked about <a href="http://jcrist.github.io/gsoc-week-7.html">last week</a>, except this
+time it's taking the limit of the bad sub-expressions as they approach the operating
+point. The thought being that it may be computationaly cheaper to find the limit
+than to apply <code>simplify</code> and then evaluate.</p>
+<p>There were several problems iwth this design. The first being that <code>Sympy</code> has no
+functionality for finding multivariable limits. These can't be calculated
+iteratively either (by that I mean find the limit for x, then the limit for y, then
+the limit for z, etc...), as the part that could "simplify out" could already be
+gone.</p>
+<p>The second, and more serious issue, is that there was no way to tell if the limit
+at that point was equal to the value the expression should actually evaluate too, or if it
+is just the value of the <em>limit at that point</em>. For example:</p>
+<div class="codehilite" style="background: #272822;"><pre style="line-height: 125%;"><span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">expr</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">(a</span> <span style="color: #f92672;">-</span> <span style="color: #ae81ff;">1</span><span style="color: #f8f8f2;">)</span><span style="color: #f92672;">/</span><span style="color: #f8f8f2;">(a</span><span style="color: #f92672;">**</span><span style="color: #ae81ff;">2</span> <span style="color: #f92672;">-</span> <span style="color: #ae81ff;">1</span><span style="color: #f8f8f2;">)</span>
+<span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">op_point</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">{a:</span> <span style="color: #ae81ff;">1</span><span style="color: #f8f8f2;">}</span>
+<span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">expr</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">subs(op_point)</span>
+<span style="color: #f8f8f2;">nan</span>
+<span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">limit(expr,</span> <span style="color: #f8f8f2;">a,</span> <span style="color: #ae81ff;">1</span><span style="color: #f8f8f2;">,</span> <span style="color: #e6db74;">'+'</span><span style="color: #f8f8f2;">)</span>
+<span style="color: #ae81ff;">1</span><span style="color: #f92672;">/</span><span style="color: #ae81ff;">2</span>
+<span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">limit(expr,</span> <span style="color: #f8f8f2;">a,</span> <span style="color: #ae81ff;">1</span><span style="color: #f8f8f2;">,</span> <span style="color: #e6db74;">'-'</span><span style="color: #f8f8f2;">)</span>
+<span style="color: #ae81ff;">1</span><span style="color: #f92672;">/</span><span style="color: #ae81ff;">2</span>
+</pre></div>
+
+
+<p>Using the method described above, it would seem that the expression should just
+evaluate to <code>1/2</code>. However, if you actually plot this expression, you'll find
+that there is a discontinuity at <code>a = 1</code>. From either side it approaches 1/2,
+but at 1 it is actually <code>nan</code>.</p>
+<h3>3. Numerical perturbation about the setpoint to find the limit of the bad sub-expressions.</h3>
+<p>The idea here was to calculate the limit of the sub-expressions through numerical
+evaluation and perturbation. This fails for all the reasons described above, as
+well as the fact that Sympy is a symbolic computation library, and we should be
+able to do this symbolically.</p>
+<hr/>
+<p>Unfortunately those were all the ideas I had to solve this problem. If the algorithm described
+last week doesn't end up working using the new cacheing system, I'm kind of stumped.
+Back on <a href="http://www.seas.upenn.edu/~terfan/strugglebus/pennapps2013f/">the struggle bus</a>...</p>
+<hr/>
+<h2>Meanwhile...</h2>
+<p>As another <em>potential</em> solution, I've set about refactoring the <code>KanesMethod</code> class
+in the hope that I'll find some way of generating expressions that are smaller
+than they currently are. The first step was rewriting to make it readable, more
+modular, and remove the dead code that had built up over the years. This is done.
+In it's current state it passes all tests, and runs them in half the time that it
+had before!!! Still no major reduction in expression size, but I'll hopefully find
+some magical place in the code that could be made more efficient. We'll see.</p>
+<p>I'm also working on the documentation for the linearization stuff that's already
+done, as well as waiting on someone to finally review my
+<a href="https://github.com/sympy/sympy/pull/7681">PR for LagrangesMethod support</a>. I hope to
+get that merged soon so that I can get started on the code generation portion of this
+project.</p></div>
+    </summary>
+    <updated>2014-07-11T22:00:00Z</updated>
+    <category term="GSoC"/>
+    <category term="sympy"/>
+    <category term="pydy"/>
+    <category term="dynamics"/>
+    <author>
+      <name>Jim Crist</name>
+    </author>
+    <source>
+      <id>http://jcrist.github.io/</id>
+      <link href="http://jcrist.github.io/" rel="alternate" type="text/html"/>
+      <link href="http://jcrist.github.io/feeds/gsoc.atom.xml" rel="self" type="application/atom+xml"/>
+      <title>Marginally Stable</title>
+      <updated>2014-07-11T22:00:00Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en">
     <id>http://thilinaatsympy.wordpress.com/?p=10</id>
@@ -52,7 +161,7 @@
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-07-11T16:00:45Z</updated>
+      <updated>2014-07-11T22:20:46Z</updated>
     </source>
   </entry>
 
@@ -78,7 +187,7 @@
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-11T16:01:07Z</updated>
+      <updated>2014-07-11T22:21:09Z</updated>
     </source>
   </entry>
 
@@ -1294,7 +1403,7 @@ In [25]:
       <link href="http://jcrist.github.io/" rel="alternate" type="text/html"/>
       <link href="http://jcrist.github.io/feeds/gsoc.atom.xml" rel="self" type="application/atom+xml"/>
       <title>Marginally Stable</title>
-      <updated>2014-07-06T22:25:00Z</updated>
+      <updated>2014-07-11T22:00:00Z</updated>
     </source>
   </entry>
 
@@ -1379,7 +1488,7 @@ implementing new stuff!).</p>
       <link href="http://tarzzz.github.io/rss.gsoc.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts categorized under GSoC</subtitle>
       <title>Tarun Gaba's blog - GSoC</title>
-      <updated>2014-07-11T16:00:44Z</updated>
+      <updated>2014-07-11T22:20:45Z</updated>
     </source>
   </entry>
 
@@ -1406,7 +1515,7 @@ implementing new stuff!).</p>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-11T16:01:07Z</updated>
+      <updated>2014-07-11T22:21:09Z</updated>
     </source>
   </entry>
 
@@ -1439,7 +1548,7 @@ when solved for \( x \).</p></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-07-11T16:01:06Z</updated>
+      <updated>2014-07-11T22:21:07Z</updated>
     </source>
   </entry>
 
@@ -1556,7 +1665,7 @@ when solved for \( x \).</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-07-11T16:01:05Z</updated>
+      <updated>2014-07-11T22:21:07Z</updated>
     </source>
   </entry>
 
@@ -1589,7 +1698,7 @@ when solved for \( x \).</p></div>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-07-11T16:00:46Z</updated>
+      <updated>2014-07-11T22:20:46Z</updated>
     </source>
   </entry>
 
@@ -1774,7 +1883,7 @@ finally be submitted.</p>&lt;script type="text/javascript"&gt;
       <link href="http://jcrist.github.io/" rel="alternate" type="text/html"/>
       <link href="http://jcrist.github.io/feeds/gsoc.atom.xml" rel="self" type="application/atom+xml"/>
       <title>Marginally Stable</title>
-      <updated>2014-07-06T22:25:00Z</updated>
+      <updated>2014-07-11T22:00:00Z</updated>
     </source>
   </entry>
 
@@ -1815,7 +1924,7 @@ finally be submitted.</p>&lt;script type="text/javascript"&gt;
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-07-11T16:00:45Z</updated>
+      <updated>2014-07-11T22:20:46Z</updated>
     </source>
   </entry>
 
@@ -1883,7 +1992,7 @@ conceder the limiting value of the equation.</p>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-07-11T16:01:06Z</updated>
+      <updated>2014-07-11T22:21:07Z</updated>
     </source>
   </entry>
 
@@ -1946,7 +2055,7 @@ False</pre>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-11T16:01:07Z</updated>
+      <updated>2014-07-11T22:21:09Z</updated>
     </source>
   </entry>
 
@@ -2013,7 +2122,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-07-11T16:00:54Z</updated>
+      <updated>2014-07-11T22:20:54Z</updated>
     </source>
   </entry>
 
@@ -2214,7 +2323,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-07-11T16:01:05Z</updated>
+      <updated>2014-07-11T22:21:07Z</updated>
     </source>
   </entry>
 
@@ -2247,7 +2356,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-07-11T16:00:46Z</updated>
+      <updated>2014-07-11T22:20:46Z</updated>
     </source>
   </entry>
 
@@ -2299,7 +2408,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-07-11T16:00:45Z</updated>
+      <updated>2014-07-11T22:20:46Z</updated>
     </source>
   </entry>
 
@@ -3145,7 +3254,7 @@ In [15]:
       <link href="http://jcrist.github.io/" rel="alternate" type="text/html"/>
       <link href="http://jcrist.github.io/feeds/gsoc.atom.xml" rel="self" type="application/atom+xml"/>
       <title>Marginally Stable</title>
-      <updated>2014-07-06T22:25:00Z</updated>
+      <updated>2014-07-11T22:00:00Z</updated>
     </source>
   </entry>
 
@@ -3297,7 +3406,7 @@ on infinitely indexed sets.</p></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-07-11T16:01:06Z</updated>
+      <updated>2014-07-11T22:21:07Z</updated>
     </source>
   </entry>
 
@@ -3400,7 +3509,7 @@ Not(ForAll((X,T), Implies(And(Person(X), Time(T)), CanFool(X, T))))</pre>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-11T16:01:07Z</updated>
+      <updated>2014-07-11T22:21:09Z</updated>
     </source>
   </entry>
 
@@ -3629,7 +3738,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-07-11T16:00:54Z</updated>
+      <updated>2014-07-11T22:20:54Z</updated>
     </source>
   </entry>
 
@@ -3660,7 +3769,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-07-11T16:01:05Z</updated>
+      <updated>2014-07-11T22:21:07Z</updated>
     </source>
   </entry>
 
@@ -3704,7 +3813,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-07-11T16:00:45Z</updated>
+      <updated>2014-07-11T22:20:46Z</updated>
     </source>
   </entry>
 
@@ -3747,7 +3856,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-07-11T16:00:46Z</updated>
+      <updated>2014-07-11T22:20:46Z</updated>
     </source>
   </entry>
 
@@ -3981,7 +4090,7 @@ more tests, and finalize the interface. I plan on working on this next week.</p>
       <link href="http://jcrist.github.io/" rel="alternate" type="text/html"/>
       <link href="http://jcrist.github.io/feeds/gsoc.atom.xml" rel="self" type="application/atom+xml"/>
       <title>Marginally Stable</title>
-      <updated>2014-07-06T22:25:00Z</updated>
+      <updated>2014-07-11T22:00:00Z</updated>
     </source>
   </entry>
 
@@ -4027,7 +4136,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-07-11T16:00:54Z</updated>
+      <updated>2014-07-11T22:20:54Z</updated>
     </source>
   </entry>
 
@@ -4196,7 +4305,7 @@ extent.</p></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-07-11T16:01:06Z</updated>
+      <updated>2014-07-11T22:21:07Z</updated>
     </source>
   </entry>
 
@@ -4223,7 +4332,7 @@ extent.</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-07-11T16:01:05Z</updated>
+      <updated>2014-07-11T22:21:07Z</updated>
     </source>
   </entry>
 
@@ -4287,7 +4396,7 @@ Xor creates one of the most complex NNF formula after simplification. Let look a
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-11T16:01:07Z</updated>
+      <updated>2014-07-11T22:21:09Z</updated>
     </source>
   </entry>
 
@@ -4496,7 +4605,7 @@ In [3]:
       <link href="http://jcrist.github.io/" rel="alternate" type="text/html"/>
       <link href="http://jcrist.github.io/feeds/gsoc.atom.xml" rel="self" type="application/atom+xml"/>
       <title>Marginally Stable</title>
-      <updated>2014-07-06T22:25:00Z</updated>
+      <updated>2014-07-11T22:00:00Z</updated>
     </source>
   </entry>
 
@@ -4529,7 +4638,7 @@ In [3]:
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-07-11T16:00:46Z</updated>
+      <updated>2014-07-11T22:20:46Z</updated>
     </source>
   </entry>
 
@@ -4592,7 +4701,7 @@ rationals, not Integers.</p><br/>  <a href="http://feeds.wordpress.com/1.0/gocom
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-07-11T16:00:45Z</updated>
+      <updated>2014-07-11T22:20:46Z</updated>
     </source>
   </entry>
 
@@ -4707,7 +4816,7 @@ week will be.</p>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-07-11T16:01:06Z</updated>
+      <updated>2014-07-11T22:21:07Z</updated>
     </source>
   </entry>
 
@@ -4911,7 +5020,7 @@ Similar to Xor above, even ITE had no independant class and all expressions were
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-11T16:01:07Z</updated>
+      <updated>2014-07-11T22:21:09Z</updated>
     </source>
   </entry>
 
@@ -4961,7 +5070,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-07-11T16:00:54Z</updated>
+      <updated>2014-07-11T22:20:54Z</updated>
     </source>
   </entry>
 
@@ -4987,7 +5096,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-07-11T16:01:05Z</updated>
+      <updated>2014-07-11T22:21:07Z</updated>
     </source>
   </entry>
 
@@ -5017,7 +5126,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-11T16:01:07Z</updated>
+      <updated>2014-07-11T22:21:09Z</updated>
     </source>
   </entry>
 
@@ -5061,7 +5170,7 @@ True<br/>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-07-11T16:00:46Z</updated>
+      <updated>2014-07-11T22:20:46Z</updated>
     </source>
   </entry>
 
@@ -5193,39 +5302,7 @@ so that others can review it before I submit it to Sympy proper.</p>&lt;script t
       <link href="http://jcrist.github.io/" rel="alternate" type="text/html"/>
       <link href="http://jcrist.github.io/feeds/gsoc.atom.xml" rel="self" type="application/atom+xml"/>
       <title>Marginally Stable</title>
-      <updated>2014-07-06T22:25:00Z</updated>
-    </source>
-  </entry>
-
-  <entry>
-    <id>tag:blogger.com,1999:blog-54146973659574488.post-8828642408732656832</id>
-    <link href="http://geekpy.blogspot.com/feeds/8828642408732656832/comments/default" rel="replies" type="application/atom+xml"/>
-    <link href="http://geekpy.blogspot.com/2014/05/gsoc-week-1.html#comment-form" rel="replies" type="text/html"/>
-    <link href="http://www.blogger.com/feeds/54146973659574488/posts/default/8828642408732656832" rel="edit" type="application/atom+xml"/>
-    <link href="http://www.blogger.com/feeds/54146973659574488/posts/default/8828642408732656832" rel="self" type="application/atom+xml"/>
-    <link href="http://geekpy.blogspot.com/2014/05/gsoc-week-1.html" rel="alternate" type="text/html"/>
-    <title>Gsoc Week 1</title>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><div dir="ltr" style="text-align: left;">The first week of Gsoc has come to an end. Most of the time was spent on trying to decide the class structure for the new Point3D class.<br/><br/>The initial class structure which I proposed was to let  the Point class inherit from the Point3D class as they have a lot of methods in common and also to allow interaction between these two classes.<br/><br/>For example:<br/>&gt;&gt;&gt;Point(1,2).distance(Point3D(1,2,3))<br/>3<br/>But after having a long discussion with Stefan and the mailing list we decided to keep both the classes seperate and raise an error for interactions like the one above.<br/><br/>So what if the user wants the above interaction? For that we decided to have a method in the Plane class( to be implemented) which converts a 2D point to 3D allowing the user to choose any plane he wants, after that he could compute the distance in the above example.<br/><br/><a href="https://groups.google.com/forum/#!topic/sympy/hqHC-9cA9UM">Here</a> is the link to the discussion on the mailing list.<br/>And I have implemented the Point3D class and the link to the PR is <a href="https://github.com/sympy/sympy/pull/7522">here.</a><br/>This following week I plan to  work on the Line class in 3D using the Point3D class as the base.<br/><br/>Till then Cheers! <br/><br/></div></div>
-    </content>
-    <updated>2014-05-28T11:48:24Z</updated>
-    <published>2014-05-27T15:20:00Z</published>
-    <author>
-      <name>Akshay Narasimha</name>
-      <email>noreply@blogger.com</email>
-      <uri>https://plus.google.com/115599165660507030010</uri>
-    </author>
-    <source>
-      <id>tag:blogger.com,1999:blog-54146973659574488</id>
-      <author>
-        <name>Akshay Narasimha</name>
-        <email>noreply@blogger.com</email>
-      </author>
-      <link href="http://geekpy.blogspot.com/feeds/posts/default" rel="http://schemas.google.com/g/2005#feed" type="application/atom+xml"/>
-      <link href="http://www.blogger.com/feeds/54146973659574488/posts/default" rel="self" type="application/atom+xml"/>
-      <link href="http://geekpy.blogspot.com/" rel="alternate" type="text/html"/>
-      <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
-      <title>Akshay Narasimha</title>
-      <updated>2014-07-08T08:31:55Z</updated>
+      <updated>2014-07-11T22:00:00Z</updated>
     </source>
   </entry>
 </feed>

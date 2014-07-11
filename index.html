@@ -34,6 +34,124 @@
 
 
 
+<h3><a href="http://jcrist.github.io/" title="Marginally Stable">Jim Crist</a></h3>
+
+
+<div class="entrygroup" id="tag:,2014-07-11:gsoc-week-8.html">
+<h4><a href="http://jcrist.github.io/gsoc-week-8.html">GSoC Week 8: Try, try, try again...</a></h4>
+<div class="entry">
+<div class="content">
+<p>I'm still struggling to solve the <code>nan</code> and <code>oo</code> issue I've discussed in my
+post <a href="http://jcrist.github.io/gsoc-week-6.html">a couple weeks ago</a>.
+<a href="http://jcrist.github.io/gsoc-week-7.html">Last week</a> I showed off a custom
+written subs function for use inside <code>sympy.physics.mechanics</code> that helped with
+speed considerably, and <em>attempted</em> to solve the <code>nan</code> problem. This worked
+great for small-medium expressions, but failed on large ones. Or did it? I'm not
+sure anymore.</p>
+<p><a href="https://github.com/sympy/sympy/pull/7464">This pull request</a> brought up something
+that I had witnessed, but never really thought about as a potential source of my
+issues. To summarize, Sympy's current (hopefully soon to be old) caching system
+never clears. Ever. For interactive work, or short running sessions this is fine.
+However, for the huge expressions generated in <code>mechanics</code>, this can be a source
+of memory issues, as the cache grows to hold all sub-expressions that were cached.</p>
+<p>It turns out that <code>simplify</code> is one of those functions that is cached. This may
+explain why when I tried to use <code>msubs</code> with <code>smart_subs=True</code> (which crawls the
+expression tree and does selective simplification) this resulted in <em>all</em> of my
+RAM being used up (4 GB!!!). I haven't had a chance to pull in this PR into my
+repo and test it out, but it sounds like it should fix the problem. Instead of
+growing infinitely, the cache uses a <a href="http://jcrist.github.io/feeds/ //en.wikipedia.org/wiki/Cache_algorithms#Least_Recently_Used">least recently used (LRU)</a> algorithm to
+determine what stays and what is removed. The cache size can be set by the user,
+so those that prefer speed over memory use can still cache everything. Per his
+benchmarks it seems to be only 10% slower, which shouldn't be much of a problem.
+Overall, I'm really psyched to start using this. Perhaps with this the <code>smart_subs</code>
+I wrote up will work, even if it takes a while. If not, I'm kind-of out of ideas.</p>
+<p>I spent some time this week trying out a few other ways of solving this problem.
+So far none of them have worked.</p>
+<h3>1. Using <code>cse</code>, and applying simplify selectively to the sub-expressions.</h3>
+<p>The basic idea here was to apply <code>cse</code> on the expression, and then evaluate
+each sub-expression. If it evaluated to <code>nan</code>, simplify it, then evaluate it
+again.</p>
+<p>This seemed like a good idea at first, but upon closer examination it
+falls apart. The issue is that the expressions that could cancel/simplify out
+are often broken into <em>separate sub-expressions</em>. This means that they are
+evaluated numerically separately, and only once combined will they result in
+a <code>nan</code>, at which point they can't be simplified anyway.</p>
+<h3>2. Taking the limit of the bad sub-expressions.</h3>
+<p>This was another idea that seemed good until I tried it. Similar to the <code>smart_subs</code>
+I talked about <a href="http://jcrist.github.io/gsoc-week-7.html">last week</a>, except this
+time it's taking the limit of the bad sub-expressions as they approach the operating
+point. The thought being that it may be computationaly cheaper to find the limit
+than to apply <code>simplify</code> and then evaluate.</p>
+<p>There were several problems iwth this design. The first being that <code>Sympy</code> has no
+functionality for finding multivariable limits. These can't be calculated
+iteratively either (by that I mean find the limit for x, then the limit for y, then
+the limit for z, etc...), as the part that could "simplify out" could already be
+gone.</p>
+<p>The second, and more serious issue, is that there was no way to tell if the limit
+at that point was equal to the value the expression should actually evaluate too, or if it
+is just the value of the <em>limit at that point</em>. For example:</p>
+<div style="background: #272822;" class="codehilite"><pre style="line-height: 125%;"><span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">expr</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">(a</span> <span style="color: #f92672;">-</span> <span style="color: #ae81ff;">1</span><span style="color: #f8f8f2;">)</span><span style="color: #f92672;">/</span><span style="color: #f8f8f2;">(a</span><span style="color: #f92672;">**</span><span style="color: #ae81ff;">2</span> <span style="color: #f92672;">-</span> <span style="color: #ae81ff;">1</span><span style="color: #f8f8f2;">)</span>
+<span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">op_point</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">{a:</span> <span style="color: #ae81ff;">1</span><span style="color: #f8f8f2;">}</span>
+<span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">expr</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">subs(op_point)</span>
+<span style="color: #f8f8f2;">nan</span>
+<span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">limit(expr,</span> <span style="color: #f8f8f2;">a,</span> <span style="color: #ae81ff;">1</span><span style="color: #f8f8f2;">,</span> <span style="color: #e6db74;">'+'</span><span style="color: #f8f8f2;">)</span>
+<span style="color: #ae81ff;">1</span><span style="color: #f92672;">/</span><span style="color: #ae81ff;">2</span>
+<span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">limit(expr,</span> <span style="color: #f8f8f2;">a,</span> <span style="color: #ae81ff;">1</span><span style="color: #f8f8f2;">,</span> <span style="color: #e6db74;">'-'</span><span style="color: #f8f8f2;">)</span>
+<span style="color: #ae81ff;">1</span><span style="color: #f92672;">/</span><span style="color: #ae81ff;">2</span>
+</pre></div>
+
+
+<p>Using the method described above, it would seem that the expression should just
+evaluate to <code>1/2</code>. However, if you actually plot this expression, you'll find
+that there is a discontinuity at <code>a = 1</code>. From either side it approaches 1/2,
+but at 1 it is actually <code>nan</code>.</p>
+<h3>3. Numerical perturbation about the setpoint to find the limit of the bad sub-expressions.</h3>
+<p>The idea here was to calculate the limit of the sub-expressions through numerical
+evaluation and perturbation. This fails for all the reasons described above, as
+well as the fact that Sympy is a symbolic computation library, and we should be
+able to do this symbolically.</p>
+<hr />
+<p>Unfortunately those were all the ideas I had to solve this problem. If the algorithm described
+last week doesn't end up working using the new cacheing system, I'm kind of stumped.
+Back on <a href="http://www.seas.upenn.edu/~terfan/strugglebus/pennapps2013f/">the struggle bus</a>...</p>
+<hr />
+<h2>Meanwhile...</h2>
+<p>As another <em>potential</em> solution, I've set about refactoring the <code>KanesMethod</code> class
+in the hope that I'll find some way of generating expressions that are smaller
+than they currently are. The first step was rewriting to make it readable, more
+modular, and remove the dead code that had built up over the years. This is done.
+In it's current state it passes all tests, and runs them in half the time that it
+had before!!! Still no major reduction in expression size, but I'll hopefully find
+some magical place in the code that could be made more efficient. We'll see.</p>
+<p>I'm also working on the documentation for the linearization stuff that's already
+done, as well as waiting on someone to finally review my
+<a href="https://github.com/sympy/sympy/pull/7681">PR for LagrangesMethod support</a>. I hope to
+get that merged soon so that I can get started on the code generation portion of this
+project.</p></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://jcrist.github.io/gsoc-week-8.html">by Jim Crist at July 11, 2014 10:00 PM</a>
+</p>
+</div>
+</div>
+
+
+
+</div>
+<div class="channelgroup">
+
+
+
+
+
+
+
 <h3><a href="http://thilinaatsympy.wordpress.com" title="Thilina's SymPy Blog">Thilina Rathnayake</a></h3>
 
 
@@ -5518,42 +5636,6 @@ so that others can review it before I submit it to Sympy proper.</p>&lt;script t
 </div>
 
 </div>
-<div class="daygroup">
-<h2>May 28, 2014</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://geekpy.blogspot.com/" title="Akshay Narasimha">Akshay Narasimha</a></h3>
-
-
-<div class="entrygroup" id="tag:blogger.com,1999:blog-54146973659574488.post-8828642408732656832">
-<h4><a href="http://geekpy.blogspot.com/2014/05/gsoc-week-1.html">Gsoc Week 1</a></h4>
-<div class="entry">
-<div class="content">
-<div style="text-align: left;" dir="ltr">The first week of Gsoc has come to an end. Most of the time was spent on trying to decide the class structure for the new Point3D class.<br /><br />The initial class structure which I proposed was to let  the Point class inherit from the Point3D class as they have a lot of methods in common and also to allow interaction between these two classes.<br /><br />For example:<br />&gt;&gt;&gt;Point(1,2).distance(Point3D(1,2,3))<br />3<br />But after having a long discussion with Stefan and the mailing list we decided to keep both the classes seperate and raise an error for interactions like the one above.<br /><br />So what if the user wants the above interaction? For that we decided to have a method in the Plane class( to be implemented) which converts a 2D point to 3D allowing the user to choose any plane he wants, after that he could compute the distance in the above example.<br /><br /><a href="https://groups.google.com/forum/#!topic/sympy/hqHC-9cA9UM">Here</a> is the link to the discussion on the mailing list.<br />And I have implemented the Point3D class and the link to the PR is <a href="https://github.com/sympy/sympy/pull/7522">here.</a><br />This following week I plan to  work on the Line class in 3D using the Point3D class as the base.<br /><br />Till then Cheers! <br /><br /></div></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://geekpy.blogspot.com/2014/05/gsoc-week-1.html">by Akshay Narasimha (noreply@blogger.com) at May 28, 2014 11:48 AM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -5703,7 +5785,7 @@ so that others can review it before I submit it to Sympy proper.</p>&lt;script t
 <a href="http://sushant-hiray.in/feed.gsoc.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sushant-hiray.in" class="message" title="no activity in 7 days">Sushant Hiray</a>
 </li>
 <li>
-<a href="http://tarzzz.github.io/rss.gsoc.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://tarzzz.github.io/gsoc14" title="Tarun Gaba's blog - GSoC">Tarun Gaba</a>
+<a href="http://tarzzz.github.io/rss.gsoc.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://tarzzz.github.io/gsoc14" class="message" title="no activity in 7 days">Tarun Gaba</a>
 </li>
 <li>
 <a href="http://thilinaatsympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://thilinaatsympy.wordpress.com" title="Thilina's SymPy Blog">Thilina Rathnayake</a>
@@ -5727,7 +5809,7 @@ so that others can review it before I submit it to Sympy proper.</p>&lt;script t
 
 <p>
 <strong>Last updated:</strong><br>
-July 11, 2014 04:01 PM<br>
+July 11, 2014 10:21 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>

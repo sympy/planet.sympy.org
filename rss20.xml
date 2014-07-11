@@ -8,6 +8,99 @@
 	<description>Planet SymPy - http://planet.sympy.org/</description>
 
 <item>
+	<title>Jim Crist: GSoC Week 8: Try, try, try again...</title>
+	<guid isPermaLink="false">tag:,2014-07-11:gsoc-week-8.html</guid>
+	<link>http://jcrist.github.io/gsoc-week-8.html</link>
+	<description>&lt;p&gt;I'm still struggling to solve the &lt;code&gt;nan&lt;/code&gt; and &lt;code&gt;oo&lt;/code&gt; issue I've discussed in my
+post &lt;a href=&quot;http://jcrist.github.io/gsoc-week-6.html&quot;&gt;a couple weeks ago&lt;/a&gt;.
+&lt;a href=&quot;http://jcrist.github.io/gsoc-week-7.html&quot;&gt;Last week&lt;/a&gt; I showed off a custom
+written subs function for use inside &lt;code&gt;sympy.physics.mechanics&lt;/code&gt; that helped with
+speed considerably, and &lt;em&gt;attempted&lt;/em&gt; to solve the &lt;code&gt;nan&lt;/code&gt; problem. This worked
+great for small-medium expressions, but failed on large ones. Or did it? I'm not
+sure anymore.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/sympy/sympy/pull/7464&quot;&gt;This pull request&lt;/a&gt; brought up something
+that I had witnessed, but never really thought about as a potential source of my
+issues. To summarize, Sympy's current (hopefully soon to be old) caching system
+never clears. Ever. For interactive work, or short running sessions this is fine.
+However, for the huge expressions generated in &lt;code&gt;mechanics&lt;/code&gt;, this can be a source
+of memory issues, as the cache grows to hold all sub-expressions that were cached.&lt;/p&gt;
+&lt;p&gt;It turns out that &lt;code&gt;simplify&lt;/code&gt; is one of those functions that is cached. This may
+explain why when I tried to use &lt;code&gt;msubs&lt;/code&gt; with &lt;code&gt;smart_subs=True&lt;/code&gt; (which crawls the
+expression tree and does selective simplification) this resulted in &lt;em&gt;all&lt;/em&gt; of my
+RAM being used up (4 GB!!!). I haven't had a chance to pull in this PR into my
+repo and test it out, but it sounds like it should fix the problem. Instead of
+growing infinitely, the cache uses a &lt;a href=&quot;http://jcrist.github.io/feeds/ //en.wikipedia.org/wiki/Cache_algorithms#Least_Recently_Used&quot;&gt;least recently used (LRU)&lt;/a&gt; algorithm to
+determine what stays and what is removed. The cache size can be set by the user,
+so those that prefer speed over memory use can still cache everything. Per his
+benchmarks it seems to be only 10% slower, which shouldn't be much of a problem.
+Overall, I'm really psyched to start using this. Perhaps with this the &lt;code&gt;smart_subs&lt;/code&gt;
+I wrote up will work, even if it takes a while. If not, I'm kind-of out of ideas.&lt;/p&gt;
+&lt;p&gt;I spent some time this week trying out a few other ways of solving this problem.
+So far none of them have worked.&lt;/p&gt;
+&lt;h3&gt;1. Using &lt;code&gt;cse&lt;/code&gt;, and applying simplify selectively to the sub-expressions.&lt;/h3&gt;
+&lt;p&gt;The basic idea here was to apply &lt;code&gt;cse&lt;/code&gt; on the expression, and then evaluate
+each sub-expression. If it evaluated to &lt;code&gt;nan&lt;/code&gt;, simplify it, then evaluate it
+again.&lt;/p&gt;
+&lt;p&gt;This seemed like a good idea at first, but upon closer examination it
+falls apart. The issue is that the expressions that could cancel/simplify out
+are often broken into &lt;em&gt;separate sub-expressions&lt;/em&gt;. This means that they are
+evaluated numerically separately, and only once combined will they result in
+a &lt;code&gt;nan&lt;/code&gt;, at which point they can't be simplified anyway.&lt;/p&gt;
+&lt;h3&gt;2. Taking the limit of the bad sub-expressions.&lt;/h3&gt;
+&lt;p&gt;This was another idea that seemed good until I tried it. Similar to the &lt;code&gt;smart_subs&lt;/code&gt;
+I talked about &lt;a href=&quot;http://jcrist.github.io/gsoc-week-7.html&quot;&gt;last week&lt;/a&gt;, except this
+time it's taking the limit of the bad sub-expressions as they approach the operating
+point. The thought being that it may be computationaly cheaper to find the limit
+than to apply &lt;code&gt;simplify&lt;/code&gt; and then evaluate.&lt;/p&gt;
+&lt;p&gt;There were several problems iwth this design. The first being that &lt;code&gt;Sympy&lt;/code&gt; has no
+functionality for finding multivariable limits. These can't be calculated
+iteratively either (by that I mean find the limit for x, then the limit for y, then
+the limit for z, etc...), as the part that could &quot;simplify out&quot; could already be
+gone.&lt;/p&gt;
+&lt;p&gt;The second, and more serious issue, is that there was no way to tell if the limit
+at that point was equal to the value the expression should actually evaluate too, or if it
+is just the value of the &lt;em&gt;limit at that point&lt;/em&gt;. For example:&lt;/p&gt;
+&lt;div style=&quot;background: #272822;&quot; class=&quot;codehilite&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;expr&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;(a&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;-&lt;/span&gt; &lt;span style=&quot;color: #ae81ff;&quot;&gt;1&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;/&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;(a&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;**&lt;/span&gt;&lt;span style=&quot;color: #ae81ff;&quot;&gt;2&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;-&lt;/span&gt; &lt;span style=&quot;color: #ae81ff;&quot;&gt;1&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;)&lt;/span&gt;
+&lt;span style=&quot;color: #f92672;&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;op_point&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;{a:&lt;/span&gt; &lt;span style=&quot;color: #ae81ff;&quot;&gt;1&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;}&lt;/span&gt;
+&lt;span style=&quot;color: #f92672;&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;expr&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;subs(op_point)&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;nan&lt;/span&gt;
+&lt;span style=&quot;color: #f92672;&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;limit(expr,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;a,&lt;/span&gt; &lt;span style=&quot;color: #ae81ff;&quot;&gt;1&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;,&lt;/span&gt; &lt;span style=&quot;color: #e6db74;&quot;&gt;'+'&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;)&lt;/span&gt;
+&lt;span style=&quot;color: #ae81ff;&quot;&gt;1&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;/&lt;/span&gt;&lt;span style=&quot;color: #ae81ff;&quot;&gt;2&lt;/span&gt;
+&lt;span style=&quot;color: #f92672;&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;limit(expr,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;a,&lt;/span&gt; &lt;span style=&quot;color: #ae81ff;&quot;&gt;1&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;,&lt;/span&gt; &lt;span style=&quot;color: #e6db74;&quot;&gt;'-'&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;)&lt;/span&gt;
+&lt;span style=&quot;color: #ae81ff;&quot;&gt;1&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;/&lt;/span&gt;&lt;span style=&quot;color: #ae81ff;&quot;&gt;2&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Using the method described above, it would seem that the expression should just
+evaluate to &lt;code&gt;1/2&lt;/code&gt;. However, if you actually plot this expression, you'll find
+that there is a discontinuity at &lt;code&gt;a = 1&lt;/code&gt;. From either side it approaches 1/2,
+but at 1 it is actually &lt;code&gt;nan&lt;/code&gt;.&lt;/p&gt;
+&lt;h3&gt;3. Numerical perturbation about the setpoint to find the limit of the bad sub-expressions.&lt;/h3&gt;
+&lt;p&gt;The idea here was to calculate the limit of the sub-expressions through numerical
+evaluation and perturbation. This fails for all the reasons described above, as
+well as the fact that Sympy is a symbolic computation library, and we should be
+able to do this symbolically.&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p&gt;Unfortunately those were all the ideas I had to solve this problem. If the algorithm described
+last week doesn't end up working using the new cacheing system, I'm kind of stumped.
+Back on &lt;a href=&quot;http://www.seas.upenn.edu/~terfan/strugglebus/pennapps2013f/&quot;&gt;the struggle bus&lt;/a&gt;...&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2&gt;Meanwhile...&lt;/h2&gt;
+&lt;p&gt;As another &lt;em&gt;potential&lt;/em&gt; solution, I've set about refactoring the &lt;code&gt;KanesMethod&lt;/code&gt; class
+in the hope that I'll find some way of generating expressions that are smaller
+than they currently are. The first step was rewriting to make it readable, more
+modular, and remove the dead code that had built up over the years. This is done.
+In it's current state it passes all tests, and runs them in half the time that it
+had before!!! Still no major reduction in expression size, but I'll hopefully find
+some magical place in the code that could be made more efficient. We'll see.&lt;/p&gt;
+&lt;p&gt;I'm also working on the documentation for the linearization stuff that's already
+done, as well as waiting on someone to finally review my
+&lt;a href=&quot;https://github.com/sympy/sympy/pull/7681&quot;&gt;PR for LagrangesMethod support&lt;/a&gt;. I hope to
+get that merged soon so that I can get started on the code generation portion of this
+project.&lt;/p&gt;</description>
+	<pubDate>Fri, 11 Jul 2014 22:00:00 +0000</pubDate>
+</item>
+<item>
 	<title>Thilina Rathnayake: [GSoC] Week 8: Solving Ax = b and Determinant</title>
 	<guid isPermaLink="false">http://thilinaatsympy.wordpress.com/?p=10</guid>
 	<link>http://thilinaatsympy.wordpress.com/2014/07/11/gsoc-week-8-solving-ax-b-and-determinant/</link>
@@ -3915,14 +4008,6 @@ so that others can review it before I submit it to Sympy proper.&lt;/p&gt;&amp;l
     }
 &amp;lt;/script&amp;gt;</description>
 	<pubDate>Fri, 30 May 2014 23:00:00 +0000</pubDate>
-</item>
-<item>
-	<title>Akshay Narasimha: Gsoc Week 1</title>
-	<guid isPermaLink="false">tag:blogger.com,1999:blog-54146973659574488.post-8828642408732656832</guid>
-	<link>http://geekpy.blogspot.com/2014/05/gsoc-week-1.html</link>
-	<description>&lt;div style=&quot;text-align: left;&quot; dir=&quot;ltr&quot;&gt;The first week of Gsoc has come to an end. Most of the time was spent on trying to decide the class structure for the new Point3D class.&lt;br /&gt;&lt;br /&gt;The initial class structure which I proposed was to let  the Point class inherit from the Point3D class as they have a lot of methods in common and also to allow interaction between these two classes.&lt;br /&gt;&lt;br /&gt;For example:&lt;br /&gt;&amp;gt;&amp;gt;&amp;gt;Point(1,2).distance(Point3D(1,2,3))&lt;br /&gt;3&lt;br /&gt;But after having a long discussion with Stefan and the mailing list we decided to keep both the classes seperate and raise an error for interactions like the one above.&lt;br /&gt;&lt;br /&gt;So what if the user wants the above interaction? For that we decided to have a method in the Plane class( to be implemented) which converts a 2D point to 3D allowing the user to choose any plane he wants, after that he could compute the distance in the above example.&lt;br /&gt;&lt;br /&gt;&lt;a href=&quot;https://groups.google.com/forum/#!topic/sympy/hqHC-9cA9UM&quot;&gt;Here&lt;/a&gt; is the link to the discussion on the mailing list.&lt;br /&gt;And I have implemented the Point3D class and the link to the PR is &lt;a href=&quot;https://github.com/sympy/sympy/pull/7522&quot;&gt;here.&lt;/a&gt;&lt;br /&gt;This following week I plan to  work on the Line class in 3D using the Point3D class as the base.&lt;br /&gt;&lt;br /&gt;Till then Cheers! &lt;br /&gt;&lt;br /&gt;&lt;/div&gt;</description>
-	<pubDate>Wed, 28 May 2014 11:48:24 +0000</pubDate>
-	<author>noreply@blogger.com (Akshay Narasimha)</author>
 </item>
 
 </channel>
