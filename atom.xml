@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2014-07-12T07:41:02Z</updated>
+  <updated>2014-07-12T14:21:04Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,149 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry xml:lang="en">
+    <id>https://hargup.github.io/posts/week-7.html</id>
+    <link href="https://hargup.github.io/posts/week-7.html" rel="alternate" type="text/html"/>
+    <title>week 7</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><h2>Week 7, 8</h2>
+<h3>Fu Simplification</h3>
+<p>In the early part of the week 7 was thinking and working on design decisions.
+I want the code to be very modular so that it could be easily extended by
+people other than me. This came up in a meeting with Matthew and I want the
+solvers to be like the Fu simplification explained by Matthew in this <a href="https://www.youtube.com/watch?v=QldxygVVj-s&amp;list=PLYx7XA2nY5GfuhCvStxgbynFNrxr3VFog&amp;index=20">Scipy
+Talk</a>.
+The idea was that we can see solving an equation as series of transformations.
+If we have a lot of small transformations such that the input type is same as
+output type, and some notion of what makes a "better" output we can search though
+the list of transformations running one on top of other. I also posted about
+it on the <a href="https://groups.google.com/forum/#!topic/sympy/42GdMJ9ssyM">mailing
+list</a> which brought
+out some flaws in the preliminary design. The idea is pretty crude in the
+current stage and I'll have to look deeper into it, but not now.</p>
+<p>I also discussed about the implementing a pattern dispached based solver
+suggested by <a href="https://groups.google.com/d/msg/sympy/moSEFHop0n4/e2hBKRQ9WP4J">F.B</a>
+on the mailing list. But we decided that it will be better if we finish the
+equation solver by the current technique first.</p>
+<h3>Intersection with S.Reals</h3>
+<p>I decribed in the last post that one way to solve trigonometric equation is
+rewriting them in terms of \( exp \). But that is \( exp \) in the complex domain and
+the solution of \(exp(x) = a \) is \( \left\{i \left(2 \pi
+n + \arg{\left (a \right )}\right) + \log{\left
+(\left\lvert{a}\right\rvert \right )}\; |\; n \in \mathbb{Z}\right\}
+\). Hence we have to filter out real solutions from the obtained solutions.
+The filering is equivalent to the intersection of the solutions with the \( \mathbb{R}
+\) set. Suppose \( g(x) \) and \( h(x) \) are real valued functions and we
+have to perform
+$$ \mathbb{R} \cap \left\{g{\left (n \right )} + i h{\left (n \right )}\; |\; n \in \mathbb{Z}\right\} $$
+then the answer will be simply
+$$ \left\{g{\left (n \right )}\; |\; n \in \left\{h{\left (n \right )} = 0\; |\; n \in \mathbb{Z}\right\}\right\} $$</p>
+<p>Separate the real and imaginary parts and equate the imaginary to zero
+but the problem was with the assumptions on the symbols. For example while
+separating real and imaginary parts of the equation.</p>
+<pre class="code literal-block"><span class="n">In</span><span class="p">[]</span><span class="o">:</span> <span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="n">I</span><span class="o">*</span><span class="n">n</span><span class="p">).</span><span class="n">as_imag_real</span><span class="p">()</span>
+<span class="n">Out</span><span class="p">[]</span><span class="o">:</span><span class="p">(</span><span class="n">re</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">-</span> <span class="n">im</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">re</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">+</span> <span class="n">im</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+</pre>
+
+
+<p>That is because <code>n</code> is by default complex, even in the <code>Lambda(..).expr</code>.
+I wrote some code to decide the
+assumption on the variable of imageset from the baseset. See <a href="https://github.com/sympy/sympy/pull/7694">PR
+7694</a>.
+There was another issue that needs to be resolved
+<code>S.Integers.intersect(S.Reals)</code> doesn't evaluate to <code>S.Reals</code>.</p>
+<h3>LambertW and Multivariate Solvers</h3>
+<p>The method to solve equation containing exp and log function is using the
+LambertW function. LambertW function is the inverse of \( x \exp(x) \).  The
+function is multivariate function both for the real and complex
+domains and Sympy has only one branch implemented. This also leads us to loss
+of solutions. Aaron gave an example
+<a href="https://github.com/sympy/sympy/pull/2723#issuecomment-33760912">here</a>. But I'm
+pretty unfamiliar with solving by LambertW and LambertW itself and it will take
+me some time to build an understanding of them.
+As an ad hoc solution I'm using the code in the <code>_tsolve</code> in the
+<code>solvers.solvers</code> module to do at least what the current solvers can do.</p>
+<p>When the importing of <code>_tsolve</code> method was done. I started working on the
+multivariate solvers. Here's how the current multivariate solvers work:</p>
+<p><strong>Solving single multivariate equation</strong></p>
+<ol>
+<li>
+<p>count the number of free symbols in f - no of symbols for
+equation. If the equation has exactly one symbol which is not asked for then
+use <code>solve_undetermined_coeffs</code>, the <code>solve_undetermined_coeffs</code> find the
+values of the coefficient in a univariate polynomial such that it always
+equates to zero.</p>
+</li>
+<li>
+<p>Then for each symbol <code>solve_linear</code> is tried which tries to find a solution
+of that symbol in terms of constants or other symbols, the docstring says</p>
+<pre class="code literal-block"><span class="n">No</span> <span class="n">simplification</span> <span class="n">is</span> <span class="n">done</span> <span class="n">to</span> <span class="n">f</span> <span class="n">other</span> <span class="n">than</span> <span class="n">and</span> <span class="n">mul</span><span class="o">=</span><span class="n">True</span> <span class="n">expansion</span><span class="p">,</span>
+<span class="n">so</span> <span class="n">the</span> <span class="n">solution</span> <span class="n">will</span> <span class="n">correspond</span> <span class="n">strictly</span> <span class="n">to</span> <span class="n">a</span> <span class="n">unique</span> <span class="n">solution</span><span class="p">.</span>
+</pre>
+
+
+</li>
+</ol>
+<p>So we don't have to worry about loosing a solution. For every symbol it is
+checked if doesn't depend on previously solved symbols, if it does that
+solution is discarded.</p>
+<ol>
+<li>For the symbols for which the above method failed, the <code>_solve</code> function is
+called for the equation for that variable and as above if the solution contains
+a variable already solved then that solution is discarded.</li>
+</ol>
+<p><strong>System of equations in multiple variables</strong></p>
+<ul>
+<li>
+<p>Try to convert the system of equations into a system of polynomial equation
+  in variables</p>
+</li>
+<li>
+<p>If all the equations are linear solve then using <code>solve_linear_system</code>, check
+  the result and return it. If asked for particular solution solve using
+  <code>minsolve_linear_system</code></p>
+</li>
+<li>
+<p>If the number of symbols is same as the size of the system solve the
+  polynomial system using <code>solve_poly_system</code>. In case the system is
+  over-determined All the free symbols intersection the variables asked for are
+  calculated. Then for every subset of such symbols of length equal to that of
+  the system, an attempt to solve the equations by <code>solve_poly_system</code> is made.
+  Here if any of the solution depends on previously solved system the solution
+  is discarded.</p>
+</li>
+<li>
+<p>In the case there are failed equations:</p>
+<ul>
+<li>For every know result:</li>
+<li>Substitute every thing into the failed equation and see if the equation turns to zero.
+  if it does accept the result otherwise put it in the bad_results group.</li>
+<li>Then try to solve try to solve the failed equation using <code>solve</code> for each symbol.</li>
+<li>If that solution depends on any other previously solved symbols
+  discard it.</li>
+<li>If it doesn't satisfy other equations, discard it.</li>
+<li>Check if the solution doesn't set any denominator to zero, if it does
+  discard that solution.</li>
+<li>If it satisfies the above conditions substitute this value in know
+  solutions and add it as a new result.</li>
+</ul>
+</li>
+</ul></div>
+    </summary>
+    <updated>2014-07-12T14:00:01Z</updated>
+    <category term="mathjax"/>
+    <category term="sympy"/>
+    <author>
+      <name>Harsh Gupta</name>
+    </author>
+    <source>
+      <id>https://hargup.github.io/</id>
+      <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
+      <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
+      <title>Harsh's blog</title>
+      <updated>2014-07-12T14:21:02Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en">
     <id>http://codesachin.wordpress.com/2014/07/12/gsoc-weeks-78-beginning-with-dyadics/</id>
@@ -43,7 +186,7 @@ The code for Dyadics is mostly done, the docs are on-going, and I am thinking of
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-07-12T07:40:42Z</updated>
+      <updated>2014-07-12T14:20:42Z</updated>
     </source>
   </entry>
 
@@ -197,7 +340,7 @@ project.</p></div>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-07-12T07:40:42Z</updated>
+      <updated>2014-07-12T14:20:41Z</updated>
     </source>
   </entry>
 
@@ -223,7 +366,7 @@ project.</p></div>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-12T07:41:02Z</updated>
+      <updated>2014-07-12T14:21:04Z</updated>
     </source>
   </entry>
 
@@ -1524,7 +1667,7 @@ implementing new stuff!).</p>
       <link href="http://tarzzz.github.io/rss.gsoc.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts categorized under GSoC</subtitle>
       <title>Tarun Gaba's blog - GSoC</title>
-      <updated>2014-07-12T07:40:41Z</updated>
+      <updated>2014-07-12T14:20:40Z</updated>
     </source>
   </entry>
 
@@ -1551,7 +1694,7 @@ implementing new stuff!).</p>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-12T07:41:02Z</updated>
+      <updated>2014-07-12T14:21:04Z</updated>
     </source>
   </entry>
 
@@ -1584,7 +1727,7 @@ when solved for \( x \).</p></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-07-12T07:40:59Z</updated>
+      <updated>2014-07-12T14:21:02Z</updated>
     </source>
   </entry>
 
@@ -1701,7 +1844,7 @@ when solved for \( x \).</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-07-12T07:40:59Z</updated>
+      <updated>2014-07-12T14:21:02Z</updated>
     </source>
   </entry>
 
@@ -1734,7 +1877,7 @@ when solved for \( x \).</p></div>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-07-12T07:40:42Z</updated>
+      <updated>2014-07-12T14:20:42Z</updated>
     </source>
   </entry>
 
@@ -1960,7 +2103,7 @@ finally be submitted.</p>&lt;script type="text/javascript"&gt;
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-07-12T07:40:42Z</updated>
+      <updated>2014-07-12T14:20:41Z</updated>
     </source>
   </entry>
 
@@ -2028,7 +2171,7 @@ conceder the limiting value of the equation.</p>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-07-12T07:40:59Z</updated>
+      <updated>2014-07-12T14:21:02Z</updated>
     </source>
   </entry>
 
@@ -2091,7 +2234,7 @@ False</pre>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-12T07:41:02Z</updated>
+      <updated>2014-07-12T14:21:04Z</updated>
     </source>
   </entry>
 
@@ -2158,7 +2301,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-07-12T07:40:49Z</updated>
+      <updated>2014-07-12T14:20:50Z</updated>
     </source>
   </entry>
 
@@ -2359,7 +2502,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-07-12T07:40:59Z</updated>
+      <updated>2014-07-12T14:21:02Z</updated>
     </source>
   </entry>
 
@@ -2392,7 +2535,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-07-12T07:40:42Z</updated>
+      <updated>2014-07-12T14:20:42Z</updated>
     </source>
   </entry>
 
@@ -2444,7 +2587,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-07-12T07:40:42Z</updated>
+      <updated>2014-07-12T14:20:41Z</updated>
     </source>
   </entry>
 
@@ -3442,7 +3585,7 @@ on infinitely indexed sets.</p></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-07-12T07:40:59Z</updated>
+      <updated>2014-07-12T14:21:02Z</updated>
     </source>
   </entry>
 
@@ -3545,7 +3688,7 @@ Not(ForAll((X,T), Implies(And(Person(X), Time(T)), CanFool(X, T))))</pre>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-12T07:41:02Z</updated>
+      <updated>2014-07-12T14:21:04Z</updated>
     </source>
   </entry>
 
@@ -3774,7 +3917,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-07-12T07:40:49Z</updated>
+      <updated>2014-07-12T14:20:50Z</updated>
     </source>
   </entry>
 
@@ -3805,7 +3948,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-07-12T07:40:59Z</updated>
+      <updated>2014-07-12T14:21:02Z</updated>
     </source>
   </entry>
 
@@ -3849,7 +3992,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-07-12T07:40:42Z</updated>
+      <updated>2014-07-12T14:20:41Z</updated>
     </source>
   </entry>
 
@@ -3892,7 +4035,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-07-12T07:40:42Z</updated>
+      <updated>2014-07-12T14:20:42Z</updated>
     </source>
   </entry>
 
@@ -4172,7 +4315,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-07-12T07:40:49Z</updated>
+      <updated>2014-07-12T14:20:50Z</updated>
     </source>
   </entry>
 
@@ -4341,7 +4484,7 @@ extent.</p></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-07-12T07:40:59Z</updated>
+      <updated>2014-07-12T14:21:02Z</updated>
     </source>
   </entry>
 
@@ -4368,7 +4511,7 @@ extent.</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-07-12T07:40:59Z</updated>
+      <updated>2014-07-12T14:21:02Z</updated>
     </source>
   </entry>
 
@@ -4432,7 +4575,7 @@ Xor creates one of the most complex NNF formula after simplification. Let look a
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-12T07:41:02Z</updated>
+      <updated>2014-07-12T14:21:04Z</updated>
     </source>
   </entry>
 
@@ -4674,7 +4817,7 @@ In [3]:
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-07-12T07:40:42Z</updated>
+      <updated>2014-07-12T14:20:42Z</updated>
     </source>
   </entry>
 
@@ -4737,7 +4880,7 @@ rationals, not Integers.</p><br/>  <a href="http://feeds.wordpress.com/1.0/gocom
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-07-12T07:40:42Z</updated>
+      <updated>2014-07-12T14:20:41Z</updated>
     </source>
   </entry>
 
@@ -4852,7 +4995,7 @@ week will be.</p>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-07-12T07:40:59Z</updated>
+      <updated>2014-07-12T14:21:02Z</updated>
     </source>
   </entry>
 
@@ -5056,7 +5199,7 @@ Similar to Xor above, even ITE had no independant class and all expressions were
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-12T07:41:02Z</updated>
+      <updated>2014-07-12T14:21:04Z</updated>
     </source>
   </entry>
 
@@ -5106,7 +5249,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-07-12T07:40:49Z</updated>
+      <updated>2014-07-12T14:20:50Z</updated>
     </source>
   </entry>
 
@@ -5132,7 +5275,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-07-12T07:40:59Z</updated>
+      <updated>2014-07-12T14:21:01Z</updated>
     </source>
   </entry>
 
@@ -5162,51 +5305,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-12T07:41:02Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://codesachin.wordpress.com/?p=11</id>
-    <link href="http://codesachin.wordpress.com/2014/06/01/gsoc-2014-second-week-basics-of-vector-and-del-operator/" rel="alternate" type="text/html"/>
-    <title>GSoC 2014 Second Week: Basics of Vector, and Del operator</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">In my previous blog post, I had mentioned that I had begun working somewhat on a new branch for the vector module. This week was spent in polishing that work. But more importantly, I spent time confirming that my last week’s idea – of implementing the Vector framework, BaseScalar class, and the Del operator before […]<img alt="" border="0" height="1" src="http://pixel.wp.com/b.gif?host=codesachin.wordpress.com&amp;blog=67602166&amp;post=11&amp;subd=codesachin&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>In my previous blog post, I had mentioned that I had begun working somewhat on a new branch for the vector module. This week was spent in polishing that work. But more importantly, I spent time confirming that my last week’s idea – of implementing the Vector framework, BaseScalar class, and the Del operator <em>before</em> implementing coordinate systems – does make sense. What this essentially means is that all the operations will occur in one frame <strong>only </strong>(for now).</p>
-<p>I have implemented the Vector framework to a great extent by now, the BaseScalar class is done, and so is the Del operator. I have tried keeping the API of the Del class as ‘easy’ as possible, mainly so that the expressions typed out in code, would be very simple to read even for a non-fluent programmer.</p>
-<p>To confirm that the one-system-framework does work, I tried proving all of the product rules of vector differential calculus (using the constructed API).</p>
-<p>Here  is a snippet of (actual) Python-Shell session proving the last product rule-</p>
-<p>Rule says :</p>
-<dl>
-<dd><img alt="\nabla \times (\vec u \times \vec v) = \vec u \, (\nabla \cdot \vec v) - \vec v \, (\nabla \cdot \vec u) + (\vec v \cdot \nabla) \, \vec u - (\vec u \cdot \nabla) \, \vec v" class="mwe-math-fallback-png-inline tex" src="http://upload.wikimedia.org/math/d/5/b/d5b8119de472d7a6d75c1672e93ccd34.png"/></dd>
-<dd/>
-</dl>
-<p><code>Shell session (i, j and k denote base vectors, while x, y and z denote base scalars)-</code></p>
-<p><code><br/>
-&gt;&gt;&gt; u = x**2 * i + 4 * j - y**2*z * k<br/>
-&gt;&gt;&gt; v = 4 * i + x*y*z * k<br/>
-&gt;&gt;&gt; lhs = delop ^ (u ^ v)<br/>
-&gt;&gt; rhs = u * (delop &amp; v) - v * (delop &amp; u) + (v &amp; delop) * u - (u &amp; delop) * v<br/>
-&gt;&gt;&gt; simplify(lhs) == simplify(rhs)<br/>
-True<br/>
-</code></p>
-<p>I guess intensive coding will begin this week onwards. The first priority would be to ensure that the Vector framework is foolproof, by writing unit tests and some long ones. I would also like SymPy functions like the <em>solve </em>one, to work with vector too (To solve problems like – given 3 vectors, prove that they can be used as a valid basis for 3D space). Then, I will most likely send a PR  with the work done till now. On a different branch, I’ll start working on the CoordSys class. Thats all for now! Have a great wek!</p><br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/codesachin.wordpress.com/11/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/codesachin.wordpress.com/11/"/></a> <img alt="" border="0" height="1" src="http://pixel.wp.com/b.gif?host=codesachin.wordpress.com&amp;blog=67602166&amp;post=11&amp;subd=codesachin&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2014-06-01T09:46:47Z</updated>
-    <category term="Google Summer of Code 2014"/>
-    <author>
-      <name>srjoglekar246</name>
-    </author>
-    <source>
-      <id>http://codesachin.wordpress.com</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://codesachin.wordpress.com/category/google-summer-of-code-2014/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://codesachin.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://codesachin.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <subtitle>- Blog by Sachin Joglekar</subtitle>
-      <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-07-12T07:40:42Z</updated>
+      <updated>2014-07-12T14:21:04Z</updated>
     </source>
   </entry>
 </feed>

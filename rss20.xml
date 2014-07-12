@@ -8,6 +8,135 @@
 	<description>Planet SymPy - http://planet.sympy.org/</description>
 
 <item>
+	<title>Harsh Gupta: week 7</title>
+	<guid isPermaLink="true">https://hargup.github.io/posts/week-7.html</guid>
+	<link>https://hargup.github.io/posts/week-7.html</link>
+	<description>&lt;h2&gt;Week 7, 8&lt;/h2&gt;
+&lt;h3&gt;Fu Simplification&lt;/h3&gt;
+&lt;p&gt;In the early part of the week 7 was thinking and working on design decisions.
+I want the code to be very modular so that it could be easily extended by
+people other than me. This came up in a meeting with Matthew and I want the
+solvers to be like the Fu simplification explained by Matthew in this &lt;a href=&quot;https://www.youtube.com/watch?v=QldxygVVj-s&amp;amp;list=PLYx7XA2nY5GfuhCvStxgbynFNrxr3VFog&amp;amp;index=20&quot;&gt;Scipy
+Talk&lt;/a&gt;.
+The idea was that we can see solving an equation as series of transformations.
+If we have a lot of small transformations such that the input type is same as
+output type, and some notion of what makes a &quot;better&quot; output we can search though
+the list of transformations running one on top of other. I also posted about
+it on the &lt;a href=&quot;https://groups.google.com/forum/#!topic/sympy/42GdMJ9ssyM&quot;&gt;mailing
+list&lt;/a&gt; which brought
+out some flaws in the preliminary design. The idea is pretty crude in the
+current stage and I'll have to look deeper into it, but not now.&lt;/p&gt;
+&lt;p&gt;I also discussed about the implementing a pattern dispached based solver
+suggested by &lt;a href=&quot;https://groups.google.com/d/msg/sympy/moSEFHop0n4/e2hBKRQ9WP4J&quot;&gt;F.B&lt;/a&gt;
+on the mailing list. But we decided that it will be better if we finish the
+equation solver by the current technique first.&lt;/p&gt;
+&lt;h3&gt;Intersection with S.Reals&lt;/h3&gt;
+&lt;p&gt;I decribed in the last post that one way to solve trigonometric equation is
+rewriting them in terms of \( exp \). But that is \( exp \) in the complex domain and
+the solution of \(exp(x) = a \) is \( \left\{i \left(2 \pi
+n + \arg{\left (a \right )}\right) + \log{\left
+(\left\lvert{a}\right\rvert \right )}\; |\; n \in \mathbb{Z}\right\}
+\). Hence we have to filter out real solutions from the obtained solutions.
+The filering is equivalent to the intersection of the solutions with the \( \mathbb{R}
+\) set. Suppose \( g(x) \) and \( h(x) \) are real valued functions and we
+have to perform
+$$ \mathbb{R} \cap \left\{g{\left (n \right )} + i h{\left (n \right )}\; |\; n \in \mathbb{Z}\right\} $$
+then the answer will be simply
+$$ \left\{g{\left (n \right )}\; |\; n \in \left\{h{\left (n \right )} = 0\; |\; n \in \mathbb{Z}\right\}\right\} $$&lt;/p&gt;
+&lt;p&gt;Separate the real and imaginary parts and equate the imaginary to zero
+but the problem was with the assumptions on the symbols. For example while
+separating real and imaginary parts of the equation.&lt;/p&gt;
+&lt;pre class=&quot;code literal-block&quot;&gt;&lt;span class=&quot;n&quot;&gt;In&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;as_imag_real&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;re&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;im&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;re&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;im&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;/pre&gt;
+
+
+&lt;p&gt;That is because &lt;code&gt;n&lt;/code&gt; is by default complex, even in the &lt;code&gt;Lambda(..).expr&lt;/code&gt;.
+I wrote some code to decide the
+assumption on the variable of imageset from the baseset. See &lt;a href=&quot;https://github.com/sympy/sympy/pull/7694&quot;&gt;PR
+7694&lt;/a&gt;.
+There was another issue that needs to be resolved
+&lt;code&gt;S.Integers.intersect(S.Reals)&lt;/code&gt; doesn't evaluate to &lt;code&gt;S.Reals&lt;/code&gt;.&lt;/p&gt;
+&lt;h3&gt;LambertW and Multivariate Solvers&lt;/h3&gt;
+&lt;p&gt;The method to solve equation containing exp and log function is using the
+LambertW function. LambertW function is the inverse of \( x \exp(x) \).  The
+function is multivariate function both for the real and complex
+domains and Sympy has only one branch implemented. This also leads us to loss
+of solutions. Aaron gave an example
+&lt;a href=&quot;https://github.com/sympy/sympy/pull/2723#issuecomment-33760912&quot;&gt;here&lt;/a&gt;. But I'm
+pretty unfamiliar with solving by LambertW and LambertW itself and it will take
+me some time to build an understanding of them.
+As an ad hoc solution I'm using the code in the &lt;code&gt;_tsolve&lt;/code&gt; in the
+&lt;code&gt;solvers.solvers&lt;/code&gt; module to do at least what the current solvers can do.&lt;/p&gt;
+&lt;p&gt;When the importing of &lt;code&gt;_tsolve&lt;/code&gt; method was done. I started working on the
+multivariate solvers. Here's how the current multivariate solvers work:&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Solving single multivariate equation&lt;/strong&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;count the number of free symbols in f - no of symbols for
+equation. If the equation has exactly one symbol which is not asked for then
+use &lt;code&gt;solve_undetermined_coeffs&lt;/code&gt;, the &lt;code&gt;solve_undetermined_coeffs&lt;/code&gt; find the
+values of the coefficient in a univariate polynomial such that it always
+equates to zero.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Then for each symbol &lt;code&gt;solve_linear&lt;/code&gt; is tried which tries to find a solution
+of that symbol in terms of constants or other symbols, the docstring says&lt;/p&gt;
+&lt;pre class=&quot;code literal-block&quot;&gt;&lt;span class=&quot;n&quot;&gt;No&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;simplification&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;done&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;other&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;than&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mul&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;True&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;expansion&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;so&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;solution&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;will&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;correspond&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;strictly&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;solution&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;
+&lt;/pre&gt;
+
+
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;So we don't have to worry about loosing a solution. For every symbol it is
+checked if doesn't depend on previously solved symbols, if it does that
+solution is discarded.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;For the symbols for which the above method failed, the &lt;code&gt;_solve&lt;/code&gt; function is
+called for the equation for that variable and as above if the solution contains
+a variable already solved then that solution is discarded.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;System of equations in multiple variables&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Try to convert the system of equations into a system of polynomial equation
+  in variables&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;If all the equations are linear solve then using &lt;code&gt;solve_linear_system&lt;/code&gt;, check
+  the result and return it. If asked for particular solution solve using
+  &lt;code&gt;minsolve_linear_system&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;If the number of symbols is same as the size of the system solve the
+  polynomial system using &lt;code&gt;solve_poly_system&lt;/code&gt;. In case the system is
+  over-determined All the free symbols intersection the variables asked for are
+  calculated. Then for every subset of such symbols of length equal to that of
+  the system, an attempt to solve the equations by &lt;code&gt;solve_poly_system&lt;/code&gt; is made.
+  Here if any of the solution depends on previously solved system the solution
+  is discarded.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;In the case there are failed equations:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;For every know result:&lt;/li&gt;
+&lt;li&gt;Substitute every thing into the failed equation and see if the equation turns to zero.
+  if it does accept the result otherwise put it in the bad_results group.&lt;/li&gt;
+&lt;li&gt;Then try to solve try to solve the failed equation using &lt;code&gt;solve&lt;/code&gt; for each symbol.&lt;/li&gt;
+&lt;li&gt;If that solution depends on any other previously solved symbols
+  discard it.&lt;/li&gt;
+&lt;li&gt;If it doesn't satisfy other equations, discard it.&lt;/li&gt;
+&lt;li&gt;Check if the solution doesn't set any denominator to zero, if it does
+  discard that solution.&lt;/li&gt;
+&lt;li&gt;If it satisfies the above conditions substitute this value in know
+  solutions and add it as a new result.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;</description>
+	<pubDate>Sat, 12 Jul 2014 14:00:01 +0000</pubDate>
+</item>
+<item>
 	<title>Sachin Joglekar: GSoC Weeks 7,8: Beginning with Dyadics</title>
 	<guid isPermaLink="true">http://codesachin.wordpress.com/2014/07/12/gsoc-weeks-78-beginning-with-dyadics/</guid>
 	<link>http://codesachin.wordpress.com/2014/07/12/gsoc-weeks-78-beginning-with-dyadics/</link>
@@ -3884,31 +4013,6 @@ Thats all for now :) Will get back next week!&lt;/p&gt;</description>
 &lt;p&gt;I guess that’s all for the introductions. Before signing off, I must mention that I am really exicted to be a part of SymPy and am looking forward to a great summer ahead.&lt;/p&gt;
 &lt;p&gt;Cheers!!!&lt;/p&gt;</description>
 	<pubDate>Sun, 01 Jun 2014 14:24:15 +0000</pubDate>
-</item>
-<item>
-	<title>Sachin Joglekar: GSoC 2014 Second Week: Basics of Vector, and Del operator</title>
-	<guid isPermaLink="false">http://codesachin.wordpress.com/?p=11</guid>
-	<link>http://codesachin.wordpress.com/2014/06/01/gsoc-2014-second-week-basics-of-vector-and-del-operator/</link>
-	<description>&lt;p&gt;In my previous blog post, I had mentioned that I had begun working somewhat on a new branch for the vector module. This week was spent in polishing that work. But more importantly, I spent time confirming that my last week’s idea – of implementing the Vector framework, BaseScalar class, and the Del operator &lt;em&gt;before&lt;/em&gt; implementing coordinate systems – does make sense. What this essentially means is that all the operations will occur in one frame &lt;strong&gt;only &lt;/strong&gt;(for now).&lt;/p&gt;
-&lt;p&gt;I have implemented the Vector framework to a great extent by now, the BaseScalar class is done, and so is the Del operator. I have tried keeping the API of the Del class as ‘easy’ as possible, mainly so that the expressions typed out in code, would be very simple to read even for a non-fluent programmer.&lt;/p&gt;
-&lt;p&gt;To confirm that the one-system-framework does work, I tried proving all of the product rules of vector differential calculus (using the constructed API).&lt;/p&gt;
-&lt;p&gt;Here  is a snippet of (actual) Python-Shell session proving the last product rule-&lt;/p&gt;
-&lt;p&gt;Rule says :&lt;/p&gt;
-&lt;dl&gt;
-&lt;dd&gt;&lt;img src=&quot;http://upload.wikimedia.org/math/d/5/b/d5b8119de472d7a6d75c1672e93ccd34.png&quot; alt=&quot;\nabla \times (\vec u \times \vec v) = \vec u \, (\nabla \cdot \vec v) - \vec v \, (\nabla \cdot \vec u) + (\vec v \cdot \nabla) \, \vec u - (\vec u \cdot \nabla) \, \vec v&quot; class=&quot;mwe-math-fallback-png-inline tex&quot; /&gt;&lt;/dd&gt;
-&lt;dd&gt;&lt;/dd&gt;
-&lt;/dl&gt;
-&lt;p&gt;&lt;code&gt;Shell session (i, j and k denote base vectors, while x, y and z denote base scalars)-&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;&lt;br /&gt;
-&amp;gt;&amp;gt;&amp;gt; u = x**2 * i + 4 * j - y**2*z * k&lt;br /&gt;
-&amp;gt;&amp;gt;&amp;gt; v = 4 * i + x*y*z * k&lt;br /&gt;
-&amp;gt;&amp;gt;&amp;gt; lhs = delop ^ (u ^ v)&lt;br /&gt;
-&amp;gt;&amp;gt; rhs = u * (delop &amp;amp; v) - v * (delop &amp;amp; u) + (v &amp;amp; delop) * u - (u &amp;amp; delop) * v&lt;br /&gt;
-&amp;gt;&amp;gt;&amp;gt; simplify(lhs) == simplify(rhs)&lt;br /&gt;
-True&lt;br /&gt;
-&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;I guess intensive coding will begin this week onwards. The first priority would be to ensure that the Vector framework is foolproof, by writing unit tests and some long ones. I would also like SymPy functions like the &lt;em&gt;solve &lt;/em&gt;one, to work with vector too (To solve problems like – given 3 vectors, prove that they can be used as a valid basis for 3D space). Then, I will most likely send a PR  with the work done till now. On a different branch, I’ll start working on the CoordSys class. Thats all for now! Have a great wek!&lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/codesachin.wordpress.com/11/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/codesachin.wordpress.com/11/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://pixel.wp.com/b.gif?host=codesachin.wordpress.com&amp;amp;blog=67602166&amp;amp;post=11&amp;amp;subd=codesachin&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
-	<pubDate>Sun, 01 Jun 2014 09:46:47 +0000</pubDate>
 </item>
 
 </channel>
