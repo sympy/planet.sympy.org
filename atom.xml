@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2014-07-13T09:21:10Z</updated>
+  <updated>2014-07-13T19:01:09Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,38 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry>
+    <id>tag:blogger.com,1999:blog-283806077182880539.post-8629525061641578470</id>
+    <link href="http://gsocblog.blogspot.com/feeds/8629525061641578470/comments/default" rel="replies" type="application/atom+xml"/>
+    <link href="http://gsocblog.blogspot.com/2014/07/as-it-turned-out-i-had-to-replace-most.html#comment-form" rel="replies" type="text/html"/>
+    <link href="http://www.blogger.com/feeds/283806077182880539/posts/default/8629525061641578470" rel="edit" type="application/atom+xml"/>
+    <link href="http://www.blogger.com/feeds/283806077182880539/posts/default/8629525061641578470" rel="self" type="application/atom+xml"/>
+    <link href="http://gsocblog.blogspot.com/2014/07/as-it-turned-out-i-had-to-replace-most.html" rel="alternate" type="text/html"/>
+    <title/>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><div dir="ltr" style="text-align: left;">As it turned out, I had to replace most of my last two week's code. I used lambda functions to implement infinite structures. Lambda function stored the delayed part of the structure.<br/><br/>I scraped that out and now instead use the more Python-ic generators for infinite structures.<br/><br/>Earlier FPS was just for series expansion around x0=0. I added support for asymptotic expansion and series expansion around arbitrary points. This just included the substitutions as done in the series() method.<br/><br/>However I faced an irritating bug regarding this.<br/>The Lazyseries class has arguments: &lt;x&gt;, &lt;generator object&gt;<br/>So if ``l = Lazyseries(x, generator)``<br/>When  ``l.subs(x, x+1)`` is done, it turned out that &lt;generator object&gt; was being iterated. I noticed this after sometime, fixing it by writing a custom _eval_subs()<br/><br/>Regarding the operation on series, I had to rewrite all of them using generators.<br/>Adding series is just term-wise addition which can be accomplished by a simple one-liner i.e. ``imap(operator.add, self, other)``.<br/>But it turned out that this was actually wrong. This didn't give sorted output when adding series.<br/>E.g.:-<br/>s1 = x + x**2 + x**3 + ...<br/>s2 = x + x**3 + x**5 + ... <br/>Now if s = s1 + s2,<br/>s = 2x + (x**2 + x**3) + (x**3 + x**5) + ...<br/>If I want series expansion of s with order = 4, it terminates at the third term after getting the x**5 term. Whereas, it should go further as there is a x**4 term too. <br/><br/><br/>I wrote a custom add function merging two iterators similar to the mergesort algorithm. There is a built-in function called heapq.merge that does the same thing but it does not provide a key to compare values. It turns out that it is one of Cpython's ideas floating around to provide a key for heapq.<br/><br/>I hope to get this done in a few days and get it ready for the merge.<br/><br/><br/></div></div>
+    </content>
+    <updated>2014-07-13T18:41:00Z</updated>
+    <published>2014-07-13T18:41:00Z</published>
+    <author>
+      <name>Avichal Dayal</name>
+      <email>noreply@blogger.com</email>
+      <uri>https://plus.google.com/107026571968093758973</uri>
+    </author>
+    <source>
+      <id>tag:blogger.com,1999:blog-283806077182880539</id>
+      <author>
+        <name>Avichal Dayal</name>
+        <email>noreply@blogger.com</email>
+      </author>
+      <link href="http://gsocblog.blogspot.com/feeds/posts/default" rel="http://schemas.google.com/g/2005#feed" type="application/atom+xml"/>
+      <link href="http://www.blogger.com/feeds/283806077182880539/posts/default" rel="self" type="application/atom+xml"/>
+      <link href="http://gsocblog.blogspot.com/" rel="alternate" type="text/html"/>
+      <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
+      <title>GSoC 2014 with SymPy</title>
+      <updated>2014-07-13T18:41:00Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en">
     <id>http://kundankumar185.wordpress.com/2014/07/13/week-7-and-week-8-non-linear-system-of-odes/</id>
@@ -35,7 +67,7 @@
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-07-13T09:21:07Z</updated>
+      <updated>2014-07-13T19:01:07Z</updated>
     </source>
   </entry>
 
@@ -71,7 +103,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-07-13T09:20:57Z</updated>
+      <updated>2014-07-13T19:00:56Z</updated>
     </source>
   </entry>
 
@@ -214,7 +246,7 @@ a variable already solved then that solution is discarded.</li>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-07-13T09:21:08Z</updated>
+      <updated>2014-07-13T19:01:07Z</updated>
     </source>
   </entry>
 
@@ -250,7 +282,7 @@ The code for Dyadics is mostly done, the docs are on-going, and I am thinking of
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-07-13T09:20:46Z</updated>
+      <updated>2014-07-13T19:00:50Z</updated>
     </source>
   </entry>
 
@@ -404,7 +436,7 @@ project.</p></div>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-07-13T09:20:45Z</updated>
+      <updated>2014-07-13T19:00:49Z</updated>
     </source>
   </entry>
 
@@ -430,7 +462,7 @@ project.</p></div>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-13T09:21:10Z</updated>
+      <updated>2014-07-13T19:01:09Z</updated>
     </source>
   </entry>
 
@@ -1690,7 +1722,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-07-13T09:20:57Z</updated>
+      <updated>2014-07-13T19:00:56Z</updated>
     </source>
   </entry>
 
@@ -1722,7 +1754,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://gsocblog.blogspot.com/" rel="alternate" type="text/html"/>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>GSoC 2014 with SymPy</title>
-      <updated>2014-07-05T08:53:52Z</updated>
+      <updated>2014-07-13T18:41:00Z</updated>
     </source>
   </entry>
 
@@ -1775,7 +1807,7 @@ implementing new stuff!).</p>
       <link href="http://tarzzz.github.io/rss.gsoc.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts categorized under GSoC</subtitle>
       <title>Tarun Gaba's blog - GSoC</title>
-      <updated>2014-07-13T09:20:44Z</updated>
+      <updated>2014-07-13T19:00:48Z</updated>
     </source>
   </entry>
 
@@ -1802,7 +1834,7 @@ implementing new stuff!).</p>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-13T09:21:10Z</updated>
+      <updated>2014-07-13T19:01:08Z</updated>
     </source>
   </entry>
 
@@ -1835,7 +1867,7 @@ when solved for \( x \).</p></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-07-13T09:21:08Z</updated>
+      <updated>2014-07-13T19:01:07Z</updated>
     </source>
   </entry>
 
@@ -1952,7 +1984,7 @@ when solved for \( x \).</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-07-13T09:21:07Z</updated>
+      <updated>2014-07-13T19:01:07Z</updated>
     </source>
   </entry>
 
@@ -1985,7 +2017,7 @@ when solved for \( x \).</p></div>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-07-13T09:20:46Z</updated>
+      <updated>2014-07-13T19:00:49Z</updated>
     </source>
   </entry>
 
@@ -2017,7 +2049,7 @@ when solved for \( x \).</p></div>
       <link href="http://gsocblog.blogspot.com/" rel="alternate" type="text/html"/>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>GSoC 2014 with SymPy</title>
-      <updated>2014-07-05T08:53:52Z</updated>
+      <updated>2014-07-13T18:41:00Z</updated>
     </source>
   </entry>
 
@@ -2211,7 +2243,7 @@ finally be submitted.</p>&lt;script type="text/javascript"&gt;
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-07-13T09:20:45Z</updated>
+      <updated>2014-07-13T19:00:49Z</updated>
     </source>
   </entry>
 
@@ -2279,7 +2311,7 @@ conceder the limiting value of the equation.</p>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-07-13T09:21:08Z</updated>
+      <updated>2014-07-13T19:01:07Z</updated>
     </source>
   </entry>
 
@@ -2342,7 +2374,7 @@ False</pre>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-13T09:21:09Z</updated>
+      <updated>2014-07-13T19:01:08Z</updated>
     </source>
   </entry>
 
@@ -2409,7 +2441,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-07-13T09:20:57Z</updated>
+      <updated>2014-07-13T19:00:56Z</updated>
     </source>
   </entry>
 
@@ -2610,7 +2642,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-07-13T09:21:07Z</updated>
+      <updated>2014-07-13T19:01:07Z</updated>
     </source>
   </entry>
 
@@ -2643,7 +2675,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-07-13T09:20:46Z</updated>
+      <updated>2014-07-13T19:00:50Z</updated>
     </source>
   </entry>
 
@@ -2695,7 +2727,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-07-13T09:20:45Z</updated>
+      <updated>2014-07-13T19:00:49Z</updated>
     </source>
   </entry>
 
@@ -3629,7 +3661,7 @@ $$</p>
       <link href="http://gsocblog.blogspot.com/" rel="alternate" type="text/html"/>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>GSoC 2014 with SymPy</title>
-      <updated>2014-07-05T08:53:52Z</updated>
+      <updated>2014-07-13T18:41:00Z</updated>
     </source>
   </entry>
 
@@ -3693,7 +3725,7 @@ on infinitely indexed sets.</p></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-07-13T09:21:08Z</updated>
+      <updated>2014-07-13T19:01:07Z</updated>
     </source>
   </entry>
 
@@ -3796,7 +3828,7 @@ Not(ForAll((X,T), Implies(And(Person(X), Time(T)), CanFool(X, T))))</pre>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-13T09:21:10Z</updated>
+      <updated>2014-07-13T19:01:08Z</updated>
     </source>
   </entry>
 
@@ -4025,7 +4057,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-07-13T09:20:57Z</updated>
+      <updated>2014-07-13T19:00:56Z</updated>
     </source>
   </entry>
 
@@ -4056,7 +4088,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-07-13T09:21:07Z</updated>
+      <updated>2014-07-13T19:01:07Z</updated>
     </source>
   </entry>
 
@@ -4100,7 +4132,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-07-13T09:20:45Z</updated>
+      <updated>2014-07-13T19:00:49Z</updated>
     </source>
   </entry>
 
@@ -4143,7 +4175,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-07-13T09:20:46Z</updated>
+      <updated>2014-07-13T19:00:50Z</updated>
     </source>
   </entry>
 
@@ -4423,7 +4455,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-07-13T09:20:57Z</updated>
+      <updated>2014-07-13T19:00:56Z</updated>
     </source>
   </entry>
 
@@ -4455,7 +4487,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://gsocblog.blogspot.com/" rel="alternate" type="text/html"/>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>GSoC 2014 with SymPy</title>
-      <updated>2014-07-05T08:53:52Z</updated>
+      <updated>2014-07-13T18:41:00Z</updated>
     </source>
   </entry>
 
@@ -4592,7 +4624,7 @@ extent.</p></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-07-13T09:21:08Z</updated>
+      <updated>2014-07-13T19:01:07Z</updated>
     </source>
   </entry>
 
@@ -4619,7 +4651,7 @@ extent.</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-07-13T09:21:07Z</updated>
+      <updated>2014-07-13T19:01:07Z</updated>
     </source>
   </entry>
 
@@ -4683,7 +4715,7 @@ Xor creates one of the most complex NNF formula after simplification. Let look a
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-13T09:21:09Z</updated>
+      <updated>2014-07-13T19:01:08Z</updated>
     </source>
   </entry>
 
@@ -4925,7 +4957,7 @@ In [3]:
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-07-13T09:20:46Z</updated>
+      <updated>2014-07-13T19:00:50Z</updated>
     </source>
   </entry>
 
@@ -4988,7 +5020,7 @@ rationals, not Integers.</p><br/>  <a href="http://feeds.wordpress.com/1.0/gocom
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-07-13T09:20:45Z</updated>
+      <updated>2014-07-13T19:00:49Z</updated>
     </source>
   </entry>
 
@@ -5052,7 +5084,7 @@ rationals, not Integers.</p><br/>  <a href="http://feeds.wordpress.com/1.0/gocom
       <link href="http://gsocblog.blogspot.com/" rel="alternate" type="text/html"/>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>GSoC 2014 with SymPy</title>
-      <updated>2014-07-05T08:53:52Z</updated>
+      <updated>2014-07-13T18:41:00Z</updated>
     </source>
   </entry>
 
@@ -5103,7 +5135,7 @@ week will be.</p>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-07-13T09:21:08Z</updated>
+      <updated>2014-07-13T19:01:07Z</updated>
     </source>
   </entry>
 
@@ -5211,103 +5243,6 @@ week will be.</p>
       <subtitle>A blog by Sudhanshu Mishra.</subtitle>
       <title>Shortlog</title>
       <updated>2014-07-09T07:03:48Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en-US">
-    <id>http://blog.s-d-b.com/?p=6</id>
-    <link href="http://blog.s-d-b.com/gsoc-2014-week-1-and-2/" rel="alternate" type="text/html"/>
-    <title>GSoC 2014: Week 1 and 2</title>
-    <summary>My last post was basically an introduction to myself, the program and the community. So, this will be my first post describing my work and the theories surrounding my work. For the remainder of...</summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>My last post was basically an introduction to myself, the program and the community. So, this will be my first post describing my work and the theories surrounding my work. For the remainder of this post and all future posts I will assume that the reader is familiar with the basics of Logic. If you have done any course associated with (mathematical) logic like Logic in Computer Science or Artificial Intelligence, or are familiar with the terms Conjunctive/Disjunctive Normal Form (CNF/DNF), Satisfiability (SAT), Validity, Consequence/Entailment etc. then you are good to go. It goes without saying that you need to know (atleast) the basics of python so as to understand the code.</p>
-<p><strong>Faster Conversion to CNF/DNF</strong><br/>
-I started off working on converting to Normal Forms more efficiently. The original implementation was a recursive one. While this method was quite elegant, the performance took a major hit whenever the number of arguments went above 2 (which is quite a common scenario). My implementation is an iterative one whose performance remains almost the same regardless of the number of arguments. I’ll put up graphs detailing the difference in performance soon. In the meantime, I would like to discuss the theoretical base behind the algorithm, which I call iterative manipulation of sets. We start with 1 stack <code>S = [set(expr)]</code> (here expr is the initial expression to be converted) and an empty list <code>T = []</code>. The algorithm involves poping elements from the stack manipulating them and pushing back to the stack till we don’t have a set containing all literals. I’ll outline the algorithm for conversion to CNF.</p>
-<ol>
-<li>Pop a set (say E) from the top of the stack. E is a set of literal and non-literals (functions like And, Or).</li>
-<li>Retrieve (and remove) the first function from E (say F). While this is an linear time operation, a small bookkeeping trick (described below) can make this a constant time operation.</li>
-<li>If no functions are available in E (i.e. E is a set of literals), then append E to T</li>
-<li>If a function is available then select the action to perform depending upon the class of F.
-<ul>
-<li>Function is Or: Simply add the arguments of F to E</li>
-<li>Function is And: For every argument of F, create a copy of E and add the argument to the corresponding copy of E. Push all these modified copies of E back to S.</li>
-</ul>
-</li>
-<li>Repeat steps 1 – 4 until S is empty and T is a list of sets of literals. To get the expression simply return <code>And(*[Or(*clause) for clause in T])</code></li>
-</ol>
-<p>Here is the reason why this algorithm works. The set of literals in T are And’ed together while the individual literals inside a set are Or’ed with each other. In step 4, if two expressions have an Or relationship, they are placed into the same set. If however the have an And relationship, they are separated and put into 2 different sets. The running of the algorithm for <code>Or(And(a, b), c, d)</code> is shown below.</p>
-<ul>
-<li><code>S = [{Or(And(a, b), c, d)}], T = []</code></li>
-<li><code>E = {Or(And(a, b), c, d)}, S = [], T = []</code></li>
-<li><code>F = Or(And(a, b), c, d), E = {}, S = [], T = []</code></li>
-<li><code>F = Or(And(a, b), c, d), E = {And(a, b), c, d}, S = [{And(a, b), c, d}], T = []</code></li>
-<li><code>E = {And(a, b), c, d}, S = [], T = []</code></li>
-<li><code>F = And(a, b), E = {c, d}, S = [], T = []</code></li>
-<li><code>F = And(a, b), E1 = {a, c, d}, E2={b, c, d}, S = [{a, c, d}, {b, c, d}], T = []</code></li>
-<li><code>E = {a, c, d}, S = [{b, c, d}], T = []</code></li>
-<li><code>E = {a, c, d}, S = [{b, c, d}], T = [{a, c, d}]</code></li>
-<li><code>E = {b, c, d}, S = [], T = [{a, c, d}]</code></li>
-<li><code>E = {b, c, d}, S = [], T = [{a, c, d}, {b, c, d}]</code></li>
-<li><code>S = [], T = [{a, c, d}, {b, c, d}]</code></li>
-<li><code>return And(Or(a, c, d), Or(b, c, d))</code></li>
-</ul>
-<p>For conversion to DNF, follow the exact same procedure replacing And with Or and vice versa.</p>
-<p>As mentioned above, retrieving a function from a mixture of functions and literals (as well as determining whether E contains any functions or not) is an O(n) operation. To perform this is O(1), use two different sets, one for functions and the other for literals. S now becomes a stack (list) of tuples, with each tuple containing 2 sets. <code>{And(a, b), c, d}</code> will now become <code>({And(a, b)}, {c, d})</code>. The set operations are performed as follows:</p>
-<ul>
-<li>Add: <code>({And(a, b)}, {c, d}) + {x, y, And(x, z), Or(y, z)} = ({And(a, b), And(x, z), Or(y, z)}, {c, d, x, y})</code></li>
-<li>Retrieve Function: <code>X = ({And(a, b)}, {c, d}); return X[0].pop() if X[0] else None</code></li>
-</ul>
-<p><strong>Remove Automatic Evaluation</strong><br/>
-Currently SymPy has a lot of (automatic) evaluation of formulas that happens without user intent. While this makes life easier for us programmers, this isn’t always very intuitive for the user. Hence, there has been a decision to remove this and instead shift to a need based simplification (evaluation). There is however a need to differentiate between evaluation and short-circuiting, and leave all of the latter in place.</p>
-<p><strong>And/Or</strong><br/>
-Almost no automatic evaluation takes place here, except short-circuiting i.e. <code>And(False, a, b, ...) = False</code> and <code>Or(True, a, b, ...) = True</code> and converting <code>And(And(a, b), And(c, d))</code> to <code>And(a, b, c, d)</code>. Except this no other evaluation takes place like reducing <code>A &amp; ~A</code> to <code>False</code> or <code>A | ~A</code> to <code>True</code>.</p>
-<p><strong>Not</strong><br/>
-Previously, De-Morgan’s Laws were automatically applied to the arguments, however this has now been removed. So <code>Not(A | B)</code> will stay so instead of automatically evaluating to <code>~A &amp; ~B</code>. Now, the only evaluation that takes place is <code>Not(Not(A)) = A</code>.</p>
-<p><strong>Implies</strong><br/>
-Implication evaluates its arguments if either of the arguments are boolean. So, that gives rise to 4 cases:</p>
-<ul>
-<li><code>True &gt;&gt; X = X</code></li>
-<li><code>False &gt;&gt; X = True</code></li>
-<li><code>X &gt;&gt; True = True</code></li>
-<li><code>X &gt;&gt; False = ~X</code></li>
-</ul>
-<p><strong>Equivalence</strong><br/>
-SymPy doesn’t automatically convert equivalence into bi-implications or into And/Or. However it does perform the following 3 simplifications:</p>
-<ul>
-<li><code>Equivalent(True, a, b, ...) = And(a, b, ...)</code></li>
-<li><code>Equivalent(False, a, b, ...) = Not(Or(a, b, ...))</code></li>
-<li><code>Equivalent(True, False, a, b, ...) = False</code></li>
-</ul>
-<p><strong>Exclusive-Or</strong><br/>
-Previously Xor did not have an independent existence in SymPy and all Xor expressions were automatically converted into And/Or sequences. Now one can create and use expressions using Xor subject to the following transformations:</p>
-<ul>
-<li><code>Xor(True, True, a, b, ...) = Xor(a, b, ...)</code> (Even number of <code>True</code> arguments)</li>
-<li><code>Xor(True, True, True, a, b, ...) = Not(Xor(a, b, ...))</code> (Odd number of <code>True</code> arguments)</li>
-<li><code>Xor(Xor(a, b), Xor(c, d)) = Xor(a, b, c, d)</code></li>
-</ul>
-<p><strong>ITE</strong><br/>
-Similar to Xor above, even ITE had no independant class and all expressions were automatically converted. This has been removed and one can create objects of type ITE subject to the following evaluations:</p>
-<ul>
-<li><code>ITE(True, a, b) = a</code></li>
-<li><code>ITE(False, a, b) = b</code></li>
-<li><code>ITE(a, b, b) = b</code></li>
-</ul>
-<p>That pretty much covers the major tasks I did, in the first 2 weeks. See you next week.</p>
-<p>Au Revoir!!!</p></div>
-    </content>
-    <updated>2014-06-01T21:15:13Z</updated>
-    <category term="GSoC"/>
-    <category term="GSoC 2014"/>
-    <category term="SymPy"/>
-    <author>
-      <name>SD</name>
-    </author>
-    <source>
-      <id>http://blog.s-d-b.com</id>
-      <link href="http://blog.s-d-b.com/category/sympy/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
-      <subtitle>CODE | RINSE | REPEAT</subtitle>
-      <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-13T09:21:10Z</updated>
     </source>
   </entry>
 </feed>
