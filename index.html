@@ -34,6 +34,98 @@
 
 
 
+<h3><a href="http://jcrist.github.io/" title="Marginally Stable">Jim Crist</a></h3>
+
+
+<div class="entrygroup" id="tag:,2014-07-18:gsoc-week-9.html">
+<h4><a href="http://jcrist.github.io/gsoc-week-9.html">GSoC Week 9: Docs!</a></h4>
+<div class="entry">
+<div class="content">
+<p>This week I spent time on all sorts of little things:</p>
+<ul>
+<li>Finished up the refactoring of <code>KanesMethod</code></li>
+<li>Little fixes to <a href="https://github.com/sympy/sympy/pull/7681">my current PR</a>. Just
+  waiting on my mentors to review this, I want to get it merged soon-ish.</li>
+<li>Documentation.</li>
+</ul>
+<p>Writing documentation is the worst<sup id="fnref:1"><a href="http://jcrist.github.io/feeds/gsoc.atom.xml#fn:1" class="footnote-ref" rel="footnote">1</a></sup>. After taking time to implement all sorts
+of new interesting things, the last thing I want to do is go back and write about
+them in detail. Which is why it's so important to do early on. <em>Good</em>
+documentation needs to accomplish three things:</p>
+<ol>
+<li>Provide motivation for <em>why</em> your software is necessary/better/useful.</li>
+<li>Describe the user interface, showing <em>how</em> to use each function or class.</li>
+<li>Provide real world <em>examples</em> showing how to tie everything together.</li>
+</ol>
+<p>Python's documentation is interesting in that there are varying ways to do it.
+Some of Sympy's documentation is just a nicely rendered form of the docstrings
+for all the methods. Other modules have a more prose-y explanation of their
+functionality. <code>mechanics</code> is one of those modules.</p>
+<p>In my opinion the prose documentation approach is the better way.
+Having good docstrings is important, but they aren't the end-all of
+documentation<sup id="fnref:2"><a href="http://jcrist.github.io/feeds/gsoc.atom.xml#fn:2" class="footnote-ref" rel="footnote">2</a></sup>. Of course, if I have a question the first thing I'm going to
+do is read the docstrings (IPython makes this trivially easy). Only if I still
+have questions afterwards will I turn to the online documentation. However, it'd
+be extremely off-putting if the online documentation was just the docstrings
+again.</p>
+<p>With the various changes I've made so far I needed to:</p>
+<ol>
+<li>Update the <code>LagrangesMethod</code> documentation to reflect the interface change.</li>
+<li>Create a documentation page all about the linearization methods.</li>
+<li>Update all the examples to reflect the new functionality.</li>
+</ol>
+<p>All of these are "done". I still need to go through and proofread, but overall
+I'd say that the current state of the documentation is acceptable. I would like
+to take some time to reorganize the layout of the whole <code>mechanics</code> documentation
+at some point. The current layout isn't the easiest to navigate for what you're
+looking for.</p>
+<p>With this out of the way, the linearization portion of my project is tentatively
+done. I say tentatively because I'm still waiting on my PRs to get merged, and 
+am also still playing around with solving <a href="http://jcrist.github.io/gsoc-week-8.html">the <code>nan</code> issue</a>
+that I've been writing about these last couple weeks.</p>
+<p>With that done, I hope to move on to code generation. I've read the current code
+generation code and documentation, as well as <a href="https://github.com/pydy/pydy/wiki/codegen-planning">this pydy wiki page</a>
+on Jason's ideas about code generation. I'm still a little iffy about the intention
+of this functionality, so I'm waiting until we can all meet to discuss what needs
+to be done. That was supposed to have happened this week, but fell through.
+Hopefully we can set some time aside next week, and I can finally get to work
+on it.</p>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p>Not actually the worst. <a href="http://jcrist.github.io/feeds/gsoc.atom.xml#fnref:1" rev="footnote" class="footnote-backref" title="Jump back to footnote 1 in the text">↩</a></p>
+</li>
+<li id="fn:2">
+<p><a href="http://stevelosh.com/blog/2013/09/teach-dont-tell/">This article</a> by Steve
+  Losh is a really good read on this. <a href="http://jcrist.github.io/feeds/gsoc.atom.xml#fnref:2" rev="footnote" class="footnote-backref" title="Jump back to footnote 2 in the text">↩</a></p>
+</li>
+</ol>
+</div></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://jcrist.github.io/gsoc-week-9.html">by Jim Crist at July 18, 2014 08:00 PM</a>
+</p>
+</div>
+</div>
+
+
+
+</div>
+<div class="channelgroup">
+
+
+
+
+
+
+
 <h3><a href="http://blog.s-d-b.com" title="SDB's Blog » SymPy">Soumya Dipta Biswas</a></h3>
 
 
@@ -5724,37 +5816,6 @@ rationals, not Integers.</p><br />  <a href="http://feeds.wordpress.com/1.0/goco
 </div>
 
 
-
-</div>
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://gsocblog.blogspot.com/" title="GSoC 2014 with SymPy">Avichal Dayal</a></h3>
-
-
-<div class="entrygroup" id="tag:blogger.com,1999:blog-283806077182880539.post-8460362206940299143">
-<div class="entry">
-<div class="content">
-<div style="text-align: left;" dir="ltr"><div style="text-align: left;" dir="ltr">Two weeks into GSoC and I'm almost finished with the first part of my project. First part of my project involved asymptotic expansion. This included implementing the MrvAsympt algorithm and writing the series expansion of special functions.<br /><br />MrvAsympt algorithm:<br />As discussed in the previous post, if the most rapidly varying subexpression of function f is same as f, we need to find a canonical representation of the mrv set. This is done by taking the leading term of the asymptotic expansion of argument of the function f.<br />After getting the representative r, f is rewritten in terms of r and expanded around it. Now the problem is that this can keep on going forever i.e. the coefficients will keep on being rewritten infinitely times.<br /> For this ``bound`` parameter was added that keeps a limit on the number of times the coefficient is rewritten.<br />With this, function can also be written as an infinite asymptotic product. If ``bound=3`` then first 3 terms of this product is computed and rest are kept in closed form<br />Here is an example</div><pre style=""><code style="color: black;"> &gt;&gt;&gt; e = exp(exp(x)/(1-1/x))  <br /> &gt;&gt;&gt; e.aseries(x)  <br /> exp(exp(x)/(1 - 1/x))  <br /> &gt;&gt;&gt; e.aseries(x, bound=2)  <br /> exp(exp(x)/x)*exp(-exp(x) + exp(x)/(1 - 1/x) - exp(x)/x)*exp(exp(x))  </code></pre>Here the canonical representation as we go further into recursion is exp(x), exp(x)/x, exp(x)/x**2 and so on. So it never ends. Keeping bound=2 terminates it in the second phase.<br /><br />Special functions series expansion:<br />It includes the following functions-<br />  <ul class="task-list"><li>erf: gauss error function</li><li>erfc: complementary error function</li><li>erfi: imaginary error function</li><li>Ei: exponential integral</li><li>expint: generalised exponential integral</li><li>li: logarithmic integral</li><li>Li: offset logarithmic integral</li><li>Si: sine integral</li><li>Ci: cosine integral</li><li>bessely</li><li>besselj</li><li>lerchphi function</li><li>Riemann zeta function</li></ul>Most of the expansion I could find from wolfram mathworld and Wikipedia websites. However there were a few bugs that troubled me and wasted a lot of time. Since the expansions were in a bit complicated form, the current Order implementation could not properly perform operations like removeO, adding order terms and getO leading to such problems.<br />I hope I can merge the two pending PR soon without much trouble and start with the next phase of my project.<br /><br />Next phase of my project includes Formal Power Series. That is the major part of my project and I'm excited to get started with it.</div></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://gsocblog.blogspot.com/2014/06/two-weeks-into-gsoc-and-im-almost.html">by Avichal Dayal (noreply@blogger.com) at June 02, 2014 12:04 PM</a>
-</p>
-</div>
-</div>
-
-
 </div>
 
 </div>
@@ -5790,7 +5851,7 @@ rationals, not Integers.</p><br />  <a href="http://feeds.wordpress.com/1.0/goco
 <a href="http://www.catchmrbharath.in/programming.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a class="message" title="404: not found">Bharath M R</a>
 </li>
 <li>
-<a href="http://brianegranger.com/?feed=rss2" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://brianegranger.com" class="message" title="no activity in 7 days">Brian Granger</a>
+<a href="http://brianegranger.com/?feed=rss2" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://brianegranger.com" class="message" title="internal server error">Brian Granger</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/267967203861801529/posts/default/-/SymPy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://straightupcoding.blogspot.com/search/label/SymPy" class="message" title="no activity in 7 days">Brian Jorgensen</a>
@@ -5931,7 +5992,7 @@ rationals, not Integers.</p><br />  <a href="http://feeds.wordpress.com/1.0/goco
 
 <p>
 <strong>Last updated:</strong><br>
-July 18, 2014 05:41 PM<br>
+July 18, 2014 08:01 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
