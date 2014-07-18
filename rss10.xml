@@ -13,6 +13,7 @@
 
 	<items>
 		<rdf:Seq>
+			<rdf:li rdf:resource="http://blog.s-d-b.com/?p=100" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-54146973659574488.post-2147515292514723776" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-283806077182880539.post-8629525061641578470" />
 			<rdf:li rdf:resource="http://asmeurer.github.io/posts/scipy-2014/" />
@@ -72,11 +73,20 @@
 			<rdf:li rdf:resource="http://thilinaatsympy.wordpress.com/?p=326" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-54146973659574488.post-4568350345911213597" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-283806077182880539.post-8460362206940299143" />
-			<rdf:li rdf:resource="https://hargup.github.io/posts/week-1-and-week-2.html" />
 		</rdf:Seq>
 	</items>
 </channel>
 
+<item rdf:about="http://blog.s-d-b.com/?p=100">
+	<title>Soumya Dipta Biswas: GSoC 2014: Week 8</title>
+	<link>http://blog.s-d-b.com/gsoc-2014-week-8/</link>
+	<content:encoded>&lt;p&gt;Hello Everyone,&lt;/p&gt;
+&lt;p&gt;I have majorly been working on fixes and optimizations this week. There was an interesting error that was coming up because of the way quantifiers had been designed. I have made some significant changes to the Quantifier class. An interesting problem regarding constants has cropped up, which I am yet to fix. Please find the discussion regarding it at &lt;a href=&quot;https://groups.google.com/forum/#!topic/sympy/16sSUehOFWA&quot; target=&quot;_blank&quot; title=&quot;Constants&quot;&gt;FOL Constants and Unification&lt;/a&gt;. For the rest or the week, I have majorly been writing tests for the FOL class and making small changes. Additionally I have spent some time writing tutorials for the logic module of SymPy. The documentation available currently only talks about how to do something but not what all can be done with it. The tutorials are far from complete but I will definitely try to finish the entire thing before the summer is over.&lt;/p&gt;
+&lt;p&gt;That’s all for now.&lt;/p&gt;
+&lt;p&gt;Farewell&lt;/p&gt;</content:encoded>
+	<dc:date>2014-07-18T13:12:18+00:00</dc:date>
+	<dc:creator>SD</dc:creator>
+</item>
 <item rdf:about="tag:blogger.com,1999:blog-54146973659574488.post-2147515292514723776">
 	<title>Akshay Narasimha: Gsoc Week - 8</title>
 	<link>http://geekpy.blogspot.com/2014/07/gsoc-week-8.html</link>
@@ -4147,43 +4157,6 @@ rationals, not Integers.&lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wo
 	<content:encoded>&lt;div style=&quot;text-align: left;&quot; dir=&quot;ltr&quot;&gt;&lt;div style=&quot;text-align: left;&quot; dir=&quot;ltr&quot;&gt;Two weeks into GSoC and I'm almost finished with the first part of my project. First part of my project involved asymptotic expansion. This included implementing the MrvAsympt algorithm and writing the series expansion of special functions.&lt;br /&gt;&lt;br /&gt;MrvAsympt algorithm:&lt;br /&gt;As discussed in the previous post, if the most rapidly varying subexpression of function f is same as f, we need to find a canonical representation of the mrv set. This is done by taking the leading term of the asymptotic expansion of argument of the function f.&lt;br /&gt;After getting the representative r, f is rewritten in terms of r and expanded around it. Now the problem is that this can keep on going forever i.e. the coefficients will keep on being rewritten infinitely times.&lt;br /&gt; For this ``bound`` parameter was added that keeps a limit on the number of times the coefficient is rewritten.&lt;br /&gt;With this, function can also be written as an infinite asymptotic product. If ``bound=3`` then first 3 terms of this product is computed and rest are kept in closed form&lt;br /&gt;Here is an example&lt;/div&gt;&lt;pre style=&quot;&quot;&gt;&lt;code style=&quot;color: black;&quot;&gt; &amp;gt;&amp;gt;&amp;gt; e = exp(exp(x)/(1-1/x))  &lt;br /&gt; &amp;gt;&amp;gt;&amp;gt; e.aseries(x)  &lt;br /&gt; exp(exp(x)/(1 - 1/x))  &lt;br /&gt; &amp;gt;&amp;gt;&amp;gt; e.aseries(x, bound=2)  &lt;br /&gt; exp(exp(x)/x)*exp(-exp(x) + exp(x)/(1 - 1/x) - exp(x)/x)*exp(exp(x))  &lt;/code&gt;&lt;/pre&gt;Here the canonical representation as we go further into recursion is exp(x), exp(x)/x, exp(x)/x**2 and so on. So it never ends. Keeping bound=2 terminates it in the second phase.&lt;br /&gt;&lt;br /&gt;Special functions series expansion:&lt;br /&gt;It includes the following functions-&lt;br /&gt;  &lt;ul class=&quot;task-list&quot;&gt;&lt;li&gt;erf: gauss error function&lt;/li&gt;&lt;li&gt;erfc: complementary error function&lt;/li&gt;&lt;li&gt;erfi: imaginary error function&lt;/li&gt;&lt;li&gt;Ei: exponential integral&lt;/li&gt;&lt;li&gt;expint: generalised exponential integral&lt;/li&gt;&lt;li&gt;li: logarithmic integral&lt;/li&gt;&lt;li&gt;Li: offset logarithmic integral&lt;/li&gt;&lt;li&gt;Si: sine integral&lt;/li&gt;&lt;li&gt;Ci: cosine integral&lt;/li&gt;&lt;li&gt;bessely&lt;/li&gt;&lt;li&gt;besselj&lt;/li&gt;&lt;li&gt;lerchphi function&lt;/li&gt;&lt;li&gt;Riemann zeta function&lt;/li&gt;&lt;/ul&gt;Most of the expansion I could find from wolfram mathworld and Wikipedia websites. However there were a few bugs that troubled me and wasted a lot of time. Since the expansions were in a bit complicated form, the current Order implementation could not properly perform operations like removeO, adding order terms and getO leading to such problems.&lt;br /&gt;I hope I can merge the two pending PR soon without much trouble and start with the next phase of my project.&lt;br /&gt;&lt;br /&gt;Next phase of my project includes Formal Power Series. That is the major part of my project and I'm excited to get started with it.&lt;/div&gt;</content:encoded>
 	<dc:date>2014-06-02T12:04:38+00:00</dc:date>
 	<dc:creator>Avichal Dayal</dc:creator>
-</item>
-<item rdf:about="https://hargup.github.io/posts/week-1-and-week-2.html">
-	<title>Harsh Gupta: Week 1 and Week 2</title>
-	<link>https://hargup.github.io/posts/week-1-and-week-2.html</link>
-	<content:encoded>&lt;p&gt;Hi, As I told you about in the previous post, My work for this summer will be
-improving the current equation solvers of sympy. There are basically three
-thing I'll have to do.&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;Create a basic set infrastructure for solvers to return sets.&lt;/li&gt;
-&lt;li&gt;Rewrite the current solvers to be clean and robust.&lt;/li&gt;
-&lt;li&gt;On the top of 1 and 2 write new solvers and function, they will returning
-   and handling all the solutions of equations like &lt;code&gt;sin(x) == 0&lt;/code&gt; and a general
-   singularity finder.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;You can look at the details in my
-&lt;a href=&quot;https://github.com/sympy/sympy/wiki/GSoC-2014-Application-Harsh-Gupta:-Solvers&quot;&gt;proposal&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;A started working on the sets module in the community bonding period, basically
-writing a set difference class at &lt;a href=&quot;https://github.com/sympy/sympy/pull/7462&quot;&gt;this
-PR&lt;/a&gt; , I try to get it merged by the
-end of this week.&lt;/p&gt;
-&lt;p&gt;Set are a pretty general mathematical constructs, and you can solve a lot of
-hard problems if you could compute general set operations. The whole number
-theory can be defined in terms of sets. So, computing general set operations,
-e.g, intersection, unions is pretty hard problem too and we should not aim to
-do all them.  In a meeting with Matthew and Sergey we discussed that it would
-    be better if complete the part 2 first. It will give a general idea about
-    what capabilities of sets we need.  Also some sets problems can be reduced
-    to equations and vice versa.  &lt;/p&gt;
-&lt;p&gt;I've started working on the univariate solvers &lt;a href=&quot;https://github.com/sympy/sympy/pull/7523&quot;&gt;at
-PR&lt;/a&gt;.  My aim for this
-week will be.&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;Completing the rational solvers&lt;/li&gt;
-&lt;li&gt;Getting the open PR for the sets merged.&lt;/li&gt;
-&lt;/ol&gt;</content:encoded>
-	<dc:date>2014-06-02T11:45:54+00:00</dc:date>
-	<dc:creator>Harsh Gupta</dc:creator>
 </item>
 
 </rdf:RDF>
