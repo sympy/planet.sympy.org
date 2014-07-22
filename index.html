@@ -34,6 +34,37 @@
 
 
 
+<h3><a href="http://gsocblog.blogspot.com/" title="GSoC 2014 with SymPy">Avichal Dayal</a></h3>
+
+
+<div class="entrygroup" id="tag:blogger.com,1999:blog-283806077182880539.post-5238978956281178700">
+<div class="entry">
+<div class="content">
+<div style="text-align: left;" dir="ltr"><div style="text-align: left;" dir="ltr">This week I converted all the operations on FPS to work with generators.<br />For e.g.:-<br />Addition for two series is something like<br /><pre style=""><code style="color: black;"> def add(s1, s2):  <br />   yield s1[0] + s2[0]  <br />   s1, s2 = s1.tail, s2.tail  <br />   for t in add(s1, s2):  <br />     yield t  <br /></code></pre><br />Almost all the operations use recursive generators. In this case argument to the add function is different each time.<br />However in some cases the same function with same argument is called recursively.  For e.g:- In case of division<br />  <pre style=""><code style="color: black;"> def div(s1, s2):  <br />   a, b = s1[0], s2[0]  <br />   def gen():  <br />     yield a/b  <br />     iterator = s2 * gen()  <br />     for t in iterator:  <br />       yield -t/b </code></pre><pre style=""><code style="color: black;">   for t in gen():</code></pre><pre style=""><code style="color: black;">      yield t </code></pre>gen() is called recursively with the same arguments (no arguments in this case). <br />I'll try to optimize recursive generators if possible over the next few days.<br /><br />Other problem I'm facing is args of Stream class. It is necessary that args of all Basic instances should be of type Basic. But the Stream class takes a generator object as an argument.<br /><br />Next week:-<br />- Optimize recursive generators if possible<br />- Generator object as Basic instance? (Find solution for this)<br />- Implement all necessary ``eval`` routines for FPS like _eval_derivative, _eval_leadterm etc.<br /><br /></div></div></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://gsocblog.blogspot.com/2014/07/this-week-i-converted-all-operations-on.html">by Avichal Dayal (noreply@blogger.com) at July 22, 2014 01:11 PM</a>
+</p>
+</div>
+</div>
+
+
+
+</div>
+<div class="channelgroup">
+
+
+
+
+
+
+
 <h3><a href="http://geekpy.blogspot.com/" title="Akshay Narasimha">Akshay Narasimha</a></h3>
 
 
@@ -5499,67 +5530,6 @@ Thats all for now :) Will get back next week!</p></div>
 </div>
 
 </div>
-<div class="daygroup">
-<h2>June 09, 2014</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="https://hargup.github.io/" title="Harsh's blog">Harsh Gupta</a></h3>
-
-
-<div class="entrygroup" id="https://hargup.github.io/posts/week-3.html">
-<h4 lang="en"><a href="https://hargup.github.io/posts/week-3.html">week 3</a></h4>
-<div class="entry">
-<div class="content">
-<p>Hi,
-At the start of this week I wrote a method to check if a given solution
-lies in the domain of the equation or not. The problem it targeted was equations like <code>(x
-- 1)/(1 + 1/(x - 1))</code> though at <code>x = 1</code> the eqution has value zero the point is
-not present in the domain of the given equation. Though there is some
-disagreement on the implementation, the idea was to traverse the expression
-tree and check if any of the subexpression goes unbounded for the given
-value.  Later I observed that caching was messing with the tests. Sometimes
-the tests passed and sometimes the same test suit run without any
-modification in the code failed. To do the check on the subexpressions I need
-to have a copy of the original equation before the solver performs any
-simplification on it. Being not sure of the mutability of the equations
-I used deepcopy to copy the original equation to a variable. Later in a
-meeting we figured out that deepcopy was messing with caching. Aaron told me
-that every expression in sympy is immutable so don't need to perform deepcopy
-on anything.</p>
-<p>This week we will restart working on the sets to represent infinite solutions,
-Almost every equation in complex domain other than polynomials and rationals
-has infinitly many solutions. For example even the simple equation <code>exp(x) ==
-1</code> has infinitely many solutions that is <code>i*2*n*pi</code> where <code>n</code> is an integer.
-To return these solutions we first need to have infrastructure to handle them.
-The old(current) solvers does it wrong, it implicity mixes up the complex and real
-domains, the answer it returns to <code>exp(x) == 1</code> is only <code>[0]</code>. Earlier I was also doing it wrong
-so I decided that I should have two seperate solvers for reals and complex
-instead of one. This also simplifed the code for the reals solvers to a large
-extent.</p></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="https://hargup.github.io/posts/week-3.html">by Harsh Gupta at June 09, 2014 02:50 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -5586,13 +5556,13 @@ extent.</p></div>
 <a href="http://angadhsympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://angadhsympy.wordpress.com" class="message" title="no activity in 7 days">Angadh Nanjangud</a>
 </li>
 <li>
-<a href="http://www.blogger.com/feeds/283806077182880539/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://gsocblog.blogspot.com/" class="message" title="no activity in 7 days">Avichal Dayal</a>
+<a href="http://www.blogger.com/feeds/283806077182880539/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://gsocblog.blogspot.com/" title="GSoC 2014 with SymPy">Avichal Dayal</a>
 </li>
 <li>
 <a href="http://www.catchmrbharath.in/programming.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a class="message" title="404: not found">Bharath M R</a>
 </li>
 <li>
-<a href="http://brianegranger.com/?feed=rss2" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://brianegranger.com" class="message" title="no activity in 7 days">Brian Granger</a>
+<a href="http://brianegranger.com/?feed=rss2" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://brianegranger.com" class="message" title="internal server error">Brian Granger</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/267967203861801529/posts/default/-/SymPy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://straightupcoding.blogspot.com/search/label/SymPy" class="message" title="no activity in 7 days">Brian Jorgensen</a>
@@ -5733,7 +5703,7 @@ extent.</p></div>
 
 <p>
 <strong>Last updated:</strong><br>
-July 22, 2014 06:21 AM<br>
+July 22, 2014 01:21 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>

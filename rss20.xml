@@ -8,6 +8,14 @@
 	<description>Planet SymPy - http://planet.sympy.org/</description>
 
 <item>
+	<title>Avichal Dayal</title>
+	<guid isPermaLink="false">tag:blogger.com,1999:blog-283806077182880539.post-5238978956281178700</guid>
+	<link>http://gsocblog.blogspot.com/2014/07/this-week-i-converted-all-operations-on.html</link>
+	<description>&lt;div style=&quot;text-align: left;&quot; dir=&quot;ltr&quot;&gt;&lt;div style=&quot;text-align: left;&quot; dir=&quot;ltr&quot;&gt;This week I converted all the operations on FPS to work with generators.&lt;br /&gt;For e.g.:-&lt;br /&gt;Addition for two series is something like&lt;br /&gt;&lt;pre style=&quot;&quot;&gt;&lt;code style=&quot;color: black;&quot;&gt; def add(s1, s2):  &lt;br /&gt;   yield s1[0] + s2[0]  &lt;br /&gt;   s1, s2 = s1.tail, s2.tail  &lt;br /&gt;   for t in add(s1, s2):  &lt;br /&gt;     yield t  &lt;br /&gt;&lt;/code&gt;&lt;/pre&gt;&lt;br /&gt;Almost all the operations use recursive generators. In this case argument to the add function is different each time.&lt;br /&gt;However in some cases the same function with same argument is called recursively.  For e.g:- In case of division&lt;br /&gt;  &lt;pre style=&quot;&quot;&gt;&lt;code style=&quot;color: black;&quot;&gt; def div(s1, s2):  &lt;br /&gt;   a, b = s1[0], s2[0]  &lt;br /&gt;   def gen():  &lt;br /&gt;     yield a/b  &lt;br /&gt;     iterator = s2 * gen()  &lt;br /&gt;     for t in iterator:  &lt;br /&gt;       yield -t/b &lt;/code&gt;&lt;/pre&gt;&lt;pre style=&quot;&quot;&gt;&lt;code style=&quot;color: black;&quot;&gt;   for t in gen():&lt;/code&gt;&lt;/pre&gt;&lt;pre style=&quot;&quot;&gt;&lt;code style=&quot;color: black;&quot;&gt;      yield t &lt;/code&gt;&lt;/pre&gt;gen() is called recursively with the same arguments (no arguments in this case). &lt;br /&gt;I'll try to optimize recursive generators if possible over the next few days.&lt;br /&gt;&lt;br /&gt;Other problem I'm facing is args of Stream class. It is necessary that args of all Basic instances should be of type Basic. But the Stream class takes a generator object as an argument.&lt;br /&gt;&lt;br /&gt;Next week:-&lt;br /&gt;- Optimize recursive generators if possible&lt;br /&gt;- Generator object as Basic instance? (Find solution for this)&lt;br /&gt;- Implement all necessary ``eval`` routines for FPS like _eval_derivative, _eval_leadterm etc.&lt;br /&gt;&lt;br /&gt;&lt;/div&gt;&lt;/div&gt;</description>
+	<pubDate>Tue, 22 Jul 2014 13:11:51 +0000</pubDate>
+	<author>noreply@blogger.com (Avichal Dayal)</author>
+</item>
+<item>
 	<title>Akshay Narasimha: Gsoc Week-9</title>
 	<guid isPermaLink="false">tag:blogger.com,1999:blog-54146973659574488.post-6754341602192868346</guid>
 	<link>http://geekpy.blogspot.com/2014/07/gsoc-week-9.html</link>
@@ -3890,38 +3898,6 @@ Thats all for now :) Will get back next week!&lt;/p&gt;</description>
 	<description>&lt;div style=&quot;text-align: left;&quot; dir=&quot;ltr&quot;&gt;Time is actually flying as the third week of Gsoc has come to an end. This week I have completed the implementation of the line class in 3D which includes geometric entities like Line, Ray and Segment. The link to the PR is &lt;a href=&quot;https://github.com/sympy/sympy/pull/7554&quot;&gt;Here&lt;/a&gt;.&lt;br /&gt;It hasn't been merged yet but  I will get it merged soon.&lt;br /&gt;&lt;br /&gt;Implementation:&lt;br /&gt;&lt;br /&gt;Line3D:&lt;br /&gt; &lt;div style=&quot;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; L = Line3D(Point3D(2, 3, 4), Point3D(3, 5, 1))&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; L&lt;/div&gt;&lt;div style=&quot;&quot;&gt;Line3D(Point3D(2, 3, 4), Point3D(3, 5, 1))&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; L.points&lt;/div&gt;&lt;div style=&quot;&quot;&gt;(Point3D(2, 3, 4), Point3D(3, 5, 1))&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; l = Line3D(Point3D(1, 2, 3), direction_ratio=[1, 2, 3]) &lt;/div&gt;&lt;div style=&quot;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; l&lt;/div&gt;&lt;div style=&quot;&quot;&gt;Line3D(Point3D(1, 2, 3), Point3D(2, 4, 6))&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;br /&gt;&lt;/div&gt;&lt;div style=&quot;&quot;&gt;Ray3D:&lt;/div&gt;&lt;div style=&quot;&quot;&gt;r = Ray3D(Point3D(2, 3, 4), Point3D(3, 5, 0))&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; r&lt;/div&gt;&lt;div style=&quot;&quot;&gt;Ray3D(Point3D(2, 3, 4), Point3D(3, 5, 0))&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; r.points&lt;/div&gt;&lt;div style=&quot;&quot;&gt;(Point3D(2, 3, 4), Point3D(3, 5, 0))&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; r.source&lt;/div&gt;&lt;div style=&quot;&quot;&gt;Point3D(2, 3, 4)&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; r.xdirection&lt;/div&gt;&lt;div style=&quot;&quot;&gt;oo&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; r.ydirection&lt;/div&gt;&lt;div style=&quot;&quot;&gt;oo&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; r.zdirection&lt;/div&gt;&lt;div style=&quot;&quot;&gt; -oo&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; r.direction_ratio&lt;/div&gt;&lt;div style=&quot;&quot;&gt;[1, 2, -4]&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;br /&gt;&lt;/div&gt;&lt;div style=&quot;&quot;&gt;Segment3D:&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; s = Segment3D(Point3D(4, 3, 9), Point3D(1, 1, 7))&lt;/div&gt;&amp;gt;&amp;gt;&amp;gt; s&lt;br /&gt;Segment3D(Point3D(1, 1, 7), Point3D(4, 3, 9)) &lt;br /&gt;&lt;div style=&quot;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; s.points&lt;/div&gt;&lt;div style=&quot;&quot;&gt;(Point3D(1, 1, 7), Point3D(4, 3, 9))&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; s.length&lt;/div&gt;&lt;div style=&quot;&quot;&gt;sqrt(17)&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&amp;gt;&amp;gt;&amp;gt; s.midpoint&lt;/div&gt;&lt;div style=&quot;&quot;&gt;Point3D(5/2, 2, 8)&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;br /&gt;&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;br /&gt;&lt;/div&gt;&lt;div style=&quot;&quot;&gt;Each of the above classes inherit methods from the LinearEntity3D class(Base class).These include:&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;br /&gt;&lt;/div&gt;&lt;ul class=&quot;task-list&quot;&gt;&lt;li&gt;is_concurrent&lt;/li&gt;&lt;li&gt;is_parallel&lt;/li&gt;&lt;li&gt;is_perpendicular&lt;/li&gt;&lt;li&gt;angle_between&lt;/li&gt;&lt;li&gt;parallel_line&lt;/li&gt;&lt;li&gt;perpendicular_line&lt;/li&gt;&lt;li&gt;projection&lt;/li&gt;&lt;li&gt;intersection&lt;/li&gt;&lt;li&gt;arbitrary_point &lt;/li&gt;&lt;/ul&gt;&lt;div style=&quot;&quot;&gt;&lt;br /&gt;&lt;/div&gt;&lt;br /&gt;This week I will start working on the Plane class which as mentioned in the previous post will bridge the gap for the interactions between 2D and 3D entities. Until then cheers!&lt;br /&gt;&lt;br /&gt;&lt;/div&gt;</description>
 	<pubDate>Tue, 10 Jun 2014 09:57:15 +0000</pubDate>
 	<author>noreply@blogger.com (Akshay Narasimha)</author>
-</item>
-<item>
-	<title>Harsh Gupta: week 3</title>
-	<guid isPermaLink="true">https://hargup.github.io/posts/week-3.html</guid>
-	<link>https://hargup.github.io/posts/week-3.html</link>
-	<description>&lt;p&gt;Hi,
-At the start of this week I wrote a method to check if a given solution
-lies in the domain of the equation or not. The problem it targeted was equations like &lt;code&gt;(x
-- 1)/(1 + 1/(x - 1))&lt;/code&gt; though at &lt;code&gt;x = 1&lt;/code&gt; the eqution has value zero the point is
-not present in the domain of the given equation. Though there is some
-disagreement on the implementation, the idea was to traverse the expression
-tree and check if any of the subexpression goes unbounded for the given
-value.  Later I observed that caching was messing with the tests. Sometimes
-the tests passed and sometimes the same test suit run without any
-modification in the code failed. To do the check on the subexpressions I need
-to have a copy of the original equation before the solver performs any
-simplification on it. Being not sure of the mutability of the equations
-I used deepcopy to copy the original equation to a variable. Later in a
-meeting we figured out that deepcopy was messing with caching. Aaron told me
-that every expression in sympy is immutable so don't need to perform deepcopy
-on anything.&lt;/p&gt;
-&lt;p&gt;This week we will restart working on the sets to represent infinite solutions,
-Almost every equation in complex domain other than polynomials and rationals
-has infinitly many solutions. For example even the simple equation &lt;code&gt;exp(x) ==
-1&lt;/code&gt; has infinitely many solutions that is &lt;code&gt;i*2*n*pi&lt;/code&gt; where &lt;code&gt;n&lt;/code&gt; is an integer.
-To return these solutions we first need to have infrastructure to handle them.
-The old(current) solvers does it wrong, it implicity mixes up the complex and real
-domains, the answer it returns to &lt;code&gt;exp(x) == 1&lt;/code&gt; is only &lt;code&gt;[0]&lt;/code&gt;. Earlier I was also doing it wrong
-so I decided that I should have two seperate solvers for reals and complex
-instead of one. This also simplifed the code for the reals solvers to a large
-extent.&lt;/p&gt;</description>
-	<pubDate>Mon, 09 Jun 2014 14:50:06 +0000</pubDate>
 </item>
 
 </channel>
