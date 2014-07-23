@@ -24,6 +24,70 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>July 23, 2014</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://sushant-hiray.in" title="Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy">Sushant Hiray</a></h3>
+
+
+<div class="entrygroup" id="http://sushant-hiray.in/posts/gsoc/csympy-week9/">
+<h4><a href="http://sushant-hiray.in/posts/gsoc/csympy-week9/">GSoC Week 9: Complexions in Complex Module</a></h4>
+<div class="entry">
+<div class="content">
+<p>Week 9 for GSoC ended a couple of days back. I’m still working on the Complex Module.</p>
+
+<h1 id="progress">Progress</h1>
+
+<p>I started of the week continuing the work on <a href="https://github.com/sympy/csympy/pull/248">pull 248</a>.
+<br /><br />
+Initially I started working on the <code>add</code> and <code>mul</code> functions and integrating the <code>complex</code> module with them. This part was pretty easy as Complex addition and Complex multiplication was completely implemented. Intially I just added special cases for the case of Complex in <code>pow</code>. But this quickly ran into issues as <code>is_canonical</code> failed in some testcases.
+<br /><br />
+Next I simplified the complex power for the following cases:</p>
+
+<ul>
+  <li>When <code>exp</code> is 1 or -1</li>
+  <li>When the <code>base</code> is purely imaginary and <code>exp</code> is integer.</li>
+</ul>
+
+<p>Following this I made appropriate changes to <code>is_canonical</code> for <code>pow</code>
+<br /><br />
+Meanwhile <a href="https://github.com/certik">@certik</a> sent a couple of PR’s <a href="https://github.com/sushant-hiray/csympy/pull/1">sushant-hiray/csympy/#1</a> and <a href="https://github.com/sushant-hiray/csympy/pull/2">sushant-hiray/csympy/#2</a> for implementing the Python wrappers for Complex Module.
+I spent some time trying to sync the wrappers and make sure they work as intended.
+<br /><br />
+One important fix needed was to improve the printing. Over the entire PR, the printing has been changed multiple times to match the SymPy output. With this PR I’ve updated the current existing printing for <code>add</code>, <code>mul</code> as well as <code>pow</code>
+<br /><br />
+The <code>expand</code> function is also updated to handle the case of Complex Numbers. Currently it doesn’t expand terms like: <code>(2 + 3I)^n</code>. Apart from this all the issues which were found have been fixed.</p>
+
+<h1 id="the-week-ahead">The Week Ahead</h1>
+<p>Merge the current PR and send a new PR for handling the cases like <code>(2 + 3I)^n</code> in <code>expand</code></p>
+
+<p><br />
+Thats all for now :) Will get back next week!</p></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://sushant-hiray.in/posts/gsoc/csympy-week9/">July 23, 2014 05:30 PM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>July 22, 2014</h2>
 
 <div class="channelgroup">
@@ -5499,38 +5563,6 @@ Thats all for now :) Will get back next week!</p></div>
 </div>
 
 
-
-</div>
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://geekpy.blogspot.com/" title="Akshay Narasimha">Akshay Narasimha</a></h3>
-
-
-<div class="entrygroup" id="tag:blogger.com,1999:blog-54146973659574488.post-8362916681945518929">
-<h4><a href="http://geekpy.blogspot.com/2014/06/gsoc14-week-3.html">Gsoc14 Week-3</a></h4>
-<div class="entry">
-<div class="content">
-<div style="text-align: left;" dir="ltr">Time is actually flying as the third week of Gsoc has come to an end. This week I have completed the implementation of the line class in 3D which includes geometric entities like Line, Ray and Segment. The link to the PR is <a href="https://github.com/sympy/sympy/pull/7554">Here</a>.<br />It hasn't been merged yet but  I will get it merged soon.<br /><br />Implementation:<br /><br />Line3D:<br /> <div style="">&gt;&gt;&gt; L = Line3D(Point3D(2, 3, 4), Point3D(3, 5, 1))</div><div style="">&gt;&gt;&gt; L</div><div style="">Line3D(Point3D(2, 3, 4), Point3D(3, 5, 1))</div><div style="">&gt;&gt;&gt; L.points</div><div style="">(Point3D(2, 3, 4), Point3D(3, 5, 1))</div><div style="">&gt;&gt;&gt; l = Line3D(Point3D(1, 2, 3), direction_ratio=[1, 2, 3]) </div><div style="">&gt;&gt;&gt; l</div><div style="">Line3D(Point3D(1, 2, 3), Point3D(2, 4, 6))</div><div style=""><br /></div><div style="">Ray3D:</div><div style="">r = Ray3D(Point3D(2, 3, 4), Point3D(3, 5, 0))</div><div style="">&gt;&gt;&gt; r</div><div style="">Ray3D(Point3D(2, 3, 4), Point3D(3, 5, 0))</div><div style="">&gt;&gt;&gt; r.points</div><div style="">(Point3D(2, 3, 4), Point3D(3, 5, 0))</div><div style="">&gt;&gt;&gt; r.source</div><div style="">Point3D(2, 3, 4)</div><div style="">&gt;&gt;&gt; r.xdirection</div><div style="">oo</div><div style="">&gt;&gt;&gt; r.ydirection</div><div style="">oo</div><div style="">&gt;&gt;&gt; r.zdirection</div><div style=""> -oo</div><div style="">&gt;&gt;&gt; r.direction_ratio</div><div style="">[1, 2, -4]</div><div style=""><br /></div><div style="">Segment3D:</div><div style="">&gt;&gt;&gt; s = Segment3D(Point3D(4, 3, 9), Point3D(1, 1, 7))</div>&gt;&gt;&gt; s<br />Segment3D(Point3D(1, 1, 7), Point3D(4, 3, 9)) <br /><div style="">&gt;&gt;&gt; s.points</div><div style="">(Point3D(1, 1, 7), Point3D(4, 3, 9))</div><div style="">&gt;&gt;&gt; s.length</div><div style="">sqrt(17)</div><div style="">&gt;&gt;&gt; s.midpoint</div><div style="">Point3D(5/2, 2, 8)</div><div style=""><br /></div><div style=""><br /></div><div style="">Each of the above classes inherit methods from the LinearEntity3D class(Base class).These include:</div><div style=""><br /></div><ul class="task-list"><li>is_concurrent</li><li>is_parallel</li><li>is_perpendicular</li><li>angle_between</li><li>parallel_line</li><li>perpendicular_line</li><li>projection</li><li>intersection</li><li>arbitrary_point </li></ul><div style=""><br /></div><br />This week I will start working on the Plane class which as mentioned in the previous post will bridge the gap for the interactions between 2D and 3D entities. Until then cheers!<br /><br /></div></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://geekpy.blogspot.com/2014/06/gsoc14-week-3.html">by Akshay Narasimha (noreply@blogger.com) at June 10, 2014 09:57 AM</a>
-</p>
-</div>
-</div>
-
-
 </div>
 
 </div>
@@ -5680,7 +5712,7 @@ Thats all for now :) Will get back next week!</p></div>
 <a href="http://blog.sudhanshumishra.in/feeds/posts/default/-/sympy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://blog.sudhanshumishra.in/search/label/sympy" title="Shortlog">Sudhanshu Mishra</a>
 </li>
 <li>
-<a href="http://sushant-hiray.in/feed.gsoc.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sushant-hiray.in" class="message" title="no activity in 7 days">Sushant Hiray</a>
+<a href="http://sushant-hiray.in/feed.gsoc.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sushant-hiray.in" title="Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy">Sushant Hiray</a>
 </li>
 <li>
 <a href="http://tarzzz.github.io/rss.gsoc.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://tarzzz.github.io/gsoc14" class="message" title="no activity in 7 days">Tarun Gaba</a>
@@ -5707,7 +5739,7 @@ Thats all for now :) Will get back next week!</p></div>
 
 <p>
 <strong>Last updated:</strong><br>
-July 23, 2014 07:01 AM<br>
+July 23, 2014 05:41 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
