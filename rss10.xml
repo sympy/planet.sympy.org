@@ -14,6 +14,7 @@
 	<items>
 		<rdf:Seq>
 			<rdf:li rdf:resource="http://tarzzz.github.io/gsoc14/first-week.html" />
+			<rdf:li rdf:resource="https://hargup.github.io/posts/week-10.html" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-8847459392628952171.post-4950031512117145558" />
 			<rdf:li rdf:resource="http://codesachin.wordpress.com/2014/07/28/gsoc-week-10-polishing-off-the-main-vector-framework/" />
 			<rdf:li rdf:resource="http://sushant-hiray.in/posts/gsoc/csympy-week10/" />
@@ -72,7 +73,6 @@
 			<rdf:li rdf:resource="http://tarzzz.github.io/gsoc14/fourth-week.html" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-8847459392628952171.post-2737301790391464158" />
 			<rdf:li rdf:resource="http://sushant-hiray.in/posts/gsoc/csympy-week4/" />
-			<rdf:li rdf:resource="http://kundankumar185.wordpress.com/?p=57" />
 		</rdf:Seq>
 	</items>
 </channel>
@@ -135,6 +135,62 @@ Happy Coding!
 
 [ &amp;lt;-Back to posts ](/gsoc14)</content:encoded>
 	<dc:date>2014-07-29T16:00:41+00:00</dc:date>
+</item>
+<item rdf:about="https://hargup.github.io/posts/week-10.html">
+	<title>Harsh Gupta: week 10: Radical equations</title>
+	<link>https://hargup.github.io/posts/week-10.html</link>
+	<content:encoded>&lt;p&gt;This week I worked on the solvers for the equations with radicals.
+Suppose you have to solve&lt;/p&gt;
+&lt;p&gt;$$ \sqrt{x} + x - 2 = 0 $$.&lt;/p&gt;
+&lt;p&gt;then you have to move the radical to the right hand side of the equation.&lt;/p&gt;
+&lt;p&gt;$$ x - 2 = - \sqrt{x} $$&lt;/p&gt;
+&lt;p&gt;and then square at both sides&lt;/p&gt;
+&lt;p&gt;$$ x^2 - 4x + 4 = x $$&lt;/p&gt;
+&lt;p&gt;Now the equation is a polynomial in \( x \) can be solved with usual
+polynomial solving methods. Note that squaring both sides produce some extra
+solutions and we will have to check all the solutions obtained against the
+original equation.  If there are more than one radicals involved we may
+have to apply the method recursively. For example in solving
+\( \sqrt{2x + 9} - \sqrt{x + 1} - \sqrt{x + 4} = 0 \)
+the method will recurse twice.&lt;/p&gt;
+&lt;p&gt;To implement the method I tried a pattern matching approach.
+The
+squaring part is easy the tricky part is identifying which part to move to
+the right hand side. First I tried to match the expression with the form
+&lt;code&gt;sqrt(p) + q&lt;/code&gt; but it failed even for case like &lt;code&gt;4*sqrt(x) + x - 2&lt;/code&gt; because no
+pattern matched to it. I had to use &lt;code&gt;a*sqrt(p) + q&lt;/code&gt; with the condition that the
+expression matched to a shouldn't be zero. Now I can simply move the expression
+matched with &lt;code&gt;p&lt;/code&gt; and terms multiplicated with it to the RHS and square both
+the sides.&lt;/p&gt;
+&lt;p&gt;Notice that this method for solving sqrt equation can work with any radical
+equation, if it were cube root instead of sqrt I just had to cube both the
+sides. OK so how do I mathch that expression? I tried to pattern matching with
+assumptions on the wild symbols but it doesn't work.  I tried to match with
+somthing like &lt;code&gt;a*p**Rational(1, m) + q&lt;/code&gt; but this also didn't work out because
+Rational(1, m) raises TypeError no matter what the assumption on the variable
+are.  There is a proposal for a new pattern matcher, I have not closely checked
+the details but it will be able to work with assumption. You can see the
+proposal on the wiki
+&lt;a href=&quot;https://github.com/sympy/sympy/wiki/Proposal-for-a-new-pattern-matching&quot;&gt;here&lt;/a&gt;
+and if it is implemented then things will be good but I can't wait for it.
+I had no other option to check term by term for rational power. Here's the
+implementation&lt;/p&gt;
+&lt;pre class=&quot;code literal-block&quot;&gt;&lt;span class=&quot;n&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_has_rational_power&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;expr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;q&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Wild&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;sc&quot;&gt;'a'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Wild&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;sc&quot;&gt;'p'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Wild&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;sc&quot;&gt;'q'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;pattern_match&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;expr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;match&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;q&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pattern_match&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;None&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;or&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pattern_match&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;S&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Zero&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;elif&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;isinstance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pattern_match&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;q&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Rational&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pattern_match&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;q&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;q&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;S&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;One&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pattern_match&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;q&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;q&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;isinstance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pattern_match&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Pow&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;or&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;isinstance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pattern_match&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Mul&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;nl&quot;&gt;else:&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_has_rational_power&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pattern_match&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+&lt;/pre&gt;</content:encoded>
+	<dc:date>2014-07-29T12:09:01+00:00</dc:date>
+	<dc:creator>Harsh Gupta</dc:creator>
 </item>
 <item rdf:about="tag:blogger.com,1999:blog-8847459392628952171.post-4950031512117145558">
 	<title>Sudhanshu Mishra: GSoC'14 Week 10: Adding more to utils</title>
@@ -3814,19 +3870,6 @@ I have also decided to implement the LambertW function. It wasn’t a part of my
 &lt;p&gt;&lt;br /&gt;
 Thats all for now :) Will get back next week!&lt;/p&gt;</content:encoded>
 	<dc:date>2014-06-15T18:20:00+00:00</dc:date>
-</item>
-<item rdf:about="http://kundankumar185.wordpress.com/?p=57">
-	<title>Kundan Kumar: GSoC week 4: Implemented system of three linear equation of first order</title>
-	<link>http://kundankumar185.wordpress.com/2014/06/15/gsoc-week-4-implemented-system-of-three-linear-equation-of-first-order/</link>
-	<content:encoded>&lt;p&gt;I will summarize the work completed until now since beginning of first week. These included&lt;/p&gt;
-&lt;p&gt;&amp;gt; Implementing classify_sysode to classify all type of equations on the basis of linearity, number of equations, order of equations.&lt;/p&gt;
-&lt;p&gt;&amp;gt; Implementing system of two linear equations of first order which includes seven type of equation of various forms.&lt;/p&gt;
-&lt;p&gt;&amp;gt; Implementing system of two linear equations of second order which has eleven type of equation.&lt;/p&gt;
-&lt;p&gt;&amp;gt; Implementing system of three linear equations of third order which has five type of equation both of constant coefficient and variable coefficients.&lt;/p&gt;
-&lt;p&gt;&amp;gt; Implementing homogeneous system of n linear equations of first order of constant coefficients.&lt;/p&gt;
-&lt;p&gt;Those were the work completed till now of which last week work was on implemention of system of three linear equations of 1st order and homogeneous system of n equations. I am currently working on implementing system of two and three nonlinear system of equations of first order and aiming to complete it by next week. Its been a good progress till now and hope to work likely in coming weeks &lt;span class=&quot;wp-smiley emoji emoji-smile&quot; title=&quot;:)&quot;&gt;:)&lt;/span&gt; .&lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/kundankumar185.wordpress.com/57/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/kundankumar185.wordpress.com/57/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://pixel.wp.com/b.gif?host=kundankumar185.wordpress.com&amp;amp;blog=68025302&amp;amp;post=57&amp;amp;subd=kundankumar185&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
-	<dc:date>2014-06-15T09:26:39+00:00</dc:date>
-	<dc:creator>Kundan</dc:creator>
 </item>
 
 </rdf:RDF>

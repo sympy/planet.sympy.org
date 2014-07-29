@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2014-07-29T16:01:03Z</updated>
+  <updated>2014-07-29T19:21:02Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -79,7 +79,76 @@ Happy Coding!
       <link href="http://tarzzz.github.io/rss.gsoc.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts categorized under GSoC</subtitle>
       <title>Tarun Gaba's blog - GSoC</title>
-      <updated>2014-07-29T16:00:41Z</updated>
+      <updated>2014-07-29T19:20:39Z</updated>
+    </source>
+  </entry>
+
+  <entry xml:lang="en">
+    <id>https://hargup.github.io/posts/week-10.html</id>
+    <link href="https://hargup.github.io/posts/week-10.html" rel="alternate" type="text/html"/>
+    <title>week 10: Radical equations</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>This week I worked on the solvers for the equations with radicals.
+Suppose you have to solve</p>
+<p>$$ \sqrt{x} + x - 2 = 0 $$.</p>
+<p>then you have to move the radical to the right hand side of the equation.</p>
+<p>$$ x - 2 = - \sqrt{x} $$</p>
+<p>and then square at both sides</p>
+<p>$$ x^2 - 4x + 4 = x $$</p>
+<p>Now the equation is a polynomial in \( x \) can be solved with usual
+polynomial solving methods. Note that squaring both sides produce some extra
+solutions and we will have to check all the solutions obtained against the
+original equation.  If there are more than one radicals involved we may
+have to apply the method recursively. For example in solving
+\( \sqrt{2x + 9} - \sqrt{x + 1} - \sqrt{x + 4} = 0 \)
+the method will recurse twice.</p>
+<p>To implement the method I tried a pattern matching approach.
+The
+squaring part is easy the tricky part is identifying which part to move to
+the right hand side. First I tried to match the expression with the form
+<code>sqrt(p) + q</code> but it failed even for case like <code>4*sqrt(x) + x - 2</code> because no
+pattern matched to it. I had to use <code>a*sqrt(p) + q</code> with the condition that the
+expression matched to a shouldn't be zero. Now I can simply move the expression
+matched with <code>p</code> and terms multiplicated with it to the RHS and square both
+the sides.</p>
+<p>Notice that this method for solving sqrt equation can work with any radical
+equation, if it were cube root instead of sqrt I just had to cube both the
+sides. OK so how do I mathch that expression? I tried to pattern matching with
+assumptions on the wild symbols but it doesn't work.  I tried to match with
+somthing like <code>a*p**Rational(1, m) + q</code> but this also didn't work out because
+Rational(1, m) raises TypeError no matter what the assumption on the variable
+are.  There is a proposal for a new pattern matcher, I have not closely checked
+the details but it will be able to work with assumption. You can see the
+proposal on the wiki
+<a href="https://github.com/sympy/sympy/wiki/Proposal-for-a-new-pattern-matching">here</a>
+and if it is implemented then things will be good but I can't wait for it.
+I had no other option to check term by term for rational power. Here's the
+implementation</p>
+<pre class="code literal-block"><span class="n">def</span> <span class="n">_has_rational_power</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span><span class="o">:</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">q</span> <span class="o">=</span> <span class="n">Wild</span><span class="p">(</span><span class="sc">'a'</span><span class="p">),</span> <span class="n">Wild</span><span class="p">(</span><span class="sc">'p'</span><span class="p">),</span> <span class="n">Wild</span><span class="p">(</span><span class="sc">'q'</span><span class="p">)</span>
+    <span class="n">pattern_match</span> <span class="o">=</span> <span class="n">expr</span><span class="p">.</span><span class="n">match</span><span class="p">(</span><span class="n">a</span><span class="o">*</span><span class="n">p</span><span class="o">**</span><span class="n">q</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">pattern_match</span> <span class="n">is</span> <span class="n">None</span> <span class="n">or</span> <span class="n">pattern_match</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="n">is</span> <span class="n">S</span><span class="p">.</span><span class="n">Zero</span><span class="o">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">False</span><span class="p">,</span> <span class="n">None</span><span class="p">)</span>
+    <span class="n">elif</span> <span class="n">isinstance</span><span class="p">(</span><span class="n">pattern_match</span><span class="p">[</span><span class="n">q</span><span class="p">],</span> <span class="n">Rational</span><span class="p">)</span><span class="o">:</span>
+        <span class="k">if</span> <span class="n">not</span> <span class="n">pattern_match</span><span class="p">[</span><span class="n">q</span><span class="p">].</span><span class="n">q</span> <span class="o">==</span> <span class="n">S</span><span class="p">.</span><span class="n">One</span><span class="o">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">True</span><span class="p">,</span> <span class="n">pattern_match</span><span class="p">[</span><span class="n">q</span><span class="p">].</span><span class="n">q</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">not</span> <span class="n">isinstance</span><span class="p">(</span><span class="n">pattern_match</span><span class="p">[</span><span class="n">a</span><span class="p">],</span> <span class="n">Pow</span><span class="p">)</span> <span class="n">or</span> <span class="n">isinstance</span><span class="p">(</span><span class="n">pattern_match</span><span class="p">[</span><span class="n">a</span><span class="p">],</span> <span class="n">Mul</span><span class="p">)</span><span class="o">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">False</span><span class="p">,</span> <span class="n">None</span><span class="p">)</span>
+    <span class="nl">else:</span>
+        <span class="k">return</span> <span class="n">_has_rational_power</span><span class="p">(</span><span class="n">pattern_match</span><span class="p">[</span><span class="n">a</span><span class="p">])</span>
+</pre></div>
+    </summary>
+    <updated>2014-07-29T12:09:01Z</updated>
+    <category term="sympy"/>
+    <author>
+      <name>Harsh Gupta</name>
+    </author>
+    <source>
+      <id>https://hargup.github.io/</id>
+      <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
+      <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
+      <title>Harsh's blog</title>
+      <updated>2014-07-29T19:21:00Z</updated>
     </source>
   </entry>
 
@@ -164,7 +233,7 @@ Happy Coding!
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-07-29T16:00:43Z</updated>
+      <updated>2014-07-29T19:20:41Z</updated>
     </source>
   </entry>
 
@@ -247,7 +316,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-07-29T16:00:50Z</updated>
+      <updated>2014-07-29T19:20:49Z</updated>
     </source>
   </entry>
 
@@ -275,7 +344,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-07-29T16:01:00Z</updated>
+      <updated>2014-07-29T19:20:59Z</updated>
     </source>
   </entry>
 
@@ -302,7 +371,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-29T16:01:03Z</updated>
+      <updated>2014-07-29T19:21:01Z</updated>
     </source>
   </entry>
 
@@ -349,7 +418,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-07-29T16:00:50Z</updated>
+      <updated>2014-07-29T19:20:49Z</updated>
     </source>
   </entry>
 
@@ -498,7 +567,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-07-29T16:01:00Z</updated>
+      <updated>2014-07-29T19:20:59Z</updated>
     </source>
   </entry>
 
@@ -537,7 +606,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-07-29T16:00:42Z</updated>
+      <updated>2014-07-29T19:20:40Z</updated>
     </source>
   </entry>
 
@@ -561,7 +630,7 @@ mention that Sergey(one of my mentors) is damn good reviewer.</p></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-07-29T16:01:02Z</updated>
+      <updated>2014-07-29T19:21:00Z</updated>
     </source>
   </entry>
 
@@ -590,7 +659,7 @@ A problem that I am facing currently is the confusion about the Del operator. I 
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-07-29T16:00:43Z</updated>
+      <updated>2014-07-29T19:20:41Z</updated>
     </source>
   </entry>
 
@@ -700,7 +769,7 @@ on it.</p>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-29T16:01:03Z</updated>
+      <updated>2014-07-29T19:21:01Z</updated>
     </source>
   </entry>
 
@@ -1003,7 +1072,7 @@ just insomuch as there were more people at all.</p>
       <link href="http://asmeurer.github.io/blog/rss.xml" rel="self" type="application/rss+xml"/>
       <subtitle>My blog</subtitle>
       <title>Aaron Meurer's Blog</title>
-      <updated>2014-07-29T16:00:21Z</updated>
+      <updated>2014-07-29T19:20:17Z</updated>
     </source>
   </entry>
 
@@ -1031,7 +1100,7 @@ just insomuch as there were more people at all.</p>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-07-29T16:01:00Z</updated>
+      <updated>2014-07-29T19:20:59Z</updated>
     </source>
   </entry>
 
@@ -1067,7 +1136,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-07-29T16:00:50Z</updated>
+      <updated>2014-07-29T19:20:49Z</updated>
     </source>
   </entry>
 
@@ -1210,7 +1279,7 @@ a variable already solved then that solution is discarded.</li>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-07-29T16:01:02Z</updated>
+      <updated>2014-07-29T19:21:00Z</updated>
     </source>
   </entry>
 
@@ -1246,7 +1315,7 @@ The code for Dyadics is mostly done, the docs are on-going, and I am thinking of
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-07-29T16:00:43Z</updated>
+      <updated>2014-07-29T19:20:41Z</updated>
     </source>
   </entry>
 
@@ -1400,7 +1469,7 @@ project.</p></div>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-07-29T16:00:42Z</updated>
+      <updated>2014-07-29T19:20:40Z</updated>
     </source>
   </entry>
 
@@ -1426,7 +1495,7 @@ project.</p></div>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-29T16:01:03Z</updated>
+      <updated>2014-07-29T19:21:02Z</updated>
     </source>
   </entry>
 
@@ -2686,7 +2755,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-07-29T16:00:50Z</updated>
+      <updated>2014-07-29T19:20:49Z</updated>
     </source>
   </entry>
 
@@ -2801,7 +2870,7 @@ implementing new stuff!).
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-29T16:01:03Z</updated>
+      <updated>2014-07-29T19:21:02Z</updated>
     </source>
   </entry>
 
@@ -2834,7 +2903,7 @@ when solved for \( x \).</p></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-07-29T16:01:02Z</updated>
+      <updated>2014-07-29T19:21:00Z</updated>
     </source>
   </entry>
 
@@ -2951,7 +3020,7 @@ when solved for \( x \).</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-07-29T16:01:01Z</updated>
+      <updated>2014-07-29T19:20:59Z</updated>
     </source>
   </entry>
 
@@ -2984,7 +3053,7 @@ when solved for \( x \).</p></div>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-07-29T16:00:43Z</updated>
+      <updated>2014-07-29T19:20:41Z</updated>
     </source>
   </entry>
 
@@ -3210,7 +3279,7 @@ finally be submitted.</p>&lt;script type="text/javascript"&gt;
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-07-29T16:00:42Z</updated>
+      <updated>2014-07-29T19:20:40Z</updated>
     </source>
   </entry>
 
@@ -3278,7 +3347,7 @@ conceder the limiting value of the equation.</p>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-07-29T16:01:02Z</updated>
+      <updated>2014-07-29T19:21:00Z</updated>
     </source>
   </entry>
 
@@ -3341,7 +3410,7 @@ False</pre><p> </p>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-29T16:01:03Z</updated>
+      <updated>2014-07-29T19:21:01Z</updated>
     </source>
   </entry>
 
@@ -3408,7 +3477,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-07-29T16:00:50Z</updated>
+      <updated>2014-07-29T19:20:49Z</updated>
     </source>
   </entry>
 
@@ -3609,7 +3678,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-07-29T16:01:00Z</updated>
+      <updated>2014-07-29T19:20:59Z</updated>
     </source>
   </entry>
 
@@ -3642,7 +3711,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-07-29T16:00:43Z</updated>
+      <updated>2014-07-29T19:20:41Z</updated>
     </source>
   </entry>
 
@@ -3694,7 +3763,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-07-29T16:00:42Z</updated>
+      <updated>2014-07-29T19:20:40Z</updated>
     </source>
   </entry>
 
@@ -4692,7 +4761,7 @@ on infinitely indexed sets.</p></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-07-29T16:01:02Z</updated>
+      <updated>2014-07-29T19:21:00Z</updated>
     </source>
   </entry>
 
@@ -4795,7 +4864,7 @@ Not(ForAll((X,T), Implies(And(Person(X), Time(T)), CanFool(X, T))))</pre><p> </p
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-07-29T16:01:03Z</updated>
+      <updated>2014-07-29T19:21:02Z</updated>
     </source>
   </entry>
 
@@ -5024,38 +5093,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-07-29T16:00:50Z</updated>
-    </source>
-  </entry>
-
-  <entry xml:lang="en">
-    <id>http://kundankumar185.wordpress.com/?p=57</id>
-    <link href="http://kundankumar185.wordpress.com/2014/06/15/gsoc-week-4-implemented-system-of-three-linear-equation-of-first-order/" rel="alternate" type="text/html"/>
-    <title>GSoC week 4: Implemented system of three linear equation of first order</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">I will summarize the work completed until now since beginning of first week. These included &gt; Implementing classify_sysode to classify all type of equations on the basis of linearity, number of equations, order of equations. &gt; Implementing system of two linear equations of first order which includes seven type of equation of various forms. &gt;…<img alt="" border="0" height="1" src="http://pixel.wp.com/b.gif?host=kundankumar185.wordpress.com&amp;blog=68025302&amp;post=57&amp;subd=kundankumar185&amp;ref=&amp;feed=1" width="1"/></div>
-    </summary>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>I will summarize the work completed until now since beginning of first week. These included</p>
-<p>&gt; Implementing classify_sysode to classify all type of equations on the basis of linearity, number of equations, order of equations.</p>
-<p>&gt; Implementing system of two linear equations of first order which includes seven type of equation of various forms.</p>
-<p>&gt; Implementing system of two linear equations of second order which has eleven type of equation.</p>
-<p>&gt; Implementing system of three linear equations of third order which has five type of equation both of constant coefficient and variable coefficients.</p>
-<p>&gt; Implementing homogeneous system of n linear equations of first order of constant coefficients.</p>
-<p>Those were the work completed till now of which last week work was on implemention of system of three linear equations of 1st order and homogeneous system of n equations. I am currently working on implementing system of two and three nonlinear system of equations of first order and aiming to complete it by next week. Its been a good progress till now and hope to work likely in coming weeks <span class="wp-smiley emoji emoji-smile" title=":)">:)</span> .</p><br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/kundankumar185.wordpress.com/57/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/kundankumar185.wordpress.com/57/"/></a> <img alt="" border="0" height="1" src="http://pixel.wp.com/b.gif?host=kundankumar185.wordpress.com&amp;blog=68025302&amp;post=57&amp;subd=kundankumar185&amp;ref=&amp;feed=1" width="1"/></div>
-    </content>
-    <updated>2014-06-15T09:26:39Z</updated>
-    <category term="GSoC"/>
-    <author>
-      <name>Kundan</name>
-    </author>
-    <source>
-      <id>http://kundankumar185.wordpress.com</id>
-      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
-      <link href="http://kundankumar185.wordpress.com/feed/" rel="self" type="application/atom+xml"/>
-      <link href="http://kundankumar185.wordpress.com" rel="alternate" type="text/html"/>
-      <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
-      <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
-      <title>my experiments with life</title>
-      <updated>2014-07-29T16:01:00Z</updated>
+      <updated>2014-07-29T19:20:49Z</updated>
     </source>
   </entry>
 </feed>
