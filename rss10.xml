@@ -13,6 +13,7 @@
 
 	<items>
 		<rdf:Seq>
+			<rdf:li rdf:resource="http://codesachin.wordpress.com/2014/08/03/gsoc-week-11-a-major-bug-fix-and-printing/" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-54146973659574488.post-8171418961117224700" />
 			<rdf:li rdf:resource="tag:,2014-08-01:gsoc-week-10-11.html" />
 			<rdf:li rdf:resource="http://tarzzz.github.io/gsoc14/first-week.html" />
@@ -72,11 +73,29 @@
 			<rdf:li rdf:resource="https://hargup.github.io/posts/week-4.html" />
 			<rdf:li rdf:resource="http://blog.s-d-b.com/?p=67" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-54146973659574488.post-857251037734880412" />
-			<rdf:li rdf:resource="http://tarzzz.github.io/gsoc14/fourth-week.html" />
 		</rdf:Seq>
 	</items>
 </channel>
 
+<item rdf:about="http://codesachin.wordpress.com/2014/08/03/gsoc-week-11-a-major-bug-fix-and-printing/">
+	<title>Sachin Joglekar: GSoC Week 11: A major bug fix, and printing</title>
+	<link>http://codesachin.wordpress.com/2014/08/03/gsoc-week-11-a-major-bug-fix-and-printing/</link>
+	<content:encoded>&lt;p&gt;Jim brought my attention to a very crucial bug in my work this week. Well, SymPy now automatically detects folders to test by looking at the &lt;code&gt;__init__.py&lt;/code&gt; files. That is, a given folder in the SymPy code directory would _only_ be tested if it has &lt;code&gt;__init__.py&lt;/code&gt;. Since I hadn’t put any such file in _sympy/vector/tests_, they were being skipped till now! Thank God this got fixed.&lt;/p&gt;
+&lt;p&gt;I started out this week with the seemingly ‘easy’ task of implementing different kinds of printing functionalities for sympy.vector. Well, the basic methodology of doing things is pretty simple, if you just follow the documentation in the _sympy.printing.printer_ file. It will tell you all you need to know about – either implementing a new printer, or adding custom code for printing of your class (to an existing printer).&lt;/p&gt;
+&lt;p&gt;Some things I had to improve/word around-&lt;/p&gt;
+&lt;p&gt;1. BaseScalars had to be handled differently from BaseVectors, since BaseScalars are a part of other Exprs (that may be measure numbers in vectorial expressions), and they have their own dedicated printing methods. Hence, I had to implement the &lt;code&gt;_latex&lt;/code&gt; and &lt;code&gt;_pretty&lt;/code&gt; methods in BaseScalar itself.&lt;/p&gt;
+&lt;p&gt;2. The pretty _as well as_ latex printing for _both_ Vectors and Dyadics with a single &lt;code&gt;_print_BasisDependent&lt;/code&gt; method in the respective printers.&lt;/p&gt;
+&lt;p&gt;3. I used the printing code in _sympy.physics.vector_ as reference, though quite a few things had to be changed keeping in mind the inheritance from Expr, the structure and nature of the args being different, etc.&lt;br /&gt; I did improve on a few things. _physics.vector_’s pretty printing messes up when dealing with vectors whose measure numbers have varying ‘heights’.&lt;/p&gt;
+&lt;p&gt;Overall, it was quite a learning experience and tricky coding – to implement printing, compared to my initial impression of it being a boring and tedious job.&lt;/p&gt;
+&lt;p&gt;Well, I have implemented all the requried methods and tests (all of which pass). I have pushed them to my third GSoC PR, so thats in line. Hopefully, the dyadics PR will soon show all tests passing, after which Jason or I will get it merged. It will add the OOP structure, and the dyadic code, as well as fix some crucial bugs.&lt;/p&gt;
+&lt;p&gt;A demo of the new printing implementations for a tedious vector expression-&lt;/p&gt;
+&lt;p&gt;Assume N is a &lt;code&gt;CoordSysCartesian&lt;/code&gt; instance. Then,&lt;br /&gt; &lt;code&gt;(a**2 + b)*N.i + (Integral(f(b)))*N.k&lt;/code&gt; pretty-prints as&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;&lt;br /&gt; u'\u239b 2 \u239e N_i + \u239b\u2320 \u239e N_k\n\u239da + b\u23a0 \u239c\u23ae f(b) db\u239f \n \u239d\u2321 \u23a0 '&lt;br /&gt; &lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;and LaTeX-prints as-&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;&lt;br /&gt; (a^{2} + b)\mathbf{\hat{i}_{N}} + (\int f{\left (b \right )}\, db)\mathbf{\hat{k}_{N}}&lt;br /&gt; &lt;/code&gt;&lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/codesachin.wordpress.com/25/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/codesachin.wordpress.com/25/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://pixel.wp.com/b.gif?host=codesachin.wordpress.com&amp;amp;blog=67602166&amp;amp;post=25&amp;amp;subd=codesachin&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</content:encoded>
+	<dc:date>2014-08-02T21:35:05+00:00</dc:date>
+	<dc:creator>srjoglekar246</dc:creator>
+</item>
 <item rdf:about="tag:blogger.com,1999:blog-54146973659574488.post-8171418961117224700">
 	<title>Akshay Narasimha: Gsoc Week 10-11</title>
 	<link>http://geekpy.blogspot.com/2014/08/gsoc-week-10-11.html</link>
@@ -4010,67 +4029,6 @@ Not(ForAll((X,T), Implies(And(Person(X), Time(T)), CanFool(X, T))))&lt;/pre&gt;&
 	<content:encoded>&lt;div style=&quot;text-align: left;&quot; dir=&quot;ltr&quot;&gt;Week 4 of Gsoc has come to an end this week and I have decided the class structure of Plane which I am going to implement in the following week.&lt;br /&gt;&lt;a href=&quot;https://github.com/akshayah3/sympy/blob/Plane/sympy/geometry/plane.py&quot;&gt;Here&lt;/a&gt; is the link to the Plane class I have implemented so far.&lt;br /&gt;&lt;br /&gt;A plane can be represented with the help of 3 points or with a point and a normal vector to the desired plane. Regarding which implementation to follow , I had a long discussion with Stefan and decided to go with the latter as 3 points will be redundant in the algorithms I am planning to implement.&lt;br /&gt;&lt;br /&gt;Implementation:&lt;br /&gt;&lt;span class=&quot;sd&quot;&gt;&amp;gt;&amp;gt;&amp;gt; a = Plane(Point3D(1, 1, 1), Point3D(2, 3, 4), Point3D(2, 2, 2)&lt;/span&gt;&lt;br /&gt;&lt;span class=&quot;sd&quot;&gt;&amp;gt;&amp;gt;&amp;gt;a &lt;/span&gt;&lt;br /&gt;&lt;span class=&quot;sd&quot;&gt;Plane(Point3D(1,  1, 1), [-1, 2, -1])&lt;/span&gt;&lt;br /&gt;&lt;span class=&quot;sd&quot;&gt;&amp;gt;&amp;gt;&amp;gt; b =Plane(Point3D(1, 1, 1), normal_vector=[1, 3, 5])&lt;/span&gt;&lt;br /&gt;&lt;span class=&quot;sd&quot;&gt;&amp;gt;&amp;gt;&amp;gt; b &lt;/span&gt;&lt;br /&gt;&lt;span class=&quot;sd&quot;&gt;Plane(Point3D(1, 1, 1), [1, 3, 5])&lt;/span&gt;&lt;br /&gt;&lt;span class=&quot;sd&quot;&gt;&amp;gt;&amp;gt;&amp;gt; b.equation()&lt;/span&gt;&lt;br /&gt;&lt;span class=&quot;sd&quot;&gt; x + 3*y + 5*z - 9&lt;/span&gt;&lt;br /&gt;&lt;span class=&quot;sd&quot;&gt;&lt;br /&gt;&lt;/span&gt;I plan to continue the work on the Plane class this week an will add more methods to it. &lt;br /&gt;&lt;br /&gt;Until then cheers!&lt;/div&gt;</content:encoded>
 	<dc:date>2014-06-17T13:47:57+00:00</dc:date>
 	<dc:creator>Akshay Narasimha</dc:creator>
-</item>
-<item rdf:about="http://tarzzz.github.io/gsoc14/fourth-week.html">
-	<title>Tarun Gaba: GSoC 14: Fourth Week!</title>
-	<link>http://tarzzz.github.io/gsoc14/fourth-week.html</link>
-	<content:encoded>{% include JB/setup %}
-
-
-[ &amp;lt;-Back to posts ](/gsoc14)
-
-Fourth week of GSoC'14 has ended. This week has been no less than an adventure for me. 
-A lot of stuff happened in this week, which I will try to elaborate in this post.
-Meanwhile, something to be proud about:
-
-&lt;img src=&quot;http://tarzzz.github.io/fourth-week.png&quot; alt=&quot;Screenshot&quot; width=&quot;800&quot; height=&quot;500&quot; /&gt;
-
-
-
-###Accomplishments:
-
-  - **PyDy Visualizer UI**: I have been working on a refined UI for the visualizer. The critical components
-    of the UI are nearly complete, and are working inside the IPython notebook. It is a great accomplishment, as
-    I was initially skeptical about binding buttons and events _inside_ the notebook's output cell, all thanks to 
-    the new features in IPython2.0. Also apart from the UI, the THREE animations are also working inside the 
-    output cell. 
-
-  
-###Objectives:
-  
-For the upcoming week, I am supposed to make the UI elements as well as backend functionality
-for changing the visualization objects via GUI itself. The objects changed should be passed
-to python side using IPython notebook's Javascript API. 
-
-This implementation will mean a fully functional visualizer in place, which can be plugged 
-into the PyDy package for usage.
-
-
-###Issues:
-
-There are two main issues which need to be addressed right now:
-
-  - The animations are buggy, and are not behaving the way they are expected to behave.
-    Probably there is some problem with the object rendering code.
-
-  - The Javascript Libraries(Prototype.js and jQuery) are conflicting with each other, 
-    and with those included in native IPython notebook. This is a major issue which needs
-    to be addressed, as it leads to unexpected behavior when the visualizations are run 
-    inside the notebook, leading to notebook freeze.
-
-
-
-Just a week left before the midterm evaluations start, and I have to get a lot before 
-the deliverables are met. I really hope that the pending issues are addressed before 
-the evaluations, so that I can merge a stable visualizer with the PyDy repository.
-
-
-
-
-
-
-[ &amp;lt;-Back to posts ](/gsoc14)</content:encoded>
-	<dc:date>2014-06-17T10:00:42+00:00</dc:date>
 </item>
 
 </rdf:RDF>

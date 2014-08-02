@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2014-08-02T06:01:11Z</updated>
+  <updated>2014-08-02T21:41:00Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,44 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry xml:lang="en">
+    <id>http://codesachin.wordpress.com/2014/08/03/gsoc-week-11-a-major-bug-fix-and-printing/</id>
+    <link href="http://codesachin.wordpress.com/2014/08/03/gsoc-week-11-a-major-bug-fix-and-printing/" rel="alternate" type="text/html"/>
+    <title>GSoC Week 11: A major bug fix, and printing</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Jim brought my attention to a very crucial bug in my work this week. Well, SymPy now automatically detects folders to test by looking at the __init__.py files. That is, a given folder in the SymPy code directory would _only_ be tested if it has __init__.py. Since I hadn’t put any such file in _sympy/vector/tests_, […]<img alt="" border="0" height="1" src="http://pixel.wp.com/b.gif?host=codesachin.wordpress.com&amp;blog=67602166&amp;post=25&amp;subd=codesachin&amp;ref=&amp;feed=1" width="1"/></div>
+    </summary>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Jim brought my attention to a very crucial bug in my work this week. Well, SymPy now automatically detects folders to test by looking at the <code>__init__.py</code> files. That is, a given folder in the SymPy code directory would _only_ be tested if it has <code>__init__.py</code>. Since I hadn’t put any such file in _sympy/vector/tests_, they were being skipped till now! Thank God this got fixed.</p>
+<p>I started out this week with the seemingly ‘easy’ task of implementing different kinds of printing functionalities for sympy.vector. Well, the basic methodology of doing things is pretty simple, if you just follow the documentation in the _sympy.printing.printer_ file. It will tell you all you need to know about – either implementing a new printer, or adding custom code for printing of your class (to an existing printer).</p>
+<p>Some things I had to improve/word around-</p>
+<p>1. BaseScalars had to be handled differently from BaseVectors, since BaseScalars are a part of other Exprs (that may be measure numbers in vectorial expressions), and they have their own dedicated printing methods. Hence, I had to implement the <code>_latex</code> and <code>_pretty</code> methods in BaseScalar itself.</p>
+<p>2. The pretty _as well as_ latex printing for _both_ Vectors and Dyadics with a single <code>_print_BasisDependent</code> method in the respective printers.</p>
+<p>3. I used the printing code in _sympy.physics.vector_ as reference, though quite a few things had to be changed keeping in mind the inheritance from Expr, the structure and nature of the args being different, etc.<br/> I did improve on a few things. _physics.vector_’s pretty printing messes up when dealing with vectors whose measure numbers have varying ‘heights’.</p>
+<p>Overall, it was quite a learning experience and tricky coding – to implement printing, compared to my initial impression of it being a boring and tedious job.</p>
+<p>Well, I have implemented all the requried methods and tests (all of which pass). I have pushed them to my third GSoC PR, so thats in line. Hopefully, the dyadics PR will soon show all tests passing, after which Jason or I will get it merged. It will add the OOP structure, and the dyadic code, as well as fix some crucial bugs.</p>
+<p>A demo of the new printing implementations for a tedious vector expression-</p>
+<p>Assume N is a <code>CoordSysCartesian</code> instance. Then,<br/> <code>(a**2 + b)*N.i + (Integral(f(b)))*N.k</code> pretty-prints as</p>
+<p><code><br/> u'\u239b 2 \u239e N_i + \u239b\u2320 \u239e N_k\n\u239da + b\u23a0 \u239c\u23ae f(b) db\u239f \n \u239d\u2321 \u23a0 '<br/> </code></p>
+<p>and LaTeX-prints as-</p>
+<p><code><br/> (a^{2} + b)\mathbf{\hat{i}_{N}} + (\int f{\left (b \right )}\, db)\mathbf{\hat{k}_{N}}<br/> </code></p><br/>  <a href="http://feeds.wordpress.com/1.0/gocomments/codesachin.wordpress.com/25/" rel="nofollow"><img alt="" border="0" src="http://feeds.wordpress.com/1.0/comments/codesachin.wordpress.com/25/"/></a> <img alt="" border="0" height="1" src="http://pixel.wp.com/b.gif?host=codesachin.wordpress.com&amp;blog=67602166&amp;post=25&amp;subd=codesachin&amp;ref=&amp;feed=1" width="1"/></div>
+    </content>
+    <updated>2014-08-02T21:35:05Z</updated>
+    <category term="Google Summer of Code 2014"/>
+    <author>
+      <name>srjoglekar246</name>
+    </author>
+    <source>
+      <id>http://codesachin.wordpress.com</id>
+      <logo>http://s2.wp.com/i/buttonw-com.png</logo>
+      <link href="http://codesachin.wordpress.com/category/google-summer-of-code-2014/feed/" rel="self" type="application/atom+xml"/>
+      <link href="http://codesachin.wordpress.com" rel="alternate" type="text/html"/>
+      <link href="http://codesachin.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
+      <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
+      <subtitle>- Blog by Sachin Joglekar</subtitle>
+      <title>Dream. Think. Code. » Google Summer of Code 2014</title>
+      <updated>2014-08-02T21:40:40Z</updated>
+    </source>
+  </entry>
 
   <entry>
     <id>tag:blogger.com,1999:blog-54146973659574488.post-8171418961117224700</id>
@@ -447,7 +485,7 @@ implementation</p>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-08-02T06:01:09Z</updated>
+      <updated>2014-08-02T21:40:58Z</updated>
     </source>
   </entry>
 
@@ -532,7 +570,7 @@ implementation</p>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-08-02T06:00:47Z</updated>
+      <updated>2014-08-02T21:40:40Z</updated>
     </source>
   </entry>
 
@@ -615,7 +653,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-08-02T06:00:56Z</updated>
+      <updated>2014-08-02T21:40:47Z</updated>
     </source>
   </entry>
 
@@ -643,7 +681,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-08-02T06:01:08Z</updated>
+      <updated>2014-08-02T21:40:57Z</updated>
     </source>
   </entry>
 
@@ -670,7 +708,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-08-02T06:01:11Z</updated>
+      <updated>2014-08-02T21:40:59Z</updated>
     </source>
   </entry>
 
@@ -717,7 +755,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-08-02T06:00:56Z</updated>
+      <updated>2014-08-02T21:40:47Z</updated>
     </source>
   </entry>
 
@@ -866,7 +904,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-08-02T06:01:08Z</updated>
+      <updated>2014-08-02T21:40:57Z</updated>
     </source>
   </entry>
 
@@ -905,7 +943,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-08-02T06:00:46Z</updated>
+      <updated>2014-08-02T21:40:39Z</updated>
     </source>
   </entry>
 
@@ -929,7 +967,7 @@ mention that Sergey(one of my mentors) is damn good reviewer.</p></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-08-02T06:01:09Z</updated>
+      <updated>2014-08-02T21:40:58Z</updated>
     </source>
   </entry>
 
@@ -958,7 +996,7 @@ A problem that I am facing currently is the confusion about the Del operator. I 
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-08-02T06:00:47Z</updated>
+      <updated>2014-08-02T21:40:40Z</updated>
     </source>
   </entry>
 
@@ -1068,7 +1106,7 @@ on it.</p>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-08-02T06:01:11Z</updated>
+      <updated>2014-08-02T21:40:59Z</updated>
     </source>
   </entry>
 
@@ -1371,7 +1409,7 @@ just insomuch as there were more people at all.</p>
       <link href="http://asmeurer.github.io/blog/rss.xml" rel="self" type="application/rss+xml"/>
       <subtitle>My blog</subtitle>
       <title>Aaron Meurer's Blog</title>
-      <updated>2014-08-02T06:00:22Z</updated>
+      <updated>2014-08-02T21:40:17Z</updated>
     </source>
   </entry>
 
@@ -1399,7 +1437,7 @@ just insomuch as there were more people at all.</p>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-08-02T06:01:08Z</updated>
+      <updated>2014-08-02T21:40:57Z</updated>
     </source>
   </entry>
 
@@ -1435,7 +1473,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-08-02T06:00:56Z</updated>
+      <updated>2014-08-02T21:40:47Z</updated>
     </source>
   </entry>
 
@@ -1578,7 +1616,7 @@ a variable already solved then that solution is discarded.</li>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-08-02T06:01:09Z</updated>
+      <updated>2014-08-02T21:40:58Z</updated>
     </source>
   </entry>
 
@@ -1614,7 +1652,7 @@ The code for Dyadics is mostly done, the docs are on-going, and I am thinking of
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-08-02T06:00:47Z</updated>
+      <updated>2014-08-02T21:40:40Z</updated>
     </source>
   </entry>
 
@@ -1768,7 +1806,7 @@ project.</p></div>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-08-02T06:00:46Z</updated>
+      <updated>2014-08-02T21:40:39Z</updated>
     </source>
   </entry>
 
@@ -1794,7 +1832,7 @@ project.</p></div>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-08-02T06:01:11Z</updated>
+      <updated>2014-08-02T21:40:59Z</updated>
     </source>
   </entry>
 
@@ -3054,7 +3092,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-08-02T06:00:56Z</updated>
+      <updated>2014-08-02T21:40:47Z</updated>
     </source>
   </entry>
 
@@ -3142,7 +3180,7 @@ implementing new stuff!).
       <link href="http://tarzzz.github.io/rss.gsoc.xml" rel="self" type="application/atom+xml"/>
       <subtitle>Posts categorized under GSoC</subtitle>
       <title>Tarun Gaba's blog - GSoC</title>
-      <updated>2014-08-02T06:00:45Z</updated>
+      <updated>2014-08-02T21:40:38Z</updated>
     </source>
   </entry>
 
@@ -3169,7 +3207,7 @@ implementing new stuff!).
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-08-02T06:01:11Z</updated>
+      <updated>2014-08-02T21:40:59Z</updated>
     </source>
   </entry>
 
@@ -3202,7 +3240,7 @@ when solved for \( x \).</p></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-08-02T06:01:09Z</updated>
+      <updated>2014-08-02T21:40:58Z</updated>
     </source>
   </entry>
 
@@ -3319,7 +3357,7 @@ when solved for \( x \).</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-08-02T06:01:08Z</updated>
+      <updated>2014-08-02T21:40:58Z</updated>
     </source>
   </entry>
 
@@ -3352,7 +3390,7 @@ when solved for \( x \).</p></div>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-08-02T06:00:47Z</updated>
+      <updated>2014-08-02T21:40:40Z</updated>
     </source>
   </entry>
 
@@ -3578,7 +3616,7 @@ finally be submitted.</p>&lt;script type="text/javascript"&gt;
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-08-02T06:00:46Z</updated>
+      <updated>2014-08-02T21:40:39Z</updated>
     </source>
   </entry>
 
@@ -3646,7 +3684,7 @@ conceder the limiting value of the equation.</p>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-08-02T06:01:09Z</updated>
+      <updated>2014-08-02T21:40:58Z</updated>
     </source>
   </entry>
 
@@ -3709,7 +3747,7 @@ False</pre><p> </p>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-08-02T06:01:11Z</updated>
+      <updated>2014-08-02T21:40:59Z</updated>
     </source>
   </entry>
 
@@ -3776,7 +3814,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-08-02T06:00:56Z</updated>
+      <updated>2014-08-02T21:40:47Z</updated>
     </source>
   </entry>
 
@@ -3977,7 +4015,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-08-02T06:01:08Z</updated>
+      <updated>2014-08-02T21:40:58Z</updated>
     </source>
   </entry>
 
@@ -4010,7 +4048,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-08-02T06:00:47Z</updated>
+      <updated>2014-08-02T21:40:40Z</updated>
     </source>
   </entry>
 
@@ -4062,7 +4100,7 @@ keep up with my deliverables before the midterm evaluations. I think I shall get
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-08-02T06:00:46Z</updated>
+      <updated>2014-08-02T21:40:39Z</updated>
     </source>
   </entry>
 
@@ -5060,7 +5098,7 @@ on infinitely indexed sets.</p></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-08-02T06:01:09Z</updated>
+      <updated>2014-08-02T21:40:58Z</updated>
     </source>
   </entry>
 
@@ -5163,7 +5201,7 @@ Not(ForAll((X,T), Implies(And(Person(X), Time(T)), CanFool(X, T))))</pre><p> </p
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-08-02T06:01:11Z</updated>
+      <updated>2014-08-02T21:40:59Z</updated>
     </source>
   </entry>
 
@@ -5196,81 +5234,6 @@ Not(ForAll((X,T), Implies(And(Person(X), Time(T)), CanFool(X, T))))</pre><p> </p
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>Akshay Narasimha</title>
       <updated>2014-08-02T05:47:20Z</updated>
-    </source>
-  </entry>
-
-  <entry>
-    <id>http://tarzzz.github.io/gsoc14/fourth-week.html</id>
-    <link href="http://tarzzz.github.io/gsoc14/fourth-week.html" rel="alternate" type="text/html"/>
-    <title>GSoC 14: Fourth Week!</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">{% include JB/setup %}
-
-
-[ &lt;-Back to posts ](/gsoc14)
-
-Fourth week of GSoC'14 has ended. This week has been no less than an adventure for me. 
-A lot of stuff happened in this week, which I will try to elaborate in this post.
-Meanwhile, something to be proud about:
-
-<img alt="Screenshot" height="500" src="http://tarzzz.github.io/fourth-week.png" width="800"/>
-
-
-
-###Accomplishments:
-
-  - **PyDy Visualizer UI**: I have been working on a refined UI for the visualizer. The critical components
-    of the UI are nearly complete, and are working inside the IPython notebook. It is a great accomplishment, as
-    I was initially skeptical about binding buttons and events _inside_ the notebook's output cell, all thanks to 
-    the new features in IPython2.0. Also apart from the UI, the THREE animations are also working inside the 
-    output cell. 
-
-  
-###Objectives:
-  
-For the upcoming week, I am supposed to make the UI elements as well as backend functionality
-for changing the visualization objects via GUI itself. The objects changed should be passed
-to python side using IPython notebook's Javascript API. 
-
-This implementation will mean a fully functional visualizer in place, which can be plugged 
-into the PyDy package for usage.
-
-
-###Issues:
-
-There are two main issues which need to be addressed right now:
-
-  - The animations are buggy, and are not behaving the way they are expected to behave.
-    Probably there is some problem with the object rendering code.
-
-  - The Javascript Libraries(Prototype.js and jQuery) are conflicting with each other, 
-    and with those included in native IPython notebook. This is a major issue which needs
-    to be addressed, as it leads to unexpected behavior when the visualizations are run 
-    inside the notebook, leading to notebook freeze.
-
-
-
-Just a week left before the midterm evaluations start, and I have to get a lot before 
-the deliverables are met. I really hope that the pending issues are addressed before 
-the evaluations, so that I can merge a stable visualizer with the PyDy repository.
-
-
-
-
-
-
-[ &lt;-Back to posts ](/gsoc14)</div>
-    </summary>
-    <updated>2014-06-17T10:00:42Z</updated>
-    <source>
-      <id>http://tarzzz.github.io/gsoc14</id>
-      <author>
-        <name>Tarun Gaba</name>
-      </author>
-      <link href="http://tarzzz.github.io/gsoc14" rel="alternate" type="text/html"/>
-      <link href="http://tarzzz.github.io/rss.gsoc.xml" rel="self" type="application/atom+xml"/>
-      <subtitle>Posts categorized under GSoC</subtitle>
-      <title>Tarun Gaba's blog - GSoC</title>
-      <updated>2014-07-01T12:00:50Z</updated>
     </source>
   </entry>
 </feed>
