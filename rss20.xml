@@ -8,6 +8,257 @@
 	<description>Planet SymPy - http://planet.sympy.org/</description>
 
 <item>
+	<title>Jim Crist: GSoC Week 10 &amp; 11: Bogged down in details</title>
+	<guid isPermaLink="false">tag:,2014-08-01:gsoc-week-10-11.html</guid>
+	<link>http://jcrist.github.io/gsoc-week-10-11.html</link>
+	<description>&lt;p&gt;I missed my post last week due to my research for grad school all going to hell
+at the worst possible time :(. There wasn't much to report on last week, so I'm
+not too perturbed. Turns out even with PRs done and tested, it still takes a
+long time to get them merged and have everyone agree on them. Fortunately I
+made up for it this week; as of now I am officially working on code generation!
+This is behind schedule on my original timeline, but should have been expected,
+as per &lt;a href=&quot;http://en.wikipedia.org/wiki/Hofstadter%27s_law&quot;&gt;Hofstadter's law&lt;/a&gt;:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Hofstadter's Law:&lt;/strong&gt; &quot;It always takes longer than you expect, even when you
+take into account Hofstadter's Law.&quot;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Things are moving ahead now, and I have some hope left that I can accomplish
+(most of) everything I set out to do.&lt;/p&gt;
+&lt;h2&gt;Project Status:&lt;/h2&gt;
+&lt;p&gt;I set out to accomplish a number of things this summer. Here's the status of
+each project goal:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;General Linearization Form:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Done!&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Linearization methods for Kane's and Lagrange's Methods:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Done! Lagrange stuff got merged last week.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Documentation for the above:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Done? This PR is waiting for review, but I think it's good.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Pre-linearized solution methods:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Nixed from the plan due to lack of interest.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Code Generation:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;In Progress...&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;I also accomplished a few other things, that I found necessary for my project:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Refactored &lt;code&gt;KanesMethod&lt;/code&gt; and &lt;code&gt;LagrangesMethod&lt;/code&gt;:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;This resulted in more readable, pythonic code, and also a speed/memory
+improvement. PR for this is still awaiting review.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Faster &lt;code&gt;subs&lt;/code&gt; function for &lt;code&gt;mechanics&lt;/code&gt;:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;My &lt;code&gt;msubs&lt;/code&gt; implementation is several orders of magnitude faster than &lt;code&gt;subs&lt;/code&gt;
+for the kinds of expressions seen in &lt;code&gt;mechanics&lt;/code&gt; (even without the benefit
+of cacheing that &lt;code&gt;subs&lt;/code&gt; has). This is in a PR awaiting review.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Soooo much work on the &lt;code&gt;nan&lt;/code&gt; and &lt;code&gt;oo&lt;/code&gt; issue:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Still not solved for &lt;em&gt;all&lt;/em&gt; cases... :(&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;TODO:&lt;/h2&gt;
+&lt;p&gt;There are only 3 weeks left of GSoC! In my last remaining weeks, here's what I
+plan to get done:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Get the Bicycle Example working:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;After my work everything runs faster, results in smaller, more tractable
+expressions, and uses less memory. Except for the bicycle example. For some
+unknown reason I can not get this thing to result in anything except &lt;code&gt;nan&lt;/code&gt;.
+This is a regress in performance (even though everything else runs better),
+and needs to be solved.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Code generation:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;I've already got some stuff working, and it's really exciting. More on this
+below.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Get all my current stuff merged:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;All that works needs to get into &lt;code&gt;Sympy&lt;/code&gt;. As not everyone else is being paid
+to do this, it can take some time and effort to get things through the
+review process and into master, but I have hope that my remaining
+contributions will eventually make it in.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;I think I can do it, but it'll be a stretch.&lt;/p&gt;
+&lt;h2&gt;Code Generation&lt;/h2&gt;
+&lt;p&gt;Sympy currently contains some facilities for code generation, but they lack
+support for the matrices that are necessary for working with dynamics problems.
+I hope to remedy that, as well as to make general improvements to the entire
+codegen module.&lt;/p&gt;
+&lt;p&gt;Code generation in sympy has three levels:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Code Printers &lt;code&gt;ccode&lt;/code&gt;, &lt;code&gt;fcode&lt;/code&gt;, and the like&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;These are printers that know how to print &lt;em&gt;simple&lt;/em&gt; sympy expressions using
+functionality and syntax found in that language. For example, &lt;code&gt;ccode&lt;/code&gt; will
+print exponents using &lt;code&gt;pow&lt;/code&gt;, which is found in the &lt;code&gt;math&lt;/code&gt; library in C.
+These printers don't have any knowledge of functions, multiple statements,
+or header files. They simply print a single expression out on one line.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;The &lt;code&gt;codegen&lt;/code&gt; submodule&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;This submodule contains facilities for representing generalized &lt;em&gt;routines&lt;/em&gt;,
+and generating functions in various languages (currently C and FORTRAN)
+that can be compiled as a library without any changes. They know about 
+function and variable declarations, header files, library imports, and
+multi-line statements. However, they have no idea how to make this
+generated code work with python.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Code wrapping, usually accessed through &lt;code&gt;autowrap&lt;/code&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;This is where the functionality for &lt;em&gt;wrapping&lt;/em&gt; the generated code lives.
+Using the functionality provided here, one can compile and wrap generated
+code, and then call it from python. The &lt;code&gt;autowrap&lt;/code&gt; function is the main
+entry point, allowing for all 3 steps to be done in one call.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;The first thing I wanted to fix was getting code generation to work with
+matrices and matrix expressions. This turned out to be harder (and more
+confusing) than I expected. There is currently support for a &quot;matrix like&quot;
+object named &lt;code&gt;sympy.tensor.IndexedBase&lt;/code&gt;, but I really don't understand the
+purpose behind it. Reading through the code and examples though it seems to be
+for representing indexed loop operations in a concise form. This unfortunately
+has nothing to do with the indexed types (matrices) that I plan on
+implementing.&lt;/p&gt;
+&lt;p&gt;I spent a long time reading through the code and playing around with it using
+pdb trying to figure out the control flow in the codegen function, and am still
+a little lost. Most of what's there seems to be for supporting the &lt;code&gt;Indexed&lt;/code&gt;
+operations.  After some time trying to bend them to work for matrices, I
+changed plans and now am supporting &lt;code&gt;Matrix&lt;/code&gt; and &lt;code&gt;MatrixExpr&lt;/code&gt; types for matrix
+operations only.  &lt;code&gt;Indexed&lt;/code&gt; types can be used elsewhere, but they shouldn't be
+used for representing matrices with expressions inside them.&lt;/p&gt;
+&lt;p&gt;I currently have this &quot;working&quot;, but am not happy with it yet. The current
+layout of the module made for some hacky work adding in matrix support. I plan
+on doing some refactoring to make this implementation cleaner. Currently, on
+my codegen branch the following is supported:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Generating C code for a matrix with expressions in each element:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Matrices are set as input-output type arguments, and are modified in place
+before being returned.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Passing in a &lt;code&gt;MatrixSymbol&lt;/code&gt; as an argument:&lt;/strong&gt; &lt;/p&gt;
+&lt;p&gt;Here the plan is to use matrices to pass in a large number of arguments.
+You can think of this kind of like a vector. There's another symbolic
+vector type as well in Sympy (&lt;code&gt;DeferredVector&lt;/code&gt;). I may end up supporting
+it, but I'm not really sure what it's for. In its current implementation,
+the following works:&lt;/p&gt;
+&lt;div style=&quot;background: #272822;&quot; class=&quot;codehilite&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;q&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;[q1,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;q2,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;q3,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;q4,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;q5]&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;q_vec&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;MatrixSymbol(&lt;/span&gt;&lt;span style=&quot;color: #e6db74;&quot;&gt;'q'&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;,&lt;/span&gt; &lt;span style=&quot;color: #ae81ff;&quot;&gt;5&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;,&lt;/span&gt; &lt;span style=&quot;color: #ae81ff;&quot;&gt;1&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;)&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;sub_dict&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;dict(zip(q,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;q_vec))&lt;/span&gt;
+&lt;span style=&quot;color: #75715e;&quot;&gt;# Replaces each q with elements from q_vec&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;expr&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;msubs(expr,&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;q_vec)&lt;/span&gt;
+&lt;span style=&quot;color: #75715e;&quot;&gt;# Generate a function that takes a numpy array (q) and returns expr&lt;/span&gt;
+&lt;span style=&quot;color: #75715e;&quot;&gt;# This works if expr is an expression, or a matrix&lt;/span&gt;
+&lt;span style=&quot;color: #f8f8f2;&quot;&gt;func&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;autowrap(expr)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;After I clean this up, I plan to add support for:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Common Subexpression Elimination (cse):&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Even though modern compilers do this already, experimentation shows that
+the large expressions generated in &lt;code&gt;mechanics&lt;/code&gt; benefit from generated code
+having cse performed. This will be implemented as a boolean kwarg (default
+False).  When True, sympy's &lt;code&gt;cse&lt;/code&gt; function will be run on the expression,
+and the code for each subexpression will be generated, followed by the
+final expression.  I actually don't think this will be too difficult to
+implement, and should give some speed improvements on the compiled code (at
+the cost of slower generation).&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;A &lt;code&gt;ctypes&lt;/code&gt; code-wrapper:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Currently the only code wrappers supported are &lt;code&gt;f2py&lt;/code&gt; and &lt;code&gt;cython&lt;/code&gt;, neither
+of which is in the standard library. While the wrappers generated with those
+functions may be more robust, a ctypes wrapper is also possible, with the
+added benefit that &lt;code&gt;ctypes&lt;/code&gt; is in the standard lib.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Support for matrix expressions:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;In an ideal world, I'd implement the excellent work done by Matthew
+Rocklin, discussed in &lt;a href=&quot;http://pyvideo.org/video/2028/matrix-expressions-and-blaslapack-scipy-2013-pr&quot;&gt;this video from SciPy
+2013&lt;/a&gt;.
+The idea here is that we have some knowledge about each of the matrices
+involved in an &lt;em&gt;expression&lt;/em&gt; (for example $A^{-1} B$). We may know that A is
+positive definite, or symmetric, or upper triangular, etc... For each case,
+there may be a faster inversion routine that we could take advantage of
+rather than using a one-size-fits-all inverse function. As I don't have time
+to implement support for all possible operations, and the many BLAS/LAPACK
+routines that support them, I'll focus just on the inverse, as it's commonly
+found in expressions in &lt;code&gt;mechanics&lt;/code&gt;. The thought is, we should be able to
+run:&lt;/p&gt;
+&lt;div style=&quot;background: #272822;&quot; class=&quot;codehilite&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;func&lt;/span&gt; &lt;span style=&quot;color: #f92672;&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #f8f8f2;&quot;&gt;autowrap(Inverse(M)&lt;/span&gt;&lt;span style=&quot;color: #f92672;&quot;&gt;*&lt;/span&gt;&lt;span style=&quot;color: #f8f8f2;&quot;&gt;F)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;And have code generated that solves the expression in a fast manner, without
+having to symbolically find the inverse of &lt;code&gt;M&lt;/code&gt; and combine it with &lt;code&gt;F&lt;/code&gt; into
+one matrix beforehand.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Of course this is a wishlist, and it's unlikely all of this will be accomplished
+in the next 3 weeks. Still, I plan to keep supporting &lt;code&gt;sympy&lt;/code&gt; after my GSoC
+ends, so if it's not done by then it will eventually get there.&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h3&gt;Other exciting news of the week:&lt;/h3&gt;
+&lt;p&gt;I got accepted to the GSoC reunion at the end of October! As this is the 10th
+annual GSoC, Google is throwing a big reunion shindig for past and present
+students. As there are lots of us, only a few were chosen based on a lottery,
+and I made it through! I'm very excited to meet other students that completed
+the program, listen to some interesting talks, and see the GooglePlex. I also
+bought my tickets to get there a day early so I have some time to explore the
+bay area. Last time I was out there I was 14, and I didn't get to see much
+of the area. If you also got accepted/live out and would be interested in
+meeting up, let me know! I'll be in San Jose/San Francisco October 23-26.&lt;/p&gt;&amp;lt;script type=&quot;text/javascript&quot;&amp;gt;
+    if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+        var mathjaxscript = document.createElement('script');
+        mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+        mathjaxscript.type = 'text/javascript';
+        mathjaxscript.src = 'https:' == document.location.protocol
+                ? 'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
+                : 'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+        mathjaxscript[(window.opera ? &quot;innerHTML&quot; : &quot;text&quot;)] =
+            &quot;MathJax.Hub.Config({&quot; +
+            &quot;    config: ['MMLorHTML.js'],&quot; +
+            &quot;    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },&quot; +
+            &quot;    jax: ['input/TeX','input/MathML','output/HTML-CSS'],&quot; +
+            &quot;    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js'],&quot; +
+            &quot;    displayAlign: 'center',&quot; +
+            &quot;    displayIndent: '0em',&quot; +
+            &quot;    showMathMenu: true,&quot; +
+            &quot;    tex2jax: { &quot; +
+            &quot;        inlineMath: [ ['$','$'] ], &quot; +
+            &quot;        displayMath: [ ['$$','$$'] ],&quot; +
+            &quot;        processEscapes: true,&quot; +
+            &quot;        preview: 'TeX',&quot; +
+            &quot;    }, &quot; +
+            &quot;    'HTML-CSS': { &quot; +
+            &quot;        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'black ! important'} }&quot; +
+            &quot;    } &quot; +
+            &quot;}); &quot;;
+        (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+    }
+&amp;lt;/script&amp;gt;</description>
+	<pubDate>Sat, 02 Aug 2014 01:44:00 +0000</pubDate>
+</item>
+<item>
 	<title>Tarun Gaba: GSoC 14: First Week!</title>
 	<guid isPermaLink="true">http://tarzzz.github.io/gsoc14/first-week.html</guid>
 	<link>http://tarzzz.github.io/gsoc14/first-week.html</link>
@@ -3776,57 +4027,6 @@ the evaluations, so that I can merge a stable visualizer with the PyDy repositor
 	<description>&lt;div style=&quot;text-align: left;&quot; dir=&quot;ltr&quot;&gt;&lt;div style=&quot;color: #444444; font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; margin-bottom: 9px;&quot;&gt;It was a great week! My last to last PR, on enhancing &lt;code style=&quot;background-color: #f7f7f9; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: 1px solid rgb(225, 225, 232); color: #dd1144; font-family: Consolas, 'Liberation Mono', Courier, monospace !important; font-size: 12px; padding: 3px 4px;&quot;&gt;TWave&lt;/code&gt;, got merged! I have also finished&lt;code style=&quot;background-color: #f7f7f9; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: 1px solid rgb(225, 225, 232); color: #dd1144; font-family: Consolas, 'Liberation Mono', Courier, monospace !important; font-size: 12px; padding: 3px 4px;&quot;&gt;Medium&lt;/code&gt; and waiting for Sean's comments on it. Here's the link to that PR:&lt;/div&gt;&lt;div style=&quot;color: #444444; font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; margin-bottom: 9px;&quot;&gt;&lt;a style=&quot;color: blue;&quot; href=&quot;https://github.com/sympy/sympy/pull/7580&quot;&gt;https://github.com/sympy/sympy/pull/7580&lt;/a&gt;&lt;/div&gt;&lt;div style=&quot;color: #444444; font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; margin-bottom: 9px;&quot;&gt;I still have a &lt;em style=&quot;&quot;&gt;todo&lt;/em&gt; in the tests:&lt;/div&gt;&lt;pre style=&quot;&quot;&gt;&lt;code style=&quot;background-color: transparent; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: 0px; color: inherit; font-family: Consolas, 'Liberation Mono', Courier, monospace !important; padding: 0px;&quot;&gt;m5 = Medium(&lt;span style=&quot;color: #dd1144;&quot; class=&quot;hljs-string&quot;&gt;'m5'&lt;/span&gt;, permittivity=&lt;span style=&quot;color: #009999;&quot; class=&quot;hljs-number&quot;&gt;710&lt;/span&gt;&lt;span style=&quot;color: teal;&quot; class=&quot;hljs-variable&quot;&gt;*10&lt;/span&gt;&lt;span style=&quot;color: teal;&quot; class=&quot;hljs-variable&quot;&gt;**&lt;/span&gt;(-&lt;span style=&quot;color: #009999;&quot; class=&quot;hljs-number&quot;&gt;12&lt;/span&gt;)&lt;span style=&quot;color: teal;&quot; class=&quot;hljs-variable&quot;&gt;*s&lt;/span&gt;&lt;span style=&quot;color: teal;&quot; class=&quot;hljs-variable&quot;&gt;**&lt;/span&gt;&lt;span style=&quot;color: #009999;&quot; class=&quot;hljs-number&quot;&gt;4&lt;/span&gt;&lt;span style=&quot;color: teal;&quot; class=&quot;hljs-variable&quot;&gt;*A&lt;/span&gt;&lt;span style=&quot;color: teal;&quot; class=&quot;hljs-variable&quot;&gt;**&lt;/span&gt;&lt;span style=&quot;color: #009999;&quot; class=&quot;hljs-number&quot;&gt;2&lt;/span&gt;/(&lt;span style=&quot;color: #333333; font-weight: bold;&quot; class=&quot;hljs-keyword&quot;&gt;m&lt;/span&gt;&lt;span style=&quot;color: teal;&quot; class=&quot;hljs-variable&quot;&gt;**&lt;/span&gt;&lt;span style=&quot;color: #009999;&quot; class=&quot;hljs-number&quot;&gt;3&lt;/span&gt;&lt;span style=&quot;color: teal;&quot; class=&quot;hljs-variable&quot;&gt;*kg&lt;/span&gt;), n=&lt;span style=&quot;color: #009999;&quot; class=&quot;hljs-number&quot;&gt;1.33&lt;/span&gt;)&lt;br /&gt;assert simplify(m5.intrinsic_impedance - &lt;span style=&quot;color: #009999;&quot; class=&quot;hljs-number&quot;&gt;6.24845417765552&lt;/span&gt;&lt;span style=&quot;color: teal;&quot; class=&quot;hljs-variable&quot;&gt;*kg&lt;/span&gt;&lt;span style=&quot;color: teal;&quot; class=&quot;hljs-variable&quot;&gt;*m&lt;/span&gt;&lt;span style=&quot;color: teal;&quot; class=&quot;hljs-variable&quot;&gt;**&lt;/span&gt;&lt;span style=&quot;color: #009999;&quot; class=&quot;hljs-number&quot;&gt;2&lt;/span&gt;/(A&lt;span style=&quot;color: teal;&quot; class=&quot;hljs-variable&quot;&gt;**&lt;/span&gt;&lt;span style=&quot;color: #009999;&quot; class=&quot;hljs-number&quot;&gt;2&lt;/span&gt;&lt;span style=&quot;color: teal;&quot; class=&quot;hljs-variable&quot;&gt;*s&lt;/span&gt;&lt;span style=&quot;color: teal;&quot; class=&quot;hljs-variable&quot;&gt;**&lt;/span&gt;&lt;span style=&quot;color: #009999;&quot; class=&quot;hljs-number&quot;&gt;3&lt;/span&gt;)) == &lt;span style=&quot;color: #009999;&quot; class=&quot;hljs-number&quot;&gt;0&lt;/span&gt;&lt;br /&gt;&lt;span style=&quot;color: #999988; font-style: italic;&quot; class=&quot;hljs-comment&quot;&gt;# XXX: This is supposed to be zero but it turns out to be&lt;/span&gt;&lt;br /&gt;&lt;span style=&quot;color: #999988; font-style: italic;&quot; class=&quot;hljs-comment&quot;&gt;# very close to zero and not zero.&lt;/span&gt;&lt;br /&gt;&lt;span style=&quot;color: #999988; font-style: italic;&quot; class=&quot;hljs-comment&quot;&gt;# assert simplify(m5.speed - 225407863.157895*m/s) == 0&lt;/span&gt;&lt;br /&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div style=&quot;color: #444444; font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; margin-bottom: 9px;&quot;&gt;This &lt;code style=&quot;background-color: #f7f7f9; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: 1px solid rgb(225, 225, 232); color: #dd1144; font-family: Consolas, 'Liberation Mono', Courier, monospace !important; font-size: 12px; padding: 3px 4px;&quot;&gt;m5.speed&lt;/code&gt; is equal to &lt;code style=&quot;background-color: #f7f7f9; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: 1px solid rgb(225, 225, 232); color: #dd1144; font-family: Consolas, 'Liberation Mono', Courier, monospace !important; font-size: 12px; padding: 3px 4px;&quot;&gt;225407863.157895*m/s&lt;/code&gt; (or maybe very close to it) but, assertion results in a failure.&lt;/div&gt;&lt;div style=&quot;color: #444444; font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; margin-bottom: 9px;&quot;&gt;Similarly in the constructor of the &lt;code style=&quot;background-color: #f7f7f9; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: 1px solid rgb(225, 225, 232); color: #dd1144; font-family: Consolas, 'Liberation Mono', Courier, monospace !important; font-size: 12px; padding: 3px 4px;&quot;&gt;Medium&lt;/code&gt; inconsistency comes due to slight difference in floating point parameters(permittivity and permeability). I've commented out this part of my code. Maybe Sean will suggest a better way to do it.&lt;/div&gt;&lt;pre style=&quot;&quot;&gt;&lt;code style=&quot;background-color: transparent; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: 0px; color: inherit; font-family: Consolas, 'Liberation Mono', Courier, monospace !important; padding: 0px;&quot;&gt;&lt;span style=&quot;color: #999988; font-style: italic;&quot; class=&quot;hljs-comment&quot;&gt;# XXX: There's issue with precision. Values may be&lt;/span&gt;&lt;br /&gt;&lt;span style=&quot;color: #999988; font-style: italic;&quot; class=&quot;hljs-comment&quot;&gt;# different slightly.&lt;/span&gt;&lt;br /&gt;&lt;span style=&quot;color: #333333; font-weight: bold;&quot; class=&quot;hljs-keyword&quot;&gt;if&lt;/span&gt; permittivity != u&lt;span style=&quot;color: #009999;&quot; class=&quot;hljs-number&quot;&gt;0&lt;/span&gt; &lt;span style=&quot;color: #333333; font-weight: bold;&quot; class=&quot;hljs-keyword&quot;&gt;and&lt;/span&gt; permittivity != e&lt;span style=&quot;color: #009999;&quot; class=&quot;hljs-number&quot;&gt;0&lt;/span&gt;:&lt;br /&gt;    &lt;span style=&quot;color: #333333; font-weight: bold;&quot; class=&quot;hljs-keyword&quot;&gt;if&lt;/span&gt; n != c&lt;span style=&quot;color: teal;&quot; class=&quot;hljs-variable&quot;&gt;*sqrt&lt;/span&gt;(permittivity&lt;span style=&quot;color: teal;&quot; class=&quot;hljs-variable&quot;&gt;*permeability&lt;/span&gt;):&lt;br /&gt;        raise ValueError(&lt;span style=&quot;color: #dd1144;&quot; class=&quot;hljs-string&quot;&gt;&quot;Values are not consistent.&quot;&lt;/span&gt;)&lt;br /&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div style=&quot;color: #444444; font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; margin-bottom: 9px;&quot;&gt;As soon as it gets merged, I'll make necessary changes in Fermat's principle and Snell's law part of the code and send a PR to review.&lt;/div&gt;&lt;div style=&quot;color: #444444; font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; margin-bottom: 9px;&quot;&gt;Now I realize that the next two weeks are not going to be a joy ride for me. I must finish major part of geometrical optics as written in my proposal.&lt;br /&gt;&lt;br /&gt;That's all for now. Cheers!&lt;/div&gt;&lt;/div&gt;</description>
 	<pubDate>Mon, 16 Jun 2014 19:32:09 +0000</pubDate>
 	<author>noreply@blogger.com (Sudhanshu Mishra)</author>
-</item>
-<item>
-	<title>Sushant Hiray: This Week in CSymPy: #4</title>
-	<guid isPermaLink="true">http://sushant-hiray.in/posts/gsoc/csympy-week4/</guid>
-	<link>http://sushant-hiray.in/posts/gsoc/csympy-week4/</link>
-	<description>&lt;p&gt;Week 4 for GSoC just ended and this week I completed implementing the Exponential Module.&lt;/p&gt;
-
-&lt;h1 id=&quot;progress&quot;&gt;Progress&lt;/h1&gt;
-
-&lt;p&gt;I started the week by implementing &lt;code&gt;ATan2&lt;/code&gt; which was not implemented in the PR of Trignometric Module.
-&lt;br /&gt;&lt;br /&gt;
-&lt;a href=&quot;https://github.com/sympy/csympy/pull/189&quot;&gt;Pull 189&lt;/a&gt; looked into implementing the &lt;code&gt;ATan2&lt;/code&gt; functionality. Since to implement &lt;code&gt;ATan2&lt;/code&gt; we needed to find whether the signs of numerator and denominators. In case of complex symbolic expressions, we are yet to implement &lt;code&gt;numeric-eval&lt;/code&gt; in CSymPy, so in those cases we just
-return the object, in cases where we find the &lt;code&gt;arg&lt;/code&gt; in lookup table we simplify and give out the result.
-&lt;br /&gt;
-A more detailed version of the assumptions can be found in this &lt;a href=&quot;https://github.com/sympy/csympy/pull/189#issuecomment-45625322&quot;&gt;comment&lt;/a&gt; in PR. It is also documented in the code.
-&lt;br /&gt;&lt;br /&gt;
-After implementing &lt;code&gt;ATan2&lt;/code&gt;, I worked on the Exponential module. &lt;a href=&quot;https://github.com/asmeurer&quot;&gt;Aaron&lt;/a&gt; gave some insights regarding the implementation of the exponential module, specifically he mentioned the fact that &lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;pre&gt;&lt;code&gt;It's better to special case E in one place `(pow)` 
-than to special case exp everywhere in the code 
-that tries to deal with pow objects 
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;So discussing this with &lt;a href=&quot;https://github.com/certik&quot;&gt;Ondrej&lt;/a&gt; we decided to keep &lt;code&gt;exp&lt;/code&gt; only as a function which just calls &lt;code&gt;pow(E, x)&lt;/code&gt; underneath.
-&lt;br /&gt;&lt;br /&gt;
-The logarithm class was similar to the current implementation of SymPy barring the part involving complex numbers. The exponential module as a whole was implemented in &lt;a href=&quot;https://github.com/sympy/csympy/pull/194&quot;&gt;pull request&lt;/a&gt; which has been merged into master.
-&lt;br /&gt;&lt;br /&gt;
-I have also decided to implement the LambertW function. It wasn’t a part of my original proposal but it seems pretty trivial to implement! Once this is merged into master, the exponential module will cover all major functions implemented by SymPy.&lt;/p&gt;
-
-&lt;h1 id=&quot;discussions&quot;&gt;Discussions&lt;/h1&gt;
-
-&lt;p&gt;As usual most of the actual discussions happened on PR, Aaron also gave some insights on gitter! So its good to hangout there as well.&lt;/p&gt;
-
-&lt;h1 id=&quot;week-highlights&quot;&gt;Week Highlights!&lt;/h1&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;This week &lt;a href=&quot;https://github.com/isuruf&quot;&gt;@isuruf&lt;/a&gt; started helping us out in the Number Theory module which was originally added by Thilina.&lt;/li&gt;
-  &lt;li&gt;Also I’ve noticed extra traffic in &lt;a href=&quot;https://gitter.im/sympy/csympy&quot;&gt;CSymPy gitter&lt;/a&gt;. A lot of people have started following the conversations there! That is good to see :)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h1 id=&quot;the-week-ahead&quot;&gt;The Week Ahead&lt;/h1&gt;
-&lt;ul&gt;
-  &lt;li&gt;Add the &lt;code&gt;LambertW&lt;/code&gt; class.&lt;/li&gt;
-  &lt;li&gt;Implement the &lt;code&gt;Hyperbolic Module&lt;/code&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;br /&gt;
-Thats all for now :) Will get back next week!&lt;/p&gt;</description>
-	<pubDate>Sun, 15 Jun 2014 18:20:00 +0000</pubDate>
 </item>
 
 </channel>
