@@ -13,6 +13,7 @@
 
 	<items>
 		<rdf:Seq>
+			<rdf:li rdf:resource="http://sushant-hiray.in/posts/gsoc/csympy-week11/" />
 			<rdf:li rdf:resource="http://codesachin.wordpress.com/2014/08/03/gsoc-week-11-a-major-bug-fix-and-printing/" />
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-54146973659574488.post-8171418961117224700" />
 			<rdf:li rdf:resource="tag:,2014-08-01:gsoc-week-10-11.html" />
@@ -72,11 +73,43 @@
 			<rdf:li rdf:resource="tag:blogger.com,1999:blog-283806077182880539.post-821534238345280726" />
 			<rdf:li rdf:resource="https://hargup.github.io/posts/week-4.html" />
 			<rdf:li rdf:resource="http://blog.s-d-b.com/?p=67" />
-			<rdf:li rdf:resource="tag:blogger.com,1999:blog-54146973659574488.post-857251037734880412" />
 		</rdf:Seq>
 	</items>
 </channel>
 
+<item rdf:about="http://sushant-hiray.in/posts/gsoc/csympy-week11/">
+	<title>Sushant Hiray: GSoC Week 11: Interacing ARB</title>
+	<link>http://sushant-hiray.in/posts/gsoc/csympy-week11/</link>
+	<content:encoded>&lt;p&gt;This week was primarily focussed on interfacting &lt;a href=&quot;http://sushant-hiray.in/fredrikj.net/arb/&quot;&gt;ARB&lt;/a&gt; library with CSymPy.&lt;/p&gt;
+
+&lt;p&gt;Arb is a C library for arbitrary-precision floating-point ball arithmetic, developed by &lt;a href=&quot;http://sushant-hiray.in/fredrik.johansson@gmail.com&quot;&gt;Fredrik Johansson&lt;/a&gt;. It supports efficient high-precision computation with polynomials, power series, matrices and special functions over the real and complex numbers, with automatic, rigorous error control.&lt;/p&gt;
+
+&lt;h1 id=&quot;progress&quot;&gt;Progress&lt;/h1&gt;
+&lt;p&gt;I opened &lt;a href=&quot;https://github.com/sympy/csympy/pull/265&quot;&gt;PR 265&lt;/a&gt; to interfact ARB with CSymPy. There were some initial hiccups with using ARB for C++. I opened up an issue &lt;a href=&quot;https://github.com/fredrik-johansson/arb/issues/21&quot;&gt;arb/#21&lt;/a&gt; which was very promptly fixed by &lt;a href=&quot;https://github.com/fredrik-johansson&quot;&gt;@fredrik-johansson&lt;/a&gt; with a minor patch.
+&lt;br /&gt;&lt;br /&gt;
+Since we were using an earlier release version 2.1.0 without this patch, &lt;a href=&quot;https://github.com/fredrik-johansson&quot;&gt;@fredrik-johansson&lt;/a&gt; willingly released a new version 2.2.0 so that we could interface immediately.
+&lt;br /&gt;&lt;br /&gt;
+I was particularly in twaeaking around with CMAKE to interface ARB. I read quite a bit about it and managed to get a basic version running. But there were quite a few issues:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;flint and arb were not getting linked&lt;/li&gt;
+  &lt;li&gt;arb was not searching &lt;code&gt;/usr/local/include/flint&lt;/code&gt; for appropriate files of flint.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;br /&gt;
+I put some minor hacks to make sure arb was linked and was able to find the files appropriately.
+Since Ondrej was out this week, he wasn’t able to suggest any better ways yet. Isuru Fernando helped me out with a much cleaner way to link the arb and flint library.
+&lt;br /&gt;&lt;br /&gt;
+I also added the Zeta Module comprising of &lt;code&gt;zeta&lt;/code&gt; and &lt;code&gt;dirichlet_eta&lt;/code&gt; functions.
+The &lt;code&gt;zeta&lt;/code&gt; function needs &lt;code&gt;harmonic&lt;/code&gt; to be implemented, which isn’t implemented yet so for now, only minor simplifications are made.&lt;/p&gt;
+
+&lt;h1 id=&quot;the-week-ahead&quot;&gt;The Week Ahead&lt;/h1&gt;
+&lt;p&gt;Get the current PR merged, add a new PR for the Tensor Module.&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;
+Thats all for now :) Will get back next week!&lt;/p&gt;</content:encoded>
+	<dc:date>2014-08-03T14:22:00+00:00</dc:date>
+</item>
 <item rdf:about="http://codesachin.wordpress.com/2014/08/03/gsoc-week-11-a-major-bug-fix-and-printing/">
 	<title>Sachin Joglekar: GSoC Week 11: A major bug fix, and printing</title>
 	<link>http://codesachin.wordpress.com/2014/08/03/gsoc-week-11-a-major-bug-fix-and-printing/</link>
@@ -498,7 +531,7 @@ After merging this PR, Complex Numbers and &lt;code&gt;I&lt;/code&gt; could be u
 Here are the some of the things which could be done using CSymPy python wrappers:
 &lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;n&quot;&gt;In&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;csympy&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;In&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;csympy&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;
 
 &lt;span class=&quot;n&quot;&gt;In&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;Out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;
@@ -524,14 +557,13 @@ Here are the some of the things which could be done using CSymPy python wrappers
 &lt;span class=&quot;n&quot;&gt;Out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;9&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;^&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;
 
 &lt;span class=&quot;n&quot;&gt;In&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;expand&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;Out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;^&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;span class=&quot;n&quot;&gt;Out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;^&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;&lt;br /&gt;&lt;br /&gt;
 The other major work in this week was to work on the expansion of integral powers of complex number.
 &lt;a href=&quot;https://github.com/sympy/csympy/pull/264&quot;&gt;Pull 264&lt;/a&gt; was created to add this functionality. We used a particularly simple yet efficient algorithm to compute the integral power.&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;powu&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;powu&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
     &lt;span class=&quot;n&quot;&gt;mask&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
     &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
     &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;
@@ -540,8 +572,7 @@ The other major work in this week was to work on the expansion of integral power
             &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;
         &lt;span class=&quot;n&quot;&gt;mask&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
         &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;&lt;br /&gt;&lt;br /&gt;
 The current expand is a bit slower than what we were expecting. We will be looking to improve the speed in the coming days.
@@ -4022,13 +4053,6 @@ Not(ForAll((X,T), Implies(And(Person(X), Time(T)), CanFool(X, T))))&lt;/pre&gt;&
 &lt;p&gt;Aloha!!!&lt;/p&gt;</content:encoded>
 	<dc:date>2014-06-17T20:54:50+00:00</dc:date>
 	<dc:creator>SD</dc:creator>
-</item>
-<item rdf:about="tag:blogger.com,1999:blog-54146973659574488.post-857251037734880412">
-	<title>Akshay Narasimha: Gsoc Week-4</title>
-	<link>http://geekpy.blogspot.com/2014/06/gsoc-week-4.html</link>
-	<content:encoded>&lt;div style=&quot;text-align: left;&quot; dir=&quot;ltr&quot;&gt;Week 4 of Gsoc has come to an end this week and I have decided the class structure of Plane which I am going to implement in the following week.&lt;br /&gt;&lt;a href=&quot;https://github.com/akshayah3/sympy/blob/Plane/sympy/geometry/plane.py&quot;&gt;Here&lt;/a&gt; is the link to the Plane class I have implemented so far.&lt;br /&gt;&lt;br /&gt;A plane can be represented with the help of 3 points or with a point and a normal vector to the desired plane. Regarding which implementation to follow , I had a long discussion with Stefan and decided to go with the latter as 3 points will be redundant in the algorithms I am planning to implement.&lt;br /&gt;&lt;br /&gt;Implementation:&lt;br /&gt;&lt;span class=&quot;sd&quot;&gt;&amp;gt;&amp;gt;&amp;gt; a = Plane(Point3D(1, 1, 1), Point3D(2, 3, 4), Point3D(2, 2, 2)&lt;/span&gt;&lt;br /&gt;&lt;span class=&quot;sd&quot;&gt;&amp;gt;&amp;gt;&amp;gt;a &lt;/span&gt;&lt;br /&gt;&lt;span class=&quot;sd&quot;&gt;Plane(Point3D(1,  1, 1), [-1, 2, -1])&lt;/span&gt;&lt;br /&gt;&lt;span class=&quot;sd&quot;&gt;&amp;gt;&amp;gt;&amp;gt; b =Plane(Point3D(1, 1, 1), normal_vector=[1, 3, 5])&lt;/span&gt;&lt;br /&gt;&lt;span class=&quot;sd&quot;&gt;&amp;gt;&amp;gt;&amp;gt; b &lt;/span&gt;&lt;br /&gt;&lt;span class=&quot;sd&quot;&gt;Plane(Point3D(1, 1, 1), [1, 3, 5])&lt;/span&gt;&lt;br /&gt;&lt;span class=&quot;sd&quot;&gt;&amp;gt;&amp;gt;&amp;gt; b.equation()&lt;/span&gt;&lt;br /&gt;&lt;span class=&quot;sd&quot;&gt; x + 3*y + 5*z - 9&lt;/span&gt;&lt;br /&gt;&lt;span class=&quot;sd&quot;&gt;&lt;br /&gt;&lt;/span&gt;I plan to continue the work on the Plane class this week an will add more methods to it. &lt;br /&gt;&lt;br /&gt;Until then cheers!&lt;/div&gt;</content:encoded>
-	<dc:date>2014-06-17T13:47:57+00:00</dc:date>
-	<dc:creator>Akshay Narasimha</dc:creator>
 </item>
 
 </rdf:RDF>
