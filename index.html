@@ -34,6 +34,37 @@
 
 
 
+<h3><a href="http://gsocblog.blogspot.com/" title="GSoC 2014 with SymPy">Avichal Dayal</a></h3>
+
+
+<div class="entrygroup" id="tag:blogger.com,1999:blog-283806077182880539.post-31986856554930244">
+<div class="entry">
+<div class="content">
+<div style="text-align: left;" dir="ltr">I returned to my college last week. I couldn't do much for a few days as a result. Also a late blog as a consequence.<br /><br />I tried solving the bugs presented in my 3 PR's. <br /><br />In the formal_series PR,<br />I implemented the necessary `_eval_` methods<br />- _eval_derivative<br />- _eval_integral<br />- _eval_as_leading_term<br />- as_ordered_terms<br />There is still the problem in test_args which fails because args of Stream class is not a Basic instance. It is a generator object.<br />I also added more test cases.<br /><br />In the special asympt PR,<br />I have a few bugs which I'm not been able to solve.<br />Suppose _eval_nseries returns expansion of the form:-<br />s = (1 + 1/x + 1/x**2 + ... O(1/x**6, (x, oo)))*(exp(-x)/x) then it fails.<br />getO fails on s as it is not an Add instance. Then it tried to append it with appropriate Order term, so<br />s + O(1/x**n, (x, oo)) = O(1/x**n, (x, oo)) which is wrong.<br /><br />I'll try fixing all these bugs in the last few days and get all the PRs ready for merge.<br /> </div></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://gsocblog.blogspot.com/2014/08/i-returned-to-my-college-last-week.html">by Avichal Dayal (noreply@blogger.com) at August 03, 2014 08:03 PM</a>
+</p>
+</div>
+</div>
+
+
+
+</div>
+<div class="channelgroup">
+
+
+
+
+
+
+
 <h3><a href="http://sushant-hiray.in" title="Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy">Sushant Hiray</a></h3>
 
 
@@ -5533,121 +5564,6 @@ on infinitely indexed sets.</p></div>
 </div>
 
 </div>
-<div class="daygroup">
-<h2>June 17, 2014</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://blog.s-d-b.com" title="SDB's Blog » SymPy">Soumya Dipta Biswas</a></h3>
-
-
-<div class="entrygroup" id="http://blog.s-d-b.com/?p=67">
-<h4 lang="en-US"><a href="http://blog.s-d-b.com/gsoc-2014-week-4/">GSoC 2014: Week 4</a></h4>
-<div class="entry">
-<div class="content" lang="en-US">
-<p>Hello Everyone,</p>
-<p>The majority of work this week was finishing up my previous work and creating the architecture for the First Order Logic module. Consequently, this post is concerned with First Order Logic (FoL) and is intended mostly for those who are not familiar with the concepts. If you find yourself comfortable with writing formulas in FoL then you can safely skip this post.</p>
-<p>Before we go on to the discussion about First Order Logic, one very interesting topic that came up this week was the idea of an Atom. What is an atom for propositional logic? The classic answer amounts to anything that cannot be broken down further to yield simpler terms. Analogously, let us define a <code>literal</code> to mean any atom or its negation. So, <code>A</code> is a literal (and so is <code>~A</code>). How about <code>A &gt; B</code>. Without bordering on any ideas of higher order logic, let us tweak the definition of atom to mean anything that cannot be broken down <em>using propositional logic</em> to yield simpler terms. So, how does this definition change things? It means we can treat any expression that propositional logic can’t break down as a black box with the assumption that it will yield a boolean value once evaluated. Analogously, a literal is now any expression which cannot be simplified (in propositional logic) or its negation. This definition gives a lot more freedom and power to the idea of formulas. Ofcourse, one needs to keep in mind that it is compulsory for these <em>literals</em> to yield a boolean once evaluated (typically before propositional formula evaluation methods are called on the formula).</p>
-<p>Ok, with that, we finish the first part our Propositional Logic post series. The future posts will be associated with First Order Logic before coming back to SAT (in propositional formula). For the remainder of the series the words First Order Logic and Predicate Logic will be used interchangeably (while there is some <a href="http://http://en.wikipedia.org/wiki/Predicate_logic" title="Predicate Logic">difference</a> between the two, we will ignore them. Finally beginning the actual discussion about FoL, let us start with some definitions.</p>
-<ul>
-<li><strong>Constant:</strong> Any object of the universe whose value remains the same throughout the expression. e.g. john, 1, computer, socrates</li>
-<li><strong>Variable:</strong> An object which can take up any value from the domain. e.g. X, Y</li>
-<li><strong>Function:</strong> A mapping of n-ary terms (see below) to a term. e.g. F(X, G(a, Y)), teacher(teacher(aristotle))</li>
-<li><strong>Term:</strong> Any Constant, Variable or Function is called a Term.</li>
-<li><strong>Predicate:</strong> A mapping of n-ary terms to a boolean value. e.g. IsTeacher(Socrates, plato)</li>
-<li><strong>Quantifier:</strong> Quantifiers assert a particular property with respect to a bound variable. Q(X, IsTeacher(X, alexander)) Here Q is some quantifier (see below) and X is the bound variable.</li>
-<li><strong>ForAll (∀)</strong>: Also known as Universal Quantifier, this asserts that for each value of the bound variable the expression holds True</li>
-<li><strong>Exists (∃)</strong>: Also known as Existential Quantifier, this asserts that for atleast one of the values of the bound variable the expression holds True</li>
-</ul>
-<p>The above description is far from complete. Below are some more examples. For these examples assume that the program is intelligent enough to know the answer.</p>
-<p></p><pre class="crayon-plain-tag"># All constants are in lowercase
-# All variables are in uppercase
-# All functions starts with a lowercase but subsequent words start with an uppercase
-# All predicates follow camel casing
-
-# teacher(person) is a function which maps a person to his teacher
-&gt;&gt;&gt; teacher(alexander)
-aristotle
-&gt;&gt;&gt; teacher(teacher(aristotle))
-'Socrates'
-
-# f(X) = 2X + 3y + 1
-&gt;&gt;&gt; f(X, Y)
-Add(Mul(2, X), Mul(3, Y), 1)
-
-# IsTeacher(a, b) is a predicate which returns if a is the teacher of b
-&gt;&gt;&gt; IsTeacher(alexander, plato)
-False
-
-# Assume that the following properties hold for the relationship teacher
-# If A is the teacher of B, and B is the teacher of C, then A is the teacher of C (Transitivity)
-# A is always the teacher of A (Identity)
-&gt;&gt;&gt; domain = [socrates, plato, aristotle, alexander]
-&gt;&gt;&gt; ForAll(X, IsTeacher(X, alexander))
-True
-&gt;&gt;&gt; Exists(X, IsWarrior(X))
-True
-&gt;&gt;&gt; ForAll(X, IsWarrior(X))
-False
-&gt;&gt;&gt; Exists(X, InventedCalculus(X))
-False
-
-# f(x, y) = x + 2y
-# g(x, y) = 2x + y
-&gt;&gt;&gt; ForAll(X, ForAll(Y, Greater(f(X, Y), g(X, Y)))
-False
-&gt;&gt;&gt; Exists(X, Exists(Y, Greater(f(X, Y), g(X, Y)))
-True</pre><p> </p>
-<p>I hope the above examples make the definitions clearer. However SymPy is a symbolic library (rather than a numeric one). The implication of the same is that we are much less concerned about the value of the expression than the expression itself. For example, we will be predominantly dealing with functions, variables and predicates without being bothered by their (real life) values. What follows next are examples of conversion of natural language sentences to First Order Logic and their representation in SymPy. One would notice that we have only dealt with the new FoL concepts in the examples above and completely ignored the traditional propositional operators. Using the idea of Atom described at the beginning of this post, if we think of every Predicate (and Quantifier) as an Atom, then we can use every idea of propositional logic here. The examples below describe the complete idea.</p>
-<p></p><pre class="crayon-plain-tag"># All dolphins all mammals
-&gt;&gt;&gt; X = symbols('X')
-&gt;&gt;&gt; Dolphin = Predicate('Dolphin')
-&gt;&gt;&gt; Mammal = Predicate('Mammal')
-&gt;&gt;&gt; ForAll(X, Dolphin(X) &gt;&gt; Mammal(X))
-ForAll((X), Implies(Dolphin(X), Mammal(X)))
-
-
-&gt;&gt;&gt; X, T = symbols('X T')
-&gt;&gt;&gt; Person = Predicate('Person')
-&gt;&gt;&gt; Time = Predicate('Time')
-&gt;&gt;&gt; CanFool = Predicate('CanFool')
-
-# You can fool some of the people all of the time
-&gt;&gt;&gt; Exists(X, ForAll(T, (Person(X) &amp; Time(T)) &gt;&gt; CanFool(X, T)))
-Exists((X), ForAll(T, Implies(And(Person(X), Time(T)), CanFool(X, T))))
-
-# You can fool all of the people some of the time
-&gt;&gt;&gt; ForAll(X, Exists(T, (Person(X) &amp; Time(T)) &gt;&gt; CanFool(X, T)))
-ForAll((X), Exists(T, Implies(And(Person(X), Time(T)), CanFool(X, T))))
-
-# You cannot fool all of the people all of the time
-&gt;&gt;&gt; ~ForAll(X, ForAll(T, (Person(X) &amp; Time(T)) &gt;&gt; CanFool(X, T)))
-Not(ForAll((X,T), Implies(And(Person(X), Time(T)), CanFool(X, T))))</pre><p> </p>
-<p>I hope this should provide you with some basic idea about First Order Logic. I will be updating this post with ideas related to Interpretation/Model. Stay tuned.</p>
-<p>Aloha!!!</p></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://blog.s-d-b.com/gsoc-2014-week-4/">by SD at June 17, 2014 08:54 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -5659,7 +5575,7 @@ Not(ForAll((X,T), Implies(And(Person(X), Time(T)), CanFool(X, T))))</pre><p> </p
 <a href="http://asmeurer.github.io/blog/rss.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://asmeurer.github.io/" class="message" title="no activity in 7 days">Aaron Meurer</a>
 </li>
 <li>
-<a href="https://asmeurersympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="https://asmeurersympy.wordpress.com" class="message" title="no activity in 7 days">Aaron Meurer (old)</a>
+<a href="http://asmeurersympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://asmeurersympy.wordpress.com" class="message" title="no activity in 7 days">Aaron Meurer (old)</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/936818886435977143/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://addisoncugini.blogspot.com/" class="message" title="no activity in 7 days">Addison Cugini</a>
@@ -5674,7 +5590,7 @@ Not(ForAll((X,T), Implies(And(Person(X), Time(T)), CanFool(X, T))))</pre><p> </p
 <a href="http://angadhsympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://angadhsympy.wordpress.com" class="message" title="no activity in 7 days">Angadh Nanjangud</a>
 </li>
 <li>
-<a href="http://www.blogger.com/feeds/283806077182880539/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://gsocblog.blogspot.com/" class="message" title="no activity in 7 days">Avichal Dayal</a>
+<a href="http://www.blogger.com/feeds/283806077182880539/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://gsocblog.blogspot.com/" title="GSoC 2014 with SymPy">Avichal Dayal</a>
 </li>
 <li>
 <a href="http://www.catchmrbharath.in/programming.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a class="message" title="404: not found">Bharath M R</a>
@@ -5821,7 +5737,7 @@ Not(ForAll((X,T), Implies(And(Person(X), Time(T)), CanFool(X, T))))</pre><p> </p
 
 <p>
 <strong>Last updated:</strong><br>
-August 03, 2014 02:41 PM<br>
+August 03, 2014 08:21 PM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>

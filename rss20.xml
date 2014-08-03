@@ -8,6 +8,14 @@
 	<description>Planet SymPy - http://planet.sympy.org/</description>
 
 <item>
+	<title>Avichal Dayal</title>
+	<guid isPermaLink="false">tag:blogger.com,1999:blog-283806077182880539.post-31986856554930244</guid>
+	<link>http://gsocblog.blogspot.com/2014/08/i-returned-to-my-college-last-week.html</link>
+	<description>&lt;div style=&quot;text-align: left;&quot; dir=&quot;ltr&quot;&gt;I returned to my college last week. I couldn't do much for a few days as a result. Also a late blog as a consequence.&lt;br /&gt;&lt;br /&gt;I tried solving the bugs presented in my 3 PR's. &lt;br /&gt;&lt;br /&gt;In the formal_series PR,&lt;br /&gt;I implemented the necessary `_eval_` methods&lt;br /&gt;- _eval_derivative&lt;br /&gt;- _eval_integral&lt;br /&gt;- _eval_as_leading_term&lt;br /&gt;- as_ordered_terms&lt;br /&gt;There is still the problem in test_args which fails because args of Stream class is not a Basic instance. It is a generator object.&lt;br /&gt;I also added more test cases.&lt;br /&gt;&lt;br /&gt;In the special asympt PR,&lt;br /&gt;I have a few bugs which I'm not been able to solve.&lt;br /&gt;Suppose _eval_nseries returns expansion of the form:-&lt;br /&gt;s = (1 + 1/x + 1/x**2 + ... O(1/x**6, (x, oo)))*(exp(-x)/x) then it fails.&lt;br /&gt;getO fails on s as it is not an Add instance. Then it tried to append it with appropriate Order term, so&lt;br /&gt;s + O(1/x**n, (x, oo)) = O(1/x**n, (x, oo)) which is wrong.&lt;br /&gt;&lt;br /&gt;I'll try fixing all these bugs in the last few days and get all the PRs ready for merge.&lt;br /&gt; &lt;/div&gt;</description>
+	<pubDate>Sun, 03 Aug 2014 20:03:11 +0000</pubDate>
+	<author>noreply@blogger.com (Avichal Dayal)</author>
+</item>
+<item>
 	<title>Sushant Hiray: GSoC Week 11: Interacing ARB</title>
 	<guid isPermaLink="true">http://sushant-hiray.in/posts/gsoc/csympy-week11/</guid>
 	<link>http://sushant-hiray.in/posts/gsoc/csympy-week11/</link>
@@ -3922,92 +3930,6 @@ there can be no better output for solvers than sets.&lt;/p&gt;
 solve real equations. I'll also try to figure out techniques to perform Union
 on infinitely indexed sets.&lt;/p&gt;</description>
 	<pubDate>Wed, 18 Jun 2014 05:59:01 +0000</pubDate>
-</item>
-<item>
-	<title>Soumya Dipta Biswas: GSoC 2014: Week 4</title>
-	<guid isPermaLink="false">http://blog.s-d-b.com/?p=67</guid>
-	<link>http://blog.s-d-b.com/gsoc-2014-week-4/</link>
-	<description>&lt;p&gt;Hello Everyone,&lt;/p&gt;
-&lt;p&gt;The majority of work this week was finishing up my previous work and creating the architecture for the First Order Logic module. Consequently, this post is concerned with First Order Logic (FoL) and is intended mostly for those who are not familiar with the concepts. If you find yourself comfortable with writing formulas in FoL then you can safely skip this post.&lt;/p&gt;
-&lt;p&gt;Before we go on to the discussion about First Order Logic, one very interesting topic that came up this week was the idea of an Atom. What is an atom for propositional logic? The classic answer amounts to anything that cannot be broken down further to yield simpler terms. Analogously, let us define a &lt;code&gt;literal&lt;/code&gt; to mean any atom or its negation. So, &lt;code&gt;A&lt;/code&gt; is a literal (and so is &lt;code&gt;~A&lt;/code&gt;). How about &lt;code&gt;A &amp;gt; B&lt;/code&gt;. Without bordering on any ideas of higher order logic, let us tweak the definition of atom to mean anything that cannot be broken down &lt;em&gt;using propositional logic&lt;/em&gt; to yield simpler terms. So, how does this definition change things? It means we can treat any expression that propositional logic can’t break down as a black box with the assumption that it will yield a boolean value once evaluated. Analogously, a literal is now any expression which cannot be simplified (in propositional logic) or its negation. This definition gives a lot more freedom and power to the idea of formulas. Ofcourse, one needs to keep in mind that it is compulsory for these &lt;em&gt;literals&lt;/em&gt; to yield a boolean once evaluated (typically before propositional formula evaluation methods are called on the formula).&lt;/p&gt;
-&lt;p&gt;Ok, with that, we finish the first part our Propositional Logic post series. The future posts will be associated with First Order Logic before coming back to SAT (in propositional formula). For the remainder of the series the words First Order Logic and Predicate Logic will be used interchangeably (while there is some &lt;a href=&quot;http://http://en.wikipedia.org/wiki/Predicate_logic&quot; title=&quot;Predicate Logic&quot;&gt;difference&lt;/a&gt; between the two, we will ignore them. Finally beginning the actual discussion about FoL, let us start with some definitions.&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Constant:&lt;/strong&gt; Any object of the universe whose value remains the same throughout the expression. e.g. john, 1, computer, socrates&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Variable:&lt;/strong&gt; An object which can take up any value from the domain. e.g. X, Y&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Function:&lt;/strong&gt; A mapping of n-ary terms (see below) to a term. e.g. F(X, G(a, Y)), teacher(teacher(aristotle))&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Term:&lt;/strong&gt; Any Constant, Variable or Function is called a Term.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Predicate:&lt;/strong&gt; A mapping of n-ary terms to a boolean value. e.g. IsTeacher(Socrates, plato)&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Quantifier:&lt;/strong&gt; Quantifiers assert a particular property with respect to a bound variable. Q(X, IsTeacher(X, alexander)) Here Q is some quantifier (see below) and X is the bound variable.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;ForAll (∀)&lt;/strong&gt;: Also known as Universal Quantifier, this asserts that for each value of the bound variable the expression holds True&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Exists (∃)&lt;/strong&gt;: Also known as Existential Quantifier, this asserts that for atleast one of the values of the bound variable the expression holds True&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;The above description is far from complete. Below are some more examples. For these examples assume that the program is intelligent enough to know the answer.&lt;/p&gt;
-&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;crayon-plain-tag&quot;&gt;# All constants are in lowercase
-# All variables are in uppercase
-# All functions starts with a lowercase but subsequent words start with an uppercase
-# All predicates follow camel casing
-
-# teacher(person) is a function which maps a person to his teacher
-&amp;gt;&amp;gt;&amp;gt; teacher(alexander)
-aristotle
-&amp;gt;&amp;gt;&amp;gt; teacher(teacher(aristotle))
-'Socrates'
-
-# f(X) = 2X + 3y + 1
-&amp;gt;&amp;gt;&amp;gt; f(X, Y)
-Add(Mul(2, X), Mul(3, Y), 1)
-
-# IsTeacher(a, b) is a predicate which returns if a is the teacher of b
-&amp;gt;&amp;gt;&amp;gt; IsTeacher(alexander, plato)
-False
-
-# Assume that the following properties hold for the relationship teacher
-# If A is the teacher of B, and B is the teacher of C, then A is the teacher of C (Transitivity)
-# A is always the teacher of A (Identity)
-&amp;gt;&amp;gt;&amp;gt; domain = [socrates, plato, aristotle, alexander]
-&amp;gt;&amp;gt;&amp;gt; ForAll(X, IsTeacher(X, alexander))
-True
-&amp;gt;&amp;gt;&amp;gt; Exists(X, IsWarrior(X))
-True
-&amp;gt;&amp;gt;&amp;gt; ForAll(X, IsWarrior(X))
-False
-&amp;gt;&amp;gt;&amp;gt; Exists(X, InventedCalculus(X))
-False
-
-# f(x, y) = x + 2y
-# g(x, y) = 2x + y
-&amp;gt;&amp;gt;&amp;gt; ForAll(X, ForAll(Y, Greater(f(X, Y), g(X, Y)))
-False
-&amp;gt;&amp;gt;&amp;gt; Exists(X, Exists(Y, Greater(f(X, Y), g(X, Y)))
-True&lt;/pre&gt;&lt;p&gt; &lt;/p&gt;
-&lt;p&gt;I hope the above examples make the definitions clearer. However SymPy is a symbolic library (rather than a numeric one). The implication of the same is that we are much less concerned about the value of the expression than the expression itself. For example, we will be predominantly dealing with functions, variables and predicates without being bothered by their (real life) values. What follows next are examples of conversion of natural language sentences to First Order Logic and their representation in SymPy. One would notice that we have only dealt with the new FoL concepts in the examples above and completely ignored the traditional propositional operators. Using the idea of Atom described at the beginning of this post, if we think of every Predicate (and Quantifier) as an Atom, then we can use every idea of propositional logic here. The examples below describe the complete idea.&lt;/p&gt;
-&lt;p&gt;&lt;/p&gt;&lt;pre class=&quot;crayon-plain-tag&quot;&gt;# All dolphins all mammals
-&amp;gt;&amp;gt;&amp;gt; X = symbols('X')
-&amp;gt;&amp;gt;&amp;gt; Dolphin = Predicate('Dolphin')
-&amp;gt;&amp;gt;&amp;gt; Mammal = Predicate('Mammal')
-&amp;gt;&amp;gt;&amp;gt; ForAll(X, Dolphin(X) &amp;gt;&amp;gt; Mammal(X))
-ForAll((X), Implies(Dolphin(X), Mammal(X)))
-
-
-&amp;gt;&amp;gt;&amp;gt; X, T = symbols('X T')
-&amp;gt;&amp;gt;&amp;gt; Person = Predicate('Person')
-&amp;gt;&amp;gt;&amp;gt; Time = Predicate('Time')
-&amp;gt;&amp;gt;&amp;gt; CanFool = Predicate('CanFool')
-
-# You can fool some of the people all of the time
-&amp;gt;&amp;gt;&amp;gt; Exists(X, ForAll(T, (Person(X) &amp;amp; Time(T)) &amp;gt;&amp;gt; CanFool(X, T)))
-Exists((X), ForAll(T, Implies(And(Person(X), Time(T)), CanFool(X, T))))
-
-# You can fool all of the people some of the time
-&amp;gt;&amp;gt;&amp;gt; ForAll(X, Exists(T, (Person(X) &amp;amp; Time(T)) &amp;gt;&amp;gt; CanFool(X, T)))
-ForAll((X), Exists(T, Implies(And(Person(X), Time(T)), CanFool(X, T))))
-
-# You cannot fool all of the people all of the time
-&amp;gt;&amp;gt;&amp;gt; ~ForAll(X, ForAll(T, (Person(X) &amp;amp; Time(T)) &amp;gt;&amp;gt; CanFool(X, T)))
-Not(ForAll((X,T), Implies(And(Person(X), Time(T)), CanFool(X, T))))&lt;/pre&gt;&lt;p&gt; &lt;/p&gt;
-&lt;p&gt;I hope this should provide you with some basic idea about First Order Logic. I will be updating this post with ideas related to Interpretation/Model. Stay tuned.&lt;/p&gt;
-&lt;p&gt;Aloha!!!&lt;/p&gt;</description>
-	<pubDate>Tue, 17 Jun 2014 20:54:50 +0000</pubDate>
 </item>
 
 </channel>
