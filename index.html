@@ -435,14 +435,14 @@ You can think of this kind of like a vector. There's another symbolic
 vector type as well in Sympy (<code>DeferredVector</code>). I may end up supporting
 it, but I'm not really sure what it's for. In its current implementation,
 the following works:</p>
-<div style="background: #272822;" class="codehilite"><pre style="line-height: 125%;"><span style="color: #f8f8f2;">q</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">[q1,</span> <span style="color: #f8f8f2;">q2,</span> <span style="color: #f8f8f2;">q3,</span> <span style="color: #f8f8f2;">q4,</span> <span style="color: #f8f8f2;">q5]</span>
-<span style="color: #f8f8f2;">q_vec</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">MatrixSymbol(</span><span style="color: #e6db74;">'q'</span><span style="color: #f8f8f2;">,</span> <span style="color: #ae81ff;">5</span><span style="color: #f8f8f2;">,</span> <span style="color: #ae81ff;">1</span><span style="color: #f8f8f2;">)</span>
-<span style="color: #f8f8f2;">sub_dict</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">dict(zip(q,</span> <span style="color: #f8f8f2;">q_vec))</span>
-<span style="color: #75715e;"># Replaces each q with elements from q_vec</span>
-<span style="color: #f8f8f2;">expr</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">msubs(expr,</span> <span style="color: #f8f8f2;">q_vec)</span>
-<span style="color: #75715e;"># Generate a function that takes a numpy array (q) and returns expr</span>
-<span style="color: #75715e;"># This works if expr is an expression, or a matrix</span>
-<span style="color: #f8f8f2;">func</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">autowrap(expr)</span>
+<div class="highlight"><pre><span class="n">q</span> <span class="o">=</span> <span class="p">[</span><span class="n">q1</span><span class="p">,</span> <span class="n">q2</span><span class="p">,</span> <span class="n">q3</span><span class="p">,</span> <span class="n">q4</span><span class="p">,</span> <span class="n">q5</span><span class="p">]</span>
+<span class="n">q_vec</span> <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'q'</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">sub_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">q_vec</span><span class="p">))</span>
+<span class="c"># Replaces each q with elements from q_vec</span>
+<span class="n">expr</span> <span class="o">=</span> <span class="n">msubs</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">q_vec</span><span class="p">)</span>
+<span class="c"># Generate a function that takes a numpy array (q) and returns expr</span>
+<span class="c"># This works if expr is an expression, or a matrix</span>
+<span class="n">func</span> <span class="o">=</span> <span class="n">autowrap</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
 </pre></div>
 
 
@@ -482,7 +482,7 @@ to implement support for all possible operations, and the many BLAS/LAPACK
 routines that support them, I'll focus just on the inverse, as it's commonly
 found in expressions in <code>mechanics</code>. The thought is, we should be able to
 run:</p>
-<div style="background: #272822;" class="codehilite"><pre style="line-height: 125%;"><span style="color: #f8f8f2;">func</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">autowrap(Inverse(M)</span><span style="color: #f92672;">*</span><span style="color: #f8f8f2;">F)</span>
+<div class="highlight"><pre><span class="n">func</span> <span class="o">=</span> <span class="n">autowrap</span><span class="p">(</span><span class="n">Inverse</span><span class="p">(</span><span class="n">M</span><span class="p">)</span><span class="o">*</span><span class="n">F</span><span class="p">)</span>
 </pre></div>
 
 
@@ -504,36 +504,7 @@ the program, listen to some interesting talks, and see the GooglePlex. I also
 bought my tickets to get there a day early so I have some time to explore the
 bay area. Last time I was out there I was 14, and I didn't get to see much
 of the area. If you also got accepted/live out and would be interested in
-meeting up, let me know! I'll be in San Jose/San Francisco October 23-26.</p>&lt;script type="text/javascript"&gt;
-    if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
-        var mathjaxscript = document.createElement('script');
-        mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
-        mathjaxscript.type = 'text/javascript';
-        mathjaxscript.src = 'https:' == document.location.protocol
-                ? 'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
-                : 'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
-        mathjaxscript[(window.opera ? "innerHTML" : "text")] =
-            "MathJax.Hub.Config({" +
-            "    config: ['MMLorHTML.js']," +
-            "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
-            "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
-            "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
-            "    displayAlign: 'center'," +
-            "    displayIndent: '0em'," +
-            "    showMathMenu: true," +
-            "    tex2jax: { " +
-            "        inlineMath: [ ['$','$'] ], " +
-            "        displayMath: [ ['$$','$$'] ]," +
-            "        processEscapes: true," +
-            "        preview: 'TeX'," +
-            "    }, " +
-            "    'HTML-CSS': { " +
-            "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'black ! important'} }" +
-            "    } " +
-            "}); ";
-        (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
-    }
-&lt;/script&gt;</div>
+meeting up, let me know! I'll be in San Jose/San Francisco October 23-26.</p></div>
 
 
 
@@ -2083,14 +2054,14 @@ gone.</p>
 <p>The second, and more serious issue, is that there was no way to tell if the limit
 at that point was equal to the value the expression should actually evaluate too, or if it
 is just the value of the <em>limit at that point</em>. For example:</p>
-<div style="background: #272822;" class="codehilite"><pre style="line-height: 125%;"><span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">expr</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">(a</span> <span style="color: #f92672;">-</span> <span style="color: #ae81ff;">1</span><span style="color: #f8f8f2;">)</span><span style="color: #f92672;">/</span><span style="color: #f8f8f2;">(a</span><span style="color: #f92672;">**</span><span style="color: #ae81ff;">2</span> <span style="color: #f92672;">-</span> <span style="color: #ae81ff;">1</span><span style="color: #f8f8f2;">)</span>
-<span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">op_point</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">{a:</span> <span style="color: #ae81ff;">1</span><span style="color: #f8f8f2;">}</span>
-<span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">expr</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">subs(op_point)</span>
-<span style="color: #f8f8f2;">nan</span>
-<span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">limit(expr,</span> <span style="color: #f8f8f2;">a,</span> <span style="color: #ae81ff;">1</span><span style="color: #f8f8f2;">,</span> <span style="color: #e6db74;">'+'</span><span style="color: #f8f8f2;">)</span>
-<span style="color: #ae81ff;">1</span><span style="color: #f92672;">/</span><span style="color: #ae81ff;">2</span>
-<span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">limit(expr,</span> <span style="color: #f8f8f2;">a,</span> <span style="color: #ae81ff;">1</span><span style="color: #f8f8f2;">,</span> <span style="color: #e6db74;">'-'</span><span style="color: #f8f8f2;">)</span>
-<span style="color: #ae81ff;">1</span><span style="color: #f92672;">/</span><span style="color: #ae81ff;">2</span>
+<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span> <span class="n">expr</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">op_point</span> <span class="o">=</span> <span class="p">{</span><span class="n">a</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">expr</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">op_point</span><span class="p">)</span>
+<span class="n">nan</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">limit</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s">'+'</span><span class="p">)</span>
+<span class="mi">1</span><span class="o">/</span><span class="mi">2</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">limit</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s">'-'</span><span class="p">)</span>
+<span class="mi">1</span><span class="o">/</span><span class="mi">2</span>
 </pre></div>
 
 
@@ -3892,7 +3863,7 @@ equations for the <a href="http://docs.sympy.org/dev/modules/ physics/mechanics/
 weeks. It's a super slow test that I'd never actual gotten to run before. But
 with the speed improvements made, it actual finishes in a reasonable time.
 Except it still doesn't work. I'm able to run all the way up to</p>
-<div style="background: #272822;" class="codehilite"><pre style="line-height: 125%;"><span style="color: #f8f8f2;">M,</span> <span style="color: #f8f8f2;">A,</span> <span style="color: #f8f8f2;">B</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">KM</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">linearize()</span>
+<div class="highlight"><pre><span class="n">M</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">B</span> <span class="o">=</span> <span class="n">KM</span><span class="o">.</span><span class="n">linearize</span><span class="p">()</span>
 </pre></div>
 
 
@@ -3901,19 +3872,19 @@ There are two issues:</p>
 <h3>Issue 1: Get <code>nan</code> when not simplified</h3>
 <p><code>M.subs(val_dict)</code> results in <code>nan</code> and <code>oo</code> upon after <code>subs</code>. But doesn't
 if it's simplified before the subs. An example of this behavior would be:</p>
-<div style="background: #272822;" class="codehilite"><pre style="line-height: 125%;"><span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">M</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">sin(q1)</span><span style="color: #f92672;">/</span><span style="color: #f8f8f2;">tan(q1)</span>
-<span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">M</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">subs({q1:</span> <span style="color: #ae81ff;">0</span><span style="color: #f8f8f2;">}</span>
-<span style="color: #f8f8f2;">nan</span>
+<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span> <span class="n">M</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">q1</span><span class="p">)</span><span class="o">/</span><span class="n">tan</span><span class="p">(</span><span class="n">q1</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">M</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">q1</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+<span class="n">nan</span>
 </pre></div>
 
 
 <p>Note that if this is simplified, this results in something completely different:</p>
-<div style="background: #272822;" class="codehilite"><pre style="line-height: 125%;"><span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">M</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">sin(q1)</span><span style="color: #f92672;">/</span><span style="color: #f8f8f2;">tan(q1)</span>
-<span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">M</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">M</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">trigsimp()</span>
-<span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">M</span>
-<span style="color: #f8f8f2;">cos(q1)</span>
-<span style="color: #f92672;">&gt;&gt;&gt;</span> <span style="color: #f8f8f2;">M</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">subs({q1:</span> <span style="color: #ae81ff;">0</span><span style="color: #f8f8f2;">})</span>
-<span style="color: #ae81ff;">1</span>
+<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span> <span class="n">M</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">q1</span><span class="p">)</span><span class="o">/</span><span class="n">tan</span><span class="p">(</span><span class="n">q1</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">M</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">trigsimp</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">M</span>
+<span class="n">cos</span><span class="p">(</span><span class="n">q1</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">M</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">q1</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
+<span class="mi">1</span>
 </pre></div>
 
 
@@ -3965,46 +3936,17 @@ for calculating the constraint forces. Also, when linearizing with Lagrange's
 method, the multipliers have operating points as well, and these need to be
 calculated based on the operating point for the other states ($q$, $\dot{q}$,
 etc...). Now a user can go:</p>
-<div style="background: #272822;" class="codehilite"><pre style="line-height: 125%;"><span style="color: #f8f8f2;">op_point</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">dict_or_iterable_of_dicts</span>
-<span style="color: #f8f8f2;">lam_op</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">LM</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">solve_multipliers(op_point)</span>
-<span style="color: #f8f8f2;">op_point</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">append(lam_op)</span>     <span style="color: #75715e;"># Or op_point.update if op_point is a dict, not a list of dicts</span>
-<span style="color: #f8f8f2;">M,</span> <span style="color: #f8f8f2;">A,</span> <span style="color: #f8f8f2;">B</span> <span style="color: #f92672;">=</span> <span style="color: #f8f8f2;">LM</span><span style="color: #f92672;">.</span><span style="color: #f8f8f2;">linearize(q_ind</span><span style="color: #f92672;">=</span><span style="color: #f8f8f2;">q_ind,</span> <span style="color: #f8f8f2;">qd_ind</span><span style="color: #f92672;">=</span><span style="color: #f8f8f2;">qd_ind,</span> <span style="color: #f8f8f2;">op_point</span><span style="color: #f92672;">=</span><span style="color: #f8f8f2;">op_point)</span>
+<div class="highlight"><pre><span class="n">op_point</span> <span class="o">=</span> <span class="n">dict_or_iterable_of_dicts</span>
+<span class="n">lam_op</span> <span class="o">=</span> <span class="n">LM</span><span class="o">.</span><span class="n">solve_multipliers</span><span class="p">(</span><span class="n">op_point</span><span class="p">)</span>
+<span class="n">op_point</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lam_op</span><span class="p">)</span>     <span class="c"># Or op_point.update if op_point is a dict, not a list of dicts</span>
+<span class="n">M</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">B</span> <span class="o">=</span> <span class="n">LM</span><span class="o">.</span><span class="n">linearize</span><span class="p">(</span><span class="n">q_ind</span><span class="o">=</span><span class="n">q_ind</span><span class="p">,</span> <span class="n">qd_ind</span><span class="o">=</span><span class="n">qd_ind</span><span class="p">,</span> <span class="n">op_point</span><span class="o">=</span><span class="n">op_point</span><span class="p">)</span>
 </pre></div>
 
 
 </li>
 </ol>
 <p>Hopefully in the next week I can get my PR merged, so the Lagrange stuff can
-finally be submitted.</p>&lt;script type="text/javascript"&gt;
-    if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
-        var mathjaxscript = document.createElement('script');
-        mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
-        mathjaxscript.type = 'text/javascript';
-        mathjaxscript.src = 'https:' == document.location.protocol
-                ? 'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
-                : 'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
-        mathjaxscript[(window.opera ? "innerHTML" : "text")] =
-            "MathJax.Hub.Config({" +
-            "    config: ['MMLorHTML.js']," +
-            "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
-            "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
-            "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
-            "    displayAlign: 'center'," +
-            "    displayIndent: '0em'," +
-            "    showMathMenu: true," +
-            "    tex2jax: { " +
-            "        inlineMath: [ ['$','$'] ], " +
-            "        displayMath: [ ['$$','$$'] ]," +
-            "        processEscapes: true," +
-            "        preview: 'TeX'," +
-            "    }, " +
-            "    'HTML-CSS': { " +
-            "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'black ! important'} }" +
-            "    } " +
-            "}); ";
-        (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
-    }
-&lt;/script&gt;</div>
+finally be submitted.</p></div>
 
 
 
@@ -5558,13 +5500,13 @@ $$</p>
 <a href="http://angadhsympy.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://angadhsympy.wordpress.com" class="message" title="no activity in 7 days">Angadh Nanjangud</a>
 </li>
 <li>
-<a href="http://www.blogger.com/feeds/283806077182880539/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://gsocblog.blogspot.com/" title="GSoC 2014 with SymPy">Avichal Dayal</a>
+<a href="http://www.blogger.com/feeds/283806077182880539/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://gsocblog.blogspot.com/" class="message" title="no activity in 7 days">Avichal Dayal</a>
 </li>
 <li>
 <a href="http://www.catchmrbharath.in/programming.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a class="message" title="404: not found">Bharath M R</a>
 </li>
 <li>
-<a href="http://brianegranger.com/?feed=rss2" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://brianegranger.com" class="message" title="no activity in 7 days">Brian Granger</a>
+<a href="http://brianegranger.com/?feed=rss2" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://brianegranger.com" class="message" title="internal server error">Brian Granger</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/267967203861801529/posts/default/-/SymPy" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://straightupcoding.blogspot.com/search/label/SymPy" class="message" title="no activity in 7 days">Brian Jorgensen</a>
@@ -5705,7 +5647,7 @@ $$</p>
 
 <p>
 <strong>Last updated:</strong><br>
-August 10, 2014 05:41 PM<br>
+August 11, 2014 04:21 AM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
