@@ -12,25 +12,26 @@
 	<guid isPermaLink="true">http://asmeurer.github.io/posts/playing-with-swift-and-spritekit/</guid>
 	<link>http://asmeurer.github.io/posts/playing-with-swift-and-spritekit/</link>
 	<description>&lt;div&gt;&lt;p&gt;I've always wanted to learn how to write native apps for iOS and the Mac as
-long as either as existed.  However, the barrier of entry has always been too
+long as either has existed.  However, the barrier of entry has always been too
 high, given that I only ever had time to play with them as a hobby.  The
 Objective-C programming language is a bit complicated to learn, especially
 alongside all the memory management that you have to do (and it doesn't help
 that Apple has gone through several memory management schemes through Mac OS X
 versions).  To add on to that, the Cocoa framework is huge, and it's quite
 daunting to even know where to get started with it.&lt;/p&gt;
-&lt;p&gt;Apple's announcement of the
+&lt;p&gt;With Apple's announcement of the
 &lt;a href=&quot;https://developer.apple.com/swift/&quot;&gt;Swift programming language&lt;/a&gt; in June, it
 was clear to me that the language would significantly lower the barrier of
-entry.  The XCode 6 beta is now public (i.e., you do not need to have a paid
-Apple Developer account to access it), so anyone can play with Swift.&lt;/p&gt;
+entry.  The &lt;a href=&quot;https://developer.apple.com/xcode/downloads/&quot;&gt;XCode 6 beta&lt;/a&gt; is
+now public (i.e., you do not need to have a paid Apple Developer account to
+access it), so anyone can play with Swift.&lt;/p&gt;
 &lt;p&gt;Note that I am still &lt;em&gt;very&lt;/em&gt; new to both Swift and iOS development in general,
 so it's quite likely that some of the things I mention here are actually bad
 ideas.  If you know more than I do and spot a bad thing that I am doing,
 please mention it in the comments.&lt;/p&gt;
 &lt;p&gt;It's also possible that some of the assumptions I've made about the Swift
-language or the Cocoa framework are actually wrong. Please remember that I am
-still a beginner and take what I say with a grain of salt.&lt;/p&gt;
+language or the SpriteKit framework are actually wrong. Please remember that I
+am still a beginner and take what I say with a grain of salt.&lt;/p&gt;
 &lt;h2&gt;The Swift Language&lt;/h2&gt;
 &lt;p&gt;If you don't know how to program at all, I don't know how well this will work
 for you. I already know several language, especially Python, so my experience
@@ -65,7 +66,7 @@ know a high-level language like Python.  A few important things:&lt;/p&gt;
   implementation of &lt;code&gt;?&lt;/code&gt; is truly a Monad.&lt;/p&gt;
 &lt;p&gt;Roughly speaking, in many circumstances, you don't know if a variable will
 actually be the given type or not. A good example of this is with
-dictionaries. &lt;code&gt;var a: [String: Int]&lt;/code&gt;, this creates a dictionary that maps
+dictionaries. &lt;code&gt;var a: [String: Int]&lt;/code&gt; creates a dictionary that maps
 strings to integers. If you manipulate this dictionary, and then access a
 key from it, like &lt;code&gt;a[b]&lt;/code&gt;, there is no way for the compiler to know if that
 key will really be in the dictionary. If the key is in the dictionary, you
@@ -81,7 +82,7 @@ only worry about types if the compiler tells you something is wrong.&lt;/p&gt;
 &lt;p&gt;Swift functions often require the parameters be named, for instance, you
   have to write &lt;code&gt;CGSize(width: 1, height: 2)&lt;/code&gt; instead of just &lt;code&gt;CGSize(1,
   2)&lt;/code&gt;. This is both for clarity (the former is much easier to read if you
-  aren't familiar with the API for &lt;code&gt;CGSize&lt;/code&gt;, and also because allows
+  aren't familiar with the API for &lt;code&gt;CGSize&lt;/code&gt;), and because Swift allows
   polymorphism, i.e., you can define different initializers for the same class
   with different type signatures. For example, &lt;code&gt;CGRect&lt;/code&gt; can be initialized as
   &lt;code&gt;CGRect(origin: CGPoint, size: CGSize)&lt;/code&gt; or &lt;code&gt;CGRect(x: Int, y: Int, width:
@@ -89,6 +90,43 @@ only worry about types if the compiler tells you something is wrong.&lt;/p&gt;
   explicitly tell the compiler which version to use.&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
+&lt;p&gt;I've found Swift to be a very strict language. I don't mean this in the sense
+described by
+&lt;a href=&quot;https://en.wikipedia.org/wiki/Strict_programming_language&quot;&gt;this Wikipedia article&lt;/a&gt;. What
+I mean is that Swift typically only lets you do things one way.  This is
+similar to Python's &quot;one way to do it,&quot; except Swift enforces this at the
+language level.&lt;/p&gt;
+&lt;p&gt;A nice example of this is that I rarely get a warning from the Swift compiler.
+Just about every message I've gotten from the compiler has been an error. The
+difference is that the program will still compile and run with a warning. This
+is different from C, C++, and Objective-C, which have many warnings that the
+compiler will still compile with. These warnings usually are for things like
+an incorrect pointer type. Since there is really only one type in C, the
+integer (because all data in memory is just integers), the program can still
+run even if you mix your types up a bit.&lt;/p&gt;
+&lt;p&gt;There are also many cases where Swift seems maybe too strict about things,
+although it's clear that it is doing it to try to stray people away from
+common mistakes and antipatterns. For example, the condition of an &lt;code&gt;if&lt;/code&gt;
+statement in Swift must always be of type &lt;code&gt;Bool&lt;/code&gt;. Unlike languages like
+Python, things do not have implicit boolean values. &lt;code&gt;if 1&lt;/code&gt; is a syntax
+error. So is &lt;code&gt;if a&lt;/code&gt; unless &lt;code&gt;a&lt;/code&gt; is type &lt;code&gt;Bool&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;This ends up not being a big problem. The things Swift forces you to do feel
+like good programming practices.  This is not unlike how Python &quot;forces&quot; you
+to keep your code indented correctly.  It feels very different from a language
+like Java, where the things that you are forced to do all feel like they are
+there simply to make the compiler writer's life easier.  And indeed, unlike
+Java and Objective-C and much like Python, Swift code requires very little
+boilerplate.  There are no header files for instance.&lt;/p&gt;
+&lt;p&gt;So all said and done, I like Swift. I don't like it as much as Python (I also
+don't have my head wrapped around it as much as Python). But it's far better
+than Objective-C, and that's what matters. Frankly, my biggest gripe with it
+is the ubiquitous use of CamelCasing and two letter prefixing (&lt;code&gt;NS&lt;/code&gt;, &lt;code&gt;CG&lt;/code&gt;,
+&lt;code&gt;SK&lt;/code&gt;; I don't know if there's a name for this) in the API. I adamantly refuse
+to do this with my own variables, because I believe CamelCase reduces
+readability over underscore_casing. I like the Python convention to use
+underscore_casing for variables, functions, and methods, and CamelCase for
+classes (because classes are kind of like proper nouns, and CamelCase is as
+close to Capitalization as possible in programming language conventions).&lt;/p&gt;
 &lt;h2&gt;Learn to read Objective-C&lt;/h2&gt;
 &lt;p&gt;While it is not necessary to write Objective-C any more, it is a good idea to
 know how to read it. The reason is that a lot of good resources on the
@@ -134,7 +172,7 @@ comfortable, you can move to another editor.&lt;/p&gt;
   it fixed inline).&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;Direct interaction with the simulator&lt;/strong&gt;: One button will compile your code
+&lt;p&gt;&lt;strong&gt;Direct interaction with the iOS Simulator&lt;/strong&gt;: One button will compile your code
   and start the simulator. If your target is Mac OS X, it will open the
   application.&lt;/p&gt;
 &lt;/li&gt;
@@ -165,7 +203,9 @@ the XCode setting to get some things the way you like them (although I found
 that trying to set TAB to autoindent did not work). You can also use a tool
 like &lt;a href=&quot;https://pqrs.org/osx/karabiner/&quot;&gt;Karabiner&lt;/a&gt; (previously
 KeyRemap4MacBook) to enable Vim or Emacs editor shortcuts everywhere
-(including XCode).&lt;/p&gt;
+(including XCode). It doesn't help that XCode 6 is still in beta (at some
+point the editor backend died and all syntax highlighting and tab completion
+stopped working; I managed to fix it by removing a spurious &lt;code&gt;!&lt;/code&gt; in the code)&lt;/p&gt;
 &lt;h2&gt;The iOS Simulator&lt;/h2&gt;
 &lt;p&gt;One disappointing thing that I learned is that you cannot run any iOS program
 you write on an iOS device unless you are in the paid developer program (or if
@@ -206,17 +246,17 @@ on a computer with a mouse.&lt;/p&gt;
 started with a SpriteKit game for iOS. This created a basic template &quot;Hello
 World&quot; Swift file with the basic &lt;code&gt;SKScene&lt;/code&gt; subclass. Go ahead and compile and
 run this in the simulator to see what it does.&lt;/p&gt;
-&lt;p&gt;There are four important methods of &lt;code&gt;SKScene&lt;/code&gt; which you will want to
-override, &lt;code&gt;didMoveToView&lt;/code&gt;, &lt;code&gt;touchesBegan&lt;/code&gt;, &lt;code&gt;touchesEnded&lt;/code&gt;, and
-&lt;code&gt;update&lt;/code&gt;. &lt;code&gt;didMoveToView&lt;/code&gt; is your initialize for your scene.  Anything that
-should be set up and appear from the very beginning should go
-there. &lt;code&gt;touchesBegan&lt;/code&gt; and &lt;code&gt;touchesEnded&lt;/code&gt; are called when a finger touches the
-screen and when it leaves the screen, respectively. Remember always that iOS
-devices are multitouch devices, so these events can happen concurrently, and
-there can be multiple touches happening at once.  The first argument to these
-methods is a set of touches, which you should iterate over to perform actions
-(the &quot;Hello World&quot; example shows how to do this). Finally, the &lt;code&gt;update&lt;/code&gt; method
-is called every time the scene is updated, at each &quot;frame&quot; essentially.&lt;/p&gt;
+&lt;p&gt;There are four important methods of &lt;code&gt;SKScene&lt;/code&gt; which you will want to override,
+&lt;code&gt;didMoveToView&lt;/code&gt;, &lt;code&gt;touchesBegan&lt;/code&gt;, &lt;code&gt;touchesEnded&lt;/code&gt;, and &lt;code&gt;update&lt;/code&gt;. &lt;code&gt;didMoveToView&lt;/code&gt;
+is the initializer for the scene.  Anything that should be set up and appear
+from the very beginning should go there. &lt;code&gt;touchesBegan&lt;/code&gt; and &lt;code&gt;touchesEnded&lt;/code&gt; are
+called when a finger touches the screen and when it leaves the screen,
+respectively. Remember always that iOS devices are multitouch devices, so
+these events can happen concurrently, and there can be multiple touches
+happening at once.  The first argument to these methods is a set of touches,
+which you should iterate over to perform actions (the &quot;Hello World&quot; example
+shows how to do this). Finally, the &lt;code&gt;update&lt;/code&gt; method is called every time the
+scene is updated, at each &quot;frame&quot; essentially.&lt;/p&gt;
 &lt;p&gt;There are other methods, for instance, &lt;code&gt;touchesMoved&lt;/code&gt;. However, I discovered
 that you don't actually want to use &lt;code&gt;touchesMoved&lt;/code&gt; to do what you would think
 you'd use it for, namely, to move stuff around. The reason is that there is no
@@ -224,7 +264,8 @@ easy way to sync up multitouches between &lt;code&gt;touchesBegan&lt;/code&gt; (
 thing the finger started on) and &lt;code&gt;touchesMoved&lt;/code&gt; to move it around. It works
 well for a single touch, but if you want to be able to move multiple things
 around at once (which I highly recommend, as it leads to a much nicer user
-experience), you have to do things a little differently.&lt;/p&gt;
+experience), you have to do things a little differently, as I'll explain
+below.&lt;/p&gt;
 &lt;h2&gt;Adding some objects to your environment&lt;/h2&gt;
 &lt;p&gt;There are a lot of classes to create various objects of various shapes. I
 started with &lt;code&gt;SKSpriteNode&lt;/code&gt;, which creates a simple square, because I wanted
@@ -256,11 +297,11 @@ from within other class variables.  In Python, you can do&lt;/p&gt;
 &lt;/pre&gt;
 
 
-&lt;p&gt;it tells you that &lt;code&gt;Test.Type does not have a member named 'a'&lt;/code&gt; no the &lt;code&gt;let b =
+&lt;p&gt;it tells you that &lt;code&gt;Test.Type does not have a member named 'a'&lt;/code&gt; on the &lt;code&gt;let b =
 a + 1&lt;/code&gt; line.&lt;/p&gt;
 &lt;p&gt;You may have to use properties with getters and setters in this case, which I
 didn't feel like fooling with. The result is that I did not abstract out the
-&lt;code&gt;CGSize(width: 10, height: 10)&lt;/code&gt; into a common variable.&lt;/p&gt;
+&lt;code&gt;CGSize(width: 30, height: 30)&lt;/code&gt; into a common variable.&lt;/p&gt;
 &lt;p&gt;The &lt;code&gt;didMoveToView&lt;/code&gt; method then becomes&lt;/p&gt;
 &lt;pre class=&quot;code literal-block&quot;&gt;&lt;span class=&quot;n&quot;&gt;override&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;func&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;didMoveToView&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;view&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SKView&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
     &lt;span class=&quot;n&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;center&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CGPoint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CGRectGetMidX&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;frame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CGRectGetMidY&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;frame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
@@ -305,12 +346,13 @@ went with was to play around with the physics a little. &lt;code&gt;SpriteKit&lt
 &lt;/pre&gt;
 
 
-&lt;p&gt;This creates an &lt;code&gt;SKPhysicsBody&lt;/code&gt; with the exact same size as our
-&lt;code&gt;SKSpriteNode&lt;/code&gt;s (there's probably a more direct way to do this). The
-&lt;code&gt;affectedByGravity&lt;/code&gt; property is important. If you don't set it to &lt;code&gt;false&lt;/code&gt;, all
-the objects will fall off the bottom of the screen. I disabled
-&lt;code&gt;allowsRotation&lt;/code&gt; because I wanted my squares to stay upright. Otherwise when
-when the squares hit one another they will rotate in space.&lt;/p&gt;
+&lt;p&gt;For each sprite, I create an &lt;code&gt;SKPhysicsBody&lt;/code&gt; with the exact same size as the
+&lt;code&gt;SKSpriteNode&lt;/code&gt;s (there's probably a more direct way to do this), and attach it
+to that node. The &lt;code&gt;affectedByGravity&lt;/code&gt; property is important. If you don't set
+it to &lt;code&gt;false&lt;/code&gt;, all the objects will fall off the bottom of the screen. I
+disabled &lt;code&gt;allowsRotation&lt;/code&gt; because I wanted my squares to stay
+upright. Otherwise when when the squares hit one another they will rotate in
+space.&lt;/p&gt;
 &lt;p&gt;Now &lt;code&gt;SceneKit&lt;/code&gt; will prevent the squares from overlapping with one another, even
 if we put them on top of each other as we have done.&lt;/p&gt;
 &lt;p&gt;So now when we start the simulator, we see&lt;/p&gt;
@@ -322,7 +364,7 @@ to do this took me some time to figure out.  I finally got some hints from
 &lt;p&gt;The key thing here is that the &lt;code&gt;UITouch&lt;/code&gt; objects remain the same objects for
 the duration of the touch. Their position is updated when the touch
 moves. Hence, you just need to associate each touch with the node that was
-touched when the touch began, and move the node to the position of the touch
+touched when the touch began, and move the node to the position of that touch
 with each update.&lt;/p&gt;
 &lt;p&gt;To start, we will create a dictionary on the class mapping touches to nodes&lt;/p&gt;
 &lt;pre class=&quot;code literal-block&quot;&gt;&lt;span class=&quot;n&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;selected&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;UITouch&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SKNode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
@@ -384,6 +426,11 @@ current position of the touch.&lt;/p&gt;
 
 
 &lt;p&gt;Note that we only modify the position for the four sprite nodes.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;touch.locationInNode(self)&lt;/code&gt; part took me a long time to figure out. There
+are other methods, like &lt;code&gt;touch.locationInView(nil)&lt;/code&gt;, but this does something
+very strange where the the horizontal axis was doubled (moving the touch one
+inch moved the object two inches), and the vertical axis was inverted. If
+someone knows what was going on there, please let me know.&lt;/p&gt;
 &lt;p&gt;Modifying the position directly is nice, but it's nice to play around a little
 bit with a third thing from SpriteKit, actions.&lt;/p&gt;
 &lt;p&gt;What we will do instead of setting the position of the node is to tell
@@ -392,7 +439,8 @@ time small enough, like &lt;code&gt;0.01&lt;/code&gt; seconds, it will appear to
 same. If we up this time, there will be a smooth &quot;lag&quot; where the node catches
 up to the touch. Because the movement always happens in the same amount of
 time, it will move faster if the finger is farther away. This gives the
-squares a nice &quot;frictioney&quot; effect, which is quite nice.&lt;/p&gt;
+squares a nice &quot;frictioney&quot; effect with some springiness to it, which is quite
+nice.&lt;/p&gt;
 &lt;pre class=&quot;code literal-block&quot;&gt;&lt;span class=&quot;n&quot;&gt;override&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;func&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;update&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;currentTime&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CFTimeInterval&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
     &lt;span class=&quot;cm&quot;&gt;/* Called before each frame is rendered */&lt;/span&gt;
     &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;touch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;node&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;selected&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
@@ -417,8 +465,8 @@ multitouch.&lt;/p&gt;
 &amp;lt;/video&amp;gt;
 
 &lt;p&gt;Here you can see the movement lag caused by using &lt;code&gt;SKAction.moveTo&lt;/code&gt; with
-&lt;code&gt;duration: 0.1&lt;/code&gt; (note that the mouse itself jumps a bit at the beginning,
-which is due to a delay in the recording).&lt;/p&gt;
+&lt;code&gt;duration: 0.1&lt;/code&gt; (note that the mouse itself jumps a bit at the beginning, but
+this is due to lag in the recording).&lt;/p&gt;
 &amp;lt;video autoplay=&quot;autoplay&quot; loop=&quot;loop&quot; src=&quot;http://asmeurer.github.io/SpriteKit-Example-2.mp4&quot; width=&quot;500&quot;&amp;gt;
   Your browser does not support the video tag.
 &amp;lt;/video&amp;gt;
@@ -428,17 +476,40 @@ which is due to a delay in the recording).&lt;/p&gt;
 &lt;p&gt;This isn't exactly a &quot;game&quot;, but it does lay down the foundations for what you
 would need to write a game in Swift using SpriteKit.  At least for me, it
 shows me the technical basics of how to write some games that I had thought
-about, which mostly involve making shape and moving them around the screen.&lt;/p&gt;&lt;/div&gt;</description>
+about, which mostly involve making shapes and moving them around the screen.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;/div&gt;</description>
 	<pubDate>Sun, 17 Aug 2014 16:31:11 +0000</pubDate>
 </item>
 <item>
 	<title>Thilina Rathnayake: More work on Sparse Matrices</title>
 	<guid isPermaLink="false">http://thilinaatsympy.wordpress.com/?p=391</guid>
-	<link>http://thilinaatsympy.wordpress.com/2014/08/15/more-work-on-sparse-matrices/</link>
+	<link>https://thilinaatsympy.wordpress.com/2014/08/15/more-work-on-sparse-matrices/</link>
 	<description>&lt;p&gt;Hi All,&lt;/p&gt;
-&lt;p&gt;During this week I completed more functionalities regarding to CSR Matrices. I mainly implemented a generalized binary operation between two matrices. It’s similar to the SciPy function &lt;a href=&quot;https://github.com/scipy/scipy/blob/master/scipy/sparse/sparsetools/csr.h#L745&quot;&gt;csr_binop_csr_canonical&lt;/a&gt;. This method applies a given binary function, &lt;img src=&quot;http://s0.wp.com/latex.php?latex=binop&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;binop&quot; class=&quot;latex&quot; title=&quot;binop&quot; /&gt; to each corresponding elements of the two matrices which are given as input arguments, i.e. &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%28i%2C+j%29%5E%7Bth%7D&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;(i, j)^{th}&quot; class=&quot;latex&quot; title=&quot;(i, j)^{th}&quot; /&gt; entry of the output matrix is equal to &lt;img src=&quot;http://s0.wp.com/latex.php?latex=binop%28a%2C+b%29&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;binop(a, b)&quot; class=&quot;latex&quot; title=&quot;binop(a, b)&quot; /&gt; where &lt;img src=&quot;http://s0.wp.com/latex.php?latex=a&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;a&quot; class=&quot;latex&quot; title=&quot;a&quot; /&gt; and &lt;img src=&quot;http://s0.wp.com/latex.php?latex=b&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;b&quot; class=&quot;latex&quot; title=&quot;b&quot; /&gt; are the &lt;img src=&quot;http://s0.wp.com/latex.php?latex=%28i%2C+j%29%5E%7Bth%7D&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;(i, j)^{th}&quot; class=&quot;latex&quot; title=&quot;(i, j)^{th}&quot; /&gt; entries of input matrices respectively.&lt;/p&gt;
-&lt;p&gt;Also, I implemented &lt;img src=&quot;http://s0.wp.com/latex.php?latex=get%28%29%2C+set%28%29&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;get(), set()&quot; class=&quot;latex&quot; title=&quot;get(), set()&quot; /&gt; methods for CSRMatrix class. It took me while to get this completely right as I was discarding some of the possible cases.&lt;/p&gt;
-&lt;p&gt;I originally planned to start writing python wrappers but I couldn’t do it as I was a bit busy with a project in my university. But I hope to get started on this in upcoming week. Although the GSoC is officially over, I will work on the project for two additional weeks as I took a two weeks break during the programme.&lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/thilinaatsympy.wordpress.com/391/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/thilinaatsympy.wordpress.com/391/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://pixel.wp.com/b.gif?host=thilinaatsympy.wordpress.com&amp;amp;blog=52956410&amp;amp;post=391&amp;amp;subd=thilinaatsympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
+&lt;p&gt;During this week I completed more functionalities regarding to CSR Matrices. I mainly implemented a generalized binary operation between two matrices. It’s similar to the SciPy function &lt;a href=&quot;https://github.com/scipy/scipy/blob/master/scipy/sparse/sparsetools/csr.h#L745&quot;&gt;csr_binop_csr_canonical&lt;/a&gt;. This method applies a given binary function, &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=binop&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;binop&quot; class=&quot;latex&quot; title=&quot;binop&quot; /&gt; to each corresponding elements of the two matrices which are given as input arguments, i.e. &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=%28i%2C+j%29%5E%7Bth%7D&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;(i, j)^{th}&quot; class=&quot;latex&quot; title=&quot;(i, j)^{th}&quot; /&gt; entry of the output matrix is equal to &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=binop%28a%2C+b%29&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;binop(a, b)&quot; class=&quot;latex&quot; title=&quot;binop(a, b)&quot; /&gt; where &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=a&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;a&quot; class=&quot;latex&quot; title=&quot;a&quot; /&gt; and &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=b&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;b&quot; class=&quot;latex&quot; title=&quot;b&quot; /&gt; are the &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=%28i%2C+j%29%5E%7Bth%7D&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;(i, j)^{th}&quot; class=&quot;latex&quot; title=&quot;(i, j)^{th}&quot; /&gt; entries of input matrices respectively.&lt;/p&gt;
+&lt;p&gt;Also, I implemented &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=get%28%29%2C+set%28%29&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;get(), set()&quot; class=&quot;latex&quot; title=&quot;get(), set()&quot; /&gt; methods for CSRMatrix class. It took me while to get this completely right as I was discarding some of the possible cases.&lt;/p&gt;
+&lt;p&gt;I originally planned to start writing python wrappers but I couldn’t do it as I was a bit busy with a project in my university. But I hope to get started on this in upcoming week. Although the GSoC is officially over, I will work on the project for two additional weeks as I took a two weeks break during the programme.&lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/thilinaatsympy.wordpress.com/391/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/thilinaatsympy.wordpress.com/391/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;https://pixel.wp.com/b.gif?host=thilinaatsympy.wordpress.com&amp;amp;blog=52956410&amp;amp;post=391&amp;amp;subd=thilinaatsympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
 	<pubDate>Fri, 15 Aug 2014 13:49:34 +0000</pubDate>
 </item>
 <item>
@@ -461,11 +532,11 @@ about, which mostly involve making shape and moving them around the screen.&lt;/
 <item>
 	<title>Thilina Rathnayake: Sparse Matrices</title>
 	<guid isPermaLink="false">http://thilinaatsympy.wordpress.com/?p=386</guid>
-	<link>http://thilinaatsympy.wordpress.com/2014/08/11/sparse-matrices/</link>
+	<link>https://thilinaatsympy.wordpress.com/2014/08/11/sparse-matrices/</link>
 	<description>&lt;p&gt;Hi All,&lt;/p&gt;
 &lt;p&gt;I am writing a blog post for GSoC after three weeks. I couldn’t work on the project for two weeks as I participated in a competition. However I am back again and started working again. Now, I am mainly concerned about finishing my work with Sparse Matrices. Then we can write some wrappers and do some benchmarks.&lt;/p&gt;
 &lt;p&gt;We decided to use SciPy’s sparse matrices code and I have ported most of the important functionalities. I created a &lt;a href=&quot;http://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.sparse.csr_matrix.html#scipy.sparse.csr_matrix&quot;&gt;CSRMatrix&lt;/a&gt; class and created a method to create a CSRMatrix from a normal COO matrix. I ported the methods for testing the canonical form and sparse matrix multiplication.  Also, I implemented three methods mainly to be used in extracting diagonal elements and scaling.&lt;/p&gt;
-&lt;p&gt;I am going to implement binary operations with CSR matrices during the coming week and also want to get started with writing wrappers so we can use the Matrix classes from python and SymPy.&lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/thilinaatsympy.wordpress.com/386/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/thilinaatsympy.wordpress.com/386/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://pixel.wp.com/b.gif?host=thilinaatsympy.wordpress.com&amp;amp;blog=52956410&amp;amp;post=386&amp;amp;subd=thilinaatsympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
+&lt;p&gt;I am going to implement binary operations with CSR matrices during the coming week and also want to get started with writing wrappers so we can use the Matrix classes from python and SymPy.&lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/thilinaatsympy.wordpress.com/386/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/thilinaatsympy.wordpress.com/386/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;https://pixel.wp.com/b.gif?host=thilinaatsympy.wordpress.com&amp;amp;blog=52956410&amp;amp;post=386&amp;amp;subd=thilinaatsympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
 	<pubDate>Mon, 11 Aug 2014 08:08:45 +0000</pubDate>
 </item>
 <item>
@@ -1131,17 +1202,17 @@ Thats all for now :) Will get back next week!&lt;/p&gt;</description>
 <item>
 	<title>Thilina Rathnayake: [GSoC] Week 9: Matrix Inverse and Sparse Matrices</title>
 	<guid isPermaLink="false">http://thilinaatsympy.wordpress.com/?p=377</guid>
-	<link>http://thilinaatsympy.wordpress.com/2014/07/20/gsoc-week-9-matrix-inverse-and-sparse-matrices/</link>
+	<link>https://thilinaatsympy.wordpress.com/2014/07/20/gsoc-week-9-matrix-inverse-and-sparse-matrices/</link>
 	<description>&lt;p&gt;Hi All, Sorry for a late blog post. I was kind of busy during last week, preparing for a competition.&lt;/p&gt;
 &lt;p&gt;During the last week, I mainly did two things, implementing matrix inverse and starting the implementation of sparse matrices.&lt;/p&gt;
 &lt;h1&gt;Implementing Matrix Inverse&lt;/h1&gt;
-&lt;p&gt;I implemented matrix inverse in two different methods, using Gauss Jordan elimination and fraction free LU decomposition. I had only implemented gauss Jordan elimination to solve a system &lt;img src=&quot;http://s0.wp.com/latex.php?latex=Ax+%3D+b&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;Ax = b&quot; class=&quot;latex&quot; title=&quot;Ax = b&quot; /&gt; where &lt;img src=&quot;http://s0.wp.com/latex.php?latex=b&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;b&quot; class=&quot;latex&quot; title=&quot;b&quot; /&gt; is a column matrix. I had to enhance the algorithm so that it can be used to solve several systems at once, i.e. &lt;img src=&quot;http://s0.wp.com/latex.php?latex=b&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;b&quot; class=&quot;latex&quot; title=&quot;b&quot; /&gt; can be a collection of column matrix.&lt;/p&gt;
-&lt;p&gt;This was not a problem in fraction free LU method because &lt;img src=&quot;http://s0.wp.com/latex.php?latex=L&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;L&quot; class=&quot;latex&quot; title=&quot;L&quot; /&gt; and &lt;img src=&quot;http://s0.wp.com/latex.php?latex=U&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;U&quot; class=&quot;latex&quot; title=&quot;U&quot; /&gt; factors can be used to solve column vectors &lt;img src=&quot;http://s0.wp.com/latex.php?latex=e_%7B1%7D%2C+e_%7B2%7D%2C+.+.+.+e_%7Bn%7D&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;e_{1}, e_{2}, . . . e_{n}&quot; class=&quot;latex&quot; title=&quot;e_{1}, e_{2}, . . . e_{n}&quot; /&gt; after calculating &lt;img src=&quot;http://s0.wp.com/latex.php?latex=L&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;L&quot; class=&quot;latex&quot; title=&quot;L&quot; /&gt; and &lt;img src=&quot;http://s0.wp.com/latex.php?latex=U&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;U&quot; class=&quot;latex&quot; title=&quot;U&quot; /&gt; once.&lt;/p&gt;
+&lt;p&gt;I implemented matrix inverse in two different methods, using Gauss Jordan elimination and fraction free LU decomposition. I had only implemented gauss Jordan elimination to solve a system &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=Ax+%3D+b&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;Ax = b&quot; class=&quot;latex&quot; title=&quot;Ax = b&quot; /&gt; where &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=b&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;b&quot; class=&quot;latex&quot; title=&quot;b&quot; /&gt; is a column matrix. I had to enhance the algorithm so that it can be used to solve several systems at once, i.e. &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=b&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;b&quot; class=&quot;latex&quot; title=&quot;b&quot; /&gt; can be a collection of column matrix.&lt;/p&gt;
+&lt;p&gt;This was not a problem in fraction free LU method because &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=L&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;L&quot; class=&quot;latex&quot; title=&quot;L&quot; /&gt; and &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=U&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;U&quot; class=&quot;latex&quot; title=&quot;U&quot; /&gt; factors can be used to solve column vectors &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=e_%7B1%7D%2C+e_%7B2%7D%2C+.+.+.+e_%7Bn%7D&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;e_{1}, e_{2}, . . . e_{n}&quot; class=&quot;latex&quot; title=&quot;e_{1}, e_{2}, . . . e_{n}&quot; /&gt; after calculating &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=L&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;L&quot; class=&quot;latex&quot; title=&quot;L&quot; /&gt; and &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=U&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;U&quot; class=&quot;latex&quot; title=&quot;U&quot; /&gt; once.&lt;/p&gt;
 &lt;h1&gt;Implementing Sparse Matrices&lt;/h1&gt;
 &lt;p&gt;We decided to adapt the implementation of SciPy sparse matrices. For the time being I have implemented CSR form of a sparse matrix. CSR is an acronym for “Compress Sparse Row”. You can learn more about it in the following links.&lt;/p&gt;
 &lt;p&gt;&lt;a href=&quot;http://en.wikipedia.org/wiki/Sparse_matrix#Compressed_sparse_row_.28CSR_or_CRS.29&quot;&gt;Wiki Article&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;&lt;a href=&quot;http://netlib.org/linalg/html_templates/node91.html#SECTION00931100000000000000&quot;&gt;Netlib Article&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;You can find information about scipy implementation of CSR matrices &lt;a href=&quot;http://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csr_matrix.html&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/thilinaatsympy.wordpress.com/377/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/thilinaatsympy.wordpress.com/377/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://pixel.wp.com/b.gif?host=thilinaatsympy.wordpress.com&amp;amp;blog=52956410&amp;amp;post=377&amp;amp;subd=thilinaatsympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
+&lt;p&gt;You can find information about scipy implementation of CSR matrices &lt;a href=&quot;http://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csr_matrix.html&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/thilinaatsympy.wordpress.com/377/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/thilinaatsympy.wordpress.com/377/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;https://pixel.wp.com/b.gif?host=thilinaatsympy.wordpress.com&amp;amp;blog=52956410&amp;amp;post=377&amp;amp;subd=thilinaatsympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
 	<pubDate>Sun, 20 Jul 2014 08:32:25 +0000</pubDate>
 </item>
 <item>
@@ -1760,9 +1831,9 @@ project.&lt;/p&gt;</description>
 <item>
 	<title>Thilina Rathnayake: [GSoC] Week 8: Solving Ax = b and Determinant</title>
 	<guid isPermaLink="false">http://thilinaatsympy.wordpress.com/?p=10</guid>
-	<link>http://thilinaatsympy.wordpress.com/2014/07/11/gsoc-week-8-solving-ax-b-and-determinant/</link>
+	<link>https://thilinaatsympy.wordpress.com/2014/07/11/gsoc-week-8-solving-ax-b-and-determinant/</link>
 	<description>&lt;p&gt;Hi All,&lt;/p&gt;
-&lt;p&gt;Sorry, I couldn’t write a blog post last week. During past two weeks, I contributed in solving some of the bugs in CSymPy and the determinant of a Matrix. Also, I implemented the solutions of the system &lt;img src=&quot;http://s0.wp.com/latex.php?latex=Ax+%3D+b&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;Ax = b&quot; class=&quot;latex&quot; title=&quot;Ax = b&quot; /&gt; by using various decomposition methods.&lt;/p&gt;
+&lt;p&gt;Sorry, I couldn’t write a blog post last week. During past two weeks, I contributed in solving some of the bugs in CSymPy and the determinant of a Matrix. Also, I implemented the solutions of the system &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=Ax+%3D+b&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;Ax = b&quot; class=&quot;latex&quot; title=&quot;Ax = b&quot; /&gt; by using various decomposition methods.&lt;/p&gt;
 &lt;h1&gt;Determinant of a Matrix&lt;/h1&gt;
 &lt;p&gt;I implemented determinant using two different methods, Bareiss’s method and Berkowitz algorithm.&lt;/p&gt;
 &lt;h2&gt;Bareiss’s algorithm&lt;/h2&gt;
@@ -1770,13 +1841,13 @@ project.&lt;/p&gt;</description>
 &lt;h2&gt;Berkowitz Algorithm&lt;/h2&gt;
 &lt;p&gt;Berkowitz algorithm can also be used in calculating the determinant. This algorithms has various other applications as well, like calculating characteristic polynomial of a matrix, principal minors and Eigen values. I am yet to implement the calculation of characteristic polynomial and Eigen values using this algorithm but that won’t be a difficult thing. I wish to do it over the weekend.&lt;/p&gt;
 &lt;h1&gt;Ax = b&lt;/h1&gt;
-&lt;p&gt;I used various matrix decompositions implemented earlier to solve the system &lt;img src=&quot;http://s0.wp.com/latex.php?latex=Ax+%3D+b&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;Ax = b&quot; class=&quot;latex&quot; title=&quot;Ax = b&quot; /&gt;. Only the fraction free LU decomposition was used earlier, but now we can solve linear systems using LU decomposition and LDL decomposition. QR and Cholesky decomposition can be enabled after figuring out a good way to do expression simplification in CSymPy.&lt;/p&gt;
+&lt;p&gt;I used various matrix decompositions implemented earlier to solve the system &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=Ax+%3D+b&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;Ax = b&quot; class=&quot;latex&quot; title=&quot;Ax = b&quot; /&gt;. Only the fraction free LU decomposition was used earlier, but now we can solve linear systems using LU decomposition and LDL decomposition. QR and Cholesky decomposition can be enabled after figuring out a good way to do expression simplification in CSymPy.&lt;/p&gt;
 &lt;p&gt;I hope to work on Sparse matrices in upcoming weeks and do some benchmarks of CSymPy’s algorithms with GiNaC.&lt;/p&gt;
 &lt;h1&gt;References&lt;/h1&gt;
 &lt;p&gt;[1] Erwin H. Bareiss, Sylvester’s Identity and Multi step Integer-Preserving Gaussian Elimination&lt;/p&gt;
 &lt;p&gt;[2] Wikipedia article, &lt;a href=&quot;http://en.wikipedia.org/wiki/Bareiss_algorithm&quot; rel=&quot;nofollow&quot;&gt;http://en.wikipedia.org/wiki/Bareiss_algorithm&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;[3] Wolfram Mathworld article, &lt;a href=&quot;http://mathworld.wolfram.com/SylvestersDeterminantIdentity.html&quot; rel=&quot;nofollow&quot;&gt;http://mathworld.wolfram.com/SylvestersDeterminantIdentity.html&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/thilinaatsympy.wordpress.com/10/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/thilinaatsympy.wordpress.com/10/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://pixel.wp.com/b.gif?host=thilinaatsympy.wordpress.com&amp;amp;blog=52956410&amp;amp;post=10&amp;amp;subd=thilinaatsympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
+&lt;p&gt; &lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/thilinaatsympy.wordpress.com/10/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/thilinaatsympy.wordpress.com/10/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;https://pixel.wp.com/b.gif?host=thilinaatsympy.wordpress.com&amp;amp;blog=52956410&amp;amp;post=10&amp;amp;subd=thilinaatsympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
 	<pubDate>Fri, 11 Jul 2014 15:51:53 +0000</pubDate>
 </item>
 <item>
@@ -3183,18 +3254,18 @@ finally be submitted.&lt;/p&gt;</description>
 <item>
 	<title>Thilina Rathnayake: [GSoC] Week 6: Cholesky and LDL Algorithms</title>
 	<guid isPermaLink="false">http://thilinaatsympy.wordpress.com/?p=360</guid>
-	<link>http://thilinaatsympy.wordpress.com/2014/06/27/gsoc-week-6-cholesky-and-ldl-algorithms/</link>
-	<description>&lt;p&gt;This week I implemented Cholesky decomposition and LDL decomposition. In addition to that I fixed two errors In CSymPy. I was also bale to finish work with LU decomposition and merge it to master. Also, I could solve the system &lt;img src=&quot;http://s0.wp.com/latex.php?latex=Ax+%3D+b&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;Ax = b&quot; class=&quot;latex&quot; title=&quot;Ax = b&quot; /&gt; using fraction free &lt;strong&gt;LU&lt;/strong&gt; factorization.&lt;/p&gt;
+	<link>https://thilinaatsympy.wordpress.com/2014/06/27/gsoc-week-6-cholesky-and-ldl-algorithms/</link>
+	<description>&lt;p&gt;This week I implemented Cholesky decomposition and LDL decomposition. In addition to that I fixed two errors In CSymPy. I was also bale to finish work with LU decomposition and merge it to master. Also, I could solve the system &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=Ax+%3D+b&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;Ax = b&quot; class=&quot;latex&quot; title=&quot;Ax = b&quot; /&gt; using fraction free &lt;strong&gt;LU&lt;/strong&gt; factorization.&lt;/p&gt;
 &lt;h2&gt;Cholesky Decomposition&lt;/h2&gt;
-&lt;p&gt;Cholesky decomposition can be applied to a &lt;strong&gt;Hermitian positive definite matrix&lt;/strong&gt;. &lt;strong&gt;Hermitian&lt;/strong&gt; matrix is a matrix with complex entries that is equal to it’s conjugate transpose &lt;strong&gt;[1]&lt;/strong&gt;. Hence a symmetric matrix with real entries can be considered as a &lt;strong&gt;Hermitian&lt;/strong&gt; matrix and can be decomposed using &lt;strong&gt;Cholesky&lt;/strong&gt; decomposition if it’s positive definite. A Symmetric matrix &lt;img src=&quot;http://s0.wp.com/latex.php?latex=A&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;A&quot; class=&quot;latex&quot; title=&quot;A&quot; /&gt; is positive definite if &lt;img src=&quot;http://s0.wp.com/latex.php?latex=z%5ETAz&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;z^TAz&quot; class=&quot;latex&quot; title=&quot;z^TAz&quot; /&gt; is greater than zero for every non zero column matrix &lt;img src=&quot;http://s0.wp.com/latex.php?latex=z&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;z&quot; class=&quot;latex&quot; title=&quot;z&quot; /&gt;&lt;strong&gt; [2]&lt;/strong&gt;. If the above conditions are satisfied, Cholesky decomposition for a matrix &lt;img src=&quot;http://s0.wp.com/latex.php?latex=A&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;A&quot; class=&quot;latex&quot; title=&quot;A&quot; /&gt; can be written as &lt;img src=&quot;http://s0.wp.com/latex.php?latex=A+%3D+LL%5E%2A&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;A = LL^*&quot; class=&quot;latex&quot; title=&quot;A = LL^*&quot; /&gt; where &lt;img src=&quot;http://s0.wp.com/latex.php?latex=L&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;L&quot; class=&quot;latex&quot; title=&quot;L&quot; /&gt; is an lower triangular Matrix. This is equal to &lt;img src=&quot;http://s0.wp.com/latex.php?latex=A+%3D+LL%5ET&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;A = LL^T&quot; class=&quot;latex&quot; title=&quot;A = LL^T&quot; /&gt; when &lt;img src=&quot;http://s0.wp.com/latex.php?latex=L&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;L&quot; class=&quot;latex&quot; title=&quot;L&quot; /&gt; is a real matrix. This factorization can be used for fast solution of the system &lt;img src=&quot;http://s0.wp.com/latex.php?latex=Ax+%3D+b&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;Ax = b&quot; class=&quot;latex&quot; title=&quot;Ax = b&quot; /&gt;. I am yet to use this decomposition in solving above mentioned system.&lt;/p&gt;
+&lt;p&gt;Cholesky decomposition can be applied to a &lt;strong&gt;Hermitian positive definite matrix&lt;/strong&gt;. &lt;strong&gt;Hermitian&lt;/strong&gt; matrix is a matrix with complex entries that is equal to it’s conjugate transpose &lt;strong&gt;[1]&lt;/strong&gt;. Hence a symmetric matrix with real entries can be considered as a &lt;strong&gt;Hermitian&lt;/strong&gt; matrix and can be decomposed using &lt;strong&gt;Cholesky&lt;/strong&gt; decomposition if it’s positive definite. A Symmetric matrix &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=A&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;A&quot; class=&quot;latex&quot; title=&quot;A&quot; /&gt; is positive definite if &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=z%5ETAz&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;z^TAz&quot; class=&quot;latex&quot; title=&quot;z^TAz&quot; /&gt; is greater than zero for every non zero column matrix &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=z&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;z&quot; class=&quot;latex&quot; title=&quot;z&quot; /&gt;&lt;strong&gt; [2]&lt;/strong&gt;. If the above conditions are satisfied, Cholesky decomposition for a matrix &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=A&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;A&quot; class=&quot;latex&quot; title=&quot;A&quot; /&gt; can be written as &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=A+%3D+LL%5E%2A&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;A = LL^*&quot; class=&quot;latex&quot; title=&quot;A = LL^*&quot; /&gt; where &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=L&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;L&quot; class=&quot;latex&quot; title=&quot;L&quot; /&gt; is an lower triangular Matrix. This is equal to &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=A+%3D+LL%5ET&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;A = LL^T&quot; class=&quot;latex&quot; title=&quot;A = LL^T&quot; /&gt; when &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=L&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;L&quot; class=&quot;latex&quot; title=&quot;L&quot; /&gt; is a real matrix. This factorization can be used for fast solution of the system &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=Ax+%3D+b&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;Ax = b&quot; class=&quot;latex&quot; title=&quot;Ax = b&quot; /&gt;. I am yet to use this decomposition in solving above mentioned system.&lt;/p&gt;
 &lt;h2&gt;LDL Factorization&lt;/h2&gt;
-&lt;p&gt;LDL decomposition is closely related to Cholesky decomposition. As the name implies, in LDL decomposition of a matrix &lt;img src=&quot;http://s0.wp.com/latex.php?latex=A&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;A&quot; class=&quot;latex&quot; title=&quot;A&quot; /&gt; can be written as &lt;img src=&quot;http://s0.wp.com/latex.php?latex=A+%3D+LDL%5E%2A&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;A = LDL^*&quot; class=&quot;latex&quot; title=&quot;A = LDL^*&quot; /&gt; where &lt;img src=&quot;http://s0.wp.com/latex.php?latex=L&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;L&quot; class=&quot;latex&quot; title=&quot;L&quot; /&gt; is a lower triangular matrix and &lt;img src=&quot;http://s0.wp.com/latex.php?latex=D&amp;amp;bg=eff1f5&amp;amp;fg=444444&amp;amp;s=0&quot; alt=&quot;D&quot; class=&quot;latex&quot; title=&quot;D&quot; /&gt; is a diagonal matrix &lt;strong&gt;[3]&lt;/strong&gt;. This decomposition can be used for some matrices which don’t have a Cholesky decomposition.&lt;/p&gt;
+&lt;p&gt;LDL decomposition is closely related to Cholesky decomposition. As the name implies, in LDL decomposition of a matrix &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=A&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;A&quot; class=&quot;latex&quot; title=&quot;A&quot; /&gt; can be written as &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=A+%3D+LDL%5E%2A&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;A = LDL^*&quot; class=&quot;latex&quot; title=&quot;A = LDL^*&quot; /&gt; where &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=L&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;L&quot; class=&quot;latex&quot; title=&quot;L&quot; /&gt; is a lower triangular matrix and &lt;img src=&quot;https://s-ssl.wordpress.com/latex.php?latex=D&amp;amp;bg=ffffff&amp;amp;fg=000&amp;amp;s=0&quot; alt=&quot;D&quot; class=&quot;latex&quot; title=&quot;D&quot; /&gt; is a diagonal matrix &lt;strong&gt;[3]&lt;/strong&gt;. This decomposition can be used for some matrices which don’t have a Cholesky decomposition.&lt;/p&gt;
 &lt;h2&gt;CSymPy printing error and simplification errror&lt;/h2&gt;
 &lt;p&gt;I also worked on a printing error of CSymPy and a simplification error in &lt;strong&gt;Mul&lt;/strong&gt; class which is used to represent multiplication types in CSymPy. There is still some work to be done to fix simplification error completely. The most important thing was that we were able to introduce a fix which doesn’t create a considerable slow down in speed after being applied.&lt;/p&gt;
 &lt;h2&gt;References&lt;/h2&gt;
 &lt;p&gt;[1] Hermitian Matrix, Wikipedia Article: &lt;a href=&quot;http://en.wikipedia.org/wiki/Hermitian_matrix&quot; rel=&quot;nofollow&quot;&gt;http://en.wikipedia.org/wiki/Hermitian_matrix&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;[2] Positive definite Matrix, Wikipedia Article: &lt;a href=&quot;http://en.wikipedia.org/wiki/Positive-definite_matrix&quot; rel=&quot;nofollow&quot;&gt;http://en.wikipedia.org/wiki/Positive-definite_matrix&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;[3] LDL Decomposition, Wikipedia Article: &lt;a href=&quot;http://en.wikipedia.org/wiki/Cholesky_decomposition#LDL_decomposition&quot; rel=&quot;nofollow&quot;&gt;http://en.wikipedia.org/wiki/Cholesky_decomposition#LDL_decomposition&lt;/a&gt;&lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/thilinaatsympy.wordpress.com/360/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/thilinaatsympy.wordpress.com/360/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;http://pixel.wp.com/b.gif?host=thilinaatsympy.wordpress.com&amp;amp;blog=52956410&amp;amp;post=360&amp;amp;subd=thilinaatsympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
+&lt;p&gt;[3] LDL Decomposition, Wikipedia Article: &lt;a href=&quot;http://en.wikipedia.org/wiki/Cholesky_decomposition#LDL_decomposition&quot; rel=&quot;nofollow&quot;&gt;http://en.wikipedia.org/wiki/Cholesky_decomposition#LDL_decomposition&lt;/a&gt;&lt;/p&gt;&lt;br /&gt;  &lt;a href=&quot;http://feeds.wordpress.com/1.0/gocomments/thilinaatsympy.wordpress.com/360/&quot; rel=&quot;nofollow&quot;&gt;&lt;img src=&quot;http://feeds.wordpress.com/1.0/comments/thilinaatsympy.wordpress.com/360/&quot; alt=&quot;&quot; border=&quot;0&quot; /&gt;&lt;/a&gt; &lt;img src=&quot;https://pixel.wp.com/b.gif?host=thilinaatsympy.wordpress.com&amp;amp;blog=52956410&amp;amp;post=360&amp;amp;subd=thilinaatsympy&amp;amp;ref=&amp;amp;feed=1&quot; alt=&quot;&quot; border=&quot;0&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</description>
 	<pubDate>Fri, 27 Jun 2014 15:58:54 +0000</pubDate>
 </item>
 <item>
