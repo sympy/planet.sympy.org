@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2014-08-20T19:41:12Z</updated>
+  <updated>2014-08-20T20:01:20Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,234 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry>
+    <id>tag:,2014-08-20:gsoc-week-12-13.html</id>
+    <link href="http://jcrist.github.io/gsoc-week-12-13.html" rel="alternate" type="text/html"/>
+    <title>GSoC Week 12 &amp; 13: The End</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>The GSoC program officially ended this Monday, and so my work for SymPy has
+concluded. I got <em>a lot</em> done in these last two weeks though. Here's what's
+new. In order of completion:</p>
+<h3>Complete overhaul of the codeprinting system</h3>
+<p>I wasn't happy with the way the codeprinters were done previously. There was a
+lot of redundant code throughout <code>ccode</code>, <code>fcode</code> and <code>jscode</code> (the main three
+printers).  They also had a lot of special case code in the <code>doprint</code> method
+for handling multiline statements, which I felt could be better accomplished
+using <a href="http://en.wikipedia.org/wiki/Visitor_pattern">the visitor pattern</a> that
+is used by all the other printers. The issue is that some nodes need to know if
+they are part of a larger expression, or part of an assignment. For example, in
+<code>C</code> <code>Piecewise</code> are printed as if statements if they contain an assignment, or
+inline using the <a href="http://en.wikipedia.org/wiki/Ternary_operation">ternary
+operator</a> if they don't.</p>
+<p>After some thought, this was solved by adding an <code>Assignment</code> node that
+contains this information, and then dispatching to it in the printer just like
+any other node. Less special case code, and allowed the base <code>CodePrinter</code>
+class to contain a lot of the redundancies. For those implementing a new code
+printer (perhaps for Octave?) all you'd need to do is add how to print certain
+operators, and a dictionary of function translations.  Everything else <em>should</em>
+just work. I may add little cleanups here and there, but I'm pretty happy with
+the refactor.</p>
+<h3>Code printers now support matrices</h3>
+<p>This was the original goal, but got put aside to do the previously described
+refactor. The codeprinters now support matrices - both as inputs and outputs.
+For example, the following now works:</p>
+<div class="highlight"><pre><span class="c"># Expressions inside a matrix</span>
+<span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="s">'x, y, z'</span><span class="p">)</span>
+<span class="n">mat</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">([</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="p">,</span> <span class="n">Piecewise</span><span class="p">((</span><span class="mi">2</span> <span class="o">+</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="bp">True</span><span class="p">)),</span> <span class="n">sin</span><span class="p">(</span><span class="n">z</span><span class="p">)])</span>
+<span class="n">A</span> <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'A'</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">ccode</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">A</span><span class="p">))</span>
+</pre></div>
+
+
+<div class="md_output">
+
+<div class="highlight"><pre><span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="p">;</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">y</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+   <span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">2</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="k">else</span> <span class="p">{</span>
+   <span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">z</span><span class="p">);</span>
+</pre></div>
+
+
+</div>
+
+<div class="highlight"><pre><span class="c"># Matrix elements inside expressions</span>
+<span class="n">expr</span> <span class="o">=</span> <span class="n">Piecewise</span><span class="p">((</span><span class="mi">2</span><span class="o">*</span><span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">True</span><span class="p">))</span> <span class="o">+</span> <span class="n">sin</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="k">print</span><span class="p">(</span><span class="n">ccode</span><span class="p">(</span><span class="n">expr</span><span class="p">))</span>
+</pre></div>
+
+
+<div class="md_output">
+
+<div class="highlight"><pre><span class="p">((</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">?</span> <span class="p">(</span>
+    <span class="mi">2</span><span class="o">*</span><span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="o">:</span> <span class="p">(</span>
+    <span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+<span class="p">))</span> <span class="o">+</span> <span class="n">sin</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+
+
+</div>
+
+<div class="highlight"><pre><span class="c"># Matrix elemnts in expressions inside a matrix</span>
+<span class="n">q</span> <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'q'</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">M</span> <span class="o">=</span> <span class="n">MatrixSymbol</span><span class="p">(</span><span class="s">'M'</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">m</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">([[</span><span class="n">sin</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">cos</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">])],</span>
+    <span class="p">[</span><span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">q</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="mi">5</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+<span class="k">print</span><span class="p">(</span><span class="n">ccode</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">M</span><span class="p">))</span>
+</pre></div>
+
+
+<div class="md_output">
+
+<div class="highlight"><pre><span class="n">M</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+<span class="n">M</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="n">M</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span>
+<span class="n">M</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+<span class="n">M</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">q</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span>
+<span class="n">M</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+<span class="n">M</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">*</span><span class="mf">1.0</span><span class="o">/</span><span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+<span class="n">M</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">+</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+<span class="n">M</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</pre></div>
+
+
+</div>
+
+<p>There even was a <code>Piecewise</code> inside a <code>Matrix</code> in there. As long as there is an
+assignment between two compatible types (matrix -&gt; matrix, scalar -&gt; scalar),
+the new codeprinters should print out valid expressions.</p>
+<h3><code>codegen</code> now supports matrices</h3>
+<p>This is more of a continuation of the above. The code generators have been
+modified to recognize instances of <code>MatrixSymbol</code> as array variables and act
+accordingly. There actually wasn't that much to change here to make this work.
+The biggest change that happened is that <em>all</em> <code>C</code> functions that have a return
+value (non <code>void</code> functions) allocate a local variable of the same type. This
+is to cover a larger set of expressions, while still generating valid code. So
+now, when performing codegen on "<code>sin(x)</code>" you won't get "<code>return sin(x)</code>",
+you'll get:</p>
+<div class="highlight"><pre><span class="n">result</span> <span class="o">=</span> <span class="n">codegen</span><span class="p">((</span><span class="s">'sin_c'</span><span class="p">,</span> <span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span> <span class="s">"C"</span><span class="p">,</span> <span class="s">"file"</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="md_output">
+
+<div class="highlight"><pre><span class="kt">double</span> <span class="nf">sin_c</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+
+   <span class="kt">double</span> <span class="n">sin_c_result</span><span class="p">;</span>
+   <span class="n">sin_c_result</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+   <span class="k">return</span> <span class="n">sin_c_result</span><span class="p">;</span>
+
+<span class="p">}</span>
+</pre></div>
+
+
+</div>
+
+<p>This isn't as pretty, but handling return inside expressions is a tricky
+problem, and this solves it without much work. Modern compilers should remove
+the variable assignment if it's unnecessary, so there shouldn't be a resulting
+speed loss in the code.</p>
+<h3><code>Cython</code> wrapper for <code>autowrap</code> now works</h3>
+<p>There was a code wrapper for <code>Cython</code> in the codebase, but I don't think it has
+ever worked. It does now:) It can do everything <code>f2py</code> can do, and I plan on
+adding more useful features. In it's current state it can:</p>
+<ul>
+<li>Handle both scalar and matrix input, input-output and output arguments</li>
+<li>Internally allocate output arguments</li>
+<li>Pull inferred variables (such as matrix dimensions) out of the function signature</li>
+<li>Create a multiple return value tuple</li>
+</ul>
+<p>The last thing I want to do to make this <em>really</em> nice is to add support for
+informative docstrings. Even so, this is already usable:</p>
+<div class="highlight"><pre><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="s">'x, y, z'</span><span class="p">)</span>
+<span class="n">mat</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">([</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="p">,</span> <span class="n">Piecewise</span><span class="p">((</span><span class="mi">2</span> <span class="o">+</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="bp">True</span><span class="p">)),</span> <span class="n">sin</span><span class="p">(</span><span class="n">z</span><span class="p">)])</span>
+<span class="n">func</span> <span class="o">=</span> <span class="n">autowrap</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="s">'c'</span><span class="p">,</span> <span class="s">'cython'</span><span class="p">)</span>
+<span class="n">func</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="md_output">
+
+<div class="highlight"><pre><span class="n">array</span><span class="p">([[</span> <span class="mf">2.</span>        <span class="p">],</span>
+       <span class="p">[</span> <span class="mf">3.</span>        <span class="p">],</span>
+       <span class="p">[</span> <span class="mf">0.14112001</span><span class="p">]])</span>
+</pre></div>
+
+
+</div>
+
+<p>For some reason the <code>Fortran</code>/<code>f2py</code> has around a 2 microseconds faster than
+the <code>C</code>/<code>Cython</code> code. I think this has something to do with array allocations,
+but I'm not sure. For larger expressions they're pretty equal, so this
+shouldn't be that big of a deal. I still plan to look into code optimizations I
+could make in the Cython wrapper.</p>
+<h2>Project Status</h2>
+<p>Overall, I accomplished <em>most</em> of what I set out to do this summer. Some things
+(pre-solution linearization) were nixed from the project due to changing goals.
+Here's a short list of what was done:</p>
+<ol>
+<li>
+<p>General linearization methods added for both <code>KanesMethod</code> and <code>LagrangesMethod</code>.</p>
+</li>
+<li>
+<p>Code cleanup and speedup for <code>KanesMethod</code> and <code>LagrangesMethod</code>.</p>
+</li>
+<li>
+<p>Creation of <code>msubs</code> - a specialized <code>subs</code> function for mechanics
+   expressions. This runs <em>significantly</em> faster than the default <code>subs</code>, while
+   adding some niceities (selective simplification).</p>
+</li>
+<li>
+<p>Complete overhaul of codeprinters. Fixed a lot of bugs.</p>
+</li>
+<li>
+<p>Addition of support for matrices in code printers, code generators, and <code>autowrap</code>.</p>
+</li>
+<li>
+<p>Overhaul of <code>Cython</code> codewrapper. It works now, and does some nice things to
+   make the wrapped functions more pythonic.</p>
+</li>
+<li>
+<p>Documentation for the above.</p>
+</li>
+</ol>
+<h2>The Future</h2>
+<p>I had an excellent summer working for SymPy, and I plan on continuing to
+contribute. I have some code for discretization that I've been using for my
+research that may be of interest to the mechanics group. I also want to get
+common sub-expression elimination added to the code generators, as this kind of
+optimization may result in speedups for the large expressions we see in
+mechanics. My contributions will unfortunately be less frequent, as I need to
+really focus on research and finishing my degree, but I still hope to help out.</p>
+<p>I plan on writing another post in the next few days about the GSoC experience
+as a whole, so I won't touch on that here. Let me just say thank you to Jason,
+Luke, Oliver, Sachin, Tarun, Aaron, and all the other wonderful people that
+have offered me guidance and support throughout the summer. You guys are
+awesome.</p></div>
+    </summary>
+    <updated>2014-08-20T19:43:00Z</updated>
+    <category term="GSoC"/>
+    <category term="sympy"/>
+    <category term="pydy"/>
+    <category term="dynamics"/>
+    <author>
+      <name>Jim Crist</name>
+    </author>
+    <source>
+      <id>http://jcrist.github.io/</id>
+      <link href="http://jcrist.github.io/" rel="alternate" type="text/html"/>
+      <link href="http://jcrist.github.io/feeds/gsoc.atom.xml" rel="self" type="application/atom+xml"/>
+      <title>Marginally Stable</title>
+      <updated>2014-08-20T19:43:00Z</updated>
+    </source>
+  </entry>
 
   <entry xml:lang="en">
     <id>http://asmeurer.github.io/posts/playing-with-swift-and-spritekit/</id>
@@ -516,7 +744,7 @@ about, which mostly involve making shapes and moving them around the screen.</p>
       <link href="http://asmeurer.github.io/blog/rss.xml" rel="self" type="application/rss+xml"/>
       <subtitle>My blog</subtitle>
       <title>Aaron Meurer's Blog</title>
-      <updated>2014-08-20T19:40:21Z</updated>
+      <updated>2014-08-20T20:00:24Z</updated>
     </source>
   </entry>
 
@@ -547,7 +775,7 @@ about, which mostly involve making shapes and moving them around the screen.</p>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-08-20T19:40:46Z</updated>
+      <updated>2014-08-20T20:00:51Z</updated>
     </source>
   </entry>
 
@@ -573,7 +801,7 @@ about, which mostly involve making shapes and moving them around the screen.</p>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-08-20T19:41:12Z</updated>
+      <updated>2014-08-20T20:01:20Z</updated>
     </source>
   </entry>
 
@@ -663,7 +891,7 @@ about, which mostly involve making shapes and moving them around the screen.</p>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-08-20T19:40:46Z</updated>
+      <updated>2014-08-20T20:00:51Z</updated>
     </source>
   </entry>
 
@@ -731,7 +959,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-08-20T19:40:56Z</updated>
+      <updated>2014-08-20T20:01:02Z</updated>
     </source>
   </entry>
 
@@ -757,7 +985,7 @@ needs to done and how can they be tackled.</p></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-08-20T19:41:10Z</updated>
+      <updated>2014-08-20T20:01:18Z</updated>
     </source>
   </entry>
 
@@ -786,7 +1014,7 @@ needs to done and how can they be tackled.</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-08-20T19:41:09Z</updated>
+      <updated>2014-08-20T20:01:18Z</updated>
     </source>
   </entry>
 
@@ -864,7 +1092,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-08-20T19:40:56Z</updated>
+      <updated>2014-08-20T20:01:01Z</updated>
     </source>
   </entry>
 
@@ -902,7 +1130,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-08-20T19:40:47Z</updated>
+      <updated>2014-08-20T20:00:52Z</updated>
     </source>
   </entry>
 
@@ -1172,7 +1400,7 @@ meeting up, let me know! I'll be in San Jose/San Francisco October 23-26.</p></d
       <link href="http://jcrist.github.io/" rel="alternate" type="text/html"/>
       <link href="http://jcrist.github.io/feeds/gsoc.atom.xml" rel="self" type="application/atom+xml"/>
       <title>Marginally Stable</title>
-      <updated>2014-08-02T01:44:00Z</updated>
+      <updated>2014-08-20T19:43:00Z</updated>
     </source>
   </entry>
 
@@ -1313,7 +1541,7 @@ implementation</p>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-08-20T19:41:10Z</updated>
+      <updated>2014-08-20T20:01:18Z</updated>
     </source>
   </entry>
 
@@ -1398,7 +1626,7 @@ implementation</p>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-08-20T19:40:47Z</updated>
+      <updated>2014-08-20T20:00:52Z</updated>
     </source>
   </entry>
 
@@ -1479,7 +1707,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-08-20T19:40:56Z</updated>
+      <updated>2014-08-20T20:01:02Z</updated>
     </source>
   </entry>
 
@@ -1507,7 +1735,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-08-20T19:41:09Z</updated>
+      <updated>2014-08-20T20:01:18Z</updated>
     </source>
   </entry>
 
@@ -1534,7 +1762,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-08-20T19:41:12Z</updated>
+      <updated>2014-08-20T20:01:20Z</updated>
     </source>
   </entry>
 
@@ -1581,7 +1809,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-08-20T19:40:56Z</updated>
+      <updated>2014-08-20T20:01:01Z</updated>
     </source>
   </entry>
 
@@ -1730,7 +1958,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-08-20T19:41:09Z</updated>
+      <updated>2014-08-20T20:01:18Z</updated>
     </source>
   </entry>
 
@@ -1769,7 +1997,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-08-20T19:40:46Z</updated>
+      <updated>2014-08-20T20:00:51Z</updated>
     </source>
   </entry>
 
@@ -1793,7 +2021,7 @@ mention that Sergey(one of my mentors) is damn good reviewer.</p></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-08-20T19:41:10Z</updated>
+      <updated>2014-08-20T20:01:18Z</updated>
     </source>
   </entry>
 
@@ -1822,7 +2050,7 @@ A problem that I am facing currently is the confusion about the Del operator. I 
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-08-20T19:40:47Z</updated>
+      <updated>2014-08-20T20:00:52Z</updated>
     </source>
   </entry>
 
@@ -1905,7 +2133,7 @@ on it.</p>
       <link href="http://jcrist.github.io/" rel="alternate" type="text/html"/>
       <link href="http://jcrist.github.io/feeds/gsoc.atom.xml" rel="self" type="application/atom+xml"/>
       <title>Marginally Stable</title>
-      <updated>2014-08-02T01:44:00Z</updated>
+      <updated>2014-08-20T19:43:00Z</updated>
     </source>
   </entry>
 
@@ -1932,7 +2160,7 @@ on it.</p>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-08-20T19:41:12Z</updated>
+      <updated>2014-08-20T20:01:20Z</updated>
     </source>
   </entry>
 
@@ -2235,7 +2463,7 @@ just insomuch as there were more people at all.</p>
       <link href="http://asmeurer.github.io/blog/rss.xml" rel="self" type="application/rss+xml"/>
       <subtitle>My blog</subtitle>
       <title>Aaron Meurer's Blog</title>
-      <updated>2014-08-20T19:40:21Z</updated>
+      <updated>2014-08-20T20:00:24Z</updated>
     </source>
   </entry>
 
@@ -2263,7 +2491,7 @@ just insomuch as there were more people at all.</p>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-08-20T19:41:09Z</updated>
+      <updated>2014-08-20T20:01:18Z</updated>
     </source>
   </entry>
 
@@ -2299,7 +2527,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-08-20T19:40:56Z</updated>
+      <updated>2014-08-20T20:01:01Z</updated>
     </source>
   </entry>
 
@@ -2442,7 +2670,7 @@ a variable already solved then that solution is discarded.</li>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-08-20T19:41:10Z</updated>
+      <updated>2014-08-20T20:01:18Z</updated>
     </source>
   </entry>
 
@@ -2478,7 +2706,7 @@ The code for Dyadics is mostly done, the docs are on-going, and I am thinking of
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-08-20T19:40:47Z</updated>
+      <updated>2014-08-20T20:00:52Z</updated>
     </source>
   </entry>
 
@@ -2587,7 +2815,7 @@ project.</p></div>
       <link href="http://jcrist.github.io/" rel="alternate" type="text/html"/>
       <link href="http://jcrist.github.io/feeds/gsoc.atom.xml" rel="self" type="application/atom+xml"/>
       <title>Marginally Stable</title>
-      <updated>2014-08-02T01:44:00Z</updated>
+      <updated>2014-08-20T19:43:00Z</updated>
     </source>
   </entry>
 
@@ -2632,7 +2860,7 @@ project.</p></div>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-08-20T19:40:46Z</updated>
+      <updated>2014-08-20T20:00:51Z</updated>
     </source>
   </entry>
 
@@ -2658,7 +2886,7 @@ project.</p></div>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-08-20T19:41:12Z</updated>
+      <updated>2014-08-20T20:01:20Z</updated>
     </source>
   </entry>
 
@@ -3874,7 +4102,7 @@ In [25]:
       <link href="http://jcrist.github.io/" rel="alternate" type="text/html"/>
       <link href="http://jcrist.github.io/feeds/gsoc.atom.xml" rel="self" type="application/atom+xml"/>
       <title>Marginally Stable</title>
-      <updated>2014-08-02T01:44:00Z</updated>
+      <updated>2014-08-20T19:43:00Z</updated>
     </source>
   </entry>
 
@@ -3918,7 +4146,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-08-20T19:40:56Z</updated>
+      <updated>2014-08-20T20:01:01Z</updated>
     </source>
   </entry>
 
@@ -4033,7 +4261,7 @@ implementing new stuff!).
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-08-20T19:41:12Z</updated>
+      <updated>2014-08-20T20:01:20Z</updated>
     </source>
   </entry>
 
@@ -4066,7 +4294,7 @@ when solved for \( x \).</p></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-08-20T19:41:10Z</updated>
+      <updated>2014-08-20T20:01:18Z</updated>
     </source>
   </entry>
 
@@ -4183,7 +4411,7 @@ when solved for \( x \).</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-08-20T19:41:09Z</updated>
+      <updated>2014-08-20T20:01:18Z</updated>
     </source>
   </entry>
 
@@ -4216,7 +4444,7 @@ when solved for \( x \).</p></div>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-08-20T19:40:47Z</updated>
+      <updated>2014-08-20T20:00:52Z</updated>
     </source>
   </entry>
 
@@ -4372,7 +4600,7 @@ finally be submitted.</p></div>
       <link href="http://jcrist.github.io/" rel="alternate" type="text/html"/>
       <link href="http://jcrist.github.io/feeds/gsoc.atom.xml" rel="self" type="application/atom+xml"/>
       <title>Marginally Stable</title>
-      <updated>2014-08-02T01:44:00Z</updated>
+      <updated>2014-08-20T19:43:00Z</updated>
     </source>
   </entry>
 
@@ -4413,7 +4641,7 @@ finally be submitted.</p></div>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-08-20T19:40:46Z</updated>
+      <updated>2014-08-20T20:00:51Z</updated>
     </source>
   </entry>
 
@@ -4481,7 +4709,7 @@ conceder the limiting value of the equation.</p>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-08-20T19:41:10Z</updated>
+      <updated>2014-08-20T20:01:18Z</updated>
     </source>
   </entry>
 
@@ -4544,7 +4772,7 @@ False</pre><p> </p>
       <link href="http://blog.s-d-b.com" rel="alternate" type="text/html"/>
       <subtitle>CODE | RINSE | REPEAT</subtitle>
       <title>SDB's Blog » SymPy</title>
-      <updated>2014-08-20T19:41:12Z</updated>
+      <updated>2014-08-20T20:01:20Z</updated>
     </source>
   </entry>
 
@@ -4611,7 +4839,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.in" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.in/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-08-20T19:40:56Z</updated>
+      <updated>2014-08-20T20:01:02Z</updated>
     </source>
   </entry>
 
@@ -4644,65 +4872,6 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <title>Akshay Narasimha</title>
       <updated>2014-08-11T03:32:52Z</updated>
-    </source>
-  </entry>
-
-  <entry>
-    <id>tag:blogger.com,1999:blog-8847459392628952171.post-8191047412644166823</id>
-    <link href="http://blog.sudhanshumishra.in/feeds/8191047412644166823/comments/default" rel="replies" type="application/atom+xml"/>
-    <link href="http://blog.sudhanshumishra.in/2014/06/gsoc14-progress-week-5.html#comment-form" rel="replies" type="text/html"/>
-    <link href="http://www.blogger.com/feeds/8847459392628952171/posts/default/8191047412644166823" rel="edit" type="application/atom+xml"/>
-    <link href="http://www.blogger.com/feeds/8847459392628952171/posts/default/8191047412644166823" rel="self" type="application/atom+xml"/>
-    <link href="http://blog.sudhanshumishra.in/2014/06/gsoc14-progress-week-5.html" rel="alternate" type="text/html"/>
-    <title>GSoC'14 progress, Week 5</title>
-    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><div dir="ltr" style="text-align: left;"><div style="font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; margin-bottom: 9px;">I did good amount of work this week. I sent a small part of it related to ray tracing for review.</div><ul style="color: #444444; font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; margin: 0px 0px 9px 25px; padding: 0px;"><li style=""><a href="https://github.com/sympy/sympy/pull/7626" style="color: blue;">https://github.com/sympy/sympy/pull/7626</a></li></ul><div style="font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; margin-bottom: 9px;">I got some great suggestions from Sean to make it compatible directly with<span style="color: #444444;"> </span><code style="background-color: #f7f7f9; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: 1px solid rgb(225, 225, 232); color: #dd1144; font-family: Consolas, 'Liberation Mono', Courier, monospace !important; font-size: 12px; padding: 3px 4px;">TWave</code><span style="color: #444444;"> </span>class. It is a WIP as I'm waiting for few 3D geometry classes. I'm also working on inteference of light waves and I hope that I'll send it for review in next couple of days. My last PR on medium is still unmerged and I really need it to be in master to work on more implementations.</div><div style="font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; margin-bottom: 9px;">I'm also trying to move<span style="color: #444444;"> </span><code style="background-color: #f7f7f9; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: 1px solid rgb(225, 225, 232); color: #dd1144; font-family: Consolas, 'Liberation Mono', Courier, monospace !important; font-size: 12px; padding: 3px 4px;">physics/gaussopt</code><span style="color: #444444;"> </span>to<span style="color: #444444;"> </span><code style="background-color: #f7f7f9; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; border-top-left-radius: 3px; border-top-right-radius: 3px; border: 1px solid rgb(225, 225, 232); color: #dd1144; font-family: Consolas, 'Liberation Mono', Courier, monospace !important; font-size: 12px; padding: 3px 4px;">physics/optics/gaussopt</code><span style="color: #444444;"> </span>as it'll be good to keep things related to optics at the same place. I'm waiting for opinion of the community about it. Here's the link to that PR:</div><ul style="color: #444444; font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; margin: 0px 0px 9px 25px; padding: 0px;"><li style=""><a href="https://github.com/sympy/sympy/pull/7607" style="color: blue;">https://github.com/sympy/sympy/pull/7607</a></li></ul><div style="font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; margin-bottom: 9px;">Here is some other minor work that I've done this week outside of optics:</div><ul style="font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; margin: 0px 0px 9px 25px; padding: 0px;"><li style=""><a href="https://github.com/sympy/sympy/pull/7609" style="color: blue;">https://github.com/sympy/sympy/pull/7609</a></li><li style="color: #444444;"><a href="https://github.com/sympy/sympy/pull/7610" style="color: blue;">https://github.com/sympy/sympy/pull/7610</a></li><li style="color: #444444;"><a href="https://github.com/sympy/sympy/pull/7612" style="color: blue;">https://github.com/sympy/sympy/pull/7612</a></li><li style="color: #444444;"><a href="https://github.com/sympy/sympy/pull/7614" style="color: blue;">https://github.com/sympy/sympy/pull/7614</a></li><li style="color: #444444;"><a href="https://github.com/sympy/sympy/pull/7627" style="color: blue;">https://github.com/sympy/sympy/pull/7627</a></li><li style="color: #444444;"><a href="https://github.com/sympy/sympy/pull/7628" style="color: blue;">https://github.com/sympy/sympy/pull/7628</a></li><li style="color: #444444;"><a href="https://github.com/sympy/sympy/pull/7629" style="color: blue;">https://github.com/sympy/sympy/pull/7629</a></li></ul><div style="font-family: Arvo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; margin-bottom: 9px;">That's all for now. <em style="">Cheers!</em></div></div></div>
-    </content>
-    <updated>2014-06-23T17:59:19Z</updated>
-    <published>2014-06-23T17:59:00Z</published>
-    <category scheme="http://www.blogger.com/atom/ns#" term="gsoc"/>
-    <category scheme="http://www.blogger.com/atom/ns#" term="physics"/>
-    <category scheme="http://www.blogger.com/atom/ns#" term="sympy"/>
-    <author>
-      <name>Sudhanshu Mishra</name>
-      <email>noreply@blogger.com</email>
-      <uri>https://plus.google.com/104813076492254893400</uri>
-    </author>
-    <source>
-      <id>tag:blogger.com,1999:blog-8847459392628952171</id>
-      <category term="gsoc"/>
-      <category term="sympy"/>
-      <category term="physics"/>
-      <category term="Android"/>
-      <category term="BinPy"/>
-      <category term="Ubuntu"/>
-      <category term="BIOS"/>
-      <category term="CapaStr"/>
-      <category term="Circuit Design"/>
-      <category term="Cordova"/>
-      <category term="Electronics"/>
-      <category term="Google"/>
-      <category term="JQueryMobile"/>
-      <category term="Lenovo"/>
-      <category term="Lenovo G580"/>
-      <category term="Linux"/>
-      <category term="PhoneGap"/>
-      <category term="Server"/>
-      <category term="Tricks"/>
-      <category term="Web"/>
-      <category term="git"/>
-      <category term="github"/>
-      <category term="iOS"/>
-      <author>
-        <name>Sudhanshu Mishra</name>
-        <email>noreply@blogger.com</email>
-      </author>
-      <link href="http://blog.sudhanshumishra.in/feeds/posts/default" rel="http://schemas.google.com/g/2005#feed" type="application/atom+xml"/>
-      <link href="http://www.blogger.com/feeds/8847459392628952171/posts/default/-/sympy" rel="self" type="application/atom+xml"/>
-      <link href="http://blog.sudhanshumishra.in/search/label/sympy" rel="alternate" type="text/html"/>
-      <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
-      <subtitle>A blog by Sudhanshu Mishra.</subtitle>
-      <title>Shortlog</title>
-      <updated>2014-08-11T11:27:11Z</updated>
     </source>
   </entry>
 </feed>
