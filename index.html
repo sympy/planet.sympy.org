@@ -24,6 +24,91 @@
 <h1>Planet SymPy</h1>
 
 <div class="daygroup">
+<h2>November 06, 2014</h2>
+
+<div class="channelgroup">
+
+
+
+
+
+
+
+<h3><a href="http://fa.bianp.net/blog/" title="I say things">Fabian Pedregosa</a></h3>
+
+
+<div class="entrygroup" id="tag:fa.bianp.net,2014-11-07:blog/2014/plot-memory-usage-as-a-function-of-time/">
+<h4><a href="http://fa.bianp.net/blog/2014/plot-memory-usage-as-a-function-of-time/">Plot memory usage as a function of time</a></h4>
+<div class="entry">
+<div class="content">
+<p>One of the lesser known features of the <a href="https://pypi.python.org/pypi/memory_profiler">memory_profiler package</a> is its ability to plot memory consumption as a function of time. This was implemented by my friend Philippe Gervais, previously a colleague at <span class="caps">INRIA</span> and now working for Google.</p>
+<p>With this feature it is possible to generate very easily a plot of the memory consumption as a function of time. The result will be something like this:</p>
+<p><img width="800px" src="http://fa.bianp.net/images/2014/mprof_example.png" /></p>
+<p>where you can see the memory used (in the y-axis) as a function of time (x-axis). Furthermore, we have used two functions, <code>test1</code> and <code>test2</code>, and it is possible to see with the colored brackets at what time do these functions start and finish.</p>
+<p>This plot was generated with the following simple script:</p>
+<div class="highlight"><pre><span class="kn">import</span> <span class="nn">time</span>
+
+<span class="nd">@profile</span>
+<span class="k">def</span> <span class="nf">test1</span><span class="p">():</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="mi">10000</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">n</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">a</span>
+
+<span class="nd">@profile</span>
+<span class="k">def</span> <span class="nf">test2</span><span class="p">():</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="mi">100000</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">n</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">b</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">"__main__"</span><span class="p">:</span>
+    <span class="n">test1</span><span class="p">()</span>
+    <span class="n">test2</span><span class="p">()</span>
+</pre></div>
+
+
+<p>what happens here is that we have two functions, <code>test1()</code> and <code>test2()</code> in which we create two lists of different sizes (the one in <code>test2</code> is bigger). We call time.sleep() for one second so that the function does not return too soon and so we have time to get reliable memory measurements. </p>
+<p>The decorator <code>@profile</code> is optional and is useful so that <code>memory_profiler</code> knows when the function has been called so he can plot the brackets indicating that. If you don’t put the decorator, the example will work just fine except that the brackets will not appear in your plot.</p>
+<p>Suppose we have saved the script as <code>test1.py<code>. We run the script as</code></code></p><code><code>
+<div class="highlight"><pre><span class="nv">$ </span>mprof run test1.py
+</pre></div>
+
+
+<p>where mprof is an executable provided by memory_profiler. If the above command was successful it will print something like this</p>
+<div class="highlight"><pre><span class="nv">$ </span>mprof run test1.py
+mprof: Sampling memory every 0.1s
+running as a Python program...
+</pre></div>
+
+
+<p>The above command will create a <code>.dat</code> file on your current working directory, something like <code>mprofile_20141108113511.dat&lt;/ocde&gt;. This file (you can inspect it, it's a text file) contains the memory measurements for your program.</code></p><code>
+<p>You can now plot the memory measurements with the command</p>
+<div class="highlight"><pre><span class="nv">$ </span>mprof plot
+</pre></div>
+
+
+<p>This will open a matplotlib window and show you the plot:</p>
+<p><img width="800px" src="http://fa.bianp.net/images/2014/mprof_example2.png" /></p>
+<p>As you see, attention has been paid to the default values so that the plot it generates already looks decent without much effort. The not-so-nice-part is that, at least as of November 2014, if you want to customize the plot, well, you’ll have to look and modify the mprof script. Some refactoring is still needed in order to make it easier to customize the plots (work in progress).</p></code></code></code></div>
+
+
+
+
+
+
+
+<p class="date">
+<a href="http://fa.bianp.net/blog/2014/plot-memory-usage-as-a-function-of-time/">by Fabian Pedregosa at November 06, 2014 11:00 PM</a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+</div>
+<div class="daygroup">
 <h2>August 21, 2014</h2>
 
 <div class="channelgroup">
@@ -5158,81 +5243,6 @@ conceder the limiting value of the equation.</p></div>
 </div>
 
 </div>
-<div class="daygroup">
-<h2>June 25, 2014</h2>
-
-<div class="channelgroup">
-
-
-
-
-
-
-
-<h3><a href="http://blog.s-d-b.com" title="SDB's Blog » SymPy">Soumya Dipta Biswas</a></h3>
-
-
-<div class="entrygroup" id="http://blog.s-d-b.com/?p=86">
-<h4 lang="en-US"><a href="http://blog.s-d-b.com/gsoc-2014-week-5/">GSoC 2014: Week 5</a></h4>
-<div class="entry">
-<div class="content" lang="en-US">
-<p>Hello Folks,</p>
-<p>This week was probably not as productive as I would have liked it to be. Firstly, it seems like the algorithm for faster conversion to CNF/DNF I talked about <a href="http://blog.s-d-b.com/gsoc-2014-week-1-and-2/" target="_blank" title="Faster_NF">before</a> works fast conditionally. If a particular formula is already quite near to a particular normal form, then the conversion takes a longer time than the recursive algorithm. The overhead incurred for the conversion in this case starts to dominate the actual conversion. So, I am now parallelly working on fixing this problem and the FOL module (as scheduled). Hence, I majorly managed to do only 2 things this week namely Interpretation and conversion to Prenex Normal Form.</p>
-<p><strong>Interpretation</strong><br />
-Akin to <code>pl_true(expr, model)</code> present in the propositional logic module, I have implemented a <code>fol_true(expr, model)</code> for the FOL module. Before jumping into the concept of interpretation for First Order Logic, let us see what it means for Propositional Logic. If you are already familiar with the same, feel free to jump to the next paragraph. Now, the interpretation of an expression is the value of expression under an assignment. So given the formula <code>A | B</code> such that <code>{A: True, B: False}</code> the formula is True. So, this is essentially the evaluated <em>result</em> of a formula given an assignment. This is quite similar to <code>a + b &gt; 0</code> which has no value inherently, but if a = 1 and b = 0, then the expression has a value (True). In some cases only a partial assignment is sufficient to determine the value of the expr. For e.g. <code>A &amp; B</code> with <code>A = False</code> is clearly False without any regard for the value of B.</p>
-<p>In Propositional Logic, the most basic elements are symbols which can have one of True or False as its value. FOL on the other hand has many elements which can take on any value in the domain. While the concept of interpretation remains the same there, the number of things to be evaluated change. Interpretation in FOL is a rather complex job which will become quite apparent very soon. Let us set about to find the value of each of the basic elements.</p>
-<ul>
-<li>Constants are the easiest to evaluate, well because they stand for themselves.</li>
-<li>Variables are similar to variables in any mathematical expression and it is sufficient to simply give them a value. However, one may also give a variable a domain. This domain is the set of all values that the corresponding variable may assume.</li>
-<li>Next come the functions. For functions, one needs to provide a mapping of every possible set of arguments to its corresponding value. For e.g. for <code>f(X, Y)</code> such that <code>X = {1, 2, 3}</code> and <code>Y = {10, 20, 30}</code>, one needs to provide a value for every feasible possible combination of X and Y.</li>
-<li>Predicates are almost the same as functions with the exception that the values they yield must be boolean. The examples below will probably make things much clearer.</li>
-</ul>
-<p>Let’s look at an example that will give better perspective to the idea of Interpretation.</p>
-<p></p><pre class="crayon-plain-tag">&gt;&gt;&gt; from sympy.abc import X, T
-&gt;&gt;&gt; from sympy.logic.FOL import Predicate, ForAll, Exists, fol_true
-&gt;&gt;&gt; Person = Predicate('Person')
-&gt;&gt;&gt; Time = Predicate('Time')
-&gt;&gt;&gt; CanFool = Predicate('CanFool')
-&gt;&gt;&gt; X_domain = ['John', 'Jack']
-&gt;&gt;&gt; T_domain = [1, 2, 3]
-&gt;&gt;&gt; def person(X): return X in X_domain
-&gt;&gt;&gt; def time(T): return T in T_domain
-&gt;&gt;&gt; CanFoolMap = {('John',2):False, ('John',3):False, 'default':True}
-&gt;&gt;&gt; model = {X:X_domain, T:T_domain, Person:person, Time:time, CanFool:CanFoolMap}
-
-# You can fool some of the people all of the time
-&gt;&gt;&gt; expr = Exists(X, ForAll(T, (Person(X) &amp; Time(T)) &gt;&gt; CanFool(X, T)))
-&gt;&gt;&gt; fol_true(expr, model)
-True
-
-# You can fool all of the people some of the time
-&gt;&gt;&gt; expr = ForAll(X, Exists(T, (Person(X) &amp; Time(T)) &gt;&gt; CanFool(X, T)))
-&gt;&gt;&gt; fol_true(expr, model)
-True
-
-# You can fool all of the people all of the time
-&gt;&gt;&gt; expr = ForAll(X, ForAll(T, (Person(X) &amp; Time(T)) &gt;&gt; CanFool(X, T)))
-&gt;&gt;&gt; fol_true(expr, model)
-False</pre><p> </p>
-<p>I hope that makes the idea of interpreation in general and how to use them in SymPy a little clearer. I will update the post giving more examples soon.</p>
-<p>Adios!!!</p></div>
-
-
-
-
-
-
-
-<p class="date">
-<a href="http://blog.s-d-b.com/gsoc-2014-week-5/">by SD at June 25, 2014 08:44 PM</a>
-</p>
-</div>
-</div>
-
-
-</div>
-
-</div>
 
 
 <div class="sidebar">
@@ -5289,7 +5299,7 @@ False</pre><p> </p>
 <a href="http://wdjoyner.wordpress.com/category/sympy/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://wdjoyner.wordpress.com" class="message" title="no activity in 7 days">David Joyner</a>
 </li>
 <li>
-<a href="http://fa.bianp.net/blog/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://fa.bianp.net/blog/" class="message" title="no activity in 7 days">Fabian Pedregosa</a>
+<a href="http://fa.bianp.net/blog/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://fa.bianp.net/blog/" title="I say things">Fabian Pedregosa</a>
 </li>
 <li>
 <a href="http://www.blogger.com/feeds/7648717043547744590/posts/default" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://gsoc-mathtex.blogspot.com/" class="message" title="no activity in 7 days">Freddie Witherden</a>
@@ -5403,7 +5413,7 @@ False</pre><p> </p>
 
 <p>
 <strong>Last updated:</strong><br>
-October 25, 2014 07:21 AM<br>
+November 08, 2014 11:21 AM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
