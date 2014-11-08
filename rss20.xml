@@ -8,14 +8,14 @@
 	<description>Planet SymPy - http://planet.sympy.org/</description>
 
 <item>
-	<title>Fabian Pedregosa: Plot memory usage as a function of time</title>
+	<title>Fabian Pedregosa: Plot memory usage as a function of time</title>
 	<guid isPermaLink="false">tag:fa.bianp.net,2014-11-07:blog/2014/plot-memory-usage-as-a-function-of-time/</guid>
 	<link>http://fa.bianp.net/blog/2014/plot-memory-usage-as-a-function-of-time/</link>
-	<description>&lt;p&gt;One of the lesser known features of the &lt;a href=&quot;https://pypi.python.org/pypi/memory_profiler&quot;&gt;memory_profiler package&lt;/a&gt; is its ability to plot memory consumption as a function of time. This was implemented by my friend Philippe Gervais, previously a colleague at &lt;span class=&quot;caps&quot;&gt;INRIA&lt;/span&gt; and now working for Google.&lt;/p&gt;
-&lt;p&gt;With this feature it is possible to generate very easily a plot of the memory consumption as a function of time. The result will be something like this:&lt;/p&gt;
-&lt;p&gt;&lt;img width=&quot;800px&quot; src=&quot;http://fa.bianp.net/images/2014/mprof_example.png&quot; /&gt;&lt;/p&gt;
-&lt;p&gt;where you can see the memory used (in the y-axis) as a function of time (x-axis). Furthermore, we have used two functions, &lt;code&gt;test1&lt;/code&gt; and &lt;code&gt;test2&lt;/code&gt;, and it is possible to see with the colored brackets at what time do these functions start and finish.&lt;/p&gt;
-&lt;p&gt;This plot was generated with the following simple script:&lt;/p&gt;
+	<description>&lt;p&gt;One of the lesser known features of the &lt;a href=&quot;https://pypi.python.org/pypi/memory_profiler&quot;&gt;memory_profiler package&lt;/a&gt; is its ability to plot memory consumption as a function of time. This was implemented by my friend Philippe Gervais, previously a colleague at INRIA and now working for Google.&lt;/p&gt;
+&lt;p&gt;With this feature it is possible to generate very easily a plot of the memory consumption as a function of time. The result will be something like this:&lt;/p&gt;
+&lt;p&gt;&lt;img width=&quot;800px&quot; src=&quot;http://fa.bianp.net/blog/images/2014/mprof_example.png&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;where you can see the memory used (in the y-axis) as a function of time (x-axis). Furthermore, we have used two functions, &lt;code&gt;test1&lt;/code&gt; and &lt;code&gt;test2&lt;/code&gt;, and it is possible to see with the colored brackets at what time do these functions start and finish.&lt;/p&gt;
+&lt;p&gt;This plot was generated with the following simple script:&lt;/p&gt;
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;time&lt;/span&gt;
 
 &lt;span class=&quot;nd&quot;&gt;@profile&lt;/span&gt;
@@ -38,29 +38,29 @@
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;p&gt;what happens here is that we have two functions, &lt;code&gt;test1()&lt;/code&gt; and &lt;code&gt;test2()&lt;/code&gt; in which we create two lists of different sizes (the one in &lt;code&gt;test2&lt;/code&gt; is bigger). We call time.sleep() for one second so that the function does not return too soon and so we have time to get reliable memory measurements. &lt;/p&gt;
-&lt;p&gt;The decorator &lt;code&gt;@profile&lt;/code&gt; is optional and is useful so that &lt;code&gt;memory_profiler&lt;/code&gt; knows when the function has been called so he can plot the brackets indicating that. If you don’t put the decorator, the example will work just fine except that the brackets will not appear in your plot.&lt;/p&gt;
-&lt;p&gt;Suppose we have saved the script as &lt;code&gt;test1.py&lt;code&gt;. We run the script as&lt;/code&gt;&lt;/code&gt;&lt;/p&gt;&lt;code&gt;&lt;code&gt;
+&lt;p&gt;what happens here is that we have two functions, &lt;code&gt;test1()&lt;/code&gt; and &lt;code&gt;test2()&lt;/code&gt; in which we create two lists of different sizes (the one in &lt;code&gt;test2&lt;/code&gt; is bigger). We call time.sleep() for one second so that the function does not return too soon and so we have time to get reliable memory measurements. &lt;/p&gt;
+&lt;p&gt;The decorator &lt;code&gt;@profile&lt;/code&gt; is optional and is useful so that &lt;code&gt;memory_profiler&lt;/code&gt; knows when the function has been called so he can plot the brackets indicating that. If you don't put the decorator, the example will work just fine except that the brackets will not appear in your plot.&lt;/p&gt;
+&lt;p&gt;Suppose we have saved the script as &lt;code&gt;test1.py&lt;code&gt;. We run the script as&lt;/code&gt;&lt;/code&gt;&lt;/p&gt;&lt;code&gt;&lt;code&gt;
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;mprof run test1.py
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;p&gt;where mprof is an executable provided by memory_profiler. If the above command was successful it will print something like this&lt;/p&gt;
+&lt;p&gt;where mprof is an executable provided by memory_profiler. If the above command was successful it will print something like this&lt;/p&gt;
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;mprof run test1.py
 mprof: Sampling memory every 0.1s
 running as a Python program...
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;p&gt;The above command will create a &lt;code&gt;.dat&lt;/code&gt; file on your current working directory, something like &lt;code&gt;mprofile_20141108113511.dat&amp;lt;/ocde&amp;gt;. This file (you can inspect it, it's a text file) contains the memory measurements for your program.&lt;/code&gt;&lt;/p&gt;&lt;code&gt;
-&lt;p&gt;You can now plot the memory measurements with the command&lt;/p&gt;
+&lt;p&gt;The above command will create a &lt;code&gt;.dat&lt;/code&gt; file on your current working directory, something like &lt;code&gt;mprofile_20141108113511.dat&amp;lt;/ocde&amp;gt;. This file (you can inspect it, it's a text file) contains the memory measurements for your program.&lt;/code&gt;&lt;/p&gt;&lt;code&gt;
+&lt;p&gt;You can now plot the memory measurements with the command&lt;/p&gt;
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;mprof plot
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;p&gt;This will open a matplotlib window and show you the plot:&lt;/p&gt;
-&lt;p&gt;&lt;img width=&quot;800px&quot; src=&quot;http://fa.bianp.net/images/2014/mprof_example2.png&quot; /&gt;&lt;/p&gt;
-&lt;p&gt;As you see, attention has been paid to the default values so that the plot it generates already looks decent without much effort. The not-so-nice-part is that, at least as of November 2014, if you want to customize the plot, well, you’ll have to look and modify the mprof script. Some refactoring is still needed in order to make it easier to customize the plots (work in progress).&lt;/p&gt;&lt;/code&gt;&lt;/code&gt;&lt;/code&gt;</description>
+&lt;p&gt;This will open a matplotlib window and show you the plot:&lt;/p&gt;
+&lt;p&gt;&lt;img width=&quot;800px&quot; src=&quot;http://fa.bianp.net/blog/images/2014/mprof_example2.png&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;As you see, attention has been paid to the default values so that the plot it generates already looks decent without much effort. The not-so-nice-part is that, at least as of November 2014, if you want to customize the plot, well, you'll have to look and modify the mprof script. Some refactoring is still needed in order to make it easier to customize the plots (work in progress).&lt;/p&gt;&lt;/code&gt;&lt;/code&gt;&lt;/code&gt;</description>
 	<pubDate>Thu, 06 Nov 2014 23:00:00 +0000</pubDate>
 </item>
 <item>

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2014-11-08T11:21:11Z</updated>
+  <updated>2014-11-08T11:41:22Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -14,12 +14,12 @@
   <entry>
     <id>tag:fa.bianp.net,2014-11-07:blog/2014/plot-memory-usage-as-a-function-of-time/</id>
     <link href="http://fa.bianp.net/blog/2014/plot-memory-usage-as-a-function-of-time/" rel="alternate" type="text/html"/>
-    <title>Plot memory usage as a function of time</title>
-    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>One of the lesser known features of the <a href="https://pypi.python.org/pypi/memory_profiler">memory_profiler package</a> is its ability to plot memory consumption as a function of time. This was implemented by my friend Philippe Gervais, previously a colleague at <span class="caps">INRIA</span> and now working for Google.</p>
-<p>With this feature it is possible to generate very easily a plot of the memory consumption as a function of time. The result will be something like this:</p>
-<p><img src="http://fa.bianp.net/images/2014/mprof_example.png" width="800px"/></p>
-<p>where you can see the memory used (in the y-axis) as a function of time (x-axis). Furthermore, we have used two functions, <code>test1</code> and <code>test2</code>, and it is possible to see with the colored brackets at what time do these functions start and finish.</p>
-<p>This plot was generated with the following simple script:</p>
+    <title>Plot memory usage as a function of time</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>One of the lesser known features of the <a href="https://pypi.python.org/pypi/memory_profiler">memory_profiler package</a> is its ability to plot memory consumption as a function of time. This was implemented by my friend Philippe Gervais, previously a colleague at INRIA and now working for Google.</p>
+<p>With this feature it is possible to generate very easily a plot of the memory consumption as a function of time. The result will be something like this:</p>
+<p><img src="http://fa.bianp.net/blog/images/2014/mprof_example.png" width="800px"/></p>
+<p>where you can see the memory used (in the y-axis) as a function of time (x-axis). Furthermore, we have used two functions, <code>test1</code> and <code>test2</code>, and it is possible to see with the colored brackets at what time do these functions start and finish.</p>
+<p>This plot was generated with the following simple script:</p>
 <div class="highlight"><pre><span class="kn">import</span> <span class="nn">time</span>
 
 <span class="nd">@profile</span>
@@ -42,29 +42,29 @@
 </pre></div>
 
 
-<p>what happens here is that we have two functions, <code>test1()</code> and <code>test2()</code> in which we create two lists of different sizes (the one in <code>test2</code> is bigger). We call time.sleep() for one second so that the function does not return too soon and so we have time to get reliable memory measurements. </p>
-<p>The decorator <code>@profile</code> is optional and is useful so that <code>memory_profiler</code> knows when the function has been called so he can plot the brackets indicating that. If you don’t put the decorator, the example will work just fine except that the brackets will not appear in your plot.</p>
-<p>Suppose we have saved the script as <code>test1.py<code>. We run the script as</code></code></p><code><code>
+<p>what happens here is that we have two functions, <code>test1()</code> and <code>test2()</code> in which we create two lists of different sizes (the one in <code>test2</code> is bigger). We call time.sleep() for one second so that the function does not return too soon and so we have time to get reliable memory measurements. </p>
+<p>The decorator <code>@profile</code> is optional and is useful so that <code>memory_profiler</code> knows when the function has been called so he can plot the brackets indicating that. If you don't put the decorator, the example will work just fine except that the brackets will not appear in your plot.</p>
+<p>Suppose we have saved the script as <code>test1.py<code>. We run the script as</code></code></p><code><code>
 <div class="highlight"><pre><span class="nv">$ </span>mprof run test1.py
 </pre></div>
 
 
-<p>where mprof is an executable provided by memory_profiler. If the above command was successful it will print something like this</p>
+<p>where mprof is an executable provided by memory_profiler. If the above command was successful it will print something like this</p>
 <div class="highlight"><pre><span class="nv">$ </span>mprof run test1.py
 mprof: Sampling memory every 0.1s
 running as a Python program...
 </pre></div>
 
 
-<p>The above command will create a <code>.dat</code> file on your current working directory, something like <code>mprofile_20141108113511.dat&lt;/ocde&gt;. This file (you can inspect it, it's a text file) contains the memory measurements for your program.</code></p><code>
-<p>You can now plot the memory measurements with the command</p>
+<p>The above command will create a <code>.dat</code> file on your current working directory, something like <code>mprofile_20141108113511.dat&lt;/ocde&gt;. This file (you can inspect it, it's a text file) contains the memory measurements for your program.</code></p><code>
+<p>You can now plot the memory measurements with the command</p>
 <div class="highlight"><pre><span class="nv">$ </span>mprof plot
 </pre></div>
 
 
-<p>This will open a matplotlib window and show you the plot:</p>
-<p><img src="http://fa.bianp.net/images/2014/mprof_example2.png" width="800px"/></p>
-<p>As you see, attention has been paid to the default values so that the plot it generates already looks decent without much effort. The not-so-nice-part is that, at least as of November 2014, if you want to customize the plot, well, you’ll have to look and modify the mprof script. Some refactoring is still needed in order to make it easier to customize the plots (work in progress).</p></code></code></code></div>
+<p>This will open a matplotlib window and show you the plot:</p>
+<p><img src="http://fa.bianp.net/blog/images/2014/mprof_example2.png" width="800px"/></p>
+<p>As you see, attention has been paid to the default values so that the plot it generates already looks decent without much effort. The not-so-nice-part is that, at least as of November 2014, if you want to customize the plot, well, you'll have to look and modify the mprof script. Some refactoring is still needed in order to make it easier to customize the plots (work in progress).</p></code></code></code></div>
     </summary>
     <updated>2014-11-06T23:00:00Z</updated>
     <category term="memory_profiler"/>
@@ -78,7 +78,7 @@ running as a Python program...
       <link href="http://fa.bianp.net/blog/" rel="alternate" type="text/html"/>
       <link href="http://fa.bianp.net/blog/feed/rss.xml" rel="self" type="application/atom+xml"/>
       <title>I say things</title>
-      <updated>2014-11-08T11:20:16Z</updated>
+      <updated>2014-11-08T11:40:16Z</updated>
     </source>
   </entry>
 
@@ -140,7 +140,7 @@ running as a Python program...
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-11-08T11:20:49Z</updated>
+      <updated>2014-11-08T11:40:54Z</updated>
     </source>
   </entry>
 
@@ -877,7 +877,7 @@ about, which mostly involve making shapes and moving them around the screen.</p>
       <link href="http://asmeurer.github.io/blog/rss.xml" rel="self" type="application/rss+xml"/>
       <subtitle>My blog</subtitle>
       <title>Aaron Meurer's Blog</title>
-      <updated>2014-11-08T11:20:28Z</updated>
+      <updated>2014-11-08T11:40:29Z</updated>
     </source>
   </entry>
 
@@ -908,7 +908,7 @@ about, which mostly involve making shapes and moving them around the screen.</p>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-11-08T11:20:48Z</updated>
+      <updated>2014-11-08T11:40:54Z</updated>
     </source>
   </entry>
 
@@ -1026,7 +1026,7 @@ about, which mostly involve making shapes and moving them around the screen.</p>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-11-08T11:20:49Z</updated>
+      <updated>2014-11-08T11:40:54Z</updated>
     </source>
   </entry>
 
@@ -1094,7 +1094,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.me" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.me/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-11-08T11:20:57Z</updated>
+      <updated>2014-11-08T11:41:02Z</updated>
     </source>
   </entry>
 
@@ -1120,7 +1120,7 @@ needs to done and how can they be tackled.</p></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-11-08T11:21:10Z</updated>
+      <updated>2014-11-08T11:41:21Z</updated>
     </source>
   </entry>
 
@@ -1149,7 +1149,7 @@ needs to done and how can they be tackled.</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-11-08T11:21:10Z</updated>
+      <updated>2014-11-08T11:41:18Z</updated>
     </source>
   </entry>
 
@@ -1227,7 +1227,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.me" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.me/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-11-08T11:20:57Z</updated>
+      <updated>2014-11-08T11:41:02Z</updated>
     </source>
   </entry>
 
@@ -1265,7 +1265,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-11-08T11:20:49Z</updated>
+      <updated>2014-11-08T11:40:54Z</updated>
     </source>
   </entry>
 
@@ -1676,7 +1676,7 @@ implementation</p>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-11-08T11:21:10Z</updated>
+      <updated>2014-11-08T11:41:21Z</updated>
     </source>
   </entry>
 
@@ -1763,7 +1763,7 @@ implementation</p>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-11-08T11:20:49Z</updated>
+      <updated>2014-11-08T11:40:54Z</updated>
     </source>
   </entry>
 
@@ -1844,7 +1844,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.me" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.me/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-11-08T11:20:57Z</updated>
+      <updated>2014-11-08T11:41:02Z</updated>
     </source>
   </entry>
 
@@ -1872,7 +1872,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-11-08T11:21:10Z</updated>
+      <updated>2014-11-08T11:41:18Z</updated>
     </source>
   </entry>
 
@@ -1946,7 +1946,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.me" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.me/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-11-08T11:20:57Z</updated>
+      <updated>2014-11-08T11:41:02Z</updated>
     </source>
   </entry>
 
@@ -2097,7 +2097,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-11-08T11:21:10Z</updated>
+      <updated>2014-11-08T11:41:18Z</updated>
     </source>
   </entry>
 
@@ -2136,7 +2136,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-11-08T11:20:48Z</updated>
+      <updated>2014-11-08T11:40:54Z</updated>
     </source>
   </entry>
 
@@ -2160,7 +2160,7 @@ mention that Sergey(one of my mentors) is damn good reviewer.</p></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-11-08T11:21:10Z</updated>
+      <updated>2014-11-08T11:41:21Z</updated>
     </source>
   </entry>
 
@@ -2189,7 +2189,7 @@ A problem that I am facing currently is the confusion about the Del operator. I 
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-11-08T11:20:49Z</updated>
+      <updated>2014-11-08T11:40:54Z</updated>
     </source>
   </entry>
 
@@ -2602,7 +2602,7 @@ just insomuch as there were more people at all.</p>
       <link href="http://asmeurer.github.io/blog/rss.xml" rel="self" type="application/rss+xml"/>
       <subtitle>My blog</subtitle>
       <title>Aaron Meurer's Blog</title>
-      <updated>2014-11-08T11:20:28Z</updated>
+      <updated>2014-11-08T11:40:29Z</updated>
     </source>
   </entry>
 
@@ -2630,7 +2630,7 @@ just insomuch as there were more people at all.</p>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-11-08T11:21:10Z</updated>
+      <updated>2014-11-08T11:41:18Z</updated>
     </source>
   </entry>
 
@@ -2666,7 +2666,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.me" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.me/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-11-08T11:20:57Z</updated>
+      <updated>2014-11-08T11:41:02Z</updated>
     </source>
   </entry>
 
@@ -2809,7 +2809,7 @@ a variable already solved then that solution is discarded.</li>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-11-08T11:21:10Z</updated>
+      <updated>2014-11-08T11:41:21Z</updated>
     </source>
   </entry>
 
@@ -2845,7 +2845,7 @@ The code for Dyadics is mostly done, the docs are on-going, and I am thinking of
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-11-08T11:20:49Z</updated>
+      <updated>2014-11-08T11:40:54Z</updated>
     </source>
   </entry>
 
@@ -2999,7 +2999,7 @@ project.</p></div>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-11-08T11:20:48Z</updated>
+      <updated>2014-11-08T11:40:54Z</updated>
     </source>
   </entry>
 
@@ -4287,7 +4287,7 @@ Thats all for now :) Will get back next week!</p></div>
       <link href="http://sushant-hiray.me" rel="alternate" type="text/html"/>
       <link href="http://sushant-hiray.me/feed.gsoc.xml" rel="self" type="application/atom+xml"/>
       <title>Sushant Hiray's Blog - Posts tagged sympy/gsoc/csympy</title>
-      <updated>2014-11-08T11:20:57Z</updated>
+      <updated>2014-11-08T11:41:02Z</updated>
     </source>
   </entry>
 
@@ -4435,7 +4435,7 @@ when solved for \( x \).</p></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-11-08T11:21:10Z</updated>
+      <updated>2014-11-08T11:41:21Z</updated>
     </source>
   </entry>
 
@@ -4554,7 +4554,7 @@ when solved for \( x \).</p></div>
       <link href="http://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="http://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2014-11-08T11:21:10Z</updated>
+      <updated>2014-11-08T11:41:18Z</updated>
     </source>
   </entry>
 
@@ -4587,7 +4587,7 @@ when solved for \( x \).</p></div>
       <link href="http://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2014-11-08T11:20:49Z</updated>
+      <updated>2014-11-08T11:40:54Z</updated>
     </source>
   </entry>
 
@@ -4784,7 +4784,7 @@ finally be submitted.</p></div>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2014-11-08T11:20:48Z</updated>
+      <updated>2014-11-08T11:40:53Z</updated>
     </source>
   </entry>
 
@@ -4852,7 +4852,7 @@ conceder the limiting value of the equation.</p>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2014-11-08T11:21:10Z</updated>
+      <updated>2014-11-08T11:41:21Z</updated>
     </source>
   </entry>
 </feed>
