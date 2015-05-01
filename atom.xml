@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:planet="http://planet.intertwingly.net/" xmlns:indexing="urn:atom-extension:indexing" indexing:index="no"><access:restriction xmlns:access="http://www.bloglines.com/about/specs/fac-1.0" relationship="deny"/>
   <title>Planet SymPy</title>
-  <updated>2015-04-03T01:40:58Z</updated>
+  <updated>2015-05-01T13:05:50Z</updated>
   <generator uri="http://intertwingly.net/code/venus/">Venus</generator>
   <author>
     <name>Ondrej Certik</name>
@@ -10,6 +10,79 @@
   <id>http://planet.sympy.org/atom.xml</id>
   <link href="http://planet.sympy.org/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="http://planet.sympy.org/" rel="alternate"/>
+
+  <entry>
+    <id>tag:www.sudhanshumishra.in,2015-05-01:posts/gsoc15-with-sympy/</id>
+    <link href="http://www.sudhanshumishra.in/posts/gsoc15-with-sympy/" rel="alternate" type="text/html"/>
+    <title>Google Summer of Code 2015 with SymPy</title>
+    <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p align="left">
+<img src="http://www.sudhanshumishra.in/images/sympy.png"/>
+</p>
+
+<p>Once again I got accepted into Google Summer of Code! I'll be working on assumptions system of SymPy. This time, SymPy is participating under Python Software Foundation.</p>
+<p><em>SymPy is a Python library for symbolic mathematics. It aims to become a full-featured <a href="https://en.wikipedia.org/wiki/Computer_algebra_system">Computer Algebra System</a> while keeping the code as simple as possible in order to be comprehensible and easily extensible.</em></p>
+<p>Here's what ideas page says about the project:</p>
+<div style="padding: 10px; border-radius: 5px;">
+<i>
+The project is to completely remove our old assumptions system, replacing it
+with the new one.<br/><br/>
+
+The difference between the two systems is outlined in the first two sections of this blog post.  A list of detailed issues can be found at this issue.<br/><br/>
+
+This project is challenging.  It requires deep understanding of the core of SymPy, basic logical inference, excellent code organization, and attention to performance.  It is also very important and of high value to the SymPy community.<br/><br/>
+
+You should take a look at the work started at
+<a href="https://github.com/sympy/sympy/pull/2508">https://github.com/sympy/sympy/pull/2508</a>. Numerous related tasks are mentioned in the "Ideas" section.
+</i>
+</div>
+
+<p>My mentors are <a href="https://github.com/asmeurer">Aaron Meurer</a> and <a href="https://github.com/tjl">Tim Lahey</a>.</p>
+<p>Currently SymPy has two versions of mathematical assumptions. One is called "old assumptions" because a new implementation has been carried out recently. Since "old assumptions" were developed a long back, they are more mature and faster. However, because of its design, it is not capable of doing some interesting things like assuming something over an expression e.g. <code>x**2 + 2 &gt; 0</code>.</p>
+<p>Old assumptions store assumptions in the object itself. For example, the code <code>x = Symbol('x', finite=True)</code> will store the assumption that the <code>x</code> is finite in this object itself.</p>
+<p>Both systems expose different APIs to query the facts:</p>
+<p>Old:</p>
+<div class="highlight"><pre><span class="n">In</span> <span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="n">x</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'x'</span><span class="p">,</span> <span class="n">imaginary</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">3</span><span class="p">]:</span> <span class="n">x</span><span class="o">.</span><span class="n">is_real</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">3</span><span class="p">]:</span> <span class="bp">False</span>
+</pre></div>
+
+
+<p>New:</p>
+<div class="highlight"><pre><span class="n">In</span> <span class="p">[</span><span class="mi">4</span><span class="p">]:</span> <span class="n">y</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s">'y'</span><span class="p">)</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">5</span><span class="p">]:</span> <span class="n">ask</span><span class="p">(</span><span class="n">Q</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">Q</span><span class="o">.</span><span class="n">positive</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">5</span><span class="p">]:</span> <span class="bp">True</span>
+</pre></div>
+
+
+<p>My work includes but is not limited to:</p>
+<ul>
+<li>Identifying inconsistencies between old and new assumptions and eliminate them.</li>
+<li>Improving performance of the new assumptions.</li>
+<li>Making new assumptions read old assumptions.</li>
+<li>Removing assumptions from the core as much as possible.</li>
+<li>Making API of old assumptions call new assumptions internally.</li>
+</ul>
+<p>That's all for now. Looking forward to a great summer!</p></div>
+    </summary>
+    <updated>2015-05-01T05:30:00Z</updated>
+    <category term="python"/>
+    <category term="sympy"/>
+    <category term="gsoc"/>
+    <author>
+      <name>Sudhanshu Mishra</name>
+    </author>
+    <source>
+      <id>http://www.sudhanshumishra.in/</id>
+      <link href="http://www.sudhanshumishra.in/" rel="alternate" type="text/html"/>
+      <link href="http://www.sudhanshumishra.in/feeds/tag.sympy.xml" rel="self" type="application/atom+xml"/>
+      <title>Shortlog</title>
+      <updated>2015-05-01T13:05:50Z</updated>
+    </source>
+  </entry>
 
   <entry>
     <id>http://sushant-hiray.me/{{ site.url }}{{ post.url }}</id>
@@ -203,7 +276,7 @@ running as a Python program...
       <link href="https://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2015-04-03T01:40:40Z</updated>
+      <updated>2015-05-01T13:05:31Z</updated>
     </source>
   </entry>
 
@@ -940,7 +1013,7 @@ about, which mostly involve making shapes and moving them around the screen.</p>
       <link href="http://asmeurer.github.io/blog/rss.xml" rel="self" type="application/rss+xml"/>
       <subtitle>My blog</subtitle>
       <title>Aaron Meurer's Blog</title>
-      <updated>2015-04-03T01:40:18Z</updated>
+      <updated>2015-05-01T13:05:10Z</updated>
     </source>
   </entry>
 
@@ -971,7 +1044,7 @@ about, which mostly involve making shapes and moving them around the screen.</p>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2015-04-03T01:40:39Z</updated>
+      <updated>2015-05-01T13:05:30Z</updated>
     </source>
   </entry>
 
@@ -1059,7 +1132,7 @@ about, which mostly involve making shapes and moving them around the screen.</p>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>A blog by Sudhanshu Mishra.</subtitle>
       <title>Shortlog</title>
-      <updated>2015-03-31T19:13:25Z</updated>
+      <updated>2015-05-01T05:49:57Z</updated>
     </source>
   </entry>
 
@@ -1091,7 +1164,7 @@ about, which mostly involve making shapes and moving them around the screen.</p>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2015-04-03T01:40:39Z</updated>
+      <updated>2015-05-01T13:05:30Z</updated>
     </source>
   </entry>
 
@@ -1117,7 +1190,7 @@ needs to done and how can they be tackled.</p></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2015-04-03T01:40:57Z</updated>
+      <updated>2015-04-21T20:00:59Z</updated>
     </source>
   </entry>
 
@@ -1146,7 +1219,7 @@ needs to done and how can they be tackled.</p></div>
       <link href="https://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="https://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2015-04-03T01:40:57Z</updated>
+      <updated>2015-05-01T13:05:49Z</updated>
     </source>
   </entry>
 
@@ -1216,7 +1289,7 @@ needs to done and how can they be tackled.</p></div>
       <link href="https://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2015-04-03T01:40:40Z</updated>
+      <updated>2015-05-01T13:05:31Z</updated>
     </source>
   </entry>
 
@@ -1627,7 +1700,7 @@ implementation</p>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2015-04-03T01:40:57Z</updated>
+      <updated>2015-04-21T20:00:59Z</updated>
     </source>
   </entry>
 
@@ -1689,7 +1762,7 @@ implementation</p>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>A blog by Sudhanshu Mishra.</subtitle>
       <title>Shortlog</title>
-      <updated>2015-03-31T19:13:25Z</updated>
+      <updated>2015-05-01T05:49:57Z</updated>
     </source>
   </entry>
 
@@ -1716,7 +1789,7 @@ implementation</p>
       <link href="https://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2015-04-03T01:40:40Z</updated>
+      <updated>2015-05-01T13:05:31Z</updated>
     </source>
   </entry>
 
@@ -1744,7 +1817,7 @@ implementation</p>
       <link href="https://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="https://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2015-04-03T01:40:57Z</updated>
+      <updated>2015-05-01T13:05:49Z</updated>
     </source>
   </entry>
 
@@ -1897,7 +1970,7 @@ implementation</p>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>A blog by Sudhanshu Mishra.</subtitle>
       <title>Shortlog</title>
-      <updated>2015-03-31T19:13:25Z</updated>
+      <updated>2015-05-01T05:49:57Z</updated>
     </source>
   </entry>
 
@@ -1924,7 +1997,7 @@ implementation</p>
       <link href="https://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="https://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2015-04-03T01:40:57Z</updated>
+      <updated>2015-05-01T13:05:49Z</updated>
     </source>
   </entry>
 
@@ -1963,7 +2036,7 @@ implementation</p>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2015-04-03T01:40:39Z</updated>
+      <updated>2015-05-01T13:05:30Z</updated>
     </source>
   </entry>
 
@@ -1987,7 +2060,7 @@ mention that Sergey(one of my mentors) is damn good reviewer.</p></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2015-04-03T01:40:57Z</updated>
+      <updated>2015-04-21T20:00:59Z</updated>
     </source>
   </entry>
 
@@ -2016,7 +2089,7 @@ A problem that I am facing currently is the confusion about the Del operator. I 
       <link href="https://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2015-04-03T01:40:40Z</updated>
+      <updated>2015-05-01T13:05:31Z</updated>
     </source>
   </entry>
 
@@ -2429,7 +2502,7 @@ just insomuch as there were more people at all.</p>
       <link href="http://asmeurer.github.io/blog/rss.xml" rel="self" type="application/rss+xml"/>
       <subtitle>My blog</subtitle>
       <title>Aaron Meurer's Blog</title>
-      <updated>2015-04-03T01:40:18Z</updated>
+      <updated>2015-05-01T13:05:11Z</updated>
     </source>
   </entry>
 
@@ -2457,7 +2530,7 @@ just insomuch as there were more people at all.</p>
       <link href="https://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="https://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2015-04-03T01:40:57Z</updated>
+      <updated>2015-05-01T13:05:49Z</updated>
     </source>
   </entry>
 
@@ -2600,7 +2673,7 @@ a variable already solved then that solution is discarded.</li>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2015-04-03T01:40:57Z</updated>
+      <updated>2015-04-21T20:00:59Z</updated>
     </source>
   </entry>
 
@@ -2636,7 +2709,7 @@ The code for Dyadics is mostly done, the docs are on-going, and I am thinking of
       <link href="https://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2015-04-03T01:40:40Z</updated>
+      <updated>2015-05-01T13:05:31Z</updated>
     </source>
   </entry>
 
@@ -2790,7 +2863,7 @@ project.</p></div>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2015-04-03T01:40:39Z</updated>
+      <updated>2015-05-01T13:05:30Z</updated>
     </source>
   </entry>
 
@@ -2879,7 +2952,7 @@ project.</p></div>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>A blog by Sudhanshu Mishra.</subtitle>
       <title>Shortlog</title>
-      <updated>2015-03-31T19:13:25Z</updated>
+      <updated>2015-05-01T05:49:57Z</updated>
     </source>
   </entry>
 
@@ -4184,7 +4257,7 @@ when solved for \( x \).</p></div>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2015-04-03T01:40:57Z</updated>
+      <updated>2015-04-21T20:00:59Z</updated>
     </source>
   </entry>
 
@@ -4247,7 +4320,7 @@ when solved for \( x \).</p></div>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>A blog by Sudhanshu Mishra.</subtitle>
       <title>Shortlog</title>
-      <updated>2015-03-31T19:13:25Z</updated>
+      <updated>2015-05-01T05:49:57Z</updated>
     </source>
   </entry>
 
@@ -4305,7 +4378,7 @@ when solved for \( x \).</p></div>
       <link href="https://kundankumar185.wordpress.com/osd.xml" rel="search" type="application/opensearchdescription+xml"/>
       <link href="https://kundankumar185.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <title>my experiments with life</title>
-      <updated>2015-04-03T01:40:57Z</updated>
+      <updated>2015-05-01T13:05:49Z</updated>
     </source>
   </entry>
 
@@ -4338,7 +4411,7 @@ when solved for \( x \).</p></div>
       <link href="https://codesachin.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>- Blog by Sachin Joglekar</subtitle>
       <title>Dream. Think. Code. » Google Summer of Code 2014</title>
-      <updated>2015-04-03T01:40:40Z</updated>
+      <updated>2015-05-01T13:05:31Z</updated>
     </source>
   </entry>
 
@@ -4535,7 +4608,7 @@ finally be submitted.</p></div>
       <link href="http://thilinaatsympy.wordpress.com/?pushpress=hub" rel="hub" type="text/html"/>
       <subtitle>My Work related to sympy</subtitle>
       <title>Thilina's SymPy Blog</title>
-      <updated>2015-04-03T01:40:39Z</updated>
+      <updated>2015-05-01T13:05:30Z</updated>
     </source>
   </entry>
 
@@ -4603,7 +4676,7 @@ conceder the limiting value of the equation.</p>
       <link href="https://hargup.github.io/" rel="alternate" type="text/html"/>
       <link href="http://hargup.github.io/rss.xml" rel="self" type="application/rss+xml"/>
       <title>Harsh's blog</title>
-      <updated>2015-04-03T01:40:57Z</updated>
+      <updated>2015-04-21T20:00:59Z</updated>
     </source>
   </entry>
 
@@ -4761,77 +4834,7 @@ False</pre><p> </p>
       <link href="http://pubsubhubbub.appspot.com/" rel="hub" type="text/html"/>
       <subtitle>A blog by Sudhanshu Mishra.</subtitle>
       <title>Shortlog</title>
-      <updated>2015-03-31T19:13:25Z</updated>
-    </source>
-  </entry>
-
-  <entry>
-    <id>http://tarzzz.github.io/gsoc14/second-week.html</id>
-    <link href="http://tarzzz.github.io/gsoc14/second-week.html" rel="alternate" type="text/html"/>
-    <title>GSoC 14: Second Week!</title>
-    <summary>{% include JB/setup %}
-
-
-[ &lt;-Back to posts ](/gsoc14)
-
-Second week of GSoC '14 has ended. It has been a very hectic week. A good part of my time was spent in studying 
-and tweaking the MGView code(whose fork we had decided to work on). The new _generic-visualizer_ has to be compatible 
-with both PyDy as well as MG(MotionGenesis), so great care is being taken to maintain the backwards compatibility
-of the package, as well to add the support for PyDy visualization data. I have also worked on Python side, to 
-modify the JSON data generated for the visualizations(from PyDy side).
-
-
-###Accomplishments:
-
-There have been three major accomplishments this week:
-
-  - **Studying MGView code:** This has to be the most time consuming part! I had to go over a module spanning
-    multiple files to study the workflow, and how each methods are linked together. Some conversations with
-    Adam Leeper(who wrote the original package) have been very useful in this regard.
-
-  - **Modifying JSON generated from PyDy:** Certain modifications have been done on the JSON generated from the
-    PyDy backend, so that they are compatible with MotionView. A major change is that the generated JSON data
-    is split over two files, one `scene_desc.json` shall contain all the parameters required to create a static
-    scene, and another file `simulation_data.json` which shall contain all the simulation data(in the form of 
-    4x4 matrices). It would be very helpful in un-cluttering the data. The API changes in Python side are totally
-    backward compatible, which means no previous code shall break once these changes are merged.
-
-  - **Tweaking MGView code:** I have started working on MGView code, to provide the support for PyDy generated
-    JSON data. This part will span the coming weeks too.
-
-
-###Objectives:
-
-The objectives of the upcoming week are to be able to produce some visualizations on the frontend side. 
-For that I will need to tweak into the MGView code to allow support for PyDy JSONs.
-
-
-###Issues:
-
-The main issues I am facing is the inhomogenities in the output produced by PyDy and MG. Since the visualizer
-(MOtionView) must be able to visualize data generated from both of these packages, without any bias it has to be 
-designed like so. Since It is already built to specifically visualize data generated from MotionGenesis software,
-There are certain parts of code which need to be totally rewritten, and it has to be done without breaking the
-workflow of the visualizer. So it can get somewhat messy to do so. I am working on to find a clean way to do so.
-
-The upcoming two weeks are somewhat crucial to the project timeline. I have to work really hard in the coming weeks to
-keep up with my deliverables before the midterm evaluations. I think I shall get back to coding now! :)
-
-
-
-
-[ &lt;-Back to posts ](/gsoc14)</summary>
-    <updated>2014-06-22T19:00:40Z</updated>
-    <source>
-      <id>http://tarzzz.github.io/gsoc14</id>
-      <author>
-        <name>Tarun Gaba</name>
-      </author>
-      <link href="http://tarzzz.github.io/gsoc14" rel="alternate" type="text/html"/>
-      <link href="http://tarzzz.github.io/rss.gsoc.xml" rel="self" type="application/atom+xml"/>
-      <subtitle>Posts categorized under GSoC</subtitle>
-      <title>Tarun Gaba's blog - GSoC</title>
-      <updated>2014-06-27T19:20:40Z</updated>
+      <updated>2015-05-01T05:49:57Z</updated>
     </source>
   </entry>
 </feed>
