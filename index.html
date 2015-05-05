@@ -43,17 +43,19 @@
 <div class="content">
 <div><p>Here are some bits of Python trickery that I have come across. Each of the
 following is invalid syntax.  See if you can figure out why</p>
-<p>1.</p>
-<pre class="code literal-block"><span class="mi">1</span> <span class="o">+</span> <span class="ow">not</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</pre>
-
-
-<p>2.</p>
-<pre class="code literal-block"><span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="p">(</span>
-<span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
-<span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">2</span><span class="p">),</span>
-<span class="n">x</span><span class="o">=</span><span class="mi">3</span><span class="p">,)</span>
-</pre></div></div>
+<ol>
+<li>
+</li></ol>
+<pre><code class="language-py">1 + not(2)
+</code></pre>
+<ol start="2">
+<li>
+</li></ol>
+<pre><code class="language-py">f(*(
+i for i in range(10)
+if i % 2),
+x=3,)
+</code></pre></div></div>
 
 
 
@@ -794,26 +796,21 @@ language.</p>
 <p>The Swift language is actually quite easy to learn, especially if you already
 know a high-level language like Python.  A few important things:</p>
 <ul>
-<li>
-<p><code>var</code> and <code>let</code> seem a bit confusing.  The difference is actually quite
-  simple: <code>var</code> denotes a variable that can change and <code>let</code> denotes a
-  variable that cannot.  You could in theory just use <code>var</code> for everything,
-  but <code>let</code> lets the compiler spot mistakes for you, and it also probably lets
-  it make your code faster.  If you intend to never change the value of a
-  variable, use <code>let</code>.</p>
-</li>
-<li>
-<p>Swift uses type inference, meaning that you usually don't need to specify
-  types. But when you do, you do so by putting a <code>:</code> after the variable name,
-  like <code>var a: Int = 2</code> or <code>func f(a: Int)</code>.  The exception is the return type
-  of a function, which uses the arrow <code>-&gt;</code> (if you are familiar with Python 3
-  type annotations, the syntax is exactly the same), <code>func f(a: Int) -&gt; Int</code>.</p>
-</li>
-<li>
-<p>Swift uses <code>?</code> after a type name to indicate that a variable could be its
-  given type, or <code>nil</code>. If you are familiar with Haskell, this is like the
-  Maybe monad.  I know very little Haskell, so I don't know if Swift's
-  implementation of <code>?</code> is truly a Monad.</p>
+<li><p><code>var</code> and <code>let</code> seem a bit confusing.  The difference is actually quite
+simple: <code>var</code> denotes a variable that can change and <code>let</code> denotes a
+variable that cannot.  You could in theory just use <code>var</code> for everything,
+but <code>let</code> lets the compiler spot mistakes for you, and it also probably lets
+it make your code faster.  If you intend to never change the value of a
+variable, use <code>let</code>.</p></li>
+<li><p>Swift uses type inference, meaning that you usually don't need to specify
+types. But when you do, you do so by putting a <code>:</code> after the variable name,
+like <code>var a: Int = 2</code> or <code>func f(a: Int)</code>.  The exception is the return type
+of a function, which uses the arrow <code>-&gt;</code> (if you are familiar with Python 3
+type annotations, the syntax is exactly the same), <code>func f(a: Int) -&gt; Int</code>.</p></li>
+<li><p>Swift uses <code>?</code> after a type name to indicate that a variable could be its
+given type, or <code>nil</code>. If you are familiar with Haskell, this is like the
+Maybe monad.  I know very little Haskell, so I don't know if Swift's
+implementation of <code>?</code> is truly a Monad.</p>
 <p>Roughly speaking, in many circumstances, you don't know if a variable will
 actually be the given type or not. A good example of this is with
 dictionaries. <code>var a: [String: Int]</code> creates a dictionary that maps
@@ -826,19 +823,14 @@ type of <code>a[b]</code> is <code>Int?</code>.</p>
 compiler to compile code that doesn't check for that case.</p>
 <p>For the most part, you can ignore this as well, at least when you
 start. Just write code as you would, let XCode add in the types for you, and
-only worry about types if the compiler tells you something is wrong.</p>
-</li>
-<li>
-<p>Swift functions often require the parameters be named, for instance, you
-  have to write <code>CGSize(width: 1, height: 2)</code> instead of just <code>CGSize(1,
-  2)</code>. This is both for clarity (the former is much easier to read if you
-  aren't familiar with the API for <code>CGSize</code>), and because Swift allows
-  polymorphism, i.e., you can define different initializers for the same class
-  with different type signatures. For example, <code>CGRect</code> can be initialized as
-  <code>CGRect(origin: CGPoint, size: CGSize)</code> or <code>CGRect(x: Int, y: Int, width:
-  Int, height: Int)</code>. This can lead to ambiguities in some cases unless you
-  explicitly tell the compiler which version to use.</p>
-</li>
+only worry about types if the compiler tells you something is wrong.</p></li>
+<li><p>Swift functions often require the parameters be named, for instance, you
+have to write <code>CGSize(width: 1, height: 2)</code> instead of just <code>CGSize(1, 2)</code>. This is both for clarity (the former is much easier to read if you
+aren't familiar with the API for <code>CGSize</code>), and because Swift allows
+polymorphism, i.e., you can define different initializers for the same class
+with different type signatures. For example, <code>CGRect</code> can be initialized as
+<code>CGRect(origin: CGPoint, size: CGSize)</code> or <code>CGRect(x: Int, y: Int, width: Int, height: Int)</code>. This can lead to ambiguities in some cases unless you
+explicitly tell the compiler which version to use.</p></li>
 </ul>
 <p>I've found Swift to be a very strict language. I don't mean this in the sense
 described by
@@ -886,15 +878,11 @@ understanding how to convert the basic syntax to Swift. Reading the section of
 the <a href="https://en.wikipedia.org/wiki/Objective_C#Syntax">Wikipedia article</a> on
 the syntax of Objective-C should be enough.</p>
 <p>For instance</p>
-<pre class="code literal-block"><span class="p">[</span><span class="n">touch</span> <span class="nl">locationInNode</span><span class="p">:</span><span class="nb">self</span><span class="p">]</span>
-</pre>
-
-
+<pre><code class="language-objective-c">[touch locationInNode:self]
+</code></pre>
 <p>would be translated to</p>
-<pre class="code literal-block"><span class="n">touch</span><span class="p">.</span><span class="n">locationInNode</span><span class="p">(</span><span class="kc">self</span><span class="p">)</span>
-</pre>
-
-
+<pre><code class="language-swift">touch.locationInNode(self)
+</code></pre>
 <h2>Use XCode</h2>
 <p>If you are comfortable with the Swift language itself, you should get started
 with a project.</p>
@@ -905,43 +893,33 @@ reduce the complexity significantly as you get started.  Once you are
 comfortable, you can move to another editor.</p>
 <p>Some things that XCode will do for you:</p>
 <ul>
-<li>
-<p><strong>Autocompletion</strong>: The best way to figure out the Cocoa APIs is to use the
-  autocompletion. This pops up when you want to override a method in a
-  subclass, create an object from an existing class, access an attribute of a
-  class, or instantiate a class or call a function (remember that Swift is
-  polymorphic, so it's useful to know all the possible ways to instantiate a
-  class or call a function).</p>
-</li>
-<li>
-<p><strong>Compiler errors and warnings</strong>: Swift, being a strictly typed language,
-  will give you a lot of useful compiler errors. It's pretty hard to write a
-  program incorrectly from a type point of view, and have it even compile.
-  XCode integrates this nicely, and it even offers suggestions on how to fix
-  things every once in a while (so that you can just click the button and have
-  it fixed inline).</p>
-</li>
-<li>
-<p><strong>Direct interaction with the iOS Simulator</strong>: One button will compile your code
-  and start the simulator. If your target is Mac OS X, it will open the
-  application.</p>
-</li>
-<li>
-<p><strong>Debugger</strong>: Clicking to the left of a line will set a breakpoint in the
-  debugger.  The Swift debugger seems pretty limited right now. I wasn't able
-  to get any useful information out of the variables view when I used it.  But
-  in my experience using XCode in the past to debug C, its graphical debugger
-  is one of the best.</p>
-</li>
-<li>
-<p><strong>Configuration settings</strong>: If you click on the XCode project in the files
-  view (the root node of all the files), you get a view with all the different
-  settings for your project. Most of these you probably won't want to change,
-  but a few are important, like what devices and orientations you want to
-  allow, what operating system versions you want to support, and the name and
-  version of your project.  Editing these outside of XCode requires editing an
-  XML file, which is no fun.</p>
-</li>
+<li><p><strong>Autocompletion</strong>: The best way to figure out the Cocoa APIs is to use the
+autocompletion. This pops up when you want to override a method in a
+subclass, create an object from an existing class, access an attribute of a
+class, or instantiate a class or call a function (remember that Swift is
+polymorphic, so it's useful to know all the possible ways to instantiate a
+class or call a function).</p></li>
+<li><p><strong>Compiler errors and warnings</strong>: Swift, being a strictly typed language,
+will give you a lot of useful compiler errors. It's pretty hard to write a
+program incorrectly from a type point of view, and have it even compile.
+XCode integrates this nicely, and it even offers suggestions on how to fix
+things every once in a while (so that you can just click the button and have
+it fixed inline).</p></li>
+<li><p><strong>Direct interaction with the iOS Simulator</strong>: One button will compile your code
+and start the simulator. If your target is Mac OS X, it will open the
+application.</p></li>
+<li><p><strong>Debugger</strong>: Clicking to the left of a line will set a breakpoint in the
+debugger.  The Swift debugger seems pretty limited right now. I wasn't able
+to get any useful information out of the variables view when I used it.  But
+in my experience using XCode in the past to debug C, its graphical debugger
+is one of the best.</p></li>
+<li><p><strong>Configuration settings</strong>: If you click on the XCode project in the files
+view (the root node of all the files), you get a view with all the different
+settings for your project. Most of these you probably won't want to change,
+but a few are important, like what devices and orientations you want to
+allow, what operating system versions you want to support, and the name and
+version of your project.  Editing these outside of XCode requires editing an
+XML file, which is no fun.</p></li>
 </ul>
 <p>Of course, any editor can potentially do these things, and I'm really looking
 forward to the point where I can just use Emacs to edit Swift code, as the
@@ -967,29 +945,21 @@ the only issue is that there are limits to how you can simulate a touch screen
 on a computer with a mouse.</p>
 <p>A few things to note about the simulator:</p>
 <ul>
-<li>
-<p>There are several things you can do with the "hardware" from the hardware
-  menu, such as rotating the device or pressing the home button.</p>
-</li>
-<li>
-<p>It's worth remembering the keyboard shortcut for pressing the home button,
-  ⇧⌘H, as you can press it twice in quick succession just like on a real
-  device to open the task manger. You can then drag your app up to completely
-  reset it, without having to restart the simulator.</p>
-</li>
-<li>
-<p>The retina iPad is taller than your display, even if you have a 15" retina
-  display. So be aware that you will need to scroll up and down to see it
-  all. Alternately, you can use a smaller device, like an iPhone, or rotate it
-  to landscape, where it all fits.</p>
-</li>
-<li>
-<p>The only way to do multitouch is to hold down the Option key. This will
-  create two fingers.  However, it's quite limited as the two fingers are
-  always centered around the center of the screen. Therefore if you want to
-  test multitouching two objects, you'll have to position them symmetrically so
-  that you can grab them both.</p>
-</li>
+<li><p>There are several things you can do with the "hardware" from the hardware
+menu, such as rotating the device or pressing the home button.</p></li>
+<li><p>It's worth remembering the keyboard shortcut for pressing the home button,
+⇧⌘H, as you can press it twice in quick succession just like on a real
+device to open the task manger. You can then drag your app up to completely
+reset it, without having to restart the simulator.</p></li>
+<li><p>The retina iPad is taller than your display, even if you have a 15" retina
+display. So be aware that you will need to scroll up and down to see it
+all. Alternately, you can use a smaller device, like an iPhone, or rotate it
+to landscape, where it all fits.</p></li>
+<li><p>The only way to do multitouch is to hold down the Option key. This will
+create two fingers.  However, it's quite limited as the two fingers are
+always centered around the center of the screen. Therefore if you want to
+test multitouching two objects, you'll have to position them symmetrically so
+that you can grab them both.</p></li>
 </ul>
 <h2>Getting started with a project</h2>
 <p>The best way to start is to start a template project with XCode. I personally
@@ -1022,49 +992,40 @@ started with <code>SKSpriteNode</code>, which creates a simple square, because I
 to play around with touch events.</p>
 <p>I started out with four sprites (yes, it would be better to put these in an
 array, and probably abstract them to a method):</p>
-<pre class="code literal-block"><span class="kd">let</span> <span class="nv">sprite1</span> <span class="p">=</span> <span class="bp">SKSpriteNode</span><span class="p">(</span><span class="n">color</span><span class="p">:</span> <span class="bp">UIColor</span><span class="p">(</span><span class="n">red</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">green</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">blue</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">size</span><span class="p">:</span> <span class="bp">CGSize</span><span class="p">(</span><span class="n">width</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="mi">30</span><span class="p">))</span>
-<span class="kd">let</span> <span class="nv">sprite2</span> <span class="p">=</span> <span class="bp">SKSpriteNode</span><span class="p">(</span><span class="n">color</span><span class="p">:</span> <span class="bp">UIColor</span><span class="p">(</span><span class="n">red</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">green</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">blue</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">size</span><span class="p">:</span> <span class="bp">CGSize</span><span class="p">(</span><span class="n">width</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="mi">30</span><span class="p">))</span>
-<span class="kd">let</span> <span class="nv">sprite3</span> <span class="p">=</span> <span class="bp">SKSpriteNode</span><span class="p">(</span><span class="n">color</span><span class="p">:</span> <span class="bp">UIColor</span><span class="p">(</span><span class="n">red</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">green</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">blue</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">size</span><span class="p">:</span> <span class="bp">CGSize</span><span class="p">(</span><span class="n">width</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="mi">30</span><span class="p">))</span>
-<span class="kd">let</span> <span class="nv">sprite4</span> <span class="p">=</span> <span class="bp">SKSpriteNode</span><span class="p">(</span><span class="n">color</span><span class="p">:</span> <span class="bp">UIColor</span><span class="p">(</span><span class="n">red</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">green</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">blue</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">size</span><span class="p">:</span> <span class="bp">CGSize</span><span class="p">(</span><span class="n">width</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="mi">30</span><span class="p">))</span>
-</pre>
-
-
+<pre><code class="language-swift">let sprite1 = SKSpriteNode(color: UIColor(red: 1.0, green: 0.0, blue: 0.0, alpha: 1.0), size: CGSize(width: 30, height: 30))
+let sprite2 = SKSpriteNode(color: UIColor(red: 0.0, green: 1.0, blue: 0.0, alpha: 1.0), size: CGSize(width: 30, height: 30))
+let sprite3 = SKSpriteNode(color: UIColor(red: 0.0, green: 0.0, blue: 1.0, alpha: 1.0), size: CGSize(width: 30, height: 30))
+let sprite4 = SKSpriteNode(color: UIColor(red: 1.0, green: 1.0, blue: 0.0, alpha: 1.0), size: CGSize(width: 30, height: 30))
+</code></pre>
 <p>These lines go at the class level. This lets them be accessed from within any
 method of the class.</p>
 <p>One thing I could not figure out how to do was how to access class variables
 from within other class variables.  In Python, you can do</p>
-<pre class="code literal-block"><span class="k">class</span> <span class="nc">Test</span><span class="p">:</span>
-    <span class="n">a</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="n">b</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="mi">1</span>
-</pre>
-
-
+<pre><code class="language-py">class Test:
+    a = 1
+    b = a + 1
+</code></pre>
 <p>But in Swift, if you do</p>
-<pre class="code literal-block"><span class="kd">class</span> <span class="nc">Test</span> <span class="p">{</span>
-    <span class="kd">let</span> <span class="nv">a</span> <span class="p">=</span> <span class="mi">1</span>
-    <span class="kd">let</span> <span class="nv">b</span> <span class="p">=</span> <span class="n">a</span> <span class="o">+</span> <span class="mi">1</span>
-<span class="p">}</span>
-</pre>
-
-
-<p>it tells you that <code>Test.Type does not have a member named 'a'</code> on the <code>let b =
-a + 1</code> line.</p>
+<pre><code class="language-swift">class Test {
+    let a = 1
+    let b = a + 1
+}
+</code></pre>
+<p>it tells you that <code>Test.Type does not have a member named 'a'</code> on the <code>let b = a + 1</code> line.</p>
 <p>You may have to use properties with getters and setters in this case, which I
 didn't feel like fooling with. The result is that I did not abstract out the
 <code>CGSize(width: 30, height: 30)</code> into a common variable.</p>
 <p>The <code>didMoveToView</code> method then becomes</p>
-<pre class="code literal-block"><span class="kr">override</span> <span class="kd">func</span> <span class="nf">didMoveToView</span><span class="p">(</span><span class="n">view</span><span class="p">:</span> <span class="bp">SKView</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kd">let</span> <span class="nv">center</span> <span class="p">=</span> <span class="bp">CGPoint</span><span class="p">(</span><span class="n">x</span><span class="p">:</span><span class="n">CGRectGetMidX</span><span class="p">(</span><span class="kc">self</span><span class="p">.</span><span class="n">frame</span><span class="p">),</span> <span class="n">y</span><span class="p">:</span><span class="n">CGRectGetMidY</span><span class="p">(</span><span class="kc">self</span><span class="p">.</span><span class="n">frame</span><span class="p">))</span>
+<pre><code class="language-swift">override func didMoveToView(view: SKView) {
+    let center = CGPoint(x:CGRectGetMidX(self.frame), y:CGRectGetMidY(self.frame))
 
-    <span class="k">for</span> <span class="n">s</span> <span class="k">in</span> <span class="p">[</span><span class="n">sprite1</span><span class="p">,</span> <span class="n">sprite2</span><span class="p">,</span> <span class="n">sprite3</span><span class="p">,</span> <span class="n">sprite4</span><span class="p">]</span> <span class="p">{</span>
-        <span class="n">s</span><span class="p">.</span><span class="n">position</span> <span class="p">=</span> <span class="n">center</span>
+    for s in [sprite1, sprite2, sprite3, sprite4] {
+        s.position = center
 
-        <span class="kc">self</span><span class="p">.</span><span class="n">addChild</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</pre>
-
-
+        self.addChild(s)
+    }
+}
+</code></pre>
 <p>The <code>self.addChild</code> is the most important method here, as it actually puts the
 sprite in the main view. If you forget this line, none of the sprites will
 show up.</p>
@@ -1076,26 +1037,24 @@ top of one another in the center of the view.</p>
 went with was to play around with the physics a little. <code>SpriteKit</code> has a nice
 2D physics engine built in, and it's quite easy to use.</p>
 <p>So my final <code>didMoveToView</code> was</p>
-<pre class="code literal-block"><span class="kr">override</span> <span class="kd">func</span> <span class="nf">didMoveToView</span><span class="p">(</span><span class="n">view</span><span class="p">:</span> <span class="bp">SKView</span><span class="p">)</span> <span class="p">{</span>
-    <span class="cm">/* Setup your scene here */</span>
-    <span class="kd">let</span> <span class="nv">center</span> <span class="p">=</span> <span class="bp">CGPoint</span><span class="p">(</span><span class="n">x</span><span class="p">:</span><span class="n">CGRectGetMidX</span><span class="p">(</span><span class="kc">self</span><span class="p">.</span><span class="n">frame</span><span class="p">),</span> <span class="n">y</span><span class="p">:</span><span class="n">CGRectGetMidY</span><span class="p">(</span><span class="kc">self</span><span class="p">.</span><span class="n">frame</span><span class="p">))</span>
+<pre><code class="language-swift">override func didMoveToView(view: SKView) {
+    /* Setup your scene here */
+    let center = CGPoint(x:CGRectGetMidX(self.frame), y:CGRectGetMidY(self.frame))
 
-    <span class="k">for</span> <span class="n">s</span> <span class="k">in</span> <span class="p">[</span><span class="n">sprite1</span><span class="p">,</span> <span class="n">sprite2</span><span class="p">,</span> <span class="n">sprite3</span><span class="p">,</span> <span class="n">sprite4</span><span class="p">]</span> <span class="p">{</span>
-        <span class="n">s</span><span class="p">.</span><span class="n">position</span> <span class="p">=</span> <span class="n">center</span>
+    for s in [sprite1, sprite2, sprite3, sprite4] {
+        s.position = center
 
-        <span class="kd">var</span> <span class="nv">physics_body</span> <span class="p">=</span> <span class="bp">SKPhysicsBody</span><span class="p">(</span><span class="n">rectangleOfSize</span><span class="p">:</span> <span class="bp">CGSize</span><span class="p">(</span><span class="n">width</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="mi">30</span><span class="p">))</span>
+        var physics_body = SKPhysicsBody(rectangleOfSize: CGSize(width: 30, height: 30))
 
-        <span class="n">physics_body</span><span class="p">.</span><span class="n">affectedByGravity</span> <span class="p">=</span> <span class="kc">false</span>
-        <span class="n">physics_body</span><span class="p">.</span><span class="n">allowsRotation</span> <span class="p">=</span> <span class="kc">false</span>
+        physics_body.affectedByGravity = false
+        physics_body.allowsRotation = false
 
-        <span class="n">s</span><span class="p">.</span><span class="n">physicsBody</span> <span class="p">=</span> <span class="n">physics_body</span>
-        <span class="kc">self</span><span class="p">.</span><span class="n">addChild</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-    <span class="p">}</span>
+        s.physicsBody = physics_body
+        self.addChild(s)
+    }
 
-<span class="p">}</span>
-</pre>
-
-
+}
+</code></pre>
 <p>For each sprite, I create an <code>SKPhysicsBody</code> with the exact same size as the
 <code>SKSpriteNode</code>s (there's probably a more direct way to do this), and attach it
 to that node. The <code>affectedByGravity</code> property is important. If you don't set
@@ -1117,26 +1076,22 @@ moves. Hence, you just need to associate each touch with the node that was
 touched when the touch began, and move the node to the position of that touch
 with each update.</p>
 <p>To start, we will create a dictionary on the class mapping touches to nodes</p>
-<pre class="code literal-block"><span class="kd">var</span> <span class="nv">selected</span><span class="p">:</span> <span class="p">[</span><span class="bp">UITouch</span><span class="p">:</span> <span class="bp">SKNode</span><span class="p">]</span> <span class="p">=</span> <span class="p">[:]</span>
-</pre>
-
-
+<pre><code class="language-swift">var selected: [UITouch: SKNode] = [:]
+</code></pre>
 <p>Then, in the <code>touchesBegan</code> method, map every touch to the node that it
 touches.</p>
-<pre class="code literal-block"><span class="kr">override</span> <span class="kd">func</span> <span class="nf">touchesBegan</span><span class="p">(</span><span class="n">touches</span><span class="p">:</span> <span class="bp">NSSet</span><span class="p">,</span> <span class="n">withEvent</span> <span class="n">event</span><span class="p">:</span> <span class="bp">UIEvent</span><span class="p">)</span> <span class="p">{</span>
-    <span class="cm">/* Called when a touch begins */</span>
+<pre><code class="language-swift">override func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
+    /* Called when a touch begins */
 
-    <span class="n">selected</span> <span class="p">=</span> <span class="p">[:]</span>
-    <span class="k">for</span> <span class="n">touch</span><span class="p">:</span> <span class="nb">AnyObject</span> <span class="k">in</span> <span class="n">touches</span> <span class="p">{</span>
-        <span class="kd">let</span> <span class="nv">location</span> <span class="p">=</span> <span class="n">touch</span><span class="p">.</span><span class="n">locationInNode</span><span class="p">(</span><span class="kc">self</span><span class="p">)</span>
+    selected = [:]
+    for touch: AnyObject in touches {
+        let location = touch.locationInNode(self)
 
-        <span class="n">selected</span><span class="p">[</span><span class="n">touch</span> <span class="kc">as</span> <span class="bp">UITouch</span><span class="p">]</span> <span class="p">=</span> <span class="n">nodeAtPoint</span><span class="p">(</span><span class="n">location</span><span class="p">)</span>
+        selected[touch as UITouch] = nodeAtPoint(location)
 
-    <span class="p">}</span>
-<span class="p">}</span>
-</pre>
-
-
+    }
+}
+</code></pre>
 <p>The <code>as UITouch</code> part is needed because the compiler only knows that touch is
 <code>AnyObject</code>. This was one of the things that was helpfully suggested by the
 compiler, so I did not really need to know what I was doing to get it right.</p>
@@ -1150,31 +1105,27 @@ console logs, so we should avoid it.</p>
 <p>Next, let's write the <code>touchesEnded</code> method. This method is simple. If a touch
 ends (the finger is removed from the screen), we should remove it from the
 <code>selected</code> dictionary.</p>
-<pre class="code literal-block"><span class="kr">override</span> <span class="kd">func</span> <span class="nf">touchesEnded</span><span class="p">(</span><span class="n">touches</span><span class="p">:</span> <span class="bp">NSSet</span><span class="p">,</span> <span class="n">withEvent</span> <span class="n">event</span><span class="p">:</span> <span class="bp">UIEvent</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">for</span> <span class="n">touch</span><span class="p">:</span> <span class="nb">AnyObject</span> <span class="k">in</span> <span class="n">touches</span> <span class="p">{</span>
-    <span class="n">selected</span><span class="p">[</span><span class="n">touch</span> <span class="kc">as</span> <span class="bp">UITouch</span><span class="p">]</span> <span class="p">=</span> <span class="kc">nil</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</pre>
-
-
+<pre><code class="language-swift">override func touchesEnded(touches: NSSet, withEvent event: UIEvent) {
+    for touch: AnyObject in touches {
+    selected[touch as UITouch] = nil
+    }
+}
+</code></pre>
 <p>To delete an item from a dictionary in Swift, just set it to <code>nil</code>.</p>
 <p>Now, finally, we need to write the <code>update</code> method to move the node to the
 current position of the touch.</p>
 <p>The simplest way to do this is</p>
-<pre class="code literal-block"><span class="kr">override</span> <span class="kd">func</span> <span class="nf">update</span><span class="p">(</span><span class="n">currentTime</span><span class="p">:</span> <span class="n">CFTimeInterval</span><span class="p">)</span> <span class="p">{</span>
-    <span class="cm">/* Called before each frame is rendered */</span>
-    <span class="k">for</span> <span class="p">(</span><span class="n">touch</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span> <span class="k">in</span> <span class="n">selected</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="o">!</span><span class="bp">contains</span><span class="p">([</span><span class="n">sprite1</span><span class="p">,</span> <span class="n">sprite2</span><span class="p">,</span> <span class="n">sprite3</span><span class="p">,</span> <span class="n">sprite4</span><span class="p">],</span> <span class="n">node</span><span class="p">)</span> <span class="p">{</span>
-            <span class="k">continue</span>
-        <span class="p">}</span>
-        <span class="kd">let</span> <span class="nv">location</span> <span class="p">=</span> <span class="n">touch</span><span class="p">.</span><span class="n">locationInNode</span><span class="p">(</span><span class="kc">self</span><span class="p">)</span>
-        <span class="n">node</span><span class="p">.</span><span class="n">position</span> <span class="p">=</span> <span class="n">location</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</pre>
-
-
+<pre><code class="language-swift">override func update(currentTime: CFTimeInterval) {
+    /* Called before each frame is rendered */
+    for (touch, node) in selected {
+        if !contains([sprite1, sprite2, sprite3, sprite4], node) {
+            continue
+        }
+        let location = touch.locationInNode(self)
+        node.position = location
+    }
+}
+</code></pre>
 <p>Note that we only modify the position for the four sprite nodes.</p>
 <p>The <code>touch.locationInNode(self)</code> part took me a long time to figure out. There
 are other methods, like <code>touch.locationInView(nil)</code>, but this does something
@@ -1191,20 +1142,18 @@ up to the touch. Because the movement always happens in the same amount of
 time, it will move faster if the finger is farther away. This gives the
 squares a nice "frictioney" effect with some springiness to it, which is quite
 nice.</p>
-<pre class="code literal-block"><span class="kr">override</span> <span class="kd">func</span> <span class="nf">update</span><span class="p">(</span><span class="n">currentTime</span><span class="p">:</span> <span class="n">CFTimeInterval</span><span class="p">)</span> <span class="p">{</span>
-    <span class="cm">/* Called before each frame is rendered */</span>
-    <span class="k">for</span> <span class="p">(</span><span class="n">touch</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span> <span class="k">in</span> <span class="n">selected</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="o">!</span><span class="bp">contains</span><span class="p">([</span><span class="n">sprite1</span><span class="p">,</span> <span class="n">sprite2</span><span class="p">,</span> <span class="n">sprite3</span><span class="p">,</span> <span class="n">sprite4</span><span class="p">],</span> <span class="n">node</span><span class="p">)</span> <span class="p">{</span>
-            <span class="k">continue</span>
-        <span class="p">}</span>
-        <span class="kd">let</span> <span class="nv">location</span> <span class="p">=</span> <span class="n">touch</span><span class="p">.</span><span class="n">locationInNode</span><span class="p">(</span><span class="kc">self</span><span class="p">)</span>
-        <span class="kd">let</span> <span class="nv">action</span> <span class="p">=</span> <span class="bp">SKAction</span><span class="p">.</span><span class="n">moveTo</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">duration</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">)</span>
-        <span class="n">node</span><span class="p">.</span><span class="n">runAction</span><span class="p">(</span><span class="bp">SKAction</span><span class="p">.</span><span class="n">repeatAction</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="bp">count</span><span class="p">:</span> <span class="mi">1</span><span class="p">))</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</pre>
-
-
+<pre><code class="language-swift">override func update(currentTime: CFTimeInterval) {
+    /* Called before each frame is rendered */
+    for (touch, node) in selected {
+        if !contains([sprite1, sprite2, sprite3, sprite4], node) {
+            continue
+        }
+        let location = touch.locationInNode(self)
+        let action = SKAction.moveTo(location, duration: 0.1)
+        node.runAction(SKAction.repeatAction(action, count: 1))
+    }
+}
+</code></pre>
 <p>There are many other actions we can perform, like rotations and color
 changes.</p>
 <h2>Conclusion</h2>
@@ -1214,31 +1163,18 @@ move out of the way when another square hits them.</p>
 &lt;video autoplay="autoplay" loop="loop" src="http://asmeurer.github.io/SpriteKit-Example.mp4" width="500"&gt;
   Your browser does not support the video tag.
 &lt;/video&gt;
-
 <p>Here you can see the movement lag caused by using <code>SKAction.moveTo</code> with
 <code>duration: 0.1</code> (note that the mouse itself jumps a bit at the beginning, but
 this is due to lag in the recording).</p>
 &lt;video autoplay="autoplay" loop="loop" src="http://asmeurer.github.io/SpriteKit-Example-2.mp4" width="500"&gt;
   Your browser does not support the video tag.
 &lt;/video&gt;
-
 <p>I have uploaded the full code to
 <a href="https://github.com/asmeurer/GameTest/blob/blog/GameTest/GameScene.swift">GitHub</a>.</p>
 <p>This isn't exactly a "game", but it does lay down the foundations for what you
 would need to write a game in Swift using SpriteKit.  At least for me, it
 shows me the technical basics of how to write some games that I had thought
 about, which mostly involve making shapes and moving them around the screen.</p>
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -2697,38 +2633,35 @@ with everything he said, although I do agree with most of it). Most of the
 talk is about pedagogy, especially regarding his experiences at
 <a href="http://software-carpentry.org/">Software Carpentry</a>. Some things he posited:</p>
 <ul>
-<li>
-<p>There is actually good research about what methods work and don't work in
-  teaching. He referenced
-  <a href="http://www.slideshare.net/richardcookau/john-hattie-effect-sizes-on-achievement">this presentation</a>,
-  which lists just about every possible pedagogical method, and the net
-  difference that it has on students, based on over 50,000 studies. For
-  example, individualized instruction has a very small positive effect,
-  whereas teacher feedback has a very large positive effect. Since each takes
-  time and resources, we should focus on those effects that have the highest
-  impact. Greg pointed out that web-based learning has very little positive
-  effect, and hence is a waste of time and money. The most effective change is
-  removing disruptive students.</p>
+<li><p>There is actually good research about what methods work and don't work in
+teaching. He referenced
+<a href="http://www.slideshare.net/richardcookau/john-hattie-effect-sizes-on-achievement">this presentation</a>,
+which lists just about every possible pedagogical method, and the net
+difference that it has on students, based on over 50,000 studies. For
+example, individualized instruction has a very small positive effect,
+whereas teacher feedback has a very large positive effect. Since each takes
+time and resources, we should focus on those effects that have the highest
+impact. Greg pointed out that web-based learning has very little positive
+effect, and hence is a waste of time and money. The most effective change is
+removing disruptive students.</p>
 <p>In particular, I liked the quote, "if you want more computing in high
 school, you have to tell me what to take out."  People like to go on that
 schools need to teach more of this or more of that, and computing and
 programming tends to be high on that list these days, but anyone who does
 not discuss what things should be removed from the curriculum, which is
-already quite full, is not being honest about the discussion.</p>
-</li>
-<li>
-<p>The other big point Greg made is that we need more incremental massive
-  collaboration in teaching. This is the same model that has built open source
-  and Wikipedia, but is mostly absent from teaching. Incremental change is
-  important here, as well. It is more useful for someone to contribute fixes
-  to existing lesson plans, so that they become better for the students, but
-  in his experience, people are much more willing to add new lessons.  Greg
-  calls for a "culture of patching". If incremental change could be adopted in
-  teaching, teachers could aggregate methods and lesson plans, removing the
-  massive duplication, and most importantly, making teaching materials that
-  actually work for students to learn. Greg Wilson asks why open source and
-  Wikipedia are able to thrive on massive <em>incremental</em> change, but teaching
-  is not, a question he hasn't found the answer to.</p>
+already quite full, is not being honest about the discussion.</p></li>
+<li><p>The other big point Greg made is that we need more incremental massive
+collaboration in teaching. This is the same model that has built open source
+and Wikipedia, but is mostly absent from teaching. Incremental change is
+important here, as well. It is more useful for someone to contribute fixes
+to existing lesson plans, so that they become better for the students, but
+in his experience, people are much more willing to add new lessons.  Greg
+calls for a "culture of patching". If incremental change could be adopted in
+teaching, teachers could aggregate methods and lesson plans, removing the
+massive duplication, and most importantly, making teaching materials that
+actually work for students to learn. Greg Wilson asks why open source and
+Wikipedia are able to thrive on massive <em>incremental</em> change, but teaching
+is not, a question he hasn't found the answer to.</p>
 <p>My thought on the matter is that unlike writing software or collecting and
 presenting facts, pedagogy is very difficult. If I contribute a patch to
 an open source project that fixes a bug, I can run the tests to see if my
@@ -2736,8 +2669,7 @@ fix is "correct". If I fix an incorrect fact on Wikipedia, it is less
 easy, but I can still cite and check references to make sure it is
 correct.  But for teaching, it is very difficult to know what methods work
 and what don't, and as Greg pointed out at the beginning of his talk, the
-effects of different methods can be very counterintuitive.</p>
-</li>
+effects of different methods can be very counterintuitive.</p></li>
 </ul>
 <p>The second talk that I recommend is
 <a href="http://jakevdp.github.io/">Jake VanderPlas</a>'s talk about Frequentism and
@@ -2859,7 +2791,6 @@ shows. There were noticeably more women at the conference this year, and not
 just insomuch as there were more people at all.</p>
 <p>Finally, I leave you with the greatest lightening talk. Ever.</p>
 <p></p><center>&lt;iframe allowfullscreen="allowfullscreen" frameborder="0" height="315" src="http://www.youtube.com/embed/ln4nE_EVDCg?start=3254" width="560"&gt;&lt;/iframe&gt;</center>
-
 
 </div></div>
 
@@ -5199,7 +5130,7 @@ finally be submitted.</p></div>
 <a href="https://codesachin.wordpress.com/category/google-summer-of-code-2014/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="https://codesachin.wordpress.com" class="message" title="no activity in 7 days">Sachin Joglekar</a>
 </li>
 <li>
-<a href="http://sahilshekhawat.github.io/rss.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sahilshekhawat.github.io" title="Sahil Shekhawat">Sahil Shekhawat</a>
+<a href="http://sahilshekhawat.me/rss.xml" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="http://sahilshekhawat.github.io" title="Sahil Shekhawat">Sahil Shekhawat</a>
 </li>
 <li>
 <a href="https://saptman.wordpress.com/feed/" title="subscribe"><img src="images/feed-icon-10x10.png" alt="(feed)"></a> <a href="https://saptman.wordpress.com" class="message" title="no activity in 7 days">Saptarshi Mandal</a>
@@ -5256,7 +5187,7 @@ finally be submitted.</p></div>
 
 <p>
 <strong>Last updated:</strong><br>
-May 04, 2015 11:41 PM<br>
+May 05, 2015 01:21 AM<br>
 <em>All times are UTC.</em><br>
 <br>
 Powered by:<br>
